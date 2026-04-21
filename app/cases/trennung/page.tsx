@@ -2,200 +2,8 @@
 
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { useState } from "react";
 
-const divorcesCases = [
-  {
-    id: "divorce-no-kids",
-    title: "Scheidung ohne Kinder",
-    subtitle: "Vermögensverteilung, Unterhalt, Altersvorsorge",
-    icon: "💔",
-    color: "blue",
-    content: {
-      problem:
-        "Trennung ist emotional schwer genug. Vor Gericht wird es zum Vermögenskampf: Wer bekommt das Haus? Die Ersparnisse? Die Rentenschuldverpflichtung? Anwälte verdienen, Paar verliert.",
-      solution:
-        "Mediation: Beide arbeiten gemeinsam an fairer Vermögensverteilung. Ohne Hass, ohne Gutachter, ohne Jahre vor Gericht.",
-      process: [
-        "Vermögens-Inventar (Haus, Ersparnisse, Autos)",
-        "Schulden klären (Hypothek, Kredite)",
-        "Altersvorsorge & Rente analysieren",
-        "Unterhaltsanspruch berechnen (wenn relevant)",
-        "Vermögen fair aufteilen",
-        "Haus: Verkaufen oder einen Partner auszahlen?",
-        "Versicherungen & Kredite regeln",
-        "Schriftliche Vereinbarung",
-      ],
-      cost: "€499 vs €20–50k+",
-      duration: "2–6 Monate vs 1–3 Jahre",
-      special:
-        "Besondere Punkte: Versicherungs-Klausel (Lebensversicherung muss Ehepartner begünstigen?), Kreditbürgschaft aufheben, Gemeinsame Konten trennen.",
-    },
-  },
-  {
-    id: "divorce-high-assets",
-    title: "Scheidung mit hohem Vermögen",
-    subtitle: "Haus, Aktien, Unternehmen, Kunstsammlung",
-    icon: "🏰",
-    color: "purple",
-    content: {
-      problem:
-        "Millionen-Vermögen, komplexe Vermögensverhältnisse. Gericht braucht Gutachter, Steuerberater, Immobilienmakler. Die Kosten sind absurd, die Dauer endlos. Beide Parteien verlieren.",
-      solution:
-        "Mediation mit Experten: Steueroptimierung, faire Aufteilung, schnell & transparent.",
-      process: [
-        "Komplettes Vermögens-Inventar erstellen",
-        "Bewertung: Immobilien, Aktien, Kunstwerke",
-        "Schulden und Leasingverpflichtungen",
-        "Altersvorsorge & Rentenpunkte teilen",
-        "Steuern optimieren (Schenkung vs Verkauf?)",
-        "Liquidität klären (Kann einer auszahlen?)",
-        "Unterhaltsanspruch (ggf. langfristig)",
-        "Immobilien-Szenarios (Verkauf/Weiterbewohnung)",
-        "Schriftliche Vereinbarung mit Steuerberater",
-      ],
-      cost: "€499–2k vs €50–200k+",
-      duration: "3–12 Monate vs 2–5 Jahre",
-      special:
-        "Spezial-Expertise: Steueroptimierung, Immobilien-Gutachten, Aktien & Depot, Kunstsammlungen, Rentenausgleich nach Versorgungsausgleichsgesetz.",
-    },
-  },
-  {
-    id: "divorce-business",
-    title: "Scheidung mit Unternehmen",
-    subtitle: "Wer behält die Firma? Abfindung? Weiterbetrieb?",
-    icon: "🏢",
-    color: "red",
-    content: {
-      problem:
-        "Einer der Partner hat ein Unternehmen. Gericht muss Firma bewerten, Schulden zuordnen, Unterhaltsanspruch kalkulieren. Lage: Die laufende Firma wird zur Qual. Keiner kann sich auf Geschäft konzentrieren.",
-      solution:
-        "Mediation: Klare Regeln, Firma bleibt operational, ein Partner übernimmt oder beide verkaufen fair.",
-      process: [
-        "Unternehmen bewerten (lassen durch Experten)",
-        "Schulden & Kredite der Firma klären",
-        "Wer will die Firma behalten?",
-        "Abfindung fair berechnen",
-        "Übergangsphase regeln (6–12 Monate)",
-        "Kundenstamm & Verträge zuordnen",
-        "Mitarbeiter & Löhne klären",
-        "Unterhaltsanspruch mit Firma-Einkommen berechnen",
-        "Schriftliche Vereinbarung",
-      ],
-      cost: "€499 vs €30–100k+",
-      duration: "3–9 Monate vs 1–4 Jahre",
-      special:
-        "Spezial-Expertise: Business-Bewertung, Schulden-Zuordnung, Übergangsmanagement, Mitarbeiter-Übergabe, Steuern bei Firma-Weitergabe.",
-    },
-  },
-  {
-    id: "divorce-new-partner",
-    title: "Trennung mit neuem Partner",
-    subtitle: "Stiefkinder, neue Verpflichtungen, Verwirrung",
-    icon: "👨‍👩‍👧‍👦",
-    color: "green",
-    content: {
-      problem:
-        "Eine oder beide haben neue Partner + Stiefkinder. Die Sorgerechts-Frage wird komplex: Welche Rolle spielt der neue Partner? Muss der Neue-Partner-Unterhalt zahlen? Erbt der Stiefkind? Gericht braucht Jahre für diese Fragen.",
-      solution:
-        "Mediation: Klare Rollen, faire Lösungen für alle Beteiligten (Kinder, Partner, neue Partner).",
-      process: [
-        "Originalfamilie-Struktur klären",
-        "Neue Partner-Situation analysieren",
-        "Kinder: Wer ist sorgeberechtigt?",
-        "Neue Partner: Welche Rolle & Verpflichtung?",
-        "Umgangsrecht mit biologischen Eltern",
-        "Unterhalt: Wer zahlt was?",
-        "Erbrecht klären (Stiefkinder?)",
-        "Versicherungen & Vollmachten updaten",
-        "Schriftliche Vereinbarung",
-      ],
-      cost: "€499 vs €25–75k+",
-      duration: "3–9 Monate vs 1–3 Jahre",
-      special:
-        "Spezial-Punkte: Stiefkind-Rechte, Unterhalts-Verschachtelung, Versorgungsausgleich mit neuen Partnern, Erbrechtliche Konsequenzen.",
-    },
-  },
-  {
-    id: "divorce-international",
-    title: "Internationale Trennung",
-    subtitle: "Visum, Auswanderung, Ausland-Vermögen",
-    icon: "🌍",
-    color: "orange",
-    content: {
-      problem:
-        "Einer oder beide sind nicht-deutsch, leben im Ausland oder wollen auswandern. Welches Recht gilt? Wo wird verhandelt? Gericht in Deutschland oder im Ausland? Monate oder Jahre Unklarheit.",
-      solution:
-        "Mediation: Klare rechtliche Basis, beide arbeiten zusammen an fairer, international gültiger Lösung.",
-      process: [
-        "Welches Recht gilt? (Deutsches Recht oder Zielland?)",
-        "Wo findet Mediation statt?",
-        "Vermögen im Ausland: Wie wird es erfasst?",
-        "Währungs-Auswirkungen klären",
-        "Visum & Aufenthaltsrecht-Fragen",
-        "Kinder: Rückkehr-Recht oder Auswanderung?",
-        "Unterhalts-Zahlung international (welche Währung?)",
-        "Anerkennung der Vereinbarung im anderen Land",
-        "Schriftliche, international gültige Vereinbarung",
-      ],
-      cost: "€499–1.5k vs €40–120k+",
-      duration: "4–12 Monate vs 2–5 Jahre",
-      special:
-        "Spezial-Expertise: Internationales Recht, Haager Kindesentführungs-Übereinkommen, Visum-Fragen, Währungs-Risiko, Anerkennung im Zielland.",
-    },
-  },
-  {
-    id: "divorce-long-marriage",
-    title: "Trennung nach langer Ehe",
-    subtitle: "Rententeilung, Altersvorsorge, Versorgungsausgleich",
-    icon: "👴👵",
-    color: "slate",
-    content: {
-      problem:
-        "Nach 20, 30, 40 Jahren Ehe: Rentenpunkte sind aufgebaut, Altersvorsorge ist komplex. Wer bekommt wieviel? Gericht braucht Rentengutachter, Versicherungs-Experten. Am Ende: Weniger für beide, weil Kosten so hoch.",
-      solution:
-        "Mediation: Fair Rentenpunkte teilen, Altersvorsorge transparent, beide haben Sicherheit im Alter.",
-      process: [
-        "Rentenkonto-Status beider Partner",
-        "Rentenpunkte-Teilung nach Versorgungsausgleich",
-        "Beamten-Pensionen klären (unterschiedlich!)",
-        "Private Altersvorsorge (Sparbuch, ETFs)",
-        "Lebensversicherungen & Rentenversicherungen",
-        "Immobilie/Haus regeln",
-        "Schenkungen aus der Ehe klären",
-        "Unterhaltsanspruch (Alters-, Krankheits-, Unterhalt)",
-        "Testament & Vollmacht updaten nach Scheidung",
-        "Schriftliche Vereinbarung",
-      ],
-      cost: "€499 vs €15–40k+",
-      duration: "2–8 Monate vs 1–3 Jahre",
-      special:
-        "Spezial-Punkte: Versorgungsausgleichsgesetz (VAG), Beamten-Pensionen, Rentenkürzung bei frühem Rücktritt, Pflegefallvorsorge, Testament nach Scheidung.",
-    },
-  },
-];
-
-const colorStyles = {
-  blue: "from-blue-500 to-blue-600",
-  purple: "from-purple-500 to-purple-600",
-  red: "from-red-500 to-red-600",
-  green: "from-green-500 to-green-600",
-  orange: "from-orange-500 to-orange-600",
-  slate: "from-slate-500 to-slate-600",
-};
-
-const bgStyles = {
-  blue: "bg-blue-50",
-  purple: "bg-purple-50",
-  red: "bg-red-50",
-  green: "bg-green-50",
-  orange: "bg-orange-50",
-  slate: "bg-slate-50",
-};
-
-export default function DivorcesCasesPage() {
-  const [expandedCase, setExpandedCase] = useState("divorce-no-kids");
-
+export default function TrennungCase() {
   return (
     <>
       <Header
@@ -206,221 +14,294 @@ export default function DivorcesCasesPage() {
       />
 
       <main className="min-h-screen bg-white text-slate-900 pt-[73px]">
-        {/* ===== HERO ===== */}
-        <section className="relative overflow-hidden bg-white py-24 lg:py-32">
+        {/* HERO */}
+        <section
+          id="top"
+          className="relative overflow-hidden scroll-mt-20 bg-white py-24 lg:py-32"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium tracking-wide text-slate-500 uppercase">
-                Scheidungs-Variationen
+                Trennung & Unterhalt
               </div>
 
               <h1 className="mt-8 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                Jede Scheidung
+                Trennung ohne
                 <span className="block bg-gradient-to-r from-emerald-500 to-slate-700 bg-clip-text text-transparent">
                   {" "}
-                  ist anders.
+                  Kampf.
                 </span>
               </h1>
 
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
-                Mit Kindern oder ohne. Mit Vermögen oder nicht. Mit Unternehmen
-                oder international – medipact hat für jede Situation eine faire
-                Lösung.
+                Unterhaltsregelung, Vermögensverteilung, Sorgerecht – alle
+                wichtigen Fragen geklärt durch strukturierte Mediation statt vor
+                Gericht.
               </p>
+
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#cta"
+                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 text-sm font-bold text-white transition hover:scale-[1.02]"
+                >
+                  Mediation starten
+                </a>
+                <a
+                  href="#process"
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-8 py-4 text-sm font-semibold text-slate-900 transition hover:border-emerald-200 hover:bg-emerald-50"
+                >
+                  Wie es funktioniert
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ===== DIVORCES ACCORDIONS ===== */}
-        <section className="bg-gradient-to-br from-slate-50 to-white py-24">
-          <div className="mx-auto max-w-5xl px-6 lg:px-8">
-            <div className="space-y-4">
-              {divorcesCases.map((caseItem) => (
-                <div
-                  key={caseItem.id}
-                  className={`rounded-[1.75rem] border-2 transition-all duration-300 ${
-                    expandedCase === caseItem.id
-                      ? `border-emerald-300 shadow-lg shadow-emerald-200/30 bg-white`
-                      : "border-slate-200 bg-white"
-                  }`}
-                >
-                  {/* Header - Always Visible */}
-                  <button
-                    onClick={() =>
-                      setExpandedCase(
-                        expandedCase === caseItem.id ? "" : caseItem.id,
-                      )
-                    }
-                    className="w-full p-8 text-left hover:bg-slate-50 transition rounded-[1.75rem]"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-6">
-                        <div className="text-5xl">{caseItem.icon}</div>
-                        <div>
-                          <h3 className="text-2xl font-black text-slate-900">
-                            {caseItem.title}
-                          </h3>
-                          <p className="mt-2 text-slate-600">
-                            {caseItem.subtitle}
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        className={`text-3xl transition-transform duration-300 ${
-                          expandedCase === caseItem.id ? "rotate-180" : ""
-                        }`}
-                      >
-                        ▼
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Content - Expandable */}
-                  {expandedCase === caseItem.id && (
-                    <div
-                      className={`border-t-2 border-slate-200 p-8 ${bgStyles[caseItem.color]}`}
-                    >
-                      <div className="space-y-8">
-                        {/* Problem */}
-                        <div>
-                          <h4 className="text-lg font-bold text-slate-900 mb-3">
-                            🔴 Das Problem
-                          </h4>
-                          <p className="text-slate-700 leading-8">
-                            {caseItem.content.problem}
-                          </p>
-                        </div>
-
-                        {/* Solution */}
-                        <div>
-                          <h4 className="text-lg font-bold text-slate-900 mb-3">
-                            🟢 Die Lösung
-                          </h4>
-                          <p className="text-slate-700 leading-8">
-                            {caseItem.content.solution}
-                          </p>
-                        </div>
-
-                        {/* Process */}
-                        <div>
-                          <h4 className="text-lg font-bold text-slate-900 mb-4">
-                            ⚙️ Der Prozess
-                          </h4>
-                          <div className="grid gap-3 md:grid-cols-2">
-                            {caseItem.content.process.map((step, idx) => (
-                              <div
-                                key={idx}
-                                className="flex gap-3 rounded-lg bg-white p-4 border border-slate-200"
-                              >
-                                <div
-                                  className={`flex items-center justify-center rounded-lg bg-gradient-to-br ${colorStyles[caseItem.color]} text-white font-bold w-8 h-8 flex-shrink-0 text-sm`}
-                                >
-                                  {idx + 1}
-                                </div>
-                                <p className="text-sm text-slate-700">{step}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Special Points */}
-                        <div className="rounded-xl border-2 border-slate-300 bg-white p-6">
-                          <h4 className="font-bold text-slate-900 mb-2">
-                            ⭐ Spezial-Punkte
-                          </h4>
-                          <p className="text-sm text-slate-700">
-                            {caseItem.content.special}
-                          </p>
-                        </div>
-
-                        {/* Comparison */}
-                        <div className="grid gap-6 md:grid-cols-2">
-                          <div className="rounded-xl border-2 border-slate-200 bg-white p-6">
-                            <div className="text-3xl font-black text-emerald-600 mb-2">
-                              {caseItem.content.cost}
-                            </div>
-                            <p className="text-sm text-slate-600">
-                              Mediation vs. Gericht
-                            </p>
-                          </div>
-                          <div className="rounded-xl border-2 border-slate-200 bg-white p-6">
-                            <div className="text-3xl font-black text-emerald-600 mb-2">
-                              {caseItem.content.duration}
-                            </div>
-                            <p className="text-sm text-slate-600">
-                              Dauer Mediation vs. Gericht
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* CTA */}
-                        <div className="pt-4">
-                          <a
-                            href="#cta"
-                            className={`inline-flex items-center justify-center rounded-2xl bg-gradient-to-r ${colorStyles[caseItem.color]} px-8 py-4 text-sm font-bold text-white transition hover:scale-[1.02]`}
-                          >
-                            Mediation für {caseItem.title} starten
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+        {/* PROBLEM SECTION - Light Emerald Background */}
+        <section className="bg-gradient-to-br from-emerald-50 via-white to-slate-50 py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+              <div>
+                <div className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                  Das Problem
                 </div>
+                <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                  Trennung vor Gericht.
+                </h2>
+                <p className="mt-5 text-lg leading-8 text-slate-700">
+                  Eine Trennung ist emotional belastend. Vor Gericht wird es zum
+                  Kampf: Verhandlungen über Monate oder Jahre, Anwälte,
+                  Gutachter – und am Ende fühlen sich beide verloren.
+                </p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-3">
+                {[
+                  {
+                    title: "Jahre statt Monate",
+                    text: "Gericht dauert 2–4 Jahre. Mediation: 3–12 Monate.",
+                  },
+                  {
+                    title: "Immense Kosten",
+                    text: "Anwälte, Gutachter, Gericht: €30.000–€100.000+",
+                  },
+                  {
+                    title: "Kinder leiden",
+                    text: "Jahrelange Kämpfe zerstören Beziehungen zwischen Kind und Eltern.",
+                  },
+                ].map((point) => (
+                  <article
+                    key={point.title}
+                    className="rounded-[1.75rem] border border-slate-200 bg-white p-6"
+                  >
+                    <div className="h-1.5 w-14 rounded-full bg-gradient-to-r from-emerald-400 to-slate-500" />
+                    <h3 className="mt-5 text-lg font-bold text-slate-900">
+                      {point.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-700">
+                      {point.text}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SOLUTION - White Background */}
+        <section className="bg-white py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-6">
+                Mediation Lösung
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                Trennung mit Respekt.
+              </h2>
+              <p className="mt-4 text-lg text-slate-700 max-w-2xl mx-auto">
+                Mit medipact arbeiten Sie nicht gegeneinander, sondern zusammen
+                – an einer fairen Lösung für alle. Inklusive der Kinder.
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2">
+              {[
+                {
+                  title: "1. Interessen klären",
+                  desc: 'Was ist wirklich wichtig? Nicht "Ich will das Haus" sondern "Ich brauche Stabilität für die Kinder".',
+                },
+                {
+                  title: "2. Gemeinsam Lösungen finden",
+                  desc: "Statt Richter-Urteil: Ihr entwickelt Optionen zusammen, die BEIDE erfüllen.",
+                },
+                {
+                  title: "3. Fair & transparent",
+                  desc: "Alle Fakten auf dem Tisch. Unterhaltstabelle, Vermögen, Sorgerecht – alles geklärt.",
+                },
+                {
+                  title: "4. Rechtlich bindend",
+                  desc: "Die schriftliche Vereinbarung ist genauso bindend wie ein Gerichtsurteil – aber fairer.",
+                },
+              ].map((step, idx) => (
+                <article
+                  key={idx}
+                  className="rounded-[1.75rem] border border-slate-200 bg-white p-8 transition hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/50"
+                >
+                  <div className="h-1.5 w-16 rounded-full bg-gradient-to-r from-emerald-400 to-slate-500" />
+                  <h3 className="mt-6 text-lg font-bold text-slate-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-slate-700">
+                    {step.desc}
+                  </p>
+                </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ===== VERGLEICH ===== */}
-        <section className="bg-white py-24">
+        {/* PROCESS - Dark Background */}
+        <section id="process" className="bg-zinc-100 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
+              <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-6">
+                Ablauf
+              </div>
               <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
-                Warum Mediation bei Scheidungen besser ist
+                Der Mediationsprozess
+              </h2>
+              <p className="mt-4 text-lg text-slate-700 max-w-2xl mx-auto">
+                Strukturiert, transparent, fair.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  num: "01",
+                  title: "Eröffnungsgespräch",
+                  desc: "Beide teilen ihre Sicht. KI erfasst die Kernthemen.",
+                },
+                {
+                  num: "02",
+                  title: "Interessenanalyse",
+                  desc: "Was braucht jeder wirklich? Was ist den Kindern wichtig?",
+                },
+                {
+                  num: "03",
+                  title: "Unterhaltsberechnung",
+                  desc: "Nach Düsseldorfer Tabelle & euren Zahlen – transparent.",
+                },
+                {
+                  num: "04",
+                  title: "Vermögensverteilung",
+                  desc: "Haus, Ersparnisse, Rente – alles fair aufgeteilt.",
+                },
+                {
+                  num: "05",
+                  title: "Sorgerecht & Umgang",
+                  desc: "Was ist beste für die Kinder? Beide arbeiten daran.",
+                },
+                {
+                  num: "06",
+                  title: "Schriftliche Vereinbarung",
+                  desc: "Fertig. Bindend. Gültig vor Gericht.",
+                },
+              ].map((step) => (
+                <article
+                  key={step.num}
+                  className="rounded-[1.5rem] border border-slate-200 bg-white p-8 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/30 transition"
+                >
+                  <div className="grid gap-6 lg:grid-cols-[80px_1fr]">
+                    <div className="flex items-start">
+                      <div className="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-bold text-white">
+                        {step.num}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-7 text-slate-700">
+                        {step.desc}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* KOSTEN - Light Background */}
+        <section className="bg-gradient-to-br from-emerald-50 to-white py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-6">
+                Kosten
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                €499 vs. €50.000+
               </h2>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3">
               {[
                 {
-                  icon: "⏱️",
-                  title: "Schneller",
+                  title: "Medipact KI-Pure",
+                  price: "€499",
                   items: [
+                    "Harvard-Prinzip",
+                    "Strukturiert",
+                    "Schnell",
                     "3–12 Monate",
-                    "Statt 1–4 Jahre",
-                    "Schnelle Lösungen",
+                  ],
+                  featured: true,
+                },
+                {
+                  title: "Klassische Mediation",
+                  price: "€5–15k",
+                  items: [
+                    "Mit Mediator",
+                    "Persönliche Sitzungen",
+                    "Erfahren",
+                    "3–6 Monate",
                   ],
                 },
                 {
-                  icon: "💰",
-                  title: "Günstiger",
+                  title: "Gericht",
+                  price: "€50–100k+",
                   items: [
-                    "€499",
-                    "Statt €30–100k+",
-                    "Keine versteckten Kosten",
+                    "2 Anwälte",
+                    "Gutachter",
+                    "Lange Verfahren",
+                    "2–4 Jahre",
                   ],
                 },
-                {
-                  icon: "😌",
-                  title: "Menschlicher",
-                  items: [
-                    "Keine Konfrontation",
-                    "Respekt bleibt",
-                    "Gemeinsam Lösen",
-                  ],
-                },
-              ].map((benefit) => (
+              ].map((option) => (
                 <div
-                  key={benefit.title}
-                  className="rounded-[1.75rem] border border-slate-200 bg-white p-8 text-center hover:border-emerald-300 hover:shadow-lg transition"
+                  key={option.title}
+                  className={`rounded-[1.75rem] border p-8 ${
+                    option.featured
+                      ? "border-emerald-300 bg-white shadow-lg shadow-emerald-200/30"
+                      : "border-slate-200 bg-white"
+                  }`}
                 >
-                  <div className="text-5xl mb-4">{benefit.icon}</div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">
-                    {benefit.title}
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {option.title}
                   </h3>
-                  <ul className="space-y-2 text-sm text-slate-700">
-                    {benefit.items.map((item) => (
-                      <li key={item}>✓ {item}</li>
+                  <div className="mt-4 text-4xl font-black text-emerald-600">
+                    {option.price}
+                  </div>
+                  <ul className="mt-8 space-y-3">
+                    {option.items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex gap-3 text-sm text-slate-700"
+                      >
+                        <span className="text-emerald-600">✓</span>
+                        <span>{item}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -429,7 +310,52 @@ export default function DivorcesCasesPage() {
           </div>
         </section>
 
-        {/* ===== CTA ===== */}
+        {/* FAQ - White Background */}
+        <section id="faq" className="bg-white py-24">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-6">
+                Q&A
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                Häufige Fragen
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  q: "Ist die Mediation bindend?",
+                  a: "Ja. Die schriftliche Vereinbarung, die beide unterzeichnen, ist rechtlich bindend – genauso wie ein Gerichtsurteil.",
+                },
+                {
+                  q: "Was wenn wir uns nicht einigen?",
+                  a: "Mediation scheitert selten (95% Erfolgsquote). Falls doch: Ihr könnt immer noch vor Gericht gehen – aber ihr spart €50k.",
+                },
+                {
+                  q: "Was ist mit den Kindern?",
+                  a: "Kinder sind im Fokus – nicht Kampf zwischen Eltern. Gemeinsamer Fokus: Was ist beste für die Kinder?",
+                },
+                {
+                  q: "Können Anwälte dabei sein?",
+                  a: "Ja. Viele lassen sich danach rechtlich beraten oder haben einen Anwalt in der Mediation dabei.",
+                },
+              ].map((faq) => (
+                <article
+                  key={faq.q}
+                  className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm"
+                >
+                  <h3 className="text-lg font-bold text-slate-900">{faq.q}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-700">
+                    {faq.a}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA FINAL - Dark Emerald Background */}
         <section
           id="cta"
           className="border-t border-slate-100 bg-gradient-to-br from-emerald-900 to-slate-900 py-24"
@@ -437,31 +363,31 @@ export default function DivorcesCasesPage() {
           <div className="mx-auto max-w-5xl px-6 text-center lg:px-8">
             <div className="inline-flex items-center rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium tracking-wide text-emerald-200 uppercase mb-8">
               <span className="mr-2">💚</span>
-              Fair scheiden tut nicht weh.
+              Trennung mit Respekt für alle.
             </div>
 
             <h2 className="text-4xl font-black tracking-tight text-white sm:text-6xl mb-6">
-              €499. Eure Zukunft.
+              €499. Punkt.
             </h2>
 
             <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-slate-300">
-              Egal ob einfache Scheidung oder komplexe Situation mit Kindern,
-              Vermögen oder internationalem Hintergrund – medipact findet die
-              faire Lösung.
+              Statt Jahren vor Gericht und €50.000+ Kosten: Strukturierte
+              Mediation nach dem Harvard-Prinzip. Fair für beide Eltern. Und vor
+              allem: Fair für die Kinder.
             </p>
 
             <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
               <a
-                href="mailto:hallo@medipact.de?subject=Scheidungs-Mediation"
+                href="mailto:hallo@medipact.de?subject=Trennung%20Mediation"
                 className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 text-sm font-bold text-white transition hover:scale-[1.02]"
               >
                 Mediation starten
               </a>
               <a
-                href="mailto:hallo@medipact.de?subject=Fragen%20zur%20Scheidung"
+                href="mailto:hallo@medipact.de?subject=Mit%20Mediator%20sprechen"
                 className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
               >
-                Kostenloses Gespräch
+                Mit Mediator sprechen
               </a>
             </div>
           </div>
