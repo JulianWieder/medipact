@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  html {
+    scroll-behavior: smooth;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: #ffffff;
+    color: #1f2937;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ──────────────────────────────────────────────────────────────
+   SECTION UTILITIES - Hintergrund-Rhythmus für alle Seiten
+   ────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .section-white {
+    @apply bg-white py-24 lg:py-32;
+  }
+
+  .section-slate-light {
+    @apply bg-slate-50 py-24 lg:py-32;
+  }
+
+  .section-emerald-light {
+    @apply bg-emerald-50 py-24 lg:py-32;
+  }
+
+  .section-amber-light {
+    @apply bg-amber-50 py-24 lg:py-32;
+  }
+
+  .section-blue-light {
+    @apply bg-blue-50 py-24 lg:py-32;
+  }
+
+  .section-purple-light {
+    @apply bg-purple-50 py-24 lg:py-32;
+  }
+
+  .section-pink-light {
+    @apply bg-pink-50 py-24 lg:py-32;
+  }
+
+  .section-teal-light {
+    @apply bg-teal-50 py-24 lg:py-32;
+  }
+
+  .section-dark {
+    @apply bg-slate-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-emerald-dark {
+    @apply bg-gradient-to-br from-emerald-900 to-slate-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-amber-dark {
+    @apply bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-blue-dark {
+    @apply bg-gradient-to-br from-blue-900 to-slate-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-purple-dark {
+    @apply bg-gradient-to-br from-purple-900 to-slate-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-pink-dark {
+    @apply bg-gradient-to-br from-pink-900 to-slate-900 py-24 lg:py-32 text-white;
+  }
+
+  .section-teal-dark {
+    @apply bg-gradient-to-br from-teal-900 to-slate-900 py-24 lg:py-32 text-white;
+  }
 }
