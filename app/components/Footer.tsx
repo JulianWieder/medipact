@@ -15,7 +15,7 @@ export default function Footer({
   tagline = "Konflikte lösen, nicht eskalieren.",
   isDark = false,
   email = "hallo@medipact.de",
-  phone = "+49 (0) 123 456789",
+  phone = " +49 1520 9942351",
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
@@ -56,7 +56,7 @@ export default function Footer({
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/konflikte" className="hover:text-white transition">
                   Wie es funktioniert
                 </a>
               </li>
@@ -68,22 +68,13 @@ export default function Footer({
             <h4 className="font-bold mb-4">Unternehmen</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/about" className="hover:text-white transition">
                   Über uns
                 </a>
               </li>
+
               <li>
-                <a href="#" className="hover:text-white transition">
-                  Kontakt
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/about" className="hover:text-white transition">
                   Karriere
                 </a>
               </li>

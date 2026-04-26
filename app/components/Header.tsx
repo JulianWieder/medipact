@@ -21,7 +21,6 @@ const navItems = [
       { label: "Mini-Matrix", href: "/beispiele#matrix" },
     ],
   },
-  { label: "Kontakt", href: "/kontakt" },
 ];
 
 export default function Header() {
@@ -57,10 +56,10 @@ export default function Header() {
 
         {/* CTA */}
         <Link
-          href="/#kontakt"
+          href="/auth/login"
           className="hidden rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 md:inline-flex"
         >
-          Termin buchen
+          Mediation Starten{" "}
         </Link>
 
         {/* MOBILE */}
