@@ -39,13 +39,6 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header
-        logoText="medipact"
-        ctaText="Registrieren"
-        ctaLink="/auth/register"
-        isDark={false}
-      />
-
       <main className="app-shell pt-[73px]">
         <section className="section section-muted">
           <div className="container max-w-md">
@@ -154,21 +147,16 @@ export default function LoginPage() {
             </div>
 
             <Card variant="muted" className="mt-8">
-              <h3 className="heading-3 mb-2">Demo-Login</h3>
+              <h3 className="heading-3 mb-2">Hinweis </h3>
               <p className="text-sm text-slate-600">
-                Für Tests: jede E-Mail mit Passwort "123456"
+                Bald werden wir den richtigen Zugang freischalten. Bitte wendne
+                sie sich an hallo@medipact.de , wenn sie informiert werden
+                möchten möchten{" "}
               </p>
             </Card>
           </div>
         </section>
       </main>
-
-      <Footer
-        brandName="medipact"
-        tagline="Konflikte lösen, nicht eskalieren."
-        isDark={false}
-        email="hallo@medipact.de"
-      />
     </>
   );
 }

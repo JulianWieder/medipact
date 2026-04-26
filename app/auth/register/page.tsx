@@ -73,13 +73,6 @@ export default function RegisterPage() {
 
   return (
     <>
-      <Header
-        logoText="medipact"
-        ctaText="Anmelden"
-        ctaLink="/auth/login"
-        isDark={false}
-      />
-
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
           <div className="space-y-2 mb-10">
@@ -264,13 +257,6 @@ export default function RegisterPage() {
           </div>
         </div>
       </main>
-
-      <Footer
-        brandName="medipact"
-        tagline="Konflikte lösen, nicht eskalieren."
-        isDark={false}
-        email="hallo@medipact.de"
-      />
     </>
   );
 }
