@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
 
 export const metadata: Metadata = {
   title: "medipact – KI-Mediation ab €499",
@@ -80,7 +82,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-white text-slate-900">{children}</body>
+      <body className="antialiased bg-white text-slate-900">
+        <Header />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
