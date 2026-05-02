@@ -11,6 +11,7 @@ from app.models.user import User
 from app.security import get_current_user
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
+mediations = []
 
 
 class MediationCreate(BaseModel):
