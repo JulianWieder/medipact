@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { Card } from "@/app/components/ui/Card";
 
 export default function LoginPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,43 +19,48 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
     if (!email) {
-      setError("Benutzername ist erforderlich");
-      setLoading(false);
+      setError("E-Mail ist erforderlich");
       return;
     }
 
     if (!password) {
       setError("Passwort ist erforderlich");
-      setLoading(false);
       return;
     }
 
-    const res = await fetch("http://127.0.0.1:8000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    setLoading(true);
 
-    if (!res.ok) {
-      setError("Login fehlgeschlagen");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        setError("Login fehlgeschlagen");
+        return;
+      }
+
+      const data = await res.json();
+
+      localStorage.setItem("token", data.access_token);
+
+      router.push("/dashboard");
+    } catch {
+      setError("Server nicht erreichbar");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const data = await res.json();
-
-    localStorage.setItem("token", data.access_token);
-
-    router.push("/dashboard");
   };
+
   return (
     <main className="app-shell pt-[73px]">
       <section className="section section-muted">
@@ -94,7 +101,7 @@ export default function LoginPage() {
                     setEmail(e.target.value);
                     setError("");
                   }}
-                  placeholder="julianvwieder"
+                  placeholder="julianvwieder@gmail.com"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
                 />
               </div>

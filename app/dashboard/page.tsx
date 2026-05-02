@@ -1,15 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
-const mediations = [
-  {
-    id: "m1",
-    title: "Erbschaft Weber",
-    phase: "interests",
-    status: "active",
-    progress: 65,
-  },
-];
+
 async function getMediations() {
   return [
     {
