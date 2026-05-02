@@ -1,4 +1,5 @@
 import Link from "next/link";
+import QuickCheck from "@/app/components/QuickCheck";
 
 const conflictTypes = [
   {
@@ -16,6 +17,22 @@ const conflictTypes = [
     text: "Wenn Nachlass, Verantwortung, Erwartungen oder alte Familienkonflikte zu Streit führen.",
     href: "/konflikte/erbschaft",
   },
+];
+
+const suitablePoints = [
+  "Beide Seiten sind grundsätzlich bereit zu sprechen.",
+  "Es gibt kein akutes Machtungleichgewicht.",
+  "Keine Gewalt, Drohung oder massiver Druck steht im Raum.",
+  "Beide Seiten können eigene Lösungen akzeptieren.",
+  "Es geht nicht primär darum, Recht zu bekommen.",
+];
+
+const unsuitablePoints = [
+  "Eine Seite will manipulieren, bestrafen oder Zeit gewinnen.",
+  "Gewalt, Sucht, Stalking oder starke psychische Instabilität sind zentral.",
+  "Eine Partei hat Angst, offen zu sprechen.",
+  "Ein Gericht oder Anwalt ist zwingend nötig.",
+  "Eine Seite übernimmt keinerlei Verantwortung.",
 ];
 
 export default function KonfliktePage() {
@@ -37,13 +54,13 @@ export default function KonfliktePage() {
             eskalieren nicht wegen des eigentlichen Themas, sondern weil
             Kommunikation, Erwartungen und Emotionen durcheinandergeraten.
           </p>
-
+          <QuickCheck />
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/kontakt" className="btn btn-primary">
               Konflikt einschätzen
             </Link>
 
-            <Link href="/beispiele" className="btn btn-secondary">
+            <Link href="/cases" className="btn btn-secondary">
               Fallbeispiele ansehen
             </Link>
           </div>
@@ -89,6 +106,73 @@ export default function KonfliktePage() {
       </section>
 
       <section className="section section-base">
+        <div className="container">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4">Schnell-Check</p>
+
+            <h2 className="heading-2 text-slate-900">
+              Ist Mediation für Ihre Situation geeignet?
+            </h2>
+
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              Mediation ist kein Ersatz für Schutz, Recht oder Therapie. Sie
+              hilft vor allem dann, wenn ein sicherer Gesprächsrahmen möglich
+              ist und beide Seiten an einer tragfähigen Lösung arbeiten können.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            <div className="card-accent">
+              <h3 className="heading-3 text-emerald-900">
+                Mediation kann geeignet sein, wenn:
+              </h3>
+
+              <ul className="mt-6 space-y-4 text-slate-700">
+                {suitablePoints.map((point) => (
+                  <li key={point} className="flex gap-3">
+                    <span className="mt-1 text-emerald-700">✓</span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="card">
+              <h3 className="heading-3 text-slate-900">
+                Eher nicht geeignet, wenn:
+              </h3>
+
+              <ul className="mt-6 space-y-4 text-slate-700">
+                {unsuitablePoints.map((point) => (
+                  <li key={point} className="flex gap-3">
+                    <span className="mt-1 text-slate-400">×</span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl bg-slate-900 p-6 text-white">
+            <h3 className="text-lg font-bold">
+              Entscheidend ist nicht nur: „Ist Mediation geeignet?“
+            </h3>
+
+            <p className="mt-3 leading-7 text-slate-300">
+              Oft lautet die bessere Frage: Was fehlt noch, damit ein sicheres
+              und faires Gespräch möglich wird?
+            </p>
+
+            <div className="mt-6">
+              <Link href="/kontakt" className="btn btn-primary">
+                Situation einordnen lassen
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-muted">
         <div className="container grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <p className="eyebrow mb-4">Warum Mediation?</p>

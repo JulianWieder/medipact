@@ -1,12 +1,13 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,22 +31,29 @@ export default function LoginPage() {
       return;
     }
 
-    const result = await signIn("credentials", {
-      username: email,
-      password,
-      redirect: false,
+    const res = await fetch("http://127.0.0.1:8000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
 
-    setLoading(false);
-
-    if (result?.error) {
+    if (!res.ok) {
       setError("Login fehlgeschlagen");
+      setLoading(false);
       return;
     }
 
-    window.location.href = "/dashboard";
-  };
+    const data = await res.json();
 
+    localStorage.setItem("token", data.access_token);
+
+    router.push("/dashboard");
+  };
   return (
     <main className="app-shell pt-[73px]">
       <section className="section section-muted">
@@ -75,7 +83,7 @@ export default function LoginPage() {
                   htmlFor="email"
                   className="mb-2 block text-sm font-semibold text-slate-900"
                 >
-                  Benutzername
+                  E-Mail
                 </label>
 
                 <input
