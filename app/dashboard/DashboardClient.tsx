@@ -35,11 +35,7 @@ export default function DashboardClient({
 
   const stats = useMemo(
     () => [
-      {
-        label: "Gesamt",
-        value: data.length,
-        text: "Mediationen",
-      },
+      { label: "Gesamt", value: data.length, text: "Mediationen" },
       {
         label: "Laufend",
         value: data.filter((m) => m.status === "active").length,
@@ -61,15 +57,16 @@ export default function DashboardClient({
           <div className="mb-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
               <p className="eyebrow mb-4">Dashboard</p>
-
               <h1 className="heading-1 text-slate-900">Meine Mediationen</h1>
-
               <p className="mt-5 max-w-3xl text-lg text-slate-600">
                 Übersicht Ihrer laufenden und abgeschlossenen Konflikte.
               </p>
             </div>
 
-            <Link href="/mediation/new" className="btn btn-primary h-fit">
+            <Link
+              href="/dashboard/mediation/new"
+              className="btn btn-primary h-fit"
+            >
               + Neue Mediation
             </Link>
           </div>
@@ -98,7 +95,10 @@ export default function DashboardClient({
                 Sie haben noch keine Mediationen gestartet.
               </p>
 
-              <Link href="/mediation/new" className="btn btn-primary mt-6">
+              <Link
+                href="/dashboard/mediation/new"
+                className="btn btn-primary mt-6"
+              >
                 Neue Mediation starten
               </Link>
             </div>
@@ -107,9 +107,10 @@ export default function DashboardClient({
               const config = statusConfig[mediation.status];
 
               return (
-                <article
+                <Link
                   key={mediation.id}
-                  className="app-surface border border-slate-200 p-6 transition hover:border-emerald-200 hover:shadow-md lg:p-8"
+                  href={`/dashboard/${mediation.id}`}
+                  className="app-surface block border border-slate-200 p-6 transition hover:border-emerald-200 hover:shadow-md lg:p-8"
                 >
                   <div className="grid gap-8 md:grid-cols-[1fr_auto]">
                     <div>
@@ -154,16 +155,14 @@ export default function DashboardClient({
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <Link
-                        href={`/mediation/${mediation.id}`}
-                        className="btn btn-primary whitespace-nowrap"
-                      >
+                      <span className="btn btn-primary whitespace-nowrap">
                         Fortsetzen
-                      </Link>
+                      </span>
 
                       <button
                         type="button"
                         className="btn btn-secondary whitespace-nowrap"
+                        onClick={(event) => event.preventDefault()}
                       >
                         Phase weiter
                       </button>
@@ -171,12 +170,13 @@ export default function DashboardClient({
                       <button
                         type="button"
                         className="btn btn-secondary whitespace-nowrap"
+                        onClick={(event) => event.preventDefault()}
                       >
                         Abschließen
                       </button>
                     </div>
                   </div>
-                </article>
+                </Link>
               );
             })
           )}
