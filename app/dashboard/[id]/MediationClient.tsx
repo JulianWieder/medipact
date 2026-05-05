@@ -33,23 +33,38 @@ export default function MediationClient({ mediationId }: Props) {
     setLoading(true);
     setError("");
 
-    const res = await fetch(
-      `http://127.0.0.1:8000/mediations/${mediationId}/invites`,
-      { method: "POST" },
-    );
+    const token = localStorage.getItem("token");
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Invite error:", res.status, errorText);
-      setError(`Einladung konnte nicht erstellt werden. Status: ${res.status}`);
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:8000/mediations/${mediationId}/invites`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: "test@test.com", // später Input
+            role: "participant",
+          }),
+        },
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Invite error:", res.status, errorText);
+        setError(`Einladung fehlgeschlagen (${res.status})`);
+        return;
+      }
+
+      const data = await res.json();
+      setInviteUrl(data.invite_url);
+    } catch (err) {
+      setError("Server nicht erreichbar");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const data = await res.json();
-
-    setInviteUrl(data.invite_url);
-    setLoading(false);
   }
 
   async function copyInviteLink() {

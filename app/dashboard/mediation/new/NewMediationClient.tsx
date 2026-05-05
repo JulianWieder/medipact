@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createMediation } from "@/lib/mediations";
 
 export default function NewMediationClient() {
   const router = useRouter();
@@ -22,38 +23,21 @@ export default function NewMediationClient() {
 
     setIsSaving(true);
 
-    const token = localStorage.getItem("token");
+    let mediation;
 
-    if (!token) {
-      alert("Bitte einloggen");
-      router.push("/auth/login");
-      return;
-    }
-
-    const res = await fetch("http://127.0.0.1:8000/mediations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+    try {
+      mediation = await createMediation({
         mediation_type: mediationType,
         description,
         priority,
         role,
-        status: "draft",
-      }),
-    });
-
-    if (!res.ok) {
-      console.error("Mediation konnte nicht gespeichert werden", res.status);
+      });
+    } catch (error) {
+      console.error(error);
       alert("Mediation konnte nicht gespeichert werden.");
       setIsSaving(false);
       return;
     }
-
-    const mediation = await res.json();
-
     router.push(
       `/dashboard/mediation/new/${mediationType}?mediationId=${mediation.id}`,
     );
@@ -135,7 +119,6 @@ export default function NewMediationClient() {
                   onChange={(e) => setRole(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500"
                 >
-                  {" "}
                   <option value="">Bitte auswählen</option>
                   <option value="beteiligte-person">
                     Ich bin selbst beteiligt

@@ -55,12 +55,39 @@ export default function RegisterPage() {
 
     setErrors({});
 
-    // TODO: API-Call zu Backend
-    setTimeout(() => {
-      // Simuliert erfolgreiche Registrierung
+    try {
+      const res = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({
+          general: data.detail ?? "Registrierung fehlgeschlagen",
+        });
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("access_token", data.access_token);
+
       window.location.href = "/dashboard";
+    } catch (error) {
+      setErrors({
+        general: "Backend nicht erreichbar",
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +238,11 @@ export default function RegisterPage() {
             >
               {loading ? "Wird registriert..." : "Konto erstellen"}
             </button>
+            {errors.general && (
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                {errors.general}
+              </p>
+            )}
           </form>
 
           {/* Terms */}
