@@ -6,7 +6,12 @@ from app.config import settings
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Security, HTTPException, Depends
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
+from app.database import get_db
+from app.models.user import User
+from app.models.mediation import Mediation
+from app.models.mediation_participant import MediationParticipant
 
 security = HTTPBearer()
 
@@ -59,5 +64,38 @@ def verify_access_token(token: str) -> str:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
-) -> str:
+    ) -> str:
     return verify_access_token(credentials.credentials)
+
+
+def get_current_db_user(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+    ) -> User:
+    user = db.query(User).filter(User.email == current_user_email).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
+
+
+def require_mediation_access(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+) -> Mediation:
+    mediation = (
+        db.query(Mediation)
+        .join(MediationParticipant)
+        .filter(
+            Mediation.id == mediation_id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    return mediation

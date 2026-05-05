@@ -28,7 +28,10 @@ class TokenResponse(BaseModel):
 
 @router.post("/register", response_model=TokenResponse)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    print("REGISTER HIT:", payload.email)
+
     existing_user = db.query(User).filter(User.email == str(payload.email)).first()
+    print("EXISTING USER:", existing_user)
 
     if existing_user:
         raise HTTPException(status_code=400, detail="Email ist bereits registriert")
@@ -37,16 +40,21 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         name=payload.name,
         email=str(payload.email),
         hashed_password=hash_password(payload.password),
+        role="party",
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
 
+    print("USER CREATED:", user.id, user.email, user.role)
+
+    check_user = db.query(User).filter(User.email == str(payload.email)).first()
+    print("CHECK AFTER COMMIT:", check_user.id if check_user else None, check_user.email if check_user else None)
+
     token = create_access_token(email=user.email)
 
     return TokenResponse(access_token=token)
-
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):

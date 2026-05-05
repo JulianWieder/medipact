@@ -3,17 +3,22 @@ import hashlib
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.mediation_invite import MediationInvite
-from app.security import get_current_user
+from app.models.mediation_participant import MediationParticipant
+from app.models.user import User
+from app.security import get_current_db_user, require_mediation_access
 
-# später ggf. anpassen:
-# from app.models.participant import Participant
-# from app.auth import get_current_user
 
 router = APIRouter(tags=["invites"])
+
+
+class InviteCreate(BaseModel):
+    invited_email: EmailStr | None = None
+    role: str = "other_party"
 
 
 def create_invite_token() -> str:
@@ -21,22 +26,24 @@ def create_invite_token() -> str:
 
 
 def hash_token(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 @router.post("/mediations/{mediation_id}/invites")
 def create_invite(
     mediation_id: int,
+    payload: InviteCreate,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    mediation=Depends(require_mediation_access),
 ):
     token = create_invite_token()
 
     invite = MediationInvite(
-        mediation_id=mediation_id,
+        mediation_id=mediation.id,
         token_hash=hash_token(token),
-        role="other_party",
+        role=payload.role,
         status="pending",
+        invited_email=payload.invited_email,
         expires_at=datetime.utcnow() + timedelta(days=7),
     )
 
@@ -44,13 +51,15 @@ def create_invite(
     db.commit()
     db.refresh(invite)
 
-    return {
-        "invite_url": f"http://localhost:3000/invite/{token}"
-    }
+    return {"invite_url": f"http://localhost:3000/invite/{token}"}
 
 
 @router.post("/invites/{token}/accept")
-def accept_invite(token: str, db: Session = Depends(get_db)):
+def accept_invite(
+    token: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
     invite = (
         db.query(MediationInvite)
         .filter(MediationInvite.token_hash == hash_token(token))
@@ -67,6 +76,29 @@ def accept_invite(token: str, db: Session = Depends(get_db)):
         invite.status = "expired"
         db.commit()
         raise HTTPException(status_code=400, detail="Einladung abgelaufen")
+
+    if invite.invited_email and invite.invited_email.lower() != user.email.lower():
+        raise HTTPException(
+            status_code=403,
+            detail="Diese Einladung gehört zu einer anderen E-Mail-Adresse",
+        )
+
+    existing_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == invite.mediation_id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+
+    if not existing_participant:
+        participant = MediationParticipant(
+            mediation_id=invite.mediation_id,
+            user_id=user.id,
+            role=invite.role,
+        )
+        db.add(participant)
 
     invite.status = "accepted"
     invite.accepted_at = datetime.utcnow()

@@ -90,8 +90,20 @@ def get_my_mediations(
 def get_mediation_participants(
     mediation_id: int,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
+    is_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
     participants = (
         db.query(MediationParticipant, User)
         .join(User, MediationParticipant.user_id == User.id)

@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+
 from app.database import Base
 
 
@@ -9,7 +10,12 @@ class MediationInvite(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    mediation_id = Column(Integer, nullable=False, index=True)
+    mediation_id = Column(
+        Integer,
+        ForeignKey("mediations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     token_hash = Column(String, nullable=False, unique=True, index=True)
 
