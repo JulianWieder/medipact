@@ -7,8 +7,6 @@ DB_PATH = BASE_DIR / "medipact.db"
 
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
-print("USING DATABASE:", DB_PATH)
-
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},

@@ -8,7 +8,8 @@ from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
-from app.security import get_current_user
+from app.security import get_current_user, get_current_db_user
+
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
 mediations = []
@@ -20,6 +21,13 @@ class MediationCreate(BaseModel):
     priority: Optional[str] = None
     role: Optional[str] = None
     status: str = "draft"
+
+
+class MediationUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = None
 
 @router.post("")
 def create_mediation(
@@ -56,6 +64,38 @@ def create_mediation(
 
     return db_mediation
 
+@router.patch("/{mediation_id}")
+def update_mediation(
+    mediation_id: int,
+    payload: MediationUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    is_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    for key, value in payload.model_dump(exclude_none=True).items():
+        setattr(mediation, key, value)
+
+    db.commit()
+    db.refresh(mediation)
+    return mediation
+
+
 @router.get("/me")
 def get_my_mediations(
     db: Session = Depends(get_db),
@@ -90,7 +130,7 @@ def get_my_mediations(
 def get_mediation_participants(
     mediation_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user: User = Depends(get_current_db_user),
 ):
     is_participant = (
         db.query(MediationParticipant)

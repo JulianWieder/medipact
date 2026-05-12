@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_participant import MediationParticipant
@@ -44,15 +45,17 @@ def create_invite(
         role=payload.role,
         status="pending",
         invited_email=payload.invited_email,
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
     )
 
     db.add(invite)
     db.commit()
     db.refresh(invite)
 
-    return {"invite_url": f"http://localhost:3000/invite/{token}"}
-
+    return {
+        "invite_url": f"{settings.APP_BASE_URL}/dashboard/invitations?token={token}",
+        "token": token,
+    }
 
 @router.post("/invites/{token}/accept")
 def accept_invite(
@@ -72,7 +75,9 @@ def accept_invite(
     if invite.status != "pending":
         raise HTTPException(status_code=400, detail="Einladung nicht mehr gültig")
 
-    if invite.expires_at < datetime.utcnow():
+    # SQLite stores naive datetimes; compare both as UTC naive
+    expires_at = invite.expires_at.replace(tzinfo=None) if invite.expires_at.tzinfo else invite.expires_at
+    if expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         invite.status = "expired"
         db.commit()
         raise HTTPException(status_code=400, detail="Einladung abgelaufen")
@@ -101,7 +106,7 @@ def accept_invite(
         db.add(participant)
 
     invite.status = "accepted"
-    invite.accepted_at = datetime.utcnow()
+    invite.accepted_at = datetime.now(timezone.utc)
 
     db.commit()
 
