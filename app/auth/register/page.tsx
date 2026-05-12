@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -56,11 +55,9 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await fetch("/api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -71,20 +68,26 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setErrors({
-          general: data.detail ?? "Registrierung fehlgeschlagen",
-        });
+        setErrors({ general: data.detail ?? data.error ?? "Registrierung fehlgeschlagen" });
         setLoading(false);
         return;
       }
 
-      localStorage.setItem("access_token", data.access_token);
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setErrors({ general: "Registrierung erfolgreich, bitte einloggen." });
+        window.location.href = "/auth/login";
+        return;
+      }
 
       window.location.href = "/dashboard";
-    } catch (error) {
-      setErrors({
-        general: "Backend nicht erreichbar",
-      });
+    } catch {
+      setErrors({ general: "Backend nicht erreichbar" });
     } finally {
       setLoading(false);
     }

@@ -1,15 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 
 export default function LoginPage() {
-  const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -33,27 +31,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      if (!res.ok) {
-        setError("Login fehlgeschlagen");
+      if (result?.error) {
+        setError("E-Mail oder Passwort falsch");
         return;
       }
 
-      const data = await res.json();
-
-      localStorage.setItem("token", data.access_token);
-
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch {
       setError("Server nicht erreichbar");
     } finally {

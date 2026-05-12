@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/login",
@@ -21,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = String(credentials?.email ?? "");
         const password = String(credentials?.password ?? "");
 
-        const res = await fetch("http://127.0.0.1:8000/auth/login", {
+        const res = await fetch(`${API_BASE_URL}/auth/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -39,10 +41,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const data = await res.json();
 
         return {
-          id: email,
-          name: email,
-          email,
-          accessToken: data.access_token,
+          id: String(data.user.id),
+          email: data.user.email,
+          name: data.user.name,
+          role: data.user.role,
+          backendAccessToken: data.access_token,
         };
       },
     }),
@@ -51,13 +54,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = (user as any).accessToken;
+        token.backendAccessToken = user.backendAccessToken;
+        token.role = user.role;
       }
+
       return token;
     },
 
     async session({ session, token }) {
-      (session as any).accessToken = token.accessToken;
+      session.backendAccessToken = token.backendAccessToken as string;
+
+      if (session.user) {
+        session.user.role = token.role as string;
+      }
+
       return session;
     },
   },
