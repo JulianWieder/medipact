@@ -1,131 +1,283 @@
+/* ============================================================
+   Medipact – Global Theme (LIGHT, off-white)
+   Tailwind v4 / Next.js 16 compatible
+   Bright base · Mint accent · Dark drama sections
+   ============================================================ */
+
 @import "tailwindcss";
 
-@layer base {
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+/* ------------------------------------------------------------
+   Theme tokens
+   ------------------------------------------------------------ */
+@theme {
+  --color-bg: #f3f5f8;
+  --color-bg-lift: #ffffff;
+  --color-bg-deep: #0f172a;
 
+  --color-accent-300: #5eead4;
+  --color-accent-500: #14b8a6;
+  --color-accent-600: #0d9488;
+
+  --font-display:
+    ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", Baskerville,
+    "Times New Roman", serif;
+  --font-body:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ------------------------------------------------------------
+   Base layer
+   ------------------------------------------------------------ */
+@layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: #ffffff;
-    color: #1f2937;
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
+    /* Dark slate text — strong contrast on the light bg */
+    color: #334155; /* slate-700 */
+    font-family: var(--font-body);
+    /* Warm off-white base */
+    background-color: #f3f5f8;
+    /* Subtle atmospheric tints — much softer than in dark mode */
+    background-image:
+      /* Top center: soft mint wash */
+      radial-gradient(
+        55% 40% at 50% 0%,
+        rgba(94, 234, 212, 0.18) 0%,
+        transparent 70%
+      ),
+      /* Top right: cool sky tint */
+        radial-gradient(
+          45% 35% at 92% 8%,
+          rgba(96, 165, 250, 0.12) 0%,
+          transparent 70%
+        ),
+      /* Bottom left: warm cream balance */
+        radial-gradient(
+          50% 40% at 8% 100%,
+          rgba(251, 191, 36, 0.08) 0%,
+          transparent 70%
+        ),
+      /* Subtle vertical depth from light to slightly cooler */
+        linear-gradient(180deg, #f3f5f8 0%, #eef1f5 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+
+  /* Dot grid — dark dots on light bg, very subtle */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background-image: radial-gradient(
+      rgba(15, 23, 42, 0.05) 1px,
+      transparent 1px
+    );
+    background-size: 32px 32px;
+    background-position: 0 0;
+    mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      black 30%,
+      transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      black 30%,
+      transparent 100%
+    );
+  }
+
+  ::selection {
+    background-color: rgba(20, 184, 166, 0.25);
+    color: #0f172a;
   }
 }
 
-/* ─────────────────────────────
-   SECTION SYSTEM (Landingpage)
-   ───────────────────────────── */
-
-@layer utilities {
-  .section {
-    @apply py-24 lg:py-32;
-  }
-
-  .section-base {
-    @apply bg-white;
-  }
-
-  .section-muted {
-    @apply bg-slate-50;
-  }
-
-  .section-accent {
-    @apply bg-emerald-50;
-  }
-
-  .section-strong {
-    @apply bg-slate-900 text-white;
-  }
-}
-
-/* ─────────────────────────────
-   APP SYSTEM
-   ───────────────────────────── */
-
-@layer utilities {
+/* ------------------------------------------------------------
+   Component layer
+   ------------------------------------------------------------ */
+@layer components {
+  /* ---------- App shell ---------- */
   .app-shell {
-    @apply bg-slate-50 text-slate-800 min-h-screen;
+    position: relative;
+    min-height: 100vh;
+    color: #334155;
   }
 
+  /* ---------- Sections ---------- */
+  .section {
+    position: relative;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  @media (min-width: 1024px) {
+    .section {
+      padding-top: 7rem;
+      padding-bottom: 7rem;
+    }
+  }
+
+  /* Default — body shows through */
+  .section-base {
+    background-color: transparent;
+  }
+
+  /* Lifted — pure white, brighter than the base */
+  .section-muted {
+    background-color: #ffffff;
+    border-color: rgba(15, 23, 42, 0.06);
+  }
+
+  /* Strong — DARK section for drama (CTA, comparison) */
+  .section-strong {
+    background-color: #0f172a; /* slate-900 */
+    color: #f1f5f9;
+    background-image: radial-gradient(
+      80% 60% at 50% 100%,
+      rgba(94, 234, 212, 0.15) 0%,
+      transparent 70%
+    );
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Accent — gentle mint atmosphere on light bg */
+  .section-accent {
+    background-color: transparent;
+    background-image:
+      radial-gradient(
+        70% 60% at 50% 50%,
+        rgba(94, 234, 212, 0.22) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        40% 50% at 80% 0%,
+        rgba(94, 234, 212, 0.12) 0%,
+        transparent 70%
+      );
+    border-color: rgba(20, 184, 166, 0.2);
+  }
+
+  /* ---------- Surfaces (cards, panels) ---------- */
   .app-surface {
-    @apply bg-white rounded-2xl shadow-sm;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem; /* Erhöht von 1.5rem für modernen Look */
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.02),
+      0 10px 40px -10px rgba(15, 23, 42, 0.05);
+    transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Subtiler Glanz-Effekt oben[cite: 5] */
+  .app-surface::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .app-surface:hover {
+    transform: translateY(-4px); /* Etwas ausgeprägterer Lift[cite: 5] */
+    border-color: var(--color-accent-300);
+    box-shadow:
+      0 20px 40px -15px rgba(20, 184, 166, 0.12),
+      0 0 0 1px rgba(20, 184, 166, 0.1);
   }
 
   .app-surface-muted {
-    @apply bg-slate-50 rounded-2xl;
-  }
-
-  .app-accent-soft {
-    @apply bg-emerald-50 rounded-2xl;
+    background-color: rgba(15, 23, 42, 0.025);
+    border-color: rgba(15, 23, 42, 0.06);
   }
 }
-
-/* ─────────────────────────────
-   COMPONENT SYSTEM
-   ───────────────────────────── */
-
-@layer utilities {
-  /* Buttons */
-  .btn {
-    @apply inline-flex items-center justify-center px-5 py-3 rounded-xl font-medium transition;
-  }
-
-  .btn-primary {
-    @apply bg-emerald-600 text-white hover:bg-emerald-700;
-  }
-
-  .btn-secondary {
-    @apply bg-slate-100 text-slate-800 hover:bg-slate-200;
-  }
-
-  .btn-ghost {
-    @apply text-slate-600 hover:text-slate-900;
-  }
-
-  /* Cards */
-  .card {
-    @apply bg-white rounded-2xl shadow-sm p-6;
-  }
-
-  .card-muted {
-    @apply bg-slate-50 rounded-2xl p-6;
-  }
-
-  .card-accent {
-    @apply bg-emerald-50 rounded-2xl p-6;
-  }
-
-  /* Container */
-  .container {
-    @apply max-w-7xl mx-auto px-6 lg:px-8;
-  }
-}
-
+/* ---------- Typography ---------- */
 .heading-1 {
-  @apply text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: #0f172a; /* slate-900 — maximum contrast */
+}
+@media (min-width: 640px) {
+  .heading-1 {
+    font-size: 4.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .heading-1 {
+    font-size: 5.5rem;
+  }
 }
 
 .heading-2 {
-  @apply text-3xl sm:text-4xl font-black tracking-tight;
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+@media (min-width: 640px) {
+  .heading-2 {
+    font-size: 3rem;
+  }
 }
 
 .heading-3 {
-  @apply text-lg font-bold text-slate-900;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+@media (min-width: 640px) {
+  .heading-3 {
+    font-size: 1.5rem;
+  }
 }
 
+/* Eyebrow — needs darker mint to be readable on light bg */
 .eyebrow {
-  @apply text-xs uppercase tracking-wide text-slate-500 font-medium;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: #0d9488; /* teal-600 */
 }
-.eyebrow-story {
-  @apply text-sm font-semibold uppercase tracking-[0.25em] text-orange-700;
+
+/* ------------------------------------------------------------
+   Utility layer
+   ------------------------------------------------------------ */
+@layer utilities {
+  .glow-mint {
+    box-shadow: 0 0 60px -10px rgba(20, 184, 166, 0.35);
+  }
+
+  .hairline {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(15, 23, 42, 0.15),
+      transparent
+    );
+  }
 }

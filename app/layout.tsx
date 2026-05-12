@@ -84,7 +84,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-slate-900">
         <Header />
+
         {children}
+
         <Footer />
       </body>
     </html>
