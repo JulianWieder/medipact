@@ -29,33 +29,22 @@ export default function DashboardClient() {
   const router = useRouter();
   useEffect(() => {
     const loadMediations = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const res = await fetch("http://127.0.0.1:8000/mediations/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch("/api/mediations/me");
 
         if (!res.ok) {
           if (res.status === 401) {
-            localStorage.removeItem("token");
             router.push("/auth/login");
             return;
           }
-
           console.error("Fehler beim Laden", res.status);
           return;
         }
 
         const raw = await res.json();
 
-        const mapped = raw.map((item: any) => ({
-          id: item.id ?? item.mediation_id,
+        const mapped = (raw ?? []).map((item: { id?: number; mediation_id?: number; title?: string; phase?: string; status?: string; progress?: number; mediation_type?: string; description?: string }) => ({
+          id: item.mediation_id ?? item.id,
           title: item.title ?? "Neue Mediation",
           phase: item.phase ?? "Entwurf",
           status: item.status ?? "pending",
@@ -73,7 +62,7 @@ export default function DashboardClient() {
     };
 
     loadMediations();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const stats = useMemo(
     () => [

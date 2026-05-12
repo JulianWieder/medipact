@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const topics = [
   "Ehedaten",
@@ -111,6 +113,59 @@ const steps = [
 ];
 
 export default function TrennungClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const mediationId = searchParams.get("mediationId");
+
+  const [beschreibung, setBeschreibung] = useState("");
+  const [datumEhe, setDatumEhe] = useState("");
+  const [datumTrennung, setDatumTrennung] = useState("");
+  const [dringlichkeit, setDringlichkeit] = useState("");
+  const [risiken, setRisiken] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSave = async () => {
+    if (!mediationId) {
+      setError("Keine Mediations-ID gefunden.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError("");
+
+    const description = [
+      beschreibung,
+      datumEhe ? `Eheschließung: ${datumEhe}` : "",
+      datumTrennung ? `Trennung: ${datumTrennung}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/update`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: description || undefined,
+          priority: dringlichkeit || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        setError(err?.error ?? `Fehler (${res.status})`);
+        return;
+      }
+
+      router.push(`/dashboard/${mediationId}`);
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <main className="app-shell pt-[73px]">
       <section className="border-b border-slate-200 bg-white">
@@ -180,6 +235,8 @@ export default function TrennungClient() {
                   Kurze Beschreibung der Trennung
                 </span>
                 <textarea
+                  value={beschreibung}
+                  onChange={(e) => setBeschreibung(e.target.value)}
                   className="min-h-40 w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
                   placeholder="Beispiel: Wir sind verheiratet, leben seit März getrennt, haben ein Kind und müssen Betreuung, Unterhalt, Wohnung und Vermögen klären..."
                 />
@@ -192,6 +249,8 @@ export default function TrennungClient() {
                   </span>
                   <input
                     type="date"
+                    value={datumEhe}
+                    onChange={(e) => setDatumEhe(e.target.value)}
                     className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
                   />
                 </label>
@@ -202,6 +261,8 @@ export default function TrennungClient() {
                   </span>
                   <input
                     type="date"
+                    value={datumTrennung}
+                    onChange={(e) => setDatumTrennung(e.target.value)}
                     className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
                   />
                 </label>
@@ -212,6 +273,8 @@ export default function TrennungClient() {
                   Was ist aktuell am dringendsten?
                 </span>
                 <input
+                  value={dringlichkeit}
+                  onChange={(e) => setDringlichkeit(e.target.value)}
                   className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
                   placeholder="z. B. Kinderbetreuung, Unterhalt, Wohnung, Konten, Kommunikation, Anwaltstermin"
                 />
@@ -222,10 +285,18 @@ export default function TrennungClient() {
                   Gibt es akute Risiken oder Eskalationen?
                 </span>
                 <textarea
+                  value={risiken}
+                  onChange={(e) => setRisiken(e.target.value)}
                   className="min-h-28 w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
                   placeholder="z. B. Kontaktabbruch, finanzielle Blockade, verweigerter Umgang, Drohungen, Auszug, gesperrte Konten..."
                 />
               </label>
+
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
 
               <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
                 <Link
@@ -235,8 +306,13 @@ export default function TrennungClient() {
                   Abbrechen
                 </Link>
 
-                <button type="button" className="btn btn-primary">
-                  Situation sortieren
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Wird gespeichert..." : "Speichern"}
                 </button>
               </div>
             </div>

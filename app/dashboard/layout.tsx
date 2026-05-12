@@ -1,16 +1,14 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { DashboardHeader } from "@/app/components/layout/DashboardHeader";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
-
-  return <>{children}</>;
+  return (
+    <div className="app-shell">
+      <DashboardHeader />
+      {children}
+    </div>
+  );
 }

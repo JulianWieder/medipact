@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createMediation } from "@/lib/mediations";
 
 export default function NewMediationClient() {
   const router = useRouter();
@@ -23,24 +22,28 @@ export default function NewMediationClient() {
 
     setIsSaving(true);
 
-    let mediation;
-
     try {
-      mediation = await createMediation({
-        mediation_type: mediationType,
-        description,
-        priority,
-        role,
+      const res = await fetch("/api/mediations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediation_type: mediationType, description, priority, role }),
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        console.error("Mediation error:", res.status, err);
+        alert("Mediation konnte nicht gespeichert werden.");
+        return;
+      }
+
+      const mediation = await res.json();
+      router.push(`/dashboard/${mediation.id}`);
     } catch (error) {
       console.error(error);
-      alert("Mediation konnte nicht gespeichert werden.");
+      alert("Server nicht erreichbar.");
+    } finally {
       setIsSaving(false);
-      return;
     }
-    router.push(
-      `/dashboard/mediation/new/${mediationType}?mediationId=${mediation.id}`,
-    );
   };
 
   return (
