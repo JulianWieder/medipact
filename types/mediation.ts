@@ -1,11 +1,12 @@
 export type MediationStatus = "draft" | "active" | "pending" | "completed";
 
 export type MediationPhase =
-  | "intake"
-  | "clarification"
-  | "interests"
-  | "options"
-  | "agreement";
+  | "einleitung"
+  | "themensammlung"
+  | "interessen"
+  | "optionen"
+  | "verhandlung"
+  | "abschluss";
 
 export type ParticipantRole =
   | "initiator"
