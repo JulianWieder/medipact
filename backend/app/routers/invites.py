@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.database import get_db
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
+from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
 
 
@@ -18,7 +19,7 @@ router = APIRouter(tags=["invites"])
 
 
 class InviteCreate(BaseModel):
-    invited_email: EmailStr | None = None
+    invited_email: EmailStr  # Pflichtfeld — Einladungen müssen an eine konkrete E-Mail gehen
     role: str = "other_party"
 
 
@@ -32,11 +33,13 @@ def hash_token(token: str) -> str:
 
 @router.post("/mediations/{mediation_id}/invites")
 def create_invite(
+    request: Request,
     mediation_id: int,
     payload: InviteCreate,
     db: Session = Depends(get_db),
     mediation=Depends(require_mediation_access),
 ):
+    invite_limiter.check(request)
     token = create_invite_token()
 
     invite = MediationInvite(
@@ -82,7 +85,8 @@ def accept_invite(
         db.commit()
         raise HTTPException(status_code=400, detail="Einladung abgelaufen")
 
-    if invite.invited_email and invite.invited_email.lower() != user.email.lower():
+    # invited_email ist jetzt immer gesetzt — Pflichtfeld seit Security-Fix
+    if not invite.invited_email or invite.invited_email.lower() != user.email.lower():
         raise HTTPException(
             status_code=403,
             detail="Diese Einladung gehört zu einer anderen E-Mail-Adresse",

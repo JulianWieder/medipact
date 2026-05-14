@@ -1,16 +1,28 @@
 from pydantic_settings import BaseSettings
 
 
+_INSECURE_DEFAULT = "dev-secret-key"
+
+
 class Settings(BaseSettings):
-    SECRET_KEY: str = "dev-secret-key"  # Must be overridden via .env in production
+    SECRET_KEY: str = _INSECURE_DEFAULT
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     APP_BASE_URL: str = "http://localhost:3000"  # Override in production
     # Comma-separated list of allowed CORS origins, e.g. "https://app.medipact.de,https://www.medipact.de"
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    # Set to true in production to enforce a real SECRET_KEY
+    PRODUCTION: bool = False
 
     class Config:
         env_file = ".env"
 
 
 settings = Settings()
+
+if settings.PRODUCTION and settings.SECRET_KEY == _INSECURE_DEFAULT:
+    raise RuntimeError(
+        "SECRET_KEY muss in der Produktionsumgebung gesetzt sein. "
+        "Generiere einen sicheren Schlüssel mit: "
+        "python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
