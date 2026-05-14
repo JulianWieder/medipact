@@ -1,45 +1,37 @@
-"use client";
+/**
+ * Server-side auth guard utility.
+ * Use this in Next.js Route Handlers to enforce authentication.
+ *
+ * Usage:
+ *   const authResult = await requireAuth();
+ *   if (!authResult.ok) return authResult.response;
+ *   // authResult.session is the NextAuth session
+ */
+import { auth } from "@/auth";
+import { NextResponse } from "next/server";
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+type AuthSuccess = {
+  ok: true;
+  session: NonNullable<Awaited<ReturnType<typeof auth>>>;
+};
 
-export default function DashboardPage() {
-  const { status } = useSession();
-  const [data, setData] = useState<any[]>([]);
+type AuthFailure = {
+  ok: false;
+  response: NextResponse;
+};
 
-  useEffect(() => {
-    if (status !== "authenticated") return;
+export async function requireAuth(): Promise<AuthSuccess | AuthFailure> {
+  const session = await auth();
 
-    loadMediations();
-  }, [status]);
-
-  async function loadMediations() {
-    const res = await fetch("/api/mediations");
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Fehler beim Laden", res.status, text);
-      return;
-    }
-
-    const result = await res.json();
-    setData(result);
+  if (!session?.user) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Nicht authentifiziert" },
+        { status: 401 },
+      ),
+    };
   }
 
-  if (status === "loading") {
-    return <p>Lade Session...</p>;
-  }
-
-  if (status === "unauthenticated") {
-    return <p>Bitte einloggen</p>;
-  }
-
-  return (
-    <div>
-      <h1>Dashboard</h1>
-   {data.map((item) => (
-  <div key={item.id}>{item.title}</div>
-))}
-    </div>
-  );
+  return { ok: true, session };
 }
