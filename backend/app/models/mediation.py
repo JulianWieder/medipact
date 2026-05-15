@@ -13,3 +13,4 @@ class Mediation(Base):
     priority = Column(Text, nullable=True)
     role = Column(String, nullable=True)
     status = Column(String, default="draft")
+    phase = Column(String, nullable=True)

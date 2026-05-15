@@ -13,6 +13,14 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
     # Set to true in production to enforce a real SECRET_KEY
     PRODUCTION: bool = False
+    # ── SMTP email settings ──────────────────────────────────────────────────
+    SMTP_HOST: str = ""          # e.g. mail.deine-domain.de
+    SMTP_PORT: int = 587         # 587 = STARTTLS, 465 = SSL, 25 = plain
+    SMTP_USER: str = ""          # e.g. noreply@deine-domain.de
+    SMTP_PASSWORD: str = ""
+    SMTP_USE_TLS: bool = True    # STARTTLS on port 587
+    SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
+    EMAIL_FROM: str = "medipact <noreply@medipact.de>"
 
     class Config:
         env_file = ".env"

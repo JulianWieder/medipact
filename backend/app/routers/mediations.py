@@ -31,6 +31,7 @@ class MediationUpdate(BaseModel):
     description: Optional[str] = None
     priority: Optional[str] = None
     status: Optional[str] = None
+    phase: Optional[str] = None
 
 @router.post("")
 def create_mediation(
@@ -168,6 +169,7 @@ def get_mediation(
         "description": mediation.description,
         "priority": mediation.priority,
         "status": mediation.status,
+        "phase": mediation.phase,
         "role": is_participant.role,
     }
 
