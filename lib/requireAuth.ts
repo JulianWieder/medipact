@@ -9,10 +9,11 @@
  */
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { Session } from "next-auth";
 
 type AuthSuccess = {
   ok: true;
-  session: NonNullable<Awaited<ReturnType<typeof auth>>>;
+  session: Session;
 };
 
 type AuthFailure = {
@@ -33,5 +34,5 @@ export async function requireAuth(): Promise<AuthSuccess | AuthFailure> {
     };
   }
 
-  return { ok: true, session };
+  return { ok: true, session: session as Session };
 }
