@@ -41,6 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 backend/*.db
+backend/*.db.bak
+backend/migrate_now.py
 *.docx
 
 # legacy root-level components (moved to app/components/)

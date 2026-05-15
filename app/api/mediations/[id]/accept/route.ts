@@ -3,9 +3,9 @@ import { acceptInvite } from "@/lib/mediations";
 
 export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ token: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { token } = await params;
-  const result = await acceptInvite(token);
+  const { id } = await params;
+  const result = await acceptInvite(id);
   return NextResponse.json(result.data, { status: result.status });
 }
