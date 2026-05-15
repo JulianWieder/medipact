@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 interface FooterProps {
   brandName?: string;
   tagline?: string;
