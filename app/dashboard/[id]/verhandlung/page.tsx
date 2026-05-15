@@ -1,12 +1,22 @@
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { getMediation } from "@/lib/mediations";
-import PhaseClient from "../_shared/PhaseClient";
+import PhaseNotesClient from "../_shared/PhaseNotesClient";
 
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function VerhandlungPage({ params }: PageProps) {
   const { id } = await params;
-  const result = await getMediation(id);
-  if (!result.ok) redirect("/dashboard");
-  return <PhaseClient mediationId={id} phaseKey="verhandlung" />;
+  const [mediationResult, session] = await Promise.all([
+    getMediation(id),
+    auth(),
+  ]);
+  if (!mediationResult.ok) redirect("/dashboard");
+  return (
+    <PhaseNotesClient
+      mediationId={id}
+      phaseKey="verhandlung"
+      currentUserName={session?.user?.name ?? ""}
+    />
+  );
 }
