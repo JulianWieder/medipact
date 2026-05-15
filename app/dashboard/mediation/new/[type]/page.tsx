@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getConfig } from "@/lib/mediation-types/registry";
 import { mediationRegistry } from "@/lib/mediation-types/registry";
 import { MediationType } from "@/lib/mediation-types/types";
-import NewMediationWizard from "@/components/mediation/NewMediationWizard";
+import NewMediationWizard from "@/app/components/mediation/NewMediationWizard";
 
 export function generateStaticParams() {
   return Object.keys(mediationRegistry).map((type) => ({ type }));

@@ -9,3 +9,8 @@ venv/
 dist/
 build/
 .pytest_cache/
+
+
+*.db
+*.db.bak
+*.bak
