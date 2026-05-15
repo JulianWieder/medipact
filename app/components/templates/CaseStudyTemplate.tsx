@@ -27,14 +27,10 @@ type CaseStudyTemplateProps = {
   intro: string;
   situationTitle: string;
   situationIntro?: string;
-  perspectiveA: {
+  perspectives: {
     title: string;
     content: ReactNode;
-  };
-  perspectiveB: {
-    title: string;
-    content: ReactNode;
-  };
+  }[];
   factsTitle?: string;
   facts: string[];
   riskTitle?: string;
