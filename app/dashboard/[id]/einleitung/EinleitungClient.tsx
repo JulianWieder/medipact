@@ -638,6 +638,3 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     </main>
   );
 }
-in>
-  );
-}
