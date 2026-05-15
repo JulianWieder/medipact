@@ -80,7 +80,6 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
             {PHASES.map((p, index) => {
               const isDone = index < currentIndex;
               const isCurrent = index === currentIndex;
-              const isUpcoming = index > currentIndex;
 
               return (
                 <li key={p.key} className="flex items-center">
