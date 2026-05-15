@@ -88,9 +88,9 @@ export const aboutPageContent = {
     ],
   },
 
+  finalCtaTitle: "Bereit, den Konflikt klarer zu sehen?",
+  finalCtaText: "Der erste Schritt ist nicht die perfekte Lösung – sondern ein klarer Blick auf die Situation.",
   finalCta: {
-    title: "Bereit, den Konflikt klarer zu sehen?",
-    text: "Der erste Schritt ist nicht die perfekte Lösung – sondern ein klarer Blick auf die Situation.",
     label: "Konflikt einschätzen",
     href: "/kontakt",
   },
