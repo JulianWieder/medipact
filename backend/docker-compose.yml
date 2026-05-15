@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    container_name: medipact-api
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    env_file:
+      - .env
+    environment:
+      DB_PATH: /data/medipact.db
+
+volumes:
+  db-data:

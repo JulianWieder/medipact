@@ -1,9 +1,11 @@
+import os
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "medipact.db"
+# In Docker: DB_PATH=/data/medipact.db (persistentes Volume), sonst lokal
+DB_PATH = Path(os.environ.get("DB_PATH", str(BASE_DIR / "medipact.db")))
 
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
