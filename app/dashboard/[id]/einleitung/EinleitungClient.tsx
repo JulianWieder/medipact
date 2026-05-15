@@ -305,7 +305,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               s.key,
               Object.fromEntries(data.map((p) => [p.id, []])),
             ])
-          ) as Record<StepKey, Record<string, string[]>>;
+          ) as unknown as Record<StepKey, Record<string, string[]>>;
 
           for (const { key, notes } of notesResults) {
             for (const n of notes) {
@@ -636,5 +636,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
       </section>
     </main>
+  );
+}
+in>
   );
 }
