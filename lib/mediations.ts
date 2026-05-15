@@ -31,6 +31,7 @@ export async function getMediation(id: string | number) {
     description: string | null;
     priority: string | null;
     status: string;
+    phase: string | null;
     role: string;
   }>(`/mediations/${id}`);
 }
@@ -52,6 +53,7 @@ export async function updateMediation(
     description?: string;
     priority?: string;
     status?: string;
+    phase?: string;
   },
 ) {
   return backendFetch(`/mediations/${id}`, {

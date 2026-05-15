@@ -14,6 +14,15 @@ interface Mediation {
   description?: string;
 }
 
+interface PendingInvite {
+  invite_id: number;
+  mediation_id: number;
+  mediation_title: string;
+  mediation_type: string;
+  role: string;
+  expires_at: string;
+}
+
 const statusConfig = {
   active: { label: "Laufend", className: "bg-emerald-100 text-emerald-800" },
   pending: { label: "Ausstehend", className: "bg-amber-100 text-amber-800" },
@@ -23,37 +32,69 @@ const statusConfig = {
   },
 };
 
+const roleLabel: Record<string, string> = {
+  other_party: "Gegenpartei",
+  mediator: "Mediator",
+  owner: "Antragsteller",
+  initiator: "Antragsteller",
+};
+
+const typeLabel: Record<string, string> = {
+  trennung: "Trennung & Scheidung",
+  erbschaft: "Erbschaftsstreit",
+  nachbarschaft: "Nachbarschaftskonflikt",
+};
+
 export default function DashboardClient() {
   const [data, setData] = useState<Mediation[]>([]);
+  const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [acceptingId, setAcceptingId] = useState<number | null>(null);
+  const [acceptError, setAcceptError] = useState<string>("");
   const router = useRouter();
-  useEffect(() => {
-    const loadMediations = async () => {
-      try {
-        const res = await fetch("/api/mediations/me");
 
-        if (!res.ok) {
-          if (res.status === 401) {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [mediationsRes, invitesRes] = await Promise.all([
+          fetch("/api/mediations/me"),
+          fetch("/api/invites/me"),
+        ]);
+
+        if (!mediationsRes.ok) {
+          if (mediationsRes.status === 401) {
             router.push("/auth/login");
             return;
           }
-          console.error("Fehler beim Laden", res.status);
-          return;
+          console.error("Fehler beim Laden", mediationsRes.status);
+        } else {
+          const raw = await mediationsRes.json();
+          const mapped = (raw ?? []).map(
+            (item: {
+              id?: number;
+              mediation_id?: number;
+              title?: string;
+              phase?: string;
+              status?: string;
+              progress?: number;
+              mediation_type?: string;
+              description?: string;
+            }) => ({
+              id: item.mediation_id ?? item.id,
+              title: item.title ?? "Neue Mediation",
+              phase: item.phase ?? "Entwurf",
+              status: item.status ?? "pending",
+              progress: item.progress ?? 10,
+              conflict_type: item.mediation_type,
+              description: item.description,
+            }),
+          );
+          setData(mapped);
         }
 
-        const raw = await res.json();
-
-        const mapped = (raw ?? []).map((item: { id?: number; mediation_id?: number; title?: string; phase?: string; status?: string; progress?: number; mediation_type?: string; description?: string }) => ({
-          id: item.mediation_id ?? item.id,
-          title: item.title ?? "Neue Mediation",
-          phase: item.phase ?? "Entwurf",
-          status: item.status ?? "pending",
-          progress: item.progress ?? 10,
-          conflict_type: item.mediation_type,
-          description: item.description,
-        }));
-
-        setData(mapped);
+        if (invitesRes.ok) {
+          setInvites(await invitesRes.json());
+        }
       } catch (error) {
         console.error("Server nicht erreichbar", error);
       } finally {
@@ -61,8 +102,31 @@ export default function DashboardClient() {
       }
     };
 
-    loadMediations();
+    load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function acceptInvite(invite: PendingInvite) {
+    setAcceptingId(invite.invite_id);
+    setAcceptError("");
+    try {
+      const res = await fetch(`/api/invites/${invite.invite_id}/accept`, {
+        method: "POST",
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        const raw = body?.detail ?? body?.error ?? "Unbekannter Fehler";
+        setAcceptError(typeof raw === "string" ? raw : JSON.stringify(raw));
+        return;
+      }
+      // Remove from invites list and navigate to the mediation
+      setInvites((prev) => prev.filter((i) => i.invite_id !== invite.invite_id));
+      router.push(`/dashboard/${body.mediation_id}`);
+    } catch {
+      setAcceptError("Server nicht erreichbar.");
+    } finally {
+      setAcceptingId(null);
+    }
+  }
 
   const stats = useMemo(
     () => [
@@ -129,6 +193,73 @@ export default function DashboardClient() {
       </section>
 
       <section className="container py-12 lg:py-16">
+        {/* ── Eingehende Mediationsanfragen ─────────────────────────── */}
+        {invites.length > 0 && (
+          <div className="mb-10">
+            <div className="mb-4 flex items-center gap-3">
+              <h2 className="text-xl font-bold text-slate-900">
+                Eingehende Mediationsanfragen
+              </h2>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
+                {invites.length}
+              </span>
+            </div>
+            <p className="mb-6 text-sm text-slate-600">
+              Du wurdest zu folgenden Mediationsverfahren eingeladen. Nimm die
+              Einladung an, um beizutreten.
+            </p>
+
+            <div className="space-y-4">
+              {invites.map((invite) => (
+                <div
+                  key={invite.invite_id}
+                  className="app-surface flex flex-col gap-4 border border-amber-200 bg-amber-50/40 p-6 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                        Einladung
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {typeLabel[invite.mediation_type] ?? invite.mediation_type}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {invite.mediation_title}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Deine Rolle:{" "}
+                      <span className="font-semibold">
+                        {roleLabel[invite.role] ?? invite.role}
+                      </span>
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => acceptInvite(invite)}
+                    disabled={acceptingId === invite.invite_id}
+                    className="btn btn-primary whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {acceptingId === invite.invite_id
+                      ? "Wird angenommen..."
+                      : "Einladung annehmen"}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {acceptError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+                <p className="text-sm font-semibold text-red-700">{acceptError}</p>
+              </div>
+            )}
+
+            <div className="mt-6 border-t border-slate-200" />
+          </div>
+        )}
+
+        {/* ── Meine Mediationen ─────────────────────────────────────── */}
         <div className="space-y-6">
           {data.length === 0 ? (
             <div className="app-surface border border-dashed border-slate-300 p-12 text-center">

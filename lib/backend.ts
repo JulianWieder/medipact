@@ -33,17 +33,27 @@ export async function backendFetch<T = unknown>(
     };
   }
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(session.backendAccessToken
-        ? { Authorization: `Bearer ${session.backendAccessToken}` }
-        : {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      method: options.method ?? "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(session.backendAccessToken
+          ? { Authorization: `Bearer ${session.backendAccessToken}` }
+          : {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error(`backendFetch: network error reaching ${API_BASE_URL}${path}`, err);
+    return {
+      ok: false,
+      status: 503,
+      data: { error: "Backend nicht erreichbar" } as T,
+    };
+  }
 
   const data = (await res.json().catch(() => null)) as T | null;
 

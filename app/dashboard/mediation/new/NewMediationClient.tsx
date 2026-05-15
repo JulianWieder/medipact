@@ -3,46 +3,46 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { mediationRegistry } from "@/lib/mediation-types/registry";
 
 export default function NewMediationClient() {
   const router = useRouter();
-  const [mediationType, setMediationType] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("");
-  const [role, setRole] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isCreating, setIsCreating] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!mediationType) {
-      alert("Bitte wählen Sie eine Art der Mediation aus.");
-      return;
-    }
-
-    setIsSaving(true);
+  const handleCreate = async (type: string) => {
+    setIsCreating(type);
 
     try {
       const res = await fetch("/api/mediations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mediation_type: mediationType, description, priority, role }),
+        body: JSON.stringify({ mediation_type: type }),
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        console.error("Mediation error:", res.status, err);
-        alert("Mediation konnte nicht gespeichert werden.");
+        console.error("Mediation konnte nicht erstellt werden.", res.status);
         return;
       }
 
       const mediation = await res.json();
-      router.push(`/dashboard/${mediation.id}`);
+      const mediationId =
+        mediation.mediation_id ??
+        mediation.id ??
+        mediation.data?.mediation_id ??
+        mediation.data?.id;
+
+      if (!mediationId) {
+        console.error("Keine Mediation-ID erhalten:", mediation);
+        return;
+      }
+
+      router.push(
+        `/dashboard/mediation/new/${type}?mediationId=${mediationId}`
+      );
     } catch (error) {
-      console.error(error);
-      alert("Server nicht erreichbar.");
+      console.error("Server nicht erreichbar.", error);
     } finally {
-      setIsSaving(false);
+      setIsCreating("");
     }
   };
 
@@ -66,99 +66,25 @@ export default function NewMediationClient() {
       </section>
 
       <section className="container py-12 lg:py-16">
-        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-          <form
-            onSubmit={handleSubmit}
-            className="app-surface border border-slate-200 p-8"
-          >
-            <div className="grid gap-6">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Art der Mediation
-                </label>
-                <select
-                  value={mediationType}
-                  onChange={(e) => setMediationType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500"
-                >
-                  <option value="">Bitte auswählen</option>
-                  <option value="trennung">Trennung & Unterhalt</option>
-                  <option value="erbschaft">Erbschafts-Konflikt</option>
-                  <option value="nachbarschaft">Nachbarschafts-Konflikt</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Kurze Beschreibung des Konflikts (optional)
-                </label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="z. B. Trennung mit Kind; Geruchsbelästigung durch Nachbarn; Streit um Erbe "
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Was ist gerade am wichtigsten?
-                </label>
-                <textarea
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  placeholder="z. B. Betreuung, Geld, Wohnung, Kommunikation oder ein konkreter nächster Schritt."
-                  className="min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Ihre Rolle
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500"
-                >
-                  <option value="">Bitte auswählen</option>
-                  <option value="beteiligte-person">
-                    Ich bin selbst beteiligt
-                  </option>
-                  <option value="vertretung">
-                    Ich handle für eine beteiligte Person
-                  </option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
-                <Link href="/dashboard" className="btn btn-secondary">
-                  Abbrechen
-                </Link>
-
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="btn btn-primary"
-                >
-                  {isSaving ? "Wird gespeichert..." : "Mediation starten →"}
-                </button>
-              </div>
-            </div>
-          </form>
-
-          <aside className="app-accent-soft h-fit p-6">
-            <h2 className="heading-3 mb-3">Erste Einordnung</h2>
-            <p className="text-sm leading-6 text-slate-700">
-              In den nächsten Schritten geht es ausschließlich um eine erste
-              Orientierung. Weitere Details wie beteiligte Personen, Ziele,
-              vorhandene Unterlagen und konkrete Streitpunkte werden im nächsten
-              Schritt gezielt abgefragt – abgestimmt auf die gewählte
-              Mediationsart. Die Klärung wird erfahrungsgemäß noch ein paar
-              Wochen dauern.
-            </p>
-          </aside>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Object.values(mediationRegistry).map((config) => (
+            <button
+              key={config.type}
+              onClick={() => handleCreate(config.type)}
+              disabled={!!isCreating}
+              className="app-surface border border-slate-200 p-6 text-left transition hover:border-emerald-500 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <h2 className="heading-3 mb-2">{config.title}</h2>
+              <p className="text-sm leading-6 text-slate-600">
+                {config.description}
+              </p>
+              {isCreating === config.type && (
+                <p className="mt-3 text-sm font-semibold text-emerald-600">
+                  Wird erstellt…
+                </p>
+              )}
+            </button>
+          ))}
         </div>
       </section>
     </main>
