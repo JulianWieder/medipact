@@ -101,6 +101,15 @@
 }
 
 /* ------------------------------------------------------------
+   Container utility (Tailwind v4 — replaces tailwind.config.ts container)
+   ------------------------------------------------------------ */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+  max-width: 80rem; /* 1280px */
+}
+
+/* ------------------------------------------------------------
    Component layer
    ------------------------------------------------------------ */
 @layer components {
