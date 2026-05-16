@@ -22,10 +22,16 @@ export default function RegisterPage() {
       newErrors.name = "Name ist erforderlich";
     }
 
+    const ALLOWED_DOMAINS = ["medipact.de", "mandexis.de"];
     if (!formData.email) {
       newErrors.email = "E-Mail ist erforderlich";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Ungültige E-Mail-Adresse";
+    } else {
+      const domain = formData.email.split("@")[1]?.toLowerCase();
+      if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
+        newErrors.email = "Nur @medipact.de- und @mandexis.de-Adressen sind erlaubt.";
+      }
     }
 
     if (!formData.password) {

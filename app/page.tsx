@@ -187,7 +187,7 @@ export default function MedipactLanding() {
               <FadeIn>
                 <h1 className="heading-1 mt-8">
                   Streit klären ohne Gericht –
-                  <span className="block bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
                     ruhig, fair und bezahlbar.
                   </span>
                 </h1>

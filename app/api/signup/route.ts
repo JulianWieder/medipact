@@ -11,6 +11,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name, E-Mail und Passwort sind erforderlich" }, { status: 400 });
     }
 
+    const ALLOWED_DOMAINS = ["medipact.de", "mandexis.de"];
+    const emailDomain = email.split("@")[1]?.toLowerCase();
+    if (!emailDomain || !ALLOWED_DOMAINS.includes(emailDomain)) {
+      return NextResponse.json(
+        { error: "Registrierung ist nur für @medipact.de- und @mandexis.de-E-Mail-Adressen möglich." },
+        { status: 403 },
+      );
+    }
+
     const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
