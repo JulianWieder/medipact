@@ -4,6 +4,8 @@ import Credentials from "next-auth/providers/credentials";
 const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
+
   pages: {
     signIn: "/auth/login",
   },
