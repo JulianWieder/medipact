@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True    # STARTTLS on port 587
     SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
+    DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
 
     class Config:
         env_file = ".env"
