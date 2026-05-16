@@ -8,10 +8,11 @@ interface Mediation {
   id: string | number;
   title?: string;
   phase?: string;
-  status?: "active" | "pending" | "completed";
+  status?: "active" | "pending" | "completed" | "draft";
   progress?: number;
   conflict_type?: string;
   description?: string;
+  role?: string;
 }
 
 interface PendingInvite {
@@ -26,6 +27,7 @@ interface PendingInvite {
 const statusConfig = {
   active: { label: "Laufend", className: "bg-emerald-100 text-emerald-800" },
   pending: { label: "Ausstehend", className: "bg-amber-100 text-amber-800" },
+  draft: { label: "Entwurf", className: "bg-blue-100 text-blue-800" },
   completed: {
     label: "Abgeschlossen",
     className: "bg-slate-100 text-slate-800",
@@ -79,6 +81,7 @@ export default function DashboardClient() {
               progress?: number;
               mediation_type?: string;
               description?: string;
+              role?: string;
             }) => ({
               id: item.mediation_id ?? item.id,
               title: item.title ?? "Neue Mediation",
@@ -87,6 +90,7 @@ export default function DashboardClient() {
               progress: item.progress ?? 10,
               conflict_type: item.mediation_type,
               description: item.description,
+              role: item.role,
             }),
           );
           setData(mapped);
@@ -130,11 +134,20 @@ export default function DashboardClient() {
 
   const stats = useMemo(
     () => [
-      { label: "Gesamt", value: data.length, text: "Mediationen" },
       {
-        label: "Laufend",
-        value: data.filter((m) => m.status === "active").length,
-        text: "aktive Verfahren",
+        label: "Bei Annahmen",
+        value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
+        text: "ausstehende Verfahren",
+      },
+      {
+        label: "Gegenseite",
+        value: data.filter((m) => m.role === "other_party").length,
+        text: "als Gegenpartei",
+      },
+      {
+        label: "Mediator",
+        value: data.filter((m) => m.role === "mediator").length,
+        text: "als Mediator",
       },
       {
         label: "Abgeschlossen",
@@ -176,7 +189,7 @@ export default function DashboardClient() {
             </Link>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((item) => (
               <article key={item.label} className="app-surface p-6">
                 <p className="eyebrow">{item.label}</p>

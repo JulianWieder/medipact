@@ -134,6 +134,9 @@ def get_my_mediations(
             "mediation_id": mediation.id,
             "title": mediation.title,
             "role": participant.role,
+            "status": mediation.status,
+            "phase": mediation.phase,
+            "mediation_type": mediation.mediation_type,
         }
         for mediation, participant in rows
     ]

@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const justVerified = searchParams.get("verified") === "1";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,6 +35,26 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // Schritt 1: Spezifischen Fehlercode vom Backend holen
+      const check = await fetch("/api/auth/check-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!check.ok) {
+        const data = await check.json().catch(() => ({}));
+        if (data.error === "EMAIL_NOT_VERIFIED") {
+          setError("Bitte bestätige zuerst deine E-Mail-Adresse. Prüfe dein Postfach.");
+        } else if (data.error === "BACKEND_UNREACHABLE") {
+          setError("Server nicht erreichbar. Bitte versuche es später erneut.");
+        } else {
+          setError("E-Mail oder Passwort falsch");
+        }
+        return;
+      }
+
+      // Schritt 2: Credentials korrekt → NextAuth-Session erstellen
       const result = await signIn("credentials", {
         email,
         password,
@@ -67,6 +91,11 @@ export default function LoginPage() {
           </div>
 
           <Card className="p-8">
+            {justVerified && !error && (
+              <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 font-medium">
+                ✅ E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
+              </div>
+            )}
             {error && (
               <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                 {error}
@@ -151,5 +180,21 @@ export default function LoginPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="app-shell pt-[73px]">
+        <section className="section section-muted">
+          <div className="container max-w-md">
+            <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-r-transparent" />
+          </div>
+        </section>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

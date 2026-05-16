@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +13,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -79,19 +79,8 @@ export default function RegisterPage() {
         return;
       }
 
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setErrors({ general: "Registrierung erfolgreich, bitte einloggen." });
-        window.location.href = "/auth/login";
-        return;
-      }
-
-      window.location.href = "/dashboard";
+      // Registrierung erfolgreich → E-Mail-Bestätigung anzeigen
+      setRegisteredEmail(formData.email);
     } catch {
       setErrors({ general: "Backend nicht erreichbar" });
     } finally {
@@ -107,6 +96,52 @@ export default function RegisterPage() {
     }
   };
 
+  // ── E-Mail-Bestätigungsansicht ────────────────────────────────────────────
+  if (registeredEmail) {
+    return (
+      <main className="min-h-screen bg-white pt-[73px]">
+        <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+            <div className="mb-4 text-5xl">📧</div>
+            <h1 className="text-2xl font-black text-emerald-900 mb-3">
+              E-Mail bestätigen
+            </h1>
+            <p className="text-slate-600 text-sm leading-relaxed mb-2">
+              Wir haben eine Bestätigungs-E-Mail an
+            </p>
+            <p className="font-semibold text-slate-900 text-sm mb-4">
+              {registeredEmail}
+            </p>
+            <p className="text-slate-600 text-sm leading-relaxed mb-6">
+              gesendet. Bitte klicke auf den Link in der E-Mail, um dein Konto
+              zu aktivieren. Der Link ist 24 Stunden gültig.
+            </p>
+            <p className="text-xs text-slate-500">
+              Keine E-Mail erhalten?{" "}
+              <button
+                onClick={() => setRegisteredEmail(null)}
+                className="font-semibold text-emerald-600 hover:underline"
+              >
+                Erneut registrieren
+              </button>{" "}
+              oder prüfe deinen Spam-Ordner.
+            </p>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/auth/login"
+              className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition"
+            >
+              Zurück zur Anmeldung
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Registrierungsformular ────────────────────────────────────────────────
   return (
     <>
       <main className="min-h-screen bg-white pt-[73px]">
