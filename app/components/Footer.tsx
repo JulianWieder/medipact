@@ -29,8 +29,8 @@ export default function Footer({
             <h3 className="font-bold text-lg mb-4">{brandName}</h3>
             <p className="text-gray-400">{tagline}</p>
             <div className="mt-4 space-y-2 text-sm text-gray-400">
-              <p>📧 {email}</p>
-              <p>📞 {phone}</p>
+              <p>{email}</p>
+              <p>{phone}</p>
             </div>
           </div>
 

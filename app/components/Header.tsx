@@ -25,7 +25,7 @@ const navItems = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-emerald-900/10 bg-[#fffdf7]/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
@@ -57,9 +57,9 @@ export default function Header() {
         {/* CTA */}
         <Link
           href="/auth/login"
-          className="hidden rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 md:inline-flex"
+          className="hidden rounded-full bg-emerald-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-950 md:inline-flex"
         >
-          Mediation Starten{" "}
+          Mediation starten
         </Link>
 
         {/* MOBILE */}

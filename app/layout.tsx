@@ -57,8 +57,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         {/* Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
 
@@ -81,7 +83,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-white text-slate-900">
+      <body className="antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
         <ConditionalHeader />
         {children}
         <ConditionalFooter />

@@ -140,7 +140,7 @@ export function CaseStudyTemplate({
               <h1 className="heading-1 mt-8">
                 {title}
                 {titleHighlight && (
-                  <span className="mt-2 block bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                  <span className="mt-2 block bg-gradient-to-r from-emerald-900 via-emerald-700 to-emerald-500 bg-clip-text text-transparent pb-2 leading-[1.15]">
                     {titleHighlight}
                   </span>
                 )}

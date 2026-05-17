@@ -141,7 +141,7 @@ const comparisonPlans = [
       "menschlicher Mediator optional",
     ],
     className:
-      "bg-emerald-900/50 border-emerald-600/60 shadow-2xl shadow-emerald-900/30",
+      "bg-emerald-950/70 border-emerald-700/40 shadow-2xl shadow-emerald-950/50",
     featured: true,
   },
   {
@@ -187,7 +187,7 @@ export default function MedipactLanding() {
               <FadeIn>
                 <h1 className="heading-1 mt-8">
                   Streit klären ohne Gericht –
-                  <span className="block bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-emerald-900 via-emerald-700 to-emerald-500 bg-clip-text text-transparent pb-2 leading-[1.15]">
                     ruhig, fair und bezahlbar.
                   </span>
                 </h1>
@@ -205,7 +205,7 @@ export default function MedipactLanding() {
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <Link
                   href="/auth/register"
-                  className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-8 py-4 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-800"
+                  className="inline-flex items-center justify-center rounded-2xl bg-emerald-900 px-8 py-4 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-950"
                 >
                   Streitfall kostenlos starten
                 </Link>
@@ -217,16 +217,20 @@ export default function MedipactLanding() {
                 </a>
               </div>
 
-              <div className="mt-8 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  🔒 Vertraulich
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  💰 Bezahlbar
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  🤝 Lösungsorientiert
-                </div>
+              <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-600">
+                {[
+                  { label: "Vertraulich", color: "bg-emerald-800" },
+                  { label: "Bezahlbar", color: "bg-emerald-600" },
+                  { label: "Lösungsorientiert", color: "bg-emerald-400" },
+                ].map(({ label, color }) => (
+                  <div
+                    key={label}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                  >
+                    <span className={`h-2 w-2 rounded-full ${color}`} />
+                    {label}
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -263,7 +267,8 @@ export default function MedipactLanding() {
         <section className="section section-muted border-y border-slate-200">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-12 max-w-3xl">
-              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+              <div className="eyebrow mb-4">Das Problem</div>
+              <h2 className="heading-2">
                 Private Konflikte brauchen keinen jahrelangen Kampf.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-700">
@@ -274,11 +279,14 @@ export default function MedipactLanding() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              {problemPoints.map((point) => (
+              {problemPoints.map((point, i) => (
                 <div
                   key={point}
-                  className="app-surface rounded-[2rem] border border-slate-200 p-8"
+                  className="app-surface p-8"
                 >
+                  <div className="mb-4 text-3xl font-black text-slate-100">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
                   <p className="text-base leading-7 text-slate-700">{point}</p>
                 </div>
               ))}
@@ -289,7 +297,8 @@ export default function MedipactLanding() {
         <section className="section section-base">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-16 text-center">
-              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+              <div className="eyebrow mb-4 justify-center">Anwendungsfälle</div>
+              <h2 className="heading-2">
                 Dafür ist Medipact gedacht
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-700">
@@ -302,18 +311,16 @@ export default function MedipactLanding() {
               {useCases.map((useCase) => (
                 <article
                   key={useCase.title}
-                  className="app-surface rounded-[2rem] border border-slate-200 p-8 transition hover:shadow-xl"
+                  className="app-surface p-8"
                 >
-                  <h3 className="text-xl font-bold text-slate-900">
-                    {useCase.title}
-                  </h3>
+                  <h3 className="heading-3">{useCase.title}</h3>
                   <p className="mt-4 text-base leading-7 text-slate-600">
                     {useCase.text}
                   </p>
-                  <ul className="mt-6 space-y-3 text-sm text-slate-700">
+                  <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-700">
                     {useCase.points.map((point) => (
-                      <li key={point} className="flex gap-3">
-                        <span className="text-emerald-700">✓</span>
+                      <li key={point} className="flex items-center gap-3">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-900/10 text-emerald-900 text-xs font-bold">✓</span>
                         <span>{point}</span>
                       </li>
                     ))}
@@ -327,7 +334,8 @@ export default function MedipactLanding() {
         <section className="section section-strong">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-16 text-center">
-              <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
+              <div className="eyebrow mb-4 justify-center text-emerald-400">Vergleich</div>
+              <h2 className="heading-2 text-white">
                 Der bessere erste Schritt vor der Eskalation
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300">
@@ -336,28 +344,35 @@ export default function MedipactLanding() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3">
               {comparisonPlans.map((plan) => (
                 <div
                   key={plan.title}
                   className={`rounded-[2rem] border p-8 ${plan.className}`}
                 >
-                  <h3 className="text-xl font-bold">{plan.title}</h3>
+                  {plan.featured && (
+                    <div className="mb-4 inline-block rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-300">
+                      Empfohlen
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-white">{plan.title}</h3>
                   <div
-                    className={`mt-2 text-sm font-bold uppercase tracking-wider ${
-                      plan.featured ? "text-emerald-300" : "text-slate-400"
+                    className={`mt-1 text-sm font-medium ${
+                      plan.featured ? "text-emerald-300" : "text-slate-500"
                     }`}
                   >
                     {plan.status}
                   </div>
 
-                  <ul className="mt-8 space-y-4">
+                  <div className="my-6 h-px bg-white/10" />
+
+                  <ul className="space-y-3">
                     {plan.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-center gap-3 text-slate-300"
+                        className="flex items-start gap-3 text-sm text-slate-300"
                       >
-                        <span className="text-lg text-emerald-400">✓</span>
+                        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${plan.featured ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"}`}>✓</span>
                         {feature}
                       </li>
                     ))}
@@ -371,7 +386,8 @@ export default function MedipactLanding() {
         <section id="process" className="section section-base">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-16 text-center text-slate-900">
-              <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
+              <div className="eyebrow mb-4 justify-center">So funktioniert es</div>
+              <h2 className="heading-2">
                 In 6 Schritten zur möglichen Einigung
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-700">
@@ -385,7 +401,7 @@ export default function MedipactLanding() {
                   key={step.num}
                   className="group flex items-center gap-8 rounded-[2rem] border border-slate-100 bg-slate-50 p-8 transition hover:border-emerald-200 hover:shadow-md"
                 >
-                  <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl font-black text-emerald-700 shadow-sm transition-colors group-hover:bg-emerald-700 group-hover:text-white sm:flex">
+                  <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl font-black text-emerald-900 shadow-sm transition-colors group-hover:bg-emerald-900 group-hover:text-white sm:flex">
                     {step.num}
                   </div>
 
@@ -406,20 +422,22 @@ export default function MedipactLanding() {
         <section className="section section-muted border-y border-slate-200">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-16 text-center">
-              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+              <div className="eyebrow mb-4 justify-center">Funktionsweise</div>
+              <h2 className="heading-2">
                 Was Medipact konkret leistet
               </h2>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              {modules.map((module) => (
+              {modules.map((module, i) => (
                 <article
                   key={module.title}
-                  className="app-surface rounded-[2rem] border border-slate-200 p-10 transition hover:shadow-xl"
+                  className="app-surface p-10"
                 >
-                  <h3 className="text-xl font-bold text-slate-900">
-                    {module.title}
-                  </h3>
+                  <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-emerald-800">
+                    Schritt {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <h3 className="heading-3">{module.title}</h3>
                   <p className="mt-4 text-base leading-7 text-slate-600">
                     {module.text}
                   </p>
@@ -432,7 +450,8 @@ export default function MedipactLanding() {
         <section className="section section-accent border-y border-emerald-100">
           <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-2 lg:px-8">
             <div>
-              <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
+              <div className="eyebrow mb-4">Vertrauen & Sicherheit</div>
+              <h2 className="heading-2">
                 Sicher genug für sensible Themen. Einfach genug für den ersten
                 Schritt.
               </h2>
@@ -447,10 +466,15 @@ export default function MedipactLanding() {
               {trustPoints.map((point) => (
                 <div
                   key={point.title}
-                  className="app-surface border border-slate-200 p-6"
+                  className="app-surface p-6"
                 >
-                  <h3 className="font-bold text-slate-900">{point.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{point.text}</p>
+                  <div className="flex items-start gap-4">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-900/10 text-emerald-900 text-sm font-bold">✓</span>
+                    <div>
+                      <h3 className="font-bold text-slate-900">{point.title}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-600">{point.text}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -459,18 +483,19 @@ export default function MedipactLanding() {
 
         <section id="faq" className="section section-base">
           <div className="mx-auto max-w-4xl px-6 lg:px-8">
-            <h2 className="mb-16 text-center text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">
-              Häufige Fragen
-            </h2>
+            <div className="mb-16 text-center">
+              <div className="eyebrow mb-4 justify-center">FAQ</div>
+              <h2 className="heading-2">Häufige Fragen</h2>
+            </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {faqs.map((faq) => (
                 <div
                   key={faq.q}
-                  className="app-surface border border-slate-200 p-8"
+                  className="app-surface p-8"
                 >
-                  <h3 className="text-lg font-bold text-slate-900">{faq.q}</h3>
-                  <p className="mt-4 leading-relaxed text-slate-600">{faq.a}</p>
+                  <h3 className="font-semibold text-slate-900">{faq.q}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -490,7 +515,7 @@ export default function MedipactLanding() {
             <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/auth/register"
-                className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-10 py-5 text-base font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-800"
+                className="inline-flex items-center justify-center rounded-2xl bg-emerald-900 px-10 py-5 text-base font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-950"
               >
                 Streitfall kostenlos starten
               </Link>
