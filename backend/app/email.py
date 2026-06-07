@@ -131,3 +131,126 @@ def send_verification_email(to_email: str, to_name: str, token: str) -> None:
             if settings.SMTP_USER and settings.SMTP_PASSWORD:
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.sendmail(settings.SMTP_USER or settings.EMAIL_FROM, to_email, msg.as_string())
+
+
+def _build_password_reset_email(to_email: str, to_name: str, reset_url: str) -> MIMEMultipart:
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Setze dein medipact-Passwort zurück"
+    msg["From"] = settings.EMAIL_FROM
+    msg["To"] = to_email
+
+    text_body = f"""\
+Hallo {to_name},
+
+du hast eine Anfrage zum Zurücksetzen deines Passworts für medipact gestellt.
+
+Bitte klicke auf folgenden Link, um dein Passwort zu ändern:
+
+{reset_url}
+
+Der Link ist 1 Stunde gültig.
+
+Wenn du diese Anfrage nicht gestellt hast, ignoriere diese E-Mail. Dein Passwort bleibt unverändert.
+
+Viele Grüße
+Das medipact-Team
+"""
+
+    html_body = f"""\
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:#059669;padding:32px 40px;">
+              <span style="font-size:22px;font-weight:900;color:#ffffff;
+                           letter-spacing:-0.5px;">medipact</span>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h1 style="margin:0 0 16px;font-size:24px;font-weight:800;
+                         color:#0f172a;line-height:1.3;">
+                Passwort zurücksetzen
+              </h1>
+              <p style="margin:0 0 12px;font-size:15px;color:#475569;line-height:1.6;">
+                Hallo {to_name},
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;color:#475569;line-height:1.6;">
+                du hast eine Anfrage zum Zurücksetzen deines Passworts gestellt.
+                Klicke auf den Button unten, um ein neues Passwort zu setzen.
+              </p>
+              <a href="{reset_url}"
+                 style="display:inline-block;background:#059669;color:#ffffff;
+                        font-size:15px;font-weight:700;text-decoration:none;
+                        padding:14px 32px;border-radius:12px;">
+                Passwort zurücksetzen
+              </a>
+              <p style="margin:28px 0 0;font-size:13px;color:#94a3b8;line-height:1.6;">
+                Der Link ist <strong>1 Stunde</strong> gültig.<br>
+                Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f8fafc;padding:20px 40px;
+                       border-top:1px solid #e2e8f0;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
+                © 2025 medipact · <a href="https://medipact.de" style="color:#059669;text-decoration:none;">medipact.de</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+    msg.attach(MIMEText(text_body, "plain", "utf-8"))
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+    return msg
+
+
+def send_password_reset_email(to_email: str, to_name: str, token: str) -> None:
+    """
+    Versendet eine Passwort-Zurücksetzen-E-Mail an den Nutzer.
+    Nutzt SMTP-Einstellungen aus den Settings (SMTP_HOST, SMTP_PORT, …).
+    """
+    reset_url = f"{settings.APP_BASE_URL}/auth/reset-password?token={token}"
+    msg = _build_password_reset_email(to_email, to_name, reset_url)
+
+    if not settings.SMTP_HOST:
+        # Kein SMTP konfiguriert – URL in den Logs ausgeben (Entwicklungsmodus)
+        print(f"[DEV] Password reset URL for {to_email}: {reset_url}")
+        return
+
+    context = ssl.create_default_context()
+
+    if settings.SMTP_USE_SSL:
+        # SSL direkt (Port 465)
+        with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context) as server:
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(settings.SMTP_USER or settings.EMAIL_FROM, to_email, msg.as_string())
+    else:
+        # STARTTLS (Port 587) oder plain
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            if settings.SMTP_USE_TLS:
+                server.starttls(context=context)
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(settings.SMTP_USER or settings.EMAIL_FROM, to_email, msg.as_string())

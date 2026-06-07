@@ -163,6 +163,15 @@ function LoginForm() {
               >
                 {loading ? "Wird angemeldet..." : "Anmelden"}
               </Button>
+
+              <div className="text-center">
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                >
+                  Passwort vergessen?
+                </Link>
+              </div>
             </form>
           </Card>
 

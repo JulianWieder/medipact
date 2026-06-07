@@ -1,11 +1,12 @@
 import secrets
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.email import send_verification_email
+from app.email import send_verification_email, send_password_reset_email
 from app.models.user import User
 from app.rate_limit import auth_limiter
 from app.security import create_access_token, hash_password, verify_password
@@ -55,6 +56,31 @@ class TokenResponse(BaseModel):
 class RegisterResponse(BaseModel):
     message: str
     email: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Passwort muss mindestens 8 Zeichen lang sein")
+        return v
+
+
+class ResetPasswordResponse(BaseModel):
+    message: str
 
 
 @router.post("/register", response_model=RegisterResponse)
@@ -164,4 +190,65 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             "name": user.name,
             "role": user.role,
         },
+    )
+
+
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Initiiert einen Passwort-Reset-Prozess.
+    Sendet einen Reset-Link per E-Mail, wenn der Account existiert.
+    """
+    auth_limiter.check(request)
+
+    user = db.query(User).filter(User.email == str(payload.email)).first()
+
+    # Wir antworten gleich, egal ob der Account existiert oder nicht (Sicherheit!)
+    if not user:
+        # Kein Account mit dieser E-Mail → trotzdem erfolgreiche Antwort geben
+        return ForgotPasswordResponse(
+            message="Falls ein Account mit dieser E-Mail existiert, erhältst du einen Reset-Link.",
+            email=str(payload.email),
+        )
+
+    # Token generieren und speichern (1 Stunde Gültigkeit)
+    token = secrets.token_urlsafe(32)
+    user.password_reset_token = token
+    user.password_reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    db.commit()
+
+    # Reset-E-Mail senden (Fehler loggen, aber nicht abbrechen)
+    try:
+        send_password_reset_email(str(payload.email), user.name, token)
+    except Exception as exc:
+        print(f"[EMAIL ERROR] {exc}")
+
+    return ForgotPasswordResponse(
+        message="Falls ein Account mit dieser E-Mail existiert, erhältst du einen Reset-Link.",
+        email=str(payload.email),
+    )
+
+
+@router.post("/reset-password", response_model=ResetPasswordResponse)
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Setzt das Passwort zurück, wenn ein gültiger Token vorhanden ist.
+    """
+    user = db.query(User).filter(User.password_reset_token == payload.token).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Ungültiger oder abgelaufener Reset-Link")
+
+    # Token-Gültigkeit überprüfen
+    if user.password_reset_token_expires is None or user.password_reset_token_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Reset-Link ist abgelaufen")
+
+    # Passwort aktualisieren
+    user.hashed_password = hash_password(payload.password)
+    user.password_reset_token = None
+    user.password_reset_token_expires = None
+    db.commit()
+
+    return ResetPasswordResponse(
+        message="Passwort erfolgreich geändert. Du kannst dich jetzt anmelden."
     )
