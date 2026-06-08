@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { mediationRegistry } from "@/lib/mediation-types/registry";
 
 export default function NewMediationClient() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState("");
+  const [error, setError] = useState("");
 
   const handleCreate = async (type: string) => {
     setIsCreating(type);
+    setError("");
 
     try {
       const res = await fetch("/api/mediations", {
@@ -19,19 +22,29 @@ export default function NewMediationClient() {
         body: JSON.stringify({ mediation_type: type }),
       });
 
+      const body = await res.json().catch(() => null);
+
       if (!res.ok) {
-        console.error("Mediation konnte nicht erstellt werden.", res.status);
+        if (res.status === 401 && body?.reauth) {
+          setError("Deine Sitzung ist abgelaufen. Du wirst zum Login weitergeleitet …");
+          await signIn(undefined, { callbackUrl: "/dashboard/mediation/new" });
+          return;
+        }
+
+        setError(body?.error ?? `Mediation konnte nicht erstellt werden (Fehler ${res.status}).`);
+        console.error("Mediation konnte nicht erstellt werden.", res.status, body);
         return;
       }
 
-      const mediation = await res.json();
+      const mediation = body;
       const mediationId =
-        mediation.mediation_id ??
-        mediation.id ??
-        mediation.data?.mediation_id ??
-        mediation.data?.id;
+        mediation?.mediation_id ??
+        mediation?.id ??
+        mediation?.data?.mediation_id ??
+        mediation?.data?.id;
 
       if (!mediationId) {
+        setError("Mediation wurde erstellt, aber es kam keine ID vom Server zurück. Bitte versuche es erneut.");
         console.error("Keine Mediation-ID erhalten:", mediation);
         return;
       }
@@ -39,8 +52,9 @@ export default function NewMediationClient() {
       router.push(
         `/dashboard/mediation/new/${type}?mediationId=${mediationId}`
       );
-    } catch (error) {
-      console.error("Server nicht erreichbar.", error);
+    } catch (err) {
+      setError("Server nicht erreichbar. Bitte versuche es später erneut.");
+      console.error("Server nicht erreichbar.", err);
     } finally {
       setIsCreating("");
     }
@@ -62,6 +76,12 @@ export default function NewMediationClient() {
             Wählen Sie zunächst den passenden Bereich. Die konkreten Fragen
             folgen danach Schritt für Schritt.
           </p>
+
+          {error && (
+            <p className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {error}
+            </p>
+          )}
         </div>
       </section>
 

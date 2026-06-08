@@ -24,12 +24,25 @@ export async function backendFetch<T = unknown>(
     };
   }
 
+  // Der jwt-Callback in auth.ts versucht das Access-Token proaktiv per
+  // Refresh-Token zu erneuern. Ist das fehlgeschlagen (z. B. weil auch das
+  // Refresh-Token abgelaufen ist), markiert er die Session mit `error`.
+  // In dem Fall lohnt sich kein weiterer Versuch — der Nutzer muss sich neu
+  // einloggen, und das soll auch klar im UI ankommen statt lautlos zu scheitern.
+  if (session.error === "RefreshAccessTokenError" || session.error === "RefreshTokenMissing") {
+    return {
+      ok: false,
+      status: 401,
+      data: { error: "Sitzung abgelaufen – bitte neu einloggen", reauth: true } as T,
+    };
+  }
+
   if (!session.backendAccessToken) {
     console.error("backendFetch: session exists but backendAccessToken is missing — session cookie is stale, user must re-login");
     return {
       ok: false,
       status: 401,
-      data: { error: "Sitzung abgelaufen – bitte neu einloggen" } as T,
+      data: { error: "Sitzung abgelaufen – bitte neu einloggen", reauth: true } as T,
     };
   }
 
@@ -52,6 +65,18 @@ export async function backendFetch<T = unknown>(
       ok: false,
       status: 503,
       data: { error: "Backend nicht erreichbar" } as T,
+    };
+  }
+
+  // Auch ein frisch erneuertes Token kann das Backend ablehnen (z. B. wenn der
+  // Nutzer in der Zwischenzeit gelöscht/gesperrt wurde). Auch hier dem Aufrufer
+  // signalisieren, dass ein Re-Login nötig ist, statt nur den rohen 401 zurückzugeben.
+  if (res.status === 401) {
+    const data = (await res.json().catch(() => null)) as T | null;
+    return {
+      ok: false,
+      status: 401,
+      data: (data ?? { error: "Sitzung abgelaufen – bitte neu einloggen", reauth: true }) as T,
     };
   }
 

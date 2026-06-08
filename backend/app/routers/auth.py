@@ -9,7 +9,13 @@ from app.database import get_db
 from app.email import send_verification_email, send_password_reset_email
 from app.models.user import User
 from app.rate_limit import auth_limiter
-from app.security import create_access_token, hash_password, verify_password
+from app.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+    verify_refresh_token,
+)
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -49,8 +55,19 @@ class UserOut(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class RefreshResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
 
 
 class RegisterResponse(BaseModel):
@@ -153,9 +170,11 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     db.refresh(user)
 
     access_token = create_access_token(email=user.email)
+    refresh_token = create_refresh_token(email=user.email)
 
     return TokenResponse(
         access_token=access_token,
+        refresh_token=refresh_token,
         user={
             "id": user.id,
             "email": user.email,
@@ -181,15 +200,40 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
         )
 
     access_token = create_access_token(email=user.email)
+    refresh_token = create_refresh_token(email=user.email)
 
     return TokenResponse(
         access_token=access_token,
+        refresh_token=refresh_token,
         user={
             "id": user.id,
             "email": user.email,
             "name": user.name,
             "role": user.role,
         },
+    )
+
+
+@router.post("/refresh", response_model=RefreshResponse)
+def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
+    """
+    Tauscht ein gültiges Refresh-Token gegen ein neues Access-Token (+ rotiertes
+    Refresh-Token) ein. Wird vom Frontend aufgerufen, kurz bevor das Access-Token
+    abläuft, damit Nutzer nicht stündlich neu einloggen müssen.
+    """
+    email = verify_refresh_token(payload.refresh_token)
+
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Ungültiges Refresh-Token")
+
+    access_token = create_access_token(email=user.email)
+    new_refresh_token = create_refresh_token(email=user.email)
+
+    return RefreshResponse(
+        access_token=access_token,
+        refresh_token=new_refresh_token,
     )
 
 

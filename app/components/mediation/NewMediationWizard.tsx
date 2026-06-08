@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { NewMediationConfig } from "@/lib/mediation-types/types";
 
 interface Props {
@@ -70,6 +71,13 @@ export default function NewMediationWizard({ config }: Props) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => null);
+
+        if (res.status === 401 && err?.reauth) {
+          setError("Deine Sitzung ist abgelaufen. Du wirst zum Login weitergeleitet …");
+          await signIn(undefined, { callbackUrl: window.location.pathname + window.location.search });
+          return;
+        }
+
         setError(err?.error ?? `Fehler (${res.status})`);
         return;
       }

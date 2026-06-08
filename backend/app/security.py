@@ -33,6 +33,7 @@ def create_access_token(email: str) -> str:
 
     payload = {
         "sub": email,
+        "type": "access",
         "exp": expire,
     }
 
@@ -43,23 +44,61 @@ def create_access_token(email: str) -> str:
     )
 
 
-def verify_access_token(token: str) -> str:
+def create_refresh_token(email: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+
+    payload = {
+        "sub": email,
+        "type": "refresh",
+        "exp": expire,
+    }
+
+    return jwt.encode(
+        payload,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
+    )
+
+
+def _decode_token(token: str) -> dict:
     try:
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-
-        email = payload.get("sub")
-
-        if not isinstance(email, str) or not email:
-            raise HTTPException(status_code=401, detail="Ungültiger Token")
-
-        return email
-
     except JWTError:
         raise HTTPException(status_code=401, detail="Token ungültig oder abgelaufen")
+
+
+def verify_access_token(token: str) -> str:
+    payload = _decode_token(token)
+
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=401, detail="Ungültiger Token-Typ")
+
+    email = payload.get("sub")
+
+    if not isinstance(email, str) or not email:
+        raise HTTPException(status_code=401, detail="Ungültiger Token")
+
+    return email
+
+
+def verify_refresh_token(token: str) -> str:
+    payload = _decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Ungültiger Token-Typ")
+
+    email = payload.get("sub")
+
+    if not isinstance(email, str) or not email:
+        raise HTTPException(status_code=401, detail="Ungültiger Token")
+
+    return email
 
 
 def get_current_user(
