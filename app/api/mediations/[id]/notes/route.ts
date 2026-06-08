@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backend";
 
-// GET /api/mediations/[id]/notes?phase=einleitung
+// GET /api/mediations/[id]/notes?phase=einleitung&step=einleitung_rollen
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const phase = request.nextUrl.searchParams.get("phase") ?? "";
+  const step = request.nextUrl.searchParams.get("step") ?? "";
 
-  const result = await backendFetch(`/mediations/${id}/notes?phase=${phase}`);
+  const result = await backendFetch(
+    `/mediations/${id}/notes?phase=${phase}&step=${step}`,
+  );
 
   if (!result.ok) {
     return NextResponse.json(result.data, { status: result.status });
@@ -19,7 +22,6 @@ export async function GET(
 }
 
 // POST /api/mediations/[id]/notes
-// Body: { phase: string, participant_id: string, content: string }
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
