@@ -12,6 +12,7 @@ from app.rate_limit import auth_limiter
 from app.security import (
     create_access_token,
     create_refresh_token,
+    get_current_user,
     hash_password,
     verify_password,
     verify_refresh_token,
@@ -273,6 +274,23 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Sessio
     )
 
 
+@router.get("/me/role")
+def get_my_role(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Gibt Rolle und Admin-Status des aktuellen Nutzers zurück."""
+    user = db.query(User).filter(User.email == current_user_email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "role": user.role,
+        "is_admin": user.role in ("mediator", "admin"),
+        "email": user.email,
+        "name": user.name,
+    }
+
+
 @router.post("/reset-password", response_model=ResetPasswordResponse)
 def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
     """
@@ -296,3 +314,26 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     return ResetPasswordResponse(
         message="Passwort erfolgreich geändert. Du kannst dich jetzt anmelden."
     )
+
+
+@router.get("/users/all")
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Alle registrierten Nutzer - nur fuer Mediatoren und Admins."""
+    current = db.query(User).filter(User.email == current_user_email).first()
+    if not current or current.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur fuer Mediatoren und Admins")
+
+    users = db.query(User).order_by(User.name).all()
+    return [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "is_verified": u.is_verified,
+        }
+        for u in users
+    ]

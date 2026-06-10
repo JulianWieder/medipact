@@ -62,6 +62,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60,  // 1 Stunde — Session läuft ab wenn 1h keine Aktivität
+    updateAge: 0,     // Bei jeder Anfrage erneuern (Rolling Session / Idle-Timeout)
   },
 
   providers: [

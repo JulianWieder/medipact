@@ -14,12 +14,20 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/invites/me")
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => setPendingCount(Array.isArray(data) ? data.length : 0))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/me/role")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.is_admin) setIsAdmin(true); })
       .catch(() => {});
   }, []);
 
@@ -38,6 +46,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   const nav = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Neue Mediation", href: "/dashboard/mediation/new" },
+    ...(isAdmin ? [{ label: "⚖ Workspace", href: "/workspace" }] : []),
   ];
 
   return (

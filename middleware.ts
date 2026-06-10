@@ -12,6 +12,13 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Protect /workspace (Mediator/Admin-Workspace)
+  if (pathname.startsWith("/workspace") && !isAuthenticated) {
+    const loginUrl = new URL("/auth/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && (pathname === "/auth/login" || pathname === "/auth/register")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -23,6 +30,8 @@ export default auth((req) => {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/workspace/:path*",
+    "/workspace",
     "/auth/login",
     "/auth/register",
   ],

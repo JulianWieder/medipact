@@ -1,0 +1,152 @@
+// ── Workspace Types ───────────────────────────────────────────────────────
+
+export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "einstellungen";
+
+export interface WorkspaceNavItem {
+  id: WorkspaceSection;
+  label: string;
+  icon: string;
+}
+
+export const WORKSPACE_NAV: WorkspaceNavItem[] = [
+  { id: "dashboard", label: "Übersicht", icon: "⊞" },
+  { id: "faelle", label: "Meine Fälle", icon: "⚖" },
+  { id: "parteien", label: "Parteien", icon: "👥" },
+  { id: "einstellungen", label: "Einstellungen", icon: "⚙" },
+];
+
+// ── Mediation ─────────────────────────────────────────────────────────────
+
+export interface MediationCase {
+  id: number;
+  mediation_id?: number;
+  title: string;
+  mediation_type: "trennung" | "erbschaft" | "nachbarschaft" | string;
+  status: "draft" | "active" | "pending" | "completed" | string;
+  phase: string | null;
+  progress?: number;
+  description?: string | null;
+  priority?: string | null;
+  role?: string;
+}
+
+export interface MediationDetail extends MediationCase {
+  participants?: Participant[];
+}
+
+// ── Participants ──────────────────────────────────────────────────────────
+
+export interface Participant {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  invitationStatus: "accepted" | "pending";
+}
+
+export interface ParticipantWithCase extends Participant {
+  mediationId: number;
+  mediationTitle: string;
+  mediationType: string;
+}
+
+// ── Notes ─────────────────────────────────────────────────────────────────
+
+export interface MediationNote {
+  participant_id: string;
+  content: string;
+  submitted: boolean;
+  participantName?: string;
+  participantRole?: string;
+}
+
+export interface PhaseNoteGroup {
+  phase: string;
+  notes: {
+    participant_id: string;
+    participant_name: string;
+    step: string;
+    content: string;
+    submitted: boolean;
+  }[];
+}
+
+// ── System User (alle Nutzer für Admin) ───────────────────────────────────
+
+export interface SystemUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  is_verified: boolean;
+}
+
+// ── User role ──────────────────────────────────────────────────────────────
+
+export interface UserRoleInfo {
+  role: string;
+  is_admin: boolean;
+  email: string;
+  name: string;
+}
+
+// ── Phases ────────────────────────────────────────────────────────────────
+
+export const PHASES: { id: string; label: string; short: string }[] = [
+  { id: "einleitung", label: "Einleitung", short: "1" },
+  { id: "themensammlung", label: "Themensammlung", short: "2" },
+  { id: "interessen", label: "Interessen", short: "3" },
+  { id: "optionen", label: "Optionen", short: "4" },
+  { id: "verhandlung", label: "Verhandlung", short: "5" },
+  { id: "abschluss", label: "Abschluss", short: "6" },
+];
+
+export function getPhaseIndex(phase: string | null): number {
+  if (!phase) return -1;
+  return PHASES.findIndex((p) => p.id === phase);
+}
+
+// ── Config maps ───────────────────────────────────────────────────────────
+
+export const TYPE_LABEL: Record<string, string> = {
+  trennung: "Trennung & Scheidung",
+  erbschaft: "Erbschaftsstreit",
+  nachbarschaft: "Nachbarschaftskonflikt",
+};
+
+export const TYPE_COLOR: Record<string, string> = {
+  trennung: "bg-rose-50 text-rose-700 border-rose-200",
+  erbschaft: "bg-amber-50 text-amber-700 border-amber-200",
+  nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
+};
+
+export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
+  draft: {
+    label: "Entwurf",
+    dot: "bg-slate-400",
+    badge: "bg-slate-100 text-slate-600 border-slate-200",
+  },
+  pending: {
+    label: "Ausstehend",
+    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  active: {
+    label: "Aktiv",
+    dot: "bg-teal-500",
+    badge: "bg-teal-50 text-teal-700 border-teal-200",
+  },
+  completed: {
+    label: "Abgeschlossen",
+    dot: "bg-slate-300",
+    badge: "bg-slate-50 text-slate-500 border-slate-100",
+  },
+};
+
+export const ROLE_LABEL: Record<string, string> = {
+  owner: "Antragsteller",
+  initiator: "Antragsteller",
+  other_party: "Gegenpartei",
+  mediator: "Mediator",
+  observer: "Beobachter",
+};
