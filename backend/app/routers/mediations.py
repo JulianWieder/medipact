@@ -150,17 +150,36 @@ def get_my_mediations(
         .filter(MediationParticipant.user_id == user.id)
         .all()
     )
-    return [
-        {
+
+    result = []
+    for mediation, participant in rows:
+        # Wartet auf meine Eingabe: aktive Mediation, aber noch keine
+        # submitted Note für die aktuelle Phase von diesem Teilnehmer
+        is_my_turn = False
+        if mediation.status == "active" and mediation.phase:
+            submitted_note = (
+                db.query(MediationNote)
+                .filter(
+                    MediationNote.mediation_id == mediation.id,
+                    MediationNote.participant_id == participant.id,
+                    MediationNote.phase == mediation.phase,
+                    MediationNote.submitted == True,
+                )
+                .first()
+            )
+            is_my_turn = submitted_note is None
+
+        result.append({
             "mediation_id": mediation.id,
             "title": mediation.title,
             "role": participant.role,
             "status": mediation.status,
             "phase": mediation.phase,
             "mediation_type": mediation.mediation_type,
-        }
-        for mediation, participant in rows
-    ]
+            "is_my_turn": is_my_turn,
+        })
+
+    return result
 
 
 @router.get("/all")

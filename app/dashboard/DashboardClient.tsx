@@ -13,6 +13,7 @@ interface Mediation {
   conflict_type?: string;
   description?: string;
   role?: string;
+  is_my_turn?: boolean;
 }
 
 interface PendingInvite {
@@ -91,6 +92,7 @@ export default function DashboardClient() {
               conflict_type: item.mediation_type,
               description: item.description,
               role: item.role,
+              is_my_turn: item.is_my_turn ?? false,
             }),
           );
           setData(mapped);
@@ -135,24 +137,28 @@ export default function DashboardClient() {
   const stats = useMemo(
     () => [
       {
+        label: "Deine Eingabe",
+        value: data.filter((m) => m.is_my_turn).length,
+        text: "wartet auf dich",
+        highlight: data.some((m) => m.is_my_turn),
+      },
+      {
         label: "Bei Annahmen",
         value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
         text: "ausstehende Verfahren",
-      },
-      {
-        label: "Gegenseite",
-        value: data.filter((m) => m.role === "other_party").length,
-        text: "als Gegenpartei",
+        highlight: false,
       },
       {
         label: "Mediator",
         value: data.filter((m) => m.role === "mediator").length,
         text: "als Mediator",
+        highlight: false,
       },
       {
         label: "Abgeschlossen",
         value: data.filter((m) => m.status === "completed").length,
         text: "beendete Verfahren",
+        highlight: false,
       },
     ],
     [data],
@@ -191,9 +197,12 @@ export default function DashboardClient() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((item) => (
-              <article key={item.label} className="app-surface p-6">
+              <article
+                key={item.label}
+                className={`app-surface p-6 ${item.highlight ? "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300" : ""}`}
+              >
                 <p className="eyebrow">{item.label}</p>
-                <p className="mt-3 text-4xl font-black text-slate-900">
+                <p className={`mt-3 text-4xl font-black ${item.highlight ? "text-amber-600" : "text-slate-900"}`}>
                   {item.value}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">
@@ -316,11 +325,19 @@ export default function DashboardClient() {
                           </p>
                         </div>
 
-                        <span
-                          className={`inline-flex w-fit items-center rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-wide ${config.className}`}
-                        >
-                          {config.label}
-                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          <span
+                            className={`inline-flex w-fit items-center rounded-lg px-3 py-1 text-xs font-bold uppercase tracking-wide ${config.className}`}
+                          >
+                            {config.label}
+                          </span>
+                          {mediation.is_my_turn && (
+                            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                              Deine Eingabe
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="mt-6">
