@@ -13,4 +13,12 @@ class MediationNote(Base):
     # Schritt innerhalb der Phase (leer = phasenweite Notiz, wie bisher)
     step = Column(String, nullable=False, default="")
     content = Column(Text, nullable=False, default="")
-    # Ob der Teilnehmer seinen Input für diesen Schritt als a
+    # Ob der Teilnehmer seinen Input für diesen Schritt abgeschlossen hat
+    submitted = Column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "mediation_id", "participant_id", "phase", "step",
+            name="uq_note_participant_phase_step",
+        ),
+    )
