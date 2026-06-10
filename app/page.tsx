@@ -1,7 +1,16 @@
-"use client";
-
 import Link from "next/link";
 import { FadeIn } from "@/app/components/ui/motion";
+import { JsonLd } from "@/app/components/JsonLd";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "medipact – Streit klären ohne Gericht | KI-Mediation",
+  description:
+    "Medipact hilft bei Trennung, Nachbarschaftsstreit und Erbschaft. KI-gestützte Mediation nach dem Harvard-Prinzip – vertraulich, bezahlbar, ohne Gericht.",
+  alternates: {
+    canonical: "https://medipact.de",
+  },
+};
 
 const problemPoints = [
   "Gespräche eskalieren, obwohl eigentlich eine Lösung gebraucht wird.",
@@ -170,9 +179,50 @@ const comparisonPlans = [
   },
 ];
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.a,
+    },
+  })),
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "KI-Mediation",
+  provider: {
+    "@type": "Organization",
+    name: "medipact",
+    url: "https://medipact.de",
+  },
+  serviceType: "Mediation",
+  description:
+    "KI-gestützte Mediation für private Konflikte bei Trennung, Scheidung, Nachbarschaftsstreit und Erbschaft. Nach dem Harvard-Prinzip.",
+  areaServed: {
+    "@type": "Country",
+    name: "Germany",
+  },
+  availableLanguage: "German",
+  url: "https://medipact.de",
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "499",
+    description: "KI-Mediation ab €499",
+  },
+};
+
 export default function MedipactLanding() {
   return (
     <>
+      <JsonLd data={faqSchema} />
+      <JsonLd data={serviceSchema} />
       <main className="app-shell pt-[73px]">
         <section
           id="top"

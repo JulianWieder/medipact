@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { aboutPageContent } from "@/app/content/aboutPage";
+
+export const metadata: Metadata = {
+  title: "Über medipact – KI-Mediation mit klarem Ergebnisfokus",
+  description:
+    "Medipact steht für strukturierte Mediation bei privaten Konflikten. Wir helfen Menschen, festgefahrene Situationen zu klären – vertraulich und lösungsorientiert.",
+  alternates: { canonical: "https://medipact.de/about" },
+};
 
 const videoAside = (
   <div

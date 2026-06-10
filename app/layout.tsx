@@ -2,6 +2,38 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ConditionalHeader, ConditionalFooter } from "@/app/components/ConditionalHeader";
+import { JsonLd } from "@/app/components/JsonLd";
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "medipact",
+  url: "https://medipact.de",
+  logo: "https://medipact.de/og-image.png",
+  description:
+    "KI-gestützte Mediation für private Konflikte – bei Trennung, Nachbarschaftsstreit und Erbschaft.",
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    availableLanguage: "German",
+  },
+  sameAs: ["https://twitter.com/medipact_de"],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "medipact",
+  url: "https://medipact.de",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://medipact.de/cases?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
 
 export const metadata: Metadata = {
   title: "medipact – KI-Mediation ab €499",
@@ -84,6 +116,8 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <JsonLd data={organizationSchema} />
+        <JsonLd data={websiteSchema} />
         <ConditionalHeader />
         {children}
         <ConditionalFooter />

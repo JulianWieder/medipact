@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import QuickCheck from "@/app/components/QuickCheck";
+
+export const metadata: Metadata = {
+  title: "Konfliktarten – Trennung, Nachbarschaft, Erbschaft | medipact",
+  description:
+    "Für welchen Konflikt brauchen Sie Hilfe? Medipact unterstützt bei Trennung & Scheidung, Nachbarschaftsstreit und Erbschaftskonflikten. Jetzt kostenlos einschätzen.",
+  alternates: { canonical: "https://medipact.de/konflikte" },
+};
 
 const conflictTypes = [
   {

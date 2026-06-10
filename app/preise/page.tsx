@@ -1,5 +1,11 @@
-"use client";
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Preise – KI-Mediation ab €499 | medipact",
+  description:
+    "Transparente Preise für KI-gestützte Mediation. Alle Parteien zahlen anteilig. Keine versteckten Kosten. Günstiger als Anwalt oder Gericht.",
+  alternates: { canonical: "https://medipact.de/preise" },
+};
 
 export default function Preise() {
   return (
