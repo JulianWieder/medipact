@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ParticipantWithCase, SystemUser } from "../types";
+import type { ParticipantWithCase } from "../types";
 import { EmptyState, cn } from "../ui";
 import { fetchAllMediations, fetchMediations, fetchParticipants, fetchAllUsers } from "../api";
 

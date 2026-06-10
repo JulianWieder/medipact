@@ -25,7 +25,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   }, []);
 
   useEffect(() => {
-    fetch("/api/auth/me/role")
+    fetch("/api/me/role")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.is_admin) setIsAdmin(true); })
       .catch(() => {});
