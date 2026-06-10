@@ -202,14 +202,14 @@ function ReflectionView({
       {/* KI-Reflexion */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-700">KI-Reflexion</p>
+          <p className="text-sm font-semibold text-slate-700">Paraphrasierung</p>
           <button
             type="button"
             onClick={generateReflection}
             disabled={loadingAi}
             className="btn btn-secondary text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loadingAi ? "Generiere …" : reflection ? "Neu generieren" : "Reflexion generieren"}
+            {loadingAi ? "Generiere …" : reflection ? "Neu paraphrasieren" : "Paraphrasieren"}
           </button>
         </div>
 
@@ -225,7 +225,7 @@ function ReflectionView({
           </div>
         ) : (
           <p className="text-sm italic text-slate-400">
-            Klicke auf &quot;Reflexion generieren&quot;, um eine KI-Zusammenfassung der Eingaben zu erhalten.
+            Klicke auf &quot;Paraphrasieren&quot;, um eine neutrale Zusammenfassung aller Eingaben zu erhalten.
           </p>
         )}
       </div>
