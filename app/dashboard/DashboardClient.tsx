@@ -83,6 +83,7 @@ export default function DashboardClient() {
               mediation_type?: string;
               description?: string;
               role?: string;
+              is_my_turn?: boolean;
             }) => ({
               id: item.mediation_id ?? item.id,
               title: item.title ?? "Neue Mediation",
