@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   mediationId: string;
+  userRole: string;
 };
 
 type Participant = {
@@ -21,7 +22,7 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-export default function MediationClient({ mediationId }: Props) {
+export default function MediationClient({ mediationId, userRole }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,6 +95,12 @@ export default function MediationClient({ mediationId }: Props) {
   }
 
   async function startMediation() {
+    // Mediatoren und Admins sehen zuerst den Leitfaden
+    if (userRole === "mediator" || userRole === "admin") {
+      router.push(`/dashboard/${mediationId}/einleitung/leitfaden`);
+      return;
+    }
+
     setAdvancing(true);
     setError("");
     try {

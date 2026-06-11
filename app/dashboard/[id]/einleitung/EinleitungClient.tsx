@@ -56,71 +56,6 @@ const EINLEITUNG_STEPS = [
 
 type StepKey = (typeof EINLEITUNG_STEPS)[number]["key"];
 
-// ── Leitfaden-Abschnitte ───────────────────────────────────────────────────────
-const PHASE_INFO_SECTIONS = [
-  {
-    title: "Ziele der Phase",
-    content: [
-      "Vertrauen herstellen",
-      "Neutralität sichern",
-      "Erwartungen klären",
-      "Gesprächsregeln definieren",
-      "Freiwilligkeit bestätigen",
-      "Konfliktparteien arbeitsfähig machen",
-    ],
-    type: "list" as const,
-  },
-  {
-    title: "1. Begrüßung und Einführung",
-    content:
-      "Der Mediator erklärt Rolle, Ablauf und Prinzipien der Mediation: Freiwilligkeit, Vertraulichkeit, Eigenverantwortung, Neutralität und Allparteilichkeit. Der Mediator entscheidet nicht – er steuert den Prozess.",
-    type: "text" as const,
-  },
-  {
-    title: "2. Auftrag klären",
-    content:
-      "Warum sitzen die Parteien hier? Was soll erreicht werden? Welche Themen gehören in die Mediation? Wer entscheidet am Ende? Wichtig: Viele Konflikte wirken sachlich, sind aber eigentlich Beziehungskonflikte.",
-    type: "text" as const,
-    example: '„Geht es um eine konkrete Lösung oder auch um die zukünftige Zusammenarbeit?"',
-  },
-  {
-    title: "3. Rahmenbedingungen festlegen",
-    content: [
-      "Zeitrahmen und Termine",
-      "Ausreden lassen",
-      "Keine Beleidigungen",
-      "Ich-Botschaften verwenden",
-      "Keine Drohungen",
-      "Respektvoller Umgang mit Emotionen",
-    ],
-    type: "list" as const,
-  },
-  {
-    title: "4. Rollen und Machtverhältnisse prüfen",
-    content: [
-      "Gibt es ein Machtgefälle?",
-      "Spricht eine Partei dominanter?",
-      "Gibt es emotionale Einschüchterung?",
-      "Wer blockiert? Wer vermeidet?",
-    ],
-    type: "list" as const,
-    note: "Sonst wird die Mediation nur eine Bühne für alte Dynamiken.",
-  },
-  {
-    title: "5. Arbeitsbündnis schaffen",
-    content:
-      "Die Parteien müssen den Prozess, den Mediator und die Bereitschaft zur Mitarbeit akzeptieren. Ohne dieses Arbeitsbündnis bleibt alles oberflächlich.",
-    type: "text" as const,
-  },
-  {
-    title: "Psychologisch wichtigste Aufgabe",
-    content:
-      "Die emotionale Eskalation senken. In Konflikten sind Menschen oft defensiv, misstrauisch und positionsorientiert. Die Einleitungsphase soll Sicherheit erzeugen, Kontrollverlust reduzieren und Gesprächsfähigkeit herstellen.",
-    type: "text" as const,
-    highlight: true,
-  },
-];
-
 const roleLabel: Record<string, string> = {
   initiator: "Antragsteller",
   other_party: "Andere Seite",
@@ -274,7 +209,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState("");
-  const [showGuide, setShowGuide] = useState(false);
 
   const currentIndex = getPhaseIndex("einleitung");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
@@ -476,66 +410,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         <div className="app-surface p-8">
           <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
           <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
-
-          {/* Mediator-Leitfaden */}
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => setShowGuide((v) => !v)}
-              className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
-            >
-              <svg
-                className={`h-4 w-4 transition-transform ${showGuide ? "rotate-90" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-              {showGuide ? "Leitfaden ausblenden" : "Mediator-Leitfaden anzeigen"}
-            </button>
-
-            {showGuide && (
-              <div className="mt-4 space-y-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6">
-                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-                  Leitfaden · Phase 1
-                </p>
-                {PHASE_INFO_SECTIONS.map((section, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-xl border p-4 ${
-                      section.highlight
-                        ? "border-emerald-300 bg-emerald-50"
-                        : "border-slate-200 bg-white"
-                    }`}
-                  >
-                    <h3 className="mb-2 text-sm font-bold text-slate-800">{section.title}</h3>
-                    {section.type === "list" ? (
-                      <ul className="space-y-1">
-                        {(section.content as string[]).map((item, j) => (
-                          <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-slate-600">{section.content as string}</p>
-                    )}
-                    {"example" in section && section.example && (
-                      <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-500">
-                        {section.example}
-                      </p>
-                    )}
-                    {"note" in section && section.note && (
-                      <p className="mt-3 text-xs font-medium text-amber-700">⚠ {section.note}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* ── Alle 4 Schritte ─────────────────────────────────────────────── */}
           <div className="mt-10 space-y-12">
