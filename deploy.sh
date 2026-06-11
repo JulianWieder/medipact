@@ -17,4 +17,8 @@ cd ~/medipact/backend
 docker build -t backend-api .
 docker restart medipact-api
 
+echo "==> Datenbank-Migrationen..."
+sleep 2
+docker exec medipact-api alembic upgrade head
+
 echo "==> Fertig!"
