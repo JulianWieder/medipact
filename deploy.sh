@@ -14,8 +14,7 @@ pm2 restart medipact --update-env
 
 echo "==> Backend (Docker) bauen..."
 cd ~/medipact/backend
-docker build -t backend-api .
-docker restart medipact-api
+docker compose up -d --build
 
 echo "==> Datenbank-Migrationen..."
 sleep 2

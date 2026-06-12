@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_note import MediationNote
+from app.models.note_reaction import NoteReaction
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.security import get_current_user, get_current_db_user
@@ -447,4 +448,94 @@ def get_all_phase_notes(
             "notes": notes,
         }
         for phase, notes in grouped.items()
+    ]
+
+
+# ── Reaktionen ────────────────────────────────────────────────────────────────
+
+class ReactionCreate(BaseModel):
+    phase: str
+    step: str = ""
+    target_participant_id: str
+    item_index: int
+    action: str  # "accept" | "reject" | "trade"
+    trade_item_index: int | None = None
+
+
+@router.post("/{mediation_id}/reactions")
+def save_reaction(
+    mediation_id: int,
+    payload: ReactionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    from_participant = _require_participant(mediation_id, current_user, db)
+
+    if payload.action not in ("accept", "reject", "trade"):
+        raise HTTPException(status_code=422, detail="action muss accept, reject oder trade sein")
+
+    if payload.action == "trade" and payload.trade_item_index is None:
+        raise HTTPException(status_code=422, detail="trade_item_index erforderlich bei action=trade")
+
+    existing = (
+        db.query(NoteReaction)
+        .filter(
+            NoteReaction.mediation_id == mediation_id,
+            NoteReaction.phase == payload.phase,
+            NoteReaction.step == payload.step,
+            NoteReaction.from_participant_id == from_participant.id,
+            NoteReaction.target_participant_id == int(payload.target_participant_id),
+            NoteReaction.item_index == payload.item_index,
+        )
+        .first()
+    )
+
+    if existing:
+        existing.action = payload.action
+        existing.trade_item_index = payload.trade_item_index
+    else:
+        db.add(NoteReaction(
+            mediation_id=mediation_id,
+            phase=payload.phase,
+            step=payload.step,
+            from_participant_id=from_participant.id,
+            target_participant_id=int(payload.target_participant_id),
+            item_index=payload.item_index,
+            action=payload.action,
+            trade_item_index=payload.trade_item_index,
+        ))
+
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/{mediation_id}/reactions")
+def get_reactions(
+    mediation_id: int,
+    phase: str = Query(...),
+    step: str = Query(""),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+
+    rows = (
+        db.query(NoteReaction)
+        .filter(
+            NoteReaction.mediation_id == mediation_id,
+            NoteReaction.phase == phase,
+            NoteReaction.step == step,
+        )
+        .all()
+    )
+
+    return [
+        {
+            "from_participant_id": str(r.from_participant_id),
+            "target_participant_id": str(r.target_participant_id),
+            "item_index": r.item_index,
+            "action": r.action,
+            "trade_item_index": r.trade_item_index,
+        }
+        for r in rows
     ]

@@ -6,11 +6,18 @@ export type PhaseKey =
   | "verhandlung"
   | "abschluss";
 
+export type ReflectionMode = "simple" | "interactive";
+
 export interface StepDetail {
   key: string;
   title: string;
   description: string;
   placeholder: string;
+  /**
+   * "simple"      – zeigt alle Inputs nebeneinander (Standard)
+   * "interactive" – Blind-Commit → Reveal → Reaktion (Accept / Reject / Trade)
+   */
+  reflectionMode?: ReflectionMode;
 }
 
 export interface GuideSection {
@@ -132,6 +139,7 @@ export const PHASES: Phase[] = [
         description:
           "Nennen Sie alle Themen und Streitpunkte, die in dieser Mediation geklärt werden sollen. Noch keine Bewertung – nur sammeln.",
         placeholder: "z.B. Aufteilung der Betreuungszeiten, Unterhaltszahlungen …",
+        reflectionMode: "interactive",
       },
       {
         key: "themensammlung_perspektive",
@@ -139,6 +147,7 @@ export const PHASES: Phase[] = [
         description:
           "Schildern Sie Ihre persönliche Sicht auf den Konflikt. Ohne Wertung – nur Ihre Wahrnehmung der Situation.",
         placeholder: "z.B. Ich erlebe die Situation so, dass …",
+        reflectionMode: "interactive",
       },
       {
         key: "themensammlung_prioritaeten",
@@ -146,6 +155,7 @@ export const PHASES: Phase[] = [
         description:
           "Welche Themen sind für Sie am dringendsten? Benennen Sie die Punkte, die zuerst geklärt werden müssen.",
         placeholder: "z.B. Zuerst muss das Thema Wohnung geklärt werden, weil …",
+        reflectionMode: "interactive",
       },
     ],
     guide: [
@@ -197,6 +207,7 @@ export const PHASES: Phase[] = [
         description:
           "Was brauchen Sie wirklich? Hinter jeder Position steckt ein tieferes Bedürfnis. Beschreiben Sie, was Ihnen wichtig ist.",
         placeholder: "z.B. Ich brauche Sicherheit, Verlässlichkeit, Respekt …",
+        reflectionMode: "interactive",
       },
       {
         key: "interessen_aengste",
@@ -204,6 +215,7 @@ export const PHASES: Phase[] = [
         description:
           "Was befürchten Sie? Was darf auf keinen Fall passieren? Diese Informationen helfen, tragfähige Lösungen zu finden.",
         placeholder: "z.B. Ich befürchte, dass meine Kinder darunter leiden …",
+        reflectionMode: "interactive",
       },
       {
         key: "interessen_kern",
@@ -211,6 +223,7 @@ export const PHASES: Phase[] = [
         description:
           "Was ist Ihrer Meinung nach der eigentliche Kern dieses Konflikts? Oft steckt hinter dem sichtbaren Streit ein tieferes Thema.",
         placeholder: "z.B. Im Kern geht es mir darum, dass ich gehört werde …",
+        reflectionMode: "interactive",
       },
     ],
     guide: [

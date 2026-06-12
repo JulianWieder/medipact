@@ -103,8 +103,339 @@ function WaitingView({ status }: { status: StepStatus }) {
   );
 }
 
-// ── Reflexions-Ansicht ────────────────────────────────────────────────────────
-function ReflectionView({
+// ── Reaktions-Typen ───────────────────────────────────────────────────────────
+type ReactionAction = "accept" | "reject" | "trade";
+
+type Reaction = {
+  from_participant_id: string;
+  target_participant_id: string;
+  item_index: number;
+  action: ReactionAction;
+  trade_item_index: number | null;
+};
+
+// ── Interaktive Reaktions-Ansicht ─────────────────────────────────────────────
+function InteractiveReflectionView({
+  step,
+  phaseKey,
+  mediationId,
+  allInputs,
+  participants,
+  currentParticipantId,
+  onNext,
+  isLastStep,
+}: {
+  step: StepDetail;
+  phaseKey: PhaseKey;
+  mediationId: string;
+  allInputs: Record<string, string[]>;
+  participants: Participant[];
+  currentParticipantId: string;
+  onNext: () => void;
+  isLastStep: boolean;
+}) {
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  // Trade-Picker: welcher Fremd-Item-Key ist gerade offen
+  const [tradePickerFor, setTradePickerFor] = useState<string | null>(null);
+
+  // Reaktionen laden + pollen
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        const res = await fetch(
+          `/api/mediations/${mediationId}/reactions?phase=${phaseKey}&step=${step.key}`
+        );
+        if (res.ok && active) setReactions(await res.json());
+      } catch { /* ignore */ }
+    }
+    load();
+    const id = setInterval(load, 4000);
+    return () => { active = false; clearInterval(id); };
+  }, [mediationId, phaseKey, step.key]);
+
+  async function sendReaction(
+    targetParticipantId: string,
+    itemIndex: number,
+    action: ReactionAction,
+    tradeItemIndex: number | null = null
+  ) {
+    const key = `${targetParticipantId}-${itemIndex}`;
+    setSaving((p) => ({ ...p, [key]: true }));
+    try {
+      await fetch(`/api/mediations/${mediationId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phase: phaseKey,
+          step: step.key,
+          target_participant_id: targetParticipantId,
+          item_index: itemIndex,
+          action,
+          trade_item_index: tradeItemIndex,
+        }),
+      });
+      // Optimistisch aktualisieren
+      setReactions((prev) => {
+        const filtered = prev.filter(
+          (r) =>
+            !(
+              r.from_participant_id === currentParticipantId &&
+              r.target_participant_id === targetParticipantId &&
+              r.item_index === itemIndex
+            )
+        );
+        return [
+          ...filtered,
+          {
+            from_participant_id: currentParticipantId,
+            target_participant_id: targetParticipantId,
+            item_index: itemIndex,
+            action,
+            trade_item_index: tradeItemIndex,
+          },
+        ];
+      });
+    } catch { /* ignore */ } finally {
+      setSaving((p) => ({ ...p, [key]: false }));
+      setTradePickerFor(null);
+    }
+  }
+
+  function getMyReaction(targetId: string, idx: number) {
+    return reactions.find(
+      (r) =>
+        r.from_participant_id === currentParticipantId &&
+        r.target_participant_id === targetId &&
+        r.item_index === idx
+    );
+  }
+
+  function getTheirReactionOnMe(targetId: string, myIdx: number) {
+    // Reaktion von targetId auf meine Punkte
+    return reactions.find(
+      (r) =>
+        r.from_participant_id === targetId &&
+        r.target_participant_id === currentParticipantId &&
+        r.item_index === myIdx
+    );
+  }
+
+  const accepted = participants.filter((p) => p.invitationStatus === "accepted");
+  const me = accepted.find((p) => p.id === currentParticipantId);
+  const others = accepted.filter((p) => p.id !== currentParticipantId);
+  const myItems = allInputs[currentParticipantId] ?? [];
+
+  const actionBadge: Record<ReactionAction, string> = {
+    accept: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    reject: "bg-red-100 text-red-700 border-red-200",
+    trade: "bg-violet-100 text-violet-700 border-violet-200",
+  };
+  const actionLabel: Record<ReactionAction, string> = {
+    accept: "✓ Akzeptiert",
+    reject: "✗ Abgelehnt",
+    trade: "⇄ Tauschangebot",
+  };
+  const incomingLabel: Record<ReactionAction, string> = {
+    accept: "✓ Akzeptiert dich",
+    reject: "✗ Lehnt ab",
+    trade: "⇄ Möchte tauschen",
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Status-Banner */}
+      <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3">
+        <svg className="h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <p className="text-sm font-semibold text-emerald-800">
+          Alle Eingaben abgeschlossen – reagiere jetzt auf die Punkte der anderen Seite.
+        </p>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* ── Meine Punkte (read-only + eingehende Reaktionen) ── */}
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
+            Deine Eingaben {me ? `· ${me.name}` : ""}
+          </p>
+          {myItems.length === 0 ? (
+            <p className="text-sm italic text-slate-400">Keine Eingaben.</p>
+          ) : (
+            <ul className="space-y-2">
+              {myItems.map((item, idx) => {
+                const incoming = others.map((o) => getTheirReactionOnMe(o.id, idx)).filter(Boolean) as Reaction[];
+                return (
+                  <li key={idx} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="flex items-start gap-2">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                      <span className="flex-1 text-sm text-slate-700">{item}</span>
+                    </div>
+                    {/* Eingehende Reaktionen der anderen Seite */}
+                    {incoming.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5 pl-3.5">
+                        {incoming.map((r, i) => {
+                          const other = others.find((o) => o.id === r.from_participant_id);
+                          const tradeItem = r.trade_item_index != null
+                            ? (allInputs[r.from_participant_id] ?? [])[r.trade_item_index]
+                            : null;
+                          return (
+                            <span
+                              key={i}
+                              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${actionBadge[r.action]}`}
+                              title={tradeItem ? `Tauschangebot: „${tradeItem}"` : undefined}
+                            >
+                              {other?.name ?? "?"}: {incomingLabel[r.action]}
+                              {tradeItem && <span className="ml-1 opacity-70">→ „{tradeItem}"</span>}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* ── Punkte der anderen Seite + Reaktions-Buttons ── */}
+        <div className="space-y-6">
+          {others.map((other) => {
+            const otherItems = allInputs[other.id] ?? [];
+            return (
+              <div key={other.id}>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  {other.name} · {roleLabel[other.role] ?? other.role}
+                </p>
+                {otherItems.length === 0 ? (
+                  <p className="text-sm italic text-slate-400">Keine Eingaben.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {otherItems.map((item, idx) => {
+                      const myReaction = getMyReaction(other.id, idx);
+                      const itemKey = `${other.id}-${idx}`;
+                      const isSaving = saving[itemKey] ?? false;
+                      const tradeOpen = tradePickerFor === itemKey;
+
+                      return (
+                        <li key={idx} className="rounded-xl border border-slate-200 bg-white p-4">
+                          <div className="flex items-start gap-2">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                            <span className="flex-1 text-sm text-slate-700">{item}</span>
+                          </div>
+
+                          {/* Reaktions-Buttons */}
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            {isSaving ? (
+                              <Spinner />
+                            ) : myReaction ? (
+                              <>
+                                <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${actionBadge[myReaction.action]}`}>
+                                  {actionLabel[myReaction.action]}
+                                  {myReaction.action === "trade" && myReaction.trade_item_index != null && (
+                                    <span className="ml-1.5 opacity-70">
+                                      → „{myItems[myReaction.trade_item_index] ?? "?"}"
+                                    </span>
+                                  )}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReactions((prev) =>
+                                      prev.filter(
+                                        (r) =>
+                                          !(
+                                            r.from_participant_id === currentParticipantId &&
+                                            r.target_participant_id === other.id &&
+                                            r.item_index === idx
+                                          )
+                                      )
+                                    );
+                                    // Auf reject setzen als "Reaktion entfernen" (Backend-Fallback)
+                                    sendReaction(other.id, idx, "reject");
+                                  }}
+                                  className="text-xs text-slate-400 underline hover:text-slate-600"
+                                >
+                                  Ändern
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => sendReaction(other.id, idx, "accept")}
+                                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                                >
+                                  ✓ Akzeptieren
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => sendReaction(other.id, idx, "reject")}
+                                  className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                                >
+                                  ✗ Ablehnen
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setTradePickerFor(tradeOpen ? null : itemKey)
+                                  }
+                                  className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
+                                >
+                                  ⇄ Tauschen
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Trade-Picker */}
+                          {tradeOpen && myItems.length > 0 && (
+                            <div className="mt-3 rounded-xl border border-violet-100 bg-violet-50 p-3">
+                              <p className="mb-2 text-xs font-semibold text-violet-700">
+                                Welchen deiner Punkte bietest du im Tausch an?
+                              </p>
+                              <ul className="space-y-1.5">
+                                {myItems.map((myItem, myIdx) => (
+                                  <li key={myIdx}>
+                                    <button
+                                      type="button"
+                                      onClick={() => sendReaction(other.id, idx, "trade", myIdx)}
+                                      className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-left text-sm text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
+                                    >
+                                      <span className="mr-2 text-violet-400">⇄</span>
+                                      {myItem}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Nächster Schritt */}
+      <div className="flex justify-end pt-2">
+        <button type="button" onClick={onNext} className="btn btn-primary">
+          {isLastStep ? "Phase abschließen →" : "Nächster Schritt →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Einfache Reflexions-Ansicht (bestehend) ───────────────────────────────────
+function SimpleReflectionView({
   step,
   phaseKey,
   mediationId,
@@ -165,7 +496,6 @@ function ReflectionView({
 
   return (
     <div className="space-y-6">
-      {/* Alle Inputs nebeneinander */}
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
         <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-emerald-800">
           <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -173,17 +503,16 @@ function ReflectionView({
           </svg>
           Alle Teilnehmer haben ihren Input abgeschlossen
         </p>
-
         <div className="grid gap-4 md:grid-cols-2">
           {accepted.map((p) => {
-            const items = allInputs[p.id] ?? [];
+            const pitems = allInputs[p.id] ?? [];
             return (
               <div key={p.id} className="rounded-xl border border-emerald-100 bg-white p-4">
                 <p className="mb-2 font-semibold text-slate-900">{p.name}</p>
                 <p className="mb-3 text-xs text-slate-500">{roleLabel[p.role] ?? p.role}</p>
-                {items.length > 0 ? (
+                {pitems.length > 0 ? (
                   <ul className="space-y-1.5">
-                    {items.map((item, i) => (
+                    {pitems.map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
                         {item}
@@ -199,7 +528,6 @@ function ReflectionView({
         </div>
       </div>
 
-      {/* KI-Reflexion */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-700">Paraphrasierung</p>
@@ -212,13 +540,9 @@ function ReflectionView({
             {loadingAi ? "Generiere …" : reflection ? "Neu paraphrasieren" : "Paraphrasieren"}
           </button>
         </div>
-
         {aiError && (
-          <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {aiError}
-          </p>
+          <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{aiError}</p>
         )}
-
         {reflection ? (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
             {reflection}
@@ -230,18 +554,30 @@ function ReflectionView({
         )}
       </div>
 
-      {/* Nächster Schritt */}
       <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={onNext}
-          className="btn btn-primary"
-        >
+        <button type="button" onClick={onNext} className="btn btn-primary">
           {isLastStep ? "Phase abschließen →" : "Nächster Schritt →"}
         </button>
       </div>
     </div>
   );
+}
+
+// ── Reflexions-Router ─────────────────────────────────────────────────────────
+function ReflectionView(props: {
+  step: StepDetail;
+  phaseKey: PhaseKey;
+  mediationId: string;
+  allInputs: Record<string, string[]>;
+  participants: Participant[];
+  currentParticipantId: string;
+  onNext: () => void;
+  isLastStep: boolean;
+}) {
+  if (props.step.reflectionMode === "interactive") {
+    return <InteractiveReflectionView {...props} />;
+  }
+  return <SimpleReflectionView {...props} />;
 }
 
 // ── Haupt-Komponente ──────────────────────────────────────────────────────────
@@ -692,6 +1028,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     mediationId={mediationId}
                     allInputs={items[currentStep.key] ?? {}}
                     participants={accepted}
+                    currentParticipantId={currentParticipant?.id ?? ""}
                     isLastStep={isLastStep}
                     onNext={() => {
                       if (!isLastStep) {
@@ -724,6 +1061,12 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 {advancing ? "Wird gespeichert …" : phase.nextPhase ? "Nächste Phase →" : "Mediation abschließen ✓"}
               </button>
             )}
+          </div>
+        </div>
+      </section>
+    </main>
+  );}
+
           </div>
         </div>
       </section>
