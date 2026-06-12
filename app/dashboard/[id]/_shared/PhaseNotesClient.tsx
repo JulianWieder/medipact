@@ -1065,11 +1065,5 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         </div>
       </section>
     </main>
-  );}
-
-          </div>
-        </div>
-      </section>
-    </main>
   );
 }
