@@ -1317,7 +1317,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           müssen ihn unterzeichnen, bevor Phase 2 beginnt.
         </p>
 
-        {!contract && isMediatorOrAdmin && (
+        {!contract && (
           <button
             type="button"
             onClick={generateContract}
@@ -1349,27 +1349,19 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </button>
         )}
 
-        {!contract && !isMediatorOrAdmin && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5 text-center">
-            <p className="text-sm text-amber-700">Der Mediator generiert gleich den Vertrag …</p>
-          </div>
-        )}
-
         {contract && (
           <>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900">Mediationsvertrag</h3>
-                {isMediatorOrAdmin && (
-                  <button
-                    type="button"
-                    onClick={generateContract}
-                    disabled={contractGenerating}
-                    className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-50"
-                  >
-                    {contractGenerating ? "Generiert…" : "Neu generieren"}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={generateContract}
+                  disabled={contractGenerating}
+                  className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-50"
+                >
+                  {contractGenerating ? "Generiert…" : "Neu generieren"}
+                </button>
               </div>
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {contract.text}
