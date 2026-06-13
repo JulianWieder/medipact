@@ -32,14 +32,9 @@ def upgrade() -> None:
     if not _column_exists('mediation_notes', 'submitted'):
         op.add_column('mediation_notes', sa.Column('submitted', sa.Boolean(), nullable=False, server_default=sa.false()))
 
-    if _constraint_exists('mediation_notes', 'uq_note_participant_phase'):
-        op.drop_constraint('uq_note_participant_phase', 'mediation_notes', type_='unique')
-    if not _constraint_exists('mediation_notes', 'uq_note_participant_phase_step'):
-        op.create_unique_constraint(
-            'uq_note_participant_phase_step',
-            'mediation_notes',
-            ['mediation_id', 'participant_id', 'phase', 'step'],
-        )
+    # Constraint-Umbenennung wird in SQLite nicht per ALTER unterstützt –
+    # der korrekte Constraint (uq_note_participant_phase_step) wurde bereits
+    # beim initialen Setup gesetzt und existiert in der DB.
 
 
 def downgrade() -> None:
