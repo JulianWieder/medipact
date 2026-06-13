@@ -4,3 +4,4 @@ from app.models.mediation_invite import MediationInvite
 from app.models.mediation_participant import MediationParticipant
 from app.models.mediation_note import MediationNote
 from app.models.note_reaction import NoteReaction
+from app.models.mediation_contract import MediationContract, MediationContractSignature

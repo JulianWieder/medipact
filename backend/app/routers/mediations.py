@@ -539,3 +539,241 @@ def get_reactions(
         }
         for r in rows
     ]
+
+
+# ── KI-Paraphrasierung ────────────────────────────────────────────────────────
+
+class ReflectRequest(BaseModel):
+    phase: str
+    step: str
+    step_title: str
+    inputs: list[dict]
+
+
+@router.post("/{mediation_id}/reflect")
+def reflect(
+    mediation_id: int,
+    payload: ReflectRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+
+    from app.config import settings
+    import anthropic
+
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
+
+    parts = "\n\n".join(
+        f"**{inp['name']} ({inp['role']}):**\n{inp['content']}"
+        for inp in payload.inputs
+        if inp.get("content", "").strip()
+    )
+    prompt = (
+        f"Du bist ein neutraler Mediationsassistent. "
+        f"Fasse die folgenden Eingaben der Parteien zum Schritt '{payload.step_title}' "
+        f"sachlich, neutral und respektvoll zusammen. "
+        f"Hebe gemeinsame Punkte hervor. Keine Bewertung, kein Ratschlag.\n\n{parts}"
+    )
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return {"reflection": message.content[0].text}
+
+
+# ── Mediationsvertrag ─────────────────────────────────────────────────────────
+
+from app.models.mediation_contract import MediationContract, MediationContractSignature
+
+
+class ContractSignRequest(BaseModel):
+    signed_name: str
+
+
+@router.post("/{mediation_id}/contract/generate")
+def generate_contract(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Generiert den Mediationsvertrag aus allen Phase-1-Notizen via KI.
+    Nur Mediator/Admin darf generieren. Bestehender Vertrag wird überschrieben."""
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen den Vertrag generieren")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+
+    # Alle Phase-1-Notizen laden
+    phase_keys = ["einleitung", "einleitung_rollen", "einleitung_vertrauen", "einleitung_ziel"]
+    notes = (
+        db.query(MediationNote, MediationParticipant, User)
+        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(
+            MediationNote.mediation_id == mediation_id,
+            MediationNote.phase.in_(phase_keys),
+            MediationNote.submitted == True,
+        )
+        .all()
+    )
+
+    if not notes:
+        raise HTTPException(status_code=422, detail="Noch keine abgeschlossenen Eingaben in Phase 1")
+
+    from app.config import settings
+    import anthropic
+
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
+
+    STEP_LABELS = {
+        "einleitung": "Regeln",
+        "einleitung_rollen": "Rollen",
+        "einleitung_vertrauen": "Vertrauen",
+        "einleitung_ziel": "Ziel",
+    }
+
+    parts = []
+    for note, participant, user in notes:
+        import json as _json
+        try:
+            items = _json.loads(note.content)
+            if not isinstance(items, list):
+                items = [note.content]
+        except Exception:
+            items = [note.content]
+        items_text = "\n".join(f"- {i}" for i in items if i.strip())
+        if items_text:
+            parts.append(f"{user.name} ({STEP_LABELS.get(note.phase, note.phase)}):\n{items_text}")
+
+    notes_text = "\n\n".join(parts)
+
+    prompt = (
+        "Du bist ein erfahrener Mediationsassistent. "
+        "Erstelle auf Basis der folgenden Eingaben der Parteien einen kurzen, klaren Mediationsvertrag auf Deutsch. "
+        "Der Vertrag soll:\n"
+        "- Die gemeinsamen Regeln für das Verfahren festhalten\n"
+        "- Die Rollen der Beteiligten klären\n"
+        "- Die Grundsätze (Freiwilligkeit, Vertraulichkeit, Eigenverantwortung, Neutralität) explizit nennen\n"
+        "- Besonders auf die Online-Besonderheiten eingehen (digitale Vertraulichkeit, Umgang mit technischen Problemen)\n"
+        "- Das gemeinsame Ziel der Mediation benennen\n"
+        "- In einem respektvollen, verbindlichen Ton gehalten sein\n"
+        "- Maximal 400 Wörter\n\n"
+        f"Eingaben der Parteien:\n\n{notes_text}"
+    )
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1200,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    generated_text = message.content[0].text
+
+    # Speichern oder überschreiben
+    existing = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
+    if existing:
+        existing.generated_text = generated_text
+        existing.created_at = __import__('datetime').datetime.utcnow()
+        # Unterschriften löschen bei Neugeneration
+        db.query(MediationContractSignature).filter(
+            MediationContractSignature.contract_id == existing.id
+        ).delete()
+        db.commit()
+        return {"text": generated_text, "contract_id": existing.id}
+    else:
+        contract = MediationContract(mediation_id=mediation_id, generated_text=generated_text)
+        db.add(contract)
+        db.commit()
+        db.refresh(contract)
+        return {"text": generated_text, "contract_id": contract.id}
+
+
+@router.get("/{mediation_id}/contract")
+def get_contract(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+
+    contract = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
+    if not contract:
+        return {"contract": None}
+
+    signatures = (
+        db.query(MediationContractSignature, MediationParticipant, User)
+        .join(MediationParticipant, MediationContractSignature.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationContractSignature.contract_id == contract.id)
+        .all()
+    )
+
+    # Alle Teilnehmer laden um all_signed zu berechnen
+    all_participants = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id == mediation_id)
+        .all()
+    )
+    signed_ids = {sig.participant_id for sig, _, _ in signatures}
+    all_signed = len(all_participants) > 0 and all(p.id in signed_ids for p in all_participants)
+
+    return {
+        "contract": {
+            "id": contract.id,
+            "text": contract.generated_text,
+            "created_at": contract.created_at.isoformat(),
+        },
+        "signatures": [
+            {
+                "participant_id": str(sig.participant_id),
+                "name": user.name,
+                "signed_name": sig.signed_name,
+                "signed_at": sig.signed_at.isoformat(),
+            }
+            for sig, participant, user in signatures
+        ],
+        "all_signed": all_signed,
+    }
+
+
+@router.post("/{mediation_id}/contract/sign")
+def sign_contract(
+    mediation_id: int,
+    payload: ContractSignRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    participant = _require_participant(mediation_id, current_user, db)
+
+    contract = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Kein Vertrag vorhanden")
+
+    if not payload.signed_name.strip():
+        raise HTTPException(status_code=422, detail="Name darf nicht leer sein")
+
+    existing = db.query(MediationContractSignature).filter(
+        MediationContractSignature.contract_id == contract.id,
+        MediationContractSignature.participant_id == participant.id,
+    ).first()
+
+    if existing:
+        existing.signed_name = payload.signed_name.strip()
+        existing.signed_at = __import__('datetime').datetime.utcnow()
+    else:
+        db.add(MediationContractSignature(
+            contract_id=contract.id,
+            participant_id=participant.id,
+            signed_name=payload.signed_name.strip(),
+        ))
+
+    db.commit()
+    return {"ok": True}
