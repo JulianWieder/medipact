@@ -611,13 +611,8 @@ def generate_contract(
         )
         .first()
     )
-    # Erlaubt wenn: globale mediator/admin-Rolle ODER Teilnehmer mit Rolle mediator/admin in diesem Fall
-    is_allowed = (
-        current_user.role in ("mediator", "admin")
-        or (participant and participant.role in ("mediator", "admin", "owner"))
-    )
-    if not is_allowed:
-        raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen den Vertrag generieren")
+    if not participant and current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nicht an dieser Mediation beteiligt")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
