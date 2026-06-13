@@ -56,7 +56,7 @@ const CONTENT_STEPS = [
   {
     key: "einleitung_ziel",
     number: 4,
-    title: "Ziel der Mediation definieren",
+    title: "Ziel der Mediation",
     description:
       "Was soll am Ende dieser Mediation erreicht sein? Jede Partei formuliert ihr persönliches Ziel für den Prozess.",
     placeholder: "z.B. Eine faire Lösung für beide Seiten finden …",
@@ -81,6 +81,49 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
+// ── Emotionale Schritt-Inhalte ─────────────────────────────────────────────────
+
+const STEP_CONTENT: Record<
+  ContentStepKey | "intro",
+  { videoTitle: string; videoDuration: string; emotional: string; sub?: string }
+> = {
+  intro: {
+    videoTitle: "Was ist Online-Mediation – und warum funktioniert sie?",
+    videoDuration: "ca. 3 Min.",
+    emotional:
+      "Du bist hier, weil etwas schiefgelaufen ist. Vielleicht fühlst du Frustration, Erschöpfung, vielleicht auch Hoffnung, dass sich endlich etwas ändert. All das ist vollkommen in Ordnung.",
+    sub: "Mediation gibt dir den Raum, gehört zu werden – ohne Urteil, ohne Druck. Dieser Prozess funktioniert nur, wenn alle freiwillig und in ihrem eigenen Tempo mitgehen. Nimm dir einen Moment. Atme durch.",
+  },
+  einleitung: {
+    videoTitle: "Warum gemeinsame Regeln den Unterschied machen",
+    videoDuration: "ca. 2 Min.",
+    emotional:
+      "In einem Konflikt verlieren wir oft das Gefühl von Kontrolle. Gemeinsame Regeln geben Sicherheit – sie schaffen den Rahmen, in dem echter Dialog erst möglich wird.",
+    sub: "Was brauchst du, damit du dich sicher genug fühlst, ehrlich zu sein? Formuliere es konkret. Nicht für die andere Seite – für dich.",
+  },
+  einleitung_rollen: {
+    videoTitle: "Rollen in Konflikten – wer bist du wirklich in dieser Situation?",
+    videoDuration: "ca. 2 Min.",
+    emotional:
+      "Wir spielen in Konflikten oft Rollen, die wir nicht bewusst gewählt haben: Täter, Opfer, Retter. Hier hast du die Chance, innezuhalten und zu fragen: Wer möchte ich in diesem Prozess sein?",
+    sub: "Es geht nicht darum, eine \"Rolle\" zu besetzen. Es geht darum, transparent zu machen, wie du dich siehst – und was du von anderen brauchst.",
+  },
+  einleitung_vertrauen: {
+    videoTitle: "Vertrauen aufbauen – auch wenn es verletzt wurde",
+    videoDuration: "ca. 2 Min.",
+    emotional:
+      "Vertrauen entsteht nicht auf Knopfdruck, besonders wenn es beschädigt wurde. Aber für diesen Prozess braucht ihr kein vollständiges Vertrauen – nur genug, um heute ehrlich sprechen zu können.",
+    sub: "Was ist dein Minimum? Was brauchst du, damit du dich wenigstens ein Stück weit öffnen kannst?",
+  },
+  einleitung_ziel: {
+    videoTitle: "Vom Problem zur Lösung – wie du dein Ziel findest",
+    videoDuration: "ca. 2 Min.",
+    emotional:
+      "Wir wissen im Konflikt oft sehr genau, was wir nicht wollen. Aber was willst du wirklich? Stell dir vor, dieser Prozess ist gelungen – wie fühlt sich das an, und was ist dann anders?",
+    sub: "Formuliere dein Ziel positiv. Nicht was aufhören soll, sondern was stattdessen sein soll. Das ist oft der schwierigere, aber wichtigere Teil.",
+  },
+};
+
 // ── Hilfsfunktionen ────────────────────────────────────────────────────────────
 
 function parseItems(raw: string): string[] {
@@ -96,6 +139,49 @@ function parseItems(raw: string): string[] {
 }
 
 // ── Sub-Komponenten ────────────────────────────────────────────────────────────
+
+function VideoPlaceholder({ title, duration }: { title: string; duration?: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video flex items-center justify-center group cursor-pointer select-none">
+      {/* Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 via-slate-900/60 to-slate-900" />
+
+      {/* Subtle grid */}
+      <div
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
+        {/* Play button */}
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/25 group-hover:bg-white/25 group-hover:scale-110 transition-all duration-200 shadow-lg">
+          <svg className="h-7 w-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+
+        <div>
+          <p className="text-white font-semibold text-sm leading-snug max-w-xs">{title}</p>
+          {duration && (
+            <p className="mt-1 text-white/50 text-xs">{duration}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Badge */}
+      <div className="absolute top-3 right-3">
+        <span className="rounded-full bg-emerald-500/90 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white shadow">
+          Video folgt bald
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function StepBadge({ index, label, status }: { index: number; label: string; status: "done" | "active" | "locked" }) {
   return (
@@ -237,7 +323,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     () => Object.fromEntries(PHASE_STEPS.map((s) => [s, "input"])) as Record<PhaseStep, StepMode>
   );
 
-  // items[stepKey][participantId] = string[]
   const [items, setItems] = useState<Record<ContentStepKey, Record<string, string[]>>>(
     () => Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, {}])) as Record<ContentStepKey, Record<string, string[]>>
   );
@@ -271,7 +356,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         const pData: Participant[] = await pRes.json();
         setParticipants(pData);
 
-        // Notizen aller Content-Schritte laden
         const notesResults = await Promise.all(
           CONTENT_STEPS.map((step) =>
             fetch(`/api/mediations/${mediationId}/notes?phase=${step.key}`)
@@ -296,7 +380,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         }
         setItems(nextItems);
 
-        // Step-Stati laden, um aktiven Schritt zu bestimmen
         await refreshAllStepStates(pData);
       } catch {
         // ignore
@@ -313,7 +396,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
       const me = parties.find((p) => p.name === currentUserName);
 
-      // Status für alle Schritte laden
       const allKeys: PhaseStep[] = ["intro", ...CONTENT_STEPS.map((s) => s.key as ContentStepKey)];
       const statuses = await Promise.all(
         allKeys.map((key) =>
@@ -342,11 +424,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         }
       }
 
-      // Contract-Status
       const allContentDone = CONTENT_STEPS.every((s) => newModes[s.key] === "done");
 
       if (allContentDone) {
-        // Vertrag laden
         const contractRes = await fetch(`/api/mediations/${mediationId}/contract`);
         if (contractRes.ok) {
           const cData = await contractRes.json();
@@ -379,7 +459,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     [mediationId, currentUserName, participants]
   );
 
-  // Polling when in "waiting" mode
   useEffect(() => {
     const isWaiting = stepModes[activeStep] === "waiting";
     if (isWaiting) {
@@ -456,7 +535,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       setSaveState("saved");
       setStepModes((prev) => ({ ...prev, [stepKey]: "waiting" }));
       setTimeout(() => setSaveState("idle"), 2000);
-      // Sofort einmal pollen
       setTimeout(() => refreshAllStepStates(), 500);
     } catch {
       setError("Server nicht erreichbar.");
@@ -556,7 +634,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         setError(body?.detail ?? body?.error ?? "Unterschrift konnte nicht gespeichert werden");
         return;
       }
-      // Vertrag neu laden
       const cRes = await fetch(`/api/mediations/${mediationId}/contract`);
       if (cRes.ok) {
         const cData = await cRes.json();
@@ -601,6 +678,30 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     return idx < activeIdx ? "done" : "locked";
   }
 
+  // ── Render: Emotionaler Schritt-Header ────────────────────────────────────
+
+  function renderStepHeader(stepKey: ContentStepKey | "intro") {
+    const content = STEP_CONTENT[stepKey];
+    return (
+      <div className="space-y-5 mb-8">
+        {/* Video-Platzhalter */}
+        <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
+
+        {/* Emotionaler Text */}
+        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5">
+          <p className="text-base font-medium text-slate-800 leading-relaxed">
+            {content.emotional}
+          </p>
+          {content.sub && (
+            <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+              {content.sub}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // ── Render: Intro-Schritt ──────────────────────────────────────────────────
 
   function renderIntroStep() {
@@ -609,29 +710,28 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6">
-          <h3 className="mb-3 text-base font-bold text-blue-900">Willkommen zur Online-Mediation</h3>
-          <div className="space-y-3 text-sm text-blue-800 leading-relaxed">
-            <p>
-              <strong>Online-Mediation ist anders als ein persönliches Gespräch.</strong> Ohne Körpersprache, ohne gemeinsamen Raum –
-              es ist leichter, Missverständnisse zu erleben und schwerer, Nähe aufzubauen. Das ist normal und kein Zeichen des Scheiterns.
-            </p>
-            <p>
-              <strong>Du kommst möglicherweise mit Anspannung oder emotionaler Belastung in dieses Gespräch.</strong> Das ist menschlich.
-              Mediation gibt dir den Raum, gehört zu werden – ohne Urteil, ohne Druck.
-            </p>
-            <p>
-              Bevor wir beginnen: Nimm dir einen Moment. Atme durch. Der Prozess funktioniert nur, wenn alle Beteiligten ihn freiwillig
-              und in ihrem eigenen Tempo gehen.
-            </p>
-            <p>
-              <strong>In dieser ersten Phase werdet ihr gemeinsam die Grundlagen legen:</strong> Regeln, Rollen, Vertrauen und ein gemeinsames Ziel.
-              Am Ende unterzeichnen alle einen kurzen Mediationsvertrag – erst dann beginnt Phase 2.
-            </p>
-            <p>
-              Die Eingaben der anderen Partei siehst du jeweils erst, nachdem du deine eigenen abgeschickt hast.
-            </p>
+        {renderStepHeader("intro")}
+
+        {/* Prozessübersicht */}
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/60 px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">In dieser Phase</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[
+              { icon: "📋", label: "Regeln festlegen" },
+              { icon: "🪞", label: "Rollen klären" },
+              { icon: "🤝", label: "Vertrauen schaffen" },
+              { icon: "🎯", label: "Ziel definieren" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-sm text-blue-800">
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
+            ))}
           </div>
+          <p className="mt-4 text-xs text-blue-600">
+            Am Ende unterzeichnen alle einen Mediationsvertrag. Erst dann beginnt Phase 2.
+            Die Eingaben der anderen Partei siehst du jeweils erst nach deiner eigenen Abgabe.
+          </p>
         </div>
 
         {mode === "waiting" && (
@@ -649,8 +749,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
         {!introSubmitted && (
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm font-medium text-slate-700">
-              Bestätige, dass du die Einführung gelesen hast und bereit bist, mit dem Prozess zu beginnen.
+            <p className="text-sm text-slate-600">
+              Bestätige, dass du bereit bist, diesen Prozess zu beginnen.
             </p>
             <button
               type="button"
@@ -658,7 +758,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               disabled={saveState === "saving"}
               className="btn btn-primary disabled:opacity-60"
             >
-              {saveState === "saving" ? "Wird gespeichert…" : "Ich habe verstanden und bin bereit →"}
+              {saveState === "saving" ? "Wird gespeichert…" : "Ich bin bereit →"}
             </button>
           </div>
         )}
@@ -676,6 +776,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (mode === "waiting") {
       return (
         <div className="space-y-4">
+          {renderStepHeader(stepDef.key)}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Deine Eingabe</p>
             <ItemList items={myItems} editable={false} />
@@ -724,6 +825,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     // input mode
     return (
       <div className="space-y-6">
+        {renderStepHeader(stepDef.key)}
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-emerald-300 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
@@ -777,6 +880,118 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     );
   }
 
+  // ── Render: Paywall ────────────────────────────────────────────────────────
+
+  function renderPaywall() {
+    return (
+      <div className="space-y-8">
+        {/* Erfolgs-Header */}
+        <div className="text-center">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 mb-5">
+            <svg className="h-10 w-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">Phase 1 ist abgeschlossen.</h2>
+          <p className="mt-3 text-slate-500 max-w-sm mx-auto leading-relaxed text-sm">
+            Ihr habt gemeinsam Regeln festgelegt, Rollen geklärt und einen Mediationsvertrag unterzeichnet.
+            Das ist bereits ein bedeutender Schritt – viele kommen nie so weit.
+          </p>
+        </div>
+
+        {/* Was euch in Phase 2 erwartet */}
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Was euch in Phase 2 erwartet</p>
+          <div className="space-y-4">
+            {[
+              {
+                emoji: "🎯",
+                title: "Themensammlung",
+                desc: "Alle Konfliktthemen kommen auf den Tisch – strukturiert, ohne Wertung, ohne Druck.",
+              },
+              {
+                emoji: "💬",
+                title: "Interessen erkunden",
+                desc: "Was steckt wirklich hinter euren Positionen? Ihr lernt euch und den Konflikt neu verstehen.",
+              },
+              {
+                emoji: "💡",
+                title: "Optionen entwickeln",
+                desc: "Gemeinsam entstehen Lösungsideen, auf die ihr allein nie gekommen wärt.",
+              },
+              {
+                emoji: "✅",
+                title: "Vereinbarung",
+                desc: "Am Ende steht eine schriftliche Vereinbarung, die beide tragen – und die hält.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5">{item.emoji}</span>
+                <div>
+                  <p className="font-semibold text-slate-900 text-sm">{item.title}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Preisbox */}
+        <div className="rounded-2xl border-2 border-emerald-400 bg-white p-8 shadow-lg shadow-emerald-100/60">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-2">Vollständiger Zugang</p>
+            <div className="flex items-baseline justify-center gap-1 mt-1">
+              <span className="text-5xl font-extrabold text-slate-900 tracking-tight">79</span>
+              <span className="text-2xl font-bold text-slate-900">€</span>
+            </div>
+            <p className="text-slate-400 text-sm mt-1">einmalig · pro Mediationsfall · inkl. MwSt.</p>
+
+            {/* TODO: Stripe-Integration hier einfügen */}
+            <button
+              type="button"
+              className="mt-6 w-full rounded-2xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:scale-[0.98] transition-all"
+              onClick={() => {
+                // TODO: Weiterleitung zu Stripe Checkout
+                alert("Stripe-Integration kommt bald.");
+              }}
+            >
+              Jetzt Phase 2 freischalten →
+            </button>
+
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+              {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map((badge) => (
+                <span key={badge} className="text-xs text-slate-400">
+                  {badge}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Menschlicher Hinweis */}
+        <p className="text-center text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+          Ihr seid bereits weiter als die meisten. Viele berichten, dass Phase 2 die entscheidende Wende bringt –
+          der Moment, in dem aus Positionen echte Gespräche werden.
+        </p>
+
+        {/* Mediator-Button (nur für Mediator/Admin nach Zahlung) */}
+        {isMediatorOrAdmin && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-center">
+            <p className="text-xs text-slate-500 mb-3">Als Mediator kannst du Phase 2 nach erfolgter Zahlung direkt starten.</p>
+            <button
+              type="button"
+              onClick={advanceToPhase2}
+              disabled={advancing}
+              className="btn btn-primary disabled:opacity-60"
+            >
+              {advancing ? "Wird gestartet…" : "Phase 2 starten (Mediator) →"}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── Render: Vertrags-Schritt ───────────────────────────────────────────────
 
   function renderContractStep() {
@@ -787,6 +1002,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           <p className="text-sm text-slate-400">Verfügbar, sobald alle vorherigen Schritte abgeschlossen sind.</p>
         </div>
       );
+    }
+
+    // Nach vollständiger Unterzeichnung → Paywall zeigen
+    if (allSigned) {
+      return renderPaywall();
     }
 
     return (
@@ -899,27 +1119,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                 </div>
               </div>
             )}
-
-            {allSigned && (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-                <p className="mb-4 text-sm font-semibold text-emerald-800">
-                  Alle Beteiligten haben den Vertrag unterzeichnet. Phase 1 ist abgeschlossen.
-                </p>
-                {isMediatorOrAdmin && (
-                  <button
-                    type="button"
-                    onClick={advanceToPhase2}
-                    disabled={advancing}
-                    className="btn btn-primary disabled:opacity-60"
-                  >
-                    {advancing ? "Wird gestartet…" : "Phase 2 starten →"}
-                  </button>
-                )}
-                {!isMediatorOrAdmin && (
-                  <p className="text-xs text-slate-500">Der Mediator startet Phase 2.</p>
-                )}
-              </div>
-            )}
           </>
         )}
       </div>
@@ -1015,9 +1214,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             {activeStep === "intro" && (
               <>
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-slate-900">Einführung in die Mediation</h2>
+                  <h2 className="text-lg font-bold text-slate-900">Willkommen</h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    Bitte lies die folgenden Informationen sorgfältig durch, bevor wir beginnen.
+                    Nimm dir einen Moment, bevor wir beginnen.
                   </p>
                 </div>
                 {renderIntroStep()}
@@ -1034,7 +1233,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       </div>
                       <h2 className="text-lg font-bold text-slate-900">{cs.title}</h2>
                     </div>
-                    <p className="ml-11 text-sm text-slate-500">{cs.description}</p>
                   </div>
                   {renderContentStep(cs)}
                 </div>
@@ -1043,14 +1241,16 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
             {activeStep === "contract" && (
               <>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                {!allSigned && (
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Mediationsvertrag</h2>
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900">Mediationsvertrag</h2>
-                </div>
+                )}
                 {renderContractStep()}
               </>
             )}
