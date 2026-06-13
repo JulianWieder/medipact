@@ -65,11 +65,12 @@ const CONTENT_STEPS = [
 
 type ContentStepKey = (typeof CONTENT_STEPS)[number]["key"];
 
-// Alle Schritte inkl. Intro und Vertrag
-type PhaseStep = "intro" | ContentStepKey | "contract";
+// Alle Schritte inkl. Intro, Video-Call und Vertrag
+type PhaseStep = "intro" | "videocall" | ContentStepKey | "contract";
 
 const PHASE_STEPS: PhaseStep[] = [
   "intro",
+  "videocall",
   ...CONTENT_STEPS.map((s) => s.key as ContentStepKey),
   "contract",
 ];
@@ -84,7 +85,7 @@ const roleLabel: Record<string, string> = {
 // ── Emotionale Schritt-Inhalte ─────────────────────────────────────────────────
 
 const STEP_CONTENT: Record<
-  ContentStepKey | "intro",
+  ContentStepKey | "intro" | "videocall",
   { videoTitle: string; videoDuration: string; emotional: string; sub?: string }
 > = {
   intro: {
@@ -93,6 +94,13 @@ const STEP_CONTENT: Record<
     emotional:
       "Du bist hier, weil etwas schiefgelaufen ist. Vielleicht fühlst du Frustration, Erschöpfung, vielleicht auch Hoffnung, dass sich endlich etwas ändert. All das ist vollkommen in Ordnung.",
     sub: "Mediation gibt dir den Raum, gehört zu werden – ohne Urteil, ohne Druck. Dieser Prozess funktioniert nur, wenn alle freiwillig und in ihrem eigenen Tempo mitgehen. Nimm dir einen Moment. Atme durch.",
+  },
+  videocall: {
+    videoTitle: "Wie du dich auf das erste Gespräch vorbereitest",
+    videoDuration: "ca. 2 Min.",
+    emotional:
+      "Zum ersten Mal seid ihr alle im selben Raum – digital, aber gemeinsam. Das erste Gespräch setzt den Ton für alles, was folgt.",
+    sub: "Wenn du bereit bist, tritt dem Raum bei. Du kannst dein Mikrofon zunächst stummschalten und einfach ankommen. Es gibt keinen Druck, sofort zu reden.",
   },
   einleitung: {
     videoTitle: "Warum gemeinsame Regeln den Unterschied machen",
@@ -138,15 +146,99 @@ function parseItems(raw: string): string[] {
   return [];
 }
 
+// ── Jitsi-Komponente ──────────────────────────────────────────────────────────
+// Hinweis: Räume auf meet.jit.si sind öffentlich aber durch UUID-basierte Namen
+// effektiv privat. Für Produktion: selbst gehostete Jitsi-Instanz empfohlen.
+
+declare global {
+  interface Window {
+    JitsiMeetExternalAPI: new (domain: string, options: Record<string, unknown>) => {
+      dispose: () => void;
+    };
+  }
+}
+
+function JitsiCall({
+  roomName,
+  displayName,
+}: {
+  roomName: string;
+  displayName: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const apiRef = useRef<{ dispose: () => void } | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    function initJitsi() {
+      if (!containerRef.current || !window.JitsiMeetExternalAPI) return;
+      apiRef.current = new window.JitsiMeetExternalAPI("meet.jit.si", {
+        roomName,
+        parentNode: containerRef.current,
+        userInfo: { displayName },
+        width: "100%",
+        height: "100%",
+        configOverwrite: {
+          startWithAudioMuted: true,
+          prejoinPageEnabled: false,
+          disableDeepLinking: true,
+        },
+        interfaceConfigOverwrite: {
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          TOOLBAR_BUTTONS: [
+            "microphone",
+            "camera",
+            "desktop",
+            "fullscreen",
+            "hangup",
+            "chat",
+            "raisehand",
+            "tileview",
+            "settings",
+          ],
+        },
+      });
+    }
+
+    if (window.JitsiMeetExternalAPI) {
+      initJitsi();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://meet.jit.si/external_api.js";
+      script.async = true;
+      script.onload = initJitsi;
+      document.body.appendChild(script);
+      scriptRef.current = script;
+    }
+
+    return () => {
+      apiRef.current?.dispose();
+      apiRef.current = null;
+      if (scriptRef.current && document.body.contains(scriptRef.current)) {
+        document.body.removeChild(scriptRef.current);
+        scriptRef.current = null;
+      }
+    };
+  }, [roomName, displayName]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
+      style={{ height: "520px" }}
+    />
+  );
+}
+
 // ── Sub-Komponenten ────────────────────────────────────────────────────────────
 
 function VideoPlaceholder({ title, duration }: { title: string; duration?: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video flex items-center justify-center group cursor-pointer select-none">
-      {/* Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 via-slate-900/60 to-slate-900" />
-
-      {/* Subtle grid */}
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -155,25 +247,17 @@ function VideoPlaceholder({ title, duration }: { title: string; duration?: strin
           backgroundSize: "40px 40px",
         }}
       />
-
-      {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
-        {/* Play button */}
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/25 group-hover:bg-white/25 group-hover:scale-110 transition-all duration-200 shadow-lg">
           <svg className="h-7 w-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
-
         <div>
           <p className="text-white font-semibold text-sm leading-snug max-w-xs">{title}</p>
-          {duration && (
-            <p className="mt-1 text-white/50 text-xs">{duration}</p>
-          )}
+          {duration && <p className="mt-1 text-white/50 text-xs">{duration}</p>}
         </div>
       </div>
-
-      {/* Badge */}
       <div className="absolute top-3 right-3">
         <span className="rounded-full bg-emerald-500/90 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white shadow">
           Video folgt bald
@@ -183,7 +267,15 @@ function VideoPlaceholder({ title, duration }: { title: string; duration?: strin
   );
 }
 
-function StepBadge({ index, label, status }: { index: number; label: string; status: "done" | "active" | "locked" }) {
+function StepBadge({
+  index,
+  label,
+  status,
+}: {
+  index: number;
+  label: string;
+  status: "done" | "active" | "locked";
+}) {
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
@@ -196,7 +288,13 @@ function StepBadge({ index, label, status }: { index: number; label: string; sta
         }`}
       >
         {status === "done" ? (
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         ) : (
@@ -205,7 +303,11 @@ function StepBadge({ index, label, status }: { index: number; label: string; sta
       </div>
       <span
         className={`max-w-[72px] text-center text-[10px] font-medium leading-tight ${
-          status === "active" ? "text-emerald-700" : status === "done" ? "text-emerald-600" : "text-slate-400"
+          status === "active"
+            ? "text-emerald-700"
+            : status === "done"
+            ? "text-emerald-600"
+            : "text-slate-400"
         }`}
       >
         {label}
@@ -218,15 +320,24 @@ function WaitingBanner({ waitingFor }: { waitingFor: string[] }) {
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-8 py-10 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-        <svg className="h-6 w-6 animate-pulse text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          className="h-6 w-6 animate-pulse text-amber-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       </div>
       <div>
         <p className="text-sm font-semibold text-amber-800">Deine Eingabe ist eingegangen.</p>
         <p className="mt-1 text-sm text-amber-700">
-          Warte auf:{" "}
-          <span className="font-medium">{waitingFor.join(", ")}</span>
+          Warte auf: <span className="font-medium">{waitingFor.join(", ")}</span>
         </p>
       </div>
     </div>
@@ -272,7 +383,13 @@ function ItemList({
             onClick={onAdd}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white transition hover:bg-emerald-700"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
           </button>
@@ -293,8 +410,18 @@ function ItemList({
                   onClick={() => onRemove(idx)}
                   className="ml-1 rounded p-0.5 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
                 >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -320,14 +447,26 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeStep, setActiveStep] = useState<PhaseStep>("intro");
   const [stepModes, setStepModes] = useState<Record<PhaseStep, StepMode>>(
-    () => Object.fromEntries(PHASE_STEPS.map((s) => [s, "input"])) as Record<PhaseStep, StepMode>
+    () =>
+      Object.fromEntries(PHASE_STEPS.map((s) => [s, "input"])) as Record<
+        PhaseStep,
+        StepMode
+      >
   );
 
   const [items, setItems] = useState<Record<ContentStepKey, Record<string, string[]>>>(
-    () => Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, {}])) as Record<ContentStepKey, Record<string, string[]>>
+    () =>
+      Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, {}])) as Record<
+        ContentStepKey,
+        Record<string, string[]>
+      >
   );
   const [inputTexts, setInputTexts] = useState<Record<ContentStepKey, string>>(
-    () => Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, ""])) as Record<ContentStepKey, string>
+    () =>
+      Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, ""])) as Record<
+        ContentStepKey,
+        string
+      >
   );
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -335,8 +474,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   const [error, setError] = useState("");
 
   // Contract state
-  const [contract, setContract] = useState<{ id: number; text: string; created_at: string } | null>(null);
-  const [signatures, setSignatures] = useState<{ participant_id: string; name: string; signed_name: string }[]>([]);
+  const [contract, setContract] = useState<{
+    id: number;
+    text: string;
+    created_at: string;
+  } | null>(null);
+  const [signatures, setSignatures] = useState<
+    { participant_id: string; name: string; signed_name: string }[]
+  >([]);
   const [allSigned, setAllSigned] = useState(false);
   const [signedName, setSignedName] = useState("");
   const [contractGenerating, setContractGenerating] = useState(false);
@@ -344,7 +489,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
-  const isMediatorOrAdmin = currentParticipant?.role === "mediator" || currentParticipant?.role === "admin";
+  const isMediatorOrAdmin =
+    currentParticipant?.role === "mediator" || currentParticipant?.role === "admin";
 
   // ── Initialer Datenladevorgang ─────────────────────────────────────────────
 
@@ -360,15 +506,23 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           CONTENT_STEPS.map((step) =>
             fetch(`/api/mediations/${mediationId}/notes?phase=${step.key}`)
               .then((r) => (r.ok ? r.json() : []))
-              .then((notes: { participant_id: string; content: string; submitted: boolean }[]) => ({
-                key: step.key as ContentStepKey,
-                notes,
-              }))
+              .then(
+                (
+                  notes: {
+                    participant_id: string;
+                    content: string;
+                    submitted: boolean;
+                  }[]
+                ) => ({ key: step.key as ContentStepKey, notes })
+              )
           )
         );
 
         const nextItems = Object.fromEntries(
-          CONTENT_STEPS.map((s) => [s.key, Object.fromEntries(pData.map((p) => [p.id, [] as string[]]))])
+          CONTENT_STEPS.map((s) => [
+            s.key,
+            Object.fromEntries(pData.map((p) => [p.id, [] as string[]])),
+          ])
         ) as unknown as Record<ContentStepKey, Record<string, string[]>>;
 
         for (const { key, notes } of notesResults) {
@@ -379,7 +533,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           }
         }
         setItems(nextItems);
-
         await refreshAllStepStates(pData);
       } catch {
         // ignore
@@ -396,7 +549,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
       const me = parties.find((p) => p.name === currentUserName);
 
-      const allKeys: PhaseStep[] = ["intro", ...CONTENT_STEPS.map((s) => s.key as ContentStepKey)];
+      // "intro" und "videocall" als einfache Bestätigungsschritte prüfen
+      const simpleKeys: PhaseStep[] = ["intro", "videocall"];
+      const contentKeys: PhaseStep[] = CONTENT_STEPS.map((s) => s.key as ContentStepKey);
+      const allKeys: PhaseStep[] = [...simpleKeys, ...contentKeys];
+
       const statuses = await Promise.all(
         allKeys.map((key) =>
           fetch(`/api/mediations/${mediationId}/step-status?phase=${key}&step=`)
@@ -410,7 +567,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
       for (const { key, data } of statuses) {
         if (!data) continue;
-        const myStatus = me ? data.participants.find((p) => p.participant_id === me.id) : null;
+        const myStatus = me
+          ? data.participants.find((p) => p.participant_id === me.id)
+          : null;
         const mySubmitted = myStatus?.submitted ?? false;
 
         if (data.all_submitted) {
@@ -434,11 +593,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             setContract(cData.contract);
             setSignatures(cData.signatures ?? []);
             setAllSigned(cData.all_signed ?? false);
-            if (cData.all_signed) {
-              newModes["contract"] = "done";
-            } else {
-              newModes["contract"] = "input";
-            }
+            newModes["contract"] = cData.all_signed ? "done" : "input";
           } else {
             newModes["contract"] = "input";
           }
@@ -483,7 +638,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       ...prev,
       [stepKey]: {
         ...prev[stepKey],
-        [currentParticipant.id]: [...(prev[stepKey]?.[currentParticipant.id] ?? []), text],
+        [currentParticipant.id]: [
+          ...(prev[stepKey]?.[currentParticipant.id] ?? []),
+          text,
+        ],
       },
     }));
     setInputTexts((prev) => ({ ...prev, [stepKey]: "" }));
@@ -495,12 +653,43 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       ...prev,
       [stepKey]: {
         ...prev[stepKey],
-        [currentParticipant.id]: (prev[stepKey]?.[currentParticipant.id] ?? []).filter((_, i) => i !== index),
+        [currentParticipant.id]: (
+          prev[stepKey]?.[currentParticipant.id] ?? []
+        ).filter((_, i) => i !== index),
       },
     }));
   }
 
   // ── Speichern & Abschicken ─────────────────────────────────────────────────
+
+  async function submitSimpleStep(phase: "intro" | "videocall") {
+    if (!currentParticipant) return;
+    setSaveState("saving");
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phase,
+          step: "",
+          participant_id: currentParticipant.id,
+          content: JSON.stringify(["confirmed"]),
+          submitted: true,
+        }),
+      });
+      if (!res.ok) {
+        setSaveState("error");
+        return;
+      }
+      setSaveState("saved");
+      setStepModes((prev) => ({ ...prev, [phase]: "waiting" }));
+      setTimeout(() => setSaveState("idle"), 2000);
+      setTimeout(() => refreshAllStepStates(), 500);
+    } catch {
+      setSaveState("error");
+    }
+  }
 
   async function submitNote(stepKey: ContentStepKey) {
     if (!currentParticipant) return;
@@ -527,7 +716,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         const raw = body?.detail ?? body?.error;
-        const detail = Array.isArray(raw) ? raw.map((e: { msg?: string }) => e.msg).join(", ") : (raw ?? "Unbekannter Fehler");
+        const detail = Array.isArray(raw)
+          ? raw.map((e: { msg?: string }) => e.msg).join(", ")
+          : (raw ?? "Unbekannter Fehler");
         setError(`Fehler (${res.status}): ${detail}`);
         setSaveState("error");
         return;
@@ -538,35 +729,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       setTimeout(() => refreshAllStepStates(), 500);
     } catch {
       setError("Server nicht erreichbar.");
-      setSaveState("error");
-    }
-  }
-
-  async function submitIntro() {
-    if (!currentParticipant) return;
-    setSaveState("saving");
-    setError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/notes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phase: "intro",
-          step: "",
-          participant_id: currentParticipant.id,
-          content: JSON.stringify(["confirmed"]),
-          submitted: true,
-        }),
-      });
-      if (!res.ok) {
-        setSaveState("error");
-        return;
-      }
-      setSaveState("saved");
-      setStepModes((prev) => ({ ...prev, intro: "waiting" }));
-      setTimeout(() => setSaveState("idle"), 2000);
-      setTimeout(() => refreshAllStepStates(), 500);
-    } catch {
       setSaveState("error");
     }
   }
@@ -585,7 +747,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         const raw = body?.detail ?? body?.error;
-        setError(Array.isArray(raw) ? raw.map((e: { msg?: string }) => e.msg).join(", ") : (raw ?? "Fehler"));
+        setError(
+          Array.isArray(raw)
+            ? raw.map((e: { msg?: string }) => e.msg).join(", ")
+            : (raw ?? "Fehler")
+        );
         return;
       }
       router.push(`/dashboard/${mediationId}/themensammlung`);
@@ -602,14 +768,20 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     setContractGenerating(true);
     setError("");
     try {
-      const res = await fetch(`/api/mediations/${mediationId}/contract/generate`, { method: "POST" });
+      const res = await fetch(`/api/mediations/${mediationId}/contract/generate`, {
+        method: "POST",
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setError(body?.detail ?? body?.error ?? "Vertragsgenerierung fehlgeschlagen");
         return;
       }
       const data = await res.json();
-      setContract({ id: data.contract_id, text: data.text, created_at: new Date().toISOString() });
+      setContract({
+        id: data.contract_id,
+        text: data.text,
+        created_at: new Date().toISOString(),
+      });
       setSignatures([]);
       setAllSigned(false);
     } catch {
@@ -631,7 +803,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        setError(body?.detail ?? body?.error ?? "Unterschrift konnte nicht gespeichert werden");
+        setError(
+          body?.detail ?? body?.error ?? "Unterschrift konnte nicht gespeichert werden"
+        );
         return;
       }
       const cRes = await fetch(`/api/mediations/${mediationId}/contract`);
@@ -654,7 +828,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     ? signatures.find((s) => s.participant_id === currentParticipant.id)
     : undefined;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function getWaitingFor(_stepKey: PhaseStep): string[] {
     return accepted
       .filter((p) => p.name !== currentUserName)
@@ -663,6 +836,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   function getPhaseStepLabel(step: PhaseStep): string {
     if (step === "intro") return "Einführung";
+    if (step === "videocall") return "Erstgespräch";
     if (step === "contract") return "Vertrag";
     const cs = CONTENT_STEPS.find((s) => s.key === step);
     return cs ? cs.title : step;
@@ -680,22 +854,17 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   // ── Render: Emotionaler Schritt-Header ────────────────────────────────────
 
-  function renderStepHeader(stepKey: ContentStepKey | "intro") {
+  function renderStepHeader(stepKey: ContentStepKey | "intro" | "videocall") {
     const content = STEP_CONTENT[stepKey];
     return (
       <div className="space-y-5 mb-8">
-        {/* Video-Platzhalter */}
         <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
-
-        {/* Emotionaler Text */}
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5">
           <p className="text-base font-medium text-slate-800 leading-relaxed">
             {content.emotional}
           </p>
           {content.sub && (
-            <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-              {content.sub}
-            </p>
+            <p className="mt-3 text-sm text-slate-500 leading-relaxed">{content.sub}</p>
           )}
         </div>
       </div>
@@ -712,15 +881,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       <div className="space-y-6">
         {renderStepHeader("intro")}
 
-        {/* Prozessübersicht */}
         <div className="rounded-2xl border border-blue-100 bg-blue-50/60 px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">In dieser Phase</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">
+            In dieser Phase
+          </p>
           <div className="grid gap-2 sm:grid-cols-2">
             {[
+              { icon: "🎥", label: "Erstes Gespräch per Video" },
               { icon: "📋", label: "Regeln festlegen" },
               { icon: "🪞", label: "Rollen klären" },
               { icon: "🤝", label: "Vertrauen schaffen" },
               { icon: "🎯", label: "Ziel definieren" },
+              { icon: "📄", label: "Mediationsvertrag" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2 text-sm text-blue-800">
                 <span>{item.icon}</span>
@@ -729,21 +901,27 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             ))}
           </div>
           <p className="mt-4 text-xs text-blue-600">
-            Am Ende unterzeichnen alle einen Mediationsvertrag. Erst dann beginnt Phase 2.
-            Die Eingaben der anderen Partei siehst du jeweils erst nach deiner eigenen Abgabe.
+            Ihr beginnt mit einem kurzen Video-Call. Danach arbeitet ihr die schriftlichen
+            Schritte durch und unterzeichnet gemeinsam einen Mediationsvertrag.
           </p>
         </div>
 
-        {mode === "waiting" && (
-          <WaitingBanner waitingFor={getWaitingFor("intro")} />
-        )}
+        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("intro")} />}
 
         {mode === "done" && (
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4">
-            <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="h-5 w-5 text-emerald-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            <p className="text-sm font-semibold text-emerald-800">Alle haben die Einführung bestätigt. Weiter zu Schritt 1.</p>
+            <p className="text-sm font-semibold text-emerald-800">
+              Alle haben die Einführung bestätigt. Weiter zum Erstgespräch.
+            </p>
           </div>
         )}
 
@@ -754,12 +932,92 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             </p>
             <button
               type="button"
-              onClick={submitIntro}
+              onClick={() => submitSimpleStep("intro")}
               disabled={saveState === "saving"}
               className="btn btn-primary disabled:opacity-60"
             >
               {saveState === "saving" ? "Wird gespeichert…" : "Ich bin bereit →"}
             </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Render: Video-Call-Schritt ─────────────────────────────────────────────
+
+  function renderVideoCallStep() {
+    const mode = stepModes["videocall"];
+    const submitted = mode === "waiting" || mode === "done";
+
+    // Einzigartiger Raumname auf Basis der Mediation-ID
+    const jitsiRoom = `medipact-${mediationId}`;
+
+    return (
+      <div className="space-y-6">
+        {renderStepHeader("videocall")}
+
+        {/* Jitsi eingebettet */}
+        <JitsiCall roomName={jitsiRoom} displayName={currentUserName} />
+
+        {/* Hinweisbox */}
+        <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <svg
+            className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p className="text-xs text-slate-500">
+            Raum-ID:{" "}
+            <code className="rounded bg-slate-200 px-1.5 py-0.5 font-mono text-slate-700">
+              {jitsiRoom}
+            </code>{" "}
+            · Der Raum ist für alle Beteiligten zugänglich. Kein separater Login notwendig.
+          </p>
+        </div>
+
+        {/* Abschluss-Bestätigung */}
+        {!submitted && (
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm text-slate-600">
+              Wenn das Gespräch abgeschlossen ist, bestätige es hier. Du kannst den
+              Video-Raum danach jederzeit wieder öffnen.
+            </p>
+            <button
+              type="button"
+              onClick={() => submitSimpleStep("videocall")}
+              disabled={saveState === "saving"}
+              className="btn btn-primary disabled:opacity-60"
+            >
+              {saveState === "saving" ? "Wird gespeichert…" : "Gespräch abgeschlossen ✓"}
+            </button>
+          </div>
+        )}
+
+        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("videocall")} />}
+
+        {mode === "done" && (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4">
+            <svg
+              className="h-5 w-5 text-emerald-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm font-semibold text-emerald-800">
+              Erstes Gespräch abgeschlossen. Weiter zu Schritt 1.
+            </p>
           </div>
         )}
       </div>
@@ -778,7 +1036,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         <div className="space-y-4">
           {renderStepHeader(stepDef.key)}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Deine Eingabe</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Deine Eingabe
+            </p>
             <ItemList items={myItems} editable={false} />
           </div>
           <WaitingBanner waitingFor={getWaitingFor(stepDef.key)} />
@@ -794,7 +1054,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-sm font-semibold text-emerald-800">{currentUserName}</p>
-                <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-700">Du</span>
+                <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                  Du
+                </span>
               </div>
               <ItemList items={myItems} editable={false} />
             </div>
@@ -812,10 +1074,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
           {mode === "done" && (
             <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3">
-              <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg
+                className="h-4 w-4 text-emerald-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-sm text-emerald-800">Alle Eingaben für diesen Schritt liegen vor.</p>
+              <p className="text-sm text-emerald-800">
+                Alle Eingaben für diesen Schritt liegen vor.
+              </p>
             </div>
           )}
         </div>
@@ -831,12 +1101,16 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           <div className="rounded-2xl border border-emerald-300 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-900">{currentUserName}</p>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">Du</span>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                Du
+              </span>
             </div>
             <ItemList
               items={myItems}
               inputValue={inputTexts[stepDef.key]}
-              onInputChange={(v) => setInputTexts((prev) => ({ ...prev, [stepDef.key]: v }))}
+              onInputChange={(v) =>
+                setInputTexts((prev) => ({ ...prev, [stepDef.key]: v }))
+              }
               onAdd={() => addItem(stepDef.key)}
               onRemove={(idx) => removeItem(stepDef.key, idx)}
               placeholder={stepDef.placeholder}
@@ -854,8 +1128,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   </span>
                 </div>
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
-                  <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    className="h-4 w-4 text-slate-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                   <p className="text-xs text-slate-400">Sichtbar nach deiner Abgabe</p>
                 </div>
@@ -885,23 +1169,33 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   function renderPaywall() {
     return (
       <div className="space-y-8">
-        {/* Erfolgs-Header */}
         <div className="text-center">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 mb-5">
-            <svg className="h-10 w-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-10 w-10 text-emerald-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.8}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Phase 1 ist abgeschlossen.</h2>
           <p className="mt-3 text-slate-500 max-w-sm mx-auto leading-relaxed text-sm">
-            Ihr habt gemeinsam Regeln festgelegt, Rollen geklärt und einen Mediationsvertrag unterzeichnet.
-            Das ist bereits ein bedeutender Schritt – viele kommen nie so weit.
+            Ihr habt gemeinsam ein Erstgespräch geführt, Regeln festgelegt, Rollen geklärt
+            und einen Mediationsvertrag unterzeichnet. Das ist bereits ein bedeutender Schritt.
           </p>
         </div>
 
-        {/* Was euch in Phase 2 erwartet */}
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Was euch in Phase 2 erwartet</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+            Was euch in Phase 2 erwartet
+          </p>
           <div className="space-y-4">
             {[
               {
@@ -936,48 +1230,53 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
         </div>
 
-        {/* Preisbox */}
         <div className="rounded-2xl border-2 border-emerald-400 bg-white p-8 shadow-lg shadow-emerald-100/60">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-2">Vollständiger Zugang</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-2">
+              Vollständiger Zugang
+            </p>
             <div className="flex items-baseline justify-center gap-1 mt-1">
               <span className="text-5xl font-extrabold text-slate-900 tracking-tight">79</span>
               <span className="text-2xl font-bold text-slate-900">€</span>
             </div>
-            <p className="text-slate-400 text-sm mt-1">einmalig · pro Mediationsfall · inkl. MwSt.</p>
+            <p className="text-slate-400 text-sm mt-1">
+              einmalig · pro Mediationsfall · inkl. MwSt.
+            </p>
 
-            {/* TODO: Stripe-Integration hier einfügen */}
+            {/* TODO: Stripe-Checkout hier integrieren */}
             <button
               type="button"
               className="mt-6 w-full rounded-2xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:scale-[0.98] transition-all"
               onClick={() => {
-                // TODO: Weiterleitung zu Stripe Checkout
-                alert("Stripe-Integration kommt bald.");
+                // TODO: router.push('/checkout?mediationId=...')
+                alert("Stripe-Integration folgt.");
               }}
             >
               Jetzt Phase 2 freischalten →
             </button>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
-              {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map((badge) => (
-                <span key={badge} className="text-xs text-slate-400">
-                  {badge}
-                </span>
-              ))}
+              {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(
+                (badge) => (
+                  <span key={badge} className="text-xs text-slate-400">
+                    {badge}
+                  </span>
+                )
+              )}
             </div>
           </div>
         </div>
 
-        {/* Menschlicher Hinweis */}
         <p className="text-center text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-          Ihr seid bereits weiter als die meisten. Viele berichten, dass Phase 2 die entscheidende Wende bringt –
-          der Moment, in dem aus Positionen echte Gespräche werden.
+          Ihr seid bereits weiter als die meisten. Viele berichten, dass Phase 2 die
+          entscheidende Wende bringt – der Moment, in dem aus Positionen echte Gespräche werden.
         </p>
 
-        {/* Mediator-Button (nur für Mediator/Admin nach Zahlung) */}
         {isMediatorOrAdmin && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-center">
-            <p className="text-xs text-slate-500 mb-3">Als Mediator kannst du Phase 2 nach erfolgter Zahlung direkt starten.</p>
+            <p className="text-xs text-slate-500 mb-3">
+              Als Mediator kannst du Phase 2 nach erfolgter Zahlung direkt starten.
+            </p>
             <button
               type="button"
               onClick={advanceToPhase2}
@@ -999,20 +1298,20 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (mode === ("locked" as StepMode)) {
       return (
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-          <p className="text-sm text-slate-400">Verfügbar, sobald alle vorherigen Schritte abgeschlossen sind.</p>
+          <p className="text-sm text-slate-400">
+            Verfügbar, sobald alle vorherigen Schritte abgeschlossen sind.
+          </p>
         </div>
       );
     }
 
-    // Nach vollständiger Unterzeichnung → Paywall zeigen
-    if (allSigned) {
-      return renderPaywall();
-    }
+    if (allSigned) return renderPaywall();
 
     return (
       <div className="space-y-6">
         <p className="text-sm text-slate-600">
-          Auf Basis eurer Eingaben wird ein Mediationsvertrag erstellt. Alle Beteiligten müssen ihn unterzeichnen, bevor Phase 2 beginnt.
+          Auf Basis eurer Eingaben wird ein Mediationsvertrag erstellt. Alle Beteiligten
+          müssen ihn unterzeichnen, bevor Phase 2 beginnt.
         </p>
 
         {!contract && isMediatorOrAdmin && (
@@ -1025,8 +1324,19 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             {contractGenerating ? (
               <span className="flex items-center gap-2">
                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  />
                 </svg>
                 KI generiert Vertrag…
               </span>
@@ -1071,16 +1381,34 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   return (
                     <div
                       key={p.id}
-                      className={`rounded-xl border p-4 ${sig ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50"}`}
+                      className={`rounded-xl border p-4 ${
+                        sig
+                          ? "border-emerald-200 bg-emerald-50"
+                          : "border-slate-200 bg-slate-50"
+                      }`}
                     >
                       <p className="mb-1 text-sm font-semibold text-slate-900">{p.name}</p>
-                      <p className="mb-2 text-xs text-slate-500">{roleLabel[p.role] ?? p.role}</p>
+                      <p className="mb-2 text-xs text-slate-500">
+                        {roleLabel[p.role] ?? p.role}
+                      </p>
                       {sig ? (
                         <div className="flex items-center gap-1.5">
-                          <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          <svg
+                            className="h-4 w-4 text-emerald-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
-                          <span className="text-xs font-medium text-emerald-700">Unterzeichnet als „{sig.signed_name}"</span>
+                          <span className="text-xs font-medium text-emerald-700">
+                            Unterzeichnet als „{sig.signed_name}"
+                          </span>
                         </div>
                       ) : (
                         <span className="text-xs text-slate-400">Ausstehend</span>
@@ -1095,7 +1423,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <div className="rounded-2xl border border-slate-300 bg-white p-5">
                 <p className="mb-3 text-sm font-semibold text-slate-900">Deine Unterschrift</p>
                 <p className="mb-4 text-xs text-slate-500">
-                  Tippe deinen vollständigen Namen und klicke „Unterzeichnen", um den Vertrag zu bestätigen.
+                  Tippe deinen vollständigen Namen und klicke „Unterzeichnen", um den Vertrag
+                  zu bestätigen.
                 </p>
                 <div className="flex gap-3">
                   <input
@@ -1132,7 +1461,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   return (
     <main className="app-shell pt-[73px]">
       <section className="container py-12">
-
         {/* Globaler Phasen-Stepper */}
         <div className="mb-8 overflow-x-auto">
           <ol className="flex min-w-max items-center">
@@ -1152,8 +1480,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       }`}
                     >
                       {isDone ? (
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       ) : (
                         index + 1
@@ -1161,7 +1499,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                     </div>
                     <span
                       className={`max-w-[80px] text-center text-xs font-medium leading-tight ${
-                        isCurrent ? "text-emerald-700" : isDone ? "text-emerald-600" : "text-slate-400"
+                        isCurrent
+                          ? "text-emerald-700"
+                          : isDone
+                          ? "text-emerald-600"
+                          : "text-slate-400"
                       }`}
                     >
                       {p.shortLabel}
@@ -1223,6 +1565,35 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               </>
             )}
 
+            {activeStep === "videocall" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Erstgespräch</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Euer erstes gemeinsames Gespräch per Video.
+                  </p>
+                </div>
+                {renderVideoCallStep()}
+              </>
+            )}
+
             {CONTENT_STEPS.map((cs) =>
               activeStep === cs.key ? (
                 <div key={cs.key}>
@@ -1244,8 +1615,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                 {!allSigned && (
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
                     </div>
                     <h2 className="text-lg font-bold text-slate-900">Mediationsvertrag</h2>
