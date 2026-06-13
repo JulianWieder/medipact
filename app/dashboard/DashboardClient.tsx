@@ -25,7 +25,7 @@ interface PendingInvite {
   expires_at: string;
 }
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: "Laufend", className: "bg-emerald-100 text-emerald-800" },
   pending: { label: "Ausstehend", className: "bg-amber-100 text-amber-800" },
   draft: { label: "Entwurf", className: "bg-blue-100 text-blue-800" },
@@ -34,6 +34,8 @@ const statusConfig = {
     className: "bg-slate-100 text-slate-800",
   },
 };
+
+const fallbackStatus = { label: "Unbekannt", className: "bg-slate-100 text-slate-500" };
 
 const roleLabel: Record<string, string> = {
   other_party: "Gegenpartei",
@@ -142,24 +144,32 @@ export default function DashboardClient() {
         value: data.filter((m) => m.is_my_turn).length,
         text: "wartet auf dich",
         highlight: data.some((m) => m.is_my_turn),
+        highlightColor: "text-amber-600",
+        borderColor: "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300",
       },
       {
-        label: "Bei Annahmen",
+        label: "Warte auf Gegenpartei",
+        value: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
+        text: "Ball liegt bei der anderen Seite",
+        highlight: false,
+        highlightColor: "text-slate-900",
+        borderColor: "",
+      },
+      {
+        label: "Ausstehend",
         value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
-        text: "ausstehende Verfahren",
+        text: "noch nicht gestartet",
         highlight: false,
-      },
-      {
-        label: "Mediator",
-        value: data.filter((m) => m.role === "mediator").length,
-        text: "als Mediator",
-        highlight: false,
+        highlightColor: "text-slate-900",
+        borderColor: "",
       },
       {
         label: "Abgeschlossen",
         value: data.filter((m) => m.status === "completed").length,
         text: "beendete Verfahren",
         highlight: false,
+        highlightColor: "text-slate-900",
+        borderColor: "",
       },
     ],
     [data],
@@ -200,10 +210,10 @@ export default function DashboardClient() {
             {stats.map((item) => (
               <article
                 key={item.label}
-                className={`app-surface p-6 ${item.highlight ? "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300" : ""}`}
+                className={`app-surface p-6 ${item.borderColor}`}
               >
                 <p className="eyebrow">{item.label}</p>
-                <p className={`mt-3 text-4xl font-black ${item.highlight ? "text-amber-600" : "text-slate-900"}`}>
+                <p className={`mt-3 text-4xl font-black ${item.highlightColor}`}>
                   {item.value}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-slate-600">
@@ -300,13 +310,21 @@ export default function DashboardClient() {
           ) : (
             data.map((mediation) => {
               const status = mediation.status ?? "pending";
-              const config = statusConfig[status];
+              const config = statusConfig[status] ?? fallbackStatus;
+              const isActive = status === "active";
+              const waitingForOther = isActive && !mediation.is_my_turn;
 
               return (
                 <Link
                   key={`mediation-${mediation.id}`}
                   href={`/dashboard/${mediation.id}`}
-                  className="app-surface block border border-slate-200 p-6 transition hover:border-emerald-200 hover:shadow-md lg:p-8"
+                  className={`app-surface block border p-6 transition hover:shadow-md lg:p-8 ${
+                    mediation.is_my_turn
+                      ? "border-amber-300 hover:border-amber-400"
+                      : waitingForOther
+                      ? "border-slate-200 hover:border-slate-300"
+                      : "border-slate-200 hover:border-emerald-200"
+                  }`}
                 >
                   <div className="grid gap-8 md:grid-cols-[1fr_auto]">
                     <div>
@@ -338,6 +356,15 @@ export default function DashboardClient() {
                               Deine Eingabe
                             </span>
                           )}
+                          {waitingForOther && (
+                            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                              <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                              </svg>
+                              Warte auf Gegenpartei
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -361,8 +388,8 @@ export default function DashboardClient() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <span className="btn btn-primary whitespace-nowrap">
-                        Fortsetzen
+                      <span className={`whitespace-nowrap ${mediation.is_my_turn ? "btn btn-primary" : waitingForOther ? "btn btn-secondary" : "btn btn-primary"}`}>
+                        {mediation.is_my_turn ? "Eingabe machen →" : waitingForOther ? "Ansehen" : "Fortsetzen"}
                       </span>
                     </div>
                   </div>

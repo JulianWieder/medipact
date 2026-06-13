@@ -602,8 +602,21 @@ def generate_contract(
     current_user: User = Depends(get_current_db_user),
 ):
     """Generiert den Mediationsvertrag aus allen Phase-1-Notizen via KI.
-    Nur Mediator/Admin darf generieren. Bestehender Vertrag wird überschrieben."""
-    if current_user.role not in ("mediator", "admin"):
+    Teilnehmer mit Rolle mediator/admin im Fall darf generieren. Bestehender Vertrag wird überschrieben."""
+    participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    # Erlaubt wenn: globale mediator/admin-Rolle ODER Teilnehmer mit Rolle mediator/admin in diesem Fall
+    is_allowed = (
+        current_user.role in ("mediator", "admin")
+        or (participant and participant.role in ("mediator", "admin", "owner"))
+    )
+    if not is_allowed:
         raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen den Vertrag generieren")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()

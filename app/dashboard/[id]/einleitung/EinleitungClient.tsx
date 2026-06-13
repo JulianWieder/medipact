@@ -490,7 +490,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
   const isMediatorOrAdmin =
-    currentParticipant?.role === "mediator" || currentParticipant?.role === "admin";
+    currentParticipant?.role === "mediator" ||
+    currentParticipant?.role === "admin" ||
+    currentParticipant?.role === "owner" ||
+    currentParticipant?.role === "initiator";
 
   // ── Initialer Datenladevorgang ─────────────────────────────────────────────
 
