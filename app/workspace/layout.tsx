@@ -1,4 +1,12 @@
+import { DashboardHeader } from "@/app/components/layout/DashboardHeader";
+
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  // Kein DashboardHeader – der Workspace hat seine eigene Sidebar
-  return <>{children}</>;
+  return (
+    <>
+      <DashboardHeader />
+      <div className="pt-[73px] h-screen overflow-hidden">
+        {children}
+      </div>
+    </>
+  );
 }

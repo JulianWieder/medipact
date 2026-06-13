@@ -26,7 +26,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
       <style>{tooltipStyle}</style>
       <aside
         className={cn(
-          "relative flex h-screen flex-col border-r border-slate-200 bg-white py-4 shrink-0 overflow-visible transition-all duration-300",
+          "relative flex h-full flex-col border-r border-slate-200 bg-white py-4 shrink-0 overflow-visible transition-all duration-300",
           collapsed ? "w-16 px-2" : "w-52 px-3",
         )}
       >

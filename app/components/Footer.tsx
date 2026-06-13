@@ -84,23 +84,18 @@ export default function Footer({
             <h4 className="font-bold mb-4">Rechtlich</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/datenschutz" className="hover:text-white transition">
                   Datenschutz
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/agb" className="hover:text-white transition">
                   AGB
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition">
+                <a href="/impressum" className="hover:text-white transition">
                   Impressum
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition">
-                  Cookies
                 </a>
               </li>
             </ul>

@@ -150,7 +150,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Dashboard ───────────────────────────────────────────────────────────
   if (section === "dashboard") {
     return (
-      <div className="flex h-screen bg-[#f8fafc] text-slate-900">
+      <div className="flex h-full bg-[#f8fafc] text-slate-900">
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto p-6">
           <WorkspaceDashboard
@@ -169,7 +169,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Einstellungen ───────────────────────────────────────────────────────
   if (section === "einstellungen") {
     return (
-      <div className="flex h-screen bg-[#f8fafc] text-slate-900">
+      <div className="flex h-full bg-[#f8fafc] text-slate-900">
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-lg">
@@ -197,7 +197,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
 
   // ── Standard: Liste + Einzelansicht ─────────────────────────────────────
   return (
-    <div className="flex h-screen bg-[#f8fafc] text-slate-900">
+    <div className="flex h-full bg-[#f8fafc] text-slate-900">
       <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
 
       {/* Main */}

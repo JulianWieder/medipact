@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   },
 };
 
+const stats = [
+  { value: "6 Schritte", label: "strukturierter Prozess" },
+  { value: "< 4 Wochen", label: "typische Dauer" },
+  { value: "ab €499", label: "statt tausenden an Anwaltskosten" },
+  { value: "100 %", label: "vertraulich & DSGVO-konform" },
+];
+
 const problemPoints = [
   "Gespräche eskalieren, obwohl eigentlich eine Lösung gebraucht wird.",
   "Anwälte und Gerichte sind teuer, langsam und emotional belastend.",
@@ -275,17 +282,26 @@ export default function MedipactLanding() {
                 ].map(({ label, color }) => (
                   <div
                     key={label}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
                   >
                     <span className={`h-2 w-2 rounded-full ${color}`} />
                     {label}
                   </div>
                 ))}
               </div>
+
+              <div className="mt-10 grid grid-cols-2 gap-4 border-t border-slate-100 pt-10 sm:grid-cols-4">
+                {stats.map((s) => (
+                  <div key={s.label}>
+                    <div className="text-xl font-black text-teal-700">{s.value}</div>
+                    <div className="mt-0.5 text-xs leading-snug text-slate-500">{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div
-              className="app-surface overflow-hidden rounded-[2.5rem] border border-slate-200"
+              className="overflow-hidden rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-teal-900/5 ring-1 ring-slate-900/5"
               style={{
                 position: "relative",
                 overflow: "hidden",
@@ -310,6 +326,21 @@ export default function MedipactLanding() {
                   overflow: "hidden",
                 }}
               />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-slate-100 bg-slate-50 py-5">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-slate-500">
+              <span className="font-semibold text-slate-700">Bekannt aus</span>
+              <span className="font-semibold tracking-tight text-slate-400">Harvard-Methode</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold tracking-tight text-slate-400">DSGVO-konform</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold tracking-tight text-slate-400">Made in Germany</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold tracking-tight text-slate-400">SSL-verschlüsselt</span>
             </div>
           </div>
         </section>
@@ -553,29 +584,33 @@ export default function MedipactLanding() {
         </section>
 
         <section id="cta" className="section section-strong text-center">
-          <div className="mx-auto max-w-4xl px-6 lg:px-8">
-            <h2 className="text-4xl font-black tracking-tight text-white sm:text-6xl">
+          <div className="mx-auto max-w-3xl px-6 lg:px-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-teal-300 mb-8">
+              Jetzt starten
+            </div>
+            <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
               Der Streit muss nicht größer werden.
             </h2>
-            <p className="mt-8 text-xl text-slate-300">
+            <p className="mt-6 text-lg text-slate-300 leading-8">
               Starten Sie ruhig, vertraulich und unverbindlich. Der erste
               Schritt ist nicht die Einigung – sondern wieder Klarheit.
             </p>
 
-            <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/auth/register"
-                className="inline-flex items-center justify-center rounded-2xl bg-teal-700 px-10 py-5 text-base font-bold text-white transition hover:scale-[1.02] hover:bg-teal-800"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-teal-900/40 transition hover:scale-[1.02] hover:bg-teal-500"
               >
                 Streitfall kostenlos starten
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
               </Link>
-              <a
-                href="#top"
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-600 px-10 py-5 text-base font-semibold text-white transition hover:border-teal-300 hover:bg-white/5"
-              >
-                Video ansehen
-              </a>
             </div>
+
+            <p className="mt-6 text-xs text-slate-500">
+              Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar
+            </p>
           </div>
         </section>
       </main>
