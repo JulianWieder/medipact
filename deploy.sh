@@ -18,6 +18,6 @@ docker compose up -d --build
 
 echo "==> Datenbank-Migrationen..."
 sleep 2
-docker exec medipact-api alembic upgrade head
+docker exec medipact-api alembic upgrade heads
 
 echo "==> Fertig!"
