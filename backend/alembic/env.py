@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -15,6 +16,12 @@ target_metadata = Base.metadata
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# In Docker wird DB_PATH=/data/medipact.db gesetzt — alembic.ini zeigt aber
+# auf ./medipact.db (falsche Datei). Hier überschreiben wir die URL dynamisch.
+_db_path = os.environ.get("DB_PATH")
+if _db_path:
+    config.set_main_option("sqlalchemy.url", f"sqlite:///{_db_path}")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
