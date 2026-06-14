@@ -1,14 +1,14 @@
 """add mediation_custom_steps table
 
 Revision ID: g4b5c6d7e8f9
-Revises: f3a4b5c6d7e8
+Revises: e3f4a5b6c7d8
 Create Date: 2026-06-14
 """
 from alembic import op
 import sqlalchemy as sa
 
 revision = "g4b5c6d7e8f9"
-down_revision = "f3a4b5c6d7e8"
+down_revision = "e3f4a5b6c7d8"
 branch_labels = None
 depends_on = None
 
