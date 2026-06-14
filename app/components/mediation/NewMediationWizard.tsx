@@ -103,7 +103,7 @@ export default function NewMediationWizard({ config }: Props) {
         return;
       }
 
-      router.push(`/dashboard/${encodeId(mediationId)}`);
+      router.push(`/dashboard/${encodeId(Number(mediationId))}`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {
