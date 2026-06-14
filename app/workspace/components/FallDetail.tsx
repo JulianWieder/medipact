@@ -79,6 +79,8 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [signatures, setSignatures] = useState<ContractSignature[]>([]);
   const [allSigned, setAllSigned] = useState(false);
   const [contractGenerating, setContractGenerating] = useState(false);
+  const [contractReleasing, setContractReleasing] = useState(false);
+  const [isReleased, setIsReleased] = useState(false);
   const [contractError, setContractError] = useState("");
 
   // Step status für Einleitung
@@ -116,8 +118,10 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
         setContract(data.contract);
         setSignatures(data.signatures ?? []);
         setAllSigned(data.all_signed ?? false);
+        setIsReleased(data.is_released ?? false);
       } else {
         setContract(null);
+        setIsReleased(false);
       }
     } catch { /* ignore */ }
   }, [fall.id]);
@@ -191,6 +195,26 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
       setContractError("Server nicht erreichbar.");
     } finally {
       setContractGenerating(false);
+    }
+  }
+
+  async function handleReleaseContract() {
+    setContractReleasing(true);
+    setContractError("");
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/contract/release`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setContractError(body?.detail ?? "Freigabe fehlgeschlagen");
+        return;
+      }
+      setIsReleased(true);
+    } catch {
+      setContractError("Server nicht erreichbar.");
+    } finally {
+      setContractReleasing(false);
     }
   }
 
@@ -548,9 +572,9 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                   <button
                     onClick={handleGenerateContract}
                     disabled={contractGenerating}
-                    className={contract ? "rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" : "rounded-full bg-teal-500 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-600 transition disabled:opacity-50"}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
                   >
-                    {contractGenerating ? "KI generiert..." : contract ? "Neu generieren" : "Vertrag generieren (KI)"}
+                    {contractGenerating ? "KI generiert..." : contract ? "Neu generieren" : "Entwurf erstellen"}
                   </button>
                 </div>
               </div>
@@ -562,11 +586,33 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
               )}
 
               {!contract && !contractGenerating && (
-                <EmptyState icon="📄" text="Noch kein Vertrag generiert. Klicke auf 'Vertrag generieren (KI)'." />
+                <EmptyState icon="📄" text="Noch kein Vertrag erstellt. Klicke auf 'Entwurf erstellen' um den Vertrag per KI zu generieren." />
               )}
 
               {contract && (
                 <div className="space-y-4">
+                  {/* Status-Banner */}
+                  {isReleased ? (
+                    <div className="flex items-center gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3">
+                      <svg className="h-4 w-4 text-teal-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      <p className="text-xs font-semibold text-teal-800">Vertrag ist für die Parteien freigegeben und kann unterzeichnet werden.</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <svg className="h-4 w-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <p className="text-xs font-semibold text-amber-800">Entwurf — noch nicht für Parteien sichtbar. Bitte prüfen und freigeben.</p>
+                      </div>
+                      <button
+                        onClick={handleReleaseContract}
+                        disabled={contractReleasing}
+                        className="shrink-0 rounded-full bg-teal-500 px-4 py-2 text-xs font-bold text-white hover:bg-teal-600 transition disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {contractReleasing ? "Wird freigegeben…" : "✓ Freigeben"}
+                      </button>
+                    </div>
+                  )}
+
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-semibold text-slate-600">Vertragstext</span>
@@ -575,37 +621,39 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{contract.text}</div>
                   </div>
 
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Unterschriften</p>
-                      {allSigned && <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-bold text-teal-700">✓ Alle unterzeichnet</span>}
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                      {accepted.map((p) => {
-                        const sig = signatures.find((s) => s.participant_id === p.id);
-                        return (
-                          <div key={p.id} className={sig ? "rounded-xl border border-teal-200 bg-teal-50 p-3" : "rounded-xl border border-slate-200 bg-slate-50 p-3"}>
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-semibold text-slate-900">{p.name}</p>
-                                <p className="text-[10px] text-slate-400">{p.email}</p>
+                  {isReleased && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Unterschriften</p>
+                        {allSigned && <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-bold text-teal-700">✓ Alle unterzeichnet</span>}
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {accepted.map((p) => {
+                          const sig = signatures.find((s) => s.participant_id === p.id);
+                          return (
+                            <div key={p.id} className={sig ? "rounded-xl border border-teal-200 bg-teal-50 p-3" : "rounded-xl border border-slate-200 bg-slate-50 p-3"}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-sm font-semibold text-slate-900">{p.name}</p>
+                                  <p className="text-[10px] text-slate-400">{p.email}</p>
+                                </div>
+                                <RoleBadge role={p.role} />
                               </div>
-                              <RoleBadge role={p.role} />
+                              {sig ? (
+                                <div className="mt-2 flex items-center gap-1.5">
+                                  <svg className="h-3.5 w-3.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                  <span className="text-xs text-teal-700">"{sig.signed_name}"</span>
+                                  <span className="text-[10px] text-slate-400 ml-auto">{new Date(sig.signed_at).toLocaleDateString("de-DE")}</span>
+                                </div>
+                              ) : (
+                                <p className="mt-2 text-xs text-slate-400">Ausstehend</p>
+                              )}
                             </div>
-                            {sig ? (
-                              <div className="mt-2 flex items-center gap-1.5">
-                                <svg className="h-3.5 w-3.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span className="text-xs text-teal-700">"{sig.signed_name}"</span>
-                                <span className="text-[10px] text-slate-400 ml-auto">{new Date(sig.signed_at).toLocaleDateString("de-DE")}</span>
-                              </div>
-                            ) : (
-                              <p className="mt-2 text-xs text-slate-400">Ausstehend</p>
-                            )}
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>

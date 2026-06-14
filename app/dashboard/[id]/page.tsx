@@ -25,6 +25,7 @@ export default async function MediationPage({ params }: PageProps) {
     <MediationClient
       mediationId={id}
       userRole={session?.user?.role ?? "party"}
+      currentUserName={session?.user?.name ?? ""}
     />
   );
 }

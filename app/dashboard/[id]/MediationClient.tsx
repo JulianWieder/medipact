@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 type Props = {
   mediationId: string;
   userRole: string;
+  currentUserName?: string;
 };
 
 type Participant = {
@@ -22,7 +23,7 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-export default function MediationClient({ mediationId, userRole }: Props) {
+export default function MediationClient({ mediationId, userRole, currentUserName }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,15 +38,24 @@ export default function MediationClient({ mediationId, userRole }: Props) {
       try {
         const res = await fetch(`/api/mediations/${mediationId}/participants`);
         if (res.ok) {
-          const data = await res.json();
+          const data: Participant[] = await res.json();
           setParticipants(data);
+
+          // Andere Partei direkt zur emotionalen Einleitung weiterleiten
+          if (currentUserName) {
+            const me = data.find((p) => p.name === currentUserName);
+            if (me?.role === "other_party") {
+              router.replace(`/dashboard/${mediationId}/einleitung`);
+              return;
+            }
+          }
         }
       } catch {
         // Fehler beim Laden still ignorieren
       }
     }
     loadParticipants();
-  }, [mediationId]);
+  }, [mediationId, currentUserName, router]);
 
   const hasOtherParty = participants.some(
     (p) => p.role === "other_party" && p.invitationStatus === "accepted",

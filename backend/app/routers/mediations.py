@@ -541,6 +541,49 @@ def get_reactions(
     ]
 
 
+# ── KI-Titelgenerierung ───────────────────────────────────────────────────────
+
+class GenerateTitleRequest(BaseModel):
+    description: str
+    mediation_type: str
+
+
+@router.post("/generate-title")
+def generate_title(
+    payload: GenerateTitleRequest,
+    current_user: User = Depends(get_current_db_user),
+):
+    """Generiert einen kurzen, prägnanten Mediationstitel aus der Beschreibung."""
+    from app.config import settings
+    import anthropic
+
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
+
+    type_labels = {
+        "trennung": "Trennung & Scheidung",
+        "erbschaft": "Erbschaftsstreit",
+        "nachbarschaft": "Nachbarschaftskonflikt",
+    }
+    type_label = type_labels.get(payload.mediation_type, payload.mediation_type)
+
+    prompt = (
+        f"Du bist ein Mediationsassistent. Erstelle einen kurzen, prägnanten Titel (max. 6 Wörter) "
+        f"für eine Mediation im Bereich '{type_label}' auf Basis dieser Beschreibung:\n\n"
+        f"{payload.description}\n\n"
+        f"Antworte NUR mit dem Titel, ohne Anführungszeichen, ohne Erklärung."
+    )
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=30,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    title = message.content[0].text.strip().strip('"').strip("'")
+    return {"title": title}
+
+
 # ── KI-Paraphrasierung ────────────────────────────────────────────────────────
 
 class ReflectRequest(BaseModel):
@@ -712,8 +755,25 @@ def get_contract(
 ):
     _require_participant(mediation_id, current_user, db)
 
+    # Prüfen ob aktueller User Mediator/Admin in dieser Mediation ist
+    caller_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    caller_is_mediator = current_user.role in ("mediator", "admin") or (
+        caller_participant and caller_participant.role in ("mediator", "admin")
+    )
+
     contract = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
     if not contract:
+        return {"contract": None}
+
+    # Parteien sehen den Vertrag erst wenn der Mediator ihn freigegeben hat
+    if not contract.is_released and not caller_is_mediator:
         return {"contract": None}
 
     signatures = (
@@ -749,7 +809,38 @@ def get_contract(
             for sig, participant, user in signatures
         ],
         "all_signed": all_signed,
+        "is_released": contract.is_released,
     }
+
+
+@router.post("/{mediation_id}/contract/release")
+def release_contract(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt den generierten Vertrag für die Parteien frei. Nur Mediatoren/Admins."""
+    caller_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    caller_is_mediator = current_user.role in ("mediator", "admin") or (
+        caller_participant and caller_participant.role in ("mediator", "admin")
+    )
+    if not caller_is_mediator:
+        raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen den Vertrag freigeben")
+
+    contract = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Kein Vertrag vorhanden")
+
+    contract.is_released = True
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/{mediation_id}/contract/sign")

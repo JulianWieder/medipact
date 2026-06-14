@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 
 from app.database import Base
 
@@ -13,6 +13,7 @@ class MediationContract(Base):
     mediation_id = Column(Integer, ForeignKey("mediations.id"), nullable=False, unique=True)
     generated_text = Column(Text, nullable=False, default="")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_released = Column(Boolean, default=False, nullable=False)
 
 
 class MediationContractSignature(Base):

@@ -484,11 +484,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   >([]);
   const [allSigned, setAllSigned] = useState(false);
   const [signedName, setSignedName] = useState("");
-  const [contractGenerating, setContractGenerating] = useState(false);
   const [contractSigning, setContractSigning] = useState(false);
 
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
+  const isOtherParty = currentParticipant?.role === "other_party";
   const isMediatorOrAdmin =
     currentParticipant?.role === "mediator" ||
     currentParticipant?.role === "admin" ||
@@ -766,33 +766,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   }
 
   // ── Vertrags-Operationen ───────────────────────────────────────────────────
-
-  async function generateContract() {
-    setContractGenerating(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/contract/generate`, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.detail ?? body?.error ?? "Vertragsgenerierung fehlgeschlagen");
-        return;
-      }
-      const data = await res.json();
-      setContract({
-        id: data.contract_id,
-        text: data.text,
-        created_at: new Date().toISOString(),
-      });
-      setSignatures([]);
-      setAllSigned(false);
-    } catch {
-      setError("Server nicht erreichbar.");
-    } finally {
-      setContractGenerating(false);
-    }
-  }
 
   async function signContract() {
     if (!currentParticipant || !signedName.trim()) return;
@@ -1313,40 +1286,34 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     return (
       <div className="space-y-6">
         <p className="text-sm text-slate-600">
-          Auf Basis eurer Eingaben wird ein Mediationsvertrag erstellt. Alle Beteiligten
-          müssen ihn unterzeichnen, bevor Phase 2 beginnt.
+          Euer Mediator stellt gleich den Mediationsvertrag bereit. Sobald er verfügbar ist,
+          könnt ihr ihn lesen und unterzeichnen.
         </p>
 
         {!contract && (
-          <button
-            type="button"
-            onClick={generateContract}
-            disabled={contractGenerating}
-            className="btn btn-primary disabled:opacity-60"
-          >
-            {contractGenerating ? (
-              <span className="flex items-center gap-2">
-                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
-                  />
-                </svg>
-                KI generiert Vertrag…
-              </span>
-            ) : (
-              "Mediationsvertrag generieren (KI)"
-            )}
-          </button>
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-8 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <svg
+                className="h-6 w-6 animate-pulse text-amber-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Vertrag wird vorbereitet.</p>
+              <p className="mt-1 text-sm text-amber-700">
+                Euer Mediator prüft und stellt den Vertrag in Kürze bereit.
+              </p>
+            </div>
+          </div>
         )}
 
         {contract && (
@@ -1354,14 +1321,6 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900">Mediationsvertrag</h3>
-                <button
-                  type="button"
-                  onClick={generateContract}
-                  disabled={contractGenerating}
-                  className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-50"
-                >
-                  {contractGenerating ? "Generiert…" : "Neu generieren"}
-                </button>
               </div>
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {contract.text}
@@ -1456,8 +1415,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   return (
     <main className="app-shell pt-[73px]">
       <section className="container py-12">
-        {/* Globaler Phasen-Stepper */}
-        <div className="mb-8 overflow-x-auto">
+        {/* Globaler Phasen-Stepper – nur für Initiator, nicht für andere Partei */}
+        <div className={`mb-8 overflow-x-auto ${isOtherParty ? "hidden" : ""}`}>
           <ol className="flex min-w-max items-center">
             {PHASES.map((p, index) => {
               const isDone = index < phaseIndex;
@@ -1518,11 +1477,32 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         </div>
 
         <div className="app-surface p-8">
-          <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
-          <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
-          </p>
+          {isOtherParty ? (
+            /* Emotionaler Header für die Gegenpartei */
+            <div className="mb-6">
+              <p className="eyebrow mb-3">Mediation</p>
+              <h1 className="heading-2 text-slate-900">
+                {activeStep === "intro"
+                  ? "Willkommen. Du bist nicht allein."
+                  : activeStep === "videocall"
+                  ? "Euer erstes Gespräch"
+                  : activeStep === "contract"
+                  ? "Euer Mediationsvertrag"
+                  : CONTENT_STEPS.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
+              </h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
+              <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+              </p>
+            </>
+          )}
 
           {/* Phase-1-interner Stepper */}
           <div className="mt-6 overflow-x-auto">

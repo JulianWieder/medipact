@@ -16,6 +16,7 @@ export default function NewMediationWizard({ config }: Props) {
   const mediationId = searchParams.get("mediationId");
 
   const [title, setTitle] = useState("");
+  const [titleGenerating, setTitleGenerating] = useState(false);
 
   // Build formData state dynamically from config.formFields
   const [formData, setFormData] = useState<Record<string, string>>(() =>
@@ -24,6 +25,25 @@ export default function NewMediationWizard({ config }: Props) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Generiert KI-Titel sobald das erste Beschreibungsfeld ausgefüllt wird
+  const handleDescriptionBlur = async (value: string) => {
+    if (!value.trim() || title.trim()) return; // Nur wenn Beschreibung vorhanden und Titel noch leer
+    setTitleGenerating(true);
+    try {
+      const res = await fetch("/api/mediations/generate-title", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: value.trim(), mediation_type: config.type }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.title) setTitle(data.title);
+      }
+    } catch { /* ignore */ } finally {
+      setTitleGenerating(false);
+    }
+  };
 
   const handleChange = (id: string, value: string) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -149,24 +169,36 @@ export default function NewMediationWizard({ config }: Props) {
             </p>
 
             <div className="grid gap-6">
-              {/* Titel */}
+              {/* Beschreibungsfelder zuerst */}
+              {renderFields(config.formFields, formData, handleChange, handleDescriptionBlur)}
+
+              <div className="border-t border-slate-100" />
+
+              {/* Titel – wird ggf. per KI vorausgefüllt */}
               <label className="block">
-                <span className="mb-2 block text-sm font-bold text-slate-800">
-                  Titel der Mediation <span className="text-emerald-600">*</span>
-                </span>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-800">
+                    Titel der Mediation <span className="text-emerald-600">*</span>
+                  </span>
+                  {titleGenerating && (
+                    <span className="flex items-center gap-1 text-xs text-emerald-600">
+                      <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      Titel wird erstellt…
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="z.B. Trennung Familie Müller"
-                  className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500"
+                  placeholder={titleGenerating ? "Wird generiert…" : "z.B. Trennung Familie Müller"}
+                  className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  disabled={titleGenerating}
                 />
               </label>
-
-              <div className="border-t border-slate-100" />
-
-              {/* Render date fields in pairs */}
-              {renderFields(config.formFields, formData, handleChange)}
 
               {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -261,13 +293,15 @@ import { FormField } from "@/lib/mediation-types/types";
 function renderFields(
   fields: FormField[],
   formData: Record<string, string>,
-  onChange: (id: string, value: string) => void
+  onChange: (id: string, value: string) => void,
+  onFirstBlur?: (value: string) => void,
 ) {
   const elements: React.ReactNode[] = [];
   let i = 0;
 
   while (i < fields.length) {
     const field = fields[i];
+    const isFirst = i === 0;
 
     // Group consecutive date fields side by side (max 2 per row)
     if (field.type === "date" && i + 1 < fields.length && fields[i + 1].type === "date") {
@@ -279,7 +313,7 @@ function renderFields(
       );
       i += 2;
     } else {
-      elements.push(renderSingleField(field, formData[field.id], onChange));
+      elements.push(renderSingleField(field, formData[field.id], onChange, isFirst ? onFirstBlur : undefined));
       i += 1;
     }
   }
@@ -290,7 +324,8 @@ function renderFields(
 function renderSingleField(
   field: FormField,
   value: string,
-  onChange: (id: string, value: string) => void
+  onChange: (id: string, value: string) => void,
+  onBlur?: (value: string) => void,
 ): React.ReactNode {
   const baseClass =
     "w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500";
@@ -304,6 +339,7 @@ function renderSingleField(
         <textarea
           value={value}
           onChange={(e) => onChange(field.id, e.target.value)}
+          onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
           className={`min-h-40 ${baseClass}`}
           placeholder={field.placeholder}
         />
