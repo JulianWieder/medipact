@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getMediation } from "@/lib/mediations";
 import EinleitungClient from "./EinleitungClient";
+import { decodeId } from "@/lib/ids";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -17,7 +18,7 @@ export default async function EinleitungPage({ params }: PageProps) {
 
   return (
     <EinleitungClient
-      mediationId={id}
+      mediationId={numericId.toString()}
       currentUserName={session?.user?.name ?? ""}
     />
   );

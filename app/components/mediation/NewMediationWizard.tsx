@@ -1,5 +1,6 @@
 "use client";
 
+import { encodeId } from "@/lib/ids";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -102,7 +103,7 @@ export default function NewMediationWizard({ config }: Props) {
         return;
       }
 
-      router.push(`/dashboard/${mediationId}`);
+      router.push(`/dashboard/${encodeId(mediationId)}`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {

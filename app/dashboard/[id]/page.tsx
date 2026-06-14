@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getMediation } from "@/lib/mediations";
 import MediationClient from "./MediationClient";
+import { decodeId } from "@/lib/ids";
 
 type PageProps = {
   params: Promise<{
@@ -12,8 +13,11 @@ type PageProps = {
 export default async function MediationPage({ params }: PageProps) {
   const { id } = await params;
 
+  const numericId = decodeId(id);
+  if (!numericId) redirect("/dashboard");
+
   const [result, session] = await Promise.all([
-    getMediation(id),
+    getMediation(numericId.toString()),
     auth(),
   ]);
 
@@ -23,7 +27,7 @@ export default async function MediationPage({ params }: PageProps) {
 
   return (
     <MediationClient
-      mediationId={id}
+      mediationId={numericId.toString()}
       userRole={session?.user?.role ?? "party"}
       currentUserName={session?.user?.name ?? ""}
     />

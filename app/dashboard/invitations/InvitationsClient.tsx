@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { encodeId } from "@/lib/ids";
 
 type Props = {
   token: string;
@@ -33,7 +34,7 @@ export default function InvitationsClient({ token }: Props) {
         return;
       }
 
-      router.push(`/dashboard/${data.mediation_id}`);
+      router.push(`/dashboard/${encodeId(data.mediation_id)}`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {

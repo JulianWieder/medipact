@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { hashId } from "@/lib/ids";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey } from "./phaseData";
 
 type Props = {
@@ -36,7 +37,7 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
         setError(`Fehler (${res.status}): ${detail}`);
         return;
       }
-      router.push(`/dashboard/${mediationId}/${phase.nextPhase}`);
+      router.push(`/dashboard/${hashId(mediationId)}/${phase.nextPhase}`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {
@@ -158,8 +159,8 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
               type="button"
               onClick={() =>
                 phase.prevPhase
-                  ? router.push(`/dashboard/${mediationId}/${phase.prevPhase}`)
-                  : router.push(`/dashboard/${mediationId}`)
+                  ? router.push(`/dashboard/${hashId(mediationId)}/${phase.prevPhase}`)
+                  : router.push(`/dashboard/${hashId(mediationId)}`)
               }
               className="btn btn-ghost"
             >

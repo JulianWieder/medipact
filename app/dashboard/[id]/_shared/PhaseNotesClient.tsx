@@ -1,5 +1,6 @@
 "use client";
 
+import { hashId } from "@/lib/ids";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from "./phaseData";
@@ -1045,7 +1046,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           <div className="mt-10 flex items-center justify-between border-t border-slate-100 pt-6">
             <button
               type="button"
-              onClick={() => phase.prevPhase ? router.push(`/dashboard/${mediationId}/${phase.prevPhase}`) : router.push(`/dashboard/${mediationId}`)}
+              onClick={() => phase.prevPhase ? router.push(`/dashboard/${hashId(mediationId)}/${phase.prevPhase}`) : router.push(`/dashboard/${hashId(mediationId)}`)}
               className="btn btn-ghost"
             >
               ← Zurück

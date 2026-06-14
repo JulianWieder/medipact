@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { hashId } from "@/lib/ids";
 
 type Props = { mediationId: string };
 
@@ -92,7 +93,7 @@ export default function LeitfadenClient({ mediationId }: Props) {
         setError(`Fehler beim Starten (${res.status}): ${detail}`);
         return;
       }
-      router.push(`/dashboard/${mediationId}/einleitung`);
+      router.push(`/dashboard/${hashId(mediationId)}/einleitung`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {

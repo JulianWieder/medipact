@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getMediation } from "@/lib/mediations";
+import { decodeId, encodeId } from "@/lib/ids";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -10,7 +11,11 @@ type PageProps = { params: Promise<{ id: string }> };
  */
 export default async function AktivPage({ params }: PageProps) {
   const { id } = await params;
-  const result = await getMediation(id);
+
+  const numericId = decodeId(id);
+  if (!numericId) redirect("/dashboard");
+
+  const result = await getMediation(numericId.toString());
   if (!result.ok) redirect("/dashboard");
-  redirect(`/dashboard/${id}/einleitung`);
+  redirect(`/dashboard/${encodeId(numericId)}/einleitung`);
 }

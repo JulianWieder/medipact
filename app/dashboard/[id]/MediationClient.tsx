@@ -1,5 +1,6 @@
 "use client";
 
+import { hashId } from "@/lib/ids";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -45,7 +46,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           if (currentUserName) {
             const me = data.find((p) => p.name === currentUserName);
             if (me?.role === "other_party") {
-              router.replace(`/dashboard/${mediationId}/einleitung`);
+              router.replace(`/dashboard/${hashId(mediationId)}/einleitung`);
               return;
             }
           }
@@ -107,7 +108,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   async function startMediation() {
     // Mediatoren und Admins sehen zuerst den Leitfaden
     if (userRole === "mediator" || userRole === "admin") {
-      router.push(`/dashboard/${mediationId}/einleitung/leitfaden`);
+      router.push(`/dashboard/${hashId(mediationId)}/einleitung/leitfaden`);
       return;
     }
 
@@ -128,7 +129,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
         setError(`Fehler beim Starten (${res.status}): ${detail}`);
         return;
       }
-      router.push(`/dashboard/${mediationId}/einleitung`);
+      router.push(`/dashboard/${hashId(mediationId)}/einleitung`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {

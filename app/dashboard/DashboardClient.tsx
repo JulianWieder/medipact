@@ -1,5 +1,6 @@
 "use client";
 
+import { encodeId } from "@/lib/ids";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -129,7 +130,7 @@ export default function DashboardClient() {
       }
       // Remove from invites list and navigate to the mediation
       setInvites((prev) => prev.filter((i) => i.invite_id !== invite.invite_id));
-      router.push(`/dashboard/${body.mediation_id}`);
+      router.push(`/dashboard/${encodeId(body.mediation_id)}`);
     } catch {
       setAcceptError("Server nicht erreichbar.");
     } finally {
@@ -317,7 +318,7 @@ export default function DashboardClient() {
               return (
                 <Link
                   key={`mediation-${mediation.id}`}
-                  href={`/dashboard/${mediation.id}`}
+                  href={`/dashboard/${encodeId(mediation.id)}`}
                   className={`app-surface block border p-6 transition hover:shadow-md lg:p-8 ${
                     mediation.is_my_turn
                       ? "border-amber-300 hover:border-amber-400"
