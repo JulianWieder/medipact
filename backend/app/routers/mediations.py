@@ -773,7 +773,7 @@ def get_contract(
         return {"contract": None}
 
     # Parteien sehen den Vertrag erst wenn der Mediator ihn freigegeben hat
-    if not contract.is_released and not caller_is_media    if not contract.is_released and not caller_is_mediator:
+    if not contract.is_released and not caller_is_mediator:
         return {"contract": None}
 
     signatures = (
