@@ -72,7 +72,33 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback">("overview");
+
+  // Feedback
+  type FeedbackEntry = {
+    id: number;
+    occasion: string;
+    participant_name: string;
+    participant_role: string;
+    answers: Record<string, string | number>;
+    created_at: string;
+  };
+  const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+
+  const loadFeedback = useCallback(async () => {
+    setLoadingFeedback(true);
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/feedback`);
+      if (res.ok) setFeedbackEntries(await res.json());
+    } catch { /* ignore */ } finally {
+      setLoadingFeedback(false);
+    }
+  }, [fall.id]);
+
+  useEffect(() => {
+    if (activeTab === "feedback") loadFeedback();
+  }, [activeTab, loadFeedback]);
 
   // Appointments
   type AppointmentSlot = { id: number; proposed_datetime: string; votes: { participant_id: number; name: string; accepted: boolean }[]; all_accepted: boolean };
@@ -277,6 +303,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     { id: "steps" as const, label: "Schrittstatus" },
     { id: "termin" as const, label: "Termin" },
     { id: "contract" as const, label: "Vertrag" },
+    { id: "feedback" as const, label: "Feedback" },
   ];
 
   return (
@@ -683,6 +710,108 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     );
                   })}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Tab: Feedback ── */}
+          {activeTab === "feedback" && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Kundenerlebnis-Feedback</p>
+                <button onClick={loadFeedback} className="text-xs text-teal-600 hover:text-teal-800 font-medium">↻ Aktualisieren</button>
+              </div>
+
+              {loadingFeedback ? (
+                <p className="text-sm italic text-slate-400">Wird geladen…</p>
+              ) : feedbackEntries.length === 0 ? (
+                <EmptyState icon="💬" text="Noch kein Feedback eingegangen." />
+              ) : (
+                (() => {
+                  const OCCASION_LABELS: Record<string, string> = {
+                    after_videocall: "Nach dem Erstgespräch",
+                    before_contract: "Vor dem Vertragsabschluss",
+                  };
+                  const QUESTION_LABELS: Record<string, string> = {
+                    einigung_wahrscheinlichkeit: "Wahrscheinlichkeit außergerichtliche Einigung",
+                    mediation_verstanden: "Mediationsprinzip verstanden?",
+                    online_verstanden: "Online-Format verstanden?",
+                    gefuehl: "Gefühl nach dem Gespräch",
+                    hindernisse: "Was hindert noch?",
+                    bereit_phase2: "Bereit für Phase 2?",
+                    gehoert_gefuehl: "Gefühl gehört zu werden",
+                    weiterer_termin: "Weiterer Termin gewünscht?",
+                  };
+                  const EMOJI_MAP: Record<number, string> = { 1: "😔 Belastet", 2: "😕 Unsicher", 3: "😐 Neutral", 4: "🙂 Gut", 5: "😊 Sehr gut" };
+
+                  // Gruppieren nach Anlass
+                  const grouped: Record<string, FeedbackEntry[]> = {};
+                  for (const entry of feedbackEntries) {
+                    if (!grouped[entry.occasion]) grouped[entry.occasion] = [];
+                    grouped[entry.occasion].push(entry);
+                  }
+
+                  // Warnung wenn jemand weiteren Termin wünscht
+                  const wantsNewAppointment = feedbackEntries.some(
+                    (e) => e.answers.weiterer_termin === "Ja, bitte"
+                  );
+
+                  return (
+                    <div className="space-y-6">
+                      {wantsNewAppointment && (
+                        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                          <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-xs font-semibold text-amber-800">
+                            Mindestens eine Partei wünscht einen weiteren Termin vor dem Vertragsabschluss. Prüfe die Antworten und entscheide, ob ein Termin sinnvoll ist.
+                          </p>
+                        </div>
+                      )}
+
+                      {Object.entries(grouped).map(([occasion, entries]) => (
+                        <div key={occasion}>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600 mb-3 flex items-center gap-2">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-100 text-violet-700 text-[9px] font-bold">💬</span>
+                            {OCCASION_LABELS[occasion] ?? occasion}
+                          </p>
+                          <div className="space-y-3 pl-7">
+                            {entries.map((entry) => (
+                              <div key={entry.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-xs font-semibold text-slate-800">{entry.participant_name}</span>
+                                  <span className="text-[10px] text-slate-400">{new Date(entry.created_at).toLocaleDateString("de-DE")}</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {Object.entries(entry.answers).map(([key, value]) => {
+                                    if (!value && value !== 0) return null;
+                                    const label = QUESTION_LABELS[key] ?? key;
+                                    let displayValue: string;
+                                    if (key === "gefuehl" || key === "gehoert_gefuehl") {
+                                      displayValue = EMOJI_MAP[Number(value)] ?? String(value);
+                                    } else if (key === "einigung_wahrscheinlichkeit") {
+                                      displayValue = `${value}/10`;
+                                    } else {
+                                      displayValue = String(value);
+                                    }
+                                    const isAlert = key === "weiterer_termin" && value === "Ja, bitte";
+                                    return (
+                                      <div key={key} className={`flex items-start gap-2 text-xs ${isAlert ? "text-amber-700 font-semibold" : "text-slate-600"}`}>
+                                        <span className="shrink-0 text-slate-400">·</span>
+                                        <span className="text-slate-500 shrink-0">{label}:</span>
+                                        <span className={isAlert ? "text-amber-700" : "text-slate-800"}>{displayValue}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()
               )}
             </div>
           )}

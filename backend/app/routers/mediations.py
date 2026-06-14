@@ -989,6 +989,122 @@ def get_appointment_slots(
     return {"slots": result, "confirmed": confirmed_slot}
 
 
+from app.models.mediation_feedback import MediationFeedback
+
+
+class FeedbackSaveRequest(BaseModel):
+    occasion: str  # "after_videocall" | "before_contract"
+    answers: dict
+
+
+@router.post("/{mediation_id}/feedback")
+def save_feedback(
+    mediation_id: int,
+    payload: FeedbackSaveRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Speichert oder aktualisiert das Feedback eines Teilnehmers für einen Anlass."""
+    import json as _json
+    participant = _require_participant(mediation_id, current_user, db)
+
+    if payload.occasion not in ("after_videocall", "before_contract"):
+        raise HTTPException(status_code=422, detail="Ungültiger Anlass")
+
+    existing = (
+        db.query(MediationFeedback)
+        .filter(
+            MediationFeedback.mediation_id == mediation_id,
+            MediationFeedback.participant_id == participant.id,
+            MediationFeedback.occasion == payload.occasion,
+        )
+        .first()
+    )
+
+    if existing:
+        existing.answers = _json.dumps(payload.answers, ensure_ascii=False)
+        existing.updated_at = __import__("datetime").datetime.utcnow()
+    else:
+        db.add(MediationFeedback(
+            mediation_id=mediation_id,
+            participant_id=participant.id,
+            occasion=payload.occasion,
+            answers=_json.dumps(payload.answers, ensure_ascii=False),
+        ))
+
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/{mediation_id}/feedback")
+def get_feedback(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt alle Feedback-Einträge eines Falls zurück.
+    Teilnehmer sehen nur ihr eigenes, Mediatoren/Admins alle."""
+    import json as _json
+
+    caller_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    caller_is_mediator = current_user.role in ("mediator", "admin") or (
+        caller_participant and caller_participant.role in ("mediator", "admin", "owner", "initiator")
+    )
+
+    if not caller_participant and not caller_is_mediator:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    query = db.query(MediationFeedback, MediationParticipant, User).join(
+        MediationParticipant, MediationFeedback.participant_id == MediationParticipant.id
+    ).join(
+        User, MediationParticipant.user_id == User.id
+    ).filter(MediationFeedback.mediation_id == mediation_id)
+
+    if not caller_is_mediator and caller_participant:
+        query = query.filter(MediationFeedback.participant_id == caller_participant.id)
+
+    rows = query.order_by(MediationFeedback.occasion, MediationFeedback.created_at).all()
+
+    return [
+        {
+            "id": fb.id,
+            "occasion": fb.occasion,
+            "participant_name": user.name,
+            "participant_role": participant.role,
+            "answers": _json.loads(fb.answers) if fb.answers else {},
+            "created_at": fb.created_at.isoformat(),
+        }
+        for fb, participant, user in rows
+    ]
+
+
+@router.get("/{mediation_id}/feedback/me")
+def get_my_feedback_occasions(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt zurück, für welche Anlässe der aktuelle Teilnehmer bereits Feedback gegeben hat."""
+    participant = _require_participant(mediation_id, current_user, db)
+
+    rows = (
+        db.query(MediationFeedback.occasion)
+        .filter(
+            MediationFeedback.mediation_id == mediation_id,
+            MediationFeedback.participant_id == participant.id,
+        )
+        .all()
+    )
+    return {"submitted_occasions": [r.occasion for r in rows]}
+
+
 @router.post("/{mediation_id}/appointment/vote")
 def vote_appointment(
     mediation_id: int,

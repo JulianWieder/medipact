@@ -65,16 +65,102 @@ const CONTENT_STEPS = [
 
 type ContentStepKey = (typeof CONTENT_STEPS)[number]["key"];
 
-// Alle Schritte inkl. Intro, Terminvereinbarung, Video-Call und Vertrag
-type PhaseStep = "intro" | "terminvereinbarung" | "videocall" | ContentStepKey | "contract";
+// Alle Schritte inkl. Intro, Terminvereinbarung, Video-Call, Feedback und Vertrag
+type FeedbackOccasion = "after_videocall" | "before_contract";
+type PhaseStep = "intro" | "terminvereinbarung" | "videocall" | "feedback_after_videocall" | ContentStepKey | "feedback_before_contract" | "contract";
 
 const PHASE_STEPS: PhaseStep[] = [
   "intro",
   "terminvereinbarung",
   "videocall",
+  "feedback_after_videocall",
   ...CONTENT_STEPS.map((s) => s.key as ContentStepKey),
+  "feedback_before_contract",
   "contract",
 ];
+
+// ── Feedback-Fragen ────────────────────────────────────────────────────────────
+
+type QuestionType = "scale10" | "choice" | "emoji5" | "text";
+
+type FeedbackQuestion = {
+  id: string;
+  label: string;
+  type: QuestionType;
+  options?: string[];
+  required?: boolean;
+};
+
+const FEEDBACK_QUESTIONS: Record<FeedbackOccasion, FeedbackQuestion[]> = {
+  after_videocall: [
+    {
+      id: "einigung_wahrscheinlichkeit",
+      label: "Wie wahrscheinlich ist eine außergerichtliche Einigung? (0 = sehr unwahrscheinlich, 10 = sehr wahrscheinlich)",
+      type: "scale10",
+      required: true,
+    },
+    {
+      id: "mediation_verstanden",
+      label: "Haben Sie das Mediationsprinzip verstanden?",
+      type: "choice",
+      options: ["Ja, vollständig", "Teilweise", "Nein, noch nicht"],
+      required: true,
+    },
+    {
+      id: "online_verstanden",
+      label: "Haben Sie das Online-Format (Video-Mediation) verstanden?",
+      type: "choice",
+      options: ["Ja", "Teilweise", "Nein"],
+      required: true,
+    },
+    {
+      id: "gefuehl",
+      label: "Wie fühlen Sie sich nach dem Gespräch?",
+      type: "emoji5",
+      required: true,
+    },
+    {
+      id: "hindernisse",
+      label: "Was hindert Sie noch? (optional)",
+      type: "text",
+      required: false,
+    },
+  ],
+  before_contract: [
+    {
+      id: "einigung_wahrscheinlichkeit",
+      label: "Wie wahrscheinlich ist eine außergerichtliche Einigung? (0 = sehr unwahrscheinlich, 10 = sehr wahrscheinlich)",
+      type: "scale10",
+      required: true,
+    },
+    {
+      id: "bereit_phase2",
+      label: "Fühlen Sie sich bereit für Phase 2?",
+      type: "choice",
+      options: ["Ja, ich bin bereit", "Unsicher", "Nein, ich brauche mehr Zeit"],
+      required: true,
+    },
+    {
+      id: "gehoert_gefuehl",
+      label: "Haben Sie sich in diesem Prozess gehört gefühlt?",
+      type: "emoji5",
+      required: true,
+    },
+    {
+      id: "weiterer_termin",
+      label: "Brauchen Sie einen weiteren Termin vor dem Vertragsabschluss?",
+      type: "choice",
+      options: ["Ja, bitte", "Nein, es ist gut so"],
+      required: true,
+    },
+    {
+      id: "hindernisse",
+      label: "Was hindert Sie noch? (optional)",
+      type: "text",
+      required: false,
+    },
+  ],
+};
 
 const roleLabel: Record<string, string> = {
   initiator: "Antragsteller",
@@ -487,6 +573,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   const [appointmentLoading, setAppointmentLoading] = useState(false);
   const [appointmentVoting, setAppointmentVoting] = useState<number | null>(null);
 
+  // Feedback state
+  const [feedbackAnswers, setFeedbackAnswers] = useState<Record<string, string | number>>({});
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [submittedFeedbackOccasions, setSubmittedFeedbackOccasions] = useState<Set<FeedbackOccasion>>(new Set());
+
   // Contract state
   const [contract, setContract] = useState<{
     id: number;
@@ -552,6 +643,15 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         setItems(nextItems);
         await refreshAllStepStates(pData);
         await refreshAppointments();
+
+        // Bereits abgegebene Feedbacks laden
+        try {
+          const fbRes = await fetch(`/api/mediations/${mediationId}/feedback/me`);
+          if (fbRes.ok) {
+            const fbData = await fbRes.json();
+            setSubmittedFeedbackOccasions(new Set(fbData.submitted_occasions ?? []));
+          }
+        } catch { /* ignore */ }
       } catch {
         // ignore
       }
@@ -598,12 +698,34 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         )
       );
 
+      // Statusmap für schnellen Zugriff
+      const statusMap = Object.fromEntries(statuses.map(({ key, data }) => [key, data]));
+
       const newModes = { ...stepModes };
       // terminvereinbarung
       newModes["terminvereinbarung"] = apptDone ? "done" : "input";
-      let firstIncomplete: PhaseStep | null = apptDone ? null : "terminvereinbarung";
 
-      for (const { key, data } of statuses) {
+      // Schritte in der richtigen PHASE_STEPS-Reihenfolge auswerten,
+      // damit "intro" immer vor "terminvereinbarung" geprüft wird
+      let firstIncomplete: PhaseStep | null = null;
+
+      for (const phaseStep of PHASE_STEPS) {
+        if (phaseStep === "terminvereinbarung") {
+          if (!apptDone && !firstIncomplete) firstIncomplete = "terminvereinbarung";
+          continue;
+        }
+        if (phaseStep === "contract") continue; // wird separat behandelt
+
+        // Feedback-Schritte: done wenn Feedback abgegeben (oder übersprungen = in submittedFeedbackOccasions)
+        if (phaseStep === "feedback_after_videocall" || phaseStep === "feedback_before_contract") {
+          const occasion: FeedbackOccasion = phaseStep === "feedback_after_videocall" ? "after_videocall" : "before_contract";
+          const fbDone = submittedFeedbackOccasions.has(occasion);
+          newModes[phaseStep] = fbDone ? "done" : "input";
+          if (!fbDone && !firstIncomplete) firstIncomplete = phaseStep;
+          continue;
+        }
+
+        const data: StepStatus | null = statusMap[phaseStep] ?? null;
         if (!data) continue;
         const myStatus = me
           ? data.participants.find((p) => p.participant_id === me.id)
@@ -611,13 +733,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         const mySubmitted = myStatus?.submitted ?? false;
 
         if (data.all_submitted) {
-          newModes[key] = "done";
+          newModes[phaseStep] = "done";
         } else if (mySubmitted) {
-          newModes[key] = "waiting";
-          if (!firstIncomplete) firstIncomplete = key;
+          newModes[phaseStep] = "waiting";
+          if (!firstIncomplete) firstIncomplete = phaseStep;
         } else {
-          newModes[key] = "input";
-          if (!firstIncomplete) firstIncomplete = key;
+          newModes[phaseStep] = "input";
+          if (!firstIncomplete) firstIncomplete = phaseStep;
         }
       }
 
@@ -849,6 +971,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (step === "intro") return "Einführung";
     if (step === "terminvereinbarung") return "Termin";
     if (step === "videocall") return "Gespräch";
+    if (step === "feedback_after_videocall") return "Feedback";
+    if (step === "feedback_before_contract") return "Feedback";
     if (step === "contract") return "Vertrag";
     const cs = CONTENT_STEPS.find((s) => s.key === step);
     return cs ? cs.title : step;
@@ -1304,28 +1428,228 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     );
   }
 
+  // ── Feedback-Operationen ───────────────────────────────────────────────────
+
+  async function submitFeedback(occasion: FeedbackOccasion) {
+    setFeedbackSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ occasion, answers: feedbackAnswers }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.detail ?? "Feedback konnte nicht gespeichert werden.");
+        return;
+      }
+      setSubmittedFeedbackOccasions((prev) => new Set([...prev, occasion]));
+      setFeedbackAnswers({});
+      await refreshAllStepStates();
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  }
+
+  function skipFeedback(occasion: FeedbackOccasion) {
+    // Als lokal übersprungen markieren (kein Backend-Call)
+    setSubmittedFeedbackOccasions((prev) => new Set([...prev, occasion]));
+    setFeedbackAnswers({});
+    setTimeout(() => refreshAllStepStates(), 50);
+  }
+
+  // ── Render: Feedback-Schritt ───────────────────────────────────────────────
+
+  function renderFeedbackStep(occasion: FeedbackOccasion) {
+    const questions = FEEDBACK_QUESTIONS[occasion];
+    const title = occasion === "after_videocall"
+      ? "Wie war das erste Gespräch?"
+      : "Kurz innehalten – bevor ihr den Vertrag abschließt";
+    const subtitle = occasion === "after_videocall"
+      ? "Deine Einschätzung hilft dem Mediator, den Prozess für dich anzupassen."
+      : "Deine Antworten helfen dem Mediator zu entscheiden, ob ein weiteres Gespräch sinnvoll ist.";
+
+    const requiredQuestions = questions.filter((q) => q.required);
+    const allRequiredAnswered = requiredQuestions.every(
+      (q) => feedbackAnswers[q.id] !== undefined && feedbackAnswers[q.id] !== ""
+    );
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-slate-50 px-6 py-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-100">
+              <svg className="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">{title}</h3>
+              <p className="mt-1 text-sm text-slate-500 leading-relaxed">{subtitle}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Fragen */}
+        <div className="space-y-5">
+          {questions.map((q) => (
+            <div key={q.id} className="rounded-xl border border-slate-200 bg-white p-5">
+              <p className="text-sm font-semibold text-slate-800 mb-3 leading-snug">
+                {q.label}
+                {q.required && <span className="ml-1 text-violet-500">*</span>}
+              </p>
+
+              {q.type === "scale10" && (
+                <div className="space-y-2">
+                  <div className="flex gap-1 flex-wrap">
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: i }))}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-all
+                          ${feedbackAnswers[q.id] === i
+                            ? "bg-violet-600 text-white shadow-sm"
+                            : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-violet-300 hover:bg-violet-50"
+                          }`}
+                      >
+                        {i}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-400 px-0.5">
+                    <span>Sehr unwahrscheinlich</span>
+                    <span>Sehr wahrscheinlich</span>
+                  </div>
+                </div>
+              )}
+
+              {q.type === "choice" && q.options && (
+                <div className="flex flex-wrap gap-2">
+                  {q.options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: opt }))}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-all
+                        ${feedbackAnswers[q.id] === opt
+                          ? "bg-violet-600 text-white shadow-sm"
+                          : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-violet-300 hover:bg-violet-50"
+                        }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "emoji5" && (
+                <div className="flex gap-3">
+                  {[
+                    { emoji: "😔", label: "Belastet" },
+                    { emoji: "😕", label: "Unsicher" },
+                    { emoji: "😐", label: "Neutral" },
+                    { emoji: "🙂", label: "Gut" },
+                    { emoji: "😊", label: "Sehr gut" },
+                  ].map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: idx + 1 }))}
+                      className={`flex flex-col items-center gap-1 rounded-xl p-2.5 transition-all
+                        ${feedbackAnswers[q.id] === idx + 1
+                          ? "bg-violet-100 ring-2 ring-violet-400 scale-110"
+                          : "hover:bg-slate-100"
+                        }`}
+                    >
+                      <span className="text-2xl">{item.emoji}</span>
+                      <span className="text-[10px] text-slate-500">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "text" && (
+                <textarea
+                  rows={3}
+                  value={(feedbackAnswers[q.id] as string) ?? ""}
+                  onChange={(e) => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                  placeholder="Deine Gedanken …"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Aktionen */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => submitFeedback(occasion)}
+            disabled={feedbackSubmitting || !allRequiredAnswered}
+            className="rounded-2xl bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {feedbackSubmitting ? "Wird gespeichert…" : "Feedback abschicken →"}
+          </button>
+          <button
+            type="button"
+            onClick={() => skipFeedback(occasion)}
+            className="text-sm text-slate-400 transition hover:text-slate-600"
+          >
+            Überspringen
+          </button>
+        </div>
+        {!allRequiredAnswered && (
+          <p className="text-xs text-slate-400">Bitte beantworte alle Pflichtfragen (*).</p>
+        )}
+      </div>
+    );
+  }
+
   // ── Render: Terminvereinbarung ─────────────────────────────────────────────
 
   async function proposeAppointments() {
     setAppointmentLoading(true);
+    setError("");
     try {
       const res = await fetch(`/api/mediations/${mediationId}/appointment/propose`, { method: "POST" });
-      if (res.ok) await refreshAppointments();
-    } catch { /* ignore */ } finally {
+      if (res.ok) {
+        await refreshAppointments();
+      } else {
+        const body = await res.json().catch(() => null);
+        const detail = body?.detail ?? body?.error ?? `Fehler ${res.status}`;
+        setError(`Termine konnten nicht erstellt werden: ${detail}`);
+      }
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
       setAppointmentLoading(false);
     }
   }
 
   async function voteSlot(slotId: number, accepted: boolean) {
     setAppointmentVoting(slotId);
+    setError("");
     try {
-      await fetch(`/api/mediations/${mediationId}/appointment/vote`, {
+      const res = await fetch(`/api/mediations/${mediationId}/appointment/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slot_id: slotId, accepted }),
       });
-      await refreshAppointments();
-    } catch { /* ignore */ } finally {
+      if (res.ok) {
+        await refreshAppointments();
+      } else {
+        const body = await res.json().catch(() => null);
+        setError(body?.detail ?? body?.error ?? `Abstimmung fehlgeschlagen (${res.status})`);
+      }
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
       setAppointmentVoting(null);
     }
   }
@@ -1684,6 +2008,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   ? "Wählt euren Gesprächstermin"
                   : activeStep === "videocall"
                   ? "Euer erstes Gespräch"
+                  : activeStep === "feedback_after_videocall"
+                  ? "Wie war das erste Gespräch?"
+                  : activeStep === "feedback_before_contract"
+                  ? "Reflexion vor dem Vertrag"
                   : activeStep === "contract"
                   ? "Euer Mediationsvertrag"
                   : CONTENT_STEPS.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
@@ -1788,6 +2116,25 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               </>
             )}
 
+            {activeStep === "feedback_after_videocall" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Kurzes Feedback</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Wie war das erste Gespräch für dich?
+                  </p>
+                </div>
+                {renderFeedbackStep("after_videocall")}
+              </>
+            )}
+
             {CONTENT_STEPS.map((cs) =>
               activeStep === cs.key ? (
                 <div key={cs.key}>
@@ -1802,6 +2149,25 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   {renderContentStep(cs)}
                 </div>
               ) : null
+            )}
+
+            {activeStep === "feedback_before_contract" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Reflexion vor dem Vertrag</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Kurze Einschätzung bevor ihr den Mediationsvertrag unterzeichnet.
+                  </p>
+                </div>
+                {renderFeedbackStep("before_contract")}
+              </>
             )}
 
             {activeStep === "contract" && (
