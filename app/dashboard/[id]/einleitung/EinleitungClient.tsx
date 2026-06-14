@@ -1,6 +1,7 @@
 "use client";
 
 import { hashId } from "@/lib/ids";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getPhaseIndex } from "../_shared/phaseData";
@@ -1862,4 +1863,359 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                           : "border-slate-200 bg-slate-50"
                       }`}
                     >
-                      <p className="mb-1 text-sm font-semibol
+                      <p className="mb-1 text-sm font-semibold text-slate-900">{p.name}</p>
+                      <p className="mb-2 text-xs text-slate-500">
+                        {roleLabel[p.role] ?? p.role}
+                      </p>
+                      {sig ? (
+                        <div className="flex items-center gap-1.5">
+                          <svg
+                            className="h-4 w-4 text-emerald-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <span className="text-xs font-medium text-emerald-700">
+                            Unterzeichnet als „{sig.signed_name}"
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">Ausstehend</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {!mySignature && currentParticipant && (
+              <div className="rounded-2xl border border-slate-300 bg-white p-5">
+                <p className="mb-3 text-sm font-semibold text-slate-900">Deine Unterschrift</p>
+                <p className="mb-4 text-xs text-slate-500">
+                  Tippe deinen vollständigen Namen und klicke „Unterzeichnen", um den Vertrag
+                  zu bestätigen.
+                </p>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={signedName}
+                    onChange={(e) => setSignedName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && signedName.trim()) signContract();
+                    }}
+                    placeholder="Vollständiger Name …"
+                    className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={signContract}
+                    disabled={contractSigning || !signedName.trim()}
+                    className="btn btn-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {contractSigning ? "Wird gespeichert…" : "Unterzeichnen"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ── Haupt-Render ───────────────────────────────────────────────────────────
+
+  const phaseIndex = getPhaseIndex("einleitung");
+
+  return (
+    <main className="app-shell pt-[73px]">
+      <section className="container py-12">
+        {/* Globaler Phasen-Stepper – nur für Initiator, nicht für andere Partei */}
+        <div className={`mb-8 overflow-x-auto ${isOtherParty ? "hidden" : ""}`}>
+          <ol className="flex min-w-max items-center">
+            {PHASES.map((p, index) => {
+              const isDone = index < phaseIndex;
+              const isCurrent = index === phaseIndex;
+              return (
+                <li key={p.key} className="flex items-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                        isDone
+                          ? "bg-emerald-500 text-white"
+                          : isCurrent
+                          ? "bg-emerald-600 text-white ring-4 ring-emerald-100"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {isDone ? (
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    <span
+                      className={`max-w-[80px] text-center text-xs font-medium leading-tight ${
+                        isCurrent
+                          ? "text-emerald-700"
+                          : isDone
+                          ? "text-emerald-600"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {p.shortLabel}
+                    </span>
+                  </div>
+                  {index < PHASES.length - 1 && (
+                    <div
+                      className={`mx-2 mb-5 h-0.5 w-12 transition-colors ${
+                        index < phaseIndex ? "bg-emerald-400" : "bg-slate-200"
+                      }`}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="app-surface p-8">
+          {isOtherParty ? (
+            /* Emotionaler Header für die Gegenpartei */
+            <div className="mb-6">
+              <p className="eyebrow mb-3">Mediation</p>
+              <h1 className="heading-2 text-slate-900">
+                {activeStep === "intro"
+                  ? "Willkommen. Du bist nicht allein."
+                  : activeStep === "terminvereinbarung"
+                  ? "Wählt euren Gesprächstermin"
+                  : activeStep === "videocall"
+                  ? "Euer erstes Gespräch"
+                  : activeStep === "feedback_after_videocall"
+                  ? "Wie war das erste Gespräch?"
+                  : activeStep === "feedback_before_contract"
+                  ? "Reflexion vor dem Vertrag"
+                  : activeStep === "contract"
+                  ? "Euer Mediationsvertrag"
+                  : CONTENT_STEPS.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
+              </h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
+              <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+              </p>
+            </>
+          )}
+
+          {/* Phase-1-interner Stepper */}
+          <div className="mt-6 overflow-x-auto">
+            <ol className="flex min-w-max items-center gap-0">
+              {PHASE_STEPS.map((step, idx) => (
+                <li key={step} className="flex items-center">
+                  <StepBadge
+                    index={idx}
+                    label={getPhaseStepLabel(step)}
+                    status={getPhaseStepStatus(step)}
+                  />
+                  {idx < PHASE_STEPS.length - 1 && (
+                    <div
+                      className={`mx-2 mb-5 h-0.5 w-8 transition-colors ${
+                        getPhaseStepStatus(step) === "done" ? "bg-emerald-400" : "bg-slate-200"
+                      }`}
+                    />
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* Aktiver Schritt-Inhalt */}
+          <div className="mt-8 rounded-2xl border border-slate-100 bg-slate-50/50 p-6">
+            {activeStep === "intro" && (
+              <>
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-slate-900">Willkommen</h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Nimm dir einen Moment, bevor wir beginnen.
+                  </p>
+                </div>
+                {renderIntroStep()}
+              </>
+            )}
+
+            {activeStep === "terminvereinbarung" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Terminvereinbarung</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Wählt gemeinsam einen Termin für das erste Gespräch.
+                  </p>
+                </div>
+                {renderTerminStep()}
+              </>
+            )}
+
+            {activeStep === "videocall" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Erstgespräch</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    {confirmedSlot
+                      ? `Vereinbart für ${new Date(confirmedSlot.proposed_datetime).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} Uhr`
+                      : "Euer erstes gemeinsames Gespräch per Video."}
+                  </p>
+                </div>
+                {renderVideoCallStep()}
+              </>
+            )}
+
+            {activeStep === "feedback_after_videocall" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Kurzes Feedback</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Wie war das erste Gespräch für dich?
+                  </p>
+                </div>
+                {renderFeedbackStep("after_videocall")}
+              </>
+            )}
+
+            {CONTENT_STEPS.map((cs) =>
+              activeStep === cs.key ? (
+                <div key={cs.key}>
+                  <div className="mb-6">
+                    <div className="mb-2 flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                        {cs.number}
+                      </div>
+                      <h2 className="text-lg font-bold text-slate-900">{cs.title}</h2>
+                    </div>
+                  </div>
+                  {renderContentStep(cs)}
+                </div>
+              ) : null
+            )}
+
+            {activeStep === "feedback_before_contract" && (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Reflexion vor dem Vertrag</h2>
+                  </div>
+                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                    Kurze Einschätzung bevor ihr den Mediationsvertrag unterzeichnet.
+                  </p>
+                </div>
+                {renderFeedbackStep("before_contract")}
+              </>
+            )}
+
+            {activeStep === "contract" && (
+              <>
+                {!allSigned && (
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">Mediationsvertrag</h2>
+                  </div>
+                )}
+                {renderContractStep()}
+              </>
+            )}
+          </div>
+
+          {error && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
+              <p className="text-sm font-semibold text-red-700">{error}</p>
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={() => router.push(`/dashboard/${mediationId}`)}
+              className="btn btn-ghost"
+            >
+              ← Zurück
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
