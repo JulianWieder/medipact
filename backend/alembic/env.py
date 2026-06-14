@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from app.database import Base
-from app.models import mediation_invite
+from app.models import mediation_invite, mediation_custom_step  # noqa: F401
 
 import app.models
 from app.database import Base

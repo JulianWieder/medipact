@@ -32,6 +32,22 @@ type StepStatus = {
 
 type StepView = "input" | "waiting" | "reflection";
 
+type CustomStepData = {
+  step_key: string;
+  title: string;
+  description: string;
+  position: number;
+};
+
+function toStepDetail(cs: CustomStepData): StepDetail {
+  return {
+    key: cs.step_key,
+    title: cs.title,
+    description: cs.description,
+    placeholder: "Deine Eingabe …",
+  };
+}
+
 const roleLabel: Record<string, string> = {
   initiator: "Antragsteller",
   other_party: "Andere Seite",
@@ -606,9 +622,17 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const [advancing, setAdvancing] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
+  // ── Custom Steps ──────────────────────────────────────────────────────────────
+  const [customStepDetails, setCustomStepDetails] = useState<StepDetail[]>([]);
+  const [showAddStep, setShowAddStep] = useState(false);
+  const [newStepTitle, setNewStepTitle] = useState("");
+  const [newStepDesc, setNewStepDesc] = useState("");
+  const [addingStep, setAddingStep] = useState(false);
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const currentStep = stepDetails[activeStepIndex];
+  const allStepDetails = [...stepDetails, ...customStepDetails];
+  const currentStep = allStepDetails[activeStepIndex];
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
 
@@ -617,16 +641,23 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
     async function load() {
       setLoading(true);
       try {
-        const [partRes] = await Promise.all([
+        const [partRes, customStepsRes] = await Promise.all([
           fetch(`/api/mediations/${mediationId}/participants`),
+          fetch(`/api/mediations/${mediationId}/custom-steps?phase=${phaseKey}`),
         ]);
         if (!partRes.ok) return;
         const parts: Participant[] = await partRes.json();
         setParticipants(parts);
 
+        const customFromAPI: CustomStepData[] = customStepsRes.ok ? await customStepsRes.json() : [];
+        const customDetails = customFromAPI.map(toStepDetail);
+        setCustomStepDetails(customDetails);
+
+        const allDetails = [...stepDetails, ...customDetails];
+
         // Alle Notizen + step-status für alle Schritte laden
         const results = await Promise.all(
-          stepDetails.map(async (step) => {
+          allDetails.map(async (step) => {
             const [notesRes, statusRes] = await Promise.all([
               fetch(`/api/mediations/${mediationId}/notes?phase=${phaseKey}&step=${step.key}`),
               fetch(`/api/mediations/${mediationId}/step-status?phase=${phaseKey}&step=${step.key}`),
@@ -669,7 +700,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         setItems(newItems);
         setStepStatus(newStatus);
         setStepView(newView);
-        setInputText(Object.fromEntries(stepDetails.map((s) => [s.key, ""])));
+        setInputText(Object.fromEntries(allDetails.map((s) => [s.key, ""])));
       } finally {
         setLoading(false);
       }
@@ -820,8 +851,8 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
   const view = currentStep ? (stepView[currentStep.key] ?? "input") : "input";
   const myItems = currentParticipant ? (items[currentStep?.key ?? ""]?.[currentParticipant.id] ?? []) : [];
-  const isLastStep = activeStepIndex === stepDetails.length - 1;
-  const allStepsReflected = stepDetails.every((s) => stepView[s.key] === "reflection");
+  const isLastStep = activeStepIndex === allStepDetails.length - 1;
+  const allStepsReflected = allStepDetails.every((s) => stepView[s.key] === "reflection");
 
   return (
     <main className="app-shell pt-[73px]">
@@ -899,35 +930,151 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           {/* Schritt-Navigator */}
           <div className="mt-8">
             <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-1">
-              {stepDetails.map((step, idx) => {
+              {allStepDetails.map((step, idx) => {
                 const sv = stepView[step.key] ?? "input";
                 const isActive = idx === activeStepIndex;
                 const isDone = sv === "reflection";
+                const isCustom = step.key.startsWith("custom_");
                 return (
-                  <button
-                    key={step.key}
-                    type="button"
-                    onClick={() => setActiveStepIndex(idx)}
-                    className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-emerald-600 text-white shadow-sm"
-                        : isDone
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {isDone ? (
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-white/20" : "bg-slate-200 text-slate-500"}`}>{idx + 1}</span>
+                  <div key={step.key} className="relative flex shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setActiveStepIndex(idx)}
+                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : isDone
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      } ${isCustom ? "pr-7" : ""}`}
+                    >
+                      {isDone ? (
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-white/20" : "bg-slate-200 text-slate-500"}`}>{idx + 1}</span>
+                      )}
+                      {step.title}
+                    </button>
+                    {/* Löschen-Button nur für custom steps (Mediator) */}
+                    {isCustom && currentParticipant && ["mediator", "owner", "initiator", "admin"].includes(currentParticipant.role) && (
+                      <button
+                        type="button"
+                        title="Schritt löschen"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!confirm(`Schritt „${step.title}" löschen?`)) return;
+                          await fetch(`/api/mediations/${mediationId}/custom-steps/${step.key}`, { method: "DELETE" });
+                          setCustomStepDetails((prev) => prev.filter((s) => s.key !== step.key));
+                          if (isActive && idx > 0) setActiveStepIndex(idx - 1);
+                        }}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full bg-white/30 text-current opacity-70 hover:opacity-100"
+                      >
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     )}
-                    {step.title}
-                  </button>
+                  </div>
                 );
               })}
-            </div>
+
+              {/* "+" Schritt hinzufügen – nur Mediator/Owner */}
+              {currentParticipant && ["mediator", "owner", "initiator", "admin"].includes(currentParticipant.role) && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddStep(true)}
+                  title="Neuen Schritt einfügen"
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-500 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Schritt
+                </button>
+              )}
+            </div>{/* end flex step-nav */}
+
+            {/* Modal: neuen Schritt hinzufügen */}
+            {showAddStep && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                  <h3 className="mb-4 text-base font-bold text-slate-900">Neuen Schritt hinzufügen</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-slate-700">Titel</label>
+                      <input
+                        type="text"
+                        value={newStepTitle}
+                        onChange={(e) => setNewStepTitle(e.target.value)}
+                        placeholder="z.B. Zusätzliche Fragen klären"
+                        className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-slate-700">Beschreibung (optional)</label>
+                      <textarea
+                        value={newStepDesc}
+                        onChange={(e) => setNewStepDesc(e.target.value)}
+                        placeholder="Was sollen die Parteien in diesem Schritt tun?"
+                        rows={3}
+                        className="w-full resize-none rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-5 flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => { setShowAddStep(false); setNewStepTitle(""); setNewStepDesc(""); }}
+                      className="btn btn-ghost text-sm"
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!newStepTitle.trim() || addingStep}
+                      onClick={async () => {
+                        if (!newStepTitle.trim()) return;
+                        setAddingStep(true);
+                        try {
+                          const res = await fetch(`/api/mediations/${mediationId}/custom-steps`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              phase: phaseKey,
+                              title: newStepTitle.trim(),
+                              description: newStepDesc.trim(),
+                            }),
+                          });
+                          if (res.ok) {
+                            const created: CustomStepData = await res.json();
+                            const newDetail = toStepDetail(created);
+                            setCustomStepDetails((prev) => [...prev, newDetail]);
+                            setInputText((prev) => ({ ...prev, [newDetail.key]: "" }));
+                            setStepView((prev) => ({ ...prev, [newDetail.key]: "input" }));
+                            setItems((prev) => ({
+                              ...prev,
+                              [newDetail.key]: Object.fromEntries(participants.map((p) => [p.id, []])),
+                                     }));
+                            setActiveStepIndex(allStepDetails.length); // springt zum neuen Step
+                            setShowAddStep(false);
+                            setNewStepTitle("");
+                            setNewStepDesc("");
+                          }
+                        } finally {
+                          setAddingStep(false);
+                        }
+                      }}
+                      className="btn btn-primary text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {addingStep ? "Wird hinzugefügt …" : "Schritt hinzufügen"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Aktiver Schritt */}
             {currentStep && (
