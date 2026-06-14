@@ -72,7 +72,47 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse">("overview");
+
+  // Analyse
+  type SwotData = {
+    staerken: string[];
+    schwaechen: string[];
+    chancen: string[];
+    risiken: string[];
+  };
+  type TeilnehmerTipp = {
+    name: string;
+    rolle: string;
+    tipps: string[];
+  };
+  type AnalyseResult = {
+    swot: SwotData;
+    zusammenfassung: string;
+    empfehlungen: string[];
+    teilnehmer_tipps: TeilnehmerTipp[];
+  };
+  const [analyseResult, setAnalyseResult] = useState<AnalyseResult | null>(null);
+  const [analyseLoading, setAnalyseLoading] = useState(false);
+  const [analyseError, setAnalyseError] = useState("");
+
+  async function handleGenerateAnalyse() {
+    setAnalyseLoading(true);
+    setAnalyseError("");
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/analyse`, { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setAnalyseError(body?.detail ?? "Analyse fehlgeschlagen");
+        return;
+      }
+      setAnalyseResult(await res.json());
+    } catch {
+      setAnalyseError("Server nicht erreichbar.");
+    } finally {
+      setAnalyseLoading(false);
+    }
+  }
 
   // Feedback
   type FeedbackEntry = {
@@ -195,6 +235,17 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     }
   }
 
+  async function handleRevokeInvite(participantId: string) {
+    // participantId hat Format "invite-{id}"
+    const match = participantId.match(/^invite-(\d+)$/);
+    if (!match) return;
+    const inviteId = match[1];
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/invites/${inviteId}`, { method: "DELETE" });
+      if (res.ok) fetchParticipants(fall.id).then(setParticipants);
+    } catch { /* ignore */ }
+  }
+
   async function handleInvite() {
     if (!inviteEmail.trim()) return;
     setInviting(true);
@@ -304,6 +355,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     { id: "termin" as const, label: "Termin" },
     { id: "contract" as const, label: "Vertrag" },
     { id: "feedback" as const, label: "Feedback" },
+    { id: "analyse" as const, label: "✦ Analyse" },
   ];
 
   return (
@@ -527,7 +579,18 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                             <div className="text-xs text-slate-400">{p.email}</div>
                           </div>
                         </div>
-                        <RoleBadge role={p.role} />
+                        <div className="flex items-center gap-2">
+                          <RoleBadge role={p.role} />
+                          {p.invitationStatus === "pending" && (
+                            <button
+                              onClick={() => handleRevokeInvite(p.id)}
+                              title="Einladung zurückziehen"
+                              className="flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:bg-red-100 hover:text-red-600 transition"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -912,6 +975,126 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
               )}
             </div>
           )}
+          {/* ── Tab: Analyse ── */}
+          {activeTab === "analyse" && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">KI-gestützte Mediationsanalyse</p>
+                <button
+                  onClick={handleGenerateAnalyse}
+                  disabled={analyseLoading}
+                  className="rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-600 disabled:opacity-50 transition"
+                >
+                  {analyseLoading ? "Wird analysiert…" : analyseResult ? "↻ Neu analysieren" : "✦ Analyse starten"}
+                </button>
+              </div>
+
+              {analyseError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+                  <p className="text-xs font-semibold text-red-700">{analyseError}</p>
+                </div>
+              )}
+
+              {analyseLoading && (
+                <div className="flex flex-col items-center gap-3 py-12 text-center">
+                  <svg className="h-8 w-8 animate-spin text-violet-400" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <p className="text-sm text-slate-400">Claude analysiert den Fall…</p>
+                </div>
+              )}
+
+              {!analyseLoading && !analyseResult && (
+                <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-12 text-center">
+                  <p className="text-2xl mb-3">✦</p>
+                  <p className="text-sm font-semibold text-slate-700 mb-1">SWOT-Analyse & Gesprächstipps</p>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">Claude analysiert alle Notizen und den Fallstatus und gibt dir eine SWOT-Analyse sowie individuelle Gesprächstipps für jeden Teilnehmer.</p>
+                </div>
+              )}
+
+              {!analyseLoading && analyseResult && (
+                <div className="space-y-5">
+                  {/* Zusammenfassung */}
+                  <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600 mb-2">Gesamtlage</p>
+                    <p className="text-sm text-slate-700 leading-relaxed">{analyseResult.zusammenfassung}</p>
+                  </div>
+
+                  {/* SWOT */}
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">SWOT-Analyse</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {([
+                        { key: "staerken", label: "Stärken", color: "border-teal-200 bg-teal-50", dot: "bg-teal-500", text: "text-teal-700" },
+                        { key: "schwaechen", label: "Schwächen", color: "border-red-200 bg-red-50", dot: "bg-red-400", text: "text-red-700" },
+                        { key: "chancen", label: "Chancen", color: "border-emerald-200 bg-emerald-50", dot: "bg-emerald-500", text: "text-emerald-700" },
+                        { key: "risiken", label: "Risiken", color: "border-amber-200 bg-amber-50", dot: "bg-amber-400", text: "text-amber-700" },
+                      ] as const).map(({ key, label, color, dot, text }) => (
+                        <div key={key} className={`rounded-xl border p-4 ${color}`}>
+                          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${text}`}>{label}</p>
+                          <ul className="space-y-1.5">
+                            {(analyseResult.swot[key] ?? []).map((item, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
+                                <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Empfehlungen */}
+                  {analyseResult.empfehlungen?.length > 0 && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Empfehlungen für den Mediator</p>
+                      <ul className="space-y-2">
+                        {analyseResult.empfehlungen.map((e, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
+                            <span className="mt-0.5 shrink-0 text-violet-400">→</span>
+                            {e}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Gesprächstipps pro Teilnehmer */}
+                  {analyseResult.teilnehmer_tipps?.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Gesprächstipps pro Teilnehmer</p>
+                      <div className="space-y-3">
+                        {analyseResult.teilnehmer_tipps.map((t, i) => (
+                          <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
+                                {t.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-slate-800">{t.name}</p>
+                                <p className="text-[10px] text-slate-400">{t.rolle}</p>
+                              </div>
+                            </div>
+                            <ul className="space-y-1.5">
+                              {t.tipps.map((tip, j) => (
+                                <li key={j} className="flex items-start gap-2 text-xs text-slate-600">
+                                  <span className="mt-0.5 shrink-0 text-violet-400">·</span>
+                                  {tip}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </WCard>
     </div>

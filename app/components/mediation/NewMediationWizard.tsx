@@ -27,27 +27,35 @@ export default function NewMediationWizard({ config }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Generiert KI-Titel sobald das erste Beschreibungsfeld ausgefüllt wird
+  // Generiert KI-Titel sobald das erste Beschreibungsfeld ausgefüllt wird (on blur)
   const handleDescriptionBlur = async (value: string) => {
-    if (!value.trim() || title.trim()) return; // Nur wenn Beschreibung vorhanden und Titel noch leer
+    if (!value.trim() || title.trim()) return;
     setTitleGenerating(true);
     try {
-      const res = await fetch("/api/mediations/generate-title", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: value.trim(), mediation_type: config.type }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.title) setTitle(data.title);
-      }
-    } catch { /* ignore */ } finally {
+      const generated = await generateTitle(value.trim());
+      if (generated) setTitle(generated);
+    } finally {
       setTitleGenerating(false);
     }
   };
 
   const handleChange = (id: string, value: string) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const generateTitle = async (description: string): Promise<string> => {
+    try {
+      const res = await fetch("/api/mediations/generate-title", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description, mediation_type: config.type }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.title ?? "";
+      }
+    } catch { /* ignore */ }
+    return "";
   };
 
   const handleSave = async () => {
@@ -69,7 +77,6 @@ export default function NewMediationWizard({ config }: Props) {
       if (field.mapTo === "priority") continue;
 
       if (field === config.formFields[0]) {
-        // First field goes as-is (main description textarea)
         descriptionParts.push(value);
       } else {
         descriptionParts.push(`${field.label}: ${value}`);
@@ -79,12 +86,22 @@ export default function NewMediationWizard({ config }: Props) {
     const description = descriptionParts.join(" | ");
     const priority = priorityField ? formData[priorityField.id] : undefined;
 
+    // Titel generieren falls noch nicht gesetzt
+    let finalTitle = title.trim();
+    if (!finalTitle) {
+      const firstFieldValue = formData[config.formFields[0]?.id ?? ""]?.trim() ?? "";
+      if (firstFieldValue) {
+        finalTitle = await generateTitle(firstFieldValue);
+        if (finalTitle) setTitle(finalTitle);
+      }
+    }
+
     try {
       const res = await fetch(`/api/mediations/${mediationId}/update`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: title.trim() || undefined,
+          title: finalTitle || undefined,
           description: description || undefined,
           priority: priority || undefined,
         }),

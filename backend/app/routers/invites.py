@@ -146,6 +146,45 @@ def send_invite_email(to_email: str, invite_url: str, mediation_title: str, role
         logger.error("Failed to send invitation email to %s: %s", to_email, exc)
 
 
+@router.delete("/mediations/{mediation_id}/invites/{invite_id}")
+def revoke_invite(
+    mediation_id: int,
+    invite_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+    mediation=Depends(require_mediation_access),
+):
+    allowed_roles = {"mediator", "owner", "admin"}
+    participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    user_role = participant.role if participant else current_user.role
+    if user_role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Keine Berechtigung")
+
+    invite = (
+        db.query(MediationInvite)
+        .filter(
+            MediationInvite.id == invite_id,
+            MediationInvite.mediation_id == mediation_id,
+        )
+        .first()
+    )
+    if not invite:
+        raise HTTPException(status_code=404, detail="Einladung nicht gefunden")
+    if invite.status != "pending":
+        raise HTTPException(status_code=400, detail="Nur ausstehende Einladungen können entfernt werden")
+
+    db.delete(invite)
+    db.commit()
+    return {"ok": True}
+
+
 @router.post("/mediations/{mediation_id}/invites")
 def create_invite(
     request: Request,

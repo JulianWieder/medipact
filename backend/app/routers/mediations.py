@@ -1023,119 +1023,139 @@ def save_feedback(
 
     if existing:
         existing.answers = _json.dumps(payload.answers, ensure_ascii=False)
-        existing.updated_at = __import__("datetime").datetime.utcnow()
-    else:
-        db.add(MediationFeedback(
-            mediation_id=mediation_id,
-            participant_id=participant.id,
-            occasion=payload.occasion,
-            answers=_json.dumps(payload.answers, ensure_ascii=False),
-        ))
+        existing.updated_at = __import__("datetime").datetime.ut
 
-    db.commit()
-    return {"ok": True}
+# ── KI-Analyse (SWOT + Gesprächstipps) ──────────────────────────────────────
 
-
-@router.get("/{mediation_id}/feedback")
-def get_feedback(
+@router.post("/{mediation_id}/analyse")
+def analyse_mediation(
     mediation_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Gibt alle Feedback-Einträge eines Falls zurück.
-    Teilnehmer sehen nur ihr eigenes, Mediatoren/Admins alle."""
+    """Generiert SWOT-Analyse + Gesprächstipps pro Teilnehmer für den Mediator."""
     import json as _json
+    import anthropic
+    from app.config import settings
 
-    caller_participant = (
-        db.query(MediationParticipant)
-        .filter(
-            MediationParticipant.mediation_id == mediation_id,
-            MediationParticipant.user_id == current_user.id,
-        )
-        .first()
-    )
-    caller_is_mediator = current_user.role in ("mediator", "admin") or (
-        caller_participant and caller_participant.role in ("mediator", "admin", "owner", "initiator")
-    )
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
 
-    if not caller_participant and not caller_is_mediator:
-        raise HTTPException(status_code=403, detail="Not allowed")
-
-    query = db.query(MediationFeedback, MediationParticipant, User).join(
-        MediationParticipant, MediationFeedback.participant_id == MediationParticipant.id
-    ).join(
-        User, MediationParticipant.user_id == User.id
-    ).filter(MediationFeedback.mediation_id == mediation_id)
-
-    if not caller_is_mediator and caller_participant:
-        query = query.filter(MediationFeedback.participant_id == caller_participant.id)
-
-    rows = query.order_by(MediationFeedback.occasion, MediationFeedback.created_at).all()
-
-    return [
-        {
-            "id": fb.id,
-            "occasion": fb.occasion,
-            "participant_name": user.name,
-            "participant_role": participant.role,
-            "answers": _json.loads(fb.answers) if fb.answers else {},
-            "created_at": fb.created_at.isoformat(),
-        }
-        for fb, participant, user in rows
-    ]
-
-
-@router.get("/{mediation_id}/feedback/me")
-def get_my_feedback_occasions(
-    mediation_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_db_user),
-):
-    """Gibt zurück, für welche Anlässe der aktuelle Teilnehmer bereits Feedback gegeben hat."""
+    # Nur Mediator/Owner/Admin darf analysieren
     participant = _require_participant(mediation_id, current_user, db)
+    if participant.role not in ("mediator", "owner", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
-    rows = (
-        db.query(MediationFeedback.occasion)
-        .filter(
-            MediationFeedback.mediation_id == mediation_id,
-            MediationFeedback.participant_id == participant.id,
-        )
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+
+    # Alle Teilnehmer laden
+    participants_with_users = (
+        db.query(MediationParticipant, User)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationParticipant.mediation_id == mediation_id)
         .all()
     )
-    return {"submitted_occasions": [r.occasion for r in rows]}
+    participants_info = [
+        {"name": u.name, "email": u.email, "role": p.role}
+        for p, u in participants_with_users
+    ]
 
+    # Alle Notizen laden
+    notes = (
+        db.query(MediationNote, MediationParticipant, User)
+        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationNote.mediation_id == mediation_id, MediationNote.submitted == True)
+        .all()
+    )
 
-@router.post("/{mediation_id}/appointment/vote")
-def vote_appointment(
-    mediation_id: int,
-    payload: AppointmentVoteRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_db_user),
-):
-    """Nimmt Termin an oder lehnt ihn ab."""
-    participant = _require_participant(mediation_id, current_user, db)
+    notes_text = ""
+    for note, part, user in notes:
+        content = note.content
+        try:
+            parsed = _json.loads(content)
+            if isinstance(parsed, list):
+                content = " | ".join(str(x) for x in parsed if x)
+        except Exception:
+            pass
+        notes_text += f"\n[{user.name} / {note.phase} / {note.step}]: {content}"
 
-    slot = db.query(MediationAppointmentSlot).filter(
-        MediationAppointmentSlot.id == payload.slot_id,
-        MediationAppointmentSlot.mediation_id == mediation_id,
-    ).first()
-    if not slot:
-        raise HTTPException(status_code=404, detail="Terminslot nicht gefunden")
+    type_labels = {
+        "trennung": "Trennung & Scheidung",
+        "erbschaft": "Erbschaftsstreit",
+        "nachbarschaft": "Nachbarschaftskonflikt",
+    }
+    type_label = type_labels.get(mediation.mediation_type or "", mediation.mediation_type or "")
+    phase_labels = {
+        "einleitung": "Einleitung",
+        "themensammlung": "Themensammlung",
+        "interessen": "Interessen",
+        "optionen": "Optionen",
+        "verhandlung": "Verhandlung",
+        "abschluss": "Abschluss",
+    }
+    current_phase = phase_labels.get(mediation.phase or "", mediation.phase or "Unbekannt")
 
-    existing = db.query(MediationAppointmentVote).filter(
-        MediationAppointmentVote.slot_id == slot.id,
-        MediationAppointmentVote.participant_id == participant.id,
-    ).first()
+    participants_list = "\n".join(
+        f"- {p['name']} ({p['role']})" for p in participants_info
+    )
 
-    if existing:
-        existing.accepted = payload.accepted
-        existing.voted_at = __import__('datetime').datetime.utcnow()
-    else:
-        db.add(MediationAppointmentVote(
-            slot_id=slot.id,
-            participant_id=participant.id,
-            accepted=payload.accepted,
-        ))
+    prompt = f"""Du bist ein erfahrener Mediationsexperte. Analysiere den folgenden Mediationsfall und gib eine strukturierte JSON-Antwort zurück.
 
-    db.commit()
-    return {"ok": True}
+FALLDETAILS:
+- Titel: {mediation.title or 'Neue Mediation'}
+- Konfliktart: {type_label}
+- Aktuelle Phase: {current_phase}
+- Beschreibung: {mediation.description or 'Keine Beschreibung'}
+- Priorität/Dringlichkeit: {mediation.priority or 'Nicht angegeben'}
+
+BETEILIGTE:
+{participants_list}
+
+BISHERIGE NOTIZEN DER PARTEIEN:
+{notes_text if notes_text.strip() else 'Noch keine Notizen eingereicht.'}
+
+Erstelle eine Analyse mit folgendem JSON-Format (auf Deutsch):
+{{
+  "swot": {{
+    "staerken": ["...", "..."],
+    "schwaechen": ["...", "..."],
+    "chancen": ["...", "..."],
+    "risiken": ["...", "..."]
+  }},
+  "zusammenfassung": "2-3 Sätze zur Gesamtlage der Mediation",
+  "empfehlungen": ["...", "..."],
+  "teilnehmer_tipps": [
+    {{
+      "name": "Name des Teilnehmers",
+      "rolle": "Rolle",
+      "tipps": ["Konkreter Gesprächstipp 1", "Tipp 2", "Tipp 3"]
+    }}
+  ]
+}}
+
+WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."""
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1500,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    raw = message.content[0].text.strip()
+    # Markdown-Blöcke entfernen falls vorhanden
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+
+    try:
+        result = _json.loads(raw)
+    except Exception:
+        raise HTTPException(status_code=500, detail="KI-Antwort konnte nicht verarbeitet werden")
+
+    return result
