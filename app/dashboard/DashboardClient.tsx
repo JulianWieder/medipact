@@ -318,7 +318,7 @@ export default function DashboardClient() {
               return (
                 <Link
                   key={`mediation-${mediation.id}`}
-                  href={`/dashboard/${encodeId(mediation.id)}`}
+                  href={`/dashboard/${encodeId(Number(mediation.id))}`}
                   className={`app-surface block border p-6 transition hover:shadow-md lg:p-8 ${
                     mediation.is_my_turn
                       ? "border-amber-300 hover:border-amber-400"
