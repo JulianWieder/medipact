@@ -9,14 +9,14 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function EinleitungPage({ params }: PageProps) {
   const { id } = await params;
   const numericId = decodeId(id);
-  if (!numericId) redirect("/dashboard");
+  if (!numericId) return redirect("/dashboard");
 
   const [mediationResult, session] = await Promise.all([
     getMediation(numericId.toString()),
     auth(),
   ]);
 
-  if (!mediationResult.ok) redirect("/dashboard");
+  if (!mediationResult.ok) return redirect("/dashboard");
 
   return (
     <EinleitungClient

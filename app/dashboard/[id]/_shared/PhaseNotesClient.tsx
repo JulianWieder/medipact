@@ -999,9 +999,46 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
             {/* Modal: neuen Schritt hinzufügen */}
             {showAddStep && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                  <h3 className="mb-4 text-base font-bold text-slate-900">Neuen Schritt hinzufügen</h3>
-                  <div className="space-y-3">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="mb-5 flex items-center justify-between">
+                    <h3 className="text-base font-bold text-slate-900">Schritt einfügen</h3>
+                    <button type="button" onClick={() => { setShowAddStep(false); setNewStepTitle(""); setNewStepDesc(""); }} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+
+                  {/* Vorlagen */}
+                  <div className="mb-5">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Vorlagen</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { title: "Pause einlegen", desc: "Kurze Unterbrechung für beide Parteien zur Sammlung.", emoji: "⏸" },
+                        { title: "Einzelgespräch (Caucus)", desc: "Vertrauliches Gespräch des Mediators mit einer Partei getrennt.", emoji: "🗣" },
+                        { title: "Zusammenfassung", desc: "Der Mediator fasst die bisherigen Erkenntnisse und Vereinbarungen zusammen.", emoji: "📋" },
+                        { title: "Shuttle-Gespräch", desc: "Mediator pendelt zwischen räumlich getrennten Parteien.", emoji: "↔" },
+                        { title: "Emotionen klären", desc: "Raum für Gefühle bevor inhaltlich weitergearbeitet wird.", emoji: "💬" },
+                        { title: "Missverständnisse auflösen", desc: "Konkrete Unklarheiten oder Fehlinformationen gemeinsam klären.", emoji: "🔍" },
+                        { title: "Gemeinsame Werte", desc: "Welche Werte und Ziele teilen beide Parteien?", emoji: "🤝" },
+                        { title: "Worst-Case betrachten", desc: "Was passiert, wenn keine Einigung erzielt wird?", emoji: "⚠" },
+                        { title: "Zwischenbilanz", desc: "Wo stehen wir? Was wurde bereits erreicht?", emoji: "📊" },
+                        { title: "Nächste Schritte", desc: "Konkrete Aktionspunkte und Verantwortlichkeiten festlegen.", emoji: "✅" },
+                      ].map((tpl) => (
+                        <button
+                          key={tpl.title}
+                          type="button"
+                          onClick={() => { setNewStepTitle(tpl.title); setNewStepDesc(tpl.desc); }}
+                          className={`flex items-start gap-2 rounded-xl border p-3 text-left text-sm transition hover:border-emerald-400 hover:bg-emerald-50 ${newStepTitle === tpl.title ? "border-emerald-500 bg-emerald-50" : "border-slate-200 bg-white"}`}
+                        >
+                          <span className="text-base leading-none mt-0.5">{tpl.emoji}</span>
+                          <span className="font-medium text-slate-800">{tpl.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Eigener Schritt */}
+                  <div className="border-t border-slate-100 pt-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Oder eigenen Schritt definieren</p>
                     <div>
                       <label className="mb-1 block text-xs font-semibold text-slate-700">Titel</label>
                       <input
@@ -1010,7 +1047,6 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                         onChange={(e) => setNewStepTitle(e.target.value)}
                         placeholder="z.B. Zusätzliche Fragen klären"
                         className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                        autoFocus
                       />
                     </div>
                     <div>
@@ -1019,11 +1055,12 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                         value={newStepDesc}
                         onChange={(e) => setNewStepDesc(e.target.value)}
                         placeholder="Was sollen die Parteien in diesem Schritt tun?"
-                        rows={3}
+                        rows={2}
                         className="w-full resize-none rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                       />
                     </div>
                   </div>
+
                   <div className="mt-5 flex gap-3 justify-end">
                     <button
                       type="button"
@@ -1057,8 +1094,8 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                             setItems((prev) => ({
                               ...prev,
                               [newDetail.key]: Object.fromEntries(participants.map((p) => [p.id, []])),
-                                     }));
-                            setActiveStepIndex(allStepDetails.length); // springt zum neuen Step
+                            }));
+                            setActiveStepIndex(allStepDetails.length);
                             setShowAddStep(false);
                             setNewStepTitle("");
                             setNewStepDesc("");
@@ -1135,7 +1172,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     {accepted.filter((p) => p.name !== currentUserName).map((p) => (
                       <div key={p.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                         <div className="flex items-center justify-between">
-                          <div>
+                                   <div>
                             <p className="font-semibold text-slate-900">{p.name}</p>
                             <p className="text-xs text-slate-500">{roleLabel[p.role] ?? p.role}</p>
                           </div>
