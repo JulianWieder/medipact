@@ -773,7 +773,7 @@ def get_contract(
         return {"contract": None}
 
     # Parteien sehen den Vertrag erst wenn der Mediator ihn freigegeben hat
-    if not contract.is_released and not caller_is_mediator:
+    if not contract.is_released and not caller_is_media    if not contract.is_released and not caller_is_mediator:
         return {"contract": None}
 
     signatures = (
@@ -784,7 +784,6 @@ def get_contract(
         .all()
     )
 
-    # Alle Teilnehmer laden um all_signed zu berechnen
     all_participants = (
         db.query(MediationParticipant)
         .filter(MediationParticipant.mediation_id == mediation_id)
@@ -872,6 +871,154 @@ def sign_contract(
             contract_id=contract.id,
             participant_id=participant.id,
             signed_name=payload.signed_name.strip(),
+        ))
+
+    db.commit()
+    return {"ok": True}
+
+
+# ── Terminvereinbarung ────────────────────────────────────────────────────────
+
+from app.models.mediation_appointment import MediationAppointmentSlot, MediationAppointmentVote
+
+
+class AppointmentVoteRequest(BaseModel):
+    slot_id: int
+    accepted: bool
+
+
+def _next_weekday_slots(n: int = 3):
+    """Schlägt n Termine vor: verteilt über 2-3 Wochen, Mo-Fr 10:00 Uhr."""
+    import datetime as dt
+    slots = []
+    base = dt.datetime.utcnow().replace(hour=10, minute=0, second=0, microsecond=0)
+    offsets = [10, 14, 21]
+    for offset in offsets[:n]:
+        candidate = base + dt.timedelta(days=offset)
+        while candidate.weekday() >= 5:
+            candidate += dt.timedelta(days=1)
+        slots.append(candidate)
+    return slots
+
+
+@router.post("/{mediation_id}/appointment/propose")
+def propose_appointment(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Schlägt 3 Terminoptionen vor (alte werden ersetzt)."""
+    _require_participant(mediation_id, current_user, db)
+
+    old_slots = db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.mediation_id == mediation_id
+    ).all()
+    for slot in old_slots:
+        db.query(MediationAppointmentVote).filter(
+            MediationAppointmentVote.slot_id == slot.id
+        ).delete()
+    db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.mediation_id == mediation_id
+    ).delete()
+
+    new_slots = []
+    for dt_val in _next_weekday_slots(3):
+        slot = MediationAppointmentSlot(mediation_id=mediation_id, proposed_datetime=dt_val)
+        db.add(slot)
+        new_slots.append(slot)
+
+    db.commit()
+    for slot in new_slots:
+        db.refresh(slot)
+
+    return [
+        {"id": s.id, "proposed_datetime": s.proposed_datetime.isoformat()}
+        for s in new_slots
+    ]
+
+
+@router.get("/{mediation_id}/appointment/slots")
+def get_appointment_slots(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt alle Slots mit Abstimmungsstand zurück."""
+    _require_participant(mediation_id, current_user, db)
+
+    slots = db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.mediation_id == mediation_id
+    ).all()
+
+    all_participants = db.query(MediationParticipant).filter(
+        MediationParticipant.mediation_id == mediation_id
+    ).all()
+    all_participant_ids = {p.id for p in all_participants}
+    participant_count = len(all_participants)
+
+    result = []
+    confirmed_slot = None
+
+    for slot in slots:
+        votes = db.query(MediationAppointmentVote, MediationParticipant, User).join(
+            MediationParticipant, MediationAppointmentVote.participant_id == MediationParticipant.id
+        ).join(
+            User, MediationParticipant.user_id == User.id
+        ).filter(MediationAppointmentVote.slot_id == slot.id).all()
+
+        vote_list = [
+            {"participant_id": v.participant_id, "name": user.name, "accepted": v.accepted}
+            for v, participant, user in votes
+        ]
+        voted_ids = {v.participant_id for v, _, _ in votes}
+        accepted_ids = {v.participant_id for v, _, _ in votes if v.accepted}
+        all_accepted = participant_count > 0 and all_participant_ids == accepted_ids
+        all_voted = all_participant_ids == voted_ids
+
+        slot_data = {
+            "id": slot.id,
+            "proposed_datetime": slot.proposed_datetime.isoformat(),
+            "votes": vote_list,
+            "all_accepted": all_accepted,
+            "all_voted": all_voted,
+        }
+        result.append(slot_data)
+        if all_accepted:
+            confirmed_slot = slot_data
+
+    return {"slots": result, "confirmed": confirmed_slot}
+
+
+@router.post("/{mediation_id}/appointment/vote")
+def vote_appointment(
+    mediation_id: int,
+    payload: AppointmentVoteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Nimmt Termin an oder lehnt ihn ab."""
+    participant = _require_participant(mediation_id, current_user, db)
+
+    slot = db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.id == payload.slot_id,
+        MediationAppointmentSlot.mediation_id == mediation_id,
+    ).first()
+    if not slot:
+        raise HTTPException(status_code=404, detail="Terminslot nicht gefunden")
+
+    existing = db.query(MediationAppointmentVote).filter(
+        MediationAppointmentVote.slot_id == slot.id,
+        MediationAppointmentVote.participant_id == participant.id,
+    ).first()
+
+    if existing:
+        existing.accepted = payload.accepted
+        existing.voted_at = __import__('datetime').datetime.utcnow()
+    else:
+        db.add(MediationAppointmentVote(
+            slot_id=slot.id,
+            participant_id=participant.id,
+            accepted=payload.accepted,
         ))
 
     db.commit()

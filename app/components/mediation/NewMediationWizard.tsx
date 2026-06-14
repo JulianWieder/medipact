@@ -307,7 +307,6 @@ function renderFields(
     if (field.type === "date" && i + 1 < fields.length && fields[i + 1].type === "date") {
       elements.push(
         <div key={`date-pair-${i}`} className="grid gap-6 md:grid-cols-2">
-          {renderSingleField(field, formData[field.id], onChange)}
           {renderSingleField(fields[i + 1], formData[fields[i + 1].id], onChange)}
         </div>
       );

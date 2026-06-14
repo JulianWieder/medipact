@@ -72,7 +72,14 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin">("overview");
+
+  // Appointments
+  type AppointmentSlot = { id: number; proposed_datetime: string; votes: { participant_id: number; name: string; accepted: boolean }[]; all_accepted: boolean };
+  const [appointmentSlots, setAppointmentSlots] = useState<AppointmentSlot[]>([]);
+  const [confirmedSlot, setConfirmedSlot] = useState<AppointmentSlot | null>(null);
+  const [appointmentLoading, setAppointmentLoading] = useState(false);
+  const [appointmentVoting, setAppointmentVoting] = useState<number | null>(null);
 
   // Contract
   const [contract, setContract] = useState<Contract | null>(null);
@@ -128,7 +135,8 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
 
   useEffect(() => {
     if (activeTab === "contract") loadContract();
-  }, [activeTab, loadContract]);
+    if (activeTab === "termin") loadAppointments();
+  }, [activeTab, loadContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadStepStatuses = useCallback(async () => {
     setLoadingSteps(true);
@@ -218,6 +226,46 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     }
   }
 
+  async function loadAppointments() {
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/appointment/slots`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setAppointmentSlots(data.slots ?? []);
+      setConfirmedSlot(data.confirmed ?? null);
+    } catch { /* ignore */ }
+  }
+
+  async function handleProposeAppointments() {
+    setAppointmentLoading(true);
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/appointment/propose`, { method: "POST" });
+      if (res.ok) await loadAppointments();
+    } catch { /* ignore */ } finally {
+      setAppointmentLoading(false);
+    }
+  }
+
+  async function handleVoteSlot(slotId: number, accepted: boolean) {
+    setAppointmentVoting(slotId);
+    try {
+      await fetch(`/api/mediations/${fall.id}/appointment/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot_id: slotId, accepted }),
+      });
+      await loadAppointments();
+    } catch { /* ignore */ } finally {
+      setAppointmentVoting(null);
+    }
+  }
+
+  function fmtDate(iso: string) {
+    return new Date(iso).toLocaleDateString("de-DE", {
+      weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
+    }) + " Uhr";
+  }
+
   const progress =
     fall.progress ?? (phaseIdx >= 0 ? Math.round(((phaseIdx + 1) / 6) * 100) : 0);
   const acceptedCount = accepted.length;
@@ -227,6 +275,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     { id: "overview" as const, label: "Übersicht" },
     { id: "notes" as const, label: "Alle Notizen" },
     { id: "steps" as const, label: "Schrittstatus" },
+    { id: "termin" as const, label: "Termin" },
     { id: "contract" as const, label: "Vertrag" },
   ];
 
@@ -554,6 +603,82 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                             ))}
                           </div>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Tab: Termin ── */}
+          {activeTab === "termin" && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Terminvereinbarung</p>
+                <div className="flex items-center gap-2">
+                  <button onClick={loadAppointments} className="text-xs text-teal-600 hover:text-teal-800 font-medium">↻</button>
+                  <button
+                    onClick={handleProposeAppointments}
+                    disabled={appointmentLoading}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
+                  >
+                    {appointmentLoading ? "Wird berechnet…" : appointmentSlots.length > 0 ? "Neue Termine vorschlagen" : "Termine vorschlagen"}
+                  </button>
+                </div>
+              </div>
+
+              {confirmedSlot ? (
+                <div className="flex flex-col items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-8 text-center">
+                  <svg className="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div>
+                    <p className="mt-1 text-base font-semibold text-slate-900">{fmtDate(confirmedSlot.proposed_datetime)}</p>
+                    <p className="mt-1 text-xs text-slate-500">Alle Beteiligten haben zugestimmt.</p>
+                  </div>
+                </div>
+              ) : appointmentSlots.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center">
+                  <p className="text-sm text-slate-400">Noch keine Terminvorschläge. Klicke auf &quot;Termine vorschlagen&quot; um Vorschläge zu generieren.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {appointmentSlots.map((slot) => {
+                    const accepted = slot.votes.filter(v => v.accepted);
+                    const declined = slot.votes.filter(v => !v.accepted);
+                    return (
+                      <div key={slot.id} className={`rounded-xl border p-4 ${slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{fmtDate(slot.proposed_datetime)}</p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {accepted.map(v => (
+                                <span key={v.participant_id} className="text-xs rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">✓ {v.name}</span>
+                              ))}
+                              {declined.map(v => (
+                                <span key={v.participant_id} className="text-xs rounded-full bg-red-50 px-2 py-0.5 text-red-600">✗ {v.name}</span>
+                              ))}
+                              {slot.votes.length === 0 && <span className="text-xs text-slate-400">Noch keine Stimmen</span>}
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5 shrink-0">
+                            <button
+                              disabled={appointmentVoting === slot.id}
+                              onClick={() => handleVoteSlot(slot.id, true)}
+                              className="rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-50 transition"
+                            >
+                              {appointmentVoting === slot.id ? "…" : "Zustimmen"}
+                            </button>
+                            <button
+                              disabled={appointmentVoting === slot.id}
+                              onClick={() => handleVoteSlot(slot.id, false)}
+                              className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition"
+                            >
+                              Ablehnen
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
