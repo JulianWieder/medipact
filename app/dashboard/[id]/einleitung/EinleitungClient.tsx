@@ -2213,6 +2213,17 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             >
               ← Zurück
             </button>
+            {isMediatorOrAdmin && (
+              <button
+                type="button"
+                onClick={advanceToPhase2}
+                disabled={advancing}
+                className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
+                title="Nur für Tests: Alle Schritte überspringen und direkt zu Phase 2"
+              >
+                {advancing ? "…" : "⚡ Test: Phase überspringen"}
+              </button>
+            )}
           </div>
         </div>
       </section>

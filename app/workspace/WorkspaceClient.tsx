@@ -13,6 +13,110 @@ import { Kalender } from "./components/Kalender";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
+// ── Mediator-Qualitätsleitfaden ────────────────────────────────────────────
+const LEITFADEN_SECTIONS = [
+  {
+    title: "Deine Rolle",
+    content: "Du steuerst den Prozess – nicht das Ergebnis. Die Parteien sind die Experten ihres Konflikts. Deine Aufgabe ist es, ihnen Raum zu geben, gehört zu werden und selbst Lösungen zu entwickeln.",
+    type: "text" as const,
+  },
+  {
+    title: "Haltung",
+    content: [
+      "Allparteilichkeit – keine Seite bevorzugen, beide Perspektiven ernst nehmen",
+      "Neutralität – eigene Meinungen und Werturteile zurückhalten",
+      "Vertraulichkeit – alles Besprochene bleibt im Raum",
+      "Eigenverantwortung – Lösungen kommen von den Parteien, nicht von dir",
+    ],
+    type: "list" as const,
+  },
+  {
+    title: "Qualitätssignale im Gespräch",
+    content: [
+      "Die Parteien sprechen mehr als du",
+      "Lösungsideen entstehen bei den Parteien selbst",
+      "Die Atmosphäre wird im Verlauf offener",
+      "Positionen weichen Interessen und Bedürfnissen",
+    ],
+    type: "list" as const,
+  },
+  {
+    title: "Eskalation früh erkennen",
+    content: "Sobald Gespräche persönlich werden, Vorwürfe auftauchen oder eine Partei dominiert – unterbreche, benenne die Dynamik und lenke zurück. Ein kurzer Moment der Unterbrechung ist besser als ein entgleistes Gespräch.",
+    type: "text" as const,
+  },
+  {
+    title: "Psychologisch entscheidend",
+    content: "Menschen im Konflikt sind defensiv und positionsorientiert. Deine Hauptaufgabe in jeder Phase ist es, Sicherheit herzustellen – nur so werden die Parteien gesprächsfähig und offen für Lösungen.",
+    type: "text" as const,
+    highlight: true,
+  },
+];
+
+function LeitfadenModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-600">Mediator-Leitfaden</p>
+            <h2 className="text-lg font-semibold text-slate-900">Qualitätsstandards</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+            aria-label="Schließen"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-3">
+          <p className="text-sm text-slate-500 mb-5">
+            Lies diesen Leitfaden bevor du eine Mediation leitest. Die Parteien sehen diese Seite nicht.
+          </p>
+          {LEITFADEN_SECTIONS.map((section, i) => (
+            <div
+              key={i}
+              className={`rounded-xl border p-4 ${
+                section.highlight
+                  ? "border-teal-200 bg-teal-50"
+                  : "border-slate-100 bg-slate-50"
+              }`}
+            >
+              <h3 className="mb-2 text-sm font-bold text-slate-800">{section.title}</h3>
+              {section.type === "list" ? (
+                <ul className="space-y-1.5">
+                  {(section.content as string[]).map((item, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-600 leading-relaxed">{section.content as string}</p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 border-t border-slate-100 bg-white px-6 py-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="rounded-full bg-teal-500 px-6 py-2 text-sm font-semibold text-white hover:bg-teal-600 transition"
+          >
+            Verstanden – Workspace öffnen →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Tab = "liste" | "einzelansicht";
 
 interface WorkspaceClientProps {
@@ -20,6 +124,7 @@ interface WorkspaceClientProps {
 }
 
 export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
+  const [showLeitfaden, setShowLeitfaden] = useState(true);
   const [section, setSection] = useState<WorkspaceSection>("dashboard");
   const [tab, setTab] = useState<Tab>("liste");
 
@@ -151,19 +256,22 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Dashboard ───────────────────────────────────────────────────────────
   if (section === "dashboard") {
     return (
-      <div className="flex h-full bg-[#f8fafc] text-slate-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
-        <div className="flex-1 overflow-auto p-6">
-          <WorkspaceDashboard
-            isAdmin={isAdmin}
-            onSelectFall={(m) => {
-              setSelectedFall(m);
-              setSection("faelle");
-              setTab("einzelansicht");
-            }}
-          />
+      <>
+        {showLeitfaden && <LeitfadenModal onClose={() => setShowLeitfaden(false)} />}
+        <div className="flex h-full bg-[#f8fafc] text-slate-900">
+          <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+          <div className="flex-1 overflow-auto p-6">
+            <WorkspaceDashboard
+              isAdmin={isAdmin}
+              onSelectFall={(m) => {
+                setSelectedFall(m);
+                setSection("faelle");
+                setTab("einzelansicht");
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 

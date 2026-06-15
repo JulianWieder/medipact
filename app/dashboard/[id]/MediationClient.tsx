@@ -106,12 +106,6 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   }
 
   async function startMediation() {
-    // Mediatoren und Admins sehen zuerst den Leitfaden
-    if (userRole === "mediator" || userRole === "admin") {
-      router.push(`/dashboard/${hashId(mediationId)}/einleitung/leitfaden`);
-      return;
-    }
-
     setAdvancing(true);
     setError("");
     try {
