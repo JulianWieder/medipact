@@ -203,7 +203,7 @@ export function Kalender({ isAdmin = false }: KalenderProps) {
                     </span>
                     {dayEvents.length > 0 && (
                       <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                        {dayEvents.slice(0, 3).map((e, idx) => (
+                        {dayEvents.slice(0, 3).map((_e, idx) => (
                           <span
                             key={idx}
                             className="w-1.5 h-1.5 rounded-full bg-teal-500"
