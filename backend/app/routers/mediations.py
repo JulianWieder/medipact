@@ -882,6 +882,44 @@ def sign_contract(
 from app.models.mediation_appointment import MediationAppointmentSlot, MediationAppointmentVote
 
 
+@router.get("/appointments/all")
+def get_all_appointments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt alle Terminslots zurück, an denen der aktuelle Nutzer beteiligt ist."""
+    # Alle Mediations-IDs des Users ermitteln
+    participations = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.user_id == current_user.id)
+        .all()
+    )
+    mediation_ids = [p.mediation_id for p in participations]
+
+    if not mediation_ids:
+        return []
+
+    slots = (
+        db.query(MediationAppointmentSlot, Mediation)
+        .join(Mediation, MediationAppointmentSlot.mediation_id == Mediation.id)
+        .filter(MediationAppointmentSlot.mediation_id.in_(mediation_ids))
+        .order_by(MediationAppointmentSlot.proposed_datetime)
+        .all()
+    )
+
+    result = []
+    for slot, mediation in slots:
+        result.append({
+            "id": slot.id,
+            "mediation_id": mediation.id,
+            "mediation_title": mediation.title,
+            "mediation_type": mediation.conflict_type,
+            "proposed_datetime": slot.proposed_datetime.isoformat(),
+        })
+
+    return result
+
+
 class AppointmentVoteRequest(BaseModel):
     slot_id: int
     accepted: bool

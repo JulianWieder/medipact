@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -146,6 +146,15 @@ export async function fetchStepStatus(
 /** Alle registrierten Nutzer - nur fuer Admins/Mediatoren. */
 export async function fetchAllUsers(): Promise<SystemUser[]> {
   const res = await fetch("/api/admin/users", { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+// ── Kalender / Termine ────────────────────────────────────────────────────
+
+/** Alle Terminslots über alle Mediationen des eingeloggten Nutzers. */
+export async function fetchAllAppointments(): Promise<AppointmentEvent[]> {
+  const res = await fetch("/api/appointments/all", { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
 }

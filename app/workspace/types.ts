@@ -1,6 +1,6 @@
 // ── Workspace Types ───────────────────────────────────────────────────────
 
-export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "einstellungen";
+export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "einstellungen";
 
 export interface WorkspaceNavItem {
   id: WorkspaceSection;
@@ -12,6 +12,7 @@ export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   { id: "dashboard", label: "Übersicht", icon: "⊞" },
   { id: "faelle", label: "Meine Fälle", icon: "⚖" },
   { id: "parteien", label: "Parteien", icon: "👥" },
+  { id: "kalender", label: "Kalender", icon: "📅" },
   { id: "einstellungen", label: "Einstellungen", icon: "⚙" },
 ];
 
@@ -79,6 +80,16 @@ export interface SystemUser {
   email: string;
   role: string;
   is_verified: boolean;
+}
+
+// ── Appointments ─────────────────────────────────────────────────────────
+
+export interface AppointmentEvent {
+  id: number;
+  mediation_id: number;
+  mediation_title: string;
+  mediation_type: string;
+  proposed_datetime: string;
 }
 
 // ── User role ──────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import { FaelleListe } from "./components/FaelleListe";
 import { FallDetail } from "./components/FallDetail";
 import { ParteienListe } from "./components/ParteienListe";
 import { ParteiDetail } from "./components/ParteiDetail";
+import { Kalender } from "./components/Kalender";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -190,6 +191,18 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
               <div className="text-sm text-slate-500">medipact workspace v1.0</div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Kalender ────────────────────────────────────────────────────────────
+  if (section === "kalender") {
+    return (
+      <div className="flex h-full bg-[#f8fafc] text-slate-900">
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <div className="flex-1 overflow-auto p-6">
+          <Kalender isAdmin={isAdmin} />
         </div>
       </div>
     );
