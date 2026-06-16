@@ -170,7 +170,7 @@
   .app-surface {
     position: relative;
     overflow: hidden;
-    border-radius: 2rem;
+    border-radius: 1rem;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid rgba(30, 41, 59, 0.07);
     box-shadow:
@@ -194,6 +194,12 @@
       transparent
     );
     pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .app-surface {
+      border-radius: 2rem;
+    }
   }
 
   .app-surface:hover {

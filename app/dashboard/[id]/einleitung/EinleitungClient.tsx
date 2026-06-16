@@ -316,8 +316,7 @@ function JitsiCall({
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
-      style={{ height: "520px" }}
+      className="w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm h-[300px] sm:h-[520px]"
     />
   );
 }
@@ -1513,7 +1512,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         key={i}
                         type="button"
                         onClick={() => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: i }))}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-all
+                        className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg text-xs sm:text-sm font-semibold transition-all
                           ${feedbackAnswers[q.id] === i
                             ? "bg-violet-600 text-white shadow-sm"
                             : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-violet-300 hover:bg-violet-50"
@@ -1902,7 +1901,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   Tippe deinen vollständigen Namen und klicke „Unterzeichnen", um den Vertrag
                   zu bestätigen.
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="text"
                     value={signedName}
@@ -1917,7 +1916,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                     type="button"
                     onClick={signContract}
                     disabled={contractSigning || !signedName.trim()}
-                    className="btn btn-primary shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="btn btn-primary sm:shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {contractSigning ? "Wird gespeichert…" : "Unterzeichnen"}
                   </button>
@@ -1936,9 +1935,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   return (
     <main className="app-shell pt-[73px]">
-      <section className="container py-12">
+      <section className="container py-4 sm:py-12">
         {/* Globaler Phasen-Stepper – nur für Initiator, nicht für andere Partei */}
-        <div className={`mb-8 overflow-x-auto ${isOtherParty ? "hidden" : ""}`}>
+        <div className={`mb-4 sm:mb-8 overflow-x-auto ${isOtherParty ? "hidden" : ""}`}>
           <ol className="flex min-w-max items-center">
             {PHASES.map((p, index) => {
               const isDone = index < phaseIndex;
@@ -1998,7 +1997,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </ol>
         </div>
 
-        <div className="app-surface p-8">
+        <div className="app-surface p-4 sm:p-8">
           {isOtherParty ? (
             /* Emotionaler Header für die Gegenpartei */
             <div className="mb-6">
@@ -2033,7 +2032,23 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           )}
 
           {/* Phase-1-interner Stepper */}
-          <div className="mt-6 overflow-x-auto">
+          {/* Mobile: kompakte Fortschrittsleiste */}
+          <div className="mt-4 sm:hidden">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-emerald-700">
+                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+              </span>
+              <span className="text-xs text-slate-400">{getPhaseStepLabel(activeStep)}</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all"
+                style={{ width: `${((PHASE_STEPS.indexOf(activeStep) + 1) / PHASE_STEPS.length) * 100}%` }}
+              />
+            </div>
+          </div>
+          {/* Desktop: Dot-Stepper */}
+          <div className="mt-6 hidden sm:block overflow-x-auto">
             <ol className="flex min-w-max items-center gap-0">
               {PHASE_STEPS.map((step, idx) => (
                 <li key={step} className="flex items-center">
@@ -2055,7 +2070,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
 
           {/* Aktiver Schritt-Inhalt */}
-          <div className="mt-8 rounded-2xl border border-slate-100 bg-slate-50/50 p-6">
+          <div className="mt-4 sm:mt-8 rounded-xl sm:rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-6">
             {activeStep === "intro" && (
               <>
                 <div className="mb-6">
