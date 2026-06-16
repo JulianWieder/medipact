@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Boolean, Column, Integer, String, Text
 
 from app.database import Base
 
@@ -14,3 +14,4 @@ class Mediation(Base):
     role = Column(String, nullable=True)
     status = Column(String, default="draft")
     phase = Column(String, nullable=True)
+    is_paid = Column(Boolean, nullable=False, default=False, server_default="0")

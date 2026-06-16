@@ -33,6 +33,8 @@ class MediationUpdate(BaseModel):
     priority: Optional[str] = None
     status: Optional[str] = None
     phase: Optional[str] = None
+    # is_paid wird bewusst NICHT hier aufgenommen - darf nur über den
+    # dedizierten /pay-Endpoint gesetzt werden, nicht über das generische Update.
 
 
 class NoteCreate(BaseModel):
@@ -128,12 +130,56 @@ def update_mediation(
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
 
-    for key, value in payload.model_dump(exclude_none=True).items():
+    update_data = payload.model_dump(exclude_none=True)
+
+    # Phase 1 darf erst starten, wenn bezahlt wurde. Diese Prüfung greift
+    # serverseitig, damit ein direkter API-Call (z.B. via Link) die Paywall
+    # nicht umgehen kann.
+    if update_data.get("status") == "active" and not mediation.is_paid:
+        raise HTTPException(
+            status_code=402,
+            detail="Zahlung erforderlich, bevor die Mediation gestartet werden kann.",
+        )
+
+    for key, value in update_data.items():
         setattr(mediation, key, value)
 
     db.commit()
     db.refresh(mediation)
     return mediation
+
+
+@router.post("/{mediation_id}/pay")
+def pay_mediation(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Markiert die Mediation als bezahlt.
+
+    Platzhalter für die echte Stripe-Checkout-Anbindung (TODO). Sobald Stripe
+    angebunden ist, sollte dieser Endpoint nur noch vom Zahlungs-Webhook
+    (nach erfolgreicher Zahlung) aufgerufen werden, nicht mehr direkt vom Client.
+    """
+    is_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    mediation.is_paid = True
+    db.commit()
+    db.refresh(mediation)
+    return {"ok": True, "is_paid": mediation.is_paid}
 
 
 @router.get("/me")
@@ -236,6 +282,7 @@ def get_mediation(
         "status": mediation.status,
         "phase": mediation.phase,
         "role": is_participant.role,
+        "is_paid": mediation.is_paid,
     }
 
 
@@ -1025,6 +1072,48 @@ def propose_appointment(
         {"id": s.id, "proposed_datetime": s.proposed_datetime.isoformat()}
         for s in new_slots
     ]
+
+
+class AppointmentVoteRequest(BaseModel):
+    slot_id: int
+    accepted: bool
+
+
+@router.post("/{mediation_id}/appointment/vote")
+def vote_appointment_slot(
+    mediation_id: int,
+    payload: AppointmentVoteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Speichert die Zu- oder Absage eines Teilnehmers zu einem Terminslot (Upsert)."""
+    participant = _require_participant(mediation_id, current_user, db)
+
+    slot = db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.id == payload.slot_id,
+        MediationAppointmentSlot.mediation_id == mediation_id,
+    ).first()
+    if not slot:
+        raise HTTPException(status_code=404, detail="Terminslot nicht gefunden")
+
+    existing_vote = db.query(MediationAppointmentVote).filter(
+        MediationAppointmentVote.slot_id == payload.slot_id,
+        MediationAppointmentVote.participant_id == participant.id,
+    ).first()
+
+    if existing_vote:
+        existing_vote.accepted = payload.accepted
+    else:
+        existing_vote = MediationAppointmentVote(
+            slot_id=payload.slot_id,
+            participant_id=participant.id,
+            accepted=payload.accepted,
+        )
+        db.add(existing_vote)
+
+    db.commit()
+    db.refresh(existing_vote)
+    return {"ok": True, "slot_id": existing_vote.slot_id, "accepted": existing_vote.accepted}
 
 
 @router.get("/{mediation_id}/appointment/slots")

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -24,11 +27,13 @@ const navItems = [
 ];
 
 export default function Header() {
+  const [open, setOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <Image
             src="/logo.png"
             alt="Medipact Logo"
@@ -62,14 +67,63 @@ export default function Header() {
           Mediation starten
         </Link>
 
-        {/* MOBILE */}
+        {/* MOBILE TOGGLE */}
         <button
+          type="button"
           className="inline-flex rounded-md p-2 text-neutral-800 md:hidden"
-          aria-label="Menü öffnen"
+          aria-label={open ? "Menü schließen" : "Menü öffnen"}
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((prev) => !prev)}
         >
-          ☰
+          {open ? "✕" : "☰"}
         </button>
       </div>
+
+      {/* MOBILE MENU */}
+      {open && (
+        <nav
+          id="mobile-menu"
+          className="border-t border-slate-200/80 bg-white px-6 py-4 md:hidden"
+        >
+          <ul className="flex flex-col gap-1">
+            {navItems.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-slate-50"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+                {item.children && (
+                  <ul className="ml-3 flex flex-col gap-1 border-l border-slate-200 pl-3">
+                    {item.children.map((child) => (
+                      <li key={child.href}>
+                        <Link
+                          href={child.href}
+                          className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-slate-50 hover:text-neutral-900"
+                          onClick={() => setOpen(false)}
+                        >
+                          {child.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href="/auth/login"
+            className="mt-4 inline-flex w-full justify-center rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+            onClick={() => setOpen(false)}
+          >
+            Mediation starten
+          </Link>
+        </nav>
+      )}
     </header>
   );
 }

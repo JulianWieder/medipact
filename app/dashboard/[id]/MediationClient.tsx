@@ -8,6 +8,7 @@ type Props = {
   mediationId: string;
   userRole: string;
   currentUserName?: string;
+  initialIsPaid?: boolean;
 };
 
 type Participant = {
@@ -24,7 +25,7 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-export default function MediationClient({ mediationId, currentUserName }: Props) {
+export default function MediationClient({ mediationId, currentUserName, initialIsPaid = false }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,8 @@ export default function MediationClient({ mediationId, currentUserName }: Props)
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [isPaid, setIsPaid] = useState(initialIsPaid);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -102,6 +105,30 @@ export default function MediationClient({ mediationId, currentUserName }: Props)
       setError("Server nicht erreichbar.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function payNow() {
+    setPaying(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/pay`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const errorBody = await res.json().catch(() => null);
+        const raw = errorBody?.detail ?? errorBody?.error;
+        const detail = Array.isArray(raw)
+          ? raw.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join(", ")
+          : (raw ?? "Unbekannter Fehler");
+        setError(`Zahlung fehlgeschlagen (${res.status}): ${detail}`);
+        return;
+      }
+      setIsPaid(true);
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -212,12 +239,60 @@ export default function MediationClient({ mediationId, currentUserName }: Props)
             )}
           </div>
 
-          {/* Bereit zum Starten */}
-          {hasOtherParty && (
+          {/* Bereit zum Starten: erst bezahlen, dann starten */}
+          {hasOtherParty && !isPaid && (
+            <div className="mt-10 rounded-3xl border-2 border-emerald-400 bg-white p-8 shadow-lg shadow-emerald-100/60">
+              <div className="text-center">
+                <p className="text-sm font-semibold text-emerald-800 mb-1">Alle Beteiligten sind verbunden</p>
+                <h2 className="text-xl font-bold text-slate-900">Mediation freischalten</h2>
+                <p className="mt-2 max-w-xl mx-auto text-sm text-slate-600">
+                  Bevor Phase 1 startet, ist eine einmalige Zahlung erforderlich.
+                </p>
+
+                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mt-6 mb-2">
+                  Vollständiger Zugang
+                </p>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-5xl font-extrabold text-slate-900 tracking-tight">79</span>
+                  <span className="text-2xl font-bold text-slate-900">€</span>
+                </div>
+                <p className="text-slate-400 text-sm mt-1">
+                  einmalig · pro Mediationsfall · inkl. MwSt.
+                </p>
+
+                {/* TODO: Stripe-Checkout hier integrieren */}
+                <button
+                  type="button"
+                  onClick={payNow}
+                  disabled={paying}
+                  className="mt-6 w-full max-w-sm mx-auto block rounded-2xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {paying ? "Wird verarbeitet..." : "Jetzt bezahlen & Phase 1 starten →"}
+                </button>
+
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+                  {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(
+                    (badge) => (
+                      <span key={badge} className="text-xs text-slate-400">
+                        {badge}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+              {error && (
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm font-semibold text-red-700">{error}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasOtherParty && isPaid && (
             <div className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">Alle Beteiligten sind verbunden</p>
+                  <p className="text-sm font-semibold text-emerald-800">Zahlung erhalten</p>
                   <h2 className="mt-2 text-xl font-bold text-slate-900">Mediation starten</h2>
                   <p className="mt-2 max-w-xl text-sm text-slate-600">
                     Alle Parteien haben dem Verfahren beigetreten. Du kannst die Mediation jetzt starten.

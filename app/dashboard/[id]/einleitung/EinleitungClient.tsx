@@ -1366,9 +1366,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   }
 
 
-  // ── Render: Paywall ────────────────────────────────────────────────────────
+  // ── Render: Phase-1-Abschluss ──────────────────────────────────────────────
+  // Hinweis: Die Bezahlung erfolgt bereits vor Phase 1 (siehe MediationClient.tsx).
+  // Hier ist keine Paywall mehr nötig – Phase 1 abschließen führt direkt weiter.
 
-  function renderPaywall() {
+  function renderPhaseOneComplete() {
     return (
       <div className="space-y-8">
         <div className="text-center">
@@ -1432,63 +1434,16 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
         </div>
 
-        <div className="rounded-2xl border-2 border-emerald-400 bg-white p-8 shadow-lg shadow-emerald-100/60">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-2">
-              Vollständiger Zugang
-            </p>
-            <div className="flex items-baseline justify-center gap-1 mt-1">
-              <span className="text-5xl font-extrabold text-slate-900 tracking-tight">79</span>
-              <span className="text-2xl font-bold text-slate-900">€</span>
-            </div>
-            <p className="text-slate-400 text-sm mt-1">
-              einmalig · pro Mediationsfall · inkl. MwSt.
-            </p>
-
-            {/* TODO: Stripe-Checkout hier integrieren */}
-            <button
-              type="button"
-              className="mt-6 w-full rounded-2xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:scale-[0.98] transition-all"
-              onClick={() => {
-                // TODO: router.push('/checkout?mediationId=...')
-                alert("Stripe-Integration folgt.");
-              }}
-            >
-              Jetzt Phase 2 freischalten →
-            </button>
-
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
-              {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(
-                (badge) => (
-                  <span key={badge} className="text-xs text-slate-400">
-                    {badge}
-                  </span>
-                )
-              )}
-            </div>
-          </div>
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={advanceToPhase2}
+            disabled={advancing}
+            className="btn btn-primary disabled:opacity-60"
+          >
+            {advancing ? "Wird gestartet…" : "Weiter zu Phase 2 →"}
+          </button>
         </div>
-
-        <p className="text-center text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-          Ihr seid bereits weiter als die meisten. Viele berichten, dass Phase 2 die
-          entscheidende Wende bringt – der Moment, in dem aus Positionen echte Gespräche werden.
-        </p>
-
-        {isMediatorOrAdmin && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-center">
-            <p className="text-xs text-slate-500 mb-3">
-              Als Mediator kannst du Phase 2 nach erfolgter Zahlung direkt starten.
-            </p>
-            <button
-              type="button"
-              onClick={advanceToPhase2}
-              disabled={advancing}
-              className="btn btn-primary disabled:opacity-60"
-            >
-              {advancing ? "Wird gestartet…" : "Phase 2 starten (Mediator) →"}
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -1866,7 +1821,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       );
     }
 
-    if (allSigned) return renderPaywall();
+    if (allSigned) return renderPhaseOneComplete();
 
     return (
       <div className="space-y-6">

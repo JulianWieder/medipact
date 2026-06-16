@@ -33,7 +33,15 @@ export async function getMediation(id: string | number) {
     status: string;
     phase: string | null;
     role: string;
+    is_paid: boolean;
   }>(`/mediations/${id}`);
+}
+
+export async function payMediation(id: string | number) {
+  return backendFetch<{ ok: boolean; is_paid: boolean }>(
+    `/mediations/${id}/pay`,
+    { method: "POST" },
+  );
 }
 
 export async function getMyMediations() {
