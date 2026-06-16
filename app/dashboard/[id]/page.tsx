@@ -30,7 +30,7 @@ export default async function MediationPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       userRole={session?.user?.role ?? "party"}
       currentUserName={session?.user?.name ?? ""}
-      initialIsPaid={result.data.is_paid ?? false}
+      initialIsPaid={result.data?.is_paid ?? false}
     />
   );
 }
