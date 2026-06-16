@@ -24,7 +24,7 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-export default function MediationClient({ mediationId, userRole, currentUserName }: Props) {
+export default function MediationClient({ mediationId, currentUserName }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
