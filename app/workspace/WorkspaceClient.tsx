@@ -138,6 +138,14 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // Phasenwechsel: Fall neu laden
   const [fallRefresh, setFallRefresh] = useState(0);
 
+  // Sprung in die Kalender-Tagesansicht (z.B. via Termin-Klick im Dashboard)
+  const [kalenderDate, setKalenderDate] = useState<Date | null>(null);
+
+  function handleSelectTermin(date: Date) {
+    setKalenderDate(date);
+    setSection("kalender");
+  }
+
   useEffect(() => {
     fetchUserRole().then((info) => {
       if (info) {
@@ -157,6 +165,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
     setTab("liste");
     setSelectedFall(null);
     setSelectedPartei(null);
+    setKalenderDate(null);
   }
 
   function handlePhaseAdvanced() {
@@ -268,6 +277,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
                 setSection("faelle");
                 setTab("einzelansicht");
               }}
+              onSelectTermin={handleSelectTermin}
             />
           </div>
         </div>
@@ -310,7 +320,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       <div className="flex h-full bg-[#f8fafc] text-slate-900">
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto p-6">
-          <Kalender isAdmin={isAdmin} />
+          <Kalender isAdmin={isAdmin} jumpToDate={kalenderDate} />
         </div>
       </div>
     );

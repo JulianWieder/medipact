@@ -25,88 +25,6 @@ const problemPoints = [
   "Familien, Nachbarn oder Ex-Partner müssen oft trotzdem weiter miteinander umgehen.",
 ];
 
-const useCases = [
-  {
-    title: "Trennung & Scheidung",
-    scenario: `„Wir haben uns getrennt – aber die Wohnung, das Konto und die Betreuungszeiten sind noch ungeklärt."`,
-    text: "Genau in dieser Phase entstehen die teuersten Fehler: voreilige Entscheidungen, eskalierte Nachrichten, unnötige Anwaltskosten. Medipact schafft einen Rahmen, in dem beide Seiten ruhig klären, was wirklich wichtig ist.",
-    points: [
-      "Finanzen, Hausrat und Betreuung getrennt besprechen",
-      "Keine Eskalation durch direkte Konfrontation",
-      "Weniger Druck – besonders für Kinder",
-    ],
-    iconPath: "M12 21C12 21 3 14.5 3 8.5a4.5 4.5 0 0 1 7.84-3.03L12 6.5l1.16-1.03A4.5 4.5 0 0 1 21 8.5C21 14.5 12 21 12 21z M8 15l4 4 4-4 M12 19v-7",
-    accentFrom: "#fff1f2",
-    accentTo: "#fff7ed",
-    iconColor: "#e11d48",
-    iconBg: "#ffe4e6",
-  },
-  {
-    title: "Nachbarschaftskonflikte",
-    scenario: `„Seit Monaten halten wir Ruhezeiten ein – und werden trotzdem regelmäßig angezeigt."`,
-    text: "Nachbarschaftsstreit eskaliert schnell, weil man sich nicht aus dem Weg gehen kann. Medipact hilft, das Muster zu durchbrechen: klare Themen, sachlicher Austausch, verbindliche Regeln.",
-    points: [
-      "Lärm, Grenzen, Gemeinschaftsflächen strukturiert klären",
-      "Sachlicher Ton statt persönlicher Angriffe",
-      "Konkrete Vereinbarungen statt vager Versprechen",
-    ],
-    iconPath: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
-    accentFrom: "#f0f9ff",
-    accentTo: "#f0fdfa",
-    iconColor: "#0284c7",
-    iconBg: "#e0f2fe",
-  },
-  {
-    title: "Erbstreitigkeiten",
-    scenario: `„Meine Geschwister und ich streiten seit dem Tod unserer Mutter. Es geht ums Haus – aber eigentlich um viel mehr."`,
-    text: "Erbkonflikte sind selten nur finanzielle Fragen. Alte Verletzungen, Erwartungen und Trauer kommen gleichzeitig. Medipact hilft, die Ebenen zu trennen – damit eine faire Lösung möglich wird, ohne die Familie zu spalten.",
-    points: [
-      "Finanzielle und emotionale Themen klar trennen",
-      "Alle Positionen sichtbar machen, ohne Druck",
-      "Familienbeziehungen soweit wie möglich erhalten",
-    ],
-    iconPath: "M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2 M12 12v4 M10 14h4",
-    accentFrom: "#fffbeb",
-    accentTo: "#fefce8",
-    iconColor: "#d97706",
-    iconBg: "#fef3c7",
-  },
-];
-
-const modules = [
-  {
-    title: "Ruhiger Einstieg",
-    text: "Sie schildern die Situation strukturiert, ohne sofort in eine direkte Konfrontation zu müssen. Das senkt die Hemmschwelle für den ersten Schritt.",
-  },
-  {
-    title: "Beide Seiten werden gehört",
-    text: "Medipact hilft, Forderungen, Sorgen und Interessen getrennt zu betrachten. So entsteht ein klareres Bild des Konflikts.",
-  },
-  {
-    title: "Geführter Lösungsprozess",
-    text: "Die KI führt Schritt für Schritt durch den Austausch, stellt neutrale Fragen und hilft, aus verhärteten Positionen konkrete Optionen zu machen.",
-  },
-  {
-    title: "Einigung festhalten",
-    text: "Wenn eine Lösung gefunden ist, wird sie verständlich dokumentiert. Bei Bedarf kann das Ergebnis anschließend juristisch geprüft werden.",
-  },
-];
-
-const trustPoints = [
-  {
-    title: "Vertraulich & DSGVO-konform",
-    text: "Private Konflikte brauchen Schutz. Der Prozess ist auf vertrauliche Kommunikation und sensible Daten ausgelegt.",
-  },
-  {
-    title: "Sie behalten die Kontrolle",
-    text: "Medipact entscheidet nicht über Sie. Die Plattform strukturiert den Weg zur Lösung; zustimmen müssen immer die Beteiligten selbst.",
-  },
-  {
-    title: "Menschliche Hilfe möglich",
-    text: "Wenn ein Fall zu emotional oder festgefahren ist, kann ein menschlicher Mediator eingebunden werden.",
-  },
-];
-
 const workflowSteps = [
   {
     num: "01",
@@ -160,47 +78,6 @@ const faqs = [
   {
     q: "Wie lange dauert der Prozess?",
     a: "Viele Konflikte lassen sich in wenigen Wochen strukturieren und lösen. Die Dauer hängt davon ab, wie komplex der Streit ist und wie aktiv beide Seiten mitarbeiten.",
-  },
-];
-
-const comparisonPlans = [
-  {
-    title: "Medipact",
-    status: "Ruhig & bezahlbar",
-    features: [
-      "niedrige Einstiegshürde",
-      "strukturierter Austausch",
-      "weniger Eskalation",
-      "für private Konflikte",
-      "menschlicher Mediator optional",
-    ],
-    className:
-      "bg-slate-800/70 border-teal-600/40 shadow-2xl shadow-teal-950/50",
-    featured: true,
-  },
-  {
-    title: "Anwaltlicher Streit",
-    status: "Konfrontativer",
-    features: [
-      "häufig positionsgetrieben",
-      "Kosten können schnell steigen",
-      "Kommunikation oft über Dritte",
-      "sinnvoll bei klaren Rechtsfragen",
-    ],
-    className: "bg-slate-800/50 border-slate-700",
-    featured: false,
-  },
-  {
-    title: "Gerichtsverfahren",
-    status: "Langsam & fremdbestimmt",
-    features: [
-      "Richter entscheidet",
-      "dauert oft lange",
-      "belastet Beziehungen zusätzlich",
-      "notwendig, wenn keine Einigung möglich ist",
-    ],
-    className: "bg-slate-800/50 border-slate-700",
-    featured: false,
   },
 ];
 
@@ -394,126 +271,13 @@ export default function MedipactLanding() {
         </section>
 
         <section className="section section-base">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="eyebrow mb-4 justify-center">Anwendungsfälle</div>
-              <h2 className="heading-2">
-                Dafür ist Medipact gedacht
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-700">
-                Nicht für jeden Streit. Sondern für Fälle, in denen eine faire
-                Einigung besser ist als ein langer Kampf.
-              </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-              {useCases.map((useCase) => (
-                <article
-                  key={useCase.title}
-                  className="app-surface flex flex-col overflow-hidden"
-                >
-                  {/* Farbige Karten-Kopfzeile */}
-                  <div
-                    className="px-8 pt-8 pb-6"
-                    style={{
-                      background: `linear-gradient(135deg, ${useCase.accentFrom} 0%, ${useCase.accentTo} 100%)`,
-                    }}
-                  >
-                    {/* Icon */}
-                    <div
-                      className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: useCase.iconBg, color: useCase.iconColor }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                        {useCase.iconPath.split(" M").map((d, i) => (
-                          <path key={i} d={i === 0 ? d : "M" + d} />
-                        ))}
-                      </svg>
-                    </div>
-
-                    <h3 className="heading-3 text-slate-900">{useCase.title}</h3>
-
-                    {/* Szenario-Zitat */}
-                    <p className="mt-3 text-sm italic leading-relaxed text-slate-500">
-                      {useCase.scenario}
-                    </p>
-                  </div>
-
-                  {/* Karten-Body */}
-                  <div className="flex flex-1 flex-col px-8 py-6">
-                    <p className="text-sm leading-7 text-slate-600">
-                      {useCase.text}
-                    </p>
-
-                    <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-700">
-                      {useCase.points.map((point) => (
-                        <li key={point} className="flex items-start gap-3">
-                          <span
-                            className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                            style={{ backgroundColor: useCase.iconColor }}
-                          >
-                            ✓
-                          </span>
-                          <span>{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section section-strong">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="eyebrow mb-4 justify-center text-teal-400">Vergleich</div>
-              <h2 className="heading-2 text-white">
-                Der bessere erste Schritt vor der Eskalation
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300">
-                Medipact ist kein Kampfmodus. Es ist ein strukturierter Weg, um
-                wieder handlungsfähig zu werden.
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {comparisonPlans.map((plan) => (
-                <div
-                  key={plan.title}
-                  className={`rounded-[2rem] border p-8 ${plan.className}`}
-                >
-                  {plan.featured && (
-                    <div className="mb-4 inline-block rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-300">
-                      Empfohlen
-                    </div>
-                  )}
-                  <h3 className="text-xl font-bold text-white">{plan.title}</h3>
-                  <div
-                    className={`mt-1 text-sm font-medium ${
-                      plan.featured ? "text-teal-300" : "text-slate-500"
-                    }`}
-                  >
-                    {plan.status}
-                  </div>
-
-                  <div className="my-6 h-px bg-white/10" />
-
-                  <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-start gap-3 text-sm text-slate-300"
-                      >
-                        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${plan.featured ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-400"}`}>✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+            <p className="text-base text-slate-600">
+              Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,{" "}
+              <Link href="/cases" className="font-semibold text-teal-700 hover:underline">
+                wie konkrete Fälle mit Medipact gelöst wurden →
+              </Link>
+            </p>
           </div>
         </section>
 
@@ -553,65 +317,15 @@ export default function MedipactLanding() {
           </div>
         </section>
 
-        <section className="section section-muted border-y border-slate-200">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="eyebrow mb-4 justify-center">Funktionsweise</div>
-              <h2 className="heading-2">
-                Was Medipact konkret leistet
-              </h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              {modules.map((module, i) => (
-                <article
-                  key={module.title}
-                  className="app-surface p-10"
-                >
-                  <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-teal-600">
-                    Schritt {String(i + 1).padStart(2, "0")}
-                  </div>
-                  <h3 className="heading-3">{module.title}</h3>
-                  <p className="mt-4 text-base leading-7 text-slate-600">
-                    {module.text}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section section-accent border-y border-teal-100">
-          <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-2 lg:px-8">
-            <div>
-              <div className="eyebrow mb-4">Vertrauen & Sicherheit</div>
-              <h2 className="heading-2">
-                Sicher genug für sensible Themen. Einfach genug für den ersten
-                Schritt.
-              </h2>
-              <p className="mt-6 text-lg leading-8 text-slate-700">
-                Menschen in Konflikten brauchen keine komplizierte Plattform.
-                Sie brauchen Orientierung, Schutz und einen Prozess, der nicht
-                sofort weiter eskaliert.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              {trustPoints.map((point) => (
-                <div
-                  key={point.title}
-                  className="app-surface p-6"
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-700/10 text-teal-700 text-sm font-bold">✓</span>
-                    <div>
-                      <h3 className="font-bold text-slate-900">{point.title}</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-600">{point.text}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <section className="section section-accent border-y border-teal-100 text-center">
+          <div className="mx-auto max-w-2xl px-6 lg:px-8">
+            <p className="text-base text-slate-700">
+              Vertraulich, DSGVO-konform und mit menschlicher Mediation als
+              Rückfalloption –{" "}
+              <Link href="/about" className="font-semibold text-teal-700 hover:underline">
+                mehr über medipact erfahren →
+              </Link>
+            </p>
           </div>
         </section>
 

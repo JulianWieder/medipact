@@ -22,8 +22,8 @@ export default function ImpressumPage() {
             <div className="space-y-1 text-base leading-7">
               <p className="font-semibold text-slate-900">medipact</p>
               <p>Julian Wieder</p>
-              <p>Dachauer Str. 233</p>
-              <p>80637 München</p>
+              <p>Ernst-Ludwig-Allee 14</p>
+              <p>63303 Dreieich</p>
               <p>Deutschland</p>
             </div>
           </section>
@@ -62,8 +62,8 @@ export default function ImpressumPage() {
             </h2>
             <div className="space-y-1 text-base leading-7">
               <p>Julian Wieder</p>
-              <p>Dachauer Str. 233</p>
-              <p>80637 München</p>
+              <p>Ernst-Ludwig-Allee 14</p>
+              <p>63303 Dreieich</p>
             </div>
           </section>
 

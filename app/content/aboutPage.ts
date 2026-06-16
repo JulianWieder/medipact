@@ -88,6 +88,60 @@ export const aboutPageContent = {
     ],
   },
 
+  comparisonTitle: "Der bessere erste Schritt vor der Eskalation",
+  comparisonIntro:
+    "Medipact ist kein Kampfmodus. Es ist ein strukturierter Weg, um wieder handlungsfähig zu werden.",
+  comparisonPlans: [
+    {
+      title: "Medipact",
+      status: "Ruhig & bezahlbar",
+      features: [
+        "niedrige Einstiegshürde",
+        "strukturierter Austausch",
+        "weniger Eskalation",
+        "für private Konflikte",
+        "menschlicher Mediator optional",
+      ],
+      featured: true,
+    },
+    {
+      title: "Anwaltlicher Streit",
+      status: "Konfrontativer",
+      features: [
+        "häufig positionsgetrieben",
+        "Kosten können schnell steigen",
+        "Kommunikation oft über Dritte",
+        "sinnvoll bei klaren Rechtsfragen",
+      ],
+    },
+    {
+      title: "Gerichtsverfahren",
+      status: "Langsam & fremdbestimmt",
+      features: [
+        "Richter entscheidet",
+        "dauert oft lange",
+        "belastet Beziehungen zusätzlich",
+        "notwendig, wenn keine Einigung möglich ist",
+      ],
+    },
+  ],
+
+  trustTitle: "Vertrauen & Sicherheit",
+  trustPoints: [
+    {
+      title: "Vertraulich & DSGVO-konform",
+      text: "Private Konflikte brauchen Schutz. Der Prozess ist auf vertrauliche Kommunikation und sensible Daten ausgelegt.",
+    },
+    {
+      title: "Sie behalten die Kontrolle",
+      text: "Medipact entscheidet nicht über Sie. Die Plattform strukturiert den Weg zur Lösung; zustimmen müssen immer die Beteiligten selbst.",
+    },
+    {
+      title: "Menschliche Hilfe möglich",
+      text: "Wenn ein Fall zu emotional oder festgefahren ist, kann ein menschlicher Mediator eingebunden werden.",
+    },
+  ],
+
   finalCtaTitle: "Bereit, den Konflikt klarer zu sehen?",
   finalCtaText: "Der erste Schritt ist nicht die perfekte Lösung – sondern ein klarer Blick auf die Situation.",
   finalCta: {

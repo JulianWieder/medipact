@@ -19,6 +19,13 @@ type Faq = {
   answer: string;
 };
 
+type ComparisonPlan = {
+  title: string;
+  status: string;
+  features: string[];
+  featured?: boolean;
+};
+
 type MarketingPageTemplateProps = {
   eyebrow?: string;
   title: string;
@@ -38,6 +45,9 @@ type MarketingPageTemplateProps = {
   features: Feature[];
   processTitle?: string;
   process: Step[];
+  comparisonTitle?: string;
+  comparisonIntro?: string;
+  comparisonPlans?: ComparisonPlan[];
   trustTitle?: string;
   trustPoints?: Feature[];
   faqTitle?: string;
@@ -83,6 +93,9 @@ export function MarketingPageTemplate({
   features,
   processTitle = "So funktioniert es",
   process,
+  comparisonTitle,
+  comparisonIntro,
+  comparisonPlans = [],
   trustTitle = "Warum medipact",
   trustPoints = [],
   faqTitle = "Häufige Fragen",
@@ -193,6 +206,66 @@ export function MarketingPageTemplate({
             </div>
           </div>
         </section>
+
+        {comparisonPlans.length > 0 && (
+          <section className="section section-strong">
+            <div className="container">
+              <SectionLead
+                eyebrow="Vergleich"
+                title={comparisonTitle ?? "Der bessere erste Schritt vor der Eskalation"}
+                text={comparisonIntro}
+                center
+              />
+
+              <div className="grid gap-6 md:grid-cols-3">
+                {comparisonPlans.map((plan) => (
+                  <div
+                    key={plan.title}
+                    className={`rounded-[2rem] border p-8 ${
+                      plan.featured
+                        ? "bg-slate-800/70 border-teal-600/40 shadow-2xl shadow-teal-950/50"
+                        : "bg-slate-800/50 border-slate-700"
+                    }`}
+                  >
+                    {plan.featured && (
+                      <div className="mb-4 inline-block rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-300">
+                        Empfohlen
+                      </div>
+                    )}
+                    <h3 className="text-xl font-bold text-white">{plan.title}</h3>
+                    <div
+                      className={`mt-1 text-sm font-medium ${
+                        plan.featured ? "text-teal-300" : "text-slate-500"
+                      }`}
+                    >
+                      {plan.status}
+                    </div>
+
+                    <div className="my-6 h-px bg-white/10" />
+
+                    <ul className="space-y-3">
+                      {plan.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-3 text-sm text-slate-300"
+                        >
+                          <span
+                            className={`mt-0.5 h-4 w-4 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              plan.featured ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-400"
+                            }`}
+                          >
+                            ✓
+                          </span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {trustPoints.length > 0 && (
           <section className="section section-accent">

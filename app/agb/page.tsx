@@ -35,7 +35,7 @@ export default function AgbPage() {
         <h1 className="heading-1 mb-2">Allgemeine Geschäftsbedingungen</h1>
         <p className="mb-2 text-sm text-slate-500">Stand: Juni 2025</p>
         <p className="mb-12 text-sm text-slate-500">
-          medipact · Julian Wieder · Dachauer Str. 233 · 80637 München
+          medipact · Julian Wieder · Ernst-Ludwig-Allee 14 · 63303 Dreieich
         </p>
 
         <div className="space-y-10">

@@ -894,6 +894,19 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     }
   }
 
+  // ── Test: aktuellen Schritt überspringen ────────────────────────────────────
+
+  function skipCurrentStep() {
+    const idx = PHASE_STEPS.indexOf(activeStep);
+    const next = PHASE_STEPS[idx + 1];
+    setStepModes((prev) => ({ ...prev, [activeStep]: "done" }));
+    if (next) {
+      setActiveStep(next);
+    } else {
+      advanceToPhase2();
+    }
+  }
+
   // ── Phase voranschreiten ───────────────────────────────────────────────────
 
   async function advanceToPhase2() {
@@ -2229,15 +2242,26 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               ← Zurück
             </button>
             {isMediatorOrAdmin && (
-              <button
-                type="button"
-                onClick={advanceToPhase2}
-                disabled={advancing}
-                className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
-                title="Nur für Tests: Alle Schritte überspringen und direkt zu Phase 2"
-              >
-                {advancing ? "…" : "⚡ Test: Phase überspringen"}
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={skipCurrentStep}
+                  disabled={advancing}
+                  className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
+                  title="Nur für Tests: Aktuellen Schritt überspringen"
+                >
+                  ⚡ Test: Schritt überspringen
+                </button>
+                <button
+                  type="button"
+                  onClick={advanceToPhase2}
+                  disabled={advancing}
+                  className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
+                  title="Nur für Tests: Alle Schritte überspringen und direkt zu Phase 2"
+                >
+                  {advancing ? "…" : "⚡ Test: Phase überspringen"}
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -2,7 +2,8 @@ import Link from "next/link";
 
 export default function MiniMatrix() {
   return (
-    <div>
+    <div className="section section-muted">
+      <div className="container">
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-200 shadow-sm">
         <div className="grid min-w-[900px] grid-cols-4 gap-px">
           <div className="bg-white p-5" />
@@ -80,6 +81,7 @@ export default function MiniMatrix() {
             text="Der Konflikt ist sichtbar eskaliert und belastet den Alltag aller Beteiligten."
           />
         </div>
+      </div>
       </div>
     </div>
   );

@@ -34,23 +34,39 @@ function monthOffset(year: number, month: number) {
 
 interface KalenderProps {
   isAdmin?: boolean;
+  /** Springt beim Setzen direkt in die Tagesansicht dieses Datums (z.B. Klick auf einen Termin im Dashboard). */
+  jumpToDate?: Date | null;
 }
 
-export function Kalender({ isAdmin = false }: KalenderProps) {
+const DAY_HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 07–21 Uhr
+
+export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) {
   const [events, setEvents] = useState<AppointmentEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"monat" | "liste">("monat");
+  const [view, setView] = useState<"monat" | "tag" | "liste">("monat");
 
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [selected, setSelected] = useState<Date | null>(null);
+  const [tagDate, setTagDate] = useState<Date>(today);
 
   useEffect(() => {
     fetchAllAppointments()
       .then(setEvents)
       .finally(() => setLoading(false));
   }, [isAdmin]);
+
+  // Von außen (z.B. Dashboard) auf ein Datum springen → Tagesansicht öffnen
+  useEffect(() => {
+    if (jumpToDate) {
+      setTagDate(jumpToDate);
+      setYear(jumpToDate.getFullYear());
+      setMonth(jumpToDate.getMonth());
+      setSelected(jumpToDate);
+      setView("tag");
+    }
+  }, [jumpToDate]);
 
   const offset = monthOffset(year, month);
   const days = daysInMonth(year, month);
@@ -72,7 +88,25 @@ export function Kalender({ isAdmin = false }: KalenderProps) {
     setSelected(null);
   }
 
+  function prevDay() {
+    setTagDate((d) => {
+      const next = new Date(d);
+      next.setDate(next.getDate() - 1);
+      return next;
+    });
+  }
+  function nextDay() {
+    setTagDate((d) => {
+      const next = new Date(d);
+      next.setDate(next.getDate() + 1);
+      return next;
+    });
+  }
+
   const selectedEvents = selected ? eventsForDay(selected) : [];
+  const tagEvents = eventsForDay(tagDate).sort(
+    (a, b) => new Date(a.proposed_datetime).getTime() - new Date(b.proposed_datetime).getTime(),
+  );
 
   // Upcoming list (alle Termine ab heute, sortiert)
   const upcoming = events
@@ -89,16 +123,19 @@ export function Kalender({ isAdmin = false }: KalenderProps) {
 
       {/* Ansicht-Umschalter */}
       <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5 w-fit">
-        {(["monat", "liste"] as const).map((v) => (
+        {(["monat", "tag", "liste"] as const).map((v) => (
           <button
             key={v}
-            onClick={() => setView(v)}
+            onClick={() => {
+              if (v === "tag" && selected) setTagDate(selected);
+              setView(v);
+            }}
             className={[
               "px-3 py-1 text-sm rounded-md transition font-medium capitalize",
               view === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700",
             ].join(" ")}
           >
-            {v === "monat" ? "Monatsansicht" : "Listenansicht"}
+            {v === "monat" ? "Monatsansicht" : v === "tag" ? "Tagesansicht" : "Listenansicht"}
           </button>
         ))}
       </div>
@@ -135,6 +172,74 @@ export function Kalender({ isAdmin = false }: KalenderProps) {
                       <span className={`mt-1.5 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
                         {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}
                       </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </WCard>
+      ) : view === "tag" ? (
+        /* ── Tag ──────────────────────────────────────────────── */
+        <WCard className="p-5">
+          {/* Tag-Header */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={prevDay}
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+            >
+              ‹
+            </button>
+            <div className="flex flex-col items-center">
+              <span className="text-base font-semibold text-slate-800">
+                {tagDate.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
+              </span>
+              {!isSameDay(tagDate, today) && (
+                <button
+                  onClick={() => setTagDate(new Date())}
+                  className="text-[11px] font-medium text-teal-600 hover:underline"
+                >
+                  Heute
+                </button>
+              )}
+            </div>
+            <button
+              onClick={nextDay}
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Stunden-Raster */}
+          {tagEvents.length === 0 ? (
+            <EmptyState icon="📅" text="Keine Termine an diesem Tag." />
+          ) : (
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 overflow-hidden">
+              {DAY_HOURS.map((hour) => {
+                const hourEvents = tagEvents.filter((e) => new Date(e.proposed_datetime).getHours() === hour);
+                return (
+                  <div key={hour} className="flex min-h-[44px]">
+                    <div className="w-14 shrink-0 py-2 px-2 text-right text-[11px] font-medium text-slate-400">
+                      {String(hour).padStart(2, "0")}:00
+                    </div>
+                    <div className="flex-1 border-l border-slate-100 py-1.5 px-2 space-y-1">
+                      {hourEvents.map((e) => {
+                        const dt = new Date(e.proposed_datetime);
+                        const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                        return (
+                          <div
+                            key={e.id}
+                            className={`rounded-lg border px-3 py-1.5 text-xs ${color}`}
+                          >
+                            <span className="font-bold">
+                              {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                            {" · "}
+                            <span className="font-medium">{e.mediation_title}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -223,10 +328,22 @@ export function Kalender({ isAdmin = false }: KalenderProps) {
           {/* Tages-Detail */}
           {selected && (
             <WCard className="p-5">
-              <SectionHeader
-                label={selected.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                title="Termine an diesem Tag"
-              />
+              <div className="flex items-start justify-between gap-3">
+                <SectionHeader
+                  label={selected.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  title="Termine an diesem Tag"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTagDate(selected);
+                    setView("tag");
+                  }}
+                  className="shrink-0 text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline whitespace-nowrap mt-1"
+                >
+                  → Tagesansicht öffnen
+                </button>
+              </div>
               {selectedEvents.length === 0 ? (
                 <EmptyState icon="📅" text="Keine Termine an diesem Tag." />
               ) : (

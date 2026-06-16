@@ -1,25 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { MediationCase } from "../types";
-import { PHASES, getPhaseIndex, TYPE_LABEL } from "../types";
+import type { AppointmentEvent, MediationCase } from "../types";
+import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR } from "../types";
 import { TypeBadge, StatusBadge, KPI, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
-import { fetchMediations, fetchAllMediations } from "../api";
+import { fetchMediations, fetchAllMediations, fetchAllAppointments } from "../api";
 
 interface WorkspaceDashboardProps {
   isAdmin?: boolean;
   onSelectFall: (m: MediationCase) => void;
+  /** Wird aufgerufen, wenn ein Termin angeklickt wird – navigiert zur Tagesansicht im Kalender. */
+  onSelectTermin?: (date: Date) => void;
 }
 
-export function WorkspaceDashboard({ isAdmin = false, onSelectFall }: WorkspaceDashboardProps) {
+export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTermin }: WorkspaceDashboardProps) {
   const [faelle, setFaelle] = useState<MediationCase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [termine, setTermine] = useState<AppointmentEvent[]>([]);
+  const [termineLoading, setTermineLoading] = useState(true);
 
   useEffect(() => {
     (isAdmin ? fetchAllMediations() : fetchMediations())
       .then(setFaelle)
       .finally(() => setLoading(false));
   }, [isAdmin]);
+
+  useEffect(() => {
+    fetchAllAppointments()
+      .then(setTermine)
+      .finally(() => setTermineLoading(false));
+  }, [isAdmin]);
+
+  const naechsteTermine = termine
+    .filter((t) => new Date(t.proposed_datetime).getTime() >= Date.now() - 1000 * 60 * 60)
+    .sort((a, b) => new Date(a.proposed_datetime).getTime() - new Date(b.proposed_datetime).getTime())
+    .slice(0, 5);
 
   const active = faelle.filter((m) => m.status === "active").length;
   const pending = faelle.filter((m) => m.status === "pending" || m.status === "draft").length;
@@ -89,6 +104,45 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall }: WorkspaceD
                   <div className="mt-1 text-xs text-slate-400">
                     Phase:{" "}
                     <span className="font-medium text-slate-600">{currentPhase}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </WCard>
+
+      {/* Nächste Termine */}
+      <WCard className="p-5">
+        <SectionHeader label="Kalender" title="Nächste Termine" />
+        {termineLoading ? (
+          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+        ) : naechsteTermine.length === 0 ? (
+          <EmptyState icon="📅" text="Keine anstehenden Termine." />
+        ) : (
+          <div className="space-y-2">
+            {naechsteTermine.map((termin) => {
+              const dt = new Date(termin.proposed_datetime);
+              const color = TYPE_COLOR[termin.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+              return (
+                <button
+                  key={termin.id}
+                  onClick={() => onSelectTermin?.(dt)}
+                  className="w-full text-left flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:border-teal-200 hover:shadow-sm transition"
+                >
+                  <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-teal-50 py-2">
+                    <span className="text-[11px] font-semibold text-teal-600">
+                      {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
+                    </span>
+                    <span className="text-xs font-bold text-teal-700">
+                      {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm text-slate-800 truncate">{termin.mediation_title}</div>
+                    <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
+                      {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
+                    </span>
                   </div>
                 </button>
               );
