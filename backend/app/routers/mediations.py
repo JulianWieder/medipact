@@ -920,6 +920,58 @@ def get_all_appointments(
     return result
 
 
+@router.get("/feedback/all")
+def get_all_feedback(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt das Feedback aus allen Fällen zurück, an denen der aktuelle Nutzer beteiligt ist.
+
+    Wird für das Feedback-Widget im Workspace-Dashboard genutzt, damit der
+    Mediator nicht jeden Fall einzeln öffnen muss, um neue Rückmeldungen zu sehen.
+    """
+    import json as _json
+
+    participations = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.user_id == current_user.id)
+        .all()
+    )
+    mediation_ids = [p.mediation_id for p in participations]
+    if not mediation_ids:
+        return []
+
+    rows = (
+        db.query(MediationFeedback, MediationParticipant, User, Mediation)
+        .join(MediationParticipant, MediationFeedback.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .join(Mediation, MediationFeedback.mediation_id == Mediation.id)
+        .filter(MediationFeedback.mediation_id.in_(mediation_ids))
+        .order_by(MediationFeedback.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for feedback, participant, user, mediation in rows:
+        try:
+            answers = _json.loads(feedback.answers)
+        except (TypeError, ValueError):
+            answers = {}
+        result.append({
+            "id": feedback.id,
+            "mediation_id": mediation.id,
+            "mediation_title": mediation.title,
+            "mediation_type": mediation.mediation_type,
+            "occasion": feedback.occasion,
+            "participant_id": participant.id,
+            "participant_name": user.name,
+            "participant_role": participant.role,
+            "answers": answers,
+            "created_at": feedback.created_at.isoformat(),
+        })
+    return result
+
+
 class AppointmentVoteRequest(BaseModel):
     slot_id: int
     accepted: bool
@@ -1042,26 +1094,93 @@ def save_feedback(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Speichert oder aktualisiert das Feedback eines Teilnehmers für einen Anlass."""
+    """Speichert das Feedback eines Teilnehmers für einen Anlass.
+
+    Jede Einreichung wird als neue Zeile gespeichert (keine Upsert-Logik mehr),
+    damit der Mediator im Workspace den Zeitverlauf wiederholter Rückmeldungen
+    eines Teilnehmers sehen kann.
+    """
     import json as _json
+    import datetime as _dt
+
     participant = _require_participant(mediation_id, current_user, db)
 
     if payload.occasion not in ("after_videocall", "before_contract"):
         raise HTTPException(status_code=422, detail="Ungültiger Anlass")
 
-    existing = (
-        db.query(MediationFeedback)
+    entry = MediationFeedback(
+        mediation_id=mediation_id,
+        participant_id=participant.id,
+        occasion=payload.occasion,
+        answers=_json.dumps(payload.answers, ensure_ascii=False),
+        created_at=_dt.datetime.utcnow(),
+        updated_at=_dt.datetime.utcnow(),
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return {"ok": True, "id": entry.id}
+
+
+@router.get("/{mediation_id}/feedback/me")
+def get_my_feedback(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt zurück, für welche Anlässe der aktuelle Teilnehmer bereits Feedback abgegeben hat."""
+    participant = _require_participant(mediation_id, current_user, db)
+
+    occasions = (
+        db.query(MediationFeedback.occasion)
         .filter(
             MediationFeedback.mediation_id == mediation_id,
             MediationFeedback.participant_id == participant.id,
-            MediationFeedback.occasion == payload.occasion,
         )
-        .first()
+        .distinct()
+        .all()
+    )
+    return {"submitted_occasions": [o[0] for o in occasions]}
+
+
+@router.get("/{mediation_id}/feedback")
+def get_feedback(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Gibt alle Feedback-Einträge eines Falls zurück (chronologisch), inkl. Teilnehmername/-rolle."""
+    import json as _json
+
+    # Sicherstellen, dass der aktuelle Nutzer Teil dieses Falls ist.
+    _require_participant(mediation_id, current_user, db)
+
+    rows = (
+        db.query(MediationFeedback, MediationParticipant, User)
+        .join(MediationParticipant, MediationFeedback.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationFeedback.mediation_id == mediation_id)
+        .order_by(MediationFeedback.created_at.asc())
+        .all()
     )
 
-    if existing:
-        existing.answers = _json.dumps(payload.answers, ensure_ascii=False)
-        existing.updated_at = __import__("datetime").datetime.ut
+    result = []
+    for feedback, participant, user in rows:
+        try:
+            answers = _json.loads(feedback.answers)
+        except (TypeError, ValueError):
+            answers = {}
+        result.append({
+            "id": feedback.id,
+            "occasion": feedback.occasion,
+            "participant_id": participant.id,
+            "participant_name": user.name,
+            "participant_role": participant.role,
+            "answers": answers,
+            "created_at": feedback.created_at.isoformat(),
+        })
+    return result
+
 
 # ── KI-Analyse (SWOT + Gesprächstipps) ──────────────────────────────────────
 

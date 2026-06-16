@@ -94,11 +94,34 @@ type FeedbackQuestion = {
 };
 
 const FEEDBACK_QUESTIONS: Record<FeedbackOccasion, FeedbackQuestion[]> = {
+  // Phase 1 ist auch eine "Verkaufsphase": Wir wollen hier verstehen, wie nah
+  // die Person am Absprung ist, wie eskaliert die Situation wirklich ist und
+  // wie viel Vertrauen in den Prozess schon da ist – nicht nur, ob das Format
+  // technisch verstanden wurde.
   after_videocall: [
     {
       id: "einigung_wahrscheinlichkeit",
       label: "Wie wahrscheinlich ist eine außergerichtliche Einigung? (0 = sehr unwahrscheinlich, 10 = sehr wahrscheinlich)",
       type: "scale10",
+      required: true,
+    },
+    {
+      id: "vertrauen_in_prozess",
+      label: "Wie sehr vertrauen Sie aktuell darauf, dass Mediation hier wirklich helfen kann? (0 = gar nicht, 10 = voll und ganz)",
+      type: "scale10",
+      required: true,
+    },
+    {
+      id: "konfliktintensitaet",
+      label: "Wie eskaliert ist der Konflikt aus Ihrer Sicht aktuell? (0 = kaum gespannt, 10 = vollständig zerrüttet)",
+      type: "scale10",
+      required: true,
+    },
+    {
+      id: "eigene_offenheit",
+      label: "Wie offen sind Sie, auch Ihre eigenen Anteile am Konflikt zu reflektieren?",
+      type: "choice",
+      options: ["Sehr offen", "Eher offen", "Eher zurückhaltend", "Noch nicht bereit dazu"],
       required: true,
     },
     {
@@ -122,17 +145,39 @@ const FEEDBACK_QUESTIONS: Record<FeedbackOccasion, FeedbackQuestion[]> = {
       required: true,
     },
     {
+      id: "groesste_sorge",
+      label: "Was ist Ihre größte Sorge bei diesem Prozess? (optional)",
+      type: "text",
+      required: false,
+    },
+    {
       id: "hindernisse",
       label: "Was hindert Sie noch? (optional)",
       type: "text",
       required: false,
     },
   ],
+  // Vor dem Vertragsabschluss geht es ums "Closing": Wie sicher ist die
+  // Unterschrift, wie fair wird das Ergebnis wahrgenommen, und gibt es noch
+  // unausgesprochene Zweifel, die den Abschluss gefährden könnten?
   before_contract: [
     {
       id: "einigung_wahrscheinlichkeit",
       label: "Wie wahrscheinlich ist eine außergerichtliche Einigung? (0 = sehr unwahrscheinlich, 10 = sehr wahrscheinlich)",
       type: "scale10",
+      required: true,
+    },
+    {
+      id: "abschlusssicherheit",
+      label: "Wie sicher fühlen Sie sich, die Vereinbarung jetzt zu unterschreiben? (0 = sehr unsicher, 10 = sehr sicher)",
+      type: "scale10",
+      required: true,
+    },
+    {
+      id: "fairness_eindruck",
+      label: "Empfinden Sie die gegenseitigen Zugeständnisse als fair?",
+      type: "choice",
+      options: ["Ja, klar fair", "Eher ja", "Unsicher", "Eher nicht fair"],
       required: true,
     },
     {
@@ -154,6 +199,12 @@ const FEEDBACK_QUESTIONS: Record<FeedbackOccasion, FeedbackQuestion[]> = {
       type: "choice",
       options: ["Ja, bitte", "Nein, es ist gut so"],
       required: true,
+    },
+    {
+      id: "restzweifel",
+      label: "Gibt es noch unausgesprochene Zweifel oder offene Themen? (optional)",
+      type: "text",
+      required: false,
     },
     {
       id: "hindernisse",

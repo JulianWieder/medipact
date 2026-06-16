@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import type { MediationCase, Participant, PhaseNoteGroup } from "../types";
+import type { MediationCase, Participant, PhaseNoteGroup, FeedbackEntry } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL } from "../types";
 import {
   StatusBadge,
@@ -115,14 +115,6 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   }
 
   // Feedback
-  type FeedbackEntry = {
-    id: number;
-    occasion: string;
-    participant_name: string;
-    participant_role: string;
-    answers: Record<string, string | number>;
-    created_at: string;
-  };
   const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
@@ -797,15 +789,28 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                   };
                   const QUESTION_LABELS: Record<string, string> = {
                     einigung_wahrscheinlichkeit: "Wahrscheinlichkeit außergerichtliche Einigung",
+                    vertrauen_in_prozess: "Vertrauen in den Prozess",
+                    konfliktintensitaet: "Eskalationsgrad des Konflikts",
+                    eigene_offenheit: "Offenheit für eigene Anteile",
                     mediation_verstanden: "Mediationsprinzip verstanden?",
                     online_verstanden: "Online-Format verstanden?",
                     gefuehl: "Gefühl nach dem Gespräch",
+                    groesste_sorge: "Größte Sorge",
                     hindernisse: "Was hindert noch?",
+                    abschlusssicherheit: "Sicherheit bei Unterschrift",
+                    fairness_eindruck: "Eindruck der Fairness",
                     bereit_phase2: "Bereit für Phase 2?",
                     gehoert_gefuehl: "Gefühl gehört zu werden",
                     weiterer_termin: "Weiterer Termin gewünscht?",
+                    restzweifel: "Unausgesprochene Zweifel",
                   };
                   const EMOJI_MAP: Record<number, string> = { 1: "😔 Belastet", 2: "😕 Unsicher", 3: "😐 Neutral", 4: "🙂 Gut", 5: "😊 Sehr gut" };
+                  const SCALE10_KEYS = new Set([
+                    "einigung_wahrscheinlichkeit",
+                    "vertrauen_in_prozess",
+                    "konfliktintensitaet",
+                    "abschlusssicherheit",
+                  ]);
 
                   // Gruppieren nach Anlass
                   const grouped: Record<string, FeedbackEntry[]> = {};
@@ -843,7 +848,10 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               <div key={entry.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
                                 <div className="flex items-center justify-between mb-3">
                                   <span className="text-xs font-semibold text-slate-800">{entry.participant_name}</span>
-                                  <span className="text-[10px] text-slate-400">{new Date(entry.created_at).toLocaleDateString("de-DE")}</span>
+                                  <span className="text-[10px] text-slate-400">
+                                    {new Date(entry.created_at).toLocaleDateString("de-DE")}{" "}
+                                    {new Date(entry.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
                                 </div>
                                 <div className="space-y-2">
                                   {Object.entries(entry.answers).map(([key, value]) => {
@@ -852,7 +860,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                                     let displayValue: string;
                                     if (key === "gefuehl" || key === "gehoert_gefuehl") {
                                       displayValue = EMOJI_MAP[Number(value)] ?? String(value);
-                                    } else if (key === "einigung_wahrscheinlichkeit") {
+                                    } else if (SCALE10_KEYS.has(key)) {
                                       displayValue = `${value}/10`;
                                     } else {
                                       displayValue = String(value);

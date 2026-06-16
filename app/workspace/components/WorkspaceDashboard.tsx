@@ -1,10 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AppointmentEvent, MediationCase } from "../types";
+import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR } from "../types";
 import { TypeBadge, StatusBadge, KPI, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
-import { fetchMediations, fetchAllMediations, fetchAllAppointments } from "../api";
+import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
+
+const FEEDBACK_OCCASION_LABELS: Record<string, string> = {
+  after_videocall: "Nach dem Erstgespräch",
+  before_contract: "Vor dem Vertragsabschluss",
+};
+
+const FEEDBACK_EMOJI_MAP: Record<number, string> = {
+  1: "😔",
+  2: "😕",
+  3: "😐",
+  4: "🙂",
+  5: "😊",
+};
+
+/** Schlüssel, die als 0–10 Skala interpretiert werden, für die Sales-/Vertrauenssignale. */
+const TRUST_SIGNAL_KEYS = ["vertrauen_in_prozess", "abschlusssicherheit", "einigung_wahrscheinlichkeit"];
 
 interface WorkspaceDashboardProps {
   isAdmin?: boolean;
@@ -18,6 +34,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
   const [loading, setLoading] = useState(true);
   const [termine, setTermine] = useState<AppointmentEvent[]>([]);
   const [termineLoading, setTermineLoading] = useState(true);
+  const [feedback, setFeedback] = useState<FeedbackEntry[]>([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
 
   useEffect(() => {
     (isAdmin ? fetchAllMediations() : fetchMediations())
@@ -29,6 +47,12 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
     fetchAllAppointments()
       .then(setTermine)
       .finally(() => setTermineLoading(false));
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchAllFeedback()
+      .then(setFeedback)
+      .finally(() => setFeedbackLoading(false));
   }, [isAdmin]);
 
   const naechsteTermine = termine
@@ -44,6 +68,48 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
     .filter((m) => m.status === "active" || m.status === "pending")
     .sort((a, b) => getPhaseIndex(b.phase) - getPhaseIndex(a.phase))
     .slice(0, 5);
+
+  // ── Feedback-Aggregation: pro Teilnehmer & Fall einen Zeitverlauf bilden ──
+  type FeedbackGroup = {
+    key: string;
+    mediationId?: number;
+    mediationTitle: string;
+    participantName: string;
+    participantRole: string;
+    entries: FeedbackEntry[];
+  };
+  const feedbackGroupsMap = new Map<string, FeedbackGroup>();
+  for (const entry of feedback) {
+    const key = `${entry.mediation_id ?? "?"}-${entry.participant_id ?? entry.participant_name}`;
+    if (!feedbackGroupsMap.has(key)) {
+      feedbackGroupsMap.set(key, {
+        key,
+        mediationId: entry.mediation_id,
+        mediationTitle: entry.mediation_title ?? "Unbekannter Fall",
+        participantName: entry.participant_name,
+        participantRole: entry.participant_role,
+        entries: [],
+      });
+    }
+    feedbackGroupsMap.get(key)!.entries.push(entry);
+  }
+  const feedbackGroups = Array.from(feedbackGroupsMap.values())
+    .map((g) => ({
+      ...g,
+      // Innerhalb einer Gruppe chronologisch aufsteigend, damit der
+      // Zeitverlauf (z.B. Erstgespräch → vor Vertragsabschluss) lesbar ist.
+      entries: [...g.entries].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      ),
+    }))
+    .sort((a, b) => {
+      const aLatest = new Date(a.entries[a.entries.length - 1].created_at).getTime();
+      const bLatest = new Date(b.entries[b.entries.length - 1].created_at).getTime();
+      return bLatest - aLatest;
+    })
+    .slice(0, 6);
+
+  const feedbackWantsAppointment = feedback.filter((e) => e.answers.weiterer_termin === "Ja, bitte").length;
 
   return (
     <div className="space-y-6">
@@ -143,6 +209,79 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                     <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
                       {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
                     </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </WCard>
+
+      {/* Feedback aus allen Fällen */}
+      <WCard className="p-5">
+        <SectionHeader label="Kundenerlebnis" title="Feedback aus allen Fällen" />
+
+        {feedbackWantsAppointment > 0 && (
+          <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs font-semibold text-amber-800">
+              {feedbackWantsAppointment} {feedbackWantsAppointment === 1 ? "Rückmeldung wünscht" : "Rückmeldungen wünschen"} einen weiteren Termin vor dem Vertragsabschluss.
+            </p>
+          </div>
+        )}
+
+        {feedbackLoading ? (
+          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+        ) : feedbackGroups.length === 0 ? (
+          <EmptyState icon="💬" text="Noch kein Feedback eingegangen." />
+        ) : (
+          <div className="space-y-3">
+            {feedbackGroups.map((group) => {
+              const fall = faelle.find((f) => f.id === group.mediationId);
+              return (
+                <button
+                  key={group.key}
+                  onClick={() => fall && onSelectFall(fall)}
+                  className="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 hover:border-teal-200 hover:shadow-sm transition disabled:cursor-default"
+                  disabled={!fall}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <div className="font-semibold text-sm text-slate-800">{group.participantName}</div>
+                      <div className="text-xs text-slate-400">{group.mediationTitle}</div>
+                    </div>
+                  </div>
+
+                  {/* Zeitverlauf: ein Punkt pro Einreichung, chronologisch */}
+                  <div className="space-y-2">
+                    {group.entries.map((entry) => {
+                      const trustKey = TRUST_SIGNAL_KEYS.find((k) => entry.answers[k] !== undefined);
+                      const emojiKey = entry.answers.gefuehl !== undefined ? "gefuehl" : entry.answers.gehoert_gefuehl !== undefined ? "gehoert_gefuehl" : null;
+                      const isAlert = entry.answers.weiterer_termin === "Ja, bitte";
+                      return (
+                        <div key={entry.id} className="flex items-center gap-2 text-xs">
+                          <span className="shrink-0 text-slate-400 w-[88px]">
+                            {new Date(entry.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
+                          </span>
+                          <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                            {FEEDBACK_OCCASION_LABELS[entry.occasion] ?? entry.occasion}
+                          </span>
+                          {trustKey && (
+                            <span className="text-slate-600">
+                              Vertrauen/Erfolg: <span className="font-semibold text-slate-800">{entry.answers[trustKey]}/10</span>
+                            </span>
+                          )}
+                          {emojiKey && (
+                            <span>{FEEDBACK_EMOJI_MAP[Number(entry.answers[emojiKey])] ?? ""}</span>
+                          )}
+                          {isAlert && (
+                            <span className="font-semibold text-amber-700">⚠ weiterer Termin gewünscht</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </button>
               );

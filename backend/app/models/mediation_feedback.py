@@ -1,12 +1,17 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 
 from app.database import Base
 
 
 class MediationFeedback(Base):
-    """Kundenerlebnis-Feedback eines Teilnehmers nach einem Mediationsschritt."""
+    """Kundenerlebnis-Feedback eines Teilnehmers nach einem Mediationsschritt.
+
+    Jede Einreichung wird als eigene Zeile gespeichert (keine Unique-Constraint
+    mehr auf mediation/participant/occasion), damit der Mediator den
+    Zeitverlauf wiederholter Rückmeldungen nachvollziehen kann.
+    """
     __tablename__ = "mediation_feedback"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,7 +23,3 @@ class MediationFeedback(Base):
     answers = Column(Text, nullable=False, default="{}")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint("mediation_id", "participant_id", "occasion", name="uq_feedback_per_participant_occasion"),
-    )

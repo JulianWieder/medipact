@@ -92,6 +92,21 @@ export interface AppointmentEvent {
   proposed_datetime: string;
 }
 
+// ── Feedback ─────────────────────────────────────────────────────────────
+
+export interface FeedbackEntry {
+  id: number;
+  mediation_id?: number;
+  mediation_title?: string;
+  mediation_type?: string;
+  occasion: string;
+  participant_id?: string | number;
+  participant_name: string;
+  participant_role: string;
+  answers: Record<string, string | number>;
+  created_at: string;
+}
+
 // ── User role ──────────────────────────────────────────────────────────────
 
 export interface UserRoleInfo {
