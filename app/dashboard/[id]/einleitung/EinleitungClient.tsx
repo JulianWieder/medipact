@@ -619,9 +619,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     votes: { participant_id: string; name: string; accepted: boolean }[];
     all_accepted: boolean;
     all_voted: boolean;
+    status?: "proposed" | "reserved" | "confirmed";
   };
   const [appointmentSlots, setAppointmentSlots] = useState<AppointmentSlot[]>([]);
   const [confirmedSlot, setConfirmedSlot] = useState<AppointmentSlot | null>(null);
+  const [reservedSlot, setReservedSlot] = useState<AppointmentSlot | null>(null);
   const [appointmentLoading, setAppointmentLoading] = useState(false);
   const [appointmentVoting, setAppointmentVoting] = useState<number | null>(null);
 
@@ -719,6 +721,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       const data = await res.json();
       setAppointmentSlots(data.slots ?? []);
       setConfirmedSlot(data.confirmed ?? null);
+      setReservedSlot(data.reserved ?? null);
     } catch { /* ignore */ }
   }, [mediationId]);
 
@@ -739,8 +742,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       if (apptRes) {
         setAppointmentSlots(apptRes.slots ?? []);
         setConfirmedSlot(apptRes.confirmed ?? null);
+        setReservedSlot(apptRes.reserved ?? null);
       }
-      const apptDone = !!(apptRes?.confirmed);
+      // Die Terminvereinbarung ist optional: der Mediator entscheidet, ob ein
+      // gemeinsamer Termin überhaupt nötig ist. Solange der Mediator noch
+      // keine Terminvorschläge erstellt hat, gilt der Schritt automatisch als
+      // erledigt (übersprungen) und blockiert den Fortschritt nicht.
+      const noSlotsProposed = (apptRes?.slots?.length ?? 0) === 0;
+      const apptDone = !!(apptRes?.confirmed) || noSlotsProposed;
 
       const statuses = await Promise.all(
         allKeys.map((key) =>
@@ -1741,7 +1750,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     return (
       <div className="space-y-6">
         <p className="text-sm text-slate-600">
-          Wähle den Termin der für dich passt. Sobald alle Beteiligten einem Termin zugestimmt haben, wird das Erstgespräch geplant.
+          {reservedSlot
+            ? "Alle Beteiligten haben zugestimmt. Der Mediator bestätigt den Termin nun final."
+            : "Wähle den Termin der für dich passt. Sobald alle Beteiligten einem Termin zugestimmt haben, wird das Erstgespräch geplant."}
         </p>
         <div className="space-y-3">
           {appointmentSlots.map((slot) => {
@@ -1751,14 +1762,15 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             const acceptedCount = slot.votes.filter(v => v.accepted).length;
             const totalVoted = slot.votes.length;
             const isVoting = appointmentVoting === slot.id;
+            const isReserved = slot.status === "reserved";
             return (
-              <div key={slot.id} className={`rounded-2xl border p-5 ${slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+              <div key={slot.id} className={`rounded-2xl border p-5 ${isReserved ? "border-amber-300 bg-amber-50" : slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-semibold text-slate-900">{fmt(slot.proposed_datetime)}</p>
                     <p className="mt-1 text-xs text-slate-500">
                       {acceptedCount} von {totalVoted} Beteiligten zugestimmt
-                      {slot.all_accepted && " · Alle bestätigt ✓"}
+                      {slot.all_accepted && " · Alle zugestimmt ✓"}
                     </p>
                     {totalVoted > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1769,8 +1781,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         ))}
                       </div>
                     )}
+                    {isReserved && (
+                      <p className="mt-2 text-xs font-semibold text-amber-700">
+                        Wartet auf finale Bestätigung durch den Mediator.
+                      </p>
+                    )}
                   </div>
-                  {!myVote && (
+                  {!myVote && !isReserved && (
                     <div className="flex gap-2 shrink-0">
                       <button
                         type="button"
@@ -1790,7 +1807,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       </button>
                     </div>
                   )}
-                  {myVote && (
+                  {myVote && !isReserved && (
                     <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${myVote.accepted ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
                       {myVote.accepted ? "Zugesagt" : "Abgesagt"}
                     </span>

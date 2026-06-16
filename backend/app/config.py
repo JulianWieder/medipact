@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
     DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen
+    # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
+    PAYPAL_CLIENT_ID: str = ""
+    PAYPAL_CLIENT_SECRET: str = ""
+    # "sandbox" für Tests ohne echtes Geld, "live" für echte Zahlungen
+    PAYPAL_ENV: str = "sandbox"
+    # Preis pro Teilnehmer in EUR (einmalig, beim Freischalten der Mediation)
+    PRICE_PER_PARTICIPANT_EUR: float = 499.0
 
     class Config:
         env_file = ".env"

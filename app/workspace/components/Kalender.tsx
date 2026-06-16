@@ -12,6 +12,12 @@ const MONTHS = [
   "Juli", "August", "September", "Oktober", "November", "Dezember",
 ];
 
+function statusLabel(status?: string) {
+  if (status === "reserved") return "Reserviert · wartet auf Mediator";
+  if (status === "proposed") return "Vorschlag · noch nicht final";
+  return null;
+}
+
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
@@ -153,8 +159,15 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
               {upcoming.map((e) => {
                 const dt = new Date(e.proposed_datetime);
                 const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                const pending = statusLabel(e.status);
                 return (
-                  <div key={e.id} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                  <div
+                    key={e.id}
+                    className={[
+                      "flex items-start gap-3 rounded-2xl border bg-white p-4",
+                      pending ? "border-dashed border-amber-300" : "border-slate-200",
+                    ].join(" ")}
+                  >
                     {/* Datum-Block */}
                     <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-teal-50 py-2">
                       <span className="text-xs font-bold text-teal-600 uppercase">
@@ -169,9 +182,16 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                         &nbsp;·&nbsp;
                         {dt.toLocaleDateString("de-DE", { weekday: "long" })}
                       </div>
-                      <span className={`mt-1.5 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
-                        {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}
-                      </span>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
+                          {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}
+                        </span>
+                        {pending && (
+                          <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
+                            {pending}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -227,16 +247,24 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                       {hourEvents.map((e) => {
                         const dt = new Date(e.proposed_datetime);
                         const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                        const pending = statusLabel(e.status);
                         return (
                           <div
                             key={e.id}
-                            className={`rounded-lg border px-3 py-1.5 text-xs ${color}`}
+                            className={[
+                              "rounded-lg border px-3 py-1.5 text-xs",
+                              color,
+                              pending ? "border-dashed border-amber-300" : "",
+                            ].join(" ")}
                           >
                             <span className="font-bold">
                               {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             {" · "}
                             <span className="font-medium">{e.mediation_title}</span>
+                            {pending && (
+                              <span className="ml-1.5 text-[10px] font-semibold text-amber-700">· {pending}</span>
+                            )}
                           </div>
                         );
                       })}
@@ -308,10 +336,13 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                     </span>
                     {dayEvents.length > 0 && (
                       <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                        {dayEvents.slice(0, 3).map((_e, idx) => (
+                        {dayEvents.slice(0, 3).map((e, idx) => (
                           <span
                             key={idx}
-                            className="w-1.5 h-1.5 rounded-full bg-teal-500"
+                            className={[
+                              "w-1.5 h-1.5 rounded-full",
+                              statusLabel(e.status) ? "bg-amber-400" : "bg-teal-500",
+                            ].join(" ")}
                           />
                         ))}
                         {dayEvents.length > 3 && (
@@ -351,8 +382,15 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                   {selectedEvents.map((e) => {
                     const dt = new Date(e.proposed_datetime);
                     const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                    const pending = statusLabel(e.status);
                     return (
-                      <div key={e.id} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                      <div
+                        key={e.id}
+                        className={[
+                          "flex items-start gap-3 rounded-2xl border bg-white p-4",
+                          pending ? "border-dashed border-amber-300" : "border-slate-200",
+                        ].join(" ")}
+                      >
                         <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-teal-50 py-2">
                           <span className="text-sm font-bold text-teal-700">
                             {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
@@ -361,9 +399,16 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm text-slate-800 truncate">{e.mediation_title}</div>
-                          <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
-                            {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}
-                          </span>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
+                              {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}
+                            </span>
+                            {pending && (
+                              <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
+                                {pending}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

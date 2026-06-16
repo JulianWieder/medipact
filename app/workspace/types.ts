@@ -90,6 +90,8 @@ export interface AppointmentEvent {
   mediation_title: string;
   mediation_type: string;
   proposed_datetime: string;
+  /** proposed: noch nicht alle zugestimmt · reserved: alle zugestimmt, wartet auf Mediator · confirmed: final bestätigt */
+  status?: "proposed" | "reserved" | "confirmed";
 }
 
 // ── Feedback ─────────────────────────────────────────────────────────────

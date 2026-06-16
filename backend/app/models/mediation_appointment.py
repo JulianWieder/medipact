@@ -13,6 +13,10 @@ class MediationAppointmentSlot(Base):
     mediation_id = Column(Integer, ForeignKey("mediations.id"), nullable=False)
     proposed_datetime = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    # Gesetzt, sobald der Mediator den (von allen Parteien akzeptierten) Slot
+    # final bestätigt hat. Erst dann gilt der Termin als verbindlich vereinbart;
+    # vorher ist er nur "reserviert".
+    mediator_confirmed_at = Column(DateTime, nullable=True)
 
 
 class MediationAppointmentVote(Base):

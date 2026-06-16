@@ -1,8 +1,24 @@
 "use client";
 
 import { hashId } from "@/lib/ids";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+declare global {
+  interface Window {
+    paypal?: {
+      Buttons: (options: Record<string, unknown>) => {
+        render: (container: HTMLElement) => void;
+      };
+    };
+  }
+}
+
+type PriceInfo = {
+  price_eur: number;
+  price_per_participant_eur: number;
+  participant_count: number;
+};
 
 type Props = {
   mediationId: string;
@@ -36,6 +52,9 @@ export default function MediationClient({ mediationId, currentUserName, initialI
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
+  const [price, setPrice] = useState<PriceInfo | null>(null);
+  const paypalContainerRef = useRef<HTMLDivElement>(null);
+  const paypalRenderedRef = useRef(false);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -108,29 +127,94 @@ export default function MediationClient({ mediationId, currentUserName, initialI
     }
   }
 
-  async function payNow() {
-    setPaying(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/pay`, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        const errorBody = await res.json().catch(() => null);
-        const raw = errorBody?.detail ?? errorBody?.error;
-        const detail = Array.isArray(raw)
-          ? raw.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join(", ")
-          : (raw ?? "Unbekannter Fehler");
-        setError(`Zahlung fehlgeschlagen (${res.status}): ${detail}`);
-        return;
+  // Preis laden, sobald die Gegenseite verbunden ist und noch nicht bezahlt wurde
+  useEffect(() => {
+    if (!hasOtherParty || isPaid) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/mediations/${mediationId}/price`);
+        if (res.ok && !cancelled) {
+          setPrice(await res.json());
+        }
+      } catch {
+        // still ignorieren - PayPal-Buttons zeigen dann den Fallback-Preis
       }
-      setIsPaid(true);
-    } catch {
-      setError("Server nicht erreichbar.");
-    } finally {
-      setPaying(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mediationId, hasOtherParty, isPaid]);
+
+  // PayPal JS SDK laden und die Buttons rendern, sobald der Preis bekannt ist
+  useEffect(() => {
+    if (!hasOtherParty || isPaid || !price || paypalRenderedRef.current) return;
+
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    if (!clientId) {
+      setError("PayPal ist noch nicht konfiguriert (NEXT_PUBLIC_PAYPAL_CLIENT_ID fehlt).");
+      return;
     }
-  }
+
+    function renderButtons() {
+      if (!window.paypal || !paypalContainerRef.current || paypalRenderedRef.current) return;
+      paypalRenderedRef.current = true;
+      window.paypal
+        .Buttons({
+          style: { layout: "vertical", color: "gold", label: "paypal" },
+          createOrder: async () => {
+            setError("");
+            const res = await fetch(`/api/mediations/${mediationId}/pay/paypal/create-order`, {
+              method: "POST",
+            });
+            const data = await res.json().catch(() => null);
+            if (!res.ok) {
+              throw new Error(data?.detail ?? "Order konnte nicht erstellt werden");
+            }
+            return data.order_id;
+          },
+          onApprove: async (data: { orderID: string }) => {
+            setPaying(true);
+            setError("");
+            try {
+              const res = await fetch(`/api/mediations/${mediationId}/pay/paypal/capture-order`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ order_id: data.orderID }),
+              });
+              const body = await res.json().catch(() => null);
+              if (!res.ok) {
+                const raw = body?.detail ?? body?.error;
+                setError(`Zahlung fehlgeschlagen: ${raw ?? "Unbekannter Fehler"}`);
+                return;
+              }
+              setIsPaid(true);
+            } catch {
+              setError("Server nicht erreichbar.");
+            } finally {
+              setPaying(false);
+            }
+          },
+          onError: () => {
+            setError("PayPal hat einen Fehler gemeldet. Bitte versuche es erneut.");
+          },
+        })
+        .render(paypalContainerRef.current);
+    }
+
+    const existing = document.getElementById("paypal-sdk") as HTMLScriptElement | null;
+    if (window.paypal) {
+      renderButtons();
+    } else if (existing) {
+      existing.addEventListener("load", renderButtons);
+    } else {
+      const script = document.createElement("script");
+      script.id = "paypal-sdk";
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
+      script.addEventListener("load", renderButtons);
+      document.body.appendChild(script);
+    }
+  }, [mediationId, hasOtherParty, isPaid, price]);
 
   async function startMediation() {
     setAdvancing(true);
@@ -253,22 +337,21 @@ export default function MediationClient({ mediationId, currentUserName, initialI
                   Vollständiger Zugang
                 </p>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold text-slate-900 tracking-tight">79</span>
+                  <span className="text-5xl font-extrabold text-slate-900 tracking-tight">
+                    {price ? price.price_eur.toFixed(0) : "499"}
+                  </span>
                   <span className="text-2xl font-bold text-slate-900">€</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-1">
-                  einmalig · pro Mediationsfall · inkl. MwSt.
+                  einmalig · 499 € pro Teilnehmer{price ? ` (${price.participant_count} Beteiligte)` : ""} · inkl. MwSt.
                 </p>
 
-                {/* TODO: Stripe-Checkout hier integrieren */}
-                <button
-                  type="button"
-                  onClick={payNow}
-                  disabled={paying}
-                  className="mt-6 w-full max-w-sm mx-auto block rounded-2xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {paying ? "Wird verarbeitet..." : "Jetzt bezahlen & Phase 1 starten →"}
-                </button>
+                <div className="mt-6 w-full max-w-sm mx-auto">
+                  <div ref={paypalContainerRef} />
+                  {paying && (
+                    <p className="mt-2 text-sm font-semibold text-slate-500">Zahlung wird verarbeitet…</p>
+                  )}
+                </div>
 
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
                   {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(

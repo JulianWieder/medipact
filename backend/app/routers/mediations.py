@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
@@ -11,6 +12,7 @@ from app.models.mediation_note import MediationNote
 from app.models.note_reaction import NoteReaction
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
+from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_user, get_current_db_user
 
 
@@ -64,6 +66,17 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     if not p:
         raise HTTPException(status_code=403, detail="Not allowed")
     return p
+
+
+def _mediation_price_eur(db: Session, mediation_id: int) -> float:
+    """Preis für die Freischaltung: 499 € pro Teilnehmer (mind. 1)."""
+    count = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id == mediation_id)
+        .count()
+    )
+    count = max(count, 1)
+    return round(settings.PRICE_PER_PARTICIPANT_EUR * count, 2)
 
 
 @router.post("")
@@ -149,32 +162,81 @@ def update_mediation(
     return mediation
 
 
-@router.post("/{mediation_id}/pay")
-def pay_mediation(
+@router.get("/{mediation_id}/price")
+def get_mediation_price(
     mediation_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Markiert die Mediation als bezahlt.
-
-    Platzhalter für die echte Stripe-Checkout-Anbindung (TODO). Sobald Stripe
-    angebunden ist, sollte dieser Endpoint nur noch vom Zahlungs-Webhook
-    (nach erfolgreicher Zahlung) aufgerufen werden, nicht mehr direkt vom Client.
-    """
-    is_participant = (
+    """Liefert den aktuellen Preis zur Freischaltung (499 € pro Teilnehmer)."""
+    _require_participant(mediation_id, user, db)
+    count = (
         db.query(MediationParticipant)
-        .filter(
-            MediationParticipant.mediation_id == mediation_id,
-            MediationParticipant.user_id == user.id,
-        )
-        .first()
+        .filter(MediationParticipant.mediation_id == mediation_id)
+        .count()
     )
-    if not is_participant:
-        raise HTTPException(status_code=403, detail="Not allowed")
+    return {
+        "price_eur": _mediation_price_eur(db, mediation_id),
+        "price_per_participant_eur": settings.PRICE_PER_PARTICIPANT_EUR,
+        "participant_count": max(count, 1),
+    }
 
+
+class PayPalCaptureRequest(BaseModel):
+    order_id: str
+
+
+@router.post("/{mediation_id}/pay/paypal/create-order")
+async def create_paypal_order(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Erstellt eine PayPal-Order über den fälligen Betrag (499 €/Teilnehmer)."""
+    _require_participant(mediation_id, user, db)
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
+    if mediation.is_paid:
+        raise HTTPException(status_code=400, detail="Mediation ist bereits bezahlt.")
+
+    price = _mediation_price_eur(db, mediation_id)
+    try:
+        order = await create_order(price, mediation_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    return {"order_id": order["id"], "price_eur": price}
+
+
+@router.post("/{mediation_id}/pay/paypal/capture-order")
+async def capture_paypal_order(
+    mediation_id: int,
+    payload: PayPalCaptureRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Erfasst eine vom Nutzer im PayPal-Fenster genehmigte Order.
+
+    Erst wenn PayPal den Status "COMPLETED" zurückmeldet, wird die Mediation
+    als bezahlt markiert - die Bestätigung kommt also direkt von PayPal, nicht
+    vom Client.
+    """
+    _require_participant(mediation_id, user, db)
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    try:
+        result = await capture_order(payload.order_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    if result.get("status") != "COMPLETED":
+        raise HTTPException(
+            status_code=402,
+            detail="Die Zahlung wurde von PayPal nicht als abgeschlossen gemeldet.",
+        )
 
     mediation.is_paid = True
     db.commit()
@@ -929,19 +991,54 @@ def sign_contract(
 from app.models.mediation_appointment import MediationAppointmentSlot, MediationAppointmentVote
 
 
+def _slot_status(db: Session, slot: "MediationAppointmentSlot", mediation_id: int) -> str:
+    """Ermittelt den Status eines Terminslots: proposed | reserved | confirmed.
+
+    - proposed: noch nicht alle Beteiligten haben zugestimmt
+    - reserved: alle Beteiligten haben zugestimmt, der Mediator hat aber noch
+      nicht final bestätigt
+    - confirmed: der Mediator hat final bestätigt – der Termin ist verbindlich
+    """
+    if slot.mediator_confirmed_at:
+        return "confirmed"
+
+    all_participant_ids = {
+        p.id for p in db.query(MediationParticipant).filter(
+            MediationParticipant.mediation_id == mediation_id
+        ).all()
+    }
+    if not all_participant_ids:
+        return "proposed"
+
+    accepted_ids = {
+        v.participant_id for v in db.query(MediationAppointmentVote).filter(
+            MediationAppointmentVote.slot_id == slot.id,
+            MediationAppointmentVote.accepted == True,  # noqa: E712
+        ).all()
+    }
+    all_accepted = all_participant_ids == accepted_ids
+    return "reserved" if all_accepted else "proposed"
+
+
 @router.get("/appointments/all")
 def get_all_appointments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Gibt alle Terminslots zurück, an denen der aktuelle Nutzer beteiligt ist."""
-    # Alle Mediations-IDs des Users ermitteln
-    participations = (
-        db.query(MediationParticipant)
-        .filter(MediationParticipant.user_id == current_user.id)
-        .all()
-    )
-    mediation_ids = [p.mediation_id for p in participations]
+    """Gibt alle Terminslots zurück, an denen der aktuelle Nutzer beteiligt ist.
+
+    Mediatoren und Admins sehen die Termine aus allen Mediationen, auch wenn
+    sie selbst kein MediationParticipant des jeweiligen Falls sind.
+    """
+    if current_user.role in ("mediator", "admin"):
+        mediation_ids = [m.id for m in db.query(Mediation.id).all()]
+    else:
+        participations = (
+            db.query(MediationParticipant)
+            .filter(MediationParticipant.user_id == current_user.id)
+            .all()
+        )
+        mediation_ids = [p.mediation_id for p in participations]
 
     if not mediation_ids:
         return []
@@ -960,8 +1057,9 @@ def get_all_appointments(
             "id": slot.id,
             "mediation_id": mediation.id,
             "mediation_title": mediation.title,
-            "mediation_type": mediation.conflict_type,
+            "mediation_type": mediation.mediation_type,
             "proposed_datetime": slot.proposed_datetime.isoformat(),
+            "status": _slot_status(db, slot, mediation.id),
         })
 
     return result
@@ -1122,7 +1220,13 @@ def get_appointment_slots(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Gibt alle Slots mit Abstimmungsstand zurück."""
+    """Gibt alle Slots mit Abstimmungsstand zurück.
+
+    `reserved` ist der Slot, dem alle Beteiligten zugestimmt haben, der aber
+    noch auf die finale Bestätigung durch den Mediator wartet. `confirmed`
+    ist erst gesetzt, wenn der Mediator final bestätigt hat – nur dann ist
+    der Termin verbindlich.
+    """
     _require_participant(mediation_id, current_user, db)
 
     slots = db.query(MediationAppointmentSlot).filter(
@@ -1137,6 +1241,7 @@ def get_appointment_slots(
 
     result = []
     confirmed_slot = None
+    reserved_slot = None
 
     for slot in slots:
         votes = db.query(MediationAppointmentVote, MediationParticipant, User).join(
@@ -1153,6 +1258,8 @@ def get_appointment_slots(
         accepted_ids = {v.participant_id for v, _, _ in votes if v.accepted}
         all_accepted = participant_count > 0 and all_participant_ids == accepted_ids
         all_voted = all_participant_ids == voted_ids
+        mediator_confirmed = slot.mediator_confirmed_at is not None
+        status = "confirmed" if mediator_confirmed else ("reserved" if all_accepted else "proposed")
 
         slot_data = {
             "id": slot.id,
@@ -1160,12 +1267,72 @@ def get_appointment_slots(
             "votes": vote_list,
             "all_accepted": all_accepted,
             "all_voted": all_voted,
+            "mediator_confirmed": mediator_confirmed,
+            "status": status,
         }
         result.append(slot_data)
-        if all_accepted:
+        if status == "confirmed":
             confirmed_slot = slot_data
+        elif status == "reserved":
+            reserved_slot = slot_data
 
-    return {"slots": result, "confirmed": confirmed_slot}
+    return {"slots": result, "confirmed": confirmed_slot, "reserved": reserved_slot}
+
+
+class AppointmentConfirmRequest(BaseModel):
+    slot_id: int
+
+
+@router.post("/{mediation_id}/appointment/confirm")
+def confirm_appointment_slot(
+    mediation_id: int,
+    payload: AppointmentConfirmRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Finale Bestätigung eines reservierten Terminslots durch den Mediator.
+
+    Erst ab dieser Bestätigung gilt der Termin als verbindlich vereinbart.
+    Nur Nutzer mit globaler Rolle 'mediator' oder 'admin' dürfen das.
+    """
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen Termine final bestätigen")
+
+    slot = db.query(MediationAppointmentSlot).filter(
+        MediationAppointmentSlot.id == payload.slot_id,
+        MediationAppointmentSlot.mediation_id == mediation_id,
+    ).first()
+    if not slot:
+        raise HTTPException(status_code=404, detail="Terminslot nicht gefunden")
+
+    all_participants = db.query(MediationParticipant).filter(
+        MediationParticipant.mediation_id == mediation_id
+    ).all()
+    all_participant_ids = {p.id for p in all_participants}
+    accepted_ids = {
+        v.participant_id for v in db.query(MediationAppointmentVote).filter(
+            MediationAppointmentVote.slot_id == slot.id,
+            MediationAppointmentVote.accepted == True,  # noqa: E712
+        ).all()
+    }
+    all_accepted = bool(all_participant_ids) and all_participant_ids == accepted_ids
+    if not all_accepted:
+        raise HTTPException(
+            status_code=400,
+            detail="Dieser Termin wurde noch nicht von allen Beteiligten akzeptiert",
+        )
+
+    import datetime as dt
+    slot.mediator_confirmed_at = dt.datetime.utcnow()
+    db.commit()
+    db.refresh(slot)
+
+    return {
+        "ok": True,
+        "slot_id": slot.id,
+        "proposed_datetime": slot.proposed_datetime.isoformat(),
+        "mediator_confirmed_at": slot.mediator_confirmed_at.isoformat(),
+    }
 
 
 from app.models.mediation_feedback import MediationFeedback

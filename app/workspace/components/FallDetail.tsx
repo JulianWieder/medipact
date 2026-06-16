@@ -133,11 +133,20 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   }, [activeTab, loadFeedback]);
 
   // Appointments
-  type AppointmentSlot = { id: number; proposed_datetime: string; votes: { participant_id: number; name: string; accepted: boolean }[]; all_accepted: boolean };
+  type AppointmentSlot = {
+    id: number;
+    proposed_datetime: string;
+    votes: { participant_id: number; name: string; accepted: boolean }[];
+    all_accepted: boolean;
+    mediator_confirmed?: boolean;
+    status?: "proposed" | "reserved" | "confirmed";
+  };
   const [appointmentSlots, setAppointmentSlots] = useState<AppointmentSlot[]>([]);
   const [confirmedSlot, setConfirmedSlot] = useState<AppointmentSlot | null>(null);
+  const [reservedSlot, setReservedSlot] = useState<AppointmentSlot | null>(null);
   const [appointmentLoading, setAppointmentLoading] = useState(false);
   const [appointmentVoting, setAppointmentVoting] = useState<number | null>(null);
+  const [appointmentConfirming, setAppointmentConfirming] = useState<number | null>(null);
 
   // Contract
   const [contract, setContract] = useState<Contract | null>(null);
@@ -302,7 +311,22 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
       const data = await res.json();
       setAppointmentSlots(data.slots ?? []);
       setConfirmedSlot(data.confirmed ?? null);
+      setReservedSlot(data.reserved ?? null);
     } catch { /* ignore */ }
+  }
+
+  async function handleConfirmSlot(slotId: number) {
+    setAppointmentConfirming(slotId);
+    try {
+      await fetch(`/api/mediations/${fall.id}/appointment/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot_id: slotId }),
+      });
+      await loadAppointments();
+    } catch { /* ignore */ } finally {
+      setAppointmentConfirming(null);
+    }
   }
 
   async function handleProposeAppointments() {
@@ -716,8 +740,9 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Final bestätigt</p>
                     <p className="mt-1 text-base font-semibold text-slate-900">{fmtDate(confirmedSlot.proposed_datetime)}</p>
-                    <p className="mt-1 text-xs text-slate-500">Alle Beteiligten haben zugestimmt.</p>
+                    <p className="mt-1 text-xs text-slate-500">Alle Beteiligten haben zugestimmt und der Termin ist verbindlich.</p>
                   </div>
                 </div>
               ) : appointmentSlots.length === 0 ? (
@@ -726,11 +751,26 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {reservedSlot && (
+                    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-6 py-6 text-center">
+                      <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Reserviert · noch nicht verbindlich</p>
+                      <p className="text-base font-semibold text-slate-900">{fmtDate(reservedSlot.proposed_datetime)}</p>
+                      <p className="text-xs text-slate-500">Alle Beteiligten haben zugestimmt. Bestätige final, um den Termin verbindlich zu machen.</p>
+                      <button
+                        disabled={appointmentConfirming === reservedSlot.id}
+                        onClick={() => handleConfirmSlot(reservedSlot.id)}
+                        className="mt-1 rounded-full bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600 disabled:opacity-50 transition"
+                      >
+                        {appointmentConfirming === reservedSlot.id ? "Wird bestätigt…" : "Termin final bestätigen"}
+                      </button>
+                    </div>
+                  )}
                   {appointmentSlots.map((slot) => {
                     const accepted = slot.votes.filter(v => v.accepted);
                     const declined = slot.votes.filter(v => !v.accepted);
+                    const isReserved = slot.status === "reserved";
                     return (
-                      <div key={slot.id} className={`rounded-xl border p-4 ${slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+                      <div key={slot.id} className={`rounded-xl border p-4 ${isReserved ? "border-amber-300 bg-amber-50" : slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-slate-900">{fmtDate(slot.proposed_datetime)}</p>
@@ -744,6 +784,15 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               {slot.votes.length === 0 && <span className="text-xs text-slate-400">Noch keine Stimmen</span>}
                             </div>
                           </div>
+                          {isReserved ? (
+                            <button
+                              disabled={appointmentConfirming === slot.id}
+                              onClick={() => handleConfirmSlot(slot.id)}
+                              className="shrink-0 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600 disabled:opacity-50 transition"
+                            >
+                              {appointmentConfirming === slot.id ? "…" : "Final bestätigen"}
+                            </button>
+                          ) : (
                           <div className="flex gap-1.5 shrink-0">
                             <button
                               disabled={appointmentVoting === slot.id}
@@ -760,6 +809,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               Ablehnen
                             </button>
                           </div>
+                          )}
                         </div>
                       </div>
                     );
