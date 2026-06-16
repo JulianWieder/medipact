@@ -20,16 +20,18 @@ def upgrade() -> None:
     # (Upsert). Damit der Mediator den Zeitverlauf wiederholter Rückmeldungen
     # sehen kann, erlauben wir jetzt mehrere Einträge pro (mediation, participant,
     # occasion) — jede Einreichung wird als neue Zeile gespeichert (Historie).
-    op.drop_constraint(
-        "uq_feedback_per_participant_occasion",
-        "mediation_feedback",
-        type_="unique",
-    )
+    # SQLite kann Constraints nicht per ALTER TABLE entfernen, daher batch mode
+    # (Tabelle wird per copy-and-move-Strategie neu aufgebaut).
+    with op.batch_alter_table("mediation_feedback") as batch_op:
+        batch_op.drop_constraint(
+            "uq_feedback_per_participant_occasion",
+            type_="unique",
+        )
 
 
 def downgrade() -> None:
-    op.create_unique_constraint(
-        "uq_feedback_per_participant_occasion",
-        "mediation_feedback",
-        ["mediation_id", "participant_id", "occasion"],
-    )
+    with op.batch_alter_table("mediation_feedback") as batch_op:
+        batch_op.create_unique_constraint(
+            "uq_feedback_per_participant_occasion",
+            ["mediation_id", "participant_id", "occasion"],
+        )
