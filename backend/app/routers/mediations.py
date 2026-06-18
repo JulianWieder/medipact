@@ -11,6 +11,7 @@ from app.models.mediation_invite import MediationInvite
 from app.models.mediation_note import MediationNote
 from app.models.note_reaction import NoteReaction
 from app.models.mediation_participant import MediationParticipant
+from app.models.mediation_step_rule import MediationStepRule
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_user, get_current_db_user
@@ -66,6 +67,170 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     if not p:
         raise HTTPException(status_code=403, detail="Not allowed")
     return p
+
+
+# ── Workflow-Regeln (konfigurierbar pro Fall, ohne Code-Änderung) ──────────────
+#
+# Standardmäßig müssen nur die Konfliktparteien einen Schritt abschließen,
+# damit er als erledigt gilt – Mediator/Admin werden nicht mitgezählt (sie
+# füllen die Partei-Formulare normalerweise nicht aus). Über die Tabelle
+# `mediation_step_rules` kann das pro Mediation und Schritt überschrieben
+# werden (z.B. "Mediator muss hier auch unterschreiben" oder "Schritt für
+# diesen Fall überspringen") – siehe /workflow-rules-Endpoints unten.
+
+DEFAULT_PARTY_ROLES = {"owner", "initiator", "other_party"}
+
+# Pseudo-Phase für die Vertragsunterschrift (kein echter Notiz-Phase-Wert).
+CONTRACT_RULE_PHASE = "__contract__"
+
+# Rollen, die Workflow-Regeln für einen Fall verwalten dürfen.
+_WORKFLOW_ADMIN_ROLES = {"mediator", "owner", "admin"}
+
+
+def _get_step_rule(
+    db: Session, mediation_id: int, phase: str, step: str
+) -> Optional[MediationStepRule]:
+    return (
+        db.query(MediationStepRule)
+        .filter(
+            MediationStepRule.mediation_id == mediation_id,
+            MediationStepRule.phase == phase,
+            MediationStepRule.step == step,
+        )
+        .first()
+    )
+
+
+def _resolve_step_requirement(
+    db: Session, mediation_id: int, phase: str, step: str, available_roles: set[str]
+) -> tuple[set[str], bool]:
+    """
+    Ermittelt, welche Rollen einen Schritt abschließen müssen, und ob der
+    Schritt für diesen Fall komplett übersprungen wird.
+
+    Reihenfolge: expliziter Override > Standard (Konfliktparteien) > falls
+    keine Konfliktpartei unter den Teilnehmern ist, alle vorhandenen Rollen
+    (Fallback, damit ein Schritt nie unerfüllbar wird).
+    """
+    rule = _get_step_rule(db, mediation_id, phase, step)
+    if rule and rule.skip:
+        return set(), True
+
+    if rule and rule.required_roles:
+        required = {r.strip() for r in rule.required_roles.split(",") if r.strip()}
+    else:
+        required = DEFAULT_PARTY_ROLES & available_roles
+
+    if not required:
+        required = available_roles
+
+    return required, False
+
+
+class WorkflowRuleUpsert(BaseModel):
+    phase: str
+    step: str = ""
+    required_roles: Optional[list[str]] = None  # None = zurück auf Standard
+    skip: bool = False
+
+
+@router.get("/{mediation_id}/workflow-rules")
+def list_workflow_rules(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Alle für diesen Fall hinterlegten Workflow-Overrides, plus die in diesem
+    Fall vorhandenen Teilnehmer-Rollen (damit das Dashboard die passenden
+    Auswahlmöglichkeiten anzeigen kann) und die Standardrollen.
+    """
+    _require_participant(mediation_id, current_user, db)
+
+    rules = (
+        db.query(MediationStepRule)
+        .filter(MediationStepRule.mediation_id == mediation_id)
+        .all()
+    )
+    available_roles = sorted(
+        {
+            p.role
+            for p in db.query(MediationParticipant)
+            .filter(MediationParticipant.mediation_id == mediation_id)
+            .all()
+        }
+    )
+    return {
+        "default_required_roles": sorted(DEFAULT_PARTY_ROLES),
+        "available_roles": available_roles,
+        "rules": [
+            {
+                "phase": r.phase,
+                "step": r.step,
+                "required_roles": r.required_roles.split(",") if r.required_roles else None,
+                "skip": r.skip,
+            }
+            for r in rules
+        ],
+    }
+
+
+@router.put("/{mediation_id}/workflow-rules")
+def upsert_workflow_rule(
+    mediation_id: int,
+    payload: WorkflowRuleUpsert,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Legt eine Abweichung vom Standard-Workflow für diesen Fall fest (oder ändert sie)."""
+    participant = _require_participant(mediation_id, current_user, db)
+    if participant.role not in _WORKFLOW_ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Nur der Mediator kann den Workflow anpassen")
+
+    rule = _get_step_rule(db, mediation_id, payload.phase, payload.step)
+    required_roles_str = ",".join(payload.required_roles) if payload.required_roles else None
+
+    if rule:
+        rule.required_roles = required_roles_str
+        rule.skip = payload.skip
+    else:
+        rule = MediationStepRule(
+            mediation_id=mediation_id,
+            phase=payload.phase,
+            step=payload.step,
+            required_roles=required_roles_str,
+            skip=payload.skip,
+        )
+        db.add(rule)
+
+    db.commit()
+    db.refresh(rule)
+    return {
+        "phase": rule.phase,
+        "step": rule.step,
+        "required_roles": rule.required_roles.split(",") if rule.required_roles else None,
+        "skip": rule.skip,
+    }
+
+
+@router.delete("/{mediation_id}/workflow-rules")
+def delete_workflow_rule(
+    mediation_id: int,
+    phase: str = Query(...),
+    step: str = Query(""),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Entfernt einen Override – der Schritt fällt zurück auf das Standardverhalten."""
+    participant = _require_participant(mediation_id, current_user, db)
+    if participant.role not in _WORKFLOW_ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Nur der Mediator kann den Workflow anpassen")
+
+    rule = _get_step_rule(db, mediation_id, phase, step)
+    if rule:
+        db.delete(rule)
+        db.commit()
+    return {"status": "reset"}
 
 
 def _mediation_price_eur(db: Session, mediation_id: int) -> float:
@@ -463,7 +628,16 @@ def get_step_status(
         }
         for p, u in participants
     ]
-    all_submitted = len(result) > 0 and all(r["submitted"] for r in result)
+
+    available_roles = {p.role for p, _ in participants}
+    required_roles, skip = _resolve_step_requirement(
+        db, mediation_id, phase, step, available_roles
+    )
+    if skip:
+        all_submitted = True
+    else:
+        required = [r for r in result if r["role"] in required_roles]
+        all_submitted = len(required) > 0 and all(r["submitted"] for r in required)
     return {"participants": result, "all_submitted": all_submitted}
 
 
@@ -898,8 +1072,21 @@ def get_contract(
         .filter(MediationParticipant.mediation_id == mediation_id)
         .all()
     )
+    # Wer unterschreiben muss, ist (wie bei den Content-Schritten) konfigurierbar
+    # – Standard sind nur die Konfliktparteien, damit ein als Participant
+    # hinterlegter Mediator/Admin den Vertragsabschluss nicht dauerhaft blockiert.
+    available_roles = {p.role for p in all_participants}
+    required_roles, skip = _resolve_step_requirement(
+        db, mediation_id, CONTRACT_RULE_PHASE, "", available_roles
+    )
     signed_ids = {sig.participant_id for sig, _, _ in signatures}
-    all_signed = len(all_participants) > 0 and all(p.id in signed_ids for p in all_participants)
+    if skip:
+        all_signed = True
+    else:
+        required_participants = [p for p in all_participants if p.role in required_roles]
+        all_signed = len(required_participants) > 0 and all(
+            p.id in signed_ids for p in required_participants
+        )
 
     return {
         "contract": {

@@ -41,7 +41,7 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-export default function MediationClient({ mediationId, currentUserName, initialIsPaid = false }: Props) {
+export default function MediationClient({ mediationId, userRole, currentUserName, initialIsPaid = false }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -286,8 +286,19 @@ export default function MediationClient({ mediationId, currentUserName, initialI
                 </div>
               ))}
             </div>
-            <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
-              ID: {mediationId}
+            <div className="flex flex-col items-end gap-3">
+              <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+                ID: {mediationId}
+              </div>
+              {(userRole === "mediator" || userRole === "admin") && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/dashboard/${hashId(mediationId)}/workflow`)}
+                  className="btn btn-ghost text-sm"
+                >
+                  ⚙ Workflow-Einstellungen
+                </button>
+              )}
             </div>
           </div>
 
