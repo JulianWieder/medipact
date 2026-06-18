@@ -141,6 +141,51 @@ export async function fetchStepStatus(
   return res.json();
 }
 
+// ── Workflow-Regeln (wer muss welchen Schritt abschließen) ────────────────
+
+export interface WorkflowRule {
+  phase: string;
+  step: string;
+  required_roles: string[] | null;
+  skip: boolean;
+}
+
+export interface WorkflowRulesResponse {
+  default_required_roles: string[];
+  available_roles: string[];
+  rules: WorkflowRule[];
+}
+
+export async function fetchWorkflowRules(mediationId: number): Promise<WorkflowRulesResponse | null> {
+  const res = await fetch(`/api/mediations/${mediationId}/workflow-rules`, { cache: "no-store" });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function saveWorkflowRule(
+  mediationId: number,
+  rule: { phase: string; step: string; required_roles: string[]; skip: boolean },
+): Promise<boolean> {
+  const res = await fetch(`/api/mediations/${mediationId}/workflow-rules`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(rule),
+  });
+  return res.ok;
+}
+
+export async function deleteWorkflowRule(
+  mediationId: number,
+  phase: string,
+  step: string,
+): Promise<boolean> {
+  const params = new URLSearchParams({ phase, step });
+  const res = await fetch(`/api/mediations/${mediationId}/workflow-rules?${params}`, {
+    method: "DELETE",
+  });
+  return res.ok;
+}
+
 // ── Admin: alle Nutzer ────────────────────────────────────────────────────
 
 /** Alle registrierten Nutzer - nur fuer Admins/Mediatoren. */

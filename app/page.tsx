@@ -4,9 +4,9 @@ import { JsonLd } from "@/app/components/JsonLd";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "medipact – Streit klären ohne Gericht | KI-Mediation",
+  title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
   description:
-    "Medipact hilft bei Trennung, Nachbarschaftsstreit und Erbschaft. KI-gestützte Mediation nach dem Harvard-Prinzip – vertraulich, bezahlbar, ohne Gericht.",
+    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. Medipact hilft bei Trennung, Nachbarschaftsstreit und Erbschaft nach dem Harvard-Prinzip.",
   alternates: {
     canonical: "https://medipact.de",
   },
@@ -138,9 +138,9 @@ export default function MedipactLanding() {
 
               <FadeIn>
                 <h1 className="heading-1 mt-8">
-                  Streit klären ohne Gericht –
+                  Mediation online –
                   <span className="block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
-                    ruhig, fair und bezahlbar.
+                    Konflikte fair, vertraulich und ohne Gericht lösen.
                   </span>
                 </h1>
               </FadeIn>

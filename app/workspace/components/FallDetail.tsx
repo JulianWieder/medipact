@@ -20,6 +20,10 @@ import {
   advanceMediationPhase,
   inviteParty,
   fetchStepStatus,
+  fetchWorkflowRules,
+  saveWorkflowRule,
+  deleteWorkflowRule,
+  type WorkflowRulesResponse,
 } from "../api";
 
 interface FallDetailProps {
@@ -57,6 +61,19 @@ interface StepStatusEntry {
   role: string;
   submitted: boolean;
 }
+
+interface StepStatusResult {
+  participants: StepStatusEntry[];
+  allSubmitted: boolean;
+}
+
+const WORKFLOW_ROLE_LABEL: Record<string, string> = {
+  initiator: "Antragsteller",
+  other_party: "Andere Seite",
+  owner: "Antragsteller",
+  mediator: "Mediator",
+  admin: "Admin",
+};
 
 export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -158,8 +175,15 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [contractError, setContractError] = useState("");
 
   // Step status für Einleitung
-  const [stepStatuses, setStepStatuses] = useState<Record<string, StepStatusEntry[]>>({});
+  const [stepStatuses, setStepStatuses] = useState<Record<string, StepStatusResult>>({});
   const [loadingSteps, setLoadingSteps] = useState(false);
+
+  // Workflow-Konfiguration (wer muss welchen Schritt abschließen)
+  const [workflowData, setWorkflowData] = useState<WorkflowRulesResponse | null>(null);
+  const [expandedStepConfig, setExpandedStepConfig] = useState<string | null>(null);
+  const [ruleSelections, setRuleSelections] = useState<Record<string, Set<string>>>({});
+  const [ruleSkips, setRuleSkips] = useState<Record<string, boolean>>({});
+  const [savingRuleKey, setSavingRuleKey] = useState<string | null>(null);
 
   const phaseIdx = getPhaseIndex(fall.phase);
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
@@ -207,20 +231,83 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
 
   const loadStepStatuses = useCallback(async () => {
     setLoadingSteps(true);
-    const results: Record<string, StepStatusEntry[]> = {};
+    const results: Record<string, StepStatusResult> = {};
     await Promise.all(
       EINLEITUNG_STEPS.map(async (s) => {
         const data = await fetchStepStatus(fall.id, s.key, "");
-        results[s.key] = data.participants;
+        results[s.key] = { participants: data.participants, allSubmitted: data.all_submitted };
       })
     );
     setStepStatuses(results);
     setLoadingSteps(false);
   }, [fall.id]);
 
+  const loadWorkflowRules = useCallback(async () => {
+    const data = await fetchWorkflowRules(fall.id);
+    if (!data) return;
+    setWorkflowData(data);
+    const nextSelections: Record<string, Set<string>> = {};
+    const nextSkips: Record<string, boolean> = {};
+    for (const step of EINLEITUNG_STEPS) {
+      const rule = data.rules.find((r) => r.phase === step.key && r.step === "");
+      nextSelections[step.key] = rule?.required_roles
+        ? new Set(rule.required_roles)
+        : new Set(data.default_required_roles.filter((r) => data.available_roles.includes(r)));
+      nextSkips[step.key] = rule?.skip ?? false;
+    }
+    setRuleSelections(nextSelections);
+    setRuleSkips(nextSkips);
+  }, [fall.id]);
+
   useEffect(() => {
-    if (activeTab === "steps") loadStepStatuses();
-  }, [activeTab, loadStepStatuses]);
+    if (activeTab === "steps") {
+      loadStepStatuses();
+      loadWorkflowRules();
+    }
+  }, [activeTab, loadStepStatuses, loadWorkflowRules]);
+
+  function toggleRuleRole(stepKey: string, role: string) {
+    setRuleSelections((prev) => {
+      const next = new Set(prev[stepKey] ?? []);
+      if (next.has(role)) next.delete(role);
+      else next.add(role);
+      return { ...prev, [stepKey]: next };
+    });
+  }
+
+  function toggleRuleSkip(stepKey: string) {
+    setRuleSkips((prev) => ({ ...prev, [stepKey]: !prev[stepKey] }));
+  }
+
+  async function handleSaveRule(stepKey: string) {
+    setSavingRuleKey(stepKey);
+    try {
+      const ok = await saveWorkflowRule(fall.id, {
+        phase: stepKey,
+        step: "",
+        required_roles: Array.from(ruleSelections[stepKey] ?? []),
+        skip: ruleSkips[stepKey] ?? false,
+      });
+      if (ok) {
+        await Promise.all([loadWorkflowRules(), loadStepStatuses()]);
+        setExpandedStepConfig(null);
+      }
+    } finally {
+      setSavingRuleKey(null);
+    }
+  }
+
+  async function handleResetRule(stepKey: string) {
+    setSavingRuleKey(stepKey);
+    try {
+      const ok = await deleteWorkflowRule(fall.id, stepKey, "");
+      if (ok) {
+        await Promise.all([loadWorkflowRules(), loadStepStatuses()]);
+      }
+    } finally {
+      setSavingRuleKey(null);
+    }
+  }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   async function handleAdvance() {
@@ -686,27 +773,127 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
               ) : (
                 <div className="space-y-3">
                   {EINLEITUNG_STEPS.map((step) => {
-                    const entries = stepStatuses[step.key] ?? [];
-                    const allDone = entries.length > 0 && entries.every((e) => e.submitted);
+                    const result = stepStatuses[step.key];
+                    const entries = result?.participants ?? [];
+                    const allDone = result?.allSubmitted ?? false;
+                    const requiredRoles = ruleSelections[step.key] ?? new Set<string>();
+                    const skipped = ruleSkips[step.key] ?? false;
+                    const overridden = workflowData?.rules.some((r) => r.phase === step.key && r.step === "") ?? false;
+                    const isExpanded = expandedStepConfig === step.key;
                     return (
                       <div key={step.key} className={allDone ? "rounded-xl border border-teal-200 bg-teal-50/60 p-4" : "rounded-xl border border-slate-200 bg-white p-4"}>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-semibold text-slate-800">{step.label}</span>
-                          {allDone ? (
-                            <span className="text-[10px] font-bold text-teal-600">✓ Alle fertig</span>
-                          ) : entries.length === 0 ? (
-                            <span className="text-[10px] text-slate-400">Noch keine Daten</span>
-                          ) : (
-                            <span className="text-[10px] font-semibold text-amber-600">{entries.filter((e) => e.submitted).length}/{entries.length} eingereicht</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-slate-800">{step.label}</span>
+                            {skipped && (
+                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Übersprungen</span>
+                            )}
+                            {overridden && !skipped && (
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Angepasst</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {skipped ? (
+                              <span className="text-[10px] font-bold text-slate-500">– übersprungen</span>
+                            ) : allDone ? (
+                              <span className="text-[10px] font-bold text-teal-600">✓ Alle fertig</span>
+                            ) : entries.length === 0 ? (
+                              <span className="text-[10px] text-slate-400">Noch keine Daten</span>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-amber-600">{entries.filter((e) => e.submitted).length}/{entries.length} eingereicht</span>
+                            )}
+                            <button
+                              onClick={() => setExpandedStepConfig(isExpanded ? null : step.key)}
+                              className="text-xs text-slate-400 hover:text-teal-600"
+                              title="Wer muss diesen Schritt abschließen?"
+                            >
+                              ⚙
+                            </button>
+                          </div>
                         </div>
                         {entries.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {entries.map((e) => (
-                              <span key={e.participant_id} className={e.submitted ? "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs border bg-teal-50 border-teal-200 text-teal-700" : "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs border bg-slate-50 border-slate-200 text-slate-500"}>
-                                {e.submitted ? "✓" : "○"} {e.name}
-                              </span>
-                            ))}
+                            {entries.map((e) => {
+                              const isRequired = requiredRoles.has(e.role);
+                              return (
+                                <span
+                                  key={e.participant_id}
+                                  className={cn(
+                                    "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs border",
+                                    e.submitted
+                                      ? "bg-teal-50 border-teal-200 text-teal-700"
+                                      : "bg-slate-50 border-slate-200 text-slate-500",
+                                    !isRequired && "opacity-50",
+                                  )}
+                                  title={isRequired ? "Erforderlich" : "Nicht erforderlich für diesen Schritt"}
+                                >
+                                  {e.submitted ? "✓" : "○"} {e.name}
+                                  {!isRequired && " (optional)"}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {isExpanded && (
+                          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <p className="mb-2 text-xs font-semibold text-slate-600">
+                              Wer muss diesen Schritt abschließen, damit er als erledigt gilt?
+                            </p>
+                            <label className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={skipped}
+                                onChange={() => toggleRuleSkip(step.key)}
+                                className="h-3.5 w-3.5 rounded border-slate-300"
+                              />
+                              Schritt für diesen Fall überspringen
+                            </label>
+                            {!skipped && (
+                              <div className="mb-3 flex flex-wrap gap-2">
+                                {(workflowData?.available_roles ?? []).map((role) => (
+                                  <label
+                                    key={role}
+                                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={requiredRoles.has(role)}
+                                      onChange={() => toggleRuleRole(step.key, role)}
+                                      className="h-3.5 w-3.5 rounded border-slate-300"
+                                    />
+                                    {WORKFLOW_ROLE_LABEL[role] ?? role}
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleSaveRule(step.key)}
+                                disabled={savingRuleKey === step.key}
+                                className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {savingRuleKey === step.key ? "Speichert …" : "Speichern"}
+                              </button>
+                              {overridden && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleResetRule(step.key)}
+                                  disabled={savingRuleKey === step.key}
+                                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Zurücksetzen
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setExpandedStepConfig(null)}
+                                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-600"
+                              >
+                                Abbrechen
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>

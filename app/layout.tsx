@@ -36,9 +36,9 @@ const websiteSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "medipact – KI-Mediation ab €499",
+  title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
   description:
-    "Konflikte lösen ohne Gericht. KI-basierte Mediation nach dem Harvard-Prinzip. Schneller, günstiger, menschlicher als klassische Mediation.",
+    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. KI-basierte Mediation nach dem Harvard-Prinzip. Schneller, günstiger, menschlicher als klassische Mediation.",
   keywords: [
     "Mediation",
     "KI-Mediation",
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: "https://medipact.de",
     siteName: "medipact",
-    title: "medipact – KI-Mediation ab €499",
-    description: "Konflikte lösen ohne Gericht.",
+    title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
+    description: "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen.",
     images: [
       {
         url: "https://medipact.de/og-image.png",
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "medipact – KI-Mediation ab €499",
-    description: "Konflikte lösen ohne Gericht.",
+    title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
+    description: "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen.",
     creator: "@medipact_de",
   },
 };
