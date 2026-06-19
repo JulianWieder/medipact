@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True    # STARTTLS on port 587
     SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
+<<<<<<< Updated upstream
     DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
@@ -31,6 +32,10 @@ class Settings(BaseSettings):
     PAYPAL_ENV: str = "sandbox"
     # Preis pro Teilnehmer in EUR (einmalig, beim Freischalten der Mediation)
     PRICE_PER_PARTICIPANT_EUR: float = 499.0
+=======
+    DB_PATH: str = ""
+    ANTHROPIC_API_KEY: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
+>>>>>>> Stashed changes
 
     class Config:
         env_file = ".env"
