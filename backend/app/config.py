@@ -1,7 +1,9 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
 _INSECURE_DEFAULT = "dev-secret-key"
+_VALID_PAYPAL_ENVS = {"sandbox", "live"}
 
 
 class Settings(BaseSettings):
@@ -22,7 +24,6 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True    # STARTTLS on port 587
     SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
-<<<<<<< Updated upstream
     DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
@@ -32,20 +33,42 @@ class Settings(BaseSettings):
     PAYPAL_ENV: str = "sandbox"
     # Preis pro Teilnehmer in EUR (einmalig, beim Freischalten der Mediation)
     PRICE_PER_PARTICIPANT_EUR: float = 499.0
-=======
-    DB_PATH: str = ""
-    ANTHROPIC_API_KEY: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
->>>>>>> Stashed changes
 
     class Config:
         env_file = ".env"
 
+    @field_validator("PAYPAL_ENV")
+    @classmethod
+    def _validate_paypal_env(cls, value: str) -> str:
+        if value not in _VALID_PAYPAL_ENVS:
+            raise ValueError(
+                f"PAYPAL_ENV muss 'sandbox' oder 'live' sein, nicht '{value}'."
+            )
+        return value
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """CORS_ORIGINS als bereinigte Liste statt Comma-String."""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
 
 settings = Settings()
 
-if settings.PRODUCTION and settings.SECRET_KEY == _INSECURE_DEFAULT:
-    raise RuntimeError(
-        "SECRET_KEY muss in der Produktionsumgebung gesetzt sein. "
-        "Generiere einen sicheren Schlüssel mit: "
-        "python -c \"import secrets; print(secrets.token_hex(32))\""
-    )
+if settings.PRODUCTION:
+    _errors = []
+    if settings.SECRET_KEY == _INSECURE_DEFAULT:
+        _errors.append(
+            "SECRET_KEY muss gesetzt sein. Generiere einen sicheren Schlüssel mit: "
+            "python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+    if settings.PAYPAL_ENV == "live" and not (
+        settings.PAYPAL_CLIENT_ID and settings.PAYPAL_CLIENT_SECRET
+    ):
+        _errors.append(
+            "PAYPAL_CLIENT_ID und PAYPAL_CLIENT_SECRET müssen gesetzt sein, "
+            "wenn PAYPAL_ENV='live' ist."
+        )
+    if _errors:
+        raise RuntimeError(
+            "Ungültige Produktionskonfiguration:\n- " + "\n- ".join(_errors)
+        )
