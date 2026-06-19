@@ -4,7 +4,8 @@ import { JsonLd } from "@/app/components/JsonLd";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
+  title:
+    "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
   description:
     "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. Medipact hilft bei Trennung, Nachbarschaftsstreit und Erbschaft nach dem Harvard-Prinzip.",
   alternates: {
@@ -188,8 +189,12 @@ export default function MedipactLanding() {
               <div className="mt-10 grid grid-cols-2 gap-4 border-t border-slate-100 pt-10 sm:grid-cols-4">
                 {stats.map((s) => (
                   <div key={s.label}>
-                    <div className="text-xl font-black text-teal-700">{s.value}</div>
-                    <div className="mt-0.5 text-xs leading-snug text-slate-500">{s.label}</div>
+                    <div className="text-xl font-black text-teal-700">
+                      {s.value}
+                    </div>
+                    <div className="mt-0.5 text-xs leading-snug text-slate-500">
+                      {s.label}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -204,7 +209,7 @@ export default function MedipactLanding() {
               }}
             >
               <iframe
-                src="https://share.synthesia.io/embeds/videos/ecc6e794-b1df-4c8e-85ca-f137b90c3f2f"
+                src="https://share.synthesia.io/ecc6e794-b1df-4c8e-85ca-f137b90c3f2f"
                 loading="lazy"
                 title="Synthesia video player - Frieden durch Mediation: Der Weg zur Einigung"
                 allowFullScreen
@@ -229,13 +234,21 @@ export default function MedipactLanding() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-slate-500">
               <span className="font-semibold text-slate-700">Bekannt aus</span>
-              <span className="font-semibold tracking-tight text-slate-400">Harvard-Methode</span>
+              <span className="font-semibold tracking-tight text-slate-400">
+                Harvard-Methode
+              </span>
               <span className="text-slate-300">·</span>
-              <span className="font-semibold tracking-tight text-slate-400">DSGVO-konform</span>
+              <span className="font-semibold tracking-tight text-slate-400">
+                DSGVO-konform
+              </span>
               <span className="text-slate-300">·</span>
-              <span className="font-semibold tracking-tight text-slate-400">Made in Germany</span>
+              <span className="font-semibold tracking-tight text-slate-400">
+                Made in Germany
+              </span>
               <span className="text-slate-300">·</span>
-              <span className="font-semibold tracking-tight text-slate-400">SSL-verschlüsselt</span>
+              <span className="font-semibold tracking-tight text-slate-400">
+                SSL-verschlüsselt
+              </span>
             </div>
           </div>
         </section>
@@ -256,10 +269,7 @@ export default function MedipactLanding() {
 
             <div className="grid gap-4 md:grid-cols-3">
               {problemPoints.map((point, i) => (
-                <div
-                  key={point}
-                  className="app-surface p-8"
-                >
+                <div key={point} className="app-surface p-8">
                   <div className="mb-4 text-3xl font-black text-slate-100">
                     {String(i + 1).padStart(2, "0")}
                   </div>
@@ -274,7 +284,10 @@ export default function MedipactLanding() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
             <p className="text-base text-slate-600">
               Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,{" "}
-              <Link href="/cases" className="font-semibold text-teal-700 hover:underline">
+              <Link
+                href="/cases"
+                className="font-semibold text-teal-700 hover:underline"
+              >
                 wie konkrete Fälle mit Medipact gelöst wurden →
               </Link>
             </p>
@@ -284,7 +297,9 @@ export default function MedipactLanding() {
         <section id="process" className="section section-base">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-16 text-center text-slate-900">
-              <div className="eyebrow mb-4 justify-center">So funktioniert es</div>
+              <div className="eyebrow mb-4 justify-center">
+                So funktioniert es
+              </div>
               <h2 className="heading-2">
                 In 6 Schritten zur möglichen Einigung
               </h2>
@@ -322,7 +337,10 @@ export default function MedipactLanding() {
             <p className="text-base text-slate-700">
               Vertraulich, DSGVO-konform und mit menschlicher Mediation als
               Rückfalloption –{" "}
-              <Link href="/about" className="font-semibold text-teal-700 hover:underline">
+              <Link
+                href="/about"
+                className="font-semibold text-teal-700 hover:underline"
+              >
                 mehr über medipact erfahren →
               </Link>
             </p>
@@ -338,12 +356,11 @@ export default function MedipactLanding() {
 
             <div className="space-y-3">
               {faqs.map((faq) => (
-                <div
-                  key={faq.q}
-                  className="app-surface p-8"
-                >
+                <div key={faq.q} className="app-surface p-8">
                   <h3 className="font-semibold text-slate-900">{faq.q}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{faq.a}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    {faq.a}
+                  </p>
                 </div>
               ))}
             </div>
@@ -369,14 +386,25 @@ export default function MedipactLanding() {
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-teal-900/40 transition hover:scale-[1.02] hover:bg-teal-500"
               >
                 Streitfall kostenlos starten
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
                 </svg>
               </Link>
             </div>
 
             <p className="mt-6 text-xs text-slate-500">
-              Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar
+              Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit
+              kündbar
             </p>
           </div>
         </section>
