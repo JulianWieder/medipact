@@ -2,7 +2,7 @@
 
 import { hashId } from "@/lib/ids";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getPhaseIndex } from "../_shared/phaseData";
 
@@ -29,57 +29,43 @@ type StepMode = "input" | "waiting" | "reflection" | "done";
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 // ── Schritt-Definitionen ───────────────────────────────────────────────────────
+// Die konkreten Inhalts-Schritte (Regeln, Rollen, Vertrauen, Ziel, ggf. weitere
+// custom Schritte) kommen nicht mehr aus einer statischen Liste, sondern aus dem
+// gemeinsamen Backend-Endpoint GET /mediations/{id}/phase-steps?phase=einleitung
+// (phase_step_defaults pro Mediationstyp + pro Fall hinzugefügte custom Steps).
+// Die fixen Rahmen-Schritte (Intro, Termin, Videocall, Feedback, Vertrag) bleiben
+// hier fest verdrahtet, da sie eigene, nicht konfigurierbare UI-Blöcke haben.
 
-const CONTENT_STEPS = [
-  {
-    key: "einleitung",
-    number: 1,
-    title: "Regeln festlegen",
-    description:
-      "Jede Partei formuliert ihre Erwartungen an das Verfahren. Was ist dir wichtig? Welche Regeln sollen gelten?",
-    placeholder: "z.B. Keine Unterbrechungen …",
-  },
-  {
-    key: "einleitung_rollen",
-    number: 2,
-    title: "Rollen klären",
-    description:
-      "Welche Rolle übernimmt jede Person in dieser Mediation? Hier werden Zuständigkeiten und Erwartungen transparent gemacht.",
-    placeholder: "z.B. Ich sehe meine Rolle als …",
-  },
-  {
-    key: "einleitung_vertrauen",
-    number: 3,
-    title: "Vertrauen schaffen",
-    description:
-      "Was braucht ihr, um offen sprechen zu können? Notiert, was euch hilft, Vertrauen in den Prozess aufzubauen.",
-    placeholder: "z.B. Vertraulichkeit über alles, was hier gesprochen wird …",
-  },
-  {
-    key: "einleitung_ziel",
-    number: 4,
-    title: "Ziel der Mediation",
-    description:
-      "Was soll am Ende dieser Mediation erreicht sein? Jede Partei formuliert ihr persönliches Ziel für den Prozess.",
-    placeholder: "z.B. Eine faire Lösung für beide Seiten finden …",
-  },
-] as const;
+type ContentStepKey = string;
 
-type ContentStepKey = (typeof CONTENT_STEPS)[number]["key"];
+type ContentStepDef = {
+  key: ContentStepKey;
+  number: number;
+  title: string;
+  description: string;
+  placeholder: string;
+};
+
+type PhaseStepFromAPI = {
+  key: string;
+  title: string;
+  description: string;
+  placeholder: string;
+  reflection_mode: "simple" | "interactive" | null;
+  custom: boolean;
+};
 
 // Alle Schritte inkl. Intro, Terminvereinbarung, Video-Call, Feedback und Vertrag
 type FeedbackOccasion = "after_videocall" | "before_contract";
 type PhaseStep = "intro" | "terminvereinbarung" | "videocall" | "feedback_after_videocall" | ContentStepKey | "feedback_before_contract" | "contract";
 
-const PHASE_STEPS: PhaseStep[] = [
+const FIXED_PHASE_STEPS_PREFIX: PhaseStep[] = [
   "intro",
   "terminvereinbarung",
   "videocall",
   "feedback_after_videocall",
-  ...CONTENT_STEPS.map((s) => s.key as ContentStepKey),
-  "feedback_before_contract",
-  "contract",
 ];
+const FIXED_PHASE_STEPS_SUFFIX: PhaseStep[] = ["feedback_before_contract", "contract"];
 
 // ── Feedback-Fragen ────────────────────────────────────────────────────────────
 
@@ -585,28 +571,25 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeStep, setActiveStep] = useState<PhaseStep>("intro");
+  const [contentSteps, setContentSteps] = useState<ContentStepDef[]>([]);
+  const phaseSteps = useMemo<PhaseStep[]>(
+    () => [
+      ...FIXED_PHASE_STEPS_PREFIX,
+      ...contentSteps.map((s) => s.key as ContentStepKey),
+      ...FIXED_PHASE_STEPS_SUFFIX,
+    ],
+    [contentSteps]
+  );
   const [stepModes, setStepModes] = useState<Record<PhaseStep, StepMode>>(
     () =>
-      Object.fromEntries(PHASE_STEPS.map((s) => [s, "input"])) as Record<
+      Object.fromEntries(FIXED_PHASE_STEPS_PREFIX.map((s) => [s, "input"])) as Record<
         PhaseStep,
         StepMode
       >
   );
 
-  const [items, setItems] = useState<Record<ContentStepKey, Record<string, string[]>>>(
-    () =>
-      Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, {}])) as Record<
-        ContentStepKey,
-        Record<string, string[]>
-      >
-  );
-  const [inputTexts, setInputTexts] = useState<Record<ContentStepKey, string>>(
-    () =>
-      Object.fromEntries(CONTENT_STEPS.map((s) => [s.key, ""])) as Record<
-        ContentStepKey,
-        string
-      >
-  );
+  const [items, setItems] = useState<Record<ContentStepKey, Record<string, string[]>>>({});
+  const [inputTexts, setInputTexts] = useState<Record<ContentStepKey, string>>({});
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [advancing, setAdvancing] = useState(false);
@@ -664,8 +647,26 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         const pData: Participant[] = await pRes.json();
         setParticipants(pData);
 
+        // Konfigurierbare Inhalts-Schritte vom Backend laden (Defaults pro
+        // Mediationstyp + pro Fall hinzugefügte custom Steps, bereits um
+        // geskippte Schritte bereinigt).
+        const stepsRes = await fetch(
+          `/api/mediations/${mediationId}/phase-steps?phase=einleitung`
+        );
+        const stepsFromAPI: PhaseStepFromAPI[] = stepsRes.ok
+          ? (await stepsRes.json()).steps ?? []
+          : [];
+        const nextContentSteps: ContentStepDef[] = stepsFromAPI.map((s, idx) => ({
+          key: s.key,
+          number: idx + 1,
+          title: s.title,
+          description: s.description,
+          placeholder: s.placeholder || "Deine Eingabe …",
+        }));
+        setContentSteps(nextContentSteps);
+
         const notesResults = await Promise.all(
-          CONTENT_STEPS.map((step) =>
+          nextContentSteps.map((step) =>
             fetch(`/api/mediations/${mediationId}/notes?phase=${step.key}`)
               .then((r) => (r.ok ? r.json() : []))
               .then(
@@ -681,7 +682,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         );
 
         const nextItems = Object.fromEntries(
-          CONTENT_STEPS.map((s) => [
+          nextContentSteps.map((s) => [
             s.key,
             Object.fromEntries(pData.map((p) => [p.id, [] as string[]])),
           ])
@@ -695,7 +696,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           }
         }
         setItems(nextItems);
-        await refreshAllStepStates(pData);
+        setInputTexts(
+          Object.fromEntries(nextContentSteps.map((s) => [s.key, ""])) as Record<
+            ContentStepKey,
+            string
+          >
+        );
+        await refreshAllStepStates(pData, nextContentSteps);
         await refreshAppointments();
 
         // Bereits abgegebene Feedbacks laden
@@ -726,15 +733,22 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   }, [mediationId]);
 
   const refreshAllStepStates = useCallback(
-    async (pData?: Participant[]) => {
+    async (pData?: Participant[], csOverride?: ContentStepDef[]) => {
       const parties = pData ?? participants;
       if (parties.length === 0) return;
+
+      const cs = csOverride ?? contentSteps;
+      const localPhaseSteps: PhaseStep[] = [
+        ...FIXED_PHASE_STEPS_PREFIX,
+        ...cs.map((s) => s.key as ContentStepKey),
+        ...FIXED_PHASE_STEPS_SUFFIX,
+      ];
 
       const me = parties.find((p) => p.name === currentUserName);
 
       // "intro" und "videocall" als einfache Bestätigungsschritte prüfen
       const simpleKeys: PhaseStep[] = ["intro", "videocall"];
-      const contentKeys: PhaseStep[] = CONTENT_STEPS.map((s) => s.key as ContentStepKey);
+      const contentKeys: PhaseStep[] = cs.map((s) => s.key as ContentStepKey);
       const allKeys: PhaseStep[] = [...simpleKeys, ...contentKeys];
 
       // terminvereinbarung: done wenn ein Slot von allen bestätigt ist
@@ -766,11 +780,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       // terminvereinbarung
       newModes["terminvereinbarung"] = apptDone ? "done" : "input";
 
-      // Schritte in der richtigen PHASE_STEPS-Reihenfolge auswerten,
+      // Schritte in der richtigen Reihenfolge auswerten,
       // damit "intro" immer vor "terminvereinbarung" geprüft wird
       let firstIncomplete: PhaseStep | null = null;
 
-      for (const phaseStep of PHASE_STEPS) {
+      for (const phaseStep of localPhaseSteps) {
         if (phaseStep === "terminvereinbarung") {
           if (!apptDone && !firstIncomplete) firstIncomplete = "terminvereinbarung";
           continue;
@@ -804,7 +818,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         }
       }
 
-      const allContentDone = CONTENT_STEPS.every((s) => newModes[s.key] === "done");
+      const allContentDone = cs.every((s) => newModes[s.key] === "done");
 
       if (allContentDone) {
         const contractRes = await fetch(`/api/mediations/${mediationId}/contract`);
@@ -832,7 +846,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mediationId, currentUserName, participants]
+    [mediationId, currentUserName, participants, contentSteps]
   );
 
   useEffect(() => {
@@ -957,8 +971,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   // ── Test: aktuellen Schritt überspringen ────────────────────────────────────
 
   function skipCurrentStep() {
-    const idx = PHASE_STEPS.indexOf(activeStep);
-    const next = PHASE_STEPS[idx + 1];
+    const idx = phaseSteps.indexOf(activeStep);
+    const next = phaseSteps[idx + 1];
     setStepModes((prev) => ({ ...prev, [activeStep]: "done" }));
     if (next) {
       setActiveStep(next);
@@ -1048,7 +1062,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (step === "feedback_after_videocall") return "Feedback";
     if (step === "feedback_before_contract") return "Feedback";
     if (step === "contract") return "Vertrag";
-    const cs = CONTENT_STEPS.find((s) => s.key === step);
+    const cs = contentSteps.find((s) => s.key === step);
     return cs ? cs.title : step;
   }
 
@@ -1057,15 +1071,32 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (mode === "done") return "done";
     if (step === activeStep) return "active";
     if (mode === ("locked" as StepMode)) return "locked";
-    const idx = PHASE_STEPS.indexOf(step);
-    const activeIdx = PHASE_STEPS.indexOf(activeStep);
+    const idx = phaseSteps.indexOf(step);
+    const activeIdx = phaseSteps.indexOf(activeStep);
     return idx < activeIdx ? "done" : "locked";
   }
 
   // ── Render: Emotionaler Schritt-Header ────────────────────────────────────
 
+  // ── Hilfsfunktion: Schritt-Inhalt mit Fallback für custom/konfigurierte Schritte ──
+
+  function getStepContent(
+    stepKey: ContentStepKey | "intro" | "videocall"
+  ): { videoTitle: string; videoDuration: string; emotional: string; sub?: string } {
+    const known = (STEP_CONTENT as Record<string, (typeof STEP_CONTENT)[keyof typeof STEP_CONTENT]>)[
+      stepKey
+    ];
+    if (known) return known;
+    const cs = contentSteps.find((s) => s.key === stepKey);
+    return {
+      videoTitle: cs?.title ?? "Dieser Schritt",
+      videoDuration: "",
+      emotional: cs?.description ?? "Nimm dir einen Moment Zeit, bevor du fortfährst.",
+    };
+  }
+
   function renderStepHeader(stepKey: ContentStepKey | "intro" | "videocall") {
-    const content = STEP_CONTENT[stepKey];
+    const content = getStepContent(stepKey);
     return (
       <div className="space-y-5 mb-8">
         <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
@@ -1236,7 +1267,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   // ── Render: Content-Schritt ────────────────────────────────────────────────
 
-  function renderContentStep(stepDef: (typeof CONTENT_STEPS)[number]) {
+  function renderContentStep(stepDef: (typeof contentSteps)[number]) {
     if (!currentParticipant) return null;
     const mode = stepModes[stepDef.key];
     const myItems = items[stepDef.key]?.[currentParticipant.id] ?? [];
@@ -2051,10 +2082,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   ? "Reflexion vor dem Vertrag"
                   : activeStep === "contract"
                   ? "Euer Mediationsvertrag"
-                  : CONTENT_STEPS.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
+                  : contentSteps.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
               </h1>
               <p className="mt-2 text-sm text-slate-500">
-                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+                Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </p>
             </div>
           ) : (
@@ -2062,7 +2093,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
               <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
               <p className="mt-2 text-sm text-slate-500">
-                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+                Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </p>
             </>
           )}
@@ -2072,28 +2103,28 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           <div className="mt-4 sm:hidden">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-emerald-700">
-                Schritt {PHASE_STEPS.indexOf(activeStep) + 1} von {PHASE_STEPS.length}
+                Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </span>
               <span className="text-xs text-slate-400">{getPhaseStepLabel(activeStep)}</span>
             </div>
             <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
               <div
                 className="h-full rounded-full bg-emerald-500 transition-all"
-                style={{ width: `${((PHASE_STEPS.indexOf(activeStep) + 1) / PHASE_STEPS.length) * 100}%` }}
+                style={{ width: `${((phaseSteps.indexOf(activeStep) + 1) / phaseSteps.length) * 100}%` }}
               />
             </div>
           </div>
           {/* Desktop: Dot-Stepper */}
           <div className="mt-6 hidden sm:block overflow-x-auto">
             <ol className="flex min-w-max items-center gap-0">
-              {PHASE_STEPS.map((step, idx) => (
+              {phaseSteps.map((step, idx) => (
                 <li key={step} className="flex items-center">
                   <StepBadge
                     index={idx}
                     label={getPhaseStepLabel(step)}
                     status={getPhaseStepStatus(step)}
                   />
-                  {idx < PHASE_STEPS.length - 1 && (
+                  {idx < phaseSteps.length - 1 && (
                     <div
                       className={`mx-2 mb-5 h-0.5 w-8 transition-colors ${
                         getPhaseStepStatus(step) === "done" ? "bg-emerald-400" : "bg-slate-200"
@@ -2188,7 +2219,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               </>
             )}
 
-            {CONTENT_STEPS.map((cs) =>
+            {contentSteps.map((cs) =>
               activeStep === cs.key ? (
                 <div key={cs.key}>
                   <div className="mb-6">

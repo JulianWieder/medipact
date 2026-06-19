@@ -12,6 +12,8 @@ from app.models.mediation_note import MediationNote
 from app.models.note_reaction import NoteReaction
 from app.models.mediation_participant import MediationParticipant
 from app.models.mediation_step_rule import MediationStepRule
+from app.models.mediation_custom_step import MediationCustomStep
+from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_user, get_current_db_user
@@ -639,6 +641,95 @@ def get_step_status(
         required = [r for r in result if r["role"] in required_roles]
         all_submitted = len(required) > 0 and all(r["submitted"] for r in required)
     return {"participants": result, "all_submitted": all_submitted}
+
+
+@router.get("/{mediation_id}/phase-steps")
+def get_phase_steps(
+    mediation_id: int,
+    phase: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Liefert die f\u00fcr diesen Fall geltende, fertig zusammengef\u00fchrte Schrittliste
+    einer Phase:
+
+      1. Default-Schritte f\u00fcr den Mediationstyp dieses Falls aus
+         `phase_step_defaults` (enabled=true), in konfigurierter Reihenfolge.
+      2. Zus\u00e4tzliche Schritte, die der Mediator f\u00fcr diesen Fall \u00fcber
+         `MediationCustomStep` angelegt hat (h\u00e4ngen danach an).
+      3. Schritte, f\u00fcr die `MediationStepRule.skip=true` gesetzt ist, werden
+         herausgefiltert.
+
+    Ersetzt die fr\u00fcher statische Liste aus phaseData.ts/EinleitungClient.tsx
+    im Frontend \u2013 die Konfiguration kommt jetzt vollst\u00e4ndig vom Backend.
+    """
+    _require_participant(mediation_id, current_user, db)
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    defaults = (
+        db.query(PhaseStepDefault)
+        .filter(
+            PhaseStepDefault.mediation_type == mediation.mediation_type,
+            PhaseStepDefault.phase == phase,
+            PhaseStepDefault.enabled.is_(True),
+        )
+        .order_by(PhaseStepDefault.position, PhaseStepDefault.id)
+        .all()
+    )
+    custom_steps = (
+        db.query(MediationCustomStep)
+        .filter(
+            MediationCustomStep.mediation_id == mediation_id,
+            MediationCustomStep.phase == phase,
+        )
+        .order_by(MediationCustomStep.position, MediationCustomStep.id)
+        .all()
+    )
+    rules = {
+        r.step: r
+        for r in db.query(MediationStepRule)
+        .filter(
+            MediationStepRule.mediation_id == mediation_id,
+            MediationStepRule.phase == phase,
+        )
+        .all()
+    }
+
+    steps = []
+    for d in defaults:
+        rule = rules.get(d.step_key)
+        if rule and rule.skip:
+            continue
+        steps.append(
+            {
+                "key": d.step_key,
+                "title": d.title,
+                "description": d.description,
+                "placeholder": d.placeholder,
+                "reflection_mode": d.reflection_mode,
+                "custom": False,
+            }
+        )
+    for c in custom_steps:
+        rule = rules.get(c.step_key)
+        if rule and rule.skip:
+            continue
+        steps.append(
+            {
+                "key": c.step_key,
+                "title": c.title,
+                "description": c.description,
+                "placeholder": "",
+                "reflection_mode": None,
+                "custom": True,
+            }
+        )
+
+    return {"phase": phase, "mediation_type": mediation.mediation_type, "steps": steps}
 
 
 @router.post("/{mediation_id}/notes")

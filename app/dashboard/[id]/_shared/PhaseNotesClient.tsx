@@ -48,6 +48,29 @@ function toStepDetail(cs: CustomStepData): StepDetail {
   };
 }
 
+// Schritt-Eintrag, wie er vom zusammengeführten Backend-Endpoint
+// GET /mediations/{id}/phase-steps?phase= kommt (Defaults aus
+// phase_step_defaults + pro Fall hinzugefügte custom Steps, bereits
+// um geskippte Schritte (MediationStepRule) bereinigt).
+type PhaseStepFromAPI = {
+  key: string;
+  title: string;
+  description: string;
+  placeholder: string;
+  reflection_mode: "simple" | "interactive" | null;
+  custom: boolean;
+};
+
+function toStepDetailFromAPI(s: PhaseStepFromAPI): StepDetail {
+  return {
+    key: s.key,
+    title: s.title,
+    description: s.description,
+    placeholder: s.placeholder || (s.custom ? "Deine Eingabe …" : ""),
+    reflectionMode: s.reflection_mode ?? undefined,
+  };
+}
+
 const roleLabel: Record<string, string> = {
   initiator: "Antragsteller",
   other_party: "Andere Seite",
@@ -602,7 +625,12 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const router = useRouter();
   const phase = getPhase(phaseKey);
   const currentIndex = getPhaseIndex(phaseKey);
-  const stepDetails = phase.stepDetails;
+
+  // Schrittliste kommt nicht mehr aus dem statischen phaseData.ts, sondern
+  // vom Backend (phase_step_defaults pro Mediationstyp + pro Fall
+  // hinzugefügte custom Steps, bereits zusammengeführt und um geskippte
+  // Schritte bereinigt). phaseData.ts liefert weiterhin Label/Guide/Stepper.
+  const [stepDetails, setStepDetails] = useState<StepDetail[]>([]);
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -623,7 +651,6 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const [showGuide, setShowGuide] = useState(false);
 
   // ── Custom Steps ──────────────────────────────────────────────────────────────
-  const [customStepDetails, setCustomStepDetails] = useState<StepDetail[]>([]);
   const [showAddStep, setShowAddStep] = useState(false);
   const [newStepTitle, setNewStepTitle] = useState("");
   const [newStepDesc, setNewStepDesc] = useState("");
@@ -631,7 +658,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const allStepDetails = [...stepDetails, ...customStepDetails];
+  const allStepDetails = stepDetails;
   const currentStep = allStepDetails[activeStepIndex];
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
@@ -641,19 +668,19 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
     async function load() {
       setLoading(true);
       try {
-        const [partRes, customStepsRes] = await Promise.all([
+        const [partRes, phaseStepsRes] = await Promise.all([
           fetch(`/api/mediations/${mediationId}/participants`),
-          fetch(`/api/mediations/${mediationId}/custom-steps?phase=${phaseKey}`),
+          fetch(`/api/mediations/${mediationId}/phase-steps?phase=${phaseKey}`),
         ]);
         if (!partRes.ok) return;
         const parts: Participant[] = await partRes.json();
         setParticipants(parts);
 
-        const customFromAPI: CustomStepData[] = customStepsRes.ok ? await customStepsRes.json() : [];
-        const customDetails = customFromAPI.map(toStepDetail);
-        setCustomStepDetails(customDetails);
-
-        const allDetails = [...stepDetails, ...customDetails];
+        const phaseStepsFromAPI: PhaseStepFromAPI[] = phaseStepsRes.ok
+          ? (await phaseStepsRes.json()).steps ?? []
+          : [];
+        const allDetails = phaseStepsFromAPI.map(toStepDetailFromAPI);
+        setStepDetails(allDetails);
 
         // Alle Notizen + step-status für alle Schritte laden
         const results = await Promise.all(
@@ -966,7 +993,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           e.stopPropagation();
                           if (!confirm(`Schritt „${step.title}" löschen?`)) return;
                           await fetch(`/api/mediations/${mediationId}/custom-steps/${step.key}`, { method: "DELETE" });
-                          setCustomStepDetails((prev) => prev.filter((s) => s.key !== step.key));
+                          setStepDetails((prev) => prev.filter((s) => s.key !== step.key));
                           if (isActive && idx > 0) setActiveStepIndex(idx - 1);
                         }}
                         className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full bg-white/30 text-current opacity-70 hover:opacity-100"
@@ -1088,7 +1115,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           if (res.ok) {
                             const created: CustomStepData = await res.json();
                             const newDetail = toStepDetail(created);
-                            setCustomStepDetails((prev) => [...prev, newDetail]);
+                            setStepDetails((prev) => [...prev, newDetail]);
                             setInputText((prev) => ({ ...prev, [newDetail.key]: "" }));
                             setStepView((prev) => ({ ...prev, [newDetail.key]: "input" }));
                             setItems((prev) => ({
