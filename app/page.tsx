@@ -138,7 +138,7 @@ export default function MedipactLanding() {
               </div>
 
               <FadeIn>
-                <h1 className="heading-1 mt-8">
+                <h1 className="hero-heading mt-8">
                   Mediation online –
                   <span className="block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
                     Konflikte fair, vertraulich und ohne Gericht lösen.
@@ -201,7 +201,7 @@ export default function MedipactLanding() {
             </div>
 
             <div
-              className="overflow-hidden rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-teal-900/5 ring-1 ring-slate-900/5"
+              className="mx-auto w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-teal-900/5 ring-1 ring-slate-900/5"
               style={{
                 position: "relative",
                 overflow: "hidden",
@@ -209,7 +209,7 @@ export default function MedipactLanding() {
               }}
             >
               <iframe
-                src="https://share.synthesia.io/ecc6e794-b1df-4c8e-85ca-f137b90c3f2f"
+                src="https://share.synthesia.io/embeds/videos/ecc6e794-b1df-4c8e-85ca-f137b90c3f2f"
                 loading="lazy"
                 title="Synthesia video player - Frieden durch Mediation: Der Weg zur Einigung"
                 allowFullScreen

@@ -238,6 +238,29 @@
   }
 }
 
+/* Etwas kleinere Variante von .heading-1, nur für den Hero-Titel auf der
+   Landing-Page – der volle .heading-1 wirkt dort zu dominant. */
+.hero-heading {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  padding-bottom: 0.05em;
+  overflow: visible;
+}
+@media (min-width: 640px) {
+  .hero-heading {
+    font-size: 3rem;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-heading {
+    font-size: 3.75rem;
+  }
+}
+
 .heading-2 {
   font-family: var(--font-display);
   font-size: 2rem;
