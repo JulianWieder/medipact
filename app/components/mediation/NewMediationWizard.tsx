@@ -26,14 +26,20 @@ export default function NewMediationWizard({ config }: Props) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [titleError, setTitleError] = useState("");
 
   // Generiert KI-Titel sobald das erste Beschreibungsfeld ausgefüllt wird (on blur)
   const handleDescriptionBlur = async (value: string) => {
     if (!value.trim() || title.trim()) return;
     setTitleGenerating(true);
+    setTitleError("");
     try {
       const generated = await generateTitle(value.trim());
-      if (generated) setTitle(generated);
+      if (generated) {
+        setTitle(generated);
+      } else {
+        setTitleError("Titel konnte nicht automatisch erstellt werden. Bitte manuell eingeben.");
+      }
     } finally {
       setTitleGenerating(false);
     }
@@ -54,7 +60,7 @@ export default function NewMediationWizard({ config }: Props) {
         const data = await res.json();
         return data.title ?? "";
       }
-    } catch { /* ignore */ }
+    } catch { /* network error, fall through to empty return */ }
     return "";
   };
 
@@ -216,6 +222,9 @@ export default function NewMediationWizard({ config }: Props) {
                   className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500 disabled:bg-slate-50 disabled:text-slate-400"
                   disabled={titleGenerating}
                 />
+                {titleError && (
+                  <p className="mt-2 text-sm text-amber-600">{titleError}</p>
+                )}
               </label>
 
               {error && (
@@ -325,6 +334,7 @@ function renderFields(
     if (field.type === "date" && i + 1 < fields.length && fields[i + 1].type === "date") {
       elements.push(
         <div key={`date-pair-${i}`} className="grid gap-6 md:grid-cols-2">
+          {renderSingleField(fields[i], formData[fields[i].id], onChange, isFirst ? onFirstBlur : undefined)}
           {renderSingleField(fields[i + 1], formData[fields[i + 1].id], onChange)}
         </div>
       );
