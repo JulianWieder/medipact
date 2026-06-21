@@ -57,6 +57,7 @@ export default function DashboardClient() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
   const [acceptError, setAcceptError] = useState<string>("");
+  const [videoModalMediationId, setVideoModalMediationId] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -130,6 +131,12 @@ export default function DashboardClient() {
       }
       // Remove from invites list and navigate to the mediation
       setInvites((prev) => prev.filter((i) => i.invite_id !== invite.invite_id));
+
+      if (body.has_video) {
+        setVideoModalMediationId(body.mediation_id);
+        return;
+      }
+
       router.push(`/dashboard/${encodeId(body.mediation_id)}`);
     } catch {
       setAcceptError("Server nicht erreichbar.");
@@ -187,6 +194,7 @@ export default function DashboardClient() {
   }
 
   return (
+    <>
     <main className="app-shell pt-[73px]">
       <section className="border-b border-slate-200 bg-white">
         <div className="container py-12 lg:py-16">
@@ -401,5 +409,37 @@ export default function DashboardClient() {
         </div>
       </section>
     </main>
+
+    {videoModalMediationId !== null && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
+        <div className="app-surface w-full max-w-2xl p-6">
+          <p className="eyebrow mb-2">Einladung angenommen</p>
+          <h2 className="heading-3 mb-3 text-slate-900">
+            Die andere Seite hat dir eine persönliche Video-Botschaft hinterlassen
+          </h2>
+          <div className="mt-4 overflow-hidden rounded-2xl bg-slate-900">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video
+              src={`/api/mediations/${videoModalMediationId}/invites/me/video`}
+              className="aspect-video w-full"
+              controls
+              autoPlay
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const id = videoModalMediationId;
+              setVideoModalMediationId(null);
+              router.push(`/dashboard/${encodeId(id as number)}`);
+            }}
+            className="btn btn-primary mt-6"
+          >
+            Weiter zur Mediation →
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

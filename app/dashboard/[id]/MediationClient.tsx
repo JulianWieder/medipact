@@ -3,6 +3,7 @@
 import { hashId } from "@/lib/ids";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 
 declare global {
   interface Window {
@@ -49,6 +50,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
+  const [personalMessage, setPersonalMessage] = useState("");
+  const [videoToken, setVideoToken] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
@@ -100,7 +103,11 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       const res = await fetch(`/api/mediations/${mediationId}/invites`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invited_email: trimmedEmail }),
+        body: JSON.stringify({
+          invited_email: trimmedEmail,
+          personal_message: personalMessage.trim() || undefined,
+          video_token: videoToken || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -345,16 +352,20 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 </p>
 
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mt-6 mb-2">
-                  Vollständiger Zugang
+                  Dein Anteil
                 </p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-5xl font-extrabold text-slate-900 tracking-tight">
-                    {price ? price.price_eur.toFixed(0) : "499"}
+                    {price ? price.price_per_participant_eur.toFixed(0) : "499"}
                   </span>
                   <span className="text-2xl font-bold text-slate-900">€</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-1">
-                  einmalig · 499 € pro Teilnehmer{price ? ` (${price.participant_count} Beteiligte)` : ""} · inkl. MwSt.
+                  einmalig pro Teilnehmer · inkl. MwSt.
+                </p>
+                <p className="mt-3 max-w-sm mx-auto text-xs text-slate-500">
+                  Der Betrag wird zunächst nur reserviert (geblockt) und erst nach
+                  erfolgreicher Freischaltung tatsächlich abgebucht.
                 </p>
 
                 <div className="mt-6 w-full max-w-sm mx-auto">
@@ -434,6 +445,29 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       placeholder="name@example.com"
                       className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     />
+
+                    <label htmlFor="invite-message" className="mt-4 block text-sm font-semibold text-slate-900">
+                      Persönliche Nachricht <span className="font-normal text-slate-400">(optional)</span>
+                    </label>
+                    <textarea
+                      id="invite-message"
+                      value={personalMessage}
+                      onChange={(e) => setPersonalMessage(e.target.value)}
+                      placeholder="z.B. Mir ist wichtig, dass wir gemeinsam eine faire Lösung finden …"
+                      className="mt-2 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <p className="mt-1 text-xs text-slate-400">
+                      Wird vor dem Versand von der KI freundlich umformuliert.
+                    </p>
+
+                    <div className="mt-4">
+                      <InviteVideoRecorder
+                        mediationId={mediationId}
+                        videoToken={videoToken}
+                        onChange={setVideoToken}
+                      />
+                    </div>
+
                     <button
                       type="button"
                       onClick={createInvite}

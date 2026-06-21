@@ -13,6 +13,8 @@ export default function InvitationsClient({ token }: Props) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mediationId, setMediationId] = useState<number | null>(null);
+  const [hasVideo, setHasVideo] = useState(false);
 
   async function acceptInvite() {
     setLoading(true);
@@ -31,6 +33,12 @@ export default function InvitationsClient({ token }: Props) {
             data.error ??
             "Einladung konnte nicht angenommen werden.",
         );
+        return;
+      }
+
+      if (data.has_video) {
+        setMediationId(data.mediation_id);
+        setHasVideo(true);
         return;
       }
 
@@ -54,6 +62,42 @@ export default function InvitationsClient({ token }: Props) {
             <p className="mt-4 text-slate-600">
               Der Einladungslink enthält keinen gültigen Token.
             </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (hasVideo && mediationId !== null) {
+    return (
+      <main className="app-shell pt-[73px]">
+        <section className="container py-12">
+          <div className="app-surface p-8">
+            <p className="eyebrow mb-3">Einladung angenommen</p>
+            <h1 className="heading-2 text-slate-900">
+              Die andere Seite hat dir eine persönliche Video-Botschaft hinterlassen
+            </h1>
+            <p className="mt-4 max-w-2xl text-slate-600">
+              Schau dir die Nachricht an, bevor es weitergeht.
+            </p>
+
+            <div className="mt-8 overflow-hidden rounded-2xl bg-slate-900">
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+              <video
+                src={`/api/mediations/${mediationId}/invites/me/video`}
+                className="aspect-video w-full"
+                controls
+                autoPlay
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push(`/dashboard/${encodeId(mediationId)}`)}
+              className="btn btn-primary mt-8"
+            >
+              Weiter zur Mediation →
+            </button>
           </div>
         </section>
       </main>

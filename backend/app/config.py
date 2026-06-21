@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
     DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
-    ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen
+    ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen + Paraphrasierung der Einladungsnachricht
+    # Verzeichnis für hochgeladene Video-Botschaften bei Mediations-Einladungen
+    # (z.B. /data/invite_videos in Docker, analog zu DB_PATH).
+    INVITE_VIDEO_DIR: str = "media/invite_videos"
+    # Maximale Dateigröße für Einladungs-Videos in MB
+    INVITE_VIDEO_MAX_MB: int = 50
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
     PAYPAL_CLIENT_ID: str = ""
     PAYPAL_CLIENT_SECRET: str = ""

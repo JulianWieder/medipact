@@ -36,9 +36,12 @@ export default function Header() {
       <div className="w-full bg-slate-900 text-white">
         <Link
           href="/auth/register"
-          className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-6 py-2 text-center text-xs font-semibold tracking-wide text-slate-100 transition hover:text-teal-300 sm:text-sm"
+          className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-semibold tracking-wide text-slate-100 transition hover:text-teal-300 sm:px-6 sm:text-sm"
         >
-          <span className="hidden sm:inline">Neu:</span> Ihren Streitfall in 5 Minuten starten – ohne Anwalt, ohne Risiko
+          <span className="sm:hidden">Streitfall in 5 Minuten starten</span>
+          <span className="hidden sm:inline">
+            Neu: Ihren Streitfall in 5 Minuten starten – ohne Anwalt, ohne Risiko
+          </span>
           <span aria-hidden="true">→</span>
         </Link>
       </div>

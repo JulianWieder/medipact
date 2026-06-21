@@ -232,7 +232,7 @@ export default function KonfliktePage() {
 
       <section className="section section-strong">
         <div className="container max-w-3xl text-center">
-          <h2 className="heading-2">
+          <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl leading-tight">
             Bereit, den Konflikt klarer einzuordnen?
           </h2>
 

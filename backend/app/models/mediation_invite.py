@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 
 from app.database import Base
 
@@ -23,6 +23,17 @@ class MediationInvite(Base):
     status = Column(String, nullable=False, default="pending")
 
     invited_email = Column(String, nullable=True)
+
+    # Persönliche Nachricht des Einladenden an die andere Seite. `personal_message`
+    # ist der Originaltext, `personal_message_paraphrased` die per KI (Claude)
+    # freundlicher/motivierender umformulierte Version, die tatsächlich in der
+    # E-Mail verschickt wird (Fallback: Original, falls KI nicht konfiguriert/fehlschlägt).
+    personal_message = Column(Text, nullable=True)
+    personal_message_paraphrased = Column(Text, nullable=True)
+
+    # Dateiname der Video-Botschaft (liegt unter settings.INVITE_VIDEO_DIR).
+    # Wird der Gegenseite erst nach Annahme der Einladung im System zugänglich gemacht.
+    video_filename = Column(String, nullable=True)
 
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

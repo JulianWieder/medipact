@@ -75,6 +75,8 @@ export async function createInvite(
   payload: {
     invited_email?: string;
     role?: string;
+    personal_message?: string;
+    video_token?: string;
   },
 ) {
   return backendFetch<{ invite_url: string }>(

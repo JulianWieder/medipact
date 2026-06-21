@@ -238,7 +238,7 @@ export default function AboutPage() {
       {/* FINAL CTA */}
       <section className="section section-strong">
         <div className="container text-center max-w-2xl">
-          <h2 className="heading-2">{finalCtaTitle}</h2>
+          <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl leading-tight">{finalCtaTitle}</h2>
           <p className="mt-4 text-slate-300">{finalCtaText}</p>
 
           <Link

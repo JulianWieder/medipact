@@ -164,9 +164,9 @@ export default function MedipactLanding() {
     <>
       <JsonLd data={faqSchema} />
       <JsonLd data={serviceSchema} />
-      <main className="app-shell pt-[73px]">
+      <main className="app-shell pt-0 sm:pt-[73px]">
         <section id="top" className="relative isolate overflow-hidden scroll-mt-20">
-          <div className="relative min-h-[640px] w-full sm:min-h-[720px]">
+          <div className="relative min-h-[560px] w-full sm:min-h-[720px]">
             <Image
               src={heroPhoto}
               alt="Paar in einer Mediationssitzung – Weg zur Einigung"
@@ -178,8 +178,8 @@ export default function MedipactLanding() {
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
-            <div className="relative flex min-h-[640px] items-center sm:min-h-[720px]">
-              <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
+            <div className="relative flex min-h-[560px] items-center sm:min-h-[720px]">
+              <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
                 <div className="max-w-2xl">
                   <div className="inline-flex items-center gap-2 rounded border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white/80 backdrop-blur-sm">
                     Für Trennung, Nachbarschaft und Erbe
@@ -200,10 +200,10 @@ export default function MedipactLanding() {
 
                   <FadeIn delay={0.1}>
                     <p className="mt-6 max-w-xl text-lg leading-8 text-slate-200">
-                      Medipact begleitet private Konflikte strukturiert: bei
-                      Scheidung, Nachbarschaftsstreit oder Erbe. Mit
-                      KI-gestützter Mediation finden beide Seiten schneller zu
-                      einer Lösung – ohne jahrelange Eskalation.
+                      Wenn Worte nicht mehr weiterhelfen, hilft Struktur.
+                      Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit
+                      oder Erbe – Schritt für Schritt zurück zu einem klaren
+                      Kopf und einer Lösung, mit der beide Seiten leben können.
                     </p>
                   </FadeIn>
 
@@ -262,7 +262,7 @@ export default function MedipactLanding() {
 
         <section className="border-y border-slate-100 bg-slate-50 py-5">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-slate-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-500 sm:gap-x-10">
               <span className="font-semibold text-slate-700">Bekannt aus</span>
               <span className="font-semibold tracking-tight text-slate-400">
                 Harvard-Methode
@@ -313,7 +313,7 @@ export default function MedipactLanding() {
 
               <div className="grid gap-4">
                 {problemPoints.map((point, i) => (
-                  <div key={point} className="app-surface p-8">
+                  <div key={point} className="app-surface p-6 sm:p-8">
                     <div className="mb-4 text-3xl font-black text-slate-100">
                       {String(i + 1).padStart(2, "0")}
                     </div>
@@ -446,7 +446,7 @@ export default function MedipactLanding() {
 
             <div className="space-y-3">
               {faqs.map((faq) => (
-                <div key={faq.q} className="app-surface p-8">
+                <div key={faq.q} className="app-surface p-6 sm:p-8">
                   <h3 className="font-semibold text-slate-900">{faq.q}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">
                     {faq.a}
