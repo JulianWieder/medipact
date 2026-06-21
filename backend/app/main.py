@@ -6,8 +6,7 @@ from app.routers import auth, custom_steps, invites, mediations, phase_step_defa
 
 app = FastAPI(title="Mediation API")
 
-# Parse comma-separated origins from environment variable
-allowed_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+allowed_origins = settings.cors_origins_list
 
 app.add_middleware(
     CORSMiddleware,
