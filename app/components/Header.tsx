@@ -30,7 +30,19 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full">
+      {/* Promo bar */}
+      <div className="w-full bg-slate-900 text-white">
+        <Link
+          href="/auth/register"
+          className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-6 py-2 text-center text-xs font-semibold tracking-wide text-slate-100 transition hover:text-teal-300 sm:text-sm"
+        >
+          <span className="hidden sm:inline">Neu:</span> Ihren Streitfall in 5 Minuten starten – ohne Anwalt, ohne Risiko
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+
+      <div className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
@@ -124,6 +136,7 @@ export default function Header() {
           </Link>
         </nav>
       )}
+      </div>
     </header>
   );
 }

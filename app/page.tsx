@@ -59,6 +59,27 @@ const workflowSteps = [
   },
 ];
 
+const differentiators = [
+  {
+    num: "01",
+    eyebrow: "Struktur statt Eskalation",
+    title: "Geführt, nicht allein gelassen.",
+    text: "Die meisten Streits scheitern nicht am Willen, sondern am Weg. Medipact gibt beiden Seiten eine klare Struktur – statt endloser, kreisender Gespräche.",
+  },
+  {
+    num: "02",
+    eyebrow: "Bewährte Methode",
+    title: "Kein Bauchgefühl. Das Harvard-Prinzip.",
+    text: "Interessen statt Positionen, Optionen statt Schuldzuweisungen. Eine Methode, die seit Jahrzehnten in der Konfliktlösung funktioniert – jetzt digital zugänglich.",
+  },
+  {
+    num: "03",
+    eyebrow: "Fair für alle Seiten",
+    title: "Eine Lösung, mit der beide weiterleben können.",
+    text: "Bei Trennung, Erbe oder Nachbarschaft sehen sich Menschen oft wieder. Medipact zielt nicht auf Sieg, sondern auf eine Einigung, die trägt.",
+  },
+];
+
 const faqs = [
   {
     q: "Für welche Konflikte ist Medipact geeignet?",
@@ -137,8 +158,12 @@ export default function MedipactLanding() {
                 Für Trennung, Nachbarschaft und Erbe
               </div>
 
+              <p className="mt-6 text-xs font-bold uppercase tracking-[0.3em] text-teal-700">
+                Es ist Ihre Lösung. Nicht der Streit.
+              </p>
+
               <FadeIn>
-                <h1 className="hero-heading mt-8">
+                <h1 className="hero-heading mt-4">
                   Mediation online –
                   <span className="block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
                     Konflikte fair, vertraulich und ohne Gericht lösen.
@@ -274,6 +299,34 @@ export default function MedipactLanding() {
                     {String(i + 1).padStart(2, "0")}
                   </div>
                   <p className="text-base leading-7 text-slate-700">{point}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section section-base">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mb-16 max-w-2xl">
+              <div className="eyebrow mb-4">Warum medipact anders ist</div>
+              <h2 className="heading-2">Drei Gründe, warum es funktioniert.</h2>
+            </div>
+
+            <div className="grid gap-10 md:grid-cols-3 md:gap-8">
+              {differentiators.map((d) => (
+                <div key={d.num}>
+                  <div className="text-sm font-black tracking-widest text-slate-300">
+                    {d.num}
+                  </div>
+                  <div className="mt-3 text-xs font-bold uppercase tracking-[0.2em] text-teal-700">
+                    {d.eyebrow}
+                  </div>
+                  <h3 className="mt-3 text-xl font-bold text-slate-900">
+                    {d.title}
+                  </h3>
+                  <p className="mt-3 leading-relaxed text-slate-600">
+                    {d.text}
+                  </p>
                 </div>
               ))}
             </div>
