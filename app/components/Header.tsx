@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import logo from "@/fotos/logo.jpg";
 
 const navItems = [
   { label: "Start", href: "/" },
@@ -47,10 +48,11 @@ export default function Header() {
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <Image
-            src="/logo.png"
+            src={logo}
             alt="Medipact Logo"
             width={36}
             height={36}
+            className="rounded-md object-cover"
             priority
           />
           <span className="text-lg font-semibold tracking-tight text-slate-900">

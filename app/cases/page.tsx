@@ -1,6 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { aboutPageContent } from "@/app/content/aboutPage";
 import MiniMatrix from "@/app/components/MiniMatrix";
+import mediModernPhoto from "@/fotos/medi_modern.jpg";
 
 const useCases = [
   {
@@ -72,23 +74,43 @@ export default function AboutPage() {
   return (
     <>
       {/* HERO */}
-      <section className="section section-base">
-        <div className="container max-w-3xl">
-          <p className="eyebrow mb-4">{eyebrow}</p>
+      <section className="relative isolate overflow-hidden">
+        <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
+          <Image
+            src={mediModernPhoto}
+            alt="Moderne Mediation mit medipact"
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
-          <h1 className="heading-1">
-            {title} <span className="text-emerald-700">{titleHighlight}</span>
-          </h1>
+          <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
+            <div className="container max-w-3xl">
+              <p className="eyebrow mb-4 text-teal-300">{eyebrow}</p>
 
-          <p className="mt-6 text-lg text-slate-600">{intro}</p>
+              <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+                {title} <span className="text-teal-300">{titleHighlight}</span>
+              </h1>
 
-          <div className="mt-8 flex gap-4">
-            <Link href={primaryCta.href} className="btn btn-primary">
-              {primaryCta.label}
-            </Link>
-            <Link href={secondaryCta.href} className="btn btn-secondary">
-              {secondaryCta.label}
-            </Link>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                {intro}
+              </p>
+
+              <div className="mt-8 flex gap-4">
+                <Link href={primaryCta.href} className="btn btn-primary">
+                  {primaryCta.label}
+                </Link>
+                <Link
+                  href={secondaryCta.href}
+                  className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                >
+                  {secondaryCta.label}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

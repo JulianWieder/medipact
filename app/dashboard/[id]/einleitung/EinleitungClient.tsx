@@ -360,6 +360,33 @@ function JitsiCall({
 
 // ── Sub-Komponenten ────────────────────────────────────────────────────────────
 
+function IntroVideo() {
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
+      style={{ aspectRatio: "1920/1080" }}
+    >
+      <iframe
+        src="https://share.synthesia.io/embeds/videos/ecc6e794-b1df-4c8e-85ca-f137b90c3f2f"
+        loading="lazy"
+        title="Synthesia video player - Frieden durch Mediation: Der Weg zur Einigung"
+        allowFullScreen
+        allow="encrypted-media; fullscreen; microphone; screen-wake-lock;"
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          top: 0,
+          left: 0,
+          border: "none",
+          padding: 0,
+          margin: 0,
+        }}
+      />
+    </div>
+  );
+}
+
 function VideoPlaceholder({ title, duration }: { title: string; duration?: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video flex items-center justify-center group cursor-pointer select-none">
@@ -1099,7 +1126,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     const content = getStepContent(stepKey);
     return (
       <div className="space-y-5 mb-8">
-        <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
+        {stepKey === "intro" ? (
+          <IntroVideo />
+        ) : (
+          <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
+        )}
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5">
           <p className="text-base font-medium text-slate-800 leading-relaxed">
             {content.emotional}

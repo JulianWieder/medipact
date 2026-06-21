@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
+import logo from "@/fotos/logo.jpg";
 
 type Props = {
   username: string;
@@ -55,9 +57,14 @@ export default function DashboardHeaderClient({ username, email }: Props) {
 
         {/* Logo */}
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-sm font-black text-white">
-            M
-          </div>
+          <Image
+            src={logo}
+            alt="medipact Logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-lg object-cover"
+            priority
+          />
           <span className="text-lg font-black tracking-tight text-slate-900">
             medipact
           </span>

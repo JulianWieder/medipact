@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import SituationCheck from "@/app/components/SituationCheck";
+import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 
 export const metadata: Metadata = {
   title: "Situation einordnen lassen – Kontakt | medipact",
@@ -12,20 +14,37 @@ export const metadata: Metadata = {
 export default function KontaktPage() {
   return (
     <main className="app-shell pt-[73px]">
-      <section className="section section-base">
-        <div className="container max-w-3xl text-center">
-          <p className="eyebrow mb-4 justify-center">Kontakt</p>
+      <section className="relative isolate overflow-hidden">
+        <div className="relative min-h-[460px] w-full sm:min-h-[520px]">
+          <Image
+            src={einordnenPhoto}
+            alt="Eine ruhige Einschätzung der eigenen Situation vor der Mediation"
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
-          <h1 className="heading-1 text-slate-900">
-            Lassen Sie Ihre Situation{" "}
-            <span className="text-emerald-700">einordnen.</span>
-          </h1>
+          <div className="relative flex min-h-[460px] items-center justify-center sm:min-h-[520px]">
+            <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
+              <p className="eyebrow mb-4 justify-center text-teal-300">Kontakt</p>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-            Bevor es um eine Lösung geht, hilft eine ehrliche Einschätzung:
-            Passt Mediation zu Ihrer Situation – oder braucht es zuerst etwas
-            anderes? Der folgende Check dauert keine zwei Minuten.
-          </p>
+              <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+                Lassen Sie Ihre Situation{" "}
+                <span className="bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent">
+                  einordnen.
+                </span>
+              </h1>
+
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                Bevor es um eine Lösung geht, hilft eine ehrliche Einschätzung:
+                Passt Mediation zu Ihrer Situation – oder braucht es zuerst etwas
+                anderes? Der folgende Check dauert keine zwei Minuten.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

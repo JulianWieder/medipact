@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { WORKSPACE_NAV, WorkspaceSection } from "../types";
 import { cn } from "../ui";
+import logo from "@/fotos/logo.jpg";
 
 interface WorkspaceSidebarProps {
   active: WorkspaceSection;
@@ -33,14 +35,24 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
         {/* Logo */}
         <div className={cn("mb-8 flex items-center", collapsed ? "justify-center" : "px-2")}>
           {collapsed ? (
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500 text-white text-sm font-bold">
-              m
-            </div>
+            <Image
+              src={logo}
+              alt="medipact Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-xl object-cover"
+              priority
+            />
           ) : (
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-500 text-white text-xs font-bold">
-                m
-              </div>
+              <Image
+                src={logo}
+                alt="medipact Logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-xl object-cover"
+                priority
+              />
               <span className="text-sm font-semibold text-slate-800">medipact</span>
             </div>
           )}

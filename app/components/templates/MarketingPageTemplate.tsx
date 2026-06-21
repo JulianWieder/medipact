@@ -3,6 +3,12 @@
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { ReactNode } from "react";
+import Image, { type StaticImageData } from "next/image";
+
+type PageImage = {
+  src: StaticImageData;
+  alt: string;
+};
 
 type Feature = {
   title: string;
@@ -40,6 +46,7 @@ type MarketingPageTemplateProps = {
     href: string;
   };
   heroAside?: ReactNode;
+  heroImage?: PageImage;
   featuresTitle: string;
   featuresIntro?: string;
   features: Feature[];
@@ -50,6 +57,7 @@ type MarketingPageTemplateProps = {
   comparisonPlans?: ComparisonPlan[];
   trustTitle?: string;
   trustPoints?: Feature[];
+  trustImage?: PageImage;
   faqTitle?: string;
   faqs?: Faq[];
   finalCtaTitle: string;
@@ -88,6 +96,7 @@ export function MarketingPageTemplate({
   primaryCta,
   secondaryCta,
   heroAside,
+  heroImage,
   featuresTitle,
   featuresIntro,
   features,
@@ -98,6 +107,7 @@ export function MarketingPageTemplate({
   comparisonPlans = [],
   trustTitle = "Warum medipact",
   trustPoints = [],
+  trustImage,
   faqTitle = "Häufige Fragen",
   faqs = [],
   finalCtaTitle,
@@ -107,59 +117,113 @@ export function MarketingPageTemplate({
   return (
     <>
       <main className="app-shell pt-[73px]">
-        <section className="relative overflow-hidden section section-base">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-emerald-100 blur-3xl opacity-60" />
-            <div className="absolute right-[-6rem] top-20 h-80 w-80 rounded-full bg-cyan-100 blur-3xl opacity-50" />
-          </div>
+        {heroImage ? (
+          <section className="relative isolate overflow-hidden">
+            <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
+              <Image
+                src={heroImage.src}
+                alt={heroImage.alt}
+                fill
+                priority
+                sizes="100vw"
+                style={{ objectFit: "cover" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
-          <div className="container relative grid items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="max-w-3xl">
-              <div className="eyebrow">{eyebrow}</div>
+              <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
+                <div className="container">
+                  <div className="max-w-2xl">
+                    <div className="eyebrow text-teal-300">{eyebrow}</div>
 
-              <h1 className="heading-1 mt-8">
-                {title}
-                {titleHighlight && (
-                  <span className="mt-2 block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
-                    {titleHighlight}
-                  </span>
-                )}
-              </h1>
+                    <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+                      {title}
+                      {titleHighlight && (
+                        <span className="mt-2 block bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                          {titleHighlight}
+                        </span>
+                      )}
+                    </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
-                {intro}
-              </p>
+                    <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                      {intro}
+                    </p>
 
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Button href={primaryCta.href} size="lg">
-                  {primaryCta.label}
-                </Button>
+                    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                      <Button href={primaryCta.href} size="lg">
+                        {primaryCta.label}
+                      </Button>
 
-                {secondaryCta && (
-                  <Button
-                    href={secondaryCta.href}
-                    variant="secondary"
-                    size="lg"
-                  >
-                    {secondaryCta.label}
+                      {secondaryCta && (
+                        <Button
+                          href={secondaryCta.href}
+                          variant="secondary"
+                          size="lg"
+                        >
+                          {secondaryCta.label}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="relative overflow-hidden section section-base">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-emerald-100 blur-3xl opacity-60" />
+              <div className="absolute right-[-6rem] top-20 h-80 w-80 rounded-full bg-cyan-100 blur-3xl opacity-50" />
+            </div>
+
+            <div className="container relative grid items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="max-w-3xl">
+                <div className="eyebrow">{eyebrow}</div>
+
+                <h1 className="heading-1 mt-8">
+                  {title}
+                  {titleHighlight && (
+                    <span className="mt-2 block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
+                      {titleHighlight}
+                    </span>
+                  )}
+                </h1>
+
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
+                  {intro}
+                </p>
+
+                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                  <Button href={primaryCta.href} size="lg">
+                    {primaryCta.label}
                   </Button>
+
+                  {secondaryCta && (
+                    <Button
+                      href={secondaryCta.href}
+                      variant="secondary"
+                      size="lg"
+                    >
+                      {secondaryCta.label}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                {heroAside ?? (
+                  <Card className="rounded-[2rem] p-8">
+                    <h3 className="heading-3">Produktvorschau</h3>
+                    <p className="mt-4 leading-7 text-slate-700">
+                      Hier kann ein Video, ein Mockup oder eine Produktvorschau
+                      stehen.
+                    </p>
+                  </Card>
                 )}
               </div>
             </div>
-
-            <div>
-              {heroAside ?? (
-                <Card className="rounded-[2rem] p-8">
-                  <h3 className="heading-3">Produktvorschau</h3>
-                  <p className="mt-4 leading-7 text-slate-700">
-                    Hier kann ein Video, ein Mockup oder eine Produktvorschau
-                    stehen.
-                  </p>
-                </Card>
-              )}
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="section section-muted">
           <div className="container">
@@ -270,18 +334,50 @@ export function MarketingPageTemplate({
         {trustPoints.length > 0 && (
           <section className="section section-accent">
             <div className="container">
-              <SectionLead eyebrow="Vertrauen" title={trustTitle} center />
+              <SectionLead
+                eyebrow="Vertrauen"
+                title={trustTitle}
+                center={!trustImage}
+              />
 
-              <div className="grid gap-6 md:grid-cols-3">
-                {trustPoints.map((point) => (
-                  <Card key={point.title} className="rounded-[2rem] p-8">
-                    <h3 className="heading-3">{point.title}</h3>
-                    <p className="mt-4 leading-7 text-slate-700">
-                      {point.text}
-                    </p>
-                  </Card>
-                ))}
-              </div>
+              {trustImage ? (
+                <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+                  <div
+                    className="relative mx-auto w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-900/5"
+                    style={{ aspectRatio: "4/3" }}
+                  >
+                    <Image
+                      src={trustImage.src}
+                      alt={trustImage.alt}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 576px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+
+                  <div className="grid gap-6">
+                    {trustPoints.map((point) => (
+                      <Card key={point.title} className="rounded-[2rem] p-8">
+                        <h3 className="heading-3">{point.title}</h3>
+                        <p className="mt-4 leading-7 text-slate-700">
+                          {point.text}
+                        </p>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-3">
+                  {trustPoints.map((point) => (
+                    <Card key={point.title} className="rounded-[2rem] p-8">
+                      <h3 className="heading-3">{point.title}</h3>
+                      <p className="mt-4 leading-7 text-slate-700">
+                        {point.text}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         )}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { trennungPageContent } from "@/app/content/trennungPage";
+import trennungPhoto from "@/fotos/trennung.jpg";
 
 export const metadata: Metadata = {
   title: "Trennung & Scheidung ohne Eskalation – KI-Mediation | medipact",
@@ -10,5 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default function TrennungPage() {
-  return <MarketingPageTemplate {...trennungPageContent} />;
+  return (
+    <MarketingPageTemplate
+      {...trennungPageContent}
+      heroImage={{
+        src: trennungPhoto,
+        alt: "Paar im Gespräch über eine Trennung",
+      }}
+    />
+  );
 }

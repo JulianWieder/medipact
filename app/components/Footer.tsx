@@ -36,7 +36,7 @@ export default function Footer({
             href="/auth/register"
             className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-teal-500"
           >
-            Streitfall kostenlos starten
+            Kostenlosen Account erstellen
             <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -122,6 +122,11 @@ export default function Footer({
               <li>
                 <Link href="/impressum" className="transition hover:text-white">
                   Impressum
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="transition hover:text-white">
+                  Cookies
                 </Link>
               </li>
             </ul>

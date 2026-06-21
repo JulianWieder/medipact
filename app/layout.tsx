@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { ConditionalHeader, ConditionalFooter } from "@/app/components/ConditionalHeader";
 import { JsonLd } from "@/app/components/JsonLd";
+import Analytics from "@/app/components/Analytics";
+import CookieConsent from "@/app/components/CookieConsent";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -95,32 +96,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-
-        {/* Google Analytics */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-HV7LZJ0V1M"
-          strategy="afterInteractive"
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-HV7LZJ0V1M');
-            `,
-          }}
-        />
       </head>
       <body className="antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
+        <Analytics />
         <ConditionalHeader />
         {children}
         <ConditionalFooter />
+        <CookieConsent />
       </body>
     </html>
   );

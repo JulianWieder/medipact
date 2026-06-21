@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import karrierePhoto from "@/fotos/medi_karriere.jpg";
 
 export const metadata: Metadata = {
   title: "Karriere bei medipact – Mitgestalten statt verwalten",
@@ -56,40 +58,53 @@ export default function KarrierePage() {
     <main className="app-shell pt-[73px]">
 
       {/* ── HERO ── */}
-      <section className="section section-base relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="app-surface-muted inline-flex items-center gap-2 rounded border border-slate-200 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              Karriere bei medipact
-            </div>
+      <section className="relative isolate overflow-hidden">
+        <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
+          <Image
+            src={karrierePhoto}
+            alt="Karriere bei medipact – Mediator im Gespräch"
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
-            <h1 className="heading-1 mt-8">
-              Konflikte lösen –{" "}
-              <span className="block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
-                mit Methode und Haltung.
-              </span>
-            </h1>
+          <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
+            <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
+              <div className="max-w-2xl">
+                <div className="eyebrow text-teal-300">Karriere bei medipact</div>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
-              Medipact verbindet strukturierte Mediation mit KI-gestützten
-              Prozessen. Wir suchen Menschen, die beides schätzen: gute
-              Technologie und den menschlichen Kern, der dahinter bleiben muss.
-            </p>
+                <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+                  Konflikte lösen –
+                  <span className="mt-2 block bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                    mit Methode und Haltung.
+                  </span>
+                </h1>
 
-            <div className="mt-10 flex flex-wrap gap-3 text-sm text-slate-600">
-              {[
-                { label: "Remote möglich", color: "bg-teal-700" },
-                { label: "Teilzeit & Vollzeit", color: "bg-teal-500" },
-                { label: "Freiberuflich willkommen", color: "bg-teal-300" },
-              ].map(({ label, color }) => (
-                <div
-                  key={label}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
-                >
-                  <span className={`h-2 w-2 rounded-full ${color}`} />
-                  {label}
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                  Medipact verbindet strukturierte Mediation mit KI-gestützten
+                  Prozessen. Wir suchen Menschen, die beides schätzen: gute
+                  Technologie und den menschlichen Kern, der dahinter bleiben muss.
+                </p>
+
+                <div className="mt-10 flex flex-wrap gap-3 text-sm text-slate-200">
+                  {[
+                    { label: "Remote möglich", color: "bg-teal-400" },
+                    { label: "Teilzeit & Vollzeit", color: "bg-teal-300" },
+                    { label: "Freiberuflich willkommen", color: "bg-teal-200" },
+                  ].map(({ label, color }) => (
+                    <div
+                      key={label}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm"
+                    >
+                      <span className={`h-2 w-2 rounded-full ${color}`} />
+                      {label}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>

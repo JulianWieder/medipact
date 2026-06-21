@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
+import nachbarnPhoto from "@/fotos/nachbarn.png";
 
 export const metadata: Metadata = {
   title: "Nachbarschaftsstreit lösen ohne Gericht | medipact",
@@ -10,5 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default function NachbarschaftPage() {
-  return <MarketingPageTemplate {...nachbarschaftPageContent} />;
+  return (
+    <MarketingPageTemplate
+      {...nachbarschaftPageContent}
+      heroImage={{
+        src: nachbarnPhoto,
+        alt: "Nachbarn im Gespräch über einen Konflikt",
+      }}
+    />
+  );
 }
