@@ -6,15 +6,33 @@ type Props = {
   mediationId: string | number;
   videoToken: string;
   onChange: (videoToken: string) => void;
+  /** Wird nach erfolgreichem Upload mit dem automatisch transkribierten Text aufgerufen. */
+  onTranscript?: (transcript: string) => void;
+  /** Ob die Video-Botschaft Pflicht ist (steuert nur die Beschriftung). */
+  required?: boolean;
 };
 
-type Status = "idle" | "requesting" | "recording" | "uploading" | "done" | "error";
+type Status =
+  | "idle"
+  | "requesting"
+  | "recording"
+  | "uploading"
+  | "transcribing"
+  | "done"
+  | "error";
 
 const MAX_SECONDS = 90;
 
-export default function InviteVideoRecorder({ mediationId, videoToken, onChange }: Props) {
+export default function InviteVideoRecorder({
+  mediationId,
+  videoToken,
+  onChange,
+  onTranscript,
+  required = false,
+}: Props) {
   const [status, setStatus] = useState<Status>(videoToken ? "done" : "idle");
   const [error, setError] = useState("");
+  const [transcribeError, setTranscribeError] = useState("");
   const [seconds, setSeconds] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
@@ -115,10 +133,39 @@ export default function InviteVideoRecorder({ mediationId, videoToken, onChange 
       }
 
       onChange(data.video_token);
-      setStatus("done");
+      await transcribeVideo(data.video_token);
     } catch {
       setError("Server nicht erreichbar.");
       setStatus("error");
+    }
+  }
+
+  async function transcribeVideo(token: string) {
+    if (!onTranscript) {
+      setStatus("done");
+      return;
+    }
+
+    setTranscribeError("");
+    setStatus("transcribing");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/invites/video/transcribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ video_token: token }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || typeof data?.transcript !== "string") {
+        setTranscribeError(
+          data?.detail ?? data?.error ?? "Video konnte nicht automatisch transkribiert werden. Bitte Text manuell eingeben.",
+        );
+      } else {
+        onTranscript(data.transcript);
+      }
+    } catch {
+      setTranscribeError("Transkription nicht erreichbar. Bitte Text manuell eingeben.");
+    } finally {
+      setStatus("done");
     }
   }
 
@@ -126,18 +173,26 @@ export default function InviteVideoRecorder({ mediationId, videoToken, onChange 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl("");
     onChange("");
+    onTranscript?.("");
     setStatus("idle");
     setError("");
+    setTranscribeError("");
   }
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <p className="text-sm font-bold text-slate-800">
-        Persönliche Video-Botschaft <span className="font-normal text-slate-400">(optional)</span>
+        Persönliche Video-Botschaft{" "}
+        {required ? (
+          <span className="font-normal text-red-500">(Pflicht)</span>
+        ) : (
+          <span className="font-normal text-slate-400">(optional)</span>
+        )}
       </p>
       <p className="mt-1 text-sm text-slate-500">
         Nimm eine kurze Video-Nachricht auf. Die andere Seite kann sie ansehen, sobald sie die
-        Einladung im System annimmt.
+        Einladung im System annimmt. Der Inhalt wird automatisch in das Textfeld unten übertragen
+        und kann dort bearbeitet werden.
       </p>
 
       <div className="mt-4">
@@ -147,7 +202,7 @@ export default function InviteVideoRecorder({ mediationId, videoToken, onChange 
           </div>
         )}
 
-        {(status === "uploading" || status === "done" || status === "error") && previewUrl && (
+        {(status === "uploading" || status === "transcribing" || status === "done" || status === "error") && previewUrl && (
           <div className="overflow-hidden rounded-xl bg-slate-900">
             <video src={previewUrl} className="aspect-video w-full" controls />
           </div>
@@ -156,6 +211,12 @@ export default function InviteVideoRecorder({ mediationId, videoToken, onChange 
         {error && (
           <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
             <p className="text-sm font-semibold text-red-700">{error}</p>
+          </div>
+        )}
+
+        {transcribeError && (
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <p className="text-sm font-semibold text-amber-700">{transcribeError}</p>
           </div>
         )}
 
@@ -183,6 +244,10 @@ export default function InviteVideoRecorder({ mediationId, videoToken, onChange 
 
           {status === "uploading" && (
             <span className="text-sm text-slate-500">Video wird hochgeladen…</span>
+          )}
+
+          {status === "transcribing" && (
+            <span className="text-sm text-slate-500">Video wird transkribiert…</span>
           )}
 
           {status === "done" && (

@@ -32,6 +32,14 @@ router = APIRouter(tags=["invites"])
 _ALLOWED_VIDEO_EXTENSIONS = {".webm", ".mp4", ".mov", ".ogg"}
 
 
+class VideoTranscribeRequest(BaseModel):
+    video_token: str
+
+
+class MessageImproveRequest(BaseModel):
+    text: str
+
+
 class InviteCreate(BaseModel):
     invited_email: EmailStr
     role: str = "other_party"
@@ -104,6 +112,92 @@ def paraphrase_personal_message(message: str, mediation_title: str) -> str:
     except Exception as exc:
         logger.error("Paraphrasierung der Einladungsnachricht fehlgeschlagen: %s", exc)
         return message
+
+
+def transcribe_invite_video(path: str) -> str:
+    """Transkribiert die Audiospur einer Einladungs-Video-Botschaft per OpenAI Whisper.
+
+    Wirft eine HTTPException, wenn keine KI konfiguriert ist oder die Transkription
+    fehlschlägt -- anders als die Paraphrasierung blockiert das hier bewusst die
+    Anfrage, weil der Nutzer aktiv auf das Transkript wartet und sofort Feedback
+    braucht, statt eine stillschweigend leere Nachricht zu bekommen.
+    """
+    if not settings.OPENAI_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="Transkription ist nicht konfiguriert (OPENAI_API_KEY fehlt).",
+        )
+
+    try:
+        import openai
+
+        client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+        with open(path, "rb") as audio_file:
+            result = client.audio.transcriptions.create(
+                model=settings.OPENAI_TRANSCRIBE_MODEL,
+                file=audio_file,
+                language="de",
+            )
+        text = (getattr(result, "text", "") or "").strip()
+        return text
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Transkription der Einladungs-Video-Botschaft fehlgeschlagen: %s", exc)
+        raise HTTPException(
+            status_code=502,
+            detail="Video konnte nicht transkribiert werden. Bitte Text manuell eingeben.",
+        ) from exc
+
+
+def improve_message_text(text: str) -> str:
+    """Verbessert einen (oft aus einer Video-Transkription stammenden) Text per Claude.
+
+    Glättet Füllwörter, Versprecher und Satzbrüche aus gesprochener Sprache, behält
+    aber Inhalt, Absicht und Ich-Perspektive der Person bei. Wird explizit per
+    Button ("Mit KI verbessern") ausgelöst, im Gegensatz zur stillen Paraphrasierung
+    beim Versand (siehe paraphrase_personal_message).
+    """
+    text = (text or "").strip()
+    if not text:
+        return text
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="KI-Verbesserung ist nicht konfiguriert (ANTHROPIC_API_KEY fehlt).",
+        )
+
+    try:
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        prompt = (
+            "Der folgende Text stammt aus der automatischen Transkription einer gesprochenen "
+            "Video-Nachricht (oder wurde von Hand geschrieben). Glätte ihn zu einem klaren, gut "
+            "lesbaren Text: entferne Füllwörter, Versprecher, Wiederholungen und Satzbrüche, "
+            "korrigiere Grammatik und Zeichensetzung. Behalte Inhalt, Tonfall und Ich-Perspektive "
+            "der Person exakt bei -- erfinde nichts hinzu und ändere die Aussage nicht. "
+            "Antworte NUR mit dem verbesserten Text, ohne Anführungszeichen, ohne Erklärung, "
+            "ohne Markdown.\n\n"
+            f"Text:\n{text}"
+        )
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=400,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        improved = "".join(
+            block.text for block in response.content if getattr(block, "type", None) == "text"
+        ).strip()
+        return improved or text
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("KI-Verbesserung des Nachrichtentexts fehlgeschlagen: %s", exc)
+        raise HTTPException(
+            status_code=502,
+            detail="Text konnte nicht verbessert werden. Bitte später erneut versuchen.",
+        ) from exc
 
 
 def send_invite_email(
@@ -316,6 +410,40 @@ async def upload_invite_video(
     return {"video_token": video_token}
 
 
+@router.post("/mediations/{mediation_id}/invites/video/transcribe")
+async def transcribe_invite_video_endpoint(
+    mediation_id: int,
+    payload: VideoTranscribeRequest,
+    mediation=Depends(require_mediation_access),
+):
+    """Transkribiert eine zuvor hochgeladene Video-Botschaft (siehe upload_invite_video)
+    per Whisper, damit der Text direkt in einem editierbaren Feld erscheinen kann."""
+    if not payload.video_token.startswith(f"{mediation_id}_"):
+        raise HTTPException(status_code=400, detail="Ungültiger video_token")
+    path = _safe_video_path(payload.video_token)
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="Hochgeladenes Video nicht gefunden")
+
+    transcript = transcribe_invite_video(path)
+    return {"transcript": transcript}
+
+
+@router.post("/mediations/{mediation_id}/invites/message/improve")
+async def improve_invite_message_endpoint(
+    mediation_id: int,
+    payload: MessageImproveRequest,
+    mediation=Depends(require_mediation_access),
+):
+    """Verbessert per Button-Klick einen (oft transkribierten) Nachrichtentext mit Claude."""
+    improved = improve_message_text(payload.text)
+    return {"text": improved}
+
+
+# Rollen, für die eine persönliche Video-Botschaft beim Erstellen der Einladung
+# verpflichtend ist (siehe create_invite). Mediator/Beobachter bleiben optional.
+_VIDEO_REQUIRED_ROLES = {"other_party"}
+
+
 @router.post("/mediations/{mediation_id}/invites")
 def create_invite(
     request: Request,
@@ -326,6 +454,12 @@ def create_invite(
 ):
     invite_limiter.check(request)
     token = create_invite_token()
+
+    if payload.role in _VIDEO_REQUIRED_ROLES and not payload.video_token:
+        raise HTTPException(
+            status_code=400,
+            detail="Eine persönliche Video-Botschaft ist für diese Einladung erforderlich.",
+        )
 
     video_filename = None
     if payload.video_token:

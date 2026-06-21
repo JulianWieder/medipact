@@ -52,6 +52,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [email, setEmail] = useState("");
   const [personalMessage, setPersonalMessage] = useState("");
   const [videoToken, setVideoToken] = useState("");
+  const [improving, setImproving] = useState(false);
+  const [improveError, setImproveError] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
@@ -131,6 +133,29 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       setError("Server nicht erreichbar.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function improveMessage() {
+    if (!personalMessage.trim()) return;
+    setImproving(true);
+    setImproveError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/invites/message/improve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: personalMessage }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || typeof data?.text !== "string") {
+        setImproveError(data?.detail ?? data?.error ?? "Text konnte nicht verbessert werden.");
+        return;
+      }
+      setPersonalMessage(data.text);
+    } catch {
+      setImproveError("Server nicht erreichbar.");
+    } finally {
+      setImproving(false);
     }
   }
 
@@ -446,36 +471,57 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     />
 
-                    <label htmlFor="invite-message" className="mt-4 block text-sm font-semibold text-slate-900">
-                      Persönliche Nachricht <span className="font-normal text-slate-400">(optional)</span>
-                    </label>
-                    <textarea
-                      id="invite-message"
-                      value={personalMessage}
-                      onChange={(e) => setPersonalMessage(e.target.value)}
-                      placeholder="z.B. Mir ist wichtig, dass wir gemeinsam eine faire Lösung finden …"
-                      className="mt-2 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                    />
-                    <p className="mt-1 text-xs text-slate-400">
-                      Wird vor dem Versand von der KI freundlich umformuliert.
-                    </p>
-
                     <div className="mt-4">
                       <InviteVideoRecorder
                         mediationId={mediationId}
                         videoToken={videoToken}
                         onChange={setVideoToken}
+                        onTranscript={setPersonalMessage}
+                        required
                       />
                     </div>
+
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <label htmlFor="invite-message" className="block text-sm font-semibold text-slate-900">
+                        Persönliche Nachricht
+                      </label>
+                      <button
+                        type="button"
+                        onClick={improveMessage}
+                        disabled={improving || !personalMessage.trim()}
+                        className="btn btn-ghost shrink-0 px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {improving ? "Wird verbessert…" : "✨ Mit KI verbessern"}
+                      </button>
+                    </div>
+                    <textarea
+                      id="invite-message"
+                      value={personalMessage}
+                      onChange={(e) => setPersonalMessage(e.target.value)}
+                      placeholder="Wird automatisch aus deiner Video-Botschaft übertragen, sobald die Aufnahme fertig ist …"
+                      className="mt-2 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <p className="mt-1 text-xs text-slate-400">
+                      Automatisch aus der Video-Botschaft übertragen (per KI transkribiert). Du kannst den
+                      Text frei bearbeiten; er wird vor dem Versand zusätzlich von der KI freundlich umformuliert.
+                    </p>
+                    {improveError && (
+                      <p className="mt-1 text-xs font-semibold text-red-600">{improveError}</p>
+                    )}
 
                     <button
                       type="button"
                       onClick={createInvite}
-                      disabled={loading || !email.trim()}
+                      disabled={loading || !email.trim() || !videoToken}
                       className="btn btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? "Wird erstellt..." : "Einladung erstellen"}
                     </button>
+                    {!videoToken && (
+                      <p className="mt-2 text-center text-xs text-slate-400">
+                        Eine Video-Botschaft ist erforderlich, bevor die Einladung erstellt werden kann.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

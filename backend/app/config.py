@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
     DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen + Paraphrasierung der Einladungsnachricht
+    OPENAI_API_KEY: str = ""  # Für die Transkription der Einladungs-Video-Botschaft (Whisper)
+    OPENAI_TRANSCRIBE_MODEL: str = "whisper-1"
     # Verzeichnis für hochgeladene Video-Botschaften bei Mediations-Einladungen
     # (z.B. /data/invite_videos in Docker, analog zu DB_PATH).
     INVITE_VIDEO_DIR: str = "media/invite_videos"

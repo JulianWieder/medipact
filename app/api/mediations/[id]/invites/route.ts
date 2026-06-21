@@ -11,6 +11,8 @@ export async function POST(
 
     const invited_email = body.invited_email ?? body.email;
     const role = body.role ?? "other_party";
+    const personal_message = body.personal_message;
+    const video_token = body.video_token;
 
     if (!invited_email) {
       return NextResponse.json(
@@ -22,6 +24,8 @@ export async function POST(
     const result = await createInvite(id, {
       invited_email,
       role,
+      personal_message,
+      video_token,
     });
 
     if (!result.ok) {
