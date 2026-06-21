@@ -21,8 +21,8 @@ const navItems = [
     label: "Beispiele",
     href: "/cases",
     children: [
-      { label: "Fallbeispiele", href: "/beispiele" },
-      { label: "Mini-Matrix", href: "/beispiele#matrix" },
+      { label: "Fallbeispiele", href: "/cases" },
+      { label: "Mini-Matrix", href: "/cases#matrix" },
     ],
   },
 ];

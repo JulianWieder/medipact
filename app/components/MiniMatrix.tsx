@@ -1,89 +1,151 @@
 import Link from "next/link";
 
+type CaseLink = {
+  href: string;
+  title: string;
+  text: string;
+};
+
+type MatrixRow = {
+  rowTitle: string;
+  rowText: string;
+  cells: CaseLink[];
+};
+
+const columns = ["Trennung & Unterhalt", "Erbschaft", "Nachbarschaft"];
+
+const rows: MatrixRow[] = [
+  {
+    rowTitle: "Es ist noch offen",
+    rowText:
+      "Es gibt Unklarheiten oder erste Spannungen, aber ein Gespräch scheint noch möglich.",
+    cells: [
+      {
+        href: "/cases/maria-thomas",
+        title: "Wer bleibt in der Wohnung?",
+        text: "Die Trennung ist ausgesprochen, aber Alltag, Geld und Betreuung sind offen.",
+      },
+      {
+        href: "/cases/anna-klaus",
+        title: "Unklare Erwartungen im Testament",
+        text: "Alle spüren, dass der Nachlass schwierig werden könnte — aber noch spricht niemand klar darüber.",
+      },
+      {
+        href: "/cases/rolf-helga",
+        title: "Kleine Spannungen werden größer",
+        text: "Lärm, Garten oder Grenzen werden zunehmend zum Reizthema.",
+      },
+    ],
+  },
+  {
+    rowTitle: "Gespräche werden schwer",
+    rowText:
+      "Man redet zwar noch, aber oft aneinander vorbei. Positionen werden fester.",
+    cells: [
+      {
+        href: "/cases/peter-sarah",
+        title: "Streit um Unterhalt",
+        text: "Finanzielle Fragen blockieren eine faire Lösung nach der Trennung.",
+      },
+      {
+        href: "/cases/familie-weber",
+        title: "Geschwister sprechen kaum noch",
+        text: "Alte Verletzungen überlagern die sachliche Verteilung.",
+      },
+      {
+        href: "/cases/jens-katarina",
+        title: "Beschwerden häufen sich",
+        text: "Aus Ärger wird Dauerstress zwischen Tür, Garten und Grundstück.",
+      },
+    ],
+  },
+  {
+    rowTitle: "Es geht kaum noch direkt",
+    rowText:
+      "Gespräche werden vermieden oder laufen nur noch über Dritte.",
+    cells: [
+      {
+        href: "/cases/alexa-david",
+        title: "Kommunikation nur noch über Anwälte",
+        text: "Die Trennung ist festgefahren. Direkte Gespräche finden kaum noch statt.",
+      },
+      {
+        href: "/cases/marie-sophie",
+        title: "Der Erbstreit steht vor Gericht",
+        text: "Die Familie findet keinen gemeinsamen Weg mehr und bereitet rechtliche Schritte vor.",
+      },
+      {
+        href: "/cases/carla-marco",
+        title: "Offener Streit im Hausflur",
+        text: "Der Konflikt ist sichtbar eskaliert und belastet den Alltag aller Beteiligten.",
+      },
+    ],
+  },
+];
+
 export default function MiniMatrix() {
   return (
-    <div className="section section-muted">
+    <div id="matrix" className="section section-muted scroll-mt-24">
       <div className="container">
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-200 shadow-sm">
-        <div className="grid min-w-[900px] grid-cols-4 gap-px">
-          <div className="bg-white p-5" />
+        {/* MOBILE / TABLET — stacked cards grouped by row, no horizontal scroll */}
+        <div className="flex flex-col gap-8 md:hidden">
+          {rows.map((row) => (
+            <div key={row.rowTitle}>
+              <p className="font-semibold text-slate-900">{row.rowTitle}</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                {row.rowText}
+              </p>
 
-          <MatrixHeader title="Trennung & Unterhalt" />
-          <MatrixHeader title="Erbschaft" />
-          <MatrixHeader title="Nachbarschaft" />
+              <div className="mt-4 flex flex-col gap-3">
+                {row.cells.map((cell, i) => (
+                  <Link
+                    key={cell.href}
+                    href={cell.href}
+                    className="group rounded-xl border border-slate-200 bg-white p-4 transition hover:bg-emerald-50"
+                  >
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      {columns[i]}
+                    </p>
+                    <p className="mt-1 font-medium text-slate-900 group-hover:text-emerald-700">
+                      {cell.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {cell.text}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
 
-          <MatrixRowHeader
-            title="Es ist noch offen"
-            text="Es gibt Unklarheiten oder erste Spannungen, aber ein Gespräch scheint noch möglich."
-          />
+        {/* DESKTOP — full matrix table */}
+        <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-slate-200 shadow-sm md:block">
+          <div className="grid min-w-[900px] grid-cols-4 gap-px">
+            <div className="bg-white p-5" />
 
-          <MatrixLink
-            href="/cases/maria-thomas"
-            title="Wer bleibt in der Wohnung?"
-            text="Die Trennung ist ausgesprochen, aber Alltag, Geld und Betreuung sind offen."
-          />
+            {columns.map((title) => (
+              <MatrixHeader key={title} title={title} />
+            ))}
 
-          <MatrixLink
-            href="/cases/anna-klaus"
-            title="Unklare Erwartungen im Testament"
-            text="Alle spüren, dass der Nachlass schwierig werden könnte — aber noch spricht niemand klar darüber."
-          />
-
-          <MatrixLink
-            href="/cases/rolf-helga"
-            title="Kleine Spannungen werden größer"
-            text="Lärm, Garten oder Grenzen werden zunehmend zum Reizthema."
-          />
-
-          <MatrixRowHeader
-            title="Gespräche werden schwer"
-            text="Man redet zwar noch, aber oft aneinander vorbei. Positionen werden fester."
-          />
-
-          <MatrixLink
-            href="/cases/peter-sarah"
-            title="Streit um Unterhalt"
-            text="Finanzielle Fragen blockieren eine faire Lösung nach der Trennung."
-          />
-
-          <MatrixLink
-            href="/cases/familie-weber"
-            title="Geschwister sprechen kaum noch"
-            text="Alte Verletzungen überlagern die sachliche Verteilung."
-          />
-
-          <MatrixLink
-            href="/cases/jens-katarina"
-            title="Beschwerden häufen sich"
-            text="Aus Ärger wird Dauerstress zwischen Tür, Garten und Grundstück."
-          />
-
-          <MatrixRowHeader
-            title="Es geht kaum noch direkt"
-            text="Gespräche werden vermieden oder laufen nur noch über Dritte."
-          />
-
-          <MatrixLink
-            href="/cases/alexa-david"
-            title="Kommunikation nur noch über Anwälte"
-            text="Die Trennung ist festgefahren. Direkte Gespräche finden kaum noch statt."
-          />
-
-          <MatrixLink
-            href="/cases/marie-sophie"
-            title="Der Erbstreit steht vor Gericht"
-            text="Die Familie findet keinen gemeinsamen Weg mehr und bereitet rechtliche Schritte vor."
-          />
-
-          <MatrixLink
-            href="/cases/carla-marco"
-            title="Offener Streit im Hausflur"
-            text="Der Konflikt ist sichtbar eskaliert und belastet den Alltag aller Beteiligten."
-          />
+            {rows.map((row) => (
+              <RowFragment key={row.rowTitle} row={row} />
+            ))}
+          </div>
         </div>
       </div>
-      </div>
     </div>
+  );
+}
+
+function RowFragment({ row }: { row: MatrixRow }) {
+  return (
+    <>
+      <MatrixRowHeader title={row.rowTitle} text={row.rowText} />
+      {row.cells.map((cell) => (
+        <MatrixLink key={cell.href} {...cell} />
+      ))}
+    </>
   );
 }
 
