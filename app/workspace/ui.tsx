@@ -50,9 +50,9 @@ export function RoleBadge({ role }: { role: string }) {
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
         role === "mediator"
-          ? "bg-teal-100 text-teal-700"
+          ? "bg-accent-100 text-accent-700"
           : isMediand
-            ? "bg-slate-100 text-slate-600"
+            ? "bg-neutral-100 text-neutral-600"
             : "bg-sky-100 text-sky-700",
       )}
     >
@@ -76,7 +76,7 @@ export function SectionHeader({
     <div className="mb-4 flex items-start justify-between gap-4">
       <div>
         {label && <p className="eyebrow mb-1">{label}</p>}
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
       </div>
       {action}
     </div>
@@ -95,10 +95,10 @@ export function KPI({
   sub?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/60 p-4">
-      <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{label}</div>
-      <div className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{value}</div>
-      {sub && <div className="mt-1 text-xs text-slate-500">{sub}</div>}
+    <div className="rounded-2xl border border-neutral-200 bg-white/60 p-4">
+      <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">{label}</div>
+      <div className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">{value}</div>
+      {sub && <div className="mt-1 text-xs text-neutral-500">{sub}</div>}
     </div>
   );
 }
@@ -116,7 +116,7 @@ export function WCard({
 }) {
   return (
     <div
-      className={cn("rounded-2xl border border-slate-200 bg-white shadow-sm", className)}
+      className={cn("rounded-2xl border border-neutral-200 bg-white shadow-sm", className)}
       style={style}
     >
       {children}
@@ -128,9 +128,9 @@ export function WCard({
 
 export function ProgressBar({ value }: { value: number }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
       <div
-        className="h-full rounded-full bg-teal-500 transition-all duration-500"
+        className="h-full rounded-full bg-accent-500 transition-all duration-500"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
@@ -149,9 +149,9 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-12 text-center">
-      {icon && <div className="mb-3 text-3xl text-slate-300">{icon}</div>}
-      <p className="text-sm text-slate-400">{text}</p>
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/50 px-6 py-12 text-center">
+      {icon && <div className="mb-3 text-3xl text-neutral-300">{icon}</div>}
+      <p className="text-sm text-neutral-400">{text}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
@@ -165,7 +165,7 @@ export function InviteStatusDot({ status }: { status: "accepted" | "pending" }) 
       title={status === "accepted" ? "Angenommen" : "Ausstehend"}
       className={cn(
         "inline-block h-2 w-2 rounded-full",
-        status === "accepted" ? "bg-teal-500" : "bg-amber-400",
+        status === "accepted" ? "bg-accent-500" : "bg-amber-400",
       )}
     />
   );

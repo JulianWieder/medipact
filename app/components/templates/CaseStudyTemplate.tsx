@@ -65,7 +65,7 @@ function SectionHeader({
     <div className={center ? "mb-14 text-center" : "mb-14 max-w-3xl"}>
       {eyebrow && (
         <div
-          className={`mb-4 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 backdrop-blur ${
+          className={`mb-4 inline-flex items-center rounded-full border border-neutral-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500 backdrop-blur ${
             center ? "mx-auto" : ""
           }`}
         >
@@ -76,7 +76,7 @@ function SectionHeader({
       <h2 className="heading-2">{title}</h2>
 
       {description && (
-        <p className="mt-5 text-lg leading-8 text-slate-600">{description}</p>
+        <p className="mt-5 text-lg leading-8 text-neutral-600">{description}</p>
       )}
     </div>
   );
@@ -116,7 +116,7 @@ export function CaseStudyTemplate({
         <h1 className="text-2xl font-bold text-red-700">
           Case Study Daten unvollständig
         </h1>
-        <p className="mt-4 text-slate-700">
+        <p className="mt-4 text-neutral-700">
           Diese Case Study braucht genau zwei Einträge im Feld{" "}
           <code>perspectives</code>.
         </p>
@@ -129,7 +129,7 @@ export function CaseStudyTemplate({
       <main className="app-shell pt-[73px]">
         <section className="relative overflow-hidden section section-base">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-emerald-100 blur-3xl opacity-60" />
+            <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-accent-100 blur-3xl opacity-60" />
             <div className="absolute right-[-6rem] top-20 h-80 w-80 rounded-full bg-cyan-100 blur-3xl opacity-50" />
           </div>
 
@@ -140,13 +140,13 @@ export function CaseStudyTemplate({
               <h1 className="heading-1 mt-8">
                 {title}
                 {titleHighlight && (
-                  <span className="mt-2 block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
+                  <span className="mt-2 block bg-gradient-to-r from-neutral-800 via-accent-600 to-accent-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
                     {titleHighlight}
                   </span>
                 )}
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-700">
                 {intro}
               </p>
             </div>
@@ -164,14 +164,14 @@ export function CaseStudyTemplate({
             <div className="grid gap-6 lg:grid-cols-2">
               <Card className="rounded-[2rem] p-8">
                 <h3 className="heading-3">{perspectiveA.title}</h3>
-                <div className="mt-4 leading-8 text-slate-700">
+                <div className="mt-4 leading-8 text-neutral-700">
                   {perspectiveA.content}
                 </div>
               </Card>
 
               <Card className="rounded-[2rem] p-8">
                 <h3 className="heading-3">{perspectiveB.title}</h3>
-                <div className="mt-4 leading-8 text-slate-700">
+                <div className="mt-4 leading-8 text-neutral-700">
                   {perspectiveB.content}
                 </div>
               </Card>
@@ -184,7 +184,7 @@ export function CaseStudyTemplate({
             <div className="grid gap-6 lg:grid-cols-2">
               <Card className="rounded-[2rem] p-8">
                 <h3 className="heading-3">{factsTitle}</h3>
-                <ul className="mt-5 space-y-3 text-slate-700">
+                <ul className="mt-5 space-y-3 text-neutral-700">
                   {facts.map((item) => (
                     <li key={item}>• {item}</li>
                   ))}
@@ -216,13 +216,13 @@ export function CaseStudyTemplate({
               {steps.map((step) => (
                 <Card key={step.label} className="rounded-[2rem] p-8">
                   <div className="flex gap-5">
-                    <div className="min-w-fit rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 px-4 py-3 text-center font-bold text-white shadow-md">
+                    <div className="min-w-fit rounded-2xl bg-gradient-to-br from-accent-600 to-accent-500 px-4 py-3 text-center font-bold text-white shadow-md">
                       {step.label}
                     </div>
 
                     <div>
                       <h3 className="heading-3">{step.title}</h3>
-                      <p className="mt-3 leading-7 text-slate-700">
+                      <p className="mt-3 leading-7 text-neutral-700">
                         {step.description}
                       </p>
                     </div>
@@ -248,7 +248,7 @@ export function CaseStudyTemplate({
                   <h3 className="mb-4 text-2xl font-black text-orange-700">
                     {positive.title}
                   </h3>
-                  <ul className="space-y-4 text-slate-700">
+                  <ul className="space-y-4 text-neutral-700">
                     {positive.items.map((item) => (
                       <li key={item} className="flex gap-3">
                         <span className="font-bold text-orange-600">✓</span>
@@ -262,7 +262,7 @@ export function CaseStudyTemplate({
                   <h3 className="mb-4 text-2xl font-black text-red-700">
                     {negative.title}
                   </h3>
-                  <ul className="space-y-4 text-slate-700">
+                  <ul className="space-y-4 text-neutral-700">
                     {negative.items.map((item) => (
                       <li key={item} className="flex gap-3">
                         <span className="font-bold text-red-600">✗</span>
@@ -283,10 +283,10 @@ export function CaseStudyTemplate({
             <div className="space-y-6">
               {quotes.map((quote) => (
                 <Card key={quote.author} className="rounded-[2rem] p-8">
-                  <p className="text-lg italic leading-8 text-slate-700">
+                  <p className="text-lg italic leading-8 text-neutral-700">
                     “{quote.text}”
                   </p>
-                  <p className="mt-5 font-bold text-slate-900">
+                  <p className="mt-5 font-bold text-neutral-900">
                     — {quote.author}
                   </p>
                 </Card>
@@ -301,7 +301,7 @@ export function CaseStudyTemplate({
               {ctaTitle}
             </h2>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-300">
               {ctaText}
             </p>
 

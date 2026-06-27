@@ -18,12 +18,12 @@ function Section({
   return (
     <section>
       <h2 className="mb-4 flex items-baseline gap-3">
-        <span className="text-xs font-bold uppercase tracking-widest text-teal-600">
+        <span className="text-xs font-bold uppercase tracking-widest text-accent-600">
           § {num}
         </span>
-        <span className="text-lg font-bold text-slate-900">{title}</span>
+        <span className="text-lg font-bold text-neutral-900">{title}</span>
       </h2>
-      <div className="space-y-3 text-base leading-7 text-slate-600">{children}</div>
+      <div className="space-y-3 text-base leading-7 text-neutral-600">{children}</div>
     </section>
   );
 }
@@ -33,8 +33,8 @@ export default function AgbPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Allgemeine Geschäftsbedingungen</h1>
-        <p className="mb-2 text-sm text-slate-500">Stand: Juni 2025</p>
-        <p className="mb-12 text-sm text-slate-500">
+        <p className="mb-2 text-sm text-neutral-500">Stand: Juni 2025</p>
+        <p className="mb-12 text-sm text-neutral-500">
           medipact · Julian Wieder · Ernst-Ludwig-Allee 14 · 63303 Dreieich
         </p>
 
@@ -125,7 +125,7 @@ export default function AgbPage() {
               Widerrufe richten Sie bitte schriftlich an:{" "}
               <a
                 href="mailto:hallo@medipact.de"
-                className="text-teal-700 hover:underline"
+                className="text-accent-700 hover:underline"
               >
                 hallo@medipact.de
               </a>
@@ -167,7 +167,7 @@ export default function AgbPage() {
             </p>
             <p>
               Einzelheiten zur Datenverarbeitung finden Sie in unserer{" "}
-              <a href="/datenschutz" className="text-teal-700 hover:underline">
+              <a href="/datenschutz" className="text-accent-700 hover:underline">
                 Datenschutzerklärung
               </a>
               .
@@ -215,7 +215,7 @@ export default function AgbPage() {
               Mitteilung an{" "}
               <a
                 href="mailto:hallo@medipact.de"
-                className="text-teal-700 hover:underline"
+                className="text-accent-700 hover:underline"
               >
                 hallo@medipact.de
               </a>{" "}
@@ -260,12 +260,12 @@ export default function AgbPage() {
 
         </div>
 
-        <div className="mt-16 rounded-2xl border border-slate-100 bg-slate-50 p-6 text-sm text-slate-500">
+        <div className="mt-16 rounded-2xl border border-neutral-100 bg-neutral-50 p-6 text-sm text-neutral-500">
           <p>
             Bei Fragen zu diesen AGB wenden Sie sich an{" "}
             <a
               href="mailto:hallo@medipact.de"
-              className="text-teal-700 hover:underline"
+              className="text-accent-700 hover:underline"
             >
               hallo@medipact.de
             </a>

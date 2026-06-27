@@ -137,7 +137,7 @@ export default function NewMediationWizard({ config }: Props) {
   return (
     <main className="app-shell pt-[73px]">
       {/* Header section */}
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-neutral-200 bg-white">
         <div className="container py-12 lg:py-16">
           <Link href="/dashboard/mediation/new" className="btn btn-ghost mb-8">
             ← Zurück zur Auswahl
@@ -147,9 +147,9 @@ export default function NewMediationWizard({ config }: Props) {
             <div>
               <p className="eyebrow mb-4">Neue Mediation</p>
 
-              <h1 className="heading-1 text-slate-900">{config.mainHeading}</h1>
+              <h1 className="heading-1 text-neutral-900">{config.mainHeading}</h1>
 
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
+              <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-600">
                 {config.mainDescription}
               </p>
 
@@ -157,7 +157,7 @@ export default function NewMediationWizard({ config }: Props) {
                 {config.topics.map((topic) => (
                   <span
                     key={topic}
-                    className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700"
+                    className="rounded-full bg-accent-50 px-4 py-2 text-sm font-semibold text-accent-700"
                   >
                     {topic}
                   </span>
@@ -165,10 +165,10 @@ export default function NewMediationWizard({ config }: Props) {
               </div>
             </div>
 
-            <aside className="app-surface border border-slate-200 p-6">
+            <aside className="app-surface border border-neutral-200 p-6">
               <p className="eyebrow mb-3">Hinweis</p>
               <h2 className="heading-3 mb-3">{config.disclaimer.title}</h2>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-neutral-600">
                 {config.disclaimer.text}
               </p>
             </aside>
@@ -179,14 +179,14 @@ export default function NewMediationWizard({ config }: Props) {
       {/* Form section */}
       <section className="section section-muted">
         <div className="container max-w-4xl">
-          <div className="app-surface border border-slate-200 p-8 lg:p-10">
+          <div className="app-surface border border-neutral-200 p-8 lg:p-10">
             <p className="eyebrow mb-4">Start</p>
 
-            <h2 className="heading-2 text-slate-900 mb-4">
+            <h2 className="heading-2 text-neutral-900 mb-4">
               Worum geht es konkret?
             </h2>
 
-            <p className="mb-8 text-slate-600 leading-7">
+            <p className="mb-8 text-neutral-600 leading-7">
               Beschreiben Sie die Situation sachlich. Noch keine Bewertung, kein
               Urteil, keine Lösung erzwingen. Erst Fakten, dann Interessen, dann
               Optionen.
@@ -196,16 +196,16 @@ export default function NewMediationWizard({ config }: Props) {
               {/* Beschreibungsfelder zuerst */}
               {renderFields(config.formFields, formData, handleChange, handleDescriptionBlur)}
 
-              <div className="border-t border-slate-100" />
+              <div className="border-t border-neutral-100" />
 
               {/* Titel – wird ggf. per KI vorausgefüllt */}
               <label className="block">
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="text-sm font-bold text-slate-800">
-                    Titel der Mediation <span className="text-emerald-600">*</span>
+                  <span className="text-sm font-bold text-neutral-800">
+                    Titel der Mediation <span className="text-accent-600">*</span>
                   </span>
                   {titleGenerating && (
-                    <span className="flex items-center gap-1 text-xs text-emerald-600">
+                    <span className="flex items-center gap-1 text-xs text-accent-600">
                       <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
@@ -219,7 +219,7 @@ export default function NewMediationWizard({ config }: Props) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={titleGenerating ? "Wird generiert…" : "z.B. Trennung Familie Müller"}
-                  className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full rounded-2xl border border-neutral-300 bg-white p-4 text-neutral-800 outline-none transition focus:border-accent-500 disabled:bg-neutral-50 disabled:text-neutral-400"
                   disabled={titleGenerating}
                 />
                 {titleError && (
@@ -233,7 +233,7 @@ export default function NewMediationWizard({ config }: Props) {
                 </div>
               )}
 
-              <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
+              <div className="flex flex-col gap-3 border-t border-neutral-200 pt-6 sm:flex-row sm:justify-end">
                 <Link
                   href="/dashboard/mediation/new"
                   className="btn btn-secondary"
@@ -259,7 +259,7 @@ export default function NewMediationWizard({ config }: Props) {
       <section className="container py-12 lg:py-16">
         <div className="mb-8">
           <p className="eyebrow mb-4">Relevante Daten</p>
-          <h2 className="heading-2 text-slate-900">
+          <h2 className="heading-2 text-neutral-900">
             Was für diese Mediation geklärt werden sollte
           </h2>
         </div>
@@ -268,7 +268,7 @@ export default function NewMediationWizard({ config }: Props) {
           {config.relevantData.map((group) => (
             <article
               key={group.title}
-              className="app-surface border border-slate-200 p-6"
+              className="app-surface border border-neutral-200 p-6"
             >
               <h3 className="heading-3 mb-4">{group.title}</h3>
 
@@ -276,9 +276,9 @@ export default function NewMediationWizard({ config }: Props) {
                 {group.fields.map((field) => (
                   <li
                     key={field}
-                    className="flex gap-3 text-sm leading-6 text-slate-600"
+                    className="flex gap-3 text-sm leading-6 text-neutral-600"
                   >
-                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent-500" />
                     <span>{field}</span>
                   </li>
                 ))}
@@ -295,15 +295,15 @@ export default function NewMediationWizard({ config }: Props) {
             {config.steps.map((step) => (
               <article
                 key={step.num}
-                className="app-surface border border-slate-200 p-6"
+                className="app-surface border border-neutral-200 p-6"
               >
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-lg font-black text-emerald-700">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-100 text-lg font-black text-accent-700">
                   {step.num}
                 </div>
 
                 <h2 className="heading-3 mb-3">{step.title}</h2>
 
-                <p className="text-sm leading-6 text-slate-600">{step.text}</p>
+                <p className="text-sm leading-6 text-neutral-600">{step.text}</p>
               </article>
             ))}
           </div>
@@ -355,12 +355,12 @@ function renderSingleField(
   onBlur?: (value: string) => void,
 ): React.ReactNode {
   const baseClass =
-    "w-full rounded-2xl border border-slate-300 bg-white p-4 text-slate-800 outline-none transition focus:border-emerald-500";
+    "w-full rounded-2xl border border-neutral-300 bg-white p-4 text-neutral-800 outline-none transition focus:border-accent-500";
 
   if (field.type === "textarea") {
     return (
       <label key={field.id} className="block">
-        <span className="mb-2 block text-sm font-bold text-slate-800">
+        <span className="mb-2 block text-sm font-bold text-neutral-800">
           {field.label}
         </span>
         <textarea
@@ -377,7 +377,7 @@ function renderSingleField(
   if (field.type === "date") {
     return (
       <label key={field.id} className="block">
-        <span className="mb-2 block text-sm font-bold text-slate-800">
+        <span className="mb-2 block text-sm font-bold text-neutral-800">
           {field.label}
         </span>
         <input
@@ -393,7 +393,7 @@ function renderSingleField(
   // default: text
   return (
     <label key={field.id} className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-800">
+      <span className="mb-2 block text-sm font-bold text-neutral-800">
         {field.label}
       </span>
       <input

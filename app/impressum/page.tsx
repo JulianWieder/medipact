@@ -11,16 +11,16 @@ export default function ImpressumPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Impressum</h1>
-        <p className="mb-12 text-sm text-slate-500">Angaben gemäß § 5 TMG</p>
+        <p className="mb-12 text-sm text-neutral-500">Angaben gemäß § 5 TMG</p>
 
-        <div className="space-y-10 text-slate-700">
+        <div className="space-y-10 text-neutral-700">
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Anbieter
             </h2>
             <div className="space-y-1 text-base leading-7">
-              <p className="font-semibold text-slate-900">medipact</p>
+              <p className="font-semibold text-neutral-900">medipact</p>
               <p>Julian Wieder</p>
               <p>Ernst-Ludwig-Allee 14</p>
               <p>63303 Dreieich</p>
@@ -29,7 +29,7 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Kontakt
             </h2>
             <div className="space-y-1 text-base leading-7">
@@ -37,7 +37,7 @@ export default function ImpressumPage() {
                 E-Mail:{" "}
                 <a
                   href="mailto:hallo@medipact.de"
-                  className="text-teal-700 hover:underline"
+                  className="text-accent-700 hover:underline"
                 >
                   hallo@medipact.de
                 </a>
@@ -47,17 +47,17 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Umsatzsteuer-ID
             </h2>
             <p className="text-base leading-7">
               Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:{" "}
-              <span className="font-medium text-slate-900">DE[wird nachgetragen]</span>
+              <span className="font-medium text-neutral-900">DE[wird nachgetragen]</span>
             </p>
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)
             </h2>
             <div className="space-y-1 text-base leading-7">
@@ -68,7 +68,7 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Hinweis zur Streitbeilegung
             </h2>
             <p className="text-base leading-7">
@@ -78,7 +78,7 @@ export default function ImpressumPage() {
                 href="https://ec.europa.eu/consumers/odr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-teal-700 hover:underline"
+                className="text-accent-700 hover:underline"
               >
                 https://ec.europa.eu/consumers/odr/
               </a>
@@ -89,10 +89,10 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Haftung für Inhalte
             </h2>
-            <p className="text-base leading-7 text-slate-600">
+            <p className="text-base leading-7 text-neutral-600">
               Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene
               Inhalte auf diesen Seiten nach den allgemeinen Gesetzen
               verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter
@@ -109,10 +109,10 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Haftung für Links
             </h2>
-            <p className="text-base leading-7 text-slate-600">
+            <p className="text-base leading-7 text-neutral-600">
               Unser Angebot enthält Links zu externen Webseiten Dritter, auf
               deren Inhalte wir keinen Einfluss haben. Deshalb können wir für
               diese fremden Inhalte auch keine Gewähr übernehmen. Für die
@@ -126,10 +126,10 @@ export default function ImpressumPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
               Urheberrecht
             </h2>
-            <p className="text-base leading-7 text-slate-600">
+            <p className="text-base leading-7 text-neutral-600">
               Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
               diesen Seiten unterliegen dem deutschen Urheberrecht. Die
               Vervielfältigung, Bearbeitung, Verbreitung und jede Art der

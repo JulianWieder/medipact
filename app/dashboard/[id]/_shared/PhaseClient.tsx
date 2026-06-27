@@ -88,10 +88,10 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
                         isDone
-                          ? "bg-emerald-500 text-white"
+                          ? "bg-accent-500 text-white"
                           : isCurrent
-                            ? "bg-emerald-600 text-white ring-4 ring-emerald-100"
-                            : "bg-slate-200 text-slate-500"
+                            ? "bg-accent-600 text-white ring-4 ring-accent-100"
+                            : "bg-neutral-200 text-neutral-500"
                       }`}
                     >
                       {isDone ? (
@@ -105,10 +105,10 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
                     <span
                       className={`max-w-[80px] text-center text-xs font-medium leading-tight ${
                         isCurrent
-                          ? "text-emerald-700"
+                          ? "text-accent-700"
                           : isDone
-                            ? "text-emerald-600"
-                            : "text-slate-400"
+                            ? "text-accent-600"
+                            : "text-neutral-400"
                       }`}
                     >
                       {p.shortLabel}
@@ -118,7 +118,7 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
                   {index < PHASES.length - 1 && (
                     <div
                       className={`mx-2 mb-5 h-0.5 w-12 transition-colors ${
-                        index < currentIndex ? "bg-emerald-400" : "bg-slate-200"
+                        index < currentIndex ? "bg-accent-400" : "bg-neutral-200"
                       }`}
                     />
                   )}
@@ -131,18 +131,18 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
         {/* Phase Content */}
         <div className="app-surface p-8">
           <p className="eyebrow mb-3">Phase {currentIndex + 1} von {PHASES.length}</p>
-          <h1 className="heading-2 text-slate-900">{phase.label}</h1>
+          <h1 className="heading-2 text-neutral-900">{phase.label}</h1>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {phase.steps.map((step, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
               >
-                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
                   {i + 1}
                 </div>
-                <p className="font-semibold text-slate-900">{step}</p>
+                <p className="font-semibold text-neutral-900">{step}</p>
               </div>
             ))}
           </div>
@@ -154,7 +154,7 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
           )}
 
           {/* Navigation */}
-          <div className="mt-10 flex items-center justify-between border-t border-slate-100 pt-8">
+          <div className="mt-10 flex items-center justify-between border-t border-neutral-100 pt-8">
             <button
               type="button"
               onClick={() =>

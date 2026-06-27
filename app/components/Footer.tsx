@@ -21,12 +21,12 @@ export default function Footer({
 
   return (
     <footer
-      className={`${isDark ? "bg-slate-950" : "bg-slate-950"} text-white`}
+      className={`${isDark ? "bg-neutral-950" : "bg-neutral-950"} text-white`}
     >
       {/* Brand statement */}
       <div className="border-b border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-16">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-teal-400">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-400">
             Es ist Ihre Lösung. Nicht der Streit.
           </p>
           <h2 className="mt-4 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
@@ -34,7 +34,7 @@ export default function Footer({
           </h2>
           <Link
             href="/auth/register"
-            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-teal-500"
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent-600 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-accent-500"
           >
             Kostenlosen Account erstellen
             <span aria-hidden="true">→</span>
@@ -48,8 +48,8 @@ export default function Footer({
           {/* Brand */}
           <div>
             <h3 className="text-lg font-bold tracking-tight">{brandName}</h3>
-            <p className="mt-3 text-slate-400">{tagline}</p>
-            <div className="mt-4 space-y-2 text-sm text-slate-400">
+            <p className="mt-3 text-neutral-400">{tagline}</p>
+            <div className="mt-4 space-y-2 text-sm text-neutral-400">
               <p>{email}</p>
               <p>{phone}</p>
             </div>
@@ -57,10 +57,10 @@ export default function Footer({
 
           {/* Produkt */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">
+            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
               Produkt
             </h4>
-            <ul className="mt-4 space-y-2 text-slate-400">
+            <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/preise" className="transition hover:text-white">
                   Preise
@@ -81,10 +81,10 @@ export default function Footer({
 
           {/* Unternehmen */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">
+            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
               Unternehmen
             </h4>
-            <ul className="mt-4 space-y-2 text-slate-400">
+            <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/about" className="transition hover:text-white">
                   Über uns
@@ -105,10 +105,10 @@ export default function Footer({
 
           {/* Rechtlich */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">
+            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
               Rechtlich
             </h4>
-            <ul className="mt-4 space-y-2 text-slate-400">
+            <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/datenschutz" className="transition hover:text-white">
                   Datenschutz
@@ -135,17 +135,17 @@ export default function Footer({
 
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-neutral-500">
             &copy; {currentYear} {brandName}. Alle Rechte vorbehalten.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-slate-500 transition hover:text-white">
+            <a href="#" className="text-neutral-500 transition hover:text-white">
               <span className="sr-only">Twitter</span>
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
               </svg>
             </a>
-            <a href="#" className="text-slate-500 transition hover:text-white">
+            <a href="#" className="text-neutral-500 transition hover:text-white">
               <span className="sr-only">LinkedIn</span>
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                 <path

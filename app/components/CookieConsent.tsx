@@ -37,13 +37,13 @@ export default function CookieConsent() {
       aria-label="Cookie-Hinweis"
       className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 sm:px-6 sm:pb-6"
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-relaxed text-slate-600">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-2xl shadow-neutral-900/10 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm leading-relaxed text-neutral-600">
           Wir verwenden Cookies, um medipact.de funktionsfähig zu halten und
           die Nutzung zu verstehen. Mehr dazu in unserer{" "}
           <Link
             href="/cookies"
-            className="font-medium text-teal-700 hover:underline"
+            className="font-medium text-accent-700 hover:underline"
           >
             Cookie-Richtlinie
           </Link>
@@ -53,14 +53,14 @@ export default function CookieConsent() {
           <button
             type="button"
             onClick={() => setConsent("declined")}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
           >
             Ablehnen
           </button>
           <button
             type="button"
             onClick={() => setConsent("accepted")}
-            className="inline-flex items-center justify-center rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
+            className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500"
           >
             Akzeptieren
           </button>

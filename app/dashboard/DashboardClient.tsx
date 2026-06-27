@@ -27,16 +27,16 @@ interface PendingInvite {
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  active: { label: "Laufend", className: "bg-emerald-100 text-emerald-800" },
+  active: { label: "Laufend", className: "bg-accent-100 text-accent-800" },
   pending: { label: "Ausstehend", className: "bg-amber-100 text-amber-800" },
   draft: { label: "Entwurf", className: "bg-blue-100 text-blue-800" },
   completed: {
     label: "Abgeschlossen",
-    className: "bg-slate-100 text-slate-800",
+    className: "bg-neutral-100 text-neutral-800",
   },
 };
 
-const fallbackStatus = { label: "Unbekannt", className: "bg-slate-100 text-slate-500" };
+const fallbackStatus = { label: "Unbekannt", className: "bg-neutral-100 text-neutral-500" };
 
 const roleLabel: Record<string, string> = {
   other_party: "Gegenpartei",
@@ -160,7 +160,7 @@ export default function DashboardClient() {
         value: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
         text: "Ball liegt bei der anderen Seite",
         highlight: false,
-        highlightColor: "text-slate-900",
+        highlightColor: "text-neutral-900",
         borderColor: "",
       },
       {
@@ -168,7 +168,7 @@ export default function DashboardClient() {
         value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
         text: "noch nicht gestartet",
         highlight: false,
-        highlightColor: "text-slate-900",
+        highlightColor: "text-neutral-900",
         borderColor: "",
       },
       {
@@ -176,7 +176,7 @@ export default function DashboardClient() {
         value: data.filter((m) => m.status === "completed").length,
         text: "beendete Verfahren",
         highlight: false,
-        highlightColor: "text-slate-900",
+        highlightColor: "text-neutral-900",
         borderColor: "",
       },
     ],
@@ -187,7 +187,7 @@ export default function DashboardClient() {
     return (
       <main className="app-shell pt-[73px]">
         <section className="container py-12">
-          <p className="text-slate-600">Mediationen werden geladen...</p>
+          <p className="text-neutral-600">Mediationen werden geladen...</p>
         </section>
       </main>
     );
@@ -196,13 +196,13 @@ export default function DashboardClient() {
   return (
     <>
     <main className="app-shell pt-[73px]">
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-neutral-200 bg-white">
         <div className="container py-12 lg:py-16">
           <div className="mb-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
               <p className="eyebrow mb-4">Dashboard</p>
-              <h1 className="heading-1 text-slate-900">Meine Mediationen</h1>
-              <p className="mt-5 max-w-3xl text-lg text-slate-600">
+              <h1 className="heading-1 text-neutral-900">Meine Mediationen</h1>
+              <p className="mt-5 max-w-3xl text-lg text-neutral-600">
                 Übersicht Ihrer laufenden und abgeschlossenen Konflikte.
               </p>
             </div>
@@ -225,7 +225,7 @@ export default function DashboardClient() {
                 <p className={`mt-3 text-4xl font-black ${item.highlightColor}`}>
                   {item.value}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-slate-600">
+                <p className="mt-2 text-sm font-semibold text-neutral-600">
                   {item.text}
                 </p>
               </article>
@@ -239,14 +239,14 @@ export default function DashboardClient() {
         {invites.length > 0 && (
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-neutral-900">
                 Eingehende Mediationsanfragen
               </h2>
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
                 {invites.length}
               </span>
             </div>
-            <p className="mb-6 text-sm text-slate-600">
+            <p className="mb-6 text-sm text-neutral-600">
               Du wurdest zu folgenden Mediationsverfahren eingeladen. Nimm die
               Einladung an, um beizutreten.
             </p>
@@ -262,14 +262,14 @@ export default function DashboardClient() {
                       <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
                         Einladung
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-neutral-500">
                         {typeLabel[invite.mediation_type] ?? invite.mediation_type}
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-base font-bold text-neutral-900">
                       {invite.mediation_title}
                     </h3>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="mt-1 text-sm text-neutral-600">
                       Deine Rolle:{" "}
                       <span className="font-semibold">
                         {roleLabel[invite.role] ?? invite.role}
@@ -297,15 +297,15 @@ export default function DashboardClient() {
               </div>
             )}
 
-            <div className="mt-6 border-t border-slate-200" />
+            <div className="mt-6 border-t border-neutral-200" />
           </div>
         )}
 
         {/* ── Meine Mediationen ─────────────────────────────────────── */}
         <div className="space-y-6">
           {data.length === 0 ? (
-            <div className="app-surface border border-dashed border-slate-300 p-12 text-center">
-              <p className="text-lg text-slate-600">
+            <div className="app-surface border border-dashed border-neutral-300 p-12 text-center">
+              <p className="text-lg text-neutral-600">
                 Sie haben noch keine Mediationen gestartet.
               </p>
 
@@ -331,23 +331,23 @@ export default function DashboardClient() {
                     mediation.is_my_turn
                       ? "border-amber-300 hover:border-amber-400"
                       : waitingForOther
-                      ? "border-slate-200 hover:border-slate-300"
-                      : "border-slate-200 hover:border-emerald-200"
+                      ? "border-neutral-200 hover:border-neutral-300"
+                      : "border-neutral-200 hover:border-accent-200"
                   }`}
                 >
                   <div className="grid gap-8 md:grid-cols-[1fr_auto]">
                     <div>
                       <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                         <div>
-                          <h2 className="heading-2 text-slate-900">
+                          <h2 className="heading-2 text-neutral-900">
                             {mediation.title ||
                               mediation.conflict_type ||
                               "Neue Mediation"}
                           </h2>
 
-                          <p className="mt-3 text-slate-600">
+                          <p className="mt-3 text-neutral-600">
                             Phase:{" "}
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-neutral-900">
                               {mediation.phase || "Entwurf"}
                             </span>
                           </p>
@@ -366,7 +366,7 @@ export default function DashboardClient() {
                             </span>
                           )}
                           {waitingForOther && (
-                            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-neutral-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
                               <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -379,17 +379,17 @@ export default function DashboardClient() {
 
                       <div className="mt-6">
                         <div className="mb-2 flex items-center justify-between">
-                          <p className="text-sm font-semibold text-slate-600">
+                          <p className="text-sm font-semibold text-neutral-600">
                             Fortschritt
                           </p>
-                          <span className="text-sm font-bold text-slate-900">
+                          <span className="text-sm font-bold text-neutral-900">
                             {mediation.progress ?? 0}%
                           </span>
                         </div>
 
-                        <div className="h-3 overflow-hidden rounded-full bg-slate-200">
+                        <div className="h-3 overflow-hidden rounded-full bg-neutral-200">
                           <div
-                            className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                            className="h-full rounded-full bg-accent-600 transition-all duration-500"
                             style={{ width: `${mediation.progress ?? 0}%` }}
                           />
                         </div>
@@ -411,13 +411,13 @@ export default function DashboardClient() {
     </main>
 
     {videoModalMediationId !== null && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/70 p-4">
         <div className="app-surface w-full max-w-2xl p-6">
           <p className="eyebrow mb-2">Einladung angenommen</p>
-          <h2 className="heading-3 mb-3 text-slate-900">
+          <h2 className="heading-3 mb-3 text-neutral-900">
             Die andere Seite hat dir eine persönliche Video-Botschaft hinterlassen
           </h2>
-          <div className="mt-4 overflow-hidden rounded-2xl bg-slate-900">
+          <div className="mt-4 overflow-hidden rounded-2xl bg-neutral-900">
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video
               src={`/api/mediations/${videoModalMediationId}/invites/me/video`}

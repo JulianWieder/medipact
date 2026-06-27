@@ -118,8 +118,8 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
 
   const SYSTEM_ROLE_CONFIG: Record<string, { label: string; badge: string }> = {
     admin: { label: "Admin", badge: "bg-purple-50 text-purple-700 border-purple-200" },
-    mediator: { label: "Mediator", badge: "bg-teal-50 text-teal-700 border-teal-200" },
-    party: { label: "Partei", badge: "bg-slate-100 text-slate-600 border-slate-200" },
+    mediator: { label: "Mediator", badge: "bg-accent-50 text-accent-700 border-accent-200" },
+    party: { label: "Partei", badge: "bg-neutral-100 text-neutral-600 border-neutral-200" },
   };
 
   const PART_ROLE_LABEL: Record<string, string> = {
@@ -131,7 +131,7 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
   };
 
   if (loading)
-    return <p className="px-4 py-6 text-sm italic text-slate-400">Wird geladen…</p>;
+    return <p className="px-4 py-6 text-sm italic text-neutral-400">Wird geladen…</p>;
   if (entries.length === 0)
     return (
       <div className="p-4">
@@ -142,7 +142,7 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
   return (
     <div className="p-2 space-y-1">
       {isAdmin && (
-        <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+        <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-neutral-400">
           {entries.length} Nutzer im System
         </div>
       )}
@@ -167,8 +167,8 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
             className={cn(
               "w-full rounded-xl px-3 py-3 text-left transition border",
               selectedId === entry.id
-                ? "bg-teal-50 border-teal-200"
-                : "hover:bg-slate-50 border-transparent",
+                ? "bg-accent-50 border-accent-200"
+                : "hover:bg-neutral-50 border-transparent",
             )}
           >
             <div className="flex items-center justify-between gap-2 mb-1">
@@ -177,10 +177,10 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
                 <span
                   className={cn(
                     "h-2 w-2 rounded-full shrink-0",
-                    entry.is_verified ? "bg-teal-500" : "bg-amber-400",
+                    entry.is_verified ? "bg-accent-500" : "bg-amber-400",
                   )}
                 />
-                <span className="text-sm font-semibold text-slate-800">{entry.name}</span>
+                <span className="text-sm font-semibold text-neutral-800">{entry.name}</span>
               </div>
               <span
                 className={cn(
@@ -191,36 +191,36 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
                 {roleCfg.label}
               </span>
             </div>
-            <div className="text-xs text-slate-400 ml-4">{entry.email}</div>
+            <div className="text-xs text-neutral-400 ml-4">{entry.email}</div>
 
             {/* Fälle */}
             {entry.cases.length > 0 && (
               <div className="mt-2 ml-4 space-y-1">
                 {entry.cases.slice(0, 2).map((c) => (
                   <div key={c.mediationId} className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs text-slate-500 truncate max-w-[140px]">
+                    <span className="text-xs text-neutral-500 truncate max-w-[140px]">
                       {c.mediationTitle}
                     </span>
-                    <span className="text-xs text-slate-300">·</span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-neutral-300">·</span>
+                    <span className="text-xs text-neutral-400">
                       {PART_ROLE_LABEL[c.participantRole] ?? c.participantRole}
                     </span>
                     {c.mediatorName && (
                       <>
-                        <span className="text-xs text-slate-300">·</span>
-                        <span className="text-xs text-teal-600">⚖ {c.mediatorName}</span>
+                        <span className="text-xs text-neutral-300">·</span>
+                        <span className="text-xs text-accent-600">⚖ {c.mediatorName}</span>
                       </>
                     )}
                   </div>
                 ))}
                 {entry.cases.length > 2 && (
-                  <div className="text-xs text-slate-400">+{entry.cases.length - 2} weitere</div>
+                  <div className="text-xs text-neutral-400">+{entry.cases.length - 2} weitere</div>
                 )}
               </div>
             )}
 
             {entry.cases.length === 0 && (
-              <div className="mt-1 ml-4 text-xs text-slate-300 italic">Noch kein Fall</div>
+              <div className="mt-1 ml-4 text-xs text-neutral-300 italic">Noch kein Fall</div>
             )}
           </button>
         );

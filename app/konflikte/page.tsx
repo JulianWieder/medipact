@@ -58,21 +58,21 @@ export default function KonfliktePage() {
             sizes="100vw"
             style={{ objectFit: "cover" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
 
           <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
             <div className="container max-w-4xl">
-              <p className="eyebrow mb-4 text-teal-300">Konflikte</p>
+              <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
               <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
                 Konflikte haben viele Formen.{" "}
-                <span className="text-teal-300">
+                <span className="text-accent-300">
                   Mediation schafft Klarheit.
                 </span>
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
                 Ob Trennung, Erbschaft oder Nachbarschaft: Viele Konflikte
                 eskalieren nicht wegen des eigentlichen Themas, sondern weil
                 Kommunikation, Erwartungen und Emotionen durcheinandergeraten.
@@ -101,11 +101,11 @@ export default function KonfliktePage() {
           <div className="max-w-3xl">
             <p className="eyebrow mb-4">Orientierung</p>
 
-            <h2 className="heading-2 text-slate-900">
+            <h2 className="heading-2 text-neutral-900">
               Welche Konfliktart passt zu Ihrer Situation?
             </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-600">
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
               Wählen Sie den Bereich, der Ihrer Lage am nächsten kommt. Auf den
               Detailseiten finden Sie typische Dynamiken, Beispiele und mögliche
               nächste Schritte.
@@ -119,13 +119,13 @@ export default function KonfliktePage() {
                 href={item.href}
                 className="card group transition hover:-translate-y-1 hover:shadow-md"
               >
-                <h3 className="heading-3 group-hover:text-emerald-700">
+                <h3 className="heading-3 group-hover:text-accent-700">
                   {item.title}
                 </h3>
 
-                <p className="mt-4 leading-7 text-slate-600">{item.text}</p>
+                <p className="mt-4 leading-7 text-neutral-600">{item.text}</p>
 
-                <p className="mt-6 font-medium text-emerald-700">
+                <p className="mt-6 font-medium text-accent-700">
                   Konfliktart ansehen →
                 </p>
               </Link>
@@ -139,11 +139,11 @@ export default function KonfliktePage() {
           <div className="max-w-3xl">
             <p className="eyebrow mb-4">Schnell-Check</p>
 
-            <h2 className="heading-2 text-slate-900">
+            <h2 className="heading-2 text-neutral-900">
               Ist Mediation für Ihre Situation geeignet?
             </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-600">
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
               Mediation ist kein Ersatz für Schutz, Recht oder Therapie. Sie
               hilft vor allem dann, wenn ein sicherer Gesprächsrahmen möglich
               ist und beide Seiten an einer tragfähigen Lösung arbeiten können.
@@ -152,14 +152,14 @@ export default function KonfliktePage() {
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
             <div className="card-accent">
-              <h3 className="heading-3 text-emerald-900">
+              <h3 className="heading-3 text-accent-900">
                 Mediation kann geeignet sein, wenn:
               </h3>
 
-              <ul className="mt-6 space-y-4 text-slate-700">
+              <ul className="mt-6 space-y-4 text-neutral-700">
                 {suitablePoints.map((point) => (
                   <li key={point} className="flex gap-3">
-                    <span className="mt-1 text-emerald-700">✓</span>
+                    <span className="mt-1 text-accent-700">✓</span>
                     <span>{point}</span>
                   </li>
                 ))}
@@ -167,14 +167,14 @@ export default function KonfliktePage() {
             </div>
 
             <div className="card">
-              <h3 className="heading-3 text-slate-900">
+              <h3 className="heading-3 text-neutral-900">
                 Eher nicht geeignet, wenn:
               </h3>
 
-              <ul className="mt-6 space-y-4 text-slate-700">
+              <ul className="mt-6 space-y-4 text-neutral-700">
                 {unsuitablePoints.map((point) => (
                   <li key={point} className="flex gap-3">
-                    <span className="mt-1 text-slate-400">×</span>
+                    <span className="mt-1 text-neutral-400">×</span>
                     <span>{point}</span>
                   </li>
                 ))}
@@ -182,12 +182,12 @@ export default function KonfliktePage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl bg-slate-900 p-6 text-white">
+          <div className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white">
             <h3 className="text-lg font-bold">
               Entscheidend ist nicht nur: „Ist Mediation geeignet?“
             </h3>
 
-            <p className="mt-3 leading-7 text-slate-300">
+            <p className="mt-3 leading-7 text-neutral-300">
               Oft lautet die bessere Frage: Was fehlt noch, damit ein sicheres
               und faires Gespräch möglich wird?
             </p>
@@ -206,11 +206,11 @@ export default function KonfliktePage() {
           <div>
             <p className="eyebrow mb-4">Warum Mediation?</p>
 
-            <h2 className="heading-2 text-slate-900">
+            <h2 className="heading-2 text-neutral-900">
               Nicht jeder Streit braucht sofort Gericht, Anwalt oder Abbruch.
             </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-600">
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
               Mediation hilft, wenn Gespräche festgefahren sind, aber eine
               tragfähige Lösung noch möglich ist. Ziel ist nicht Harmonie um
               jeden Preis, sondern eine klare, realistische Vereinbarung.
@@ -220,7 +220,7 @@ export default function KonfliktePage() {
           <div className="card-accent">
             <h3 className="heading-3">Typische Anzeichen</h3>
 
-            <ul className="mt-5 space-y-3 text-slate-700">
+            <ul className="mt-5 space-y-3 text-neutral-700">
               <li>• Gespräche drehen sich im Kreis.</li>
               <li>• Sachfragen werden persönlich.</li>
               <li>• Entscheidungen werden immer wieder vertagt.</li>
@@ -236,7 +236,7 @@ export default function KonfliktePage() {
             Bereit, den Konflikt klarer einzuordnen?
           </h2>
 
-          <p className="mt-5 text-lg leading-8 text-slate-300">
+          <p className="mt-5 text-lg leading-8 text-neutral-300">
             Der erste Schritt ist keine fertige Lösung, sondern eine nüchterne
             Einschätzung der Situation.
           </p>

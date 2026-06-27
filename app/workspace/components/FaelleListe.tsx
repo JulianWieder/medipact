@@ -30,7 +30,7 @@ export function FaelleListe({ isAdmin = false, selectedId, onSelect }: FaelleLis
   }, [isAdmin]);
 
   if (loading)
-    return <p className="px-4 py-6 text-sm italic text-slate-400">Wird geladen…</p>;
+    return <p className="px-4 py-6 text-sm italic text-neutral-400">Wird geladen…</p>;
   if (error)
     return <p className="px-4 py-6 text-sm text-red-500">{error}</p>;
   if (faelle.length === 0)
@@ -54,15 +54,15 @@ export function FaelleListe({ isAdmin = false, selectedId, onSelect }: FaelleLis
             className={cn(
               "w-full rounded-xl px-3 py-3 text-left transition",
               selectedId === fall.id
-                ? "bg-teal-50 border border-teal-200"
-                : "hover:bg-slate-50 border border-transparent",
+                ? "bg-accent-50 border border-accent-200"
+                : "hover:bg-neutral-50 border border-transparent",
             )}
           >
             <div className="flex items-start justify-between gap-2 mb-1.5">
               <span
                 className={cn(
                   "text-sm font-semibold leading-snug",
-                  selectedId === fall.id ? "text-teal-800" : "text-slate-800",
+                  selectedId === fall.id ? "text-accent-800" : "text-neutral-800",
                 )}
               >
                 {fall.title}
@@ -76,11 +76,11 @@ export function FaelleListe({ isAdmin = false, selectedId, onSelect }: FaelleLis
 
             <div className="flex items-center gap-2 mb-2">
               <ProgressBar value={progress} />
-              <span className="text-xs text-slate-400 shrink-0">{progress}%</span>
+              <span className="text-xs text-neutral-400 shrink-0">{progress}%</span>
             </div>
 
-            <div className="text-xs text-slate-400">
-              Phase: <span className="font-medium text-slate-600">{phaseLabel}</span>
+            <div className="text-xs text-neutral-400">
+              Phase: <span className="font-medium text-neutral-600">{phaseLabel}</span>
             </div>
           </button>
         );

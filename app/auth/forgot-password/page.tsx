@@ -50,11 +50,11 @@ export default function ForgotPasswordPage() {
           <div className="mb-10 space-y-3 text-center">
             <div className="eyebrow justify-center">Passwort zurücksetzen</div>
 
-            <h1 className="text-4xl font-black tracking-tight text-slate-900">
+            <h1 className="text-4xl font-black tracking-tight text-neutral-900">
               Passwort vergessen?
             </h1>
 
-            <p className="text-lg leading-8 text-slate-600">
+            <p className="text-lg leading-8 text-neutral-600">
               Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.
             </p>
           </div>
@@ -62,12 +62,12 @@ export default function ForgotPasswordPage() {
           <Card className="p-8">
             {submitted ? (
               <div className="space-y-6 text-center">
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+                <div className="rounded-2xl border border-accent-200 bg-accent-50 p-6">
                   <div className="mb-3 text-4xl">✅</div>
-                  <p className="text-lg font-semibold text-emerald-900">
+                  <p className="text-lg font-semibold text-accent-900">
                     E-Mail versendet!
                   </p>
-                  <p className="mt-2 text-sm text-emerald-800">
+                  <p className="mt-2 text-sm text-accent-800">
                     Falls ein Account mit dieser E-Mail existiert, erhältst du einen Reset-Link.
                     Bitte überprüfe dein Postfach (und Spam-Ordner).
                   </p>
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
                 <div className="pt-4">
                   <Link
                     href="/auth/login"
-                    className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                    className="text-sm font-semibold text-accent-600 transition hover:text-accent-700"
                   >
                     Zurück zum Login
                   </Link>
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block text-sm font-semibold text-slate-900"
+                    className="mb-2 block text-sm font-semibold text-neutral-900"
                   >
                     E-Mail-Adresse
                   </label>
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
                       setError("");
                     }}
                     placeholder="deine@email.de"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/10"
                   />
                 </div>
 
@@ -124,11 +124,11 @@ export default function ForgotPasswordPage() {
           </Card>
 
           <div className="mt-8 text-center">
-            <p className="text-slate-600">
+            <p className="text-neutral-600">
               Du kennst dein Passwort noch?{" "}
               <Link
                 href="/auth/login"
-                className="font-semibold text-emerald-600 transition hover:text-emerald-700"
+                className="font-semibold text-accent-600 transition hover:text-accent-700"
               >
                 Hier anmelden
               </Link>

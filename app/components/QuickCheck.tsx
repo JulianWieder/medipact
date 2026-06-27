@@ -82,21 +82,21 @@ export default function QuickCheck() {
                   key={i}
                   className={`h-1.5 w-6 rounded-full transition-colors ${
                     i < step
-                      ? "bg-emerald-500"
+                      ? "bg-accent-500"
                       : i === step
-                        ? "bg-emerald-300"
-                        : "bg-slate-200"
+                        ? "bg-accent-300"
+                        : "bg-neutral-200"
                   }`}
                 />
               ))}
             </div>
 
-            <p className="text-lg leading-8 text-slate-700">
+            <p className="text-lg leading-8 text-neutral-700">
               {currentQuestion.text}
             </p>
 
             {currentQuestion.hint && (
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="mt-3 text-sm text-neutral-500">
                 {currentQuestion.hint}
               </p>
             )}
@@ -125,7 +125,7 @@ export default function QuickCheck() {
           <div className="mt-10">
             {result === "suitable" && (
               <>
-                <p className="text-lg text-emerald-700 font-medium">
+                <p className="text-lg text-accent-700 font-medium">
                   Mediation ist wahrscheinlich sinnvoll.
                 </p>
                 <Link href="/kontakt" className="btn btn-primary mt-6">
@@ -136,7 +136,7 @@ export default function QuickCheck() {
 
             {result === "unclear" && (
               <>
-                <p className="text-lg text-slate-700">
+                <p className="text-lg text-neutral-700">
                   Ihre Situation ist noch nicht klar einzuordnen.
                 </p>
                 <Link href="/kontakt" className="btn btn-primary mt-6">

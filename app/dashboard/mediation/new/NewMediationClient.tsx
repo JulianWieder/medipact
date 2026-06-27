@@ -62,7 +62,7 @@ export default function NewMediationClient() {
 
   return (
     <main className="app-shell pt-[73px]">
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-neutral-200 bg-white">
         <div className="container py-12 lg:py-16">
           <Link href="/dashboard" className="btn btn-ghost mb-6">
             ← Zurück zum Dashboard
@@ -70,9 +70,9 @@ export default function NewMediationClient() {
 
           <p className="eyebrow mb-3">Neue Mediation</p>
 
-          <h1 className="heading-1 text-slate-900">Worum geht es?</h1>
+          <h1 className="heading-1 text-neutral-900">Worum geht es?</h1>
 
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-600">
             Wählen Sie zunächst den passenden Bereich. Die konkreten Fragen
             folgen danach Schritt für Schritt.
           </p>
@@ -92,14 +92,14 @@ export default function NewMediationClient() {
               key={config.type}
               onClick={() => handleCreate(config.type)}
               disabled={!!isCreating}
-              className="app-surface border border-slate-200 p-6 text-left transition hover:border-emerald-500 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+              className="app-surface border border-neutral-200 p-6 text-left transition hover:border-accent-500 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               <h2 className="heading-3 mb-2">{config.title}</h2>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-neutral-600">
                 {config.description}
               </p>
               {isCreating === config.type && (
-                <p className="mt-3 text-sm font-semibold text-emerald-600">
+                <p className="mt-3 text-sm font-semibold text-accent-600">
                   Wird erstellt…
                 </p>
               )}

@@ -242,10 +242,10 @@ export default function AdminPhaseStepsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
+    <div className="min-h-screen bg-neutral-50 px-6 py-8">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-xl font-semibold text-slate-800">Phasen-Schritt-Konfiguration</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-neutral-800">Phasen-Schritt-Konfiguration</h1>
+        <p className="mt-1 text-sm text-neutral-500">
           Standard-Schritte pro Mediationstyp und Phase verwalten. Diese Konfiguration gilt global
           für alle neuen und bestehenden Fälle des jeweiligen Typs.
         </p>
@@ -254,7 +254,7 @@ export default function AdminPhaseStepsClient() {
           <select
             value={mediationType}
             onChange={(e) => setMediationType(e.target.value as MediationType)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700"
           >
             {MEDIATION_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
@@ -266,7 +266,7 @@ export default function AdminPhaseStepsClient() {
           <select
             value={phase}
             onChange={(e) => setPhase(e.target.value as Phase)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700"
           >
             {PHASES.map((p) => (
               <option key={p.value} value={p.value}>
@@ -282,15 +282,15 @@ export default function AdminPhaseStepsClient() {
           </div>
         )}
 
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white">
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white">
           {loading ? (
-            <div className="px-4 py-6 text-sm text-slate-400">Lade Schritte…</div>
+            <div className="px-4 py-6 text-sm text-neutral-400">Lade Schritte…</div>
           ) : steps.length === 0 ? (
-            <div className="px-4 py-6 text-sm text-slate-400">
+            <div className="px-4 py-6 text-sm text-neutral-400">
               Keine Schritte für diesen Mediationstyp/Phase konfiguriert.
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-neutral-100">
               {steps.map((step, index) => (
                 <li
                   key={step.id}
@@ -298,7 +298,7 @@ export default function AdminPhaseStepsClient() {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(index, e)}
                   onDragEnd={handleDragEnd}
-                  className={`px-4 py-3 ${dragIndex === index ? "bg-teal-50" : ""}`}
+                  className={`px-4 py-3 ${dragIndex === index ? "bg-accent-50" : ""}`}
                 >
                   {editingId === step.id ? (
                     <div className="flex flex-col gap-2">
@@ -306,7 +306,7 @@ export default function AdminPhaseStepsClient() {
                         value={editForm.title}
                         onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
                         placeholder="Titel"
-                        className="rounded-md border border-slate-200 px-2 py-1 text-sm"
+                        className="rounded-md border border-neutral-200 px-2 py-1 text-sm"
                       />
                       <textarea
                         value={editForm.description}
@@ -315,7 +315,7 @@ export default function AdminPhaseStepsClient() {
                         }
                         placeholder="Beschreibung"
                         rows={2}
-                        className="rounded-md border border-slate-200 px-2 py-1 text-sm"
+                        className="rounded-md border border-neutral-200 px-2 py-1 text-sm"
                       />
                       <input
                         value={editForm.placeholder}
@@ -323,7 +323,7 @@ export default function AdminPhaseStepsClient() {
                           setEditForm((f) => ({ ...f, placeholder: e.target.value }))
                         }
                         placeholder="Placeholder-Text"
-                        className="rounded-md border border-slate-200 px-2 py-1 text-sm"
+                        className="rounded-md border border-neutral-200 px-2 py-1 text-sm"
                       />
                       <select
                         value={editForm.reflection_mode ?? ""}
@@ -333,7 +333,7 @@ export default function AdminPhaseStepsClient() {
                             reflection_mode: (e.target.value || null) as ReflectionMode,
                           }))
                         }
-                        className="rounded-md border border-slate-200 px-2 py-1 text-sm"
+                        className="rounded-md border border-neutral-200 px-2 py-1 text-sm"
                       >
                         <option value="">Kein Reflection-Mode</option>
                         <option value="simple">simple</option>
@@ -343,13 +343,13 @@ export default function AdminPhaseStepsClient() {
                         <button
                           onClick={() => saveEdit(step.id)}
                           disabled={savingId === step.id}
-                          className="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+                          className="rounded-md bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700 disabled:opacity-50"
                         >
                           Speichern
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                          className="rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
                         >
                           Abbrechen
                         </button>
@@ -357,13 +357,13 @@ export default function AdminPhaseStepsClient() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <span className="cursor-grab text-slate-300 select-none" title="Verschieben">
+                      <span className="cursor-grab text-neutral-300 select-none" title="Verschieben">
                         ⠿
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-slate-800">{step.title}</span>
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-400">
+                          <span className="text-sm font-medium text-neutral-800">{step.title}</span>
+                          <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] font-mono text-neutral-400">
                             {step.step_key}
                           </span>
                           {!step.enabled && (
@@ -373,13 +373,13 @@ export default function AdminPhaseStepsClient() {
                           )}
                         </div>
                         {step.description && (
-                          <p className="mt-0.5 truncate text-xs text-slate-500">
+                          <p className="mt-0.5 truncate text-xs text-neutral-500">
                             {step.description}
                           </p>
                         )}
                       </div>
 
-                      <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <label className="flex items-center gap-1.5 text-xs text-neutral-500">
                         <input
                           type="checkbox"
                           checked={step.enabled}
@@ -391,7 +391,7 @@ export default function AdminPhaseStepsClient() {
 
                       <button
                         onClick={() => startEdit(step)}
-                        className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                        className="rounded-md border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
                       >
                         Bearbeiten
                       </button>
@@ -412,33 +412,33 @@ export default function AdminPhaseStepsClient() {
 
         <div className="mt-4">
           {showAddForm ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <h2 className="text-sm font-semibold text-slate-700">Neuen Schritt anlegen</h2>
+            <div className="rounded-xl border border-neutral-200 bg-white p-4">
+              <h2 className="text-sm font-semibold text-neutral-700">Neuen Schritt anlegen</h2>
               <div className="mt-3 flex flex-col gap-2">
                 <input
                   value={newStep.step_key}
                   onChange={(e) => setNewStep((f) => ({ ...f, step_key: e.target.value }))}
                   placeholder="Step-Key (z. B. einleitung_extra)"
-                  className="rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5 text-sm"
                 />
                 <input
                   value={newStep.title}
                   onChange={(e) => setNewStep((f) => ({ ...f, title: e.target.value }))}
                   placeholder="Titel"
-                  className="rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5 text-sm"
                 />
                 <textarea
                   value={newStep.description}
                   onChange={(e) => setNewStep((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Beschreibung"
                   rows={2}
-                  className="rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5 text-sm"
                 />
                 <input
                   value={newStep.placeholder}
                   onChange={(e) => setNewStep((f) => ({ ...f, placeholder: e.target.value }))}
                   placeholder="Placeholder-Text"
-                  className="rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5 text-sm"
                 />
                 <select
                   value={newStep.reflection_mode ?? ""}
@@ -448,7 +448,7 @@ export default function AdminPhaseStepsClient() {
                       reflection_mode: (e.target.value || null) as ReflectionMode,
                     }))
                   }
-                  className="rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5 text-sm"
                 >
                   <option value="">Kein Reflection-Mode</option>
                   <option value="simple">simple</option>
@@ -458,7 +458,7 @@ export default function AdminPhaseStepsClient() {
                   <button
                     onClick={createStep}
                     disabled={savingId === -1}
-                    className="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+                    className="rounded-md bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700 disabled:opacity-50"
                   >
                     Anlegen
                   </button>
@@ -467,7 +467,7 @@ export default function AdminPhaseStepsClient() {
                       setShowAddForm(false);
                       setNewStep(EMPTY_NEW_STEP);
                     }}
-                    className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                    className="rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
                   >
                     Abbrechen
                   </button>
@@ -477,7 +477,7 @@ export default function AdminPhaseStepsClient() {
           ) : (
             <button
               onClick={() => setShowAddForm(true)}
-              className="rounded-md border border-dashed border-slate-300 px-4 py-2 text-sm font-medium text-slate-500 hover:border-teal-400 hover:text-teal-600"
+              className="rounded-md border border-dashed border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-500 hover:border-accent-400 hover:text-accent-600"
             >
               + Schritt hinzufügen
             </button>

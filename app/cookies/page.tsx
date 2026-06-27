@@ -15,10 +15,10 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
         {title}
       </h2>
-      <div className="space-y-3 text-base leading-7 text-slate-600">{children}</div>
+      <div className="space-y-3 text-base leading-7 text-neutral-600">{children}</div>
     </section>
   );
 }
@@ -28,7 +28,7 @@ export default function CookiesPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Cookie-Richtlinie</h1>
-        <p className="mb-12 text-sm text-slate-500">Stand: Juni 2026</p>
+        <p className="mb-12 text-sm text-neutral-500">Stand: Juni 2026</p>
 
         <div className="space-y-10">
           <Section title="1. Was sind Cookies?">
@@ -74,7 +74,7 @@ export default function CookiesPage() {
               unserer{" "}
               <a
                 href="/datenschutz"
-                className="text-teal-700 hover:underline"
+                className="text-accent-700 hover:underline"
               >
                 Datenschutzerklärung
               </a>
@@ -83,12 +83,12 @@ export default function CookiesPage() {
           </Section>
         </div>
 
-        <div className="mt-16 rounded-2xl border border-slate-100 bg-slate-50 p-6 text-sm text-slate-500">
+        <div className="mt-16 rounded-2xl border border-neutral-100 bg-neutral-50 p-6 text-sm text-neutral-500">
           <p>
             Bei Fragen zu Cookies wenden Sie sich an{" "}
             <a
               href="mailto:hallo@medipact.de"
-              className="text-teal-700 hover:underline"
+              className="text-accent-700 hover:underline"
             >
               hallo@medipact.de
             </a>

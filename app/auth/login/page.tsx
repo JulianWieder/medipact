@@ -81,18 +81,18 @@ function LoginForm() {
           <div className="mb-10 space-y-3 text-center">
             <div className="eyebrow justify-center">Login</div>
 
-            <h1 className="text-4xl font-black tracking-tight text-slate-900">
+            <h1 className="text-4xl font-black tracking-tight text-neutral-900">
               Willkommen zurück
             </h1>
 
-            <p className="text-lg leading-8 text-slate-600">
+            <p className="text-lg leading-8 text-neutral-600">
               Melden Sie sich an, um Ihre Mediation fortzusetzen.
             </p>
           </div>
 
           <Card className="p-8">
             {justVerified && !error && (
-              <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 font-medium">
+              <div className="mb-6 rounded-2xl border border-accent-200 bg-accent-50 p-4 text-sm text-accent-800 font-medium">
                 ✅ E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
               </div>
             )}
@@ -106,7 +106,7 @@ function LoginForm() {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-slate-900"
+                  className="mb-2 block text-sm font-semibold text-neutral-900"
                 >
                   E-Mail
                 </label>
@@ -120,14 +120,14 @@ function LoginForm() {
                     setError("");
                   }}
                   placeholder="julianvwieder@gmail.com"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                  className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/10"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-slate-900"
+                  className="mb-2 block text-sm font-semibold text-neutral-900"
                 >
                   Passwort
                 </label>
@@ -142,13 +142,13 @@ function LoginForm() {
                       setError("");
                     }}
                     placeholder="dein-passwort"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-24 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 pr-24 text-neutral-900 placeholder-neutral-400 transition focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/10"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 transition hover:text-slate-700"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-500 transition hover:text-neutral-700"
                   >
                     {showPassword ? "Verbergen" : "Zeigen"}
                   </button>
@@ -167,7 +167,7 @@ function LoginForm() {
               <div className="text-center">
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                  className="text-sm font-semibold text-accent-600 transition hover:text-accent-700"
                 >
                   Passwort vergessen?
                 </Link>
@@ -176,11 +176,11 @@ function LoginForm() {
           </Card>
 
           <div className="mt-8 text-center">
-            <p className="text-slate-600">
+            <p className="text-neutral-600">
               Noch kein Konto?{" "}
               <Link
                 href="/auth/register"
-                className="font-semibold text-emerald-600 transition hover:text-emerald-700"
+                className="font-semibold text-accent-600 transition hover:text-accent-700"
               >
                 Hier registrieren
               </Link>
@@ -198,7 +198,7 @@ export default function LoginPage() {
       <main className="app-shell pt-[73px]">
         <section className="section section-muted">
           <div className="container max-w-md">
-            <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-r-transparent" />
+            <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-accent-600 border-r-transparent" />
           </div>
         </section>
       </main>

@@ -14,9 +14,35 @@
   --color-bg-lift: #ffffff;
   --color-bg-deep: #1e293b;
 
+  /* Accent scale — zentralisiert aus dem bisherigen teal/accent-Mix.
+     Bewusst auf einen einzigen Grünton (Teal) vereinheitlicht, damit
+     die Akzentfarbe app-weit konsistent ist statt zwischen teal/emerald
+     zu wechseln. Werte entsprechen der bisherigen Teal-Palette. */
+  --color-accent-50: #f0fdfa;
+  --color-accent-100: #ccfbf1;
+  --color-accent-200: #99f6e4;
   --color-accent-300: #5eead4;
-  --color-accent-500: #0d9488;
-  --color-accent-600: #0f766e;
+  --color-accent-400: #2dd4bf;
+  --color-accent-500: #14b8a6;
+  --color-accent-600: #0d9488;
+  --color-accent-700: #0f766e;
+  --color-accent-800: #115e59;
+  --color-accent-900: #134e4a;
+  --color-accent-950: #042f2e;
+
+  /* Neutral scale — zentralisiert aus den bisherigen neutral-Werten
+     (identische Hex-Werte, nur jetzt als Token statt Tailwind-Default). */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
 
   --font-display:
     "Playfair Display", ui-serif, Georgia, "Times New Roman", serif;
@@ -136,7 +162,7 @@
     border-color: rgba(30, 41, 59, 0.06);
   }
 
-  /* Strong — slate-800 for drama */
+  /* Strong — neutral-800 for drama */
   .section-strong {
     background-color: #1e293b;
     color: #f1f5f9;
@@ -296,7 +322,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: #0d9488;
+  color: var(--color-accent-600);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -306,7 +332,7 @@
   display: inline-block;
   width: 1.5rem;
   height: 1px;
-  background-color: #0d9488;
+  background-color: var(--color-accent-600);
   opacity: 0.6;
 }
 

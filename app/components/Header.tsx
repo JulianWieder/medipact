@@ -33,10 +33,10 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Promo bar */}
-      <div className="w-full bg-slate-900 text-white">
+      <div className="w-full bg-neutral-900 text-white">
         <Link
           href="/auth/register"
-          className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-semibold tracking-wide text-slate-100 transition hover:text-teal-300 sm:px-6 sm:text-sm"
+          className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-semibold tracking-wide text-neutral-100 transition hover:text-accent-300 sm:px-6 sm:text-sm"
         >
           <span className="sm:hidden">Streitfall in 5 Minuten starten</span>
           <span className="hidden sm:inline">
@@ -46,7 +46,7 @@ export default function Header() {
         </Link>
       </div>
 
-      <div className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur">
+      <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
@@ -58,7 +58,7 @@ export default function Header() {
             className="rounded-md object-cover"
             priority
           />
-          <span className="text-lg font-semibold tracking-tight text-slate-900">
+          <span className="text-lg font-semibold tracking-tight text-neutral-900">
             Medipact
           </span>
         </Link>
@@ -79,7 +79,7 @@ export default function Header() {
         {/* CTA */}
         <Link
           href="/auth/login"
-          className="hidden rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 md:inline-flex"
+          className="hidden rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700 md:inline-flex"
         >
           Mediation starten
         </Link>
@@ -101,25 +101,25 @@ export default function Header() {
       {open && (
         <nav
           id="mobile-menu"
-          className="border-t border-slate-200/80 bg-white px-6 py-4 md:hidden"
+          className="border-t border-neutral-200/80 bg-white px-6 py-4 md:hidden"
         >
           <ul className="flex flex-col gap-1">
             {navItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-slate-50"
+                  className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
                 </Link>
                 {item.children && (
-                  <ul className="ml-3 flex flex-col gap-1 border-l border-slate-200 pl-3">
+                  <ul className="ml-3 flex flex-col gap-1 border-l border-neutral-200 pl-3">
                     {item.children.map((child) => (
                       <li key={child.href}>
                         <Link
                           href={child.href}
-                          className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-slate-50 hover:text-neutral-900"
+                          className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                           onClick={() => setOpen(false)}
                         >
                           {child.label}
@@ -134,7 +134,7 @@ export default function Header() {
 
           <Link
             href="/auth/login"
-            className="mt-4 inline-flex w-full justify-center rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+            className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
             onClick={() => setOpen(false)}
           >
             Mediation starten

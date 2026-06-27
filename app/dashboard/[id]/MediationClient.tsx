@@ -288,8 +288,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="eyebrow mb-3">Mediation vorbereiten</p>
-              <h1 className="heading-2 text-slate-900">Beteiligte</h1>
-              <p className="mt-4 max-w-2xl text-slate-600">
+              <h1 className="heading-2 text-neutral-900">Beteiligte</h1>
+              <p className="mt-4 max-w-2xl text-neutral-600">
                 Damit die Mediation starten kann, müssen alle Beteiligten dem
                 Verfahren beitreten.
               </p>
@@ -301,13 +301,13 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                   className="card-muted flex items-center justify-between"
                 >
                   <div>
-                    <p className="font-medium text-slate-900">{participant.name}</p>
-                    <p className="text-sm text-slate-500">{participant.role}</p>
+                    <p className="font-medium text-neutral-900">{participant.name}</p>
+                    <p className="text-sm text-neutral-500">{participant.role}</p>
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
                       participant.invitationStatus === "accepted"
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-accent-100 text-accent-700"
                         : "bg-amber-100 text-amber-700"
                     }`}
                   >
@@ -319,7 +319,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               ))}
             </div>
             <div className="flex flex-col items-end gap-3">
-              <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+              <div className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-600">
                 ID: {mediationId}
               </div>
               {(userRole === "mediator" || userRole === "admin") && (
@@ -338,17 +338,17 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             {participants.map((person) => (
               <div
                 key={person.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-slate-900">{person.name}</p>
-                    <p className="mt-1 text-sm text-slate-500">{roleLabel[person.role]}</p>
+                    <p className="font-semibold text-neutral-900">{person.name}</p>
+                    <p className="mt-1 text-sm text-neutral-500">{roleLabel[person.role]}</p>
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       person.invitationStatus === "accepted"
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-accent-100 text-accent-700"
                         : "bg-amber-100 text-amber-700"
                     }`}
                   >
@@ -359,36 +359,36 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             ))}
 
             {!hasOtherParty && (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
-                <p className="font-semibold text-slate-900">Andere Seite</p>
-                <p className="mt-1 text-sm text-slate-500">Noch nicht verbunden</p>
+              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-5">
+                <p className="font-semibold text-neutral-900">Andere Seite</p>
+                <p className="mt-1 text-sm text-neutral-500">Noch nicht verbunden</p>
               </div>
             )}
           </div>
 
           {/* Bereit zum Starten: erst bezahlen, dann starten */}
           {hasOtherParty && !isPaid && (
-            <div className="mt-10 rounded-3xl border-2 border-emerald-400 bg-white p-8 shadow-lg shadow-emerald-100/60">
+            <div className="mt-10 rounded-3xl border-2 border-accent-400 bg-white p-8 shadow-lg shadow-accent-100/60">
               <div className="text-center">
-                <p className="text-sm font-semibold text-emerald-800 mb-1">Alle Beteiligten sind verbunden</p>
-                <h2 className="text-xl font-bold text-slate-900">Mediation freischalten</h2>
-                <p className="mt-2 max-w-xl mx-auto text-sm text-slate-600">
+                <p className="text-sm font-semibold text-accent-800 mb-1">Alle Beteiligten sind verbunden</p>
+                <h2 className="text-xl font-bold text-neutral-900">Mediation freischalten</h2>
+                <p className="mt-2 max-w-xl mx-auto text-sm text-neutral-600">
                   Bevor Phase 1 startet, ist eine einmalige Zahlung erforderlich.
                 </p>
 
-                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mt-6 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-accent-600 mt-6 mb-2">
                   Dein Anteil
                 </p>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold text-slate-900 tracking-tight">
+                  <span className="text-5xl font-extrabold text-neutral-900 tracking-tight">
                     {price ? price.price_per_participant_eur.toFixed(0) : "499"}
                   </span>
-                  <span className="text-2xl font-bold text-slate-900">€</span>
+                  <span className="text-2xl font-bold text-neutral-900">€</span>
                 </div>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-neutral-400 text-sm mt-1">
                   einmalig pro Teilnehmer · inkl. MwSt.
                 </p>
-                <p className="mt-3 max-w-sm mx-auto text-xs text-slate-500">
+                <p className="mt-3 max-w-sm mx-auto text-xs text-neutral-500">
                   Der Betrag wird zunächst nur reserviert (geblockt) und erst nach
                   erfolgreicher Freischaltung tatsächlich abgebucht.
                 </p>
@@ -396,14 +396,14 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 <div className="mt-6 w-full max-w-sm mx-auto">
                   <div ref={paypalContainerRef} />
                   {paying && (
-                    <p className="mt-2 text-sm font-semibold text-slate-500">Zahlung wird verarbeitet…</p>
+                    <p className="mt-2 text-sm font-semibold text-neutral-500">Zahlung wird verarbeitet…</p>
                   )}
                 </div>
 
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
                   {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(
                     (badge) => (
-                      <span key={badge} className="text-xs text-slate-400">
+                      <span key={badge} className="text-xs text-neutral-400">
                         {badge}
                       </span>
                     )
@@ -419,12 +419,12 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           )}
 
           {hasOtherParty && isPaid && (
-            <div className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+            <div className="mt-10 rounded-3xl border border-accent-200 bg-accent-50 p-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">Zahlung erhalten</p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900">Mediation starten</h2>
-                  <p className="mt-2 max-w-xl text-sm text-slate-600">
+                  <p className="text-sm font-semibold text-accent-800">Zahlung erhalten</p>
+                  <h2 className="mt-2 text-xl font-bold text-neutral-900">Mediation starten</h2>
+                  <p className="mt-2 max-w-xl text-sm text-neutral-600">
                     Alle Parteien haben dem Verfahren beigetreten. Du kannst die Mediation jetzt starten.
                   </p>
                 </div>
@@ -447,19 +447,19 @@ export default function MediationClient({ mediationId, userRole, currentUserName
 
           {/* Einladung erstellen */}
           {!hasOtherParty && (
-            <div className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+            <div className="mt-10 rounded-3xl border border-accent-200 bg-accent-50 p-6">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">Nächster Schritt</p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900">Andere Seite einladen</h2>
-                  <p className="mt-2 max-w-xl text-sm text-slate-600">
+                  <p className="text-sm font-semibold text-accent-800">Nächster Schritt</p>
+                  <h2 className="mt-2 text-xl font-bold text-neutral-900">Andere Seite einladen</h2>
+                  <p className="mt-2 max-w-xl text-sm text-neutral-600">
                     Erstelle einen sicheren Einladungslink. Die andere Seite kann damit dem Verfahren beitreten.
                   </p>
                 </div>
 
                 {!inviteUrl && (
                   <div className="w-full max-w-md">
-                    <label htmlFor="invite-email" className="text-sm font-semibold text-slate-900">
+                    <label htmlFor="invite-email" className="text-sm font-semibold text-neutral-900">
                       E-Mail-Adresse
                     </label>
                     <input
@@ -468,7 +468,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                      className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                     />
 
                     <div className="mt-4">
@@ -482,7 +482,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-3">
-                      <label htmlFor="invite-message" className="block text-sm font-semibold text-slate-900">
+                      <label htmlFor="invite-message" className="block text-sm font-semibold text-neutral-900">
                         Persönliche Nachricht
                       </label>
                       <button
@@ -499,9 +499,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       value={personalMessage}
                       onChange={(e) => setPersonalMessage(e.target.value)}
                       placeholder="Wird automatisch aus deiner Video-Botschaft übertragen, sobald die Aufnahme fertig ist …"
-                      className="mt-2 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                      className="mt-2 min-h-24 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                     />
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-neutral-400">
                       Automatisch aus der Video-Botschaft übertragen (per KI transkribiert). Du kannst den
                       Text frei bearbeiten; er wird vor dem Versand zusätzlich von der KI freundlich umformuliert.
                     </p>
@@ -518,7 +518,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       {loading ? "Wird erstellt..." : "Einladung erstellen"}
                     </button>
                     {!videoToken && (
-                      <p className="mt-2 text-center text-xs text-slate-400">
+                      <p className="mt-2 text-center text-xs text-neutral-400">
                         Eine Video-Botschaft ist erforderlich, bevor die Einladung erstellt werden kann.
                       </p>
                     )}
@@ -536,13 +536,13 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Einladung ist bereit</p>
-                      <p className="mt-1 text-sm text-slate-500">Kopiere den Link und sende ihn an die andere Seite.</p>
+                      <p className="text-sm font-semibold text-neutral-900">Einladung ist bereit</p>
+                      <p className="mt-1 text-sm text-neutral-500">Kopiere den Link und sende ihn an die andere Seite.</p>
                     </div>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Aktiv</span>
+                    <span className="rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold text-accent-700">Aktiv</span>
                   </div>
-                  <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="break-all font-mono text-sm text-slate-700">{inviteUrl}</p>
+                  <div className="mt-5 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+                    <p className="break-all font-mono text-sm text-neutral-700">{inviteUrl}</p>
                   </div>
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                     <button type="button" onClick={copyInviteLink} className="btn btn-primary">

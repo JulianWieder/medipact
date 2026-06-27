@@ -97,11 +97,11 @@ function ResetPasswordForm() {
           <div className="mb-10 space-y-3 text-center">
             <div className="eyebrow justify-center">Passwort zurücksetzen</div>
 
-            <h1 className="text-4xl font-black tracking-tight text-slate-900">
+            <h1 className="text-4xl font-black tracking-tight text-neutral-900">
               Neues Passwort setzen
             </h1>
 
-            <p className="text-lg leading-8 text-slate-600">
+            <p className="text-lg leading-8 text-neutral-600">
               Wähle ein sicheres Passwort für dein Konto.
             </p>
           </div>
@@ -109,12 +109,12 @@ function ResetPasswordForm() {
           <Card className="p-8">
             {success ? (
               <div className="space-y-6 text-center">
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+                <div className="rounded-2xl border border-accent-200 bg-accent-50 p-6">
                   <div className="mb-3 text-4xl">✅</div>
-                  <p className="text-lg font-semibold text-emerald-900">
+                  <p className="text-lg font-semibold text-accent-900">
                     Passwort aktualisiert!
                   </p>
-                  <p className="mt-2 text-sm text-emerald-800">
+                  <p className="mt-2 text-sm text-accent-800">
                     Dein Passwort wurde erfolgreich zurückgesetzt.
                     Du kannst dich jetzt mit deinem neuen Passwort anmelden.
                   </p>
@@ -122,7 +122,7 @@ function ResetPasswordForm() {
 
                 <Link
                   href="/auth/login"
-                  className="inline-block font-semibold text-emerald-600 transition hover:text-emerald-700"
+                  className="inline-block font-semibold text-accent-600 transition hover:text-accent-700"
                 >
                   Zur Anmeldung
                 </Link>
@@ -138,7 +138,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block text-sm font-semibold text-slate-900"
+                    className="mb-2 block text-sm font-semibold text-neutral-900"
                   >
                     Neues Passwort
                   </label>
@@ -153,13 +153,13 @@ function ResetPasswordForm() {
                         setError("");
                       }}
                       placeholder="Mindestens 8 Zeichen"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-24 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 pr-24 text-neutral-900 placeholder-neutral-400 transition focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/10"
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 transition hover:text-slate-700"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-500 transition hover:text-neutral-700"
                     >
                       {showPassword ? "Verbergen" : "Zeigen"}
                     </button>
@@ -169,7 +169,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="mb-2 block text-sm font-semibold text-slate-900"
+                    className="mb-2 block text-sm font-semibold text-neutral-900"
                   >
                     Passwort wiederholen
                   </label>
@@ -184,13 +184,13 @@ function ResetPasswordForm() {
                         setError("");
                       }}
                       placeholder="Passwort wiederholen"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-24 text-slate-900 placeholder-slate-400 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 pr-24 text-neutral-900 placeholder-neutral-400 transition focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/10"
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 transition hover:text-slate-700"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-500 transition hover:text-neutral-700"
                     >
                       {showPassword ? "Verbergen" : "Zeigen"}
                     </button>
@@ -220,7 +220,7 @@ export default function ResetPasswordPage() {
       <main className="app-shell pt-[73px]">
         <section className="section section-muted">
           <div className="container max-w-md">
-            <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-r-transparent" />
+            <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-accent-600 border-r-transparent" />
           </div>
         </section>
       </main>

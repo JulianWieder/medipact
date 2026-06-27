@@ -51,17 +51,17 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
       {/* Header */}
       <WCard
         className="overflow-hidden"
-        style={{ background: "#1e293b", color: "white", border: "none" }}
+        style={{ background: "var(--color-neutral-800)", color: "white", border: "none" }}
       >
         <div className="p-6">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-400 mb-2">
             Partei
           </p>
           <h2 className="text-xl font-semibold leading-snug">{partei.name}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <RoleBadge role={partei.role} />
             <InviteStatusDot status={partei.invitationStatus} />
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-neutral-300">
               {partei.invitationStatus === "accepted" ? "Einladung angenommen" : "Einladung ausstehend"}
             </span>
           </div>
@@ -73,16 +73,16 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
         <SectionHeader label="Kontakt" title="Kontaktinformationen" />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400 mb-1">
               E-Mail
             </div>
-            <div className="text-sm text-slate-700">{partei.email}</div>
+            <div className="text-sm text-neutral-700">{partei.email}</div>
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400 mb-1">
               Teilnehmer-ID
             </div>
-            <div className="text-sm font-mono text-slate-500">{partei.id}</div>
+            <div className="text-sm font-mono text-neutral-500">{partei.id}</div>
           </div>
         </div>
       </WCard>
@@ -91,7 +91,7 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
       <WCard className="p-5">
         <SectionHeader label="Fälle" title="Beteiligte Mediationen" />
         {loading ? (
-          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
         ) : mediations.length === 0 ? (
           <EmptyState icon="⚖" text="Keine Mediationsfälle gefunden." />
         ) : (
@@ -104,10 +104,10 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
               return (
                 <div
                   key={fall.id}
-                  className="rounded-xl border border-slate-200 bg-slate-50/60 p-4"
+                  className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="font-semibold text-sm text-slate-800">{fall.title}</div>
+                    <div className="font-semibold text-sm text-neutral-800">{fall.title}</div>
                     <StatusBadge status={fall.status} />
                   </div>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -117,11 +117,11 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <ProgressBar value={progress} />
-                    <span className="text-xs text-slate-400 shrink-0">{progress}%</span>
+                    <span className="text-xs text-neutral-400 shrink-0">{progress}%</span>
                   </div>
                   {fall.phase && (
-                    <div className="mt-1.5 text-xs text-slate-400">
-                      Phase: <span className="font-medium text-slate-600">
+                    <div className="mt-1.5 text-xs text-neutral-400">
+                      Phase: <span className="font-medium text-neutral-600">
                         {PHASES.find((p) => p.id === fall.phase)?.label ?? fall.phase}
                       </span>
                     </div>

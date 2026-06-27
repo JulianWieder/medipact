@@ -106,8 +106,8 @@ export default function LeitfadenClient({ mediationId }: Props) {
       <section className="container py-12">
         <div className="app-surface p-8">
           <p className="eyebrow mb-3">Phase 1 von 6 · Mediator-Leitfaden</p>
-          <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
-          <p className="mt-3 max-w-2xl text-slate-600 text-sm">
+          <h1 className="heading-2 text-neutral-900">Auftrags- und Einleitungsphase</h1>
+          <p className="mt-3 max-w-2xl text-neutral-600 text-sm">
             Lies den Leitfaden bevor du die Mediation startest. Die Parteien sehen diese Seite nicht.
           </p>
 
@@ -117,25 +117,25 @@ export default function LeitfadenClient({ mediationId }: Props) {
                 key={i}
                 className={`rounded-xl border p-4 ${
                   section.highlight
-                    ? "border-emerald-300 bg-emerald-50"
-                    : "border-slate-200 bg-white"
+                    ? "border-accent-300 bg-accent-50"
+                    : "border-neutral-200 bg-white"
                 }`}
               >
-                <h3 className="mb-2 text-sm font-bold text-slate-800">{section.title}</h3>
+                <h3 className="mb-2 text-sm font-bold text-neutral-800">{section.title}</h3>
                 {section.type === "list" ? (
                   <ul className="space-y-1">
                     {(section.content as string[]).map((item, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                      <li key={j} className="flex items-start gap-2 text-sm text-neutral-600">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
                         {item}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-slate-600">{section.content as string}</p>
+                  <p className="text-sm text-neutral-600">{section.content as string}</p>
                 )}
                 {"example" in section && section.example && (
-                  <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-500">
+                  <p className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs italic text-neutral-500">
                     {section.example}
                   </p>
                 )}
@@ -152,7 +152,7 @@ export default function LeitfadenClient({ mediationId }: Props) {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
+          <div className="mt-8 flex items-center justify-between border-t border-neutral-100 pt-6">
             <button
               type="button"
               onClick={() => router.back()}

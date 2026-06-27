@@ -24,21 +24,21 @@ export default function KontaktPage() {
             sizes="100vw"
             style={{ objectFit: "cover" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/70 to-neutral-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
 
           <div className="relative flex min-h-[460px] items-center justify-center sm:min-h-[520px]">
             <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
-              <p className="eyebrow mb-4 justify-center text-teal-300">Kontakt</p>
+              <p className="eyebrow mb-4 justify-center text-accent-300">Kontakt</p>
 
               <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
                 Lassen Sie Ihre Situation{" "}
-                <span className="bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent">
                   einordnen.
                 </span>
               </h1>
 
-              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
                 Bevor es um eine Lösung geht, hilft eine ehrliche Einschätzung:
                 Passt Mediation zu Ihrer Situation – oder braucht es zuerst etwas
                 anderes? Der folgende Check dauert keine zwei Minuten.
@@ -57,37 +57,37 @@ export default function KontaktPage() {
       <section className="section section-base">
         <div className="container max-w-2xl text-center">
           <p className="eyebrow mb-4 justify-center">Direkt schreiben</p>
-          <h2 className="heading-2 text-slate-900">
+          <h2 className="heading-2 text-neutral-900">
             Lieber gleich persönlich schildern?
           </h2>
-          <p className="mt-5 text-lg leading-8 text-slate-600">
+          <p className="mt-5 text-lg leading-8 text-neutral-600">
             Schreiben Sie uns kurz, worum es geht. Wir melden uns mit einer
             ehrlichen Einschätzung – auch wenn die Antwort lautet, dass
             Mediation (noch) nicht der richtige Weg ist.
           </p>
 
-          <div className="mt-8 flex flex-col items-center gap-2 text-slate-700">
+          <div className="mt-8 flex flex-col items-center gap-2 text-neutral-700">
             <a
               href="mailto:hallo@medipact.de"
-              className="text-lg font-medium text-teal-700 hover:text-teal-800"
+              className="text-lg font-medium text-accent-700 hover:text-accent-800"
             >
               hallo@medipact.de
             </a>
             <a
               href="tel:+4915209942351"
-              className="text-slate-500 hover:text-slate-700"
+              className="text-neutral-500 hover:text-neutral-700"
             >
               +49 1520 9942351
             </a>
           </div>
 
-          <p className="mt-10 text-sm text-slate-500">
+          <p className="mt-10 text-sm text-neutral-500">
             Unsicher, welche Konfliktart passt?{" "}
-            <Link href="/konflikte" className="text-teal-700 hover:underline">
+            <Link href="/konflikte" className="text-accent-700 hover:underline">
               Konfliktarten ansehen
             </Link>{" "}
             oder{" "}
-            <Link href="/cases" className="text-teal-700 hover:underline">
+            <Link href="/cases" className="text-accent-700 hover:underline">
               Fallbeispiele durchsehen
             </Link>
             .

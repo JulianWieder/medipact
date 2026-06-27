@@ -91,8 +91,8 @@ export default function MiniMatrix() {
         <div className="flex flex-col gap-8 md:hidden">
           {rows.map((row) => (
             <div key={row.rowTitle}>
-              <p className="font-semibold text-slate-900">{row.rowTitle}</p>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
+              <p className="font-semibold text-neutral-900">{row.rowTitle}</p>
+              <p className="mt-1 text-sm leading-6 text-neutral-500">
                 {row.rowText}
               </p>
 
@@ -101,15 +101,15 @@ export default function MiniMatrix() {
                   <Link
                     key={cell.href}
                     href={cell.href}
-                    className="group rounded-xl border border-slate-200 bg-white p-4 transition hover:bg-emerald-50"
+                    className="group rounded-xl border border-neutral-200 bg-white p-4 transition hover:bg-accent-50"
                   >
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
                       {columns[i]}
                     </p>
-                    <p className="mt-1 font-medium text-slate-900 group-hover:text-emerald-700">
+                    <p className="mt-1 font-medium text-neutral-900 group-hover:text-accent-700">
                       {cell.title}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-neutral-600">
                       {cell.text}
                     </p>
                   </Link>
@@ -120,7 +120,7 @@ export default function MiniMatrix() {
         </div>
 
         {/* DESKTOP — full matrix table */}
-        <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-slate-200 shadow-sm md:block">
+        <div className="hidden overflow-x-auto rounded-2xl border border-neutral-200 bg-neutral-200 shadow-sm md:block">
           <div className="grid min-w-[900px] grid-cols-4 gap-px">
             <div className="bg-white p-5" />
 
@@ -160,8 +160,8 @@ function MatrixHeader({ title }: { title: string }) {
 function MatrixRowHeader({ title, text }: { title: string; text: string }) {
   return (
     <div className="bg-white p-5">
-      <p className="font-semibold text-slate-900">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
+      <p className="font-semibold text-neutral-900">{title}</p>
+      <p className="mt-1 text-sm leading-6 text-neutral-500">{text}</p>
     </div>
   );
 }
@@ -178,12 +178,12 @@ function MatrixLink({
   return (
     <Link
       href={href}
-      className="group bg-white p-5 transition hover:bg-emerald-50"
+      className="group bg-white p-5 transition hover:bg-accent-50"
     >
-      <p className="font-medium text-slate-900 group-hover:text-emerald-700">
+      <p className="font-medium text-neutral-900 group-hover:text-accent-700">
         {title}
       </p>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+      <p className="mt-2 text-sm leading-6 text-neutral-600">{text}</p>
     </Link>
   );
 }

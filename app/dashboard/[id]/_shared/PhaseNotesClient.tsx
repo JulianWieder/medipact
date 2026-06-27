@@ -93,8 +93,8 @@ function parseItems(raw: string): string[] {
 // ── Lade-Spinner ──────────────────────────────────────────────────────────────
 function Spinner() {
   return (
-    <div className="flex items-center gap-2 text-sm text-slate-500">
-      <svg className="h-4 w-4 animate-spin text-emerald-500" fill="none" viewBox="0 0 24 24">
+    <div className="flex items-center gap-2 text-sm text-neutral-500">
+      <svg className="h-4 w-4 animate-spin text-accent-500" fill="none" viewBox="0 0 24 24">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
       </svg>
@@ -131,7 +131,7 @@ function WaitingView({ status }: { status: StepStatus }) {
           <p className="mb-1 text-xs font-medium text-amber-700">Bereits abgeschlossen:</p>
           {status.participants.filter((p) => p.submitted).map((p) => (
             <div key={p.participant_id} className="flex items-center gap-2 text-sm text-amber-800">
-              <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <svg className="h-4 w-4 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               {p.name}
@@ -268,7 +268,7 @@ function InteractiveReflectionView({
   const myItems = allInputs[currentParticipantId] ?? [];
 
   const actionBadge: Record<ReactionAction, string> = {
-    accept: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    accept: "bg-accent-100 text-accent-700 border-accent-200",
     reject: "bg-red-100 text-red-700 border-red-200",
     trade: "bg-violet-100 text-violet-700 border-violet-200",
   };
@@ -286,11 +286,11 @@ function InteractiveReflectionView({
   return (
     <div className="space-y-8">
       {/* Status-Banner */}
-      <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3">
-        <svg className="h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <div className="flex items-center gap-2 rounded-2xl border border-accent-200 bg-accent-50 px-5 py-3">
+        <svg className="h-4 w-4 shrink-0 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
-        <p className="text-sm font-semibold text-emerald-800">
+        <p className="text-sm font-semibold text-accent-800">
           Alle Eingaben abgeschlossen – reagiere jetzt auf die Punkte der anderen Seite.
         </p>
       </div>
@@ -298,20 +298,20 @@ function InteractiveReflectionView({
       <div className="grid gap-8 lg:grid-cols-2">
         {/* ── Meine Punkte (read-only + eingehende Reaktionen) ── */}
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-neutral-500">
             Deine Eingaben {me ? `· ${me.name}` : ""}
           </p>
           {myItems.length === 0 ? (
-            <p className="text-sm italic text-slate-400">Keine Eingaben.</p>
+            <p className="text-sm italic text-neutral-400">Keine Eingaben.</p>
           ) : (
             <ul className="space-y-2">
               {myItems.map((item, idx) => {
                 const incoming = others.map((o) => getTheirReactionOnMe(o.id, idx)).filter(Boolean) as Reaction[];
                 return (
-                  <li key={idx} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <li key={idx} className="rounded-xl border border-neutral-200 bg-white px-4 py-3">
                     <div className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                      <span className="flex-1 text-sm text-slate-700">{item}</span>
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
+                      <span className="flex-1 text-sm text-neutral-700">{item}</span>
                     </div>
                     {/* Eingehende Reaktionen der anderen Seite */}
                     {incoming.length > 0 && (
@@ -347,11 +347,11 @@ function InteractiveReflectionView({
             const otherItems = allInputs[other.id] ?? [];
             return (
               <div key={other.id}>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-neutral-500">
                   {other.name} · {roleLabel[other.role] ?? other.role}
                 </p>
                 {otherItems.length === 0 ? (
-                  <p className="text-sm italic text-slate-400">Keine Eingaben.</p>
+                  <p className="text-sm italic text-neutral-400">Keine Eingaben.</p>
                 ) : (
                   <ul className="space-y-3">
                     {otherItems.map((item, idx) => {
@@ -361,10 +361,10 @@ function InteractiveReflectionView({
                       const tradeOpen = tradePickerFor === itemKey;
 
                       return (
-                        <li key={idx} className="rounded-xl border border-slate-200 bg-white p-4">
+                        <li key={idx} className="rounded-xl border border-neutral-200 bg-white p-4">
                           <div className="flex items-start gap-2">
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
-                            <span className="flex-1 text-sm text-slate-700">{item}</span>
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-400" />
+                            <span className="flex-1 text-sm text-neutral-700">{item}</span>
                           </div>
 
                           {/* Reaktions-Buttons */}
@@ -397,7 +397,7 @@ function InteractiveReflectionView({
                                     // Auf reject setzen als "Reaktion entfernen" (Backend-Fallback)
                                     sendReaction(other.id, idx, "reject");
                                   }}
-                                  className="text-xs text-slate-400 underline hover:text-slate-600"
+                                  className="text-xs text-neutral-400 underline hover:text-neutral-600"
                                 >
                                   Ändern
                                 </button>
@@ -407,7 +407,7 @@ function InteractiveReflectionView({
                                 <button
                                   type="button"
                                   onClick={() => sendReaction(other.id, idx, "accept")}
-                                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                                  className="rounded-full border border-accent-200 bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700 transition hover:bg-accent-100"
                                 >
                                   ✓ Akzeptieren
                                 </button>
@@ -443,7 +443,7 @@ function InteractiveReflectionView({
                                     <button
                                       type="button"
                                       onClick={() => sendReaction(other.id, idx, "trade", myIdx)}
-                                      className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-left text-sm text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
+                                      className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-left text-sm text-neutral-700 transition hover:border-violet-400 hover:bg-violet-50"
                                     >
                                       <span className="mr-2 text-violet-400">⇄</span>
                                       {myItem}
@@ -536,9 +536,9 @@ function SimpleReflectionView({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-        <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-emerald-800">
-          <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <div className="rounded-2xl border border-accent-200 bg-accent-50 p-6">
+        <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-accent-800">
+          <svg className="h-4 w-4 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
           Alle Teilnehmer haben ihren Input abgeschlossen
@@ -547,20 +547,20 @@ function SimpleReflectionView({
           {accepted.map((p) => {
             const pitems = allInputs[p.id] ?? [];
             return (
-              <div key={p.id} className="rounded-xl border border-emerald-100 bg-white p-4">
-                <p className="mb-2 font-semibold text-slate-900">{p.name}</p>
-                <p className="mb-3 text-xs text-slate-500">{roleLabel[p.role] ?? p.role}</p>
+              <div key={p.id} className="rounded-xl border border-accent-100 bg-white p-4">
+                <p className="mb-2 font-semibold text-neutral-900">{p.name}</p>
+                <p className="mb-3 text-xs text-neutral-500">{roleLabel[p.role] ?? p.role}</p>
                 {pitems.length > 0 ? (
                   <ul className="space-y-1.5">
                     {pitems.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                      <li key={i} className="flex items-start gap-2 text-sm text-neutral-700">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
                         {item}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm italic text-slate-400">Keine Eingaben.</p>
+                  <p className="text-sm italic text-neutral-400">Keine Eingaben.</p>
                 )}
               </div>
             );
@@ -568,9 +568,9 @@ function SimpleReflectionView({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-700">Paraphrasierung</p>
+          <p className="text-sm font-semibold text-neutral-700">Paraphrasierung</p>
           <button
             type="button"
             onClick={generateReflection}
@@ -584,11 +584,11 @@ function SimpleReflectionView({
           <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{aiError}</p>
         )}
         {reflection ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-relaxed text-neutral-700 whitespace-pre-wrap">
             {reflection}
           </div>
         ) : (
-          <p className="text-sm italic text-slate-400">
+          <p className="text-sm italic text-neutral-400">
             Klicke auf &quot;Paraphrasieren&quot;, um eine neutrale Zusammenfassung aller Eingaben zu erhalten.
           </p>
         )}
@@ -894,19 +894,19 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
               return (
                 <li key={p.key} className="flex items-center">
                   <div className="flex flex-col items-center gap-2">
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${isDone ? "bg-emerald-500 text-white" : isCurrent ? "bg-emerald-600 text-white ring-4 ring-emerald-100" : "bg-slate-200 text-slate-500"}`}>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${isDone ? "bg-accent-500 text-white" : isCurrent ? "bg-accent-600 text-white ring-4 ring-accent-100" : "bg-neutral-200 text-neutral-500"}`}>
                       {isDone ? (
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (index + 1)}
                     </div>
-                    <span className={`max-w-[80px] text-center text-xs font-medium leading-tight ${isCurrent ? "text-emerald-700" : isDone ? "text-emerald-600" : "text-slate-400"}`}>
+                    <span className={`max-w-[80px] text-center text-xs font-medium leading-tight ${isCurrent ? "text-accent-700" : isDone ? "text-accent-600" : "text-neutral-400"}`}>
                       {p.shortLabel}
                     </span>
                   </div>
                   {index < PHASES.length - 1 && (
-                    <div className={`mx-2 mb-5 h-0.5 w-12 transition-colors ${index < currentIndex ? "bg-emerald-400" : "bg-slate-200"}`} />
+                    <div className={`mx-2 mb-5 h-0.5 w-12 transition-colors ${index < currentIndex ? "bg-accent-400" : "bg-neutral-200"}`} />
                   )}
                 </li>
               );
@@ -916,36 +916,36 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
         <div className="app-surface p-8">
           <p className="eyebrow mb-1">Phase {currentIndex + 1} von {PHASES.length}</p>
-          <h1 className="heading-2 text-slate-900">{phase.label}</h1>
+          <h1 className="heading-2 text-neutral-900">{phase.label}</h1>
 
           {/* Mediator-Leitfaden */}
           {phase.guide.length > 0 && (
             <div className="mt-4">
-              <button type="button" onClick={() => setShowGuide((v) => !v)} className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
+              <button type="button" onClick={() => setShowGuide((v) => !v)} className="flex items-center gap-2 rounded-xl border border-accent-200 bg-accent-50 px-4 py-2.5 text-sm font-semibold text-accent-700 transition hover:bg-accent-100">
                 <svg className={`h-4 w-4 transition-transform ${showGuide ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
                 {showGuide ? "Leitfaden ausblenden" : "Mediator-Leitfaden anzeigen"}
               </button>
               {showGuide && (
-                <div className="mt-4 space-y-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Leitfaden · {phase.shortLabel}</p>
+                <div className="mt-4 space-y-4 rounded-2xl border border-accent-100 bg-accent-50/40 p-6">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-accent-600">Leitfaden · {phase.shortLabel}</p>
                   {phase.guide.map((section, i) => (
-                    <div key={i} className={`rounded-xl border p-4 ${section.highlight ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
-                      <h3 className="mb-2 text-sm font-bold text-slate-800">{section.title}</h3>
+                    <div key={i} className={`rounded-xl border p-4 ${section.highlight ? "border-accent-300 bg-accent-50" : "border-neutral-200 bg-white"}`}>
+                      <h3 className="mb-2 text-sm font-bold text-neutral-800">{section.title}</h3>
                       {section.type === "list" ? (
                         <ul className="space-y-1">
                           {(section.content as string[]).map((item, j) => (
-                            <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                            <li key={j} className="flex items-start gap-2 text-sm text-neutral-600">
+                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
                               {item}
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-sm text-slate-600">{section.content as string}</p>
+                        <p className="text-sm text-neutral-600">{section.content as string}</p>
                       )}
-                      {section.example && <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs italic text-slate-500">{section.example}</p>}
+                      {section.example && <p className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs italic text-neutral-500">{section.example}</p>}
                       {section.note && <p className="mt-3 text-xs font-medium text-amber-700">{section.note}</p>}
                     </div>
                   ))}
@@ -969,10 +969,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                       onClick={() => setActiveStepIndex(idx)}
                       className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-emerald-600 text-white shadow-sm"
+                          ? "bg-accent-600 text-white shadow-sm"
                           : isDone
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          ? "bg-accent-100 text-accent-700"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                       } ${isCustom ? "pr-7" : ""}`}
                     >
                       {isDone ? (
@@ -980,7 +980,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-white/20" : "bg-slate-200 text-slate-500"}`}>{idx + 1}</span>
+                        <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-white/20" : "bg-neutral-200 text-neutral-500"}`}>{idx + 1}</span>
                       )}
                       {step.title}
                     </button>
@@ -1013,7 +1013,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                   type="button"
                   onClick={() => setShowAddStep(true)}
                   title="Neuen Schritt einfügen"
-                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-500 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-500 transition hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -1028,15 +1028,15 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                 <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                   <div className="mb-5 flex items-center justify-between">
-                    <h3 className="text-base font-bold text-slate-900">Schritt einfügen</h3>
-                    <button type="button" onClick={() => { setShowAddStep(false); setNewStepTitle(""); setNewStepDesc(""); }} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                    <h3 className="text-base font-bold text-neutral-900">Schritt einfügen</h3>
+                    <button type="button" onClick={() => { setShowAddStep(false); setNewStepTitle(""); setNewStepDesc(""); }} className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600">
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
 
                   {/* Vorlagen */}
                   <div className="mb-5">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Vorlagen</p>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-500">Vorlagen</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { title: "Pause einlegen", desc: "Kurze Unterbrechung für beide Parteien zur Sammlung.", emoji: "⏸" },
@@ -1054,36 +1054,36 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           key={tpl.title}
                           type="button"
                           onClick={() => { setNewStepTitle(tpl.title); setNewStepDesc(tpl.desc); }}
-                          className={`flex items-start gap-2 rounded-xl border p-3 text-left text-sm transition hover:border-emerald-400 hover:bg-emerald-50 ${newStepTitle === tpl.title ? "border-emerald-500 bg-emerald-50" : "border-slate-200 bg-white"}`}
+                          className={`flex items-start gap-2 rounded-xl border p-3 text-left text-sm transition hover:border-accent-400 hover:bg-accent-50 ${newStepTitle === tpl.title ? "border-accent-500 bg-accent-50" : "border-neutral-200 bg-white"}`}
                         >
                           <span className="text-base leading-none mt-0.5">{tpl.emoji}</span>
-                          <span className="font-medium text-slate-800">{tpl.title}</span>
+                          <span className="font-medium text-neutral-800">{tpl.title}</span>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   {/* Eigener Schritt */}
-                  <div className="border-t border-slate-100 pt-4 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Oder eigenen Schritt definieren</p>
+                  <div className="border-t border-neutral-100 pt-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Oder eigenen Schritt definieren</p>
                     <div>
-                      <label className="mb-1 block text-xs font-semibold text-slate-700">Titel</label>
+                      <label className="mb-1 block text-xs font-semibold text-neutral-700">Titel</label>
                       <input
                         type="text"
                         value={newStepTitle}
                         onChange={(e) => setNewStepTitle(e.target.value)}
                         placeholder="z.B. Zusätzliche Fragen klären"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                        className="w-full rounded-xl border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-semibold text-slate-700">Beschreibung (optional)</label>
+                      <label className="mb-1 block text-xs font-semibold text-neutral-700">Beschreibung (optional)</label>
                       <textarea
                         value={newStepDesc}
                         onChange={(e) => setNewStepDesc(e.target.value)}
                         placeholder="Was sollen die Parteien in diesem Schritt tun?"
                         rows={2}
-                        className="w-full resize-none rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                        className="w-full resize-none rounded-xl border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                       />
                     </div>
                   </div>
@@ -1144,24 +1144,24 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
             {currentStep && (
               <div>
                 <div className="mb-2 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
                     {activeStepIndex + 1}
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900">{currentStep.title}</h2>
+                  <h2 className="text-lg font-bold text-neutral-900">{currentStep.title}</h2>
                 </div>
-                <p className="mb-6 ml-11 max-w-2xl text-sm text-slate-600">{currentStep.description}</p>
+                <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{currentStep.description}</p>
 
                 {/* Input-Ansicht */}
                 {view === "input" && (
                   <div className="space-y-5">
                     {/* Mein Input */}
-                    <div className="rounded-2xl border border-emerald-300 bg-white p-5 shadow-sm">
+                    <div className="rounded-2xl border border-accent-300 bg-white p-5 shadow-sm">
                       <div className="mb-3 flex items-center justify-between">
                         <div>
-                          <p className="font-semibold text-slate-900">{currentUserName}</p>
-                          <p className="text-xs text-slate-500">{currentParticipant ? (roleLabel[currentParticipant.role] ?? currentParticipant.role) : ""}</p>
+                          <p className="font-semibold text-neutral-900">{currentUserName}</p>
+                          <p className="text-xs text-neutral-500">{currentParticipant ? (roleLabel[currentParticipant.role] ?? currentParticipant.role) : ""}</p>
                         </div>
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">Du</span>
+                        <span className="rounded-full bg-accent-100 px-2.5 py-1 text-xs font-semibold text-accent-700">Du</span>
                       </div>
                       <div className="flex gap-2">
                         <input
@@ -1170,9 +1170,9 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           onChange={(e) => setInputText((prev) => ({ ...prev, [currentStep.key]: e.target.value }))}
                           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addItem(currentStep.key); } }}
                           placeholder={currentStep.placeholder}
-                          className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                          className="flex-1 rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                         />
-                        <button type="button" onClick={() => addItem(currentStep.key)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white transition hover:bg-emerald-700">
+                        <button type="button" onClick={() => addItem(currentStep.key)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-600 text-white transition hover:bg-accent-700">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                           </svg>
@@ -1181,10 +1181,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                       {myItems.length > 0 && (
                         <ul className="mt-3 space-y-1.5">
                           {myItems.map((item, idx) => (
-                            <li key={idx} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                            <li key={idx} className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
                               <span className="flex-1">{item}</span>
-                              <button type="button" onClick={() => removeItem(currentStep.key, idx)} className="ml-1 rounded p-0.5 text-slate-400 hover:bg-red-50 hover:text-red-500">
+                              <button type="button" onClick={() => removeItem(currentStep.key, idx)} className="ml-1 rounded p-0.5 text-neutral-400 hover:bg-red-50 hover:text-red-500">
                                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -1197,14 +1197,14 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
                     {/* Andere Teilnehmer (noch wartend) */}
                     {accepted.filter((p) => p.name !== currentUserName).map((p) => (
-                      <div key={p.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                      <div key={p.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
                         <div className="flex items-center justify-between">
                                    <div>
-                            <p className="font-semibold text-slate-900">{p.name}</p>
-                            <p className="text-xs text-slate-500">{roleLabel[p.role] ?? p.role}</p>
+                            <p className="font-semibold text-neutral-900">{p.name}</p>
+                            <p className="text-xs text-neutral-500">{roleLabel[p.role] ?? p.role}</p>
                           </div>
                         </div>
-                        <p className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm italic text-slate-400">
+                        <p className="mt-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm italic text-neutral-400">
                           Wartet auf Eingabe …
                         </p>
                       </div>
@@ -1254,7 +1254,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           </div>
 
           {/* Phasen-Navigation */}
-          <div className="mt-10 flex items-center justify-between border-t border-slate-100 pt-6">
+          <div className="mt-10 flex items-center justify-between border-t border-neutral-100 pt-6">
             <button
               type="button"
               onClick={() => phase.prevPhase ? router.push(`/dashboard/${hashId(mediationId)}/${phase.prevPhase}`) : router.push(`/dashboard/${hashId(mediationId)}`)}

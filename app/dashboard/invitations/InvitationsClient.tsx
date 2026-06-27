@@ -56,10 +56,10 @@ export default function InvitationsClient({ token }: Props) {
         <section className="container py-12">
           <div className="app-surface p-8">
             <p className="eyebrow mb-3">Einladungen</p>
-            <h1 className="heading-2 text-slate-900">
+            <h1 className="heading-2 text-neutral-900">
               Keine Einladung gefunden
             </h1>
-            <p className="mt-4 text-slate-600">
+            <p className="mt-4 text-neutral-600">
               Der Einladungslink enthält keinen gültigen Token.
             </p>
           </div>
@@ -74,14 +74,14 @@ export default function InvitationsClient({ token }: Props) {
         <section className="container py-12">
           <div className="app-surface p-8">
             <p className="eyebrow mb-3">Einladung angenommen</p>
-            <h1 className="heading-2 text-slate-900">
+            <h1 className="heading-2 text-neutral-900">
               Die andere Seite hat dir eine persönliche Video-Botschaft hinterlassen
             </h1>
-            <p className="mt-4 max-w-2xl text-slate-600">
+            <p className="mt-4 max-w-2xl text-neutral-600">
               Schau dir die Nachricht an, bevor es weitergeht.
             </p>
 
-            <div className="mt-8 overflow-hidden rounded-2xl bg-slate-900">
+            <div className="mt-8 overflow-hidden rounded-2xl bg-neutral-900">
               {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
                 src={`/api/mediations/${mediationId}/invites/me/video`}
@@ -110,21 +110,21 @@ export default function InvitationsClient({ token }: Props) {
         <div className="app-surface p-8">
           <p className="eyebrow mb-3">Einladung erhalten</p>
 
-          <h1 className="heading-2 text-slate-900">
+          <h1 className="heading-2 text-neutral-900">
             Du wurdest zu einer Mediation eingeladen
           </h1>
 
-          <p className="mt-4 max-w-2xl text-slate-600">
+          <p className="mt-4 max-w-2xl text-neutral-600">
             Nimm die Einladung an, um dem Verfahren beizutreten und die nächsten
             Schritte zu sehen.
           </p>
 
           <div className="card-muted mt-8">
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-neutral-900">
               Einladungstoken
             </p>
 
-            <p className="mt-3 break-all font-mono text-sm text-slate-600">
+            <p className="mt-3 break-all font-mono text-sm text-neutral-600">
               {token}
             </p>
           </div>

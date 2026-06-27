@@ -28,7 +28,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
       <style>{tooltipStyle}</style>
       <aside
         className={cn(
-          "relative flex h-full flex-col border-r border-slate-200 bg-white py-4 shrink-0 overflow-visible transition-all duration-300",
+          "relative flex h-full flex-col border-r border-neutral-200 bg-white py-4 shrink-0 overflow-visible transition-all duration-300",
           collapsed ? "w-16 px-2" : "w-52 px-3",
         )}
       >
@@ -53,7 +53,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
                 className="h-7 w-7 rounded-xl object-cover"
                 priority
               />
-              <span className="text-sm font-semibold text-slate-800">medipact</span>
+              <span className="text-sm font-semibold text-neutral-800">medipact</span>
             </div>
           )}
         </div>
@@ -68,12 +68,12 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
                   "flex items-center gap-3 rounded-xl transition-all w-full",
                   collapsed ? "justify-center px-0 py-3" : "px-3 py-2.5",
                   active === item.id
-                    ? "bg-teal-50 text-teal-700"
-                    : "text-slate-400 hover:bg-slate-50 hover:text-slate-700",
+                    ? "bg-accent-50 text-accent-700"
+                    : "text-neutral-400 hover:bg-neutral-50 hover:text-neutral-700",
                 )}
               >
                 {active === item.id && !collapsed && (
-                  <div className="absolute left-0 w-1 h-5 bg-teal-500 rounded-r-full" />
+                  <div className="absolute left-0 w-1 h-5 bg-accent-500 rounded-r-full" />
                 )}
                 <span className="text-lg leading-none shrink-0">{item.icon}</span>
                 {!collapsed && (
@@ -90,9 +90,9 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
 
               {collapsed && (
                 <div className="ws-tooltip absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50">
-                  <div className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white whitespace-nowrap shadow-lg">
+                  <div className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white whitespace-nowrap shadow-lg">
                     {item.label}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-neutral-900" />
                   </div>
                 </div>
               )}
@@ -101,7 +101,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
         </nav>
 
         {/* Unterer Bereich */}
-        <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-1">
+        <div className="mt-auto pt-4 border-t border-neutral-100 flex flex-col gap-1">
           {bottomNav.map((item) => (
             <div key={item.id} className="ws-item relative">
               <button
@@ -110,8 +110,8 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
                   "flex items-center gap-3 rounded-xl transition-all w-full",
                   collapsed ? "justify-center px-0 py-3" : "px-3 py-2.5",
                   active === item.id
-                    ? "bg-teal-50 text-teal-700"
-                    : "text-slate-400 hover:bg-slate-50 hover:text-slate-700",
+                    ? "bg-accent-50 text-accent-700"
+                    : "text-neutral-400 hover:bg-neutral-50 hover:text-neutral-700",
                 )}
               >
                 <span className="text-lg leading-none shrink-0">{item.icon}</span>
@@ -120,9 +120,9 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
 
               {collapsed && (
                 <div className="ws-tooltip absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50">
-                  <div className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white whitespace-nowrap shadow-lg">
+                  <div className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white whitespace-nowrap shadow-lg">
                     {item.label}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-neutral-900" />
                   </div>
                 </div>
               )}
@@ -131,11 +131,11 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
 
           {/* User-Info */}
           {!collapsed && userEmail && (
-            <div className="mt-3 px-3 py-2 rounded-xl bg-slate-50">
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
+            <div className="mt-3 px-3 py-2 rounded-xl bg-neutral-50">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-0.5">
                 Mediator
               </div>
-              <div className="text-xs text-slate-600 truncate">{userEmail}</div>
+              <div className="text-xs text-neutral-600 truncate">{userEmail}</div>
             </div>
           )}
         </div>
@@ -143,7 +143,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSideb
         {/* Toggle Button */}
         <button
           onClick={() => setCollapsed((v) => !v)}
-          className="absolute -right-3.5 top-8 z-50 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white shadow-md text-slate-500 hover:bg-teal-500 hover:text-white hover:border-teal-500 transition-all cursor-pointer"
+          className="absolute -right-3.5 top-8 z-50 flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-md text-neutral-500 hover:bg-accent-500 hover:text-white hover:border-accent-500 transition-all cursor-pointer"
           title={collapsed ? "Ausklappen" : "Einklappen"}
         >
           <span className="text-xs font-bold">{collapsed ? "›" : "‹"}</span>

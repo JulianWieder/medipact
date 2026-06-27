@@ -353,7 +353,7 @@ function JitsiCall({
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm h-[300px] sm:h-[520px]"
+      className="w-full overflow-hidden rounded-2xl border border-neutral-200 shadow-sm h-[300px] sm:h-[520px]"
     />
   );
 }
@@ -363,7 +363,7 @@ function JitsiCall({
 function IntroVideo() {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
+      className="relative overflow-hidden rounded-2xl border border-neutral-200 shadow-sm"
       style={{ aspectRatio: "1920/1080" }}
     >
       <iframe
@@ -389,8 +389,8 @@ function IntroVideo() {
 
 function VideoPlaceholder({ title, duration }: { title: string; duration?: string }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video flex items-center justify-center group cursor-pointer select-none">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 via-slate-900/60 to-slate-900" />
+    <div className="relative overflow-hidden rounded-2xl bg-neutral-900 aspect-video flex items-center justify-center group cursor-pointer select-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-accent-900/50 via-neutral-900/60 to-neutral-900" />
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -411,7 +411,7 @@ function VideoPlaceholder({ title, duration }: { title: string; duration?: strin
         </div>
       </div>
       <div className="absolute top-3 right-3">
-        <span className="rounded-full bg-emerald-500/90 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white shadow">
+        <span className="rounded-full bg-accent-500/90 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white shadow">
           Video folgt bald
         </span>
       </div>
@@ -433,10 +433,10 @@ function StepBadge({
       <div
         className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
           status === "done"
-            ? "bg-emerald-500 text-white"
+            ? "bg-accent-500 text-white"
             : status === "active"
-            ? "bg-emerald-600 text-white ring-4 ring-emerald-100"
-            : "bg-slate-200 text-slate-400"
+            ? "bg-accent-600 text-white ring-4 ring-accent-100"
+            : "bg-neutral-200 text-neutral-400"
         }`}
       >
         {status === "done" ? (
@@ -456,10 +456,10 @@ function StepBadge({
       <span
         className={`max-w-[72px] text-center text-[10px] font-medium leading-tight ${
           status === "active"
-            ? "text-emerald-700"
+            ? "text-accent-700"
             : status === "done"
-            ? "text-emerald-600"
-            : "text-slate-400"
+            ? "text-accent-600"
+            : "text-neutral-400"
         }`}
       >
         {label}
@@ -528,12 +528,12 @@ function ItemList({
               }
             }}
             placeholder={placeholder ?? "Punkt hinzufügen …"}
-            className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            className="flex-1 rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
           />
           <button
             type="button"
             onClick={onAdd}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white transition hover:bg-emerald-700"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-600 text-white transition hover:bg-accent-700"
           >
             <svg
               className="h-4 w-4"
@@ -552,15 +552,15 @@ function ItemList({
           {items.map((item, idx) => (
             <li
               key={idx}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700"
             >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
               <span className="flex-1">{item}</span>
               {editable && onRemove && (
                 <button
                   type="button"
                   onClick={() => onRemove(idx)}
-                  className="ml-1 rounded p-0.5 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                  className="ml-1 rounded p-0.5 text-neutral-400 transition hover:bg-red-50 hover:text-red-500"
                 >
                   <svg
                     className="h-3.5 w-3.5"
@@ -582,7 +582,7 @@ function ItemList({
         </ul>
       )}
       {items.length === 0 && !editable && (
-        <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm italic text-slate-400">
+        <p className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm italic text-neutral-400">
           Wartet auf Eingabe …
         </p>
       )}
@@ -1131,12 +1131,12 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         ) : (
           <VideoPlaceholder title={content.videoTitle} duration={content.videoDuration} />
         )}
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5">
-          <p className="text-base font-medium text-slate-800 leading-relaxed">
+        <div className="rounded-2xl border border-neutral-200 bg-white px-6 py-5">
+          <p className="text-base font-medium text-neutral-800 leading-relaxed">
             {content.emotional}
           </p>
           {content.sub && (
-            <p className="mt-3 text-sm text-slate-500 leading-relaxed">{content.sub}</p>
+            <p className="mt-3 text-sm text-neutral-500 leading-relaxed">{content.sub}</p>
           )}
         </div>
       </div>
@@ -1181,9 +1181,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("intro")} />}
 
         {mode === "done" && (
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-accent-200 bg-accent-50 px-6 py-4">
             <svg
-              className="h-5 w-5 text-emerald-600"
+              className="h-5 w-5 text-accent-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -1191,7 +1191,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            <p className="text-sm font-semibold text-emerald-800">
+            <p className="text-sm font-semibold text-accent-800">
               Alle haben die Einführung bestätigt. Weiter zum Erstgespräch.
             </p>
           </div>
@@ -1199,7 +1199,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
         {!introSubmitted && (
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-neutral-600">
               Bestätige, dass du bereit bist, diesen Prozess zu beginnen.
             </p>
             <button
@@ -1233,9 +1233,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         <JitsiCall roomName={jitsiRoom} displayName={currentUserName} />
 
         {/* Hinweisbox */}
-        <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
           <svg
-            className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
+            className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1247,9 +1247,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-neutral-500">
             Raum-ID:{" "}
-            <code className="rounded bg-slate-200 px-1.5 py-0.5 font-mono text-slate-700">
+            <code className="rounded bg-neutral-200 px-1.5 py-0.5 font-mono text-neutral-700">
               {jitsiRoom}
             </code>{" "}
             · Der Raum ist für alle Beteiligten zugänglich. Kein separater Login notwendig.
@@ -1259,7 +1259,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         {/* Abschluss-Bestätigung */}
         {!submitted && (
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-neutral-600">
               Wenn das Gespräch abgeschlossen ist, bestätige es hier. Du kannst den
               Video-Raum danach jederzeit wieder öffnen.
             </p>
@@ -1277,9 +1277,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("videocall")} />}
 
         {mode === "done" && (
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-accent-200 bg-accent-50 px-6 py-4">
             <svg
-              className="h-5 w-5 text-emerald-600"
+              className="h-5 w-5 text-accent-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -1287,7 +1287,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            <p className="text-sm font-semibold text-emerald-800">
+            <p className="text-sm font-semibold text-accent-800">
               Erstes Gespräch abgeschlossen. Weiter zu Schritt 1.
             </p>
           </div>
@@ -1307,8 +1307,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       return (
         <div className="space-y-4">
           {renderStepHeader(stepDef.key)}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-400">
               Deine Eingabe
             </p>
             <ItemList items={myItems} editable={false} />
@@ -1323,20 +1323,20 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       return (
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="rounded-2xl border border-accent-200 bg-accent-50 p-5">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-emerald-800">{currentUserName}</p>
-                <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                <p className="text-sm font-semibold text-accent-800">{currentUserName}</p>
+                <span className="rounded-full bg-accent-200 px-2 py-0.5 text-xs font-semibold text-accent-700">
                   Du
                 </span>
               </div>
               <ItemList items={myItems} editable={false} />
             </div>
             {otherParticipants.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div key={p.id} className="rounded-2xl border border-neutral-200 bg-white p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-900">{p.name}</p>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                  <p className="text-sm font-semibold text-neutral-900">{p.name}</p>
+                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
                     {roleLabel[p.role] ?? p.role}
                   </span>
                 </div>
@@ -1345,9 +1345,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             ))}
           </div>
           {mode === "done" && (
-            <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-accent-200 bg-accent-50 px-5 py-3">
               <svg
-                className="h-4 w-4 text-emerald-600"
+                className="h-4 w-4 text-accent-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1355,7 +1355,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-sm text-emerald-800">
+              <p className="text-sm text-accent-800">
                 Alle Eingaben für diesen Schritt liegen vor.
               </p>
             </div>
@@ -1370,10 +1370,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         {renderStepHeader(stepDef.key)}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-emerald-300 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-accent-300 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">{currentUserName}</p>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              <p className="text-sm font-semibold text-neutral-900">{currentUserName}</p>
+              <span className="rounded-full bg-accent-100 px-2.5 py-1 text-xs font-semibold text-accent-700">
                 Du
               </span>
             </div>
@@ -1392,16 +1392,16 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           {accepted
             .filter((p) => p.id !== currentParticipant.id)
             .map((p) => (
-              <div key={p.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div key={p.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-700">{p.name}</p>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                  <p className="text-sm font-semibold text-neutral-700">{p.name}</p>
+                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
                     {roleLabel[p.role] ?? p.role}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-100 px-4 py-3">
                   <svg
-                    className="h-4 w-4 text-slate-400"
+                    className="h-4 w-4 text-neutral-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -1413,7 +1413,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                     />
                   </svg>
-                  <p className="text-xs text-slate-400">Sichtbar nach deiner Abgabe</p>
+                  <p className="text-xs text-neutral-400">Sichtbar nach deiner Abgabe</p>
                 </div>
               </div>
             ))}
@@ -1429,7 +1429,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             {saveState === "saving" ? "Wird abgeschickt…" : "Abschicken →"}
           </button>
           {myItems.length === 0 && (
-            <p className="text-xs text-slate-400">Mindestens einen Punkt hinzufügen</p>
+            <p className="text-xs text-neutral-400">Mindestens einen Punkt hinzufügen</p>
           )}
         </div>
       </div>
@@ -1445,9 +1445,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     return (
       <div className="space-y-8">
         <div className="text-center">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 mb-5">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-accent-100 mb-5">
             <svg
-              className="h-10 w-10 text-emerald-600"
+              className="h-10 w-10 text-accent-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -1460,15 +1460,15 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">Phase 1 ist abgeschlossen.</h2>
-          <p className="mt-3 text-slate-500 max-w-sm mx-auto leading-relaxed text-sm">
+          <h2 className="text-2xl font-bold text-neutral-900">Phase 1 ist abgeschlossen.</h2>
+          <p className="mt-3 text-neutral-500 max-w-sm mx-auto leading-relaxed text-sm">
             Ihr habt gemeinsam ein Erstgespräch geführt, Regeln festgelegt, Rollen geklärt
             und einen Mediationsvertrag unterzeichnet. Das ist bereits ein bedeutender Schritt.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-4">
             Was euch in Phase 2 erwartet
           </p>
           <div className="space-y-4">
@@ -1497,8 +1497,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <div key={item.title} className="flex items-start gap-3">
                 <span className="text-2xl mt-0.5">{item.emoji}</span>
                 <div>
-                  <p className="font-semibold text-slate-900 text-sm">{item.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="font-semibold text-neutral-900 text-sm">{item.title}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -1571,7 +1571,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     return (
       <div className="space-y-6">
         {/* Header */}
-        <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-slate-50 px-6 py-6">
+        <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-neutral-50 px-6 py-6">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-100">
               <svg className="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -1579,8 +1579,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               </svg>
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">{title}</h3>
-              <p className="mt-1 text-sm text-slate-500 leading-relaxed">{subtitle}</p>
+              <h3 className="text-base font-bold text-neutral-900">{title}</h3>
+              <p className="mt-1 text-sm text-neutral-500 leading-relaxed">{subtitle}</p>
             </div>
           </div>
         </div>
@@ -1588,8 +1588,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         {/* Fragen */}
         <div className="space-y-5">
           {questions.map((q) => (
-            <div key={q.id} className="rounded-xl border border-slate-200 bg-white p-5">
-              <p className="text-sm font-semibold text-slate-800 mb-3 leading-snug">
+            <div key={q.id} className="rounded-xl border border-neutral-200 bg-white p-5">
+              <p className="text-sm font-semibold text-neutral-800 mb-3 leading-snug">
                 {q.label}
                 {q.required && <span className="ml-1 text-violet-500">*</span>}
               </p>
@@ -1605,14 +1605,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg text-xs sm:text-sm font-semibold transition-all
                           ${feedbackAnswers[q.id] === i
                             ? "bg-violet-600 text-white shadow-sm"
-                            : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-violet-300 hover:bg-violet-50"
+                            : "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-violet-300 hover:bg-violet-50"
                           }`}
                       >
                         {i}
                       </button>
                     ))}
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 px-0.5">
+                  <div className="flex justify-between text-[10px] text-neutral-400 px-0.5">
                     <span>Sehr unwahrscheinlich</span>
                     <span>Sehr wahrscheinlich</span>
                   </div>
@@ -1629,7 +1629,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       className={`rounded-full px-4 py-2 text-sm font-medium transition-all
                         ${feedbackAnswers[q.id] === opt
                           ? "bg-violet-600 text-white shadow-sm"
-                          : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-violet-300 hover:bg-violet-50"
+                          : "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-violet-300 hover:bg-violet-50"
                         }`}
                     >
                       {opt}
@@ -1654,11 +1654,11 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       className={`flex flex-col items-center gap-1 rounded-xl p-2.5 transition-all
                         ${feedbackAnswers[q.id] === idx + 1
                           ? "bg-violet-100 ring-2 ring-violet-400 scale-110"
-                          : "hover:bg-slate-100"
+                          : "hover:bg-neutral-100"
                         }`}
                     >
                       <span className="text-2xl">{item.emoji}</span>
-                      <span className="text-[10px] text-slate-500">{item.label}</span>
+                      <span className="text-[10px] text-neutral-500">{item.label}</span>
                     </button>
                   ))}
                 </div>
@@ -1670,7 +1670,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   value={(feedbackAnswers[q.id] as string) ?? ""}
                   onChange={(e) => setFeedbackAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                   placeholder="Deine Gedanken …"
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                  className="w-full resize-none rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 outline-none transition placeholder:text-neutral-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
                 />
               )}
             </div>
@@ -1690,13 +1690,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           <button
             type="button"
             onClick={() => skipFeedback(occasion)}
-            className="text-sm text-slate-400 transition hover:text-slate-600"
+            className="text-sm text-neutral-400 transition hover:text-neutral-600"
           >
             Überspringen
           </button>
         </div>
         {!allRequiredAnswered && (
-          <p className="text-xs text-slate-400">Bitte beantworte alle Pflichtfragen (*).</p>
+          <p className="text-xs text-neutral-400">Bitte beantworte alle Pflichtfragen (*).</p>
         )}
       </div>
     );
@@ -1756,20 +1756,20 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (confirmedSlot) {
       return (
         <div className="space-y-6">
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-8 py-10 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-              <svg className="h-7 w-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50 px-8 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100">
+              <svg className="h-7 w-7 text-accent-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-emerald-800">Termin bestätigt</p>
-              <p className="mt-2 text-base font-semibold text-slate-900">{fmt(confirmedSlot.proposed_datetime)}</p>
-              <p className="mt-1 text-sm text-emerald-700">Alle Beteiligten haben zugestimmt.</p>
+              <p className="text-sm font-bold text-accent-800">Termin bestätigt</p>
+              <p className="mt-2 text-base font-semibold text-neutral-900">{fmt(confirmedSlot.proposed_datetime)}</p>
+              <p className="mt-1 text-sm text-accent-700">Alle Beteiligten haben zugestimmt.</p>
             </div>
           </div>
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm text-slate-600">Ihr könnt nun mit dem nächsten Schritt fortfahren — dem gemeinsamen Erstgespräch.</p>
+            <p className="text-sm text-neutral-600">Ihr könnt nun mit dem nächsten Schritt fortfahren — dem gemeinsamen Erstgespräch.</p>
             <button
               type="button"
               onClick={() => { setStepModes(prev => ({ ...prev, terminvereinbarung: "done" })); setActiveStep("videocall"); }}
@@ -1787,14 +1787,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         currentParticipant?.role === "initiator" || isMediatorOrAdmin;
       return (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-4">
-              <svg className="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-8 text-center">
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 mb-4">
+              <svg className="h-7 w-7 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-slate-700">Noch keine Terminvorschläge</p>
-            <p className="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
+            <p className="text-sm font-semibold text-neutral-700">Noch keine Terminvorschläge</p>
+            <p className="mt-2 text-sm text-neutral-500 max-w-sm mx-auto">
               {isOwnerOrMediator
                 ? "Klicke auf 'Termine vorschlagen' damit das System drei mögliche Termine für das Erstgespräch berechnet."
                 : "Dein Mediator wird in Kürze Terminvorschläge für das erste gemeinsame Gespräch einstellen."}
@@ -1811,7 +1811,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
     return (
       <div className="space-y-6">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-neutral-600">
           {reservedSlot
             ? "Alle Beteiligten haben zugestimmt. Der Mediator bestätigt den Termin nun final."
             : "Wähle den Termin der für dich passt. Sobald alle Beteiligten einem Termin zugestimmt haben, wird das Erstgespräch geplant."}
@@ -1826,18 +1826,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             const isVoting = appointmentVoting === slot.id;
             const isReserved = slot.status === "reserved";
             return (
-              <div key={slot.id} className={`rounded-2xl border p-5 ${isReserved ? "border-amber-300 bg-amber-50" : slot.all_accepted ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+              <div key={slot.id} className={`rounded-2xl border p-5 ${isReserved ? "border-amber-300 bg-amber-50" : slot.all_accepted ? "border-accent-300 bg-accent-50" : "border-neutral-200 bg-white"}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-slate-900">{fmt(slot.proposed_datetime)}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="font-semibold text-neutral-900">{fmt(slot.proposed_datetime)}</p>
+                    <p className="mt-1 text-xs text-neutral-500">
                       {acceptedCount} von {totalVoted} Beteiligten zugestimmt
                       {slot.all_accepted && " · Alle zugestimmt ✓"}
                     </p>
                     {totalVoted > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {slot.votes.map(v => (
-                          <span key={v.participant_id} className={`text-xs rounded-full px-2 py-0.5 ${v.accepted ? "bg-emerald-100 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                          <span key={v.participant_id} className={`text-xs rounded-full px-2 py-0.5 ${v.accepted ? "bg-accent-100 text-accent-700" : "bg-red-50 text-red-600"}`}>
                             {v.accepted ? "✓" : "✗"} {v.name}
                           </span>
                         ))}
@@ -1855,7 +1855,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         type="button"
                         disabled={isVoting}
                         onClick={() => voteSlot(slot.id, true)}
-                        className="rounded-full bg-emerald-500 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-50 transition"
+                        className="rounded-full bg-accent-500 px-4 py-2 text-xs font-bold text-white hover:bg-accent-600 disabled:opacity-50 transition"
                       >
                         {isVoting ? "…" : "Zusagen"}
                       </button>
@@ -1863,14 +1863,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         type="button"
                         disabled={isVoting}
                         onClick={() => voteSlot(slot.id, false)}
-                        className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition"
+                        className="rounded-full border border-neutral-300 px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 transition"
                       >
                         Absagen
                       </button>
                     </div>
                   )}
                   {myVote && !isReserved && (
-                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${myVote.accepted ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${myVote.accepted ? "bg-accent-100 text-accent-700" : "bg-neutral-100 text-neutral-500"}`}>
                       {myVote.accepted ? "Zugesagt" : "Abgesagt"}
                     </span>
                   )}
@@ -1879,7 +1879,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             );
           })}
         </div>
-        <button type="button" onClick={proposeAppointments} disabled={appointmentLoading} className="text-xs text-slate-400 hover:text-slate-600 transition">
+        <button type="button" onClick={proposeAppointments} disabled={appointmentLoading} className="text-xs text-neutral-400 hover:text-neutral-600 transition">
           {appointmentLoading ? "Wird neu berechnet…" : "↻ Neue Termine vorschlagen"}
         </button>
       </div>
@@ -1892,8 +1892,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     const mode = stepModes["contract"];
     if (mode === ("locked" as StepMode)) {
       return (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-          <p className="text-sm text-slate-400">
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-8 text-center">
+          <p className="text-sm text-neutral-400">
             Verfügbar, sobald alle vorherigen Schritte abgeschlossen sind.
           </p>
         </div>
@@ -1904,7 +1904,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
     return (
       <div className="space-y-6">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-neutral-600">
           Euer Mediator stellt gleich den Mediationsvertrag bereit. Sobald er verfügbar ist,
           könnt ihr ihn lesen und unterzeichnen.
         </p>
@@ -1937,17 +1937,17 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
         {contract && (
           <>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-900">Mediationsvertrag</h3>
+                <h3 className="text-sm font-bold text-neutral-900">Mediationsvertrag</h3>
               </div>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
                 {contract.text}
               </div>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-slate-900">Unterschriften</h3>
+              <h3 className="text-sm font-bold text-neutral-900">Unterschriften</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {accepted.map((p) => {
                   const sig = signatures.find((s) => s.participant_id === p.id);
@@ -1956,18 +1956,18 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       key={p.id}
                       className={`rounded-xl border p-4 ${
                         sig
-                          ? "border-emerald-200 bg-emerald-50"
-                          : "border-slate-200 bg-slate-50"
+                          ? "border-accent-200 bg-accent-50"
+                          : "border-neutral-200 bg-neutral-50"
                       }`}
                     >
-                      <p className="mb-1 text-sm font-semibold text-slate-900">{p.name}</p>
-                      <p className="mb-2 text-xs text-slate-500">
+                      <p className="mb-1 text-sm font-semibold text-neutral-900">{p.name}</p>
+                      <p className="mb-2 text-xs text-neutral-500">
                         {roleLabel[p.role] ?? p.role}
                       </p>
                       {sig ? (
                         <div className="flex items-center gap-1.5">
                           <svg
-                            className="h-4 w-4 text-emerald-600"
+                            className="h-4 w-4 text-accent-600"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -1979,12 +1979,12 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                               d="M5 13l4 4L19 7"
                             />
                           </svg>
-                          <span className="text-xs font-medium text-emerald-700">
+                          <span className="text-xs font-medium text-accent-700">
                             Unterzeichnet als „{sig.signed_name}"
                           </span>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400">Ausstehend</span>
+                        <span className="text-xs text-neutral-400">Ausstehend</span>
                       )}
                     </div>
                   );
@@ -1993,9 +1993,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             </div>
 
             {!mySignature && currentParticipant && (
-              <div className="rounded-2xl border border-slate-300 bg-white p-5">
-                <p className="mb-3 text-sm font-semibold text-slate-900">Deine Unterschrift</p>
-                <p className="mb-4 text-xs text-slate-500">
+              <div className="rounded-2xl border border-neutral-300 bg-white p-5">
+                <p className="mb-3 text-sm font-semibold text-neutral-900">Deine Unterschrift</p>
+                <p className="mb-4 text-xs text-neutral-500">
                   Tippe deinen vollständigen Namen und klicke „Unterzeichnen", um den Vertrag
                   zu bestätigen.
                 </p>
@@ -2008,7 +2008,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                       if (e.key === "Enter" && signedName.trim()) signContract();
                     }}
                     placeholder="Vollständiger Name …"
-                    className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    className="flex-1 rounded-xl border border-neutral-300 px-4 py-2.5 text-sm outline-none focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                   />
                   <button
                     type="button"
@@ -2046,10 +2046,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
                         isDone
-                          ? "bg-emerald-500 text-white"
+                          ? "bg-accent-500 text-white"
                           : isCurrent
-                          ? "bg-emerald-600 text-white ring-4 ring-emerald-100"
-                          : "bg-slate-200 text-slate-500"
+                          ? "bg-accent-600 text-white ring-4 ring-accent-100"
+                          : "bg-neutral-200 text-neutral-500"
                       }`}
                     >
                       {isDone ? (
@@ -2073,10 +2073,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                     <span
                       className={`max-w-[80px] text-center text-xs font-medium leading-tight ${
                         isCurrent
-                          ? "text-emerald-700"
+                          ? "text-accent-700"
                           : isDone
-                          ? "text-emerald-600"
-                          : "text-slate-400"
+                          ? "text-accent-600"
+                          : "text-neutral-400"
                       }`}
                     >
                       {p.shortLabel}
@@ -2085,7 +2085,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   {index < PHASES.length - 1 && (
                     <div
                       className={`mx-2 mb-5 h-0.5 w-12 transition-colors ${
-                        index < phaseIndex ? "bg-emerald-400" : "bg-slate-200"
+                        index < phaseIndex ? "bg-accent-400" : "bg-neutral-200"
                       }`}
                     />
                   )}
@@ -2100,7 +2100,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             /* Emotionaler Header für die Gegenpartei */
             <div className="mb-6">
               <p className="eyebrow mb-3">Mediation</p>
-              <h1 className="heading-2 text-slate-900">
+              <h1 className="heading-2 text-neutral-900">
                 {activeStep === "intro"
                   ? "Willkommen. Du bist nicht allein."
                   : activeStep === "terminvereinbarung"
@@ -2115,15 +2115,15 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   ? "Euer Mediationsvertrag"
                   : contentSteps.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
               </h1>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-neutral-500">
                 Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </p>
             </div>
           ) : (
             <>
               <p className="eyebrow mb-3">Phase 1 von {PHASES.length}</p>
-              <h1 className="heading-2 text-slate-900">Auftrags- und Einleitungsphase</h1>
-              <p className="mt-2 text-sm text-slate-500">
+              <h1 className="heading-2 text-neutral-900">Auftrags- und Einleitungsphase</h1>
+              <p className="mt-2 text-sm text-neutral-500">
                 Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </p>
             </>
@@ -2133,14 +2133,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           {/* Mobile: kompakte Fortschrittsleiste */}
           <div className="mt-4 sm:hidden">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-emerald-700">
+              <span className="text-xs font-semibold text-accent-700">
                 Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
               </span>
-              <span className="text-xs text-slate-400">{getPhaseStepLabel(activeStep)}</span>
+              <span className="text-xs text-neutral-400">{getPhaseStepLabel(activeStep)}</span>
             </div>
-            <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+            <div className="h-1.5 rounded-full bg-neutral-200 overflow-hidden">
               <div
-                className="h-full rounded-full bg-emerald-500 transition-all"
+                className="h-full rounded-full bg-accent-500 transition-all"
                 style={{ width: `${((phaseSteps.indexOf(activeStep) + 1) / phaseSteps.length) * 100}%` }}
               />
             </div>
@@ -2158,7 +2158,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   {idx < phaseSteps.length - 1 && (
                     <div
                       className={`mx-2 mb-5 h-0.5 w-8 transition-colors ${
-                        getPhaseStepStatus(step) === "done" ? "bg-emerald-400" : "bg-slate-200"
+                        getPhaseStepStatus(step) === "done" ? "bg-accent-400" : "bg-neutral-200"
                       }`}
                     />
                   )}
@@ -2168,12 +2168,12 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
 
           {/* Aktiver Schritt-Inhalt */}
-          <div className="mt-4 sm:mt-8 rounded-xl sm:rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-6">
+          <div className="mt-4 sm:mt-8 rounded-xl sm:rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4 sm:p-6">
             {activeStep === "intro" && (
               <>
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-slate-900">Willkommen</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <h2 className="text-lg font-bold text-neutral-900">Willkommen</h2>
+                  <p className="mt-1 text-sm text-neutral-500">
                     Nimm dir einen Moment, bevor wir beginnen.
                   </p>
                 </div>
@@ -2185,14 +2185,14 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <>
                 <div className="mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Terminvereinbarung</h2>
+                    <h2 className="text-lg font-bold text-neutral-900">Terminvereinbarung</h2>
                   </div>
-                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                  <p className="mt-1 ml-11 text-sm text-neutral-500">
                     Wählt gemeinsam einen Termin für das erste Gespräch.
                   </p>
                 </div>
@@ -2204,7 +2204,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <>
                 <div className="mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700">
                       <svg
                         className="h-4 w-4"
                         fill="none"
@@ -2219,9 +2219,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         />
                       </svg>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Erstgespräch</h2>
+                    <h2 className="text-lg font-bold text-neutral-900">Erstgespräch</h2>
                   </div>
-                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                  <p className="mt-1 ml-11 text-sm text-neutral-500">
                     {confirmedSlot
                       ? `Vereinbart für ${new Date(confirmedSlot.proposed_datetime).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} Uhr`
                       : "Euer erstes gemeinsames Gespräch per Video."}
@@ -2240,9 +2240,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Kurzes Feedback</h2>
+                    <h2 className="text-lg font-bold text-neutral-900">Kurzes Feedback</h2>
                   </div>
-                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                  <p className="mt-1 ml-11 text-sm text-neutral-500">
                     Wie war das erste Gespräch für dich?
                   </p>
                 </div>
@@ -2255,10 +2255,10 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                 <div key={cs.key}>
                   <div className="mb-6">
                     <div className="mb-2 flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
                         {cs.number}
                       </div>
-                      <h2 className="text-lg font-bold text-slate-900">{cs.title}</h2>
+                      <h2 className="text-lg font-bold text-neutral-900">{cs.title}</h2>
                     </div>
                   </div>
                   {renderContentStep(cs)}
@@ -2275,9 +2275,9 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Reflexion vor dem Vertrag</h2>
+                    <h2 className="text-lg font-bold text-neutral-900">Reflexion vor dem Vertrag</h2>
                   </div>
-                  <p className="mt-1 ml-11 text-sm text-slate-500">
+                  <p className="mt-1 ml-11 text-sm text-neutral-500">
                     Kurze Einschätzung bevor ihr den Mediationsvertrag unterzeichnet.
                   </p>
                 </div>
@@ -2289,7 +2289,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <>
                 {!allSigned && (
                   <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
                       <svg
                         className="h-4 w-4"
                         fill="none"
@@ -2304,7 +2304,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                         />
                       </svg>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Mediationsvertrag</h2>
+                    <h2 className="text-lg font-bold text-neutral-900">Mediationsvertrag</h2>
                   </div>
                 )}
                 {renderContractStep()}
@@ -2332,7 +2332,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   type="button"
                   onClick={skipCurrentStep}
                   disabled={advancing}
-                  className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
+                  className="text-xs text-neutral-300 hover:text-neutral-500 transition disabled:opacity-50"
                   title="Nur für Tests: Aktuellen Schritt überspringen"
                 >
                   ⚡ Test: Schritt überspringen
@@ -2341,7 +2341,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   type="button"
                   onClick={advanceToPhase2}
                   disabled={advancing}
-                  className="text-xs text-slate-300 hover:text-slate-500 transition disabled:opacity-50"
+                  className="text-xs text-neutral-300 hover:text-neutral-500 transition disabled:opacity-50"
                   title="Nur für Tests: Alle Schritte überspringen und direkt zu Phase 2"
                 >
                   {advancing ? "…" : "⚡ Test: Phase überspringen"}

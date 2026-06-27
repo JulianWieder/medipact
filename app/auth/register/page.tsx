@@ -101,26 +101,26 @@ export default function RegisterPage() {
     return (
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+          <div className="rounded-2xl border border-accent-200 bg-accent-50 p-8 text-center">
             <div className="mb-4 text-5xl">📧</div>
-            <h1 className="text-2xl font-black text-emerald-900 mb-3">
+            <h1 className="text-2xl font-black text-accent-900 mb-3">
               E-Mail bestätigen
             </h1>
-            <p className="text-slate-600 text-sm leading-relaxed mb-2">
+            <p className="text-neutral-600 text-sm leading-relaxed mb-2">
               Wir haben eine Bestätigungs-E-Mail an
             </p>
-            <p className="font-semibold text-slate-900 text-sm mb-4">
+            <p className="font-semibold text-neutral-900 text-sm mb-4">
               {registeredEmail}
             </p>
-            <p className="text-slate-600 text-sm leading-relaxed mb-6">
+            <p className="text-neutral-600 text-sm leading-relaxed mb-6">
               gesendet. Bitte klicke auf den Link in der E-Mail, um dein Konto
               zu aktivieren. Der Link ist 24 Stunden gültig.
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-neutral-500">
               Keine E-Mail erhalten?{" "}
               <button
                 onClick={() => setRegisteredEmail(null)}
-                className="font-semibold text-emerald-600 hover:underline"
+                className="font-semibold text-accent-600 hover:underline"
               >
                 Erneut registrieren
               </button>{" "}
@@ -131,7 +131,7 @@ export default function RegisterPage() {
           <div className="mt-8 text-center">
             <Link
               href="/auth/login"
-              className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition"
+              className="text-sm font-semibold text-accent-600 hover:text-accent-700 transition"
             >
               Zurück zur Anmeldung
             </Link>
@@ -147,10 +147,10 @@ export default function RegisterPage() {
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
           <div className="space-y-2 mb-10">
-            <h1 className="text-4xl font-black tracking-tight text-slate-900">
+            <h1 className="text-4xl font-black tracking-tight text-neutral-900">
               Konto erstellen
             </h1>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-neutral-600">
               Starten Sie Ihre Mediation mit medipact.
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-semibold text-slate-900 mb-2"
+                className="block text-sm font-semibold text-neutral-900 mb-2"
               >
                 Vollständiger Name
               </label>
@@ -171,10 +171,10 @@ export default function RegisterPage() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Max Mustermann"
-                className={`w-full rounded-2xl border px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/10 ${
+                className={`w-full rounded-2xl border px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-accent-500/10 ${
                   errors.name
                     ? "border-red-300 bg-red-50 focus:border-red-500"
-                    : "border-slate-200 bg-white focus:border-emerald-500"
+                    : "border-neutral-200 bg-white focus:border-accent-500"
                 }`}
               />
               {errors.name && (
@@ -186,7 +186,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold text-slate-900 mb-2"
+                className="block text-sm font-semibold text-neutral-900 mb-2"
               >
                 E-Mail-Adresse
               </label>
@@ -197,10 +197,10 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="kontakt@beispiel.de"
-                className={`w-full rounded-2xl border px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/10 ${
+                className={`w-full rounded-2xl border px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-accent-500/10 ${
                   errors.email
                     ? "border-red-300 bg-red-50 focus:border-red-500"
-                    : "border-slate-200 bg-white focus:border-emerald-500"
+                    : "border-neutral-200 bg-white focus:border-accent-500"
                 }`}
               />
               {errors.email && (
@@ -212,7 +212,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-slate-900 mb-2"
+                className="block text-sm font-semibold text-neutral-900 mb-2"
               >
                 Passwort
               </label>
@@ -224,16 +224,16 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className={`w-full rounded-2xl border px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/10 ${
+                  className={`w-full rounded-2xl border px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-accent-500/10 ${
                     errors.password
                       ? "border-red-300 bg-red-50 focus:border-red-500"
-                      : "border-slate-200 bg-white focus:border-emerald-500"
+                      : "border-neutral-200 bg-white focus:border-accent-500"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition"
                 >
                   {showPassword ? "Verbergen" : "Zeigen"}
                 </button>
@@ -241,7 +241,7 @@ export default function RegisterPage() {
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-neutral-500">
                 Mindestens 8 Zeichen erforderlich
               </p>
             </div>
@@ -250,7 +250,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-semibold text-slate-900 mb-2"
+                className="block text-sm font-semibold text-neutral-900 mb-2"
               >
                 Passwort wiederholen
               </label>
@@ -261,10 +261,10 @@ export default function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className={`w-full rounded-2xl border px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/10 ${
+                className={`w-full rounded-2xl border px-4 py-3 text-neutral-900 placeholder-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-accent-500/10 ${
                   errors.confirmPassword
                     ? "border-red-300 bg-red-50 focus:border-red-500"
-                    : "border-slate-200 bg-white focus:border-emerald-500"
+                    : "border-neutral-200 bg-white focus:border-accent-500"
                 }`}
               />
               {errors.confirmPassword && (
@@ -278,7 +278,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-emerald-600 px-8 py-4 text-base font-bold text-white transition hover:bg-emerald-700 hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-2xl bg-accent-600 px-8 py-4 text-base font-bold text-white transition hover:bg-accent-700 hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Wird registriert..." : "Konto erstellen"}
             </button>
@@ -290,18 +290,18 @@ export default function RegisterPage() {
           </form>
 
           {/* Terms */}
-          <p className="mt-6 text-center text-xs text-slate-600">
+          <p className="mt-6 text-center text-xs text-neutral-600">
             Durch die Registrierung stimmen Sie unseren{" "}
             <Link
               href="#"
-              className="font-semibold text-emerald-600 hover:underline"
+              className="font-semibold text-accent-600 hover:underline"
             >
               Nutzungsbedingungen
             </Link>{" "}
             und der{" "}
             <Link
               href="#"
-              className="font-semibold text-emerald-600 hover:underline"
+              className="font-semibold text-accent-600 hover:underline"
             >
               Datenschutzrichtlinie
             </Link>{" "}
@@ -309,12 +309,12 @@ export default function RegisterPage() {
           </p>
 
           {/* Sign In Link */}
-          <div className="mt-10 border-t border-slate-200 pt-10 text-center">
-            <p className="text-slate-600">
+          <div className="mt-10 border-t border-neutral-200 pt-10 text-center">
+            <p className="text-neutral-600">
               Bereits registriert?{" "}
               <Link
                 href="/auth/login"
-                className="font-semibold text-emerald-600 hover:text-emerald-700 transition"
+                className="font-semibold text-accent-600 hover:text-accent-700 transition"
               >
                 Hier anmelden
               </Link>
@@ -322,11 +322,11 @@ export default function RegisterPage() {
           </div>
 
           {/* Info Box */}
-          <div className="mt-10 rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-            <h3 className="font-bold text-emerald-900 mb-2">
+          <div className="mt-10 rounded-2xl border border-accent-200 bg-accent-50 p-6">
+            <h3 className="font-bold text-accent-900 mb-2">
               🔐 Sichere Daten
             </h3>
-            <p className="text-sm text-emerald-800">
+            <p className="text-sm text-accent-800">
               Ihre Daten werden verschlüsselt und sicher gespeichert. Wir geben
               Ihre Daten niemals an Dritte weiter.
             </p>

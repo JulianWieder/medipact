@@ -116,8 +116,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
       {/* Begrüßung */}
       <div>
         <p className="eyebrow mb-2">Workspace</p>
-        <h2 className="text-2xl font-bold text-slate-900">Übersicht</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="text-2xl font-bold text-neutral-900">Übersicht</h2>
+        <p className="mt-1 text-sm text-neutral-500">
           {isAdmin ? "Alle Mediationsfälle auf einen Blick." : "Ihre Mediationsfälle auf einen Blick."}
         </p>
       </div>
@@ -137,7 +137,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
           title="Laufende & ausstehende Fälle"
         />
         {loading ? (
-          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
         ) : upcoming.length === 0 ? (
           <EmptyState icon="⚖" text="Keine laufenden Fälle." />
         ) : (
@@ -152,11 +152,11 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                 <button
                   key={fall.id}
                   onClick={() => onSelectFall(fall)}
-                  className="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 hover:border-teal-200 hover:shadow-sm transition"
+                  className="w-full text-left rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <div className="font-semibold text-sm text-slate-800">{fall.title}</div>
+                      <div className="font-semibold text-sm text-neutral-800">{fall.title}</div>
                       <div className="mt-0.5 flex items-center gap-2 flex-wrap">
                         <TypeBadge type={fall.mediation_type} />
                       </div>
@@ -165,11 +165,11 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <ProgressBar value={progress} />
-                    <span className="text-xs text-slate-400 shrink-0">{progress}%</span>
+                    <span className="text-xs text-neutral-400 shrink-0">{progress}%</span>
                   </div>
-                  <div className="mt-1 text-xs text-slate-400">
+                  <div className="mt-1 text-xs text-neutral-400">
                     Phase:{" "}
-                    <span className="font-medium text-slate-600">{currentPhase}</span>
+                    <span className="font-medium text-neutral-600">{currentPhase}</span>
                   </div>
                 </button>
               );
@@ -182,30 +182,30 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
       <WCard className="p-5">
         <SectionHeader label="Kalender" title="Nächste Termine" />
         {termineLoading ? (
-          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
         ) : naechsteTermine.length === 0 ? (
           <EmptyState icon="📅" text="Keine anstehenden Termine." />
         ) : (
           <div className="space-y-2">
             {naechsteTermine.map((termin) => {
               const dt = new Date(termin.proposed_datetime);
-              const color = TYPE_COLOR[termin.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+              const color = TYPE_COLOR[termin.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
               return (
                 <button
                   key={termin.id}
                   onClick={() => onSelectTermin?.(dt)}
-                  className="w-full text-left flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:border-teal-200 hover:shadow-sm transition"
+                  className="w-full text-left flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition"
                 >
-                  <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-teal-50 py-2">
-                    <span className="text-[11px] font-semibold text-teal-600">
+                  <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-accent-50 py-2">
+                    <span className="text-[11px] font-semibold text-accent-600">
                       {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                     </span>
-                    <span className="text-xs font-bold text-teal-700">
+                    <span className="text-xs font-bold text-accent-700">
                       {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-slate-800 truncate">{termin.mediation_title}</div>
+                    <div className="font-semibold text-sm text-neutral-800 truncate">{termin.mediation_title}</div>
                     <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
                       {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
                     </span>
@@ -233,7 +233,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
         )}
 
         {feedbackLoading ? (
-          <p className="text-sm italic text-slate-400">Wird geladen…</p>
+          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
         ) : feedbackGroups.length === 0 ? (
           <EmptyState icon="💬" text="Noch kein Feedback eingegangen." />
         ) : (
@@ -244,13 +244,13 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                 <button
                   key={group.key}
                   onClick={() => fall && onSelectFall(fall)}
-                  className="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 hover:border-teal-200 hover:shadow-sm transition disabled:cursor-default"
+                  className="w-full text-left rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition disabled:cursor-default"
                   disabled={!fall}
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
-                      <div className="font-semibold text-sm text-slate-800">{group.participantName}</div>
-                      <div className="text-xs text-slate-400">{group.mediationTitle}</div>
+                      <div className="font-semibold text-sm text-neutral-800">{group.participantName}</div>
+                      <div className="text-xs text-neutral-400">{group.mediationTitle}</div>
                     </div>
                   </div>
 
@@ -262,15 +262,15 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                       const isAlert = entry.answers.weiterer_termin === "Ja, bitte";
                       return (
                         <div key={entry.id} className="flex items-center gap-2 text-xs">
-                          <span className="shrink-0 text-slate-400 w-[88px]">
+                          <span className="shrink-0 text-neutral-400 w-[88px]">
                             {new Date(entry.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                           </span>
                           <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
                             {FEEDBACK_OCCASION_LABELS[entry.occasion] ?? entry.occasion}
                           </span>
                           {trustKey && (
-                            <span className="text-slate-600">
-                              Vertrauen/Erfolg: <span className="font-semibold text-slate-800">{entry.answers[trustKey]}/10</span>
+                            <span className="text-neutral-600">
+                              Vertrauen/Erfolg: <span className="font-semibold text-neutral-800">{entry.answers[trustKey]}/10</span>
                             </span>
                           )}
                           {emojiKey && (
@@ -301,8 +301,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
               return (
                 <div key={type}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-slate-600">{TYPE_LABEL[type]}</span>
-                    <span className="text-xs text-slate-400">{count} Fälle</span>
+                    <span className="text-xs font-medium text-neutral-600">{TYPE_LABEL[type]}</span>
+                    <span className="text-xs text-neutral-400">{count} Fälle</span>
                   </div>
                   <ProgressBar value={pct} />
                 </div>

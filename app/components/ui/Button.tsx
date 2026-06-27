@@ -22,14 +22,14 @@ type NativeButtonProps = BaseProps &
 type ButtonProps = LinkButtonProps | NativeButtonProps;
 
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
 const variants = {
   primary:
-    "bg-teal-500 text-white hover:bg-teal-600 hover:shadow-[0_10px_25px_-5px_rgba(20,184,166,0.4)] active:scale-[0.96] active:shadow-inner",
+    "bg-accent-500 text-white hover:bg-accent-600 hover:shadow-[0_10px_25px_-5px_rgba(20,184,166,0.4)] active:scale-[0.96] active:shadow-inner",
   secondary:
-    "border border-slate-200 bg-white text-slate-900 hover:border-teal-400 hover:bg-teal-50/50 hover:text-teal-700 shadow-sm active:scale-[0.98]",
-  ghost: "text-slate-600 hover:text-teal-600 hover:bg-teal-50/30",
+    "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm active:scale-[0.98]",
+  ghost: "text-neutral-600 hover:text-accent-600 hover:bg-accent-50/30",
 };
 
 const sizes = {

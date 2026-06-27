@@ -58,14 +58,14 @@ function LeitfadenModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-100 bg-white px-6 py-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-600">Mediator-Leitfaden</p>
-            <h2 className="text-lg font-semibold text-slate-900">Qualitätsstandards</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-600">Mediator-Leitfaden</p>
+            <h2 className="text-lg font-semibold text-neutral-900">Qualitätsstandards</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+            className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition"
             aria-label="Schließen"
           >
             ✕
@@ -74,7 +74,7 @@ function LeitfadenModal({ onClose }: { onClose: () => void }) {
 
         {/* Content */}
         <div className="p-6 space-y-3">
-          <p className="text-sm text-slate-500 mb-5">
+          <p className="text-sm text-neutral-500 mb-5">
             Lies diesen Leitfaden bevor du eine Mediation leitest. Die Parteien sehen diese Seite nicht.
           </p>
           {LEITFADEN_SECTIONS.map((section, i) => (
@@ -82,32 +82,32 @@ function LeitfadenModal({ onClose }: { onClose: () => void }) {
               key={i}
               className={`rounded-xl border p-4 ${
                 section.highlight
-                  ? "border-teal-200 bg-teal-50"
-                  : "border-slate-100 bg-slate-50"
+                  ? "border-accent-200 bg-accent-50"
+                  : "border-neutral-100 bg-neutral-50"
               }`}
             >
-              <h3 className="mb-2 text-sm font-bold text-slate-800">{section.title}</h3>
+              <h3 className="mb-2 text-sm font-bold text-neutral-800">{section.title}</h3>
               {section.type === "list" ? (
                 <ul className="space-y-1.5">
                   {(section.content as string[]).map((item, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
+                    <li key={j} className="flex items-start gap-2 text-sm text-neutral-600">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
                       {item}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-600 leading-relaxed">{section.content as string}</p>
+                <p className="text-sm text-neutral-600 leading-relaxed">{section.content as string}</p>
               )}
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 border-t border-slate-100 bg-white px-6 py-4 flex justify-end">
+        <div className="sticky bottom-0 border-t border-neutral-100 bg-white px-6 py-4 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-full bg-teal-500 px-6 py-2 text-sm font-semibold text-white hover:bg-teal-600 transition"
+            className="rounded-full bg-accent-500 px-6 py-2 text-sm font-semibold text-white hover:bg-accent-600 transition"
           >
             Verstanden – Workspace öffnen →
           </button>
@@ -182,10 +182,10 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           <div className="flex h-full items-center justify-center p-8">
             <div className="text-center">
               <div className="text-4xl mb-3">⚖</div>
-              <p className="text-sm text-slate-400">Keinen Fall ausgewählt.</p>
+              <p className="text-sm text-neutral-400">Keinen Fall ausgewählt.</p>
               <button
                 onClick={() => setTab("liste")}
-                className="mt-4 text-xs text-teal-600 hover:underline"
+                className="mt-4 text-xs text-accent-600 hover:underline"
               >
                 → Zur Fallliste
               </button>
@@ -208,10 +208,10 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           <div className="flex h-full items-center justify-center p-8">
             <div className="text-center">
               <div className="text-4xl mb-3">👥</div>
-              <p className="text-sm text-slate-400">Keine Partei ausgewählt.</p>
+              <p className="text-sm text-neutral-400">Keine Partei ausgewählt.</p>
               <button
                 onClick={() => setTab("liste")}
-                className="mt-4 text-xs text-teal-600 hover:underline"
+                className="mt-4 text-xs text-accent-600 hover:underline"
               >
                 → Zur Parteienliste
               </button>
@@ -224,7 +224,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
 
     return (
       <div className="flex h-full items-center justify-center p-8">
-        <p className="text-sm text-slate-400">Keine Auswahl getroffen.</p>
+        <p className="text-sm text-neutral-400">Keine Auswahl getroffen.</p>
       </div>
     );
   }
@@ -256,7 +256,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       );
     }
     return (
-      <div className="p-6 text-sm text-slate-400 italic">
+      <div className="p-6 text-sm text-neutral-400 italic">
         Dieser Bereich ist in Vorbereitung.
       </div>
     );
@@ -267,7 +267,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
     return (
       <>
         {showLeitfaden && <LeitfadenModal onClose={() => setShowLeitfaden(false)} />}
-        <div className="flex h-full bg-[#f8fafc] text-slate-900">
+        <div className="flex h-full bg-neutral-50 text-neutral-900">
           <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
           <div className="flex-1 overflow-auto p-6">
             <WorkspaceDashboard
@@ -288,25 +288,25 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Einstellungen ───────────────────────────────────────────────────────
   if (section === "einstellungen") {
     return (
-      <div className="flex h-full bg-[#f8fafc] text-slate-900">
+      <div className="flex h-full bg-neutral-50 text-neutral-900">
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-lg">
             <p className="eyebrow mb-2">Workspace</p>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Einstellungen</h2>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
+            <h2 className="text-2xl font-bold text-neutral-900 mb-6">Einstellungen</h2>
+            <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <div className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">
                 Angemeldet als
               </div>
-              <div className="text-sm text-slate-700">{userEmail ?? "–"}</div>
-              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
+              <div className="text-sm text-neutral-700">{userEmail ?? "–"}</div>
+              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">
                 Rolle
               </div>
-              <div className="text-sm text-slate-700">{userRoleLabel}</div>
-              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">
+              <div className="text-sm text-neutral-700">{userRoleLabel}</div>
+              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">
                 Workspace Version
               </div>
-              <div className="text-sm text-slate-500">medipact workspace v1.0</div>
+              <div className="text-sm text-neutral-500">medipact workspace v1.0</div>
             </div>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Kalender ────────────────────────────────────────────────────────────
   if (section === "kalender") {
     return (
-      <div className="flex h-full bg-[#f8fafc] text-slate-900">
+      <div className="flex h-full bg-neutral-50 text-neutral-900">
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto p-6">
           <Kalender isAdmin={isAdmin} jumpToDate={kalenderDate} />
@@ -328,22 +328,22 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
 
   // ── Standard: Liste + Einzelansicht ─────────────────────────────────────
   return (
-    <div className="flex h-full bg-[#f8fafc] text-slate-900">
+    <div className="flex h-full bg-neutral-50 text-neutral-900">
       <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
 
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="flex h-12 shrink-0 items-center border-b border-slate-200 bg-white px-4 gap-4">
+        <div className="flex h-12 shrink-0 items-center border-b border-neutral-200 bg-white px-4 gap-4">
           {/* Tab-Toggle */}
-          <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-neutral-100 rounded-lg p-0.5">
             <button
               onClick={() => setTab("liste")}
               className={cn(
                 "px-3 py-1 text-sm rounded-md transition font-medium",
                 tab === "liste"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700",
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-700",
               )}
             >
               Liste
@@ -353,8 +353,8 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
               className={cn(
                 "px-3 py-1 text-sm rounded-md transition font-medium",
                 tab === "einzelansicht"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700",
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-700",
               )}
             >
               Einzelansicht
@@ -362,17 +362,17 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           </div>
 
           {/* Breadcrumb */}
-          <span className="text-sm font-semibold text-slate-600">{sectionLabel}</span>
+          <span className="text-sm font-semibold text-neutral-600">{sectionLabel}</span>
           {selectedFall && section === "faelle" && (
             <>
-              <span className="text-slate-300">·</span>
-              <span className="text-sm text-slate-500 truncate max-w-xs">{selectedFall.title}</span>
+              <span className="text-neutral-300">·</span>
+              <span className="text-sm text-neutral-500 truncate max-w-xs">{selectedFall.title}</span>
             </>
           )}
           {selectedPartei && section === "parteien" && (
             <>
-              <span className="text-slate-300">·</span>
-              <span className="text-sm text-slate-500">{selectedPartei.name}</span>
+              <span className="text-neutral-300">·</span>
+              <span className="text-sm text-neutral-500">{selectedPartei.name}</span>
             </>
           )}
         </div>
@@ -382,7 +382,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           {/* Liste (links) */}
           <div
             className={cn(
-              "overflow-auto border-r border-slate-200 bg-white",
+              "overflow-auto border-r border-neutral-200 bg-white",
               tab === "einzelansicht" && (selectedFall || selectedPartei)
                 ? "hidden xl:block xl:w-72 shrink-0"
                 : "flex-1",
@@ -394,7 +394,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           {/* Einzelansicht (rechts) */}
           <div
             className={cn(
-              "overflow-auto flex-1 bg-[#f8fafc]",
+              "overflow-auto flex-1 bg-neutral-50",
               tab === "liste" && !selectedFall && !selectedPartei ? "hidden xl:block" : "block",
             )}
           >

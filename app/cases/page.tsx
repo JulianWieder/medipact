@@ -84,18 +84,18 @@ export default function AboutPage() {
             sizes="100vw"
             style={{ objectFit: "cover" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
 
           <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
             <div className="container max-w-3xl">
-              <p className="eyebrow mb-4 text-teal-300">{eyebrow}</p>
+              <p className="eyebrow mb-4 text-accent-300">{eyebrow}</p>
 
               <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                {title} <span className="text-teal-300">{titleHighlight}</span>
+                {title} <span className="text-accent-300">{titleHighlight}</span>
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
                 {intro}
               </p>
 
@@ -120,14 +120,14 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-2xl">
             <h2 className="heading-2">{featuresTitle}</h2>
-            <p className="mt-4 text-slate-600">{featuresIntro}</p>
+            <p className="mt-4 text-neutral-600">{featuresIntro}</p>
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {features.map((item) => (
               <Link key={item.title} href={item.href} className="card">
                 <h3 className="heading-3">{item.title}</h3>
-                <p className="mt-4 text-slate-600">{item.text}</p>
+                <p className="mt-4 text-neutral-600">{item.text}</p>
               </Link>
             ))}
           </div>
@@ -139,17 +139,17 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-2xl">
             <h2 className="heading-2">{processTitle}</h2>
-            <p className="mt-4 text-slate-600">{processIntro}</p>
+            <p className="mt-4 text-neutral-600">{processIntro}</p>
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-4">
             {process.map((step, index) => (
               <div key={step.title} className="card">
-                <p className="text-sm text-emerald-700 font-medium">
+                <p className="text-sm text-accent-700 font-medium">
                   Schritt {index + 1}
                 </p>
                 <h3 className="heading-3 mt-2">{step.title}</h3>
-                <p className="mt-4 text-slate-600">{step.text}</p>
+                <p className="mt-4 text-neutral-600">{step.text}</p>
               </div>
             ))}
           </div>
@@ -166,7 +166,7 @@ export default function AboutPage() {
               Welche Situation kommt Ihrer am nächsten?
             </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-600">
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
               Die Fallbeispiele zeigen, wie sich Konflikte konkret entwickeln
               können — und an welcher Stelle Mediation wieder Struktur ins
               Gespräch bringt.
@@ -198,21 +198,21 @@ export default function AboutPage() {
                     </svg>
                   </div>
 
-                  <h3 className="heading-3 text-slate-900">{useCase.title}</h3>
+                  <h3 className="heading-3 text-neutral-900">{useCase.title}</h3>
 
                   {/* Szenario-Zitat */}
-                  <p className="mt-3 text-sm italic leading-relaxed text-slate-500">
+                  <p className="mt-3 text-sm italic leading-relaxed text-neutral-500">
                     {useCase.scenario}
                   </p>
                 </div>
 
                 {/* Karten-Body */}
                 <div className="flex flex-1 flex-col px-8 py-6">
-                  <p className="text-sm leading-7 text-slate-600">
+                  <p className="text-sm leading-7 text-neutral-600">
                     {useCase.text}
                   </p>
 
-                  <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-700">
+                  <ul className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
                     {useCase.points.map((point) => (
                       <li key={point} className="flex items-start gap-3">
                         <span
@@ -239,7 +239,7 @@ export default function AboutPage() {
       <section className="section section-strong">
         <div className="container text-center max-w-2xl">
           <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl leading-tight">{finalCtaTitle}</h2>
-          <p className="mt-4 text-slate-300">{finalCtaText}</p>
+          <p className="mt-4 text-neutral-300">{finalCtaText}</p>
 
           <Link
             href={finalCta.href}

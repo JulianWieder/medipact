@@ -123,12 +123,12 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
     <div className="space-y-6">
       <div>
         <p className="eyebrow mb-2">Workspace</p>
-        <h2 className="text-2xl font-bold text-slate-900">Kalender</h2>
-        <p className="mt-1 text-sm text-slate-500">Alle Terminslots aus Ihren Mediationsfällen.</p>
+        <h2 className="text-2xl font-bold text-neutral-900">Kalender</h2>
+        <p className="mt-1 text-sm text-neutral-500">Alle Terminslots aus Ihren Mediationsfällen.</p>
       </div>
 
       {/* Ansicht-Umschalter */}
-      <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5 w-fit">
+      <div className="flex items-center gap-0.5 bg-neutral-100 rounded-lg p-0.5 w-fit">
         {(["monat", "tag", "liste"] as const).map((v) => (
           <button
             key={v}
@@ -138,7 +138,7 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
             }}
             className={[
               "px-3 py-1 text-sm rounded-md transition font-medium capitalize",
-              view === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700",
+              view === v ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-700",
             ].join(" ")}
           >
             {v === "monat" ? "Monatsansicht" : v === "tag" ? "Tagesansicht" : "Listenansicht"}
@@ -147,7 +147,7 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
       </div>
 
       {loading ? (
-        <p className="text-sm italic text-slate-400">Wird geladen…</p>
+        <p className="text-sm italic text-neutral-400">Wird geladen…</p>
       ) : view === "liste" ? (
         /* ── Liste ────────────────────────────────────────────── */
         <WCard className="p-5">
@@ -158,26 +158,26 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
             <div className="space-y-2">
               {upcoming.map((e) => {
                 const dt = new Date(e.proposed_datetime);
-                const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                const color = TYPE_COLOR[e.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
                 const pending = statusLabel(e.status);
                 return (
                   <div
                     key={e.id}
                     className={[
                       "flex items-start gap-3 rounded-2xl border bg-white p-4",
-                      pending ? "border-dashed border-amber-300" : "border-slate-200",
+                      pending ? "border-dashed border-amber-300" : "border-neutral-200",
                     ].join(" ")}
                   >
                     {/* Datum-Block */}
-                    <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-teal-50 py-2">
-                      <span className="text-xs font-bold text-teal-600 uppercase">
+                    <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-accent-50 py-2">
+                      <span className="text-xs font-bold text-accent-600 uppercase">
                         {dt.toLocaleDateString("de-DE", { month: "short" })}
                       </span>
-                      <span className="text-xl font-bold text-teal-700 leading-none">{dt.getDate()}</span>
+                      <span className="text-xl font-bold text-accent-700 leading-none">{dt.getDate()}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm text-slate-800 truncate">{e.mediation_title}</div>
-                      <div className="mt-0.5 text-xs text-slate-500">
+                      <div className="font-semibold text-sm text-neutral-800 truncate">{e.mediation_title}</div>
+                      <div className="mt-0.5 text-xs text-neutral-500">
                         {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
                         &nbsp;·&nbsp;
                         {dt.toLocaleDateString("de-DE", { weekday: "long" })}
@@ -206,18 +206,18 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={prevDay}
-              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-100 text-neutral-500 transition"
             >
               ‹
             </button>
             <div className="flex flex-col items-center">
-              <span className="text-base font-semibold text-slate-800">
+              <span className="text-base font-semibold text-neutral-800">
                 {tagDate.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
               </span>
               {!isSameDay(tagDate, today) && (
                 <button
                   onClick={() => setTagDate(new Date())}
-                  className="text-[11px] font-medium text-teal-600 hover:underline"
+                  className="text-[11px] font-medium text-accent-600 hover:underline"
                 >
                   Heute
                 </button>
@@ -225,7 +225,7 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
             </div>
             <button
               onClick={nextDay}
-              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-100 text-neutral-500 transition"
             >
               ›
             </button>
@@ -235,18 +235,18 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
           {tagEvents.length === 0 ? (
             <EmptyState icon="📅" text="Keine Termine an diesem Tag." />
           ) : (
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 overflow-hidden">
+            <div className="divide-y divide-neutral-100 rounded-xl border border-neutral-100 overflow-hidden">
               {DAY_HOURS.map((hour) => {
                 const hourEvents = tagEvents.filter((e) => new Date(e.proposed_datetime).getHours() === hour);
                 return (
                   <div key={hour} className="flex min-h-[44px]">
-                    <div className="w-14 shrink-0 py-2 px-2 text-right text-[11px] font-medium text-slate-400">
+                    <div className="w-14 shrink-0 py-2 px-2 text-right text-[11px] font-medium text-neutral-400">
                       {String(hour).padStart(2, "0")}:00
                     </div>
-                    <div className="flex-1 border-l border-slate-100 py-1.5 px-2 space-y-1">
+                    <div className="flex-1 border-l border-neutral-100 py-1.5 px-2 space-y-1">
                       {hourEvents.map((e) => {
                         const dt = new Date(e.proposed_datetime);
-                        const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                        const color = TYPE_COLOR[e.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
                         const pending = statusLabel(e.status);
                         return (
                           <div
@@ -283,16 +283,16 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={prevMonth}
-                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-100 text-neutral-500 transition"
               >
                 ‹
               </button>
-              <span className="text-base font-semibold text-slate-800">
+              <span className="text-base font-semibold text-neutral-800">
                 {MONTHS[month]} {year}
               </span>
               <button
                 onClick={nextMonth}
-                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-100 text-neutral-500 transition"
               >
                 ›
               </button>
@@ -301,14 +301,14 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
             {/* Wochentage */}
             <div className="grid grid-cols-7 mb-1">
               {WEEKDAYS.map((w) => (
-                <div key={w} className="text-center text-[10px] font-bold uppercase text-slate-400 py-1">
+                <div key={w} className="text-center text-[10px] font-bold uppercase text-neutral-400 py-1">
                   {w}
                 </div>
               ))}
             </div>
 
             {/* Tage */}
-            <div className="grid grid-cols-7 gap-px bg-slate-100 rounded-xl overflow-hidden">
+            <div className="grid grid-cols-7 gap-px bg-neutral-100 rounded-xl overflow-hidden">
               {Array.from({ length: rows * 7 }).map((_, i) => {
                 const dayNum = i - offset + 1;
                 const isValid = dayNum >= 1 && dayNum <= days;
@@ -324,13 +324,13 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                     onClick={() => date && setSelected(isSelected ? null : date)}
                     className={[
                       "relative flex flex-col items-center pt-1.5 pb-2 bg-white transition min-h-[52px]",
-                      !isValid ? "opacity-0 pointer-events-none" : "hover:bg-slate-50",
-                      isSelected ? "ring-2 ring-inset ring-teal-500" : "",
+                      !isValid ? "opacity-0 pointer-events-none" : "hover:bg-neutral-50",
+                      isSelected ? "ring-2 ring-inset ring-accent-500" : "",
                     ].join(" ")}
                   >
                     <span className={[
                       "flex h-6 w-6 items-center justify-center rounded-full text-sm",
-                      isToday ? "bg-teal-500 text-white font-bold" : "text-slate-700",
+                      isToday ? "bg-accent-500 text-white font-bold" : "text-neutral-700",
                     ].join(" ")}>
                       {isValid ? dayNum : ""}
                     </span>
@@ -341,12 +341,12 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                             key={idx}
                             className={[
                               "w-1.5 h-1.5 rounded-full",
-                              statusLabel(e.status) ? "bg-amber-400" : "bg-teal-500",
+                              statusLabel(e.status) ? "bg-amber-400" : "bg-accent-500",
                             ].join(" ")}
                           />
                         ))}
                         {dayEvents.length > 3 && (
-                          <span className="text-[8px] text-teal-600 font-bold">+{dayEvents.length - 3}</span>
+                          <span className="text-[8px] text-accent-600 font-bold">+{dayEvents.length - 3}</span>
                         )}
                       </div>
                     )}
@@ -370,7 +370,7 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                     setTagDate(selected);
                     setView("tag");
                   }}
-                  className="shrink-0 text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline whitespace-nowrap mt-1"
+                  className="shrink-0 text-xs font-semibold text-accent-600 hover:text-accent-700 hover:underline whitespace-nowrap mt-1"
                 >
                   → Tagesansicht öffnen
                 </button>
@@ -381,24 +381,24 @@ export function Kalender({ isAdmin = false, jumpToDate = null }: KalenderProps) 
                 <div className="space-y-2">
                   {selectedEvents.map((e) => {
                     const dt = new Date(e.proposed_datetime);
-                    const color = TYPE_COLOR[e.mediation_type] ?? "bg-slate-50 text-slate-600 border-slate-200";
+                    const color = TYPE_COLOR[e.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
                     const pending = statusLabel(e.status);
                     return (
                       <div
                         key={e.id}
                         className={[
                           "flex items-start gap-3 rounded-2xl border bg-white p-4",
-                          pending ? "border-dashed border-amber-300" : "border-slate-200",
+                          pending ? "border-dashed border-amber-300" : "border-neutral-200",
                         ].join(" ")}
                       >
-                        <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-teal-50 py-2">
-                          <span className="text-sm font-bold text-teal-700">
+                        <div className="flex flex-col items-center justify-center w-12 shrink-0 rounded-xl bg-accent-50 py-2">
+                          <span className="text-sm font-bold text-accent-700">
                             {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                           </span>
-                          <span className="text-[10px] text-teal-500">Uhr</span>
+                          <span className="text-[10px] text-accent-500">Uhr</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-slate-800 truncate">{e.mediation_title}</div>
+                          <div className="font-semibold text-sm text-neutral-800 truncate">{e.mediation_title}</div>
                           <div className="mt-1 flex flex-wrap gap-1.5">
                             <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
                               {TYPE_LABEL[e.mediation_type] ?? e.mediation_type}

@@ -52,7 +52,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur-sm">
       <div className="container flex h-[73px] items-center justify-between gap-6">
 
         {/* Logo */}
@@ -65,7 +65,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
             className="h-8 w-8 rounded-lg object-cover"
             priority
           />
-          <span className="text-lg font-black tracking-tight text-slate-900">
+          <span className="text-lg font-black tracking-tight text-neutral-900">
             medipact
           </span>
         </Link>
@@ -82,8 +82,8 @@ export default function DashboardHeaderClient({ username, email }: Props) {
                 href={item.href}
                 className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? "bg-slate-100 text-slate-900"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-neutral-100 text-neutral-900"
+                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
                 }`}
               >
                 {item.label}
@@ -99,7 +99,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
           <Link
             href="/dashboard"
             title="Eingehende Einladungen"
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -116,16 +116,16 @@ export default function DashboardHeaderClient({ username, email }: Props) {
             <button
               type="button"
               onClick={() => setDropdownOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-neutral-100"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-600 text-sm font-bold text-white">
                 {initials}
               </div>
-              <span className="hidden max-w-[128px] truncate text-sm font-semibold text-slate-900 sm:block">
+              <span className="hidden max-w-[128px] truncate text-sm font-semibold text-neutral-900 sm:block">
                 {username}
               </span>
               <svg
-                className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${
+                className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform ${
                   dropdownOpen ? "rotate-180" : ""
                 }`}
                 fill="none"
@@ -138,17 +138,17 @@ export default function DashboardHeaderClient({ username, email }: Props) {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/80">
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg shadow-neutral-200/80">
                 {/* User info */}
-                <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+                <div className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-600 text-sm font-bold text-white">
                     {initials}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900">
+                    <p className="truncate text-sm font-semibold text-neutral-900">
                       {username}
                     </p>
-                    <p className="truncate text-xs text-slate-500">{email}</p>
+                    <p className="truncate text-xs text-neutral-500">{email}</p>
                   </div>
                 </div>
 
@@ -157,7 +157,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
                   <button
                     type="button"
                     onClick={() => signOut({ callbackUrl: "/auth/login" })}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-red-50 hover:text-red-700"
                   >
                     <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />

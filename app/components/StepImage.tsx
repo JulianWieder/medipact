@@ -27,10 +27,10 @@ export function StepImage({ src, alt, num }: Props) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`${alt} – Bild vergrößern`}
-        className="relative hidden h-20 w-20 shrink-0 cursor-zoom-in overflow-hidden rounded-2xl shadow-sm transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 sm:block"
+        className="relative hidden h-20 w-20 shrink-0 cursor-zoom-in overflow-hidden rounded-2xl shadow-sm transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 sm:block"
       >
         <Image src={src} alt={alt} fill sizes="80px" style={{ objectFit: "cover" }} />
-        <div className="absolute bottom-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-teal-700 text-xs font-bold text-white shadow">
+        <div className="absolute bottom-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-accent-700 text-xs font-bold text-white shadow">
           {num}
         </div>
       </button>
@@ -41,7 +41,7 @@ export function StepImage({ src, alt, num }: Props) {
           aria-modal="true"
           aria-label={alt}
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-6 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-950/80 p-6 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -64,7 +64,7 @@ export function StepImage({ src, alt, num }: Props) {
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Schließen"
-              className="absolute -top-4 -right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 shadow-lg transition hover:scale-110 hover:text-slate-950"
+              className="absolute -top-4 -right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-700 shadow-lg transition hover:scale-110 hover:text-neutral-950"
             >
               ✕
             </button>

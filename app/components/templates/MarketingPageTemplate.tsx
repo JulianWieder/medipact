@@ -83,7 +83,7 @@ function SectionLead({
     <div className={center ? "mb-14 text-center" : "mb-14 max-w-3xl"}>
       {eyebrow && <div className="eyebrow mb-4">{eyebrow}</div>}
       <h2 className="heading-2">{title}</h2>
-      {text && <p className="mt-5 text-lg leading-8 text-slate-600">{text}</p>}
+      {text && <p className="mt-5 text-lg leading-8 text-neutral-600">{text}</p>}
     </div>
   );
 }
@@ -128,24 +128,24 @@ export function MarketingPageTemplate({
                 sizes="100vw"
                 style={{ objectFit: "cover" }}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
 
               <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
                 <div className="container">
                   <div className="max-w-2xl">
-                    <div className="eyebrow text-teal-300">{eyebrow}</div>
+                    <div className="eyebrow text-accent-300">{eyebrow}</div>
 
                     <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
                       {title}
                       {titleHighlight && (
-                        <span className="mt-2 block bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                        <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
                           {titleHighlight}
                         </span>
                       )}
                     </h1>
 
-                    <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                    <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
                       {intro}
                     </p>
 
@@ -172,7 +172,7 @@ export function MarketingPageTemplate({
         ) : (
           <section className="relative overflow-hidden section section-base">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-emerald-100 blur-3xl opacity-60" />
+              <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-accent-100 blur-3xl opacity-60" />
               <div className="absolute right-[-6rem] top-20 h-80 w-80 rounded-full bg-cyan-100 blur-3xl opacity-50" />
             </div>
 
@@ -183,13 +183,13 @@ export function MarketingPageTemplate({
                 <h1 className="heading-1 mt-8">
                   {title}
                   {titleHighlight && (
-                    <span className="mt-2 block bg-gradient-to-r from-slate-800 via-teal-600 to-teal-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
+                    <span className="mt-2 block bg-gradient-to-r from-neutral-800 via-accent-600 to-accent-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
                       {titleHighlight}
                     </span>
                   )}
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-700">
                   {intro}
                 </p>
 
@@ -214,7 +214,7 @@ export function MarketingPageTemplate({
                 {heroAside ?? (
                   <Card className="rounded-[2rem] p-8">
                     <h3 className="heading-3">Produktvorschau</h3>
-                    <p className="mt-4 leading-7 text-slate-700">
+                    <p className="mt-4 leading-7 text-neutral-700">
                       Hier kann ein Video, ein Mockup oder eine Produktvorschau
                       stehen.
                     </p>
@@ -237,7 +237,7 @@ export function MarketingPageTemplate({
               {features.map((feature) => (
                 <Card key={feature.title} className="rounded-[2rem] p-8">
                   <h3 className="heading-3">{feature.title}</h3>
-                  <p className="mt-4 leading-7 text-slate-700">
+                  <p className="mt-4 leading-7 text-neutral-700">
                     {feature.text}
                   </p>
                 </Card>
@@ -254,13 +254,13 @@ export function MarketingPageTemplate({
               {process.map((step, index) => (
                 <Card key={step.title} className="rounded-[2rem] p-8">
                   <div className="flex gap-5">
-                    <div className="min-w-fit rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 px-4 py-3 text-center font-bold text-white shadow-md">
+                    <div className="min-w-fit rounded-2xl bg-gradient-to-br from-accent-600 to-accent-500 px-4 py-3 text-center font-bold text-white shadow-md">
                       {String(index + 1).padStart(2, "0")}
                     </div>
 
                     <div>
                       <h3 className="heading-3">{step.title}</h3>
-                      <p className="mt-3 leading-7 text-slate-700">
+                      <p className="mt-3 leading-7 text-neutral-700">
                         {step.text}
                       </p>
                     </div>
@@ -287,19 +287,19 @@ export function MarketingPageTemplate({
                     key={plan.title}
                     className={`rounded-[2rem] border p-8 ${
                       plan.featured
-                        ? "bg-slate-800/70 border-teal-600/40 shadow-2xl shadow-teal-950/50"
-                        : "bg-slate-800/50 border-slate-700"
+                        ? "bg-neutral-800/70 border-accent-600/40 shadow-2xl shadow-accent-950/50"
+                        : "bg-neutral-800/50 border-neutral-700"
                     }`}
                   >
                     {plan.featured && (
-                      <div className="mb-4 inline-block rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-300">
+                      <div className="mb-4 inline-block rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-300">
                         Empfohlen
                       </div>
                     )}
                     <h3 className="text-xl font-bold text-white">{plan.title}</h3>
                     <div
                       className={`mt-1 text-sm font-medium ${
-                        plan.featured ? "text-teal-300" : "text-slate-500"
+                        plan.featured ? "text-accent-300" : "text-neutral-500"
                       }`}
                     >
                       {plan.status}
@@ -311,11 +311,11 @@ export function MarketingPageTemplate({
                       {plan.features.map((feature) => (
                         <li
                           key={feature}
-                          className="flex items-start gap-3 text-sm text-slate-300"
+                          className="flex items-start gap-3 text-sm text-neutral-300"
                         >
                           <span
                             className={`mt-0.5 h-4 w-4 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                              plan.featured ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-400"
+                              plan.featured ? "bg-accent-500 text-white" : "bg-neutral-700 text-neutral-400"
                             }`}
                           >
                             ✓
@@ -343,7 +343,7 @@ export function MarketingPageTemplate({
               {trustImage ? (
                 <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
                   <div
-                    className="relative mx-auto w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-900/5"
+                    className="relative mx-auto w-full max-w-xl overflow-hidden rounded-[2rem] border border-neutral-200 shadow-xl shadow-neutral-900/5"
                     style={{ aspectRatio: "4/3" }}
                   >
                     <Image
@@ -359,7 +359,7 @@ export function MarketingPageTemplate({
                     {trustPoints.map((point) => (
                       <Card key={point.title} className="rounded-[2rem] p-8">
                         <h3 className="heading-3">{point.title}</h3>
-                        <p className="mt-4 leading-7 text-slate-700">
+                        <p className="mt-4 leading-7 text-neutral-700">
                           {point.text}
                         </p>
                       </Card>
@@ -371,7 +371,7 @@ export function MarketingPageTemplate({
                   {trustPoints.map((point) => (
                     <Card key={point.title} className="rounded-[2rem] p-8">
                       <h3 className="heading-3">{point.title}</h3>
-                      <p className="mt-4 leading-7 text-slate-700">
+                      <p className="mt-4 leading-7 text-neutral-700">
                         {point.text}
                       </p>
                     </Card>
@@ -391,7 +391,7 @@ export function MarketingPageTemplate({
                 {faqs.map((faq) => (
                   <Card key={faq.question} className="rounded-[2rem] p-8">
                     <h3 className="heading-3">{faq.question}</h3>
-                    <p className="mt-4 leading-7 text-slate-700">
+                    <p className="mt-4 leading-7 text-neutral-700">
                       {faq.answer}
                     </p>
                   </Card>
@@ -407,7 +407,7 @@ export function MarketingPageTemplate({
               {finalCtaTitle}
             </h2>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-300">
               {finalCtaText}
             </p>
 

@@ -230,8 +230,8 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
         <section className="container py-12">
           <div className="app-surface p-8">
             <p className="eyebrow mb-3">Workflow-Einstellungen</p>
-            <h1 className="heading-2 text-slate-900">Kein Zugriff</h1>
-            <p className="mt-3 text-sm text-slate-600">
+            <h1 className="heading-2 text-neutral-900">Kein Zugriff</h1>
+            <p className="mt-3 text-sm text-neutral-600">
               Nur Mediatoren und Admins können den Workflow für einen Fall anpassen.
             </p>
             <button type="button" onClick={() => router.back()} className="btn btn-ghost mt-6">
@@ -248,8 +248,8 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
       <section className="container py-12">
         <div className="app-surface p-8">
           <p className="eyebrow mb-3">Workflow-Einstellungen</p>
-          <h1 className="heading-2 text-slate-900">Wer muss welchen Schritt abschließen?</h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-600">
+          <h1 className="heading-2 text-neutral-900">Wer muss welchen Schritt abschließen?</h1>
+          <p className="mt-3 max-w-2xl text-sm text-neutral-600">
             Standardmäßig müssen nur die Konfliktparteien
             ({(data?.default_required_roles ?? []).map((r) => roleLabel[r] ?? r).join(", ")})
             einen Schritt abschließen, damit er als erledigt gilt. Hier kannst du das pro Fall
@@ -264,7 +264,7 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
           )}
 
           {loading ? (
-            <p className="mt-8 text-sm text-slate-500">Lädt …</p>
+            <p className="mt-8 text-sm text-neutral-500">Lädt …</p>
           ) : (
             <div className="mt-8 space-y-4">
               {CATALOG.map((entry) => {
@@ -276,30 +276,30 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
                   <div
                     key={k}
                     className={`rounded-xl border p-4 ${
-                      overridden ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"
+                      overridden ? "border-accent-300 bg-accent-50" : "border-neutral-200 bg-white"
                     }`}
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
                           {entry.phaseLabel}
                         </p>
-                        <h3 className="text-sm font-bold text-slate-800">{entry.title}</h3>
+                        <h3 className="text-sm font-bold text-neutral-800">{entry.title}</h3>
                       </div>
                       {overridden && (
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        <span className="rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold text-accent-700">
                           Angepasst
                         </span>
                       )}
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-3">
-                      <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                      <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
                         <input
                           type="checkbox"
                           checked={skip}
                           onChange={() => toggleSkip(k)}
-                          className="h-4 w-4 rounded border-slate-300"
+                          className="h-4 w-4 rounded border-neutral-300"
                         />
                         Schritt für diesen Fall überspringen
                       </label>
@@ -310,13 +310,13 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
                         {(data?.available_roles ?? []).map((role) => (
                           <label
                             key={role}
-                            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                            className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700"
                           >
                             <input
                               type="checkbox"
                               checked={selected.has(role)}
                               onChange={() => toggleRole(k, role)}
-                              className="h-4 w-4 rounded border-slate-300"
+                              className="h-4 w-4 rounded border-neutral-300"
                             />
                             {roleLabel[role] ?? role}
                           </label>
@@ -350,7 +350,7 @@ export default function WorkflowClient({ mediationId, userRole }: Props) {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
+          <div className="mt-8 flex items-center justify-between border-t border-neutral-100 pt-6">
             <button
               type="button"
               onClick={() => router.push(`/dashboard/${hashId(mediationId)}`)}

@@ -95,7 +95,7 @@ export default function SituationCheck() {
     <Card className="rounded-[2rem] p-8 sm:p-10">
       <p className="eyebrow mb-4">Schnell-Check</p>
       <h2 className="heading-2">Ist Mediation für Ihre Situation geeignet?</h2>
-      <p className="mt-4 leading-7 text-slate-600">
+      <p className="mt-4 leading-7 text-neutral-600">
         Beantworten Sie {questions.length} kurze Fragen. Es werden keine
         Angaben gespeichert oder übermittelt.
       </p>
@@ -108,16 +108,16 @@ export default function SituationCheck() {
                 key={q.id}
                 className={`h-1.5 flex-1 rounded-full ${
                   i < step
-                    ? "bg-teal-500"
+                    ? "bg-accent-500"
                     : i === step
-                      ? "bg-teal-300"
-                      : "bg-slate-200"
+                      ? "bg-accent-300"
+                      : "bg-neutral-200"
                 }`}
               />
             ))}
           </div>
 
-          <p className="text-lg font-medium text-slate-900">
+          <p className="text-lg font-medium text-neutral-900">
             {questions[step].text}
           </p>
 
@@ -153,14 +153,14 @@ export default function SituationCheck() {
             <h3 className="heading-3 text-red-700">
               Mediation ist hier wahrscheinlich nicht der richtige Weg.
             </h3>
-            <p className="mt-3 leading-7 text-slate-700">
+            <p className="mt-3 leading-7 text-neutral-700">
               Wenn Gewalt, Drohungen, Stalking oder ein starkes
               Machtungleichgewicht im Raum stehen, kann ein Mediationsgespräch
               nicht das nötige Sicherheitsgefühl bieten – und wäre nicht fair
               gegenüber der betroffenen Person. Bitte wenden Sie sich zuerst an
               eine Stelle, die unmittelbar helfen kann.
             </p>
-            <ul className="mt-5 space-y-2 text-sm text-slate-700">
+            <ul className="mt-5 space-y-2 text-sm text-neutral-700">
               <li>
                 <strong>Polizei (Notfall):</strong> 110
               </li>
@@ -176,7 +176,7 @@ export default function SituationCheck() {
               </li>
             </ul>
           </Card>
-          <p className="mt-6 leading-7 text-slate-600">
+          <p className="mt-6 leading-7 text-neutral-600">
             Wenn sich die Lage später ändert oder Sie unsicher sind, was in
             Ihrem konkreten Fall sinnvoll ist, können Sie uns trotzdem
             unverbindlich schreiben – wir ordnen die Situation gemeinsam mit
@@ -195,10 +195,10 @@ export default function SituationCheck() {
 
       {finished && result === "suitable" && (
         <div className="mt-10">
-          <p className="text-lg font-medium text-emerald-700">
+          <p className="text-lg font-medium text-accent-700">
             Ihre Situation klingt grundsätzlich geeignet für Mediation.
           </p>
-          <p className="mt-3 leading-7 text-slate-600">
+          <p className="mt-3 leading-7 text-neutral-600">
             Beide Seiten sind gesprächsbereit, es gibt keinen akuten
             Sicherheitsaspekt, und es geht um eine gemeinsame Lösung. Das ist
             ein guter Ausgangspunkt.
@@ -214,10 +214,10 @@ export default function SituationCheck() {
 
       {finished && result === "unsure" && (
         <div className="mt-10">
-          <p className="text-lg font-medium text-slate-900">
+          <p className="text-lg font-medium text-neutral-900">
             Ihre Situation ist noch nicht klar einzuordnen.
           </p>
-          <p className="mt-3 leading-7 text-slate-600">
+          <p className="mt-3 leading-7 text-neutral-600">
             Das ist normal – nicht jeder Konflikt lässt sich mit ein paar
             Fragen eindeutig einordnen. Oft hilft ein kurzer Austausch, um zu
             sehen, was genau noch fehlt, damit ein faires Gespräch möglich
@@ -236,11 +236,11 @@ export default function SituationCheck() {
 
       {finished && result === "not_suitable" && (
         <div className="mt-10">
-          <p className="text-lg font-medium text-slate-900">
+          <p className="text-lg font-medium text-neutral-900">
             Mediation ist aktuell wahrscheinlich nicht der passende nächste
             Schritt.
           </p>
-          <p className="mt-3 leading-7 text-slate-600">
+          <p className="mt-3 leading-7 text-neutral-600">
             Wenn eine Seite nicht gesprächsbereit ist, keine Verantwortung
             übernimmt oder es vor allem um eine rechtlich verbindliche
             Klärung geht, ist anwaltliche oder gerichtliche Beratung oft der

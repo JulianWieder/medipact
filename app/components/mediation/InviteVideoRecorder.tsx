@@ -180,16 +180,16 @@ export default function InviteVideoRecorder({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-bold text-slate-800">
+    <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+      <p className="text-sm font-bold text-neutral-800">
         Persönliche Video-Botschaft{" "}
         {required ? (
           <span className="font-normal text-red-500">(Pflicht)</span>
         ) : (
-          <span className="font-normal text-slate-400">(optional)</span>
+          <span className="font-normal text-neutral-400">(optional)</span>
         )}
       </p>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-neutral-500">
         Nimm eine kurze Video-Nachricht auf. Die andere Seite kann sie ansehen, sobald sie die
         Einladung im System annimmt. Der Inhalt wird automatisch in das Textfeld unten übertragen
         und kann dort bearbeitet werden.
@@ -197,13 +197,13 @@ export default function InviteVideoRecorder({
 
       <div className="mt-4">
         {status === "recording" && (
-          <div className="overflow-hidden rounded-xl bg-slate-900">
+          <div className="overflow-hidden rounded-xl bg-neutral-900">
             <video ref={videoRef} className="aspect-video w-full" playsInline muted />
           </div>
         )}
 
         {(status === "uploading" || status === "transcribing" || status === "done" || status === "error") && previewUrl && (
-          <div className="overflow-hidden rounded-xl bg-slate-900">
+          <div className="overflow-hidden rounded-xl bg-neutral-900">
             <video src={previewUrl} className="aspect-video w-full" controls />
           </div>
         )}
@@ -228,7 +228,7 @@ export default function InviteVideoRecorder({
           )}
 
           {status === "requesting" && (
-            <span className="text-sm text-slate-500">Kamera wird aktiviert…</span>
+            <span className="text-sm text-neutral-500">Kamera wird aktiviert…</span>
           )}
 
           {status === "recording" && (
@@ -236,23 +236,23 @@ export default function InviteVideoRecorder({
               <button type="button" onClick={stopRecording} className="btn btn-primary">
                 Aufnahme beenden
               </button>
-              <span className="text-sm font-mono text-slate-500">
+              <span className="text-sm font-mono text-neutral-500">
                 {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")} / {MAX_SECONDS}s
               </span>
             </>
           )}
 
           {status === "uploading" && (
-            <span className="text-sm text-slate-500">Video wird hochgeladen…</span>
+            <span className="text-sm text-neutral-500">Video wird hochgeladen…</span>
           )}
 
           {status === "transcribing" && (
-            <span className="text-sm text-slate-500">Video wird transkribiert…</span>
+            <span className="text-sm text-neutral-500">Video wird transkribiert…</span>
           )}
 
           {status === "done" && (
             <>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold text-accent-700">
                 Video bereit ✓
               </span>
               <button type="button" onClick={reset} className="btn btn-ghost">

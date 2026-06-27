@@ -151,8 +151,8 @@ export const TYPE_COLOR: Record<string, string> = {
 export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
   draft: {
     label: "Entwurf",
-    dot: "bg-slate-400",
-    badge: "bg-slate-100 text-slate-600 border-slate-200",
+    dot: "bg-neutral-400",
+    badge: "bg-neutral-100 text-neutral-600 border-neutral-200",
   },
   pending: {
     label: "Ausstehend",
@@ -161,13 +161,13 @@ export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: 
   },
   active: {
     label: "Aktiv",
-    dot: "bg-teal-500",
-    badge: "bg-teal-50 text-teal-700 border-teal-200",
+    dot: "bg-accent-500",
+    badge: "bg-accent-50 text-accent-700 border-accent-200",
   },
   completed: {
     label: "Abgeschlossen",
-    dot: "bg-slate-300",
-    badge: "bg-slate-50 text-slate-500 border-slate-100",
+    dot: "bg-neutral-300",
+    badge: "bg-neutral-50 text-neutral-500 border-neutral-100",
   },
 };
 

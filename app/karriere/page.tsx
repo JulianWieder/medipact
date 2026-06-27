@@ -68,32 +68,32 @@ export default function KarrierePage() {
             sizes="100vw"
             style={{ objectFit: "cover" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
 
           <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <div className="max-w-2xl">
-                <div className="eyebrow text-teal-300">Karriere bei medipact</div>
+                <div className="eyebrow text-accent-300">Karriere bei medipact</div>
 
                 <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
                   Konflikte lösen –
-                  <span className="mt-2 block bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                  <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
                     mit Methode und Haltung.
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
                   Medipact verbindet strukturierte Mediation mit KI-gestützten
                   Prozessen. Wir suchen Menschen, die beides schätzen: gute
                   Technologie und den menschlichen Kern, der dahinter bleiben muss.
                 </p>
 
-                <div className="mt-10 flex flex-wrap gap-3 text-sm text-slate-200">
+                <div className="mt-10 flex flex-wrap gap-3 text-sm text-neutral-200">
                   {[
-                    { label: "Remote möglich", color: "bg-teal-400" },
-                    { label: "Teilzeit & Vollzeit", color: "bg-teal-300" },
-                    { label: "Freiberuflich willkommen", color: "bg-teal-200" },
+                    { label: "Remote möglich", color: "bg-accent-400" },
+                    { label: "Teilzeit & Vollzeit", color: "bg-accent-300" },
+                    { label: "Freiberuflich willkommen", color: "bg-accent-200" },
                   ].map(({ label, color }) => (
                     <div
                       key={label}
@@ -111,12 +111,12 @@ export default function KarrierePage() {
       </section>
 
       {/* ── WERTE ── */}
-      <section className="section section-muted border-y border-slate-200">
+      <section className="section section-muted border-y border-neutral-200">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-14 max-w-2xl">
             <div className="eyebrow mb-4">Wie wir arbeiten</div>
             <h2 className="heading-2">Was uns wichtig ist</h2>
-            <p className="mt-4 text-lg text-slate-600">
+            <p className="mt-4 text-lg text-neutral-600">
               Bevor du dir die Stelle anschaust: hier ist, wofür wir stehen.
             </p>
           </div>
@@ -124,11 +124,11 @@ export default function KarrierePage() {
           <div className="grid gap-6 md:grid-cols-3">
             {values.map((v) => (
               <div key={v.title} className="app-surface p-8">
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-700/10">
+                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-700/10">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#0f766e"
+                    stroke="var(--color-accent-700)"
                     strokeWidth={1.75}
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -138,7 +138,7 @@ export default function KarrierePage() {
                   </svg>
                 </div>
                 <h3 className="heading-3">{v.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{v.text}</p>
+                <p className="mt-3 text-sm leading-7 text-neutral-600">{v.text}</p>
               </div>
             ))}
           </div>
@@ -154,16 +154,16 @@ export default function KarrierePage() {
           </div>
 
           {/* Job-Karte */}
-          <div className="overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-xl shadow-teal-900/5 ring-1 ring-slate-900/5">
+          <div className="overflow-hidden rounded-[2.5rem] border border-neutral-200 bg-white shadow-xl shadow-accent-900/5 ring-1 ring-neutral-900/5">
 
             {/* Karten-Header */}
-            <div className="border-b border-slate-100 bg-gradient-to-r from-teal-50 to-slate-50 px-10 py-8">
+            <div className="border-b border-neutral-100 bg-gradient-to-r from-accent-50 to-neutral-50 px-10 py-8">
               <div className="flex flex-wrap items-start justify-between gap-6">
                 <div>
-                  <div className="mb-2 inline-block rounded-full bg-teal-700/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-700">
+                  <div className="mb-2 inline-block rounded-full bg-accent-700/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-700">
                     Jetzt offen
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                  <h3 className="text-2xl font-bold text-neutral-900 sm:text-3xl">
                     Zertifizierter Mediator (m/w/d)
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-3">
@@ -174,9 +174,9 @@ export default function KarrierePage() {
                     ].map((tag) => (
                       <span
                         key={tag.label}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600"
                       >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-teal-600">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-accent-600">
                           <path d={tag.icon} />
                         </svg>
                         {tag.label}
@@ -187,7 +187,7 @@ export default function KarrierePage() {
 
                 <a
                   href="mailto:jobs@medipact.de?subject=Bewerbung: Zertifizierter Mediator"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-teal-700 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-teal-800"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-accent-700 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-accent-800"
                 >
                   Jetzt bewerben
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -198,24 +198,24 @@ export default function KarrierePage() {
             </div>
 
             {/* Karten-Body */}
-            <div className="grid gap-0 divide-y divide-slate-100 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+            <div className="grid gap-0 divide-y divide-neutral-100 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
 
               {/* Linke Spalte */}
               <div className="space-y-10 px-10 py-10">
 
                 {/* Intro */}
                 <div>
-                  <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-teal-600">
+                  <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-accent-600">
                     Über die Rolle
                   </h4>
-                  <p className="text-sm leading-7 text-slate-600">
+                  <p className="text-sm leading-7 text-neutral-600">
                     Als Mediator bei medipact begleitest du Verfahren, bei denen
                     menschliche Kompetenz den Unterschied macht. Du arbeitest
                     eng mit unserem Produktteam zusammen, gibst der KI fachliches
                     Fundament und übernimmst eigenständig Fälle – auf Wunsch
                     vollständig remote.
                   </p>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">
+                  <p className="mt-4 text-sm leading-7 text-neutral-600">
                     Die Stelle ist ideal für erfahrene Mediatoren, die nicht nur
                     Einzelfälle bearbeiten, sondern aktiv mitgestalten wollen,
                     wie Mediation in der digitalen Welt funktioniert.
@@ -224,13 +224,13 @@ export default function KarrierePage() {
 
                 {/* Aufgaben */}
                 <div>
-                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-teal-600">
+                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-accent-600">
                     Deine Aufgaben
                   </h4>
                   <ul className="space-y-4">
                     {responsibilities.map((r, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[10px] font-bold text-white">
+                      <li key={i} className="flex items-start gap-3 text-sm text-neutral-700">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-700 text-[10px] font-bold text-white">
                           {i + 1}
                         </span>
                         <span className="leading-6">{r}</span>
@@ -245,7 +245,7 @@ export default function KarrierePage() {
 
                 {/* Anforderungen */}
                 <div>
-                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-teal-600">
+                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-accent-600">
                     Anforderungen
                   </h4>
                   <ul className="space-y-3">
@@ -254,16 +254,16 @@ export default function KarrierePage() {
                         <span
                           className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                             req.must
-                              ? "bg-teal-700 text-white"
-                              : "border border-slate-300 bg-slate-50 text-slate-400"
+                              ? "bg-accent-700 text-white"
+                              : "border border-neutral-300 bg-neutral-50 text-neutral-400"
                           }`}
                         >
                           ✓
                         </span>
-                        <span className={req.must ? "text-slate-700" : "text-slate-500"}>
+                        <span className={req.must ? "text-neutral-700" : "text-neutral-500"}>
                           {req.text}
                           {!req.must && (
-                            <span className="ml-1.5 text-[11px] text-slate-400">(von Vorteil)</span>
+                            <span className="ml-1.5 text-[11px] text-neutral-400">(von Vorteil)</span>
                           )}
                         </span>
                       </li>
@@ -273,32 +273,32 @@ export default function KarrierePage() {
 
                 {/* Was wir bieten */}
                 <div>
-                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-teal-600">
+                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-accent-600">
                     Was wir bieten
                   </h4>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {weOffer.map((item) => (
                       <div
                         key={item.title}
-                        className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                        className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4"
                       >
-                        <div className="text-xs font-bold text-slate-800">{item.title}</div>
-                        <div className="mt-1 text-xs leading-5 text-slate-500">{item.text}</div>
+                        <div className="text-xs font-bold text-neutral-800">{item.title}</div>
+                        <div className="mt-1 text-xs leading-5 text-neutral-500">{item.text}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Bewerbung */}
-                <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-6">
-                  <h4 className="mb-2 text-sm font-bold text-slate-900">
+                <div className="rounded-2xl border border-accent-100 bg-accent-50/60 p-6">
+                  <h4 className="mb-2 text-sm font-bold text-neutral-900">
                     So bewirbst du dich
                   </h4>
-                  <p className="text-sm leading-6 text-slate-600">
+                  <p className="text-sm leading-6 text-neutral-600">
                     Schick uns eine formlose E-Mail an{" "}
                     <a
                       href="mailto:jobs@medipact.de"
-                      className="font-medium text-teal-700 underline underline-offset-2"
+                      className="font-medium text-accent-700 underline underline-offset-2"
                     >
                       jobs@medipact.de
                     </a>
@@ -308,7 +308,7 @@ export default function KarrierePage() {
                   </p>
                   <a
                     href="mailto:jobs@medipact.de?subject=Bewerbung: Zertifizierter Mediator"
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800"
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-accent-800"
                   >
                     E-Mail schreiben
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -325,20 +325,20 @@ export default function KarrierePage() {
       {/* ── KEIN PASSENDER JOB? ── */}
       <section className="section section-strong">
         <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-teal-300 mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-300 mb-8">
             Spontanbewerbung
           </div>
           <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl leading-tight">
             Kein passender Job –
-            <span className="block text-teal-300">aber du bist überzeugt?</span>
+            <span className="block text-accent-300">aber du bist überzeugt?</span>
           </h2>
-          <p className="mt-6 text-lg text-slate-300 leading-8">
+          <p className="mt-6 text-lg text-neutral-300 leading-8">
             Wir freuen uns über Initiativbewerbungen. Wenn du glaubst, dass deine
             Fähigkeiten zu dem passen, was wir aufbauen, schreib uns einfach.
           </p>
           <a
             href="mailto:jobs@medipact.de?subject=Initiativbewerbung"
-            className="mt-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-teal-900/40 transition hover:scale-[1.02] hover:bg-teal-500"
+            className="mt-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-500"
           >
             Initiativbewerbung senden
           </a>
