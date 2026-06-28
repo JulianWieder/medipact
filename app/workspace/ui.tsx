@@ -106,18 +106,40 @@ export function KPI({
   label,
   value,
   sub,
+  onClick,
+  active,
 }: {
   label: string;
   value: React.ReactNode;
   sub?: string;
+  /** Macht die KPI-Kachel klickbar (z.B. um die Fallliste nach diesem Status zu filtern). */
+  onClick?: () => void;
+  /** Hebt die Kachel hervor, wenn ihr Filter aktuell aktiv ist. */
+  active?: boolean;
 }) {
-  return (
-    <div className="rounded-2xl border border-neutral-200 bg-white/60 p-4">
+  const content = (
+    <>
       <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">{label}</div>
       <div className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">{value}</div>
       {sub && <div className="mt-1 text-xs text-neutral-500">{sub}</div>}
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "w-full rounded-2xl border bg-white/60 p-4 text-left transition hover:border-accent-300 hover:shadow-sm",
+          active ? "border-accent-300 ring-1 ring-accent-200" : "border-neutral-200",
+        )}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className="rounded-2xl border border-neutral-200 bg-white/60 p-4">{content}</div>;
 }
 
 // ── Workspace Card ────────────────────────────────────────────────────────

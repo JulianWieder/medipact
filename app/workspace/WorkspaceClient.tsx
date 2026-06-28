@@ -132,6 +132,9 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   const [selectedFall, setSelectedFall] = useState<MediationCase | null>(null);
   const [selectedPartei, setSelectedPartei] = useState<ParticipantWithCase | null>(null);
 
+  // Status-Filter für die Fallliste, z.B. per Klick auf eine Dashboard-KPI gesetzt.
+  const [faelleFilter, setFaelleFilter] = useState<{ statuses: string[]; label: string } | null>(null);
+
   // Nutzerrolle: bestimmt ob Admin-Ansicht (alle Fälle) oder eigene Fälle
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRoleLabel, setUserRoleLabel] = useState("Mediator / Admin");
@@ -167,6 +170,15 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
     setSelectedFall(null);
     setSelectedPartei(null);
     setKalenderDate(null);
+    setFaelleFilter(null);
+  }
+
+  /** Klick auf eine Status-KPI im Dashboard: zur Fallliste mit gesetztem Filter springen. */
+  function handleFilterStatus(statuses: string[] | null, label: string) {
+    setFaelleFilter(statuses ? { statuses, label } : null);
+    setSection("faelle");
+    setTab("liste");
+    setSelectedFall(null);
   }
 
   function handlePhaseAdvanced() {
@@ -237,6 +249,8 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         <FaelleListe
           isAdmin={isAdmin}
           selectedId={selectedFall?.id}
+          statusFilter={faelleFilter}
+          onClearFilter={() => setFaelleFilter(null)}
           onSelect={(m) => {
             setSelectedFall(m);
             setTab("einzelansicht");
@@ -279,6 +293,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
                 setTab("einzelansicht");
               }}
               onSelectTermin={handleSelectTermin}
+              onFilterStatus={handleFilterStatus}
             />
           </div>
         </div>

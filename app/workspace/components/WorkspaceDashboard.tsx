@@ -27,9 +27,12 @@ interface WorkspaceDashboardProps {
   onSelectFall: (m: MediationCase) => void;
   /** Wird aufgerufen, wenn ein Termin angeklickt wird – navigiert zur Tagesansicht im Kalender. */
   onSelectTermin?: (date: Date) => void;
+  /** Wird aufgerufen, wenn auf eine Status-KPI geklickt wird – navigiert zur
+   * gefilterten Fallliste. `statuses: null` = kein Filter (z.B. "Gesamt"). */
+  onFilterStatus?: (statuses: string[] | null, label: string) => void;
 }
 
-export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTermin }: WorkspaceDashboardProps) {
+export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTermin, onFilterStatus }: WorkspaceDashboardProps) {
   const [faelle, setFaelle] = useState<MediationCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [termine, setTermine] = useState<AppointmentEvent[]>([]);
@@ -124,10 +127,30 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
 
       {/* KPI-Zeile */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <KPI label="Aktive Fälle" value={active} sub="laufende Mediationen" />
-        <KPI label="Ausstehend" value={pending} sub="noch nicht gestartet" />
-        <KPI label="Abgeschlossen" value={completed} sub="beendete Verfahren" />
-        <KPI label="Gesamt" value={faelle.length} sub="alle Fälle" />
+        <KPI
+          label="Aktive Fälle"
+          value={active}
+          sub="laufende Mediationen"
+          onClick={() => onFilterStatus?.(["active"], "Aktive Fälle")}
+        />
+        <KPI
+          label="Ausstehend"
+          value={pending}
+          sub="noch nicht gestartet"
+          onClick={() => onFilterStatus?.(["pending", "draft"], "Ausstehend")}
+        />
+        <KPI
+          label="Abgeschlossen"
+          value={completed}
+          sub="beendete Verfahren"
+          onClick={() => onFilterStatus?.(["completed"], "Abgeschlossen")}
+        />
+        <KPI
+          label="Gesamt"
+          value={faelle.length}
+          sub="alle Fälle"
+          onClick={() => onFilterStatus?.(null, "Alle Fälle")}
+        />
       </div>
 
       {/* Aktuelle Fälle */}

@@ -52,7 +52,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-40 border-b border-neutral-200/70 bg-white/80 backdrop-blur-md">
       <div className="container flex h-[73px] items-center justify-between gap-6">
 
         {/* Logo */}
@@ -65,7 +65,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
             className="h-8 w-8 rounded-lg object-cover"
             priority
           />
-          <span className="text-lg font-black tracking-tight text-neutral-900">
+          <span className="font-display text-lg font-medium tracking-tight text-neutral-900">
             medipact
           </span>
         </Link>
@@ -80,13 +80,18 @@ export default function DashboardHeaderClient({ username, email }: Props) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
+                className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 ${
                   isActive
-                    ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+                    ? "text-neutral-900"
+                    : "text-neutral-400 hover:text-neutral-900"
                 }`}
               >
                 {item.label}
+                <span
+                  className={`absolute inset-x-3.5 -bottom-[1px] h-px bg-neutral-900 transition-opacity duration-300 ${
+                    isActive ? "opacity-100" : "opacity-0"
+                  }`}
+                />
               </Link>
             );
           })}
@@ -118,7 +123,10 @@ export default function DashboardHeaderClient({ username, email }: Props) {
               onClick={() => setDropdownOpen((v) => !v)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-neutral-100"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-600 text-sm font-bold text-white">
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                style={{ background: "linear-gradient(145deg, #334155 0%, #0f172a 100%)" }}
+              >
                 {initials}
               </div>
               <span className="hidden max-w-[128px] truncate text-sm font-semibold text-neutral-900 sm:block">
@@ -138,7 +146,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg shadow-neutral-200/80">
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-neutral-100 bg-white/95 backdrop-blur-md shadow-[0_20px_50px_-15px_rgba(15,23,42,0.18)]">
                 {/* User info */}
                 <div className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-600 text-sm font-bold text-white">
