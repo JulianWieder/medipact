@@ -1,7 +1,10 @@
 // Shared UI-Bausteine für den Workspace – nutzen das medipact Design-System
+// und die app-weit geteilten Premium-Komponenten aus app/components/ui/premium.tsx,
+// damit Workspace und das öffentliche Dashboard optisch konsistent bleiben.
 
 import React from "react";
 import { STATUS_CONFIG, TYPE_LABEL, TYPE_COLOR, ROLE_LABEL, INVOICE_STATUS_CONFIG } from "./types";
+import { OutlinePill, ThinProgressBar } from "@/app/components/ui/premium";
 
 // ── Utilities ─────────────────────────────────────────────────────────────
 
@@ -13,17 +16,7 @@ export function cn(...classes: (string | false | null | undefined)[]) {
 
 export function StatusBadge({ status }: { status: string | null | undefined }) {
   const cfg = STATUS_CONFIG[status ?? "draft"] ?? STATUS_CONFIG.draft;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
-        cfg.badge,
-      )}
-    >
-      <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />
-      {cfg.label}
-    </span>
-  );
+  return <OutlinePill label={cfg.label} className={cfg.badge} dot={cfg.dot} />;
 }
 
 // ── Type Badge ────────────────────────────────────────────────────────────
@@ -31,30 +24,14 @@ export function StatusBadge({ status }: { status: string | null | undefined }) {
 export function TypeBadge({ type }: { type: string | null | undefined }) {
   const color = TYPE_COLOR[type ?? "nachbarschaft"] ?? TYPE_COLOR.nachbarschaft;
   const label = TYPE_LABEL[type ?? ""] ?? (type ?? "–");
-  return (
-    <span
-      className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold", color)}
-    >
-      {label}
-    </span>
-  );
+  return <OutlinePill label={label} className={color} />;
 }
 
 // ── Invoice Status Badge ──────────────────────────────────────────────────
 
 export function InvoiceStatusBadge({ status }: { status: string | null | undefined }) {
   const cfg = INVOICE_STATUS_CONFIG[status ?? "open"] ?? INVOICE_STATUS_CONFIG.open;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
-        cfg.badge,
-      )}
-    >
-      <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />
-      {cfg.label}
-    </span>
-  );
+  return <OutlinePill label={cfg.label} className={cfg.badge} dot={cfg.dot} />;
 }
 
 // ── Role Badge ────────────────────────────────────────────────────────────
@@ -119,9 +96,16 @@ export function KPI({
 }) {
   const content = (
     <>
-      <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">{label}</div>
-      <div className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">{value}</div>
-      {sub && <div className="mt-1 text-xs text-neutral-500">{sub}</div>}
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{label}</div>
+      <div
+        className={cn(
+          "mt-2.5 font-display text-2xl font-medium tracking-tight",
+          active ? "text-accent-600" : "text-neutral-900",
+        )}
+      >
+        {value}
+      </div>
+      {sub && <div className="mt-1 text-xs font-light text-neutral-500">{sub}</div>}
     </>
   );
 
@@ -129,12 +113,15 @@ export function KPI({
     return (
       <button
         onClick={onClick}
-        className={cn(
-          "w-full rounded-2xl border bg-white/60 p-4 text-left transition hover:border-accent-300 hover:shadow-sm",
-          active ? "border-accent-300 ring-1 ring-accent-200" : "border-neutral-200",
-        )}
+        className="relative w-full rounded-2xl border border-neutral-200 bg-white/60 p-4 text-left transition-colors duration-300 hover:border-neutral-300"
       >
         {content}
+        <span
+          className={cn(
+            "absolute inset-x-4 bottom-0 h-px bg-accent-500 transition-opacity duration-300",
+            active ? "opacity-100" : "opacity-0",
+          )}
+        />
       </button>
     );
   }
@@ -164,16 +151,12 @@ export function WCard({
 }
 
 // ── Progress Bar ──────────────────────────────────────────────────────────
+// Dünner, geteilter Fortschrittsbalken (siehe app/components/ui/premium.tsx),
+// als Wrapper beibehalten, damit bestehende Imports (FaelleListe, FallDetail,
+// ParteienListe, …) unverändert bleiben.
 
 export function ProgressBar({ value }: { value: number }) {
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
-      <div
-        className="h-full rounded-full bg-accent-500 transition-all duration-500"
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
-    </div>
-  );
+  return <ThinProgressBar value={value} tone="accent" />;
 }
 
 // ── Empty State ───────────────────────────────────────────────────────────

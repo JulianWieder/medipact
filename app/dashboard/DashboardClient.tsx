@@ -1,9 +1,9 @@
 "use client";
 
 import { encodeId } from "@/lib/ids";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { PremiumHero, PillButton, ArrowLink, ThinProgressBar, OutlinePill, PremiumCard } from "@/app/components/ui/premium";
 
 interface Mediation {
   id: string | number;
@@ -150,34 +150,23 @@ export default function DashboardClient() {
       {
         label: "Deine Eingabe",
         value: data.filter((m) => m.is_my_turn).length,
-        text: "wartet auf dich",
+        sub: "wartet auf dich",
         highlight: data.some((m) => m.is_my_turn),
-        highlightColor: "text-amber-600",
-        borderColor: "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300",
       },
       {
         label: "Warte auf Gegenpartei",
         value: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
-        text: "Ball liegt bei der anderen Seite",
-        highlight: false,
-        highlightColor: "text-neutral-900",
-        borderColor: "",
+        sub: "Ball liegt bei der anderen Seite",
       },
       {
         label: "Ausstehend",
         value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
-        text: "noch nicht gestartet",
-        highlight: false,
-        highlightColor: "text-neutral-900",
-        borderColor: "",
+        sub: "noch nicht gestartet",
       },
       {
         label: "Abgeschlossen",
         value: data.filter((m) => m.status === "completed").length,
-        text: "beendete Verfahren",
-        highlight: false,
-        highlightColor: "text-neutral-900",
-        borderColor: "",
+        sub: "beendete Verfahren",
       },
     ],
     [data],
@@ -196,60 +185,19 @@ export default function DashboardClient() {
   return (
     <>
     <main className="app-shell pt-[73px]">
-      <section className="relative overflow-hidden bg-neutral-900 text-white">
-        {/* dezenter metallischer Glanz, wie eine Chrome-Oberfläche */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(60% 50% at 15% 0%, rgba(255,255,255,0.08) 0%, transparent 70%), radial-gradient(50% 40% at 100% 100%, rgba(94,234,212,0.10) 0%, transparent 70%), linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
-          }}
-        />
-        <div className="container relative py-16 lg:py-24">
-          <div className="mb-14 flex flex-col justify-between gap-10 md:flex-row md:items-end">
-            <div>
-              <p className="eyebrow mb-5 text-accent-300 [&::before]:bg-accent-300/60">Dashboard</p>
-              <h1
-                className="font-display text-4xl font-medium tracking-tight text-white sm:text-5xl lg:text-6xl"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                Meine Mediationen
-              </h1>
-              <p className="mt-5 max-w-xl text-base font-light text-neutral-300 lg:text-lg">
-                Übersicht Ihrer laufenden und abgeschlossenen Konflikte.
-              </p>
-            </div>
-
-            <Link
-              href="/dashboard/mediation/new"
-              className="group inline-flex h-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-neutral-900 transition-all duration-300 hover:bg-accent-300 hover:shadow-[0_0_30px_-5px_rgba(94,234,212,0.5)]"
-            >
-              Neue Mediation
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-10 lg:grid-cols-4">
-            {stats.map((item) => (
-              <div key={item.label} className="relative">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-                  {item.label}
-                </p>
-                <p
-                  className={`mt-3 font-display text-4xl font-medium tracking-tight lg:text-5xl ${
-                    item.highlight ? "text-accent-300" : "text-white"
-                  }`}
-                >
-                  {item.value}
-                </p>
-                <p className="mt-2 text-sm font-light text-neutral-400">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PremiumHero
+        variant="bleed"
+        eyebrow="Dashboard"
+        title="Meine Mediationen"
+        subtitle="Übersicht Ihrer laufenden und abgeschlossenen Konflikte."
+        stats={stats}
+        action={
+          <PillButton href="/dashboard/mediation/new" tone="light">
+            Neue Mediation
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+          </PillButton>
+        }
+      />
 
       <section className="container py-16 lg:py-20">
         {/* ── Eingehende Mediationsanfragen ─────────────────────────── */}
@@ -276,9 +224,7 @@ export default function DashboardClient() {
                 >
                   <div>
                     <div className="mb-1.5 flex items-center gap-2">
-                      <span className="rounded-full border border-amber-300/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                        Einladung
-                      </span>
+                      <OutlinePill label="Einladung" className="border-amber-300/70 text-amber-700" />
                       <span className="text-xs text-neutral-500">
                         {typeLabel[invite.mediation_type] ?? invite.mediation_type}
                       </span>
@@ -294,16 +240,14 @@ export default function DashboardClient() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
+                  <PillButton
                     onClick={() => acceptInvite(invite)}
                     disabled={acceptingId === invite.invite_id}
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-300 hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {acceptingId === invite.invite_id
                       ? "Wird angenommen…"
                       : "Einladung annehmen"}
-                  </button>
+                  </PillButton>
                 </div>
               ))}
             </div>
@@ -326,12 +270,9 @@ export default function DashboardClient() {
                 Sie haben noch keine Mediationen gestartet.
               </p>
 
-              <Link
-                href="/dashboard/mediation/new"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-accent-600"
-              >
+              <PillButton href="/dashboard/mediation/new" className="mt-6">
                 Neue Mediation starten →
-              </Link>
+              </PillButton>
             </div>
           ) : (
             data.map((mediation) => {
@@ -341,14 +282,10 @@ export default function DashboardClient() {
               const waitingForOther = isActive && !mediation.is_my_turn;
 
               return (
-                <Link
+                <PremiumCard
                   key={`mediation-${mediation.id}`}
                   href={`/dashboard/${encodeId(Number(mediation.id))}`}
-                  className={`group block rounded-2xl border bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18)] lg:p-8 ${
-                    mediation.is_my_turn
-                      ? "border-amber-200 hover:border-amber-300"
-                      : "border-neutral-200 hover:border-neutral-300"
-                  }`}
+                  emphasis={mediation.is_my_turn ? "amber" : "neutral"}
                 >
                   <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
                     <div>
@@ -369,16 +306,13 @@ export default function DashboardClient() {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          <span
-                            className={`inline-flex w-fit items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${config.className}`}
-                          >
-                            {config.label}
-                          </span>
+                          <OutlinePill label={config.label} className={config.className} />
                           {mediation.is_my_turn && (
-                            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
-                              Deine Eingabe
-                            </span>
+                            <OutlinePill
+                              label="Deine Eingabe"
+                              className="border-amber-300 text-amber-700"
+                              dot="animate-pulse bg-amber-500"
+                            />
                           )}
                           {waitingForOther && (
                             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
@@ -402,23 +336,17 @@ export default function DashboardClient() {
                           </span>
                         </div>
 
-                        <div className="h-1 overflow-hidden rounded-full bg-neutral-200">
-                          <div
-                            className="h-full rounded-full bg-neutral-900 transition-all duration-500"
-                            style={{ width: `${mediation.progress ?? 0}%` }}
-                          />
-                        </div>
+                        <ThinProgressBar value={mediation.progress ?? 0} />
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-3 md:items-end">
-                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-neutral-900 transition-colors duration-300 group-hover:text-accent-600">
+                      <ArrowLink>
                         {mediation.is_my_turn ? "Eingabe machen" : waitingForOther ? "Ansehen" : "Fortsetzen"}
-                        <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
-                      </span>
+                      </ArrowLink>
                     </div>
                   </div>
-                </Link>
+                </PremiumCard>
               );
             })
           )}
@@ -442,17 +370,16 @@ export default function DashboardClient() {
               autoPlay
             />
           </div>
-          <button
-            type="button"
+          <PillButton
             onClick={() => {
               const id = videoModalMediationId;
               setVideoModalMediationId(null);
               router.push(`/dashboard/${encodeId(id as number)}`);
             }}
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-accent-600"
+            className="mt-6"
           >
             Weiter zur Mediation →
-          </button>
+          </PillButton>
         </div>
       </div>
     )}

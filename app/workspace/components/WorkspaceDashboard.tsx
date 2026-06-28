@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR } from "../types";
-import { TypeBadge, StatusBadge, KPI, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
+import { TypeBadge, StatusBadge, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
 import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
+import { PremiumHero } from "@/app/components/ui/premium";
 
 const FEEDBACK_OCCASION_LABELS: Record<string, string> = {
   after_videocall: "Nach dem Erstgespräch",
@@ -116,42 +117,39 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
 
   return (
     <div className="space-y-6">
-      {/* Begrüßung */}
-      <div>
-        <p className="eyebrow mb-2">Workspace</p>
-        <h2 className="text-2xl font-bold text-neutral-900">Übersicht</h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          {isAdmin ? "Alle Mediationsfälle auf einen Blick." : "Ihre Mediationsfälle auf einen Blick."}
-        </p>
-      </div>
-
-      {/* KPI-Zeile */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <KPI
-          label="Aktive Fälle"
-          value={active}
-          sub="laufende Mediationen"
-          onClick={() => onFilterStatus?.(["active"], "Aktive Fälle")}
-        />
-        <KPI
-          label="Ausstehend"
-          value={pending}
-          sub="noch nicht gestartet"
-          onClick={() => onFilterStatus?.(["pending", "draft"], "Ausstehend")}
-        />
-        <KPI
-          label="Abgeschlossen"
-          value={completed}
-          sub="beendete Verfahren"
-          onClick={() => onFilterStatus?.(["completed"], "Abgeschlossen")}
-        />
-        <KPI
-          label="Gesamt"
-          value={faelle.length}
-          sub="alle Fälle"
-          onClick={() => onFilterStatus?.(null, "Alle Fälle")}
-        />
-      </div>
+      {/* Begrüßung + KPI-Zeile */}
+      <PremiumHero
+        variant="card"
+        eyebrow="Workspace"
+        title="Übersicht"
+        subtitle={isAdmin ? "Alle Mediationsfälle auf einen Blick." : "Ihre Mediationsfälle auf einen Blick."}
+        stats={[
+          {
+            label: "Aktive Fälle",
+            value: active,
+            sub: "laufende Mediationen",
+            onClick: () => onFilterStatus?.(["active"], "Aktive Fälle"),
+          },
+          {
+            label: "Ausstehend",
+            value: pending,
+            sub: "noch nicht gestartet",
+            onClick: () => onFilterStatus?.(["pending", "draft"], "Ausstehend"),
+          },
+          {
+            label: "Abgeschlossen",
+            value: completed,
+            sub: "beendete Verfahren",
+            onClick: () => onFilterStatus?.(["completed"], "Abgeschlossen"),
+          },
+          {
+            label: "Gesamt",
+            value: faelle.length,
+            sub: "alle Fälle",
+            onClick: () => onFilterStatus?.(null, "Alle Fälle"),
+          },
+        ]}
+      />
 
       {/* Aktuelle Fälle */}
       <WCard className="p-5">
