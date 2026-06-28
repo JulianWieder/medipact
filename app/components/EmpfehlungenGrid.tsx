@@ -62,15 +62,33 @@ export async function EmpfehlungenGrid() {
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
                   {isMigratedLocalePath(href) ? (
-                    <Link href={href} className="text-accent-700 hover:underline">
+                    <Link
+                      href={href}
+                      className="group/cta inline-flex items-center gap-1.5 text-accent-700 transition hover:text-accent-800"
+                    >
                       {t("ctaPrimary")}
+                      <span
+                        aria-hidden="true"
+                        className="inline-block transition-transform duration-300 group-hover/cta:translate-x-1"
+                      >
+                        →
+                      </span>
                     </Link>
                   ) : (
-                    <a href={href} className="text-accent-700 hover:underline">
+                    <a
+                      href={href}
+                      className="group/cta inline-flex items-center gap-1.5 text-accent-700 transition hover:text-accent-800"
+                    >
                       {t("ctaPrimary")}
+                      <span
+                        aria-hidden="true"
+                        className="inline-block transition-transform duration-300 group-hover/cta:translate-x-1"
+                      >
+                        →
+                      </span>
                     </a>
                   )}
-                  <a href="/auth/register" className="text-neutral-500 hover:text-neutral-800 hover:underline">
+                  <a href="/auth/register" className="text-neutral-500 transition hover:text-neutral-800">
                     {t("ctaSecondary")}
                   </a>
                 </div>

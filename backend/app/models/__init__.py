@@ -8,3 +8,4 @@ from app.models.mediation_contract import MediationContract, MediationContractSi
 from app.models.mediation_custom_step import MediationCustomStep
 from app.models.mediation_step_rule import MediationStepRule
 from app.models.phase_step_default import PhaseStepDefault
+from app.models.invoice import Invoice

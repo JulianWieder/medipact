@@ -126,7 +126,7 @@ export function MarketingPageTemplate({
 }: MarketingPageTemplateProps) {
   return (
     <>
-      <main className="app-shell pt-[73px]">
+      <main className="app-shell pt-0">
         {heroImage ? (
           <ImagePinHero image={heroImage.src} imageAlt={heroImage.alt}>
             <div className="container">
@@ -220,7 +220,7 @@ export function MarketingPageTemplate({
           </section>
         )}
 
-        <section className="section section-muted">
+        <section className="section section-muted pt-10 lg:pt-14">
           <div className="container">
             <SectionLead
               eyebrow="Leistungen"

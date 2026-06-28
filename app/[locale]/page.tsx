@@ -55,18 +55,21 @@ export default async function MedipactLanding() {
   return (
     <>
       <JsonLd data={serviceSchema} />
-      <main className="app-shell pt-0 sm:pt-[73px]">
+      <main className="app-shell pt-0">
         <HeroScrollPin heroPhoto={heroPhoto} />
 
-        <section className="border-b border-neutral-100 bg-white py-10">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <section className="relative z-10 px-6 lg:px-8">
+          <div className="relative mx-auto -mt-10 max-w-5xl rounded-[1.75rem] border border-neutral-100 bg-white/95 px-6 py-7 shadow-xl shadow-neutral-900/10 backdrop-blur-sm sm:-mt-14 sm:px-10 sm:py-8 lg:-mt-16">
+            <div className="grid grid-cols-2 divide-neutral-100 sm:grid-cols-4 sm:divide-x">
               {stats.map((s) => (
-                <div key={s.label}>
-                  <div className="text-xl font-black text-accent-700">
+                <div
+                  key={s.label}
+                  className="px-2 py-2 text-center first:pl-0 sm:px-6 sm:first:pl-0 sm:last:pr-0"
+                >
+                  <div className="text-xl font-black text-neutral-900 sm:text-2xl">
                     {s.value}
                   </div>
-                  <div className="mt-0.5 text-xs leading-snug text-neutral-500">
+                  <div className="mt-1 text-xs leading-snug text-neutral-500">
                     {s.label}
                   </div>
                 </div>
