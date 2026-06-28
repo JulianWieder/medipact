@@ -60,7 +60,7 @@ export const ScrollPinFrame = forwardRef<
       className={`relative isolate overflow-hidden ${className}`}
       style={{ height: `${heightVh}vh` }}
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div className="sticky top-0 h-screen h-[100dvh] w-full overflow-hidden">
         {children}
       </div>
     </section>

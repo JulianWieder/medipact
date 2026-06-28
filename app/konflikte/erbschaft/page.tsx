@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
-import erbschaftFamilie from "@/fotos/erbschaft-familie.jpg";
+import erbschaftFamilie from "@/fotos/medi_Erbe.jpg";
 import erbschaftTisch from "@/fotos/erbschaft-tisch.jpg";
 
 export const metadata: Metadata = {

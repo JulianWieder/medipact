@@ -42,5 +42,65 @@
     "text": "Wir verwenden technisch notwendige Cookies, um medipact.de bereitzustellen. Mit Ihrer Einwilligung nutzen wir zusätzlich Analyse-Cookies, um die Nutzung der Plattform zu verstehen und zu verbessern. Details und Widerruf jederzeit in unserer <cookiePolicyLink>Cookie-Richtlinie</cookiePolicyLink>.",
     "declineButton": "Nur notwendige",
     "acceptButton": "Alle akzeptieren"
+  },
+  "home": {
+    "hero": {
+      "badge": "Für Trennung, Nachbarschaft und Erbe",
+      "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
+      "titleLine1": "Mediation online –",
+      "titleLine2": "Konflikte fair, vertraulich und ohne Gericht lösen.",
+      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe – Schritt für Schritt zurück zu einem klaren Kopf und einer Lösung, mit der beide Seiten leben können.",
+      "ctaPrimary": "Kostenlosen Account erstellen",
+      "ctaSecondary": "So funktioniert es",
+      "badgeVertraulich": "Vertraulich",
+      "badgeBezahlbar": "Bezahlbar",
+      "badgeLoesungsorientiert": "Lösungsorientiert"
+    },
+    "stats": [
+      { "value": "6 Schritte", "label": "strukturierter Prozess" },
+      { "value": "< 4 Wochen", "label": "typische Dauer" },
+      { "value": "ab €499", "label": "statt tausenden an Anwaltskosten" },
+      { "value": "100 %", "label": "vertraulich & DSGVO-konform" }
+    ],
+    "bekanntAusLabel": "Bekannt aus",
+    "bekanntAusTags": [
+      "Harvard-Methode",
+      "DSGVO-konform",
+      "Made in Germany",
+      "SSL-verschlüsselt"
+    ],
+    "casesTeaser": "Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,",
+    "casesTeaserLink": "wie konkrete Fälle mit Medipact gelöst wurden →",
+    "empfehlungen": {
+      "eyebrow": "Unsere Empfehlungen",
+      "title": "Für welchen Konflikt brauchen Sie Klarheit?",
+      "ctaPrimary": "Mehr erfahren",
+      "ctaSecondary": "Kostenlos starten",
+      "cards": {
+        "trennung": {
+          "title": "Trennung & Scheidung",
+          "text": "Sorgerecht, Unterhalt und die Aufteilung des gemeinsamen Lebens – fair geregelt, ohne dass beide Seiten vor Gericht ziehen müssen."
+        },
+        "nachbarschaft": {
+          "title": "Nachbarschaftsstreit",
+          "text": "Lärm, Grenzen oder Stellplätze: bevor aus Ärger eine jahrelange Fehde wird, moderiert medipact die Klärung."
+        },
+        "erbschaft": {
+          "title": "Erbe & Familie",
+          "text": "Erbstreitigkeiten belasten Familien oft länger als das Erbe selbst wert ist. Medipact hilft, eine Lösung zu finden, mit der alle weiterleben können."
+        }
+      }
+    },
+    "processEyebrow": "So funktioniert es",
+    "processTitle": "In 6 klaren Schritten zur möglichen Einigung.",
+    "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
+    "processLink": "So funktioniert medipact →",
+    "trustText": "Vertraulich, DSGVO-konform und mit menschlicher Mediation als Rückfalloption –",
+    "trustLink": "mehr über medipact erfahren →",
+    "ctaBadge": "Jetzt starten",
+    "ctaTitle": "Der Streit muss nicht größer werden.",
+    "ctaText": "Starten Sie ruhig, vertraulich und unverbindlich. Der erste Schritt ist nicht die Einigung – sondern wieder Klarheit.",
+    "ctaButton": "Kostenlosen Account erstellen",
+    "ctaDisclaimer": "Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar"
   }
 }

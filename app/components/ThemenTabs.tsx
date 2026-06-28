@@ -8,9 +8,9 @@ import { TabSwitcher, CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { trennungPageContent } from "@/app/content/trennungPage";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
-import trennungPhoto from "../../fotos/trennung.jpg";
-import nachbarnPhoto from "../../fotos/nachbarn.png";
-import erbschaftPhoto from "../../fotos/erbschaft-familie.jpg";
+import trennungPhoto from "../../fotos/medi_trennung.jpg";
+import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
+import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
 
 type ThemaContent = {
   eyebrow: string;
