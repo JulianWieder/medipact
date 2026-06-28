@@ -58,6 +58,7 @@ export default function DashboardClient() {
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
   const [acceptError, setAcceptError] = useState<string>("");
   const [videoModalMediationId, setVideoModalMediationId] = useState<number | null>(null);
+  const [filter, setFilter] = useState<{ key: string; label: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -145,6 +146,20 @@ export default function DashboardClient() {
     }
   }
 
+  // Filter-Prädikate für die Stat-Kacheln im Hero – ein Klick filtert die
+  // Mediationsliste darunter, ein erneuter Klick auf dieselbe Kachel hebt
+  // den Filter wieder auf (Toggle-Verhalten, analog zum Workspace-Dashboard).
+  const filterPredicates: Record<string, (m: Mediation) => boolean> = {
+    my_turn: (m) => !!m.is_my_turn,
+    waiting: (m) => m.status === "active" && !m.is_my_turn,
+    pending: (m) => m.status === "pending" || m.status === "draft",
+    completed: (m) => m.status === "completed",
+  };
+
+  function toggleFilter(key: string, label: string) {
+    setFilter((prev) => (prev?.key === key ? null : { key, label }));
+  }
+
   const stats = useMemo(
     () => [
       {
@@ -152,25 +167,39 @@ export default function DashboardClient() {
         value: data.filter((m) => m.is_my_turn).length,
         sub: "wartet auf dich",
         highlight: data.some((m) => m.is_my_turn),
+        active: filter?.key === "my_turn",
+        onClick: () => toggleFilter("my_turn", "Deine Eingabe"),
       },
       {
         label: "Warte auf Gegenpartei",
         value: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
         sub: "Ball liegt bei der anderen Seite",
+        active: filter?.key === "waiting",
+        onClick: () => toggleFilter("waiting", "Warte auf Gegenpartei"),
       },
       {
         label: "Ausstehend",
         value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
         sub: "noch nicht gestartet",
+        active: filter?.key === "pending",
+        onClick: () => toggleFilter("pending", "Ausstehend"),
       },
       {
         label: "Abgeschlossen",
         value: data.filter((m) => m.status === "completed").length,
         sub: "beendete Verfahren",
+        active: filter?.key === "completed",
+        onClick: () => toggleFilter("completed", "Abgeschlossen"),
       },
     ],
-    [data],
+    [data, filter],
   );
+
+  const visibleData = useMemo(() => {
+    if (!filter) return data;
+    const predicate = filterPredicates[filter.key];
+    return predicate ? data.filter(predicate) : data;
+  }, [data, filter]);
 
   if (loading) {
     return (
@@ -263,6 +292,19 @@ export default function DashboardClient() {
         )}
 
         {/* ── Meine Mediationen ─────────────────────────────────────── */}
+        {filter && (
+          <div className="mb-6 flex items-center gap-3">
+            <OutlinePill label={`Filter: ${filter.label}`} className="border-neutral-300 text-neutral-700" />
+            <button
+              type="button"
+              onClick={() => setFilter(null)}
+              className="text-xs font-semibold text-neutral-400 underline-offset-2 transition-colors hover:text-neutral-900 hover:underline"
+            >
+              Filter zurücksetzen
+            </button>
+          </div>
+        )}
+
         <div className="space-y-3">
           {data.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
@@ -274,8 +316,14 @@ export default function DashboardClient() {
                 Neue Mediation starten →
               </PillButton>
             </div>
+          ) : visibleData.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
+              <p className="text-lg font-light text-neutral-500">
+                Keine Mediationen für diesen Filter.
+              </p>
+            </div>
           ) : (
-            data.map((mediation) => {
+            visibleData.map((mediation) => {
               const status = mediation.status ?? "pending";
               const config = statusConfig[status] ?? fallbackStatus;
               const isActive = status === "active";
