@@ -1,7 +1,7 @@
 // Shared UI-Bausteine für den Workspace – nutzen das medipact Design-System
 
 import React from "react";
-import { STATUS_CONFIG, TYPE_LABEL, TYPE_COLOR, ROLE_LABEL } from "./types";
+import { STATUS_CONFIG, TYPE_LABEL, TYPE_COLOR, ROLE_LABEL, INVOICE_STATUS_CONFIG } from "./types";
 
 // ── Utilities ─────────────────────────────────────────────────────────────
 
@@ -36,6 +36,23 @@ export function TypeBadge({ type }: { type: string | null | undefined }) {
       className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold", color)}
     >
       {label}
+    </span>
+  );
+}
+
+// ── Invoice Status Badge ──────────────────────────────────────────────────
+
+export function InvoiceStatusBadge({ status }: { status: string | null | undefined }) {
+  const cfg = INVOICE_STATUS_CONFIG[status ?? "open"] ?? INVOICE_STATUS_CONFIG.open;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+        cfg.badge,
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />
+      {cfg.label}
     </span>
   );
 }

@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -211,4 +211,18 @@ export async function fetchAllFeedback(): Promise<FeedbackEntry[]> {
   const res = await fetch("/api/feedback/all", { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
+}
+
+// ── Rechnungen ────────────────────────────────────────────────────────────
+//
+// Ruft /api/invoices auf (siehe app/api/invoices/route.ts), das per
+// backendFetch an das medipact-api-Backend weiterleitet. Der Endpoint dort
+// existiert noch nicht — siehe Kommentar in ./types.ts für die erwartete
+// Response-Struktur.
+
+export async function fetchInvoices(): Promise<Invoice[]> {
+  const res = await fetch("/api/invoices", { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => null);
+  return Array.isArray(data) ? data : [];
 }

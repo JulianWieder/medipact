@@ -1,6 +1,6 @@
 // ── Workspace Types ───────────────────────────────────────────────────────
 
-export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "einstellungen";
+export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "einstellungen";
 
 export interface WorkspaceNavItem {
   id: WorkspaceSection;
@@ -13,6 +13,7 @@ export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   { id: "faelle", label: "Meine Fälle", icon: "⚖" },
   { id: "parteien", label: "Parteien", icon: "👥" },
   { id: "kalender", label: "Kalender", icon: "📅" },
+  { id: "rechnungen", label: "Rechnungen", icon: "🧾" },
   { id: "einstellungen", label: "Einstellungen", icon: "⚙" },
 ];
 
@@ -108,6 +109,66 @@ export interface FeedbackEntry {
   answers: Record<string, string | number>;
   created_at: string;
 }
+
+// ── Invoices ──────────────────────────────────────────────────────────────
+//
+// Erwartete Backend-Response für GET /invoices (siehe app/api/invoices/route.ts):
+// [{
+//   id: number,
+//   invoice_number: string,        // z. B. "RE-2026-0042"
+//   mediation_id: number,
+//   mediation_title: string,
+//   payer_name?: string,
+//   payer_email?: string,
+//   amount: number,                 // in EUR, z. B. 499.0
+//   currency: string,                // "EUR"
+//   status: "paid" | "open" | "refunded" | "failed",
+//   paypal_order_id?: string,
+//   issued_at: string,               // ISO-Datum
+//   paid_at?: string,                // ISO-Datum, falls bezahlt
+//   pdf_url?: string,                 // optionaler Direktlink zum PDF
+// }]
+// Dieses Modul existiert nur als Frontend-Oberfläche — das Backend
+// (medipact-api, separates Repo) muss /invoices noch implementieren.
+
+export interface Invoice {
+  id: number;
+  invoice_number: string;
+  mediation_id: number;
+  mediation_title: string;
+  payer_name?: string | null;
+  payer_email?: string | null;
+  amount: number;
+  currency: string;
+  status: "paid" | "open" | "refunded" | "failed" | string;
+  paypal_order_id?: string | null;
+  issued_at: string;
+  paid_at?: string | null;
+  pdf_url?: string | null;
+}
+
+export const INVOICE_STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
+  paid: {
+    label: "Bezahlt",
+    dot: "bg-accent-500",
+    badge: "bg-accent-50 text-accent-700 border-accent-200",
+  },
+  open: {
+    label: "Offen",
+    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  refunded: {
+    label: "Erstattet",
+    dot: "bg-sky-400",
+    badge: "bg-sky-50 text-sky-700 border-sky-200",
+  },
+  failed: {
+    label: "Fehlgeschlagen",
+    dot: "bg-red-400",
+    badge: "bg-red-50 text-red-700 border-red-200",
+  },
+};
 
 // ── User role ──────────────────────────────────────────────────────────────
 

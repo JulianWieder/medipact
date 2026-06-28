@@ -10,6 +10,7 @@ import { FallDetail } from "./components/FallDetail";
 import { ParteienListe } from "./components/ParteienListe";
 import { ParteiDetail } from "./components/ParteiDetail";
 import { Kalender } from "./components/Kalender";
+import { RechnungenListe } from "./components/RechnungenListe";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -309,6 +310,18 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
               <div className="text-sm text-neutral-500">medipact workspace v1.0</div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Rechnungen ──────────────────────────────────────────────────────────
+  if (section === "rechnungen") {
+    return (
+      <div className="flex h-full bg-neutral-50 text-neutral-900">
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <div className="flex-1 overflow-auto">
+          <RechnungenListe />
         </div>
       </div>
     );
