@@ -45,7 +45,9 @@ export default function CookiesPage() {
               Diese Cookies sind für den Betrieb von medipact.de erforderlich,
               zum Beispiel für die Anmeldung, die Sitzungsverwaltung und
               Sicherheitsfunktionen. Sie können nicht deaktiviert werden, da
-              die Plattform sonst nicht funktioniert.
+              die Plattform sonst nicht funktioniert. Rechtsgrundlage ist
+              § 25 Abs. 2 Nr. 2 TDDDG i. V. m. Art. 6 Abs. 1 lit. f DSGVO
+              (berechtigtes Interesse am technischen Betrieb).
             </p>
           </Section>
 
@@ -54,18 +56,40 @@ export default function CookiesPage() {
               Mit Ihrer Einwilligung verwenden wir Google Analytics, um zu
               verstehen, wie Besucher medipact.de nutzen, und um die Plattform
               zu verbessern. Diese Cookies werden erst gesetzt, wenn Sie im
-              Cookie-Banner auf „Akzeptieren“ klicken.
+              Cookie-Banner auf „Alle akzeptieren“ klicken. Rechtsgrundlage
+              ist § 25 Abs. 1 TDDDG für das Speichern/Auslesen auf Ihrem
+              Gerät sowie Art. 6 Abs. 1 lit. a DSGVO für die anschließende
+              Verarbeitung der Daten.
             </p>
           </Section>
 
-          <Section title="4. Ihre Wahl">
+          <Section title="4. Ihre Wahl – und wann das Banner erneut erscheint">
             <p>
               Beim ersten Besuch von medipact.de werden Sie über ein Banner
-              gefragt, ob Sie Analyse-Cookies zulassen möchten. Sie können
-              Ihre Auswahl jederzeit ändern, indem Sie die
-              Website-Daten/Cookies Ihres Browsers für medipact.de löschen –
-              das Banner erscheint dann erneut.
+              gefragt, ob Sie Analyse-Cookies zulassen möchten. Ihre
+              Entscheidung speichern wir lokal in Ihrem Browser.
             </p>
+            <p>Das Cookie-Banner erscheint erneut, wenn:</p>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>
+                Sie über den Link „Cookie-Einstellungen“ im Footer Ihre
+                bisherige Entscheidung zurücksetzen,
+              </li>
+              <li>
+                seit Ihrer letzten Entscheidung mehr als 12 Monate vergangen
+                sind – eine sehr alte Einwilligung gilt nicht mehr als
+                verlässlich informiert,
+              </li>
+              <li>
+                wir die Cookie-Kategorien oder eingesetzten Dienste ändern
+                (z. B. ein neues Analyse-Tool hinzukommt) – eine bestehende
+                Einwilligung deckt nur das ab, worüber Sie informiert wurden,
+              </li>
+              <li>
+                oder Sie die Website-Daten Ihres Browsers für medipact.de
+                löschen.
+              </li>
+            </ul>
           </Section>
 
           <Section title="5. Weitere Informationen">

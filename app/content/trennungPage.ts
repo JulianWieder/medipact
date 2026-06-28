@@ -1,5 +1,7 @@
 // app/content/trennungPage.ts
 
+import { trennungFacts } from "@/app/components/ui/DidYouKnowSection";
+
 export const trennungPageContent = {
   eyebrow: "Trennung & Unterhalt",
 
@@ -71,6 +73,8 @@ export const trennungPageContent = {
       text: "Vereinbarungen halten besser, weil beide Seiten dahinterstehen.",
     },
   ],
+
+  didYouKnowFacts: trennungFacts,
 
   finalCtaTitle: "Klär die wichtigsten Fragen, bevor es eskaliert.",
   finalCtaText:

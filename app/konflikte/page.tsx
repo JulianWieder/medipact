@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import QuickCheck from "@/app/components/QuickCheck";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
+import kostenPhoto from "@/fotos/kosten.jpg";
 
 export const metadata: Metadata = {
   title: "Konfliktarten – Trennung, Nachbarschaft, Erbschaft | medipact",
@@ -45,58 +47,91 @@ const unsuitablePoints = [
   "Eine Seite übernimmt keinerlei Verantwortung.",
 ];
 
+const problemPoints = [
+  "Gespräche eskalieren, obwohl eigentlich eine Lösung gebraucht wird.",
+  "Anwälte und Gerichte sind teuer, langsam und emotional belastend.",
+  "Familien, Nachbarn oder Ex-Partner müssen oft trotzdem weiter miteinander umgehen.",
+];
+
 export default function KonfliktePage() {
   return (
     <>
-      <section className="relative isolate overflow-hidden">
-        <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
-          <Image
-            src={konFormenPhoto}
-            alt="Verschiedene Formen privater Konflikte"
-            fill
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+      <ImagePinHero image={konFormenPhoto} imageAlt="Verschiedene Formen privater Konflikte">
+        <div className="container max-w-4xl">
+          <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
-          <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
-            <div className="container max-w-4xl">
-              <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
+          <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+            Konflikte haben viele Formen.{" "}
+            <span className="text-accent-300">
+              Mediation schafft Klarheit.
+            </span>
+          </h1>
 
-              <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                Konflikte haben viele Formen.{" "}
-                <span className="text-accent-300">
-                  Mediation schafft Klarheit.
-                </span>
-              </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
+            Ob Trennung, Erbschaft oder Nachbarschaft: Viele Konflikte
+            eskalieren nicht wegen des eigentlichen Themas, sondern weil
+            Kommunikation, Erwartungen und Emotionen durcheinandergeraten.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/kontakt" className="btn btn-primary">
+              Konflikt einschätzen
+            </Link>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-                Ob Trennung, Erbschaft oder Nachbarschaft: Viele Konflikte
-                eskalieren nicht wegen des eigentlichen Themas, sondern weil
-                Kommunikation, Erwartungen und Emotionen durcheinandergeraten.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/kontakt" className="btn btn-primary">
-                  Konflikt einschätzen
-                </Link>
+            <Link
+              href="/cases"
+              className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+            >
+              Fallbeispiele ansehen
+            </Link>
+          </div>
+        </div>
+      </ImagePinHero>
 
-                <Link
-                  href="/cases"
-                  className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
-                >
-                  Fallbeispiele ansehen
-                </Link>
-              </div>
+      <QuickCheck />
+
+      <section className="section section-muted">
+        <div className="container">
+          <div className="mb-12 max-w-3xl">
+            <div className="eyebrow mb-4">Das Problem</div>
+            <h2 className="heading-2 text-neutral-900">
+              Private Konflikte brauchen keinen jahrelangen Kampf.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
+              Gerade bei Trennung, Erbe oder Nachbarschaft geht es nicht nur
+              um Recht. Es geht um Stress, Geld, Familie und Alltag. Genau
+              hier setzt Medipact an.
+            </p>
+          </div>
+
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+            <div
+              className="relative mx-auto w-full max-w-xl overflow-hidden rounded-[2rem] border border-neutral-200 shadow-xl shadow-neutral-900/5"
+              style={{ aspectRatio: "4/3" }}
+            >
+              <Image
+                src={kostenPhoto}
+                alt="Kosten und Belastung durch einen langwierigen Konflikt"
+                fill
+                sizes="(max-width: 1024px) 100vw, 576px"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+
+            <div className="grid gap-4">
+              {problemPoints.map((point, i) => (
+                <div key={point} className="card">
+                  <div className="mb-4 text-3xl font-black text-neutral-100">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <p className="text-base leading-7 text-neutral-700">{point}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <QuickCheck />
-
-      <section className="section section-muted">
+      <section className="section section-base">
         <div className="container">
           <div className="max-w-3xl">
             <p className="eyebrow mb-4">Orientierung</p>

@@ -4,6 +4,11 @@ import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { ReactNode } from "react";
 import Image, { type StaticImageData } from "next/image";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
+import {
+  DidYouKnowSection,
+  type DidYouKnowFact,
+} from "@/app/components/ui/DidYouKnowSection";
 
 type PageImage = {
   src: StaticImageData;
@@ -60,6 +65,10 @@ type MarketingPageTemplateProps = {
   trustImage?: PageImage;
   faqTitle?: string;
   faqs?: Faq[];
+  /** Optional "Wussten Sie schon?" fact carousel, rendered just before the
+   * final CTA. Omit to skip the section entirely (e.g. /konflikte/* pages
+   * that don't need the extra institutional-trust beat). */
+  didYouKnowFacts?: DidYouKnowFact[];
   finalCtaTitle: string;
   finalCtaText: string;
   finalCta: {
@@ -110,6 +119,7 @@ export function MarketingPageTemplate({
   trustImage,
   faqTitle = "Häufige Fragen",
   faqs = [],
+  didYouKnowFacts,
   finalCtaTitle,
   finalCtaText,
   finalCta,
@@ -118,57 +128,42 @@ export function MarketingPageTemplate({
     <>
       <main className="app-shell pt-[73px]">
         {heroImage ? (
-          <section className="relative isolate overflow-hidden">
-            <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
-              <Image
-                src={heroImage.src}
-                alt={heroImage.alt}
-                fill
-                priority
-                sizes="100vw"
-                style={{ objectFit: "cover" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+          <ImagePinHero image={heroImage.src} imageAlt={heroImage.alt}>
+            <div className="container">
+              <div className="max-w-2xl">
+                <div className="eyebrow text-accent-300">{eyebrow}</div>
 
-              <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
-                <div className="container">
-                  <div className="max-w-2xl">
-                    <div className="eyebrow text-accent-300">{eyebrow}</div>
+                <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+                  {title}
+                  {titleHighlight && (
+                    <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                      {titleHighlight}
+                    </span>
+                  )}
+                </h1>
 
-                    <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                      {title}
-                      {titleHighlight && (
-                        <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
-                          {titleHighlight}
-                        </span>
-                      )}
-                    </h1>
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
+                  {intro}
+                </p>
 
-                    <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-                      {intro}
-                    </p>
+                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                  <Button href={primaryCta.href} size="lg">
+                    {primaryCta.label}
+                  </Button>
 
-                    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                      <Button href={primaryCta.href} size="lg">
-                        {primaryCta.label}
-                      </Button>
-
-                      {secondaryCta && (
-                        <Button
-                          href={secondaryCta.href}
-                          variant="secondary"
-                          size="lg"
-                        >
-                          {secondaryCta.label}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  {secondaryCta && (
+                    <Button
+                      href={secondaryCta.href}
+                      variant="secondary"
+                      size="lg"
+                    >
+                      {secondaryCta.label}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
-          </section>
+          </ImagePinHero>
         ) : (
           <section className="relative overflow-hidden section section-base">
             <div className="absolute inset-0 pointer-events-none">
@@ -401,7 +396,12 @@ export function MarketingPageTemplate({
           </section>
         )}
 
-        <section id="cta" className="section section-strong">
+        {didYouKnowFacts && <DidYouKnowSection facts={didYouKnowFacts} />}
+
+        <section
+          id="cta"
+          className={`section section-strong ${didYouKnowFacts ? "border-t border-white/5" : ""}`}
+        >
           <div className="container max-w-4xl text-center">
             <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
               {finalCtaTitle}

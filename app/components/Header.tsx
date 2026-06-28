@@ -17,6 +17,7 @@ const navItems = [
       { label: "Erbe & Familie", href: "/konflikte/erbschaft" },
     ],
   },
+  { label: "So funktioniert es", href: "/methode" },
   {
     label: "Beispiele",
     href: "/cases",

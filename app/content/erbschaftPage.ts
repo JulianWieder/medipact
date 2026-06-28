@@ -1,5 +1,7 @@
 // app/content/erbschaftPage.ts
 
+import { erbschaftFacts } from "@/app/components/ui/DidYouKnowSection";
+
 export const erbschaftPageContent = {
   eyebrow: "Erbschafts-Konflikt",
   title: "Wenn ein Nachlass zur Belastungsprobe wird.",
@@ -67,6 +69,8 @@ export const erbschaftPageContent = {
       text: "Nicht jede faire Lösung ist rein rechnerisch. Mediation macht Interessen verhandelbar.",
     },
   ],
+
+  didYouKnowFacts: erbschaftFacts,
 
   finalCtaTitle: "Erbe klären, bevor Familie zerbricht.",
   finalCtaText:

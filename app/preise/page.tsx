@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
@@ -14,38 +14,23 @@ export default function Preise() {
     <>
       <main className="app-shell pt-[73px]">
         {/* HERO */}
-        <section className="relative isolate overflow-hidden">
-          <div className="relative min-h-[480px] w-full sm:min-h-[560px]">
-            <Image
-              src={preisPhoto}
-              alt="Faire, transparente Preise bei medipact"
-              fill
-              priority
-              sizes="100vw"
-              style={{ objectFit: "cover" }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
-
-            <div className="relative flex min-h-[480px] items-center sm:min-h-[560px]">
-              <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
-                <div className="max-w-2xl">
-                  <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
-                    Transparente Preise.
-                    <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                      Fair aufgeteilt.
-                    </span>
-                  </h1>
-                  <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
-                    Sie wissen vorher genau, was auf Sie zukommt. Alle
-                    Parteien zahlen anteilig – keine versteckten Kosten, keine
-                    Überraschungen am Ende.
-                  </p>
-                </div>
-              </div>
+        <ImagePinHero image={preisPhoto} imageAlt="Faire, transparente Preise bei medipact">
+          <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
+                Transparente Preise.
+                <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
+                  Fair aufgeteilt.
+                </span>
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
+                Sie wissen vorher genau, was auf Sie zukommt. Alle
+                Parteien zahlen anteilig – keine versteckten Kosten, keine
+                Überraschungen am Ende.
+              </p>
             </div>
           </div>
-        </section>
+        </ImagePinHero>
 
         {/* DREI MODELLE */}
         <section className="section section-base">

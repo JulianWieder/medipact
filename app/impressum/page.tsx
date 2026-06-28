@@ -11,7 +11,7 @@ export default function ImpressumPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Impressum</h1>
-        <p className="mb-12 text-sm text-neutral-500">Angaben gemäß § 5 TMG</p>
+        <p className="mb-12 text-sm text-neutral-500">Angaben gemäß § 5 DDG</p>
 
         <div className="space-y-10 text-neutral-700">
 
@@ -58,7 +58,7 @@ export default function ImpressumPage() {
 
           <section>
             <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-neutral-400">
-              Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)
+              Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)
             </h2>
             <div className="space-y-1 text-base leading-7">
               <p>Julian Wieder</p>
@@ -93,9 +93,9 @@ export default function ImpressumPage() {
               Haftung für Inhalte
             </h2>
             <p className="text-base leading-7 text-neutral-600">
-              Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene
+              Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene
               Inhalte auf diesen Seiten nach den allgemeinen Gesetzen
-              verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter
+              verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter
               jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
               Informationen zu überwachen oder nach Umständen zu forschen, die
               auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur

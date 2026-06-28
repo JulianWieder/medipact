@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import karrierePhoto from "@/fotos/medi_karriere.jpg";
 
 export const metadata: Metadata = {
@@ -58,57 +58,42 @@ export default function KarrierePage() {
     <main className="app-shell pt-[73px]">
 
       {/* ── HERO ── */}
-      <section className="relative isolate overflow-hidden">
-        <div className="relative min-h-[560px] w-full sm:min-h-[640px]">
-          <Image
-            src={karrierePhoto}
-            alt="Karriere bei medipact – Mediator im Gespräch"
-            fill
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+      <ImagePinHero image={karrierePhoto} imageAlt="Karriere bei medipact – Mediator im Gespräch">
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <div className="eyebrow text-accent-300">Karriere bei medipact</div>
 
-          <div className="relative flex min-h-[560px] items-center sm:min-h-[640px]">
-            <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
-              <div className="max-w-2xl">
-                <div className="eyebrow text-accent-300">Karriere bei medipact</div>
+            <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              Konflikte lösen –
+              <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
+                mit Methode und Haltung.
+              </span>
+            </h1>
 
-                <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                  Konflikte lösen –
-                  <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
-                    mit Methode und Haltung.
-                  </span>
-                </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
+              Medipact verbindet strukturierte Mediation mit KI-gestützten
+              Prozessen. Wir suchen Menschen, die beides schätzen: gute
+              Technologie und den menschlichen Kern, der dahinter bleiben muss.
+            </p>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-                  Medipact verbindet strukturierte Mediation mit KI-gestützten
-                  Prozessen. Wir suchen Menschen, die beides schätzen: gute
-                  Technologie und den menschlichen Kern, der dahinter bleiben muss.
-                </p>
-
-                <div className="mt-10 flex flex-wrap gap-3 text-sm text-neutral-200">
-                  {[
-                    { label: "Remote möglich", color: "bg-accent-400" },
-                    { label: "Teilzeit & Vollzeit", color: "bg-accent-300" },
-                    { label: "Freiberuflich willkommen", color: "bg-accent-200" },
-                  ].map(({ label, color }) => (
-                    <div
-                      key={label}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm"
-                    >
-                      <span className={`h-2 w-2 rounded-full ${color}`} />
-                      {label}
-                    </div>
-                  ))}
+            <div className="mt-10 flex flex-wrap gap-3 text-sm text-neutral-200">
+              {[
+                { label: "Remote möglich", color: "bg-accent-400" },
+                { label: "Teilzeit & Vollzeit", color: "bg-accent-300" },
+                { label: "Freiberuflich willkommen", color: "bg-accent-200" },
+              ].map(({ label, color }) => (
+                <div
+                  key={label}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm"
+                >
+                  <span className={`h-2 w-2 rounded-full ${color}`} />
+                  {label}
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </ImagePinHero>
 
       {/* ── WERTE ── */}
       <section className="section section-muted border-y border-neutral-200">

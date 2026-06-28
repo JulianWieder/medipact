@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { resetCookieConsent } from "@/app/components/CookieConsent";
 
 interface FooterProps {
   brandName?: string;
@@ -27,7 +28,7 @@ export default function Footer({
       <div className="border-b border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-16">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-400">
-            Es ist Ihre Lösung. Nicht der Streit.
+            Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.
           </p>
           <h2 className="mt-4 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
             Bereit, den Streit hinter sich zu lassen?
@@ -67,7 +68,7 @@ export default function Footer({
                 </Link>
               </li>
               <li>
-                <Link href="/konflikte" className="transition hover:text-white">
+                <Link href="/methode" className="transition hover:text-white">
                   Wie es funktioniert
                 </Link>
               </li>
@@ -128,6 +129,15 @@ export default function Footer({
                 <Link href="/cookies" className="transition hover:text-white">
                   Cookies
                 </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={resetCookieConsent}
+                  className="text-left transition hover:text-white"
+                >
+                  Cookie-Einstellungen
+                </button>
               </li>
             </ul>
           </div>

@@ -1,5 +1,7 @@
 // app/content/nachbarschaftPage.ts
 
+import { nachbarschaftFacts } from "@/app/components/ui/DidYouKnowSection";
+
 export const nachbarschaftPageContent = {
   eyebrow: "Nachbarschafts-Streit",
   title: "Wenn der Alltag zum Konflikt wird.",
@@ -67,6 +69,8 @@ export const nachbarschaftPageContent = {
       text: "Am Ende stehen klare Absprachen statt vager Hoffnungen auf Besserung.",
     },
   ],
+
+  didYouKnowFacts: nachbarschaftFacts,
 
   finalCtaTitle: "Nachbarschaft klären, bevor es dauerhaft belastet.",
   finalCtaText:
