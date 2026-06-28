@@ -1,4 +1,6 @@
-import Link from "next/link";
+import UnlocalizedLink from "next/link";
+import { Link as LocalizedLink } from "@/i18n/navigation";
+import { isMigratedLocalePath } from "@/i18n/routing";
 import clsx from "clsx";
 import { ReactNode, ButtonHTMLAttributes } from "react";
 
@@ -56,10 +58,25 @@ export function Button(props: ButtonProps) {
         </a>
       );
     }
+
+    // Only paths actually migrated into app/[locale]/ (see
+    // isMigratedLocalePath, i18n/routing.ts) may use the locale-aware Link.
+    // Using it for an unmigrated path (most marketing pages right now, plus
+    // /auth, /dashboard, /workspace) is what caused the "/de/en/methode"
+    // prefix-loop bug — next-intl adds a locale prefix to a page that has
+    // nothing in app/[locale]/ to strip it back off again.
+    if (isMigratedLocalePath(props.href.split("#")[0])) {
+      return (
+        <LocalizedLink href={props.href} className={classes}>
+          {children}
+        </LocalizedLink>
+      );
+    }
+
     return (
-      <Link href={props.href} className={classes}>
+      <UnlocalizedLink href={props.href} className={classes}>
         {children}
-      </Link>
+      </UnlocalizedLink>
     );
   }
 

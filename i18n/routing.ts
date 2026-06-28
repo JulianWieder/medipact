@@ -17,3 +17,24 @@ export const routing = defineRouting({
 });
 
 export type AppLocale = (typeof routing.locales)[number];
+
+/**
+ * Single source of truth for which marketing paths actually live under
+ * app/[locale]/ today. Used by middleware.ts (to decide whether to run
+ * next-intl's locale-rewriting) AND by any component choosing between the
+ * locale-aware Link/router (@/i18n/navigation) and plain next/link.
+ *
+ * Using the locale-aware Link for a path that ISN'T in this list is exactly
+ * the bug that caused "/de/en/methode"-style loops: next-intl's Link/router
+ * compute their target assuming the page is inside the locale routing
+ * context, but the actual page (e.g. /methode) is the old, unmigrated,
+ * unprefixed route — so prefixes get added with nothing to ever strip them
+ * back off. Add a path here ONLY the same moment it's moved into
+ * app/[locale]/ (see migration-notes.md).
+ */
+export const MIGRATED_LOCALE_ROUTES = ["/", "/konflikte/trennung"];
+
+export function isMigratedLocalePath(pathname: string): boolean {
+  const withoutLocalePrefix = pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+  return MIGRATED_LOCALE_ROUTES.includes(withoutLocalePrefix);
+}

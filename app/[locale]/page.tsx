@@ -1,15 +1,15 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/app/components/JsonLd";
 import { HeroScrollPin } from "@/app/components/HeroScrollPin";
 import { ThemenTabs } from "@/app/components/ThemenTabs";
+import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
 import type { Metadata } from "next";
-import heroPhoto from "../../fotos/hero-mediation.png";
+import heroPhoto from "../../fotos/medi_main.jpg";
 
-// NOTE: this page's body copy (stats, headings, CTA text below) is still
-// hardcoded German — only the routing/provider plumbing was migrated in
-// this pass. See migration-notes.md for how to lift these into
-// messages/*.json the same way Header/Footer/CookieConsent were done.
+// Body copy lives in messages/*.json under "home" (see migration-notes.md
+// for the lift-into-translations pattern used here and in HeroScrollPin).
 
 export const metadata: Metadata = {
   title:
@@ -20,13 +20,6 @@ export const metadata: Metadata = {
     canonical: "https://medipact.de",
   },
 };
-
-const stats = [
-  { value: "6 Schritte", label: "strukturierter Prozess" },
-  { value: "< 4 Wochen", label: "typische Dauer" },
-  { value: "ab €499", label: "statt tausenden an Anwaltskosten" },
-  { value: "100 %", label: "vertraulich & DSGVO-konform" },
-];
 
 const serviceSchema = {
   "@context": "https://schema.org",
@@ -54,7 +47,11 @@ const serviceSchema = {
   },
 };
 
-export default function MedipactLanding() {
+export default async function MedipactLanding() {
+  const t = await getTranslations("home");
+  const stats = t.raw("stats") as { value: string; label: string }[];
+  const bekanntAusTags = t.raw("bekanntAusTags") as string[];
+
   return (
     <>
       <JsonLd data={serviceSchema} />
@@ -81,57 +78,51 @@ export default function MedipactLanding() {
         <section className="border-y border-neutral-100 bg-neutral-50 py-5">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-neutral-500 sm:gap-x-10">
-              <span className="font-semibold text-neutral-700">Bekannt aus</span>
-              <span className="font-semibold tracking-tight text-neutral-400">
-                Harvard-Methode
+              <span className="font-semibold text-neutral-700">
+                {t("bekanntAusLabel")}
               </span>
-              <span className="text-neutral-300">·</span>
-              <span className="font-semibold tracking-tight text-neutral-400">
-                DSGVO-konform
-              </span>
-              <span className="text-neutral-300">·</span>
-              <span className="font-semibold tracking-tight text-neutral-400">
-                Made in Germany
-              </span>
-              <span className="text-neutral-300">·</span>
-              <span className="font-semibold tracking-tight text-neutral-400">
-                SSL-verschlüsselt
-              </span>
+              {bekanntAusTags.map((tag, index) => (
+                <span key={tag} className="flex items-center gap-x-6 sm:gap-x-10">
+                  {index === 0 && (
+                    <span className="font-semibold tracking-tight text-neutral-400">
+                      {tag}
+                    </span>
+                  )}
+                  {index > 0 && (
+                    <>
+                      <span className="text-neutral-300">·</span>
+                      <span className="font-semibold tracking-tight text-neutral-400">
+                        {tag}
+                      </span>
+                    </>
+                  )}
+                </span>
+              ))}
             </div>
           </div>
         </section>
 
         <ThemenTabs />
 
-        <section className="section section-base">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-            <p className="text-base text-neutral-600">
-              Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,{" "}
-              <Link
-                href="/cases"
-                className="font-semibold text-accent-700 hover:underline"
-              >
-                wie konkrete Fälle mit Medipact gelöst wurden →
-              </Link>
-            </p>
-          </div>
-        </section>
+        <EmpfehlungenGrid />
 
-        <section className="section section-muted border-y border-neutral-200 text-center">
+        <section
+          id="process"
+          className="section section-muted border-y border-neutral-200 text-center scroll-mt-20"
+        >
           <div className="mx-auto max-w-2xl px-6 lg:px-8">
-            <div className="eyebrow mb-4 justify-center">So funktioniert es</div>
-            <h2 className="heading-2">
-              In 6 klaren Schritten zur möglichen Einigung.
-            </h2>
+            <div className="eyebrow mb-4 justify-center">
+              {t("processEyebrow")}
+            </div>
+            <h2 className="heading-2">{t("processTitle")}</h2>
             <p className="mt-5 text-lg leading-8 text-neutral-700">
-              Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair
-              für alle Seiten.
+              {t("processText")}
             </p>
             <Link
               href="/methode"
               className="mt-8 inline-flex font-semibold text-accent-700 hover:underline"
             >
-              So funktioniert medipact →
+              {t("processLink")}
             </Link>
           </div>
         </section>
@@ -139,13 +130,12 @@ export default function MedipactLanding() {
         <section className="section section-accent border-y border-accent-100 text-center">
           <div className="mx-auto max-w-2xl px-6 lg:px-8">
             <p className="text-base text-neutral-700">
-              Vertraulich, DSGVO-konform und mit menschlicher Mediation als
-              Rückfalloption –{" "}
+              {t("trustText")}{" "}
               <Link
                 href="/about"
                 className="font-semibold text-accent-700 hover:underline"
               >
-                mehr über medipact erfahren →
+                {t("trustLink")}
               </Link>
             </p>
           </div>
@@ -159,14 +149,13 @@ export default function MedipactLanding() {
         >
           <div className="mx-auto max-w-3xl px-6 lg:px-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-300 mb-8">
-              Jetzt starten
+              {t("ctaBadge")}
             </div>
             <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
-              Der Streit muss nicht größer werden.
+              {t("ctaTitle")}
             </h2>
             <p className="mt-6 text-lg text-neutral-300 leading-8">
-              Starten Sie ruhig, vertraulich und unverbindlich. Der erste
-              Schritt ist nicht die Einigung – sondern wieder Klarheit.
+              {t("ctaText")}
             </p>
 
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
@@ -174,7 +163,7 @@ export default function MedipactLanding() {
                 href="/auth/register"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-500"
               >
-                Kostenlosen Account erstellen
+                {t("ctaButton")}
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -191,10 +180,7 @@ export default function MedipactLanding() {
               </a>
             </div>
 
-            <p className="mt-6 text-xs text-neutral-500">
-              Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit
-              kündbar
-            </p>
+            <p className="mt-6 text-xs text-neutral-500">{t("ctaDisclaimer")}</p>
           </div>
         </section>
       </main>

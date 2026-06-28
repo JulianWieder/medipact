@@ -1,20 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { isMigratedLocalePath } from "@/i18n/routing";
+import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import logo from "@/fotos/Medipact Logo für Mediation Online.png";
+
+/**
+ * Most marketing routes (e.g. /methode, /cases, /about) are NOT migrated
+ * into app/[locale]/ yet — only "/" and "/konflikte/trennung" are (see
+ * isMigratedLocalePath in i18n/routing.ts). Using the locale-aware Link for
+ * an unmigrated path is what caused the "/de/en/methode" prefix-loop bug:
+ * next-intl computes a locale-prefixed href for a page that has nothing to
+ * strip that prefix back off. So pick per-link, not blanket.
+ */
+function NavLink({
+  href,
+  className,
+  onClick,
+  children,
+}: {
+  href: string;
+  className?: string;
+  onClick?: () => void;
+  children: ReactNode;
+}) {
+  if (isMigratedLocalePath(href.split("#")[0])) {
+    return (
+      <Link href={href} className={className} onClick={onClick}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <UnlocalizedLink href={href} className={className} onClick={onClick}>
+      {children}
+    </UnlocalizedLink>
+  );
+}
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const t = useTranslations("nav");
 
-  // hrefs point at marketing routes inside the [locale] segment, so this
-  // list uses the locale-aware Link (@/i18n/navigation) below, not
-  // next/link. /auth/* links stay on plain next/link (UnlocalizedLink)
-  // because /auth is outside the locale routing — see migration-notes.md.
   const navItems = [
     { label: t("start"), href: "/" },
     { label: t("about"), href: "/about" },
@@ -72,23 +103,26 @@ export default function Header() {
         {/* NAV */}
         <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
               className="text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
             >
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
 
         {/* CTA */}
-        <UnlocalizedLink
-          href="/auth/login"
-          className="hidden rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700 md:inline-flex"
-        >
-          {t("login")}
-        </UnlocalizedLink>
+        <div className="hidden items-center gap-4 md:flex">
+          <LanguageSwitcher />
+          <UnlocalizedLink
+            href="/auth/login"
+            className="rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
+          >
+            {t("login")}
+          </UnlocalizedLink>
+        </div>
 
         {/* MOBILE TOGGLE */}
         <button
@@ -112,24 +146,24 @@ export default function Header() {
           <ul className="flex flex-col gap-1">
             {navItems.map((item) => (
               <li key={item.href}>
-                <Link
+                <NavLink
                   href={item.href}
                   className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
-                </Link>
+                </NavLink>
                 {item.children && (
                   <ul className="ml-3 flex flex-col gap-1 border-l border-neutral-200 pl-3">
                     {item.children.map((child) => (
                       <li key={child.href}>
-                        <Link
+                        <NavLink
                           href={child.href}
                           className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                           onClick={() => setOpen(false)}
                         >
                           {child.label}
-                        </Link>
+                        </NavLink>
                       </li>
                     ))}
                   </ul>
@@ -137,6 +171,10 @@ export default function Header() {
               </li>
             ))}
           </ul>
+
+          <div className="mt-4 flex items-center justify-center">
+            <LanguageSwitcher />
+          </div>
 
           <UnlocalizedLink
             href="/auth/login"

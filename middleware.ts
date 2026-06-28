@@ -1,29 +1,9 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { routing } from "@/i18n/routing";
+import { routing, isMigratedLocalePath } from "@/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
-
-/**
- * Routes that actually live under app/[locale]/ today. next-intl's
- * middleware rewrites matched requests to include the locale segment
- * internally (e.g. "/preise" -> "/de/preise") so the [locale] folder can
- * resolve them — but if no app/[locale]/preise/page.tsx exists yet, that
- * rewrite produces a 404, even though the *old*, unmigrated
- * app/preise/page.tsx would have served the request fine on its own.
- *
- * So: only run intlMiddleware for paths that are confirmed migrated.
- * Everything else falls through untouched and keeps working exactly like
- * before next-intl was introduced. Add a path here the same moment you
- * move it into app/[locale]/ (see migration-notes.md).
- */
-const MIGRATED_LOCALE_ROUTES = ["/", "/konflikte/trennung"];
-
-function isMigratedMarketingPath(pathname: string): boolean {
-  const withoutLocalePrefix = pathname.replace(/^\/en(?=\/|$)/, "") || "/";
-  return MIGRATED_LOCALE_ROUTES.includes(withoutLocalePrefix);
-}
 
 /**
  * Two concerns live in this one middleware because Next.js only allows a
@@ -65,7 +45,7 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  if (isMigratedMarketingPath(pathname)) {
+  if (isMigratedLocalePath(pathname)) {
     return intlMiddleware(req);
   }
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { getTrennungPageContent } from "@/app/content/trennungPage.loader";
 import type { AppLocale } from "@/i18n/routing";
-import trennungPhoto from "@/fotos/trennung.jpg";
+import trennungPhoto from "@/fotos/medi_trennung.jpg";
 
 export const metadata: Metadata = {
   title: "Trennung & Scheidung ohne Eskalation – KI-Mediation | medipact",
