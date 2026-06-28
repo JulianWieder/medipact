@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const STORAGE_KEY = "medipact-cookie-consent";
 
@@ -89,6 +90,7 @@ export function resetCookieConsent() {
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations("cookieConsent");
 
   useEffect(() => {
     if (getCookieConsent() === null) {
@@ -121,22 +123,21 @@ export default function CookieConsent() {
     <div
       role="dialog"
       aria-live="polite"
-      aria-label="Cookie-Einstellungen"
+      aria-label={t("ariaLabel")}
       className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 sm:px-6 sm:pb-6"
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-2xl shadow-neutral-900/10 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-relaxed text-neutral-600">
-          Wir verwenden technisch notwendige Cookies, um medipact.de
-          bereitzustellen. Mit Ihrer Einwilligung nutzen wir zusätzlich
-          Analyse-Cookies, um die Nutzung der Plattform zu verstehen und zu
-          verbessern. Details und Widerruf jederzeit in unserer{" "}
-          <Link
-            href="/cookies"
-            className="font-medium text-accent-700 hover:underline"
-          >
-            Cookie-Richtlinie
-          </Link>
-          .
+          {t.rich("text", {
+            cookiePolicyLink: (chunks) => (
+              <Link
+                href="/cookies"
+                className="font-medium text-accent-700 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
         <div className="flex shrink-0 gap-3">
           <button
@@ -144,14 +145,14 @@ export default function CookieConsent() {
             onClick={() => setConsent("declined")}
             className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
           >
-            Nur notwendige
+            {t("declineButton")}
           </button>
           <button
             type="button"
             onClick={() => setConsent("accepted")}
             className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500"
           >
-            Alle akzeptieren
+            {t("acceptButton")}
           </button>
         </div>
       </div>

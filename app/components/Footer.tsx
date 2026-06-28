@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import UnlocalizedLink from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { resetCookieConsent } from "@/app/components/CookieConsent";
 
 interface FooterProps {
@@ -13,12 +15,14 @@ interface FooterProps {
 
 export default function Footer({
   brandName = "medipact",
-  tagline = "Konflikte lösen, nicht eskalieren.",
+  tagline,
   isDark = false,
   email = "hallo@medipact.de",
   phone = " +49 1520 9942351",
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const t = useTranslations("footer");
+  const resolvedTagline = tagline ?? t("tagline");
 
   return (
     <footer
@@ -28,18 +32,18 @@ export default function Footer({
       <div className="border-b border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-16">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-400">
-            Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.
+            {t("ctaEyebrow")}
           </p>
           <h2 className="mt-4 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-            Bereit, den Streit hinter sich zu lassen?
+            {t("ctaTitle")}
           </h2>
-          <Link
+          <UnlocalizedLink
             href="/auth/register"
             className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent-600 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-accent-500"
           >
-            Kostenlosen Account erstellen
+            {t("ctaButton")}
             <span aria-hidden="true">→</span>
-          </Link>
+          </UnlocalizedLink>
         </div>
       </div>
 
@@ -49,7 +53,7 @@ export default function Footer({
           {/* Brand */}
           <div>
             <h3 className="text-lg font-bold tracking-tight">{brandName}</h3>
-            <p className="mt-3 text-neutral-400">{tagline}</p>
+            <p className="mt-3 text-neutral-400">{resolvedTagline}</p>
             <div className="mt-4 space-y-2 text-sm text-neutral-400">
               <p>{email}</p>
               <p>{phone}</p>
@@ -59,22 +63,22 @@ export default function Footer({
           {/* Produkt */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
-              Produkt
+              {t("productHeading")}
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/preise" className="transition hover:text-white">
-                  Preise
+                  {t("productPricing")}
                 </Link>
               </li>
               <li>
                 <Link href="/methode" className="transition hover:text-white">
-                  Wie es funktioniert
+                  {t("productMethod")}
                 </Link>
               </li>
               <li>
                 <Link href="/cases" className="transition hover:text-white">
-                  Fallbeispiele
+                  {t("productCases")}
                 </Link>
               </li>
             </ul>
@@ -83,22 +87,22 @@ export default function Footer({
           {/* Unternehmen */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
-              Unternehmen
+              {t("companyHeading")}
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/about" className="transition hover:text-white">
-                  Über uns
+                  {t("companyAbout")}
                 </Link>
               </li>
               <li>
                 <Link href="/karriere" className="transition hover:text-white">
-                  Karriere
+                  {t("companyCareers")}
                 </Link>
               </li>
               <li>
                 <Link href="/kontakt" className="transition hover:text-white">
-                  Kontakt
+                  {t("companyContact")}
                 </Link>
               </li>
             </ul>
@@ -107,27 +111,27 @@ export default function Footer({
           {/* Rechtlich */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
-              Rechtlich
+              {t("legalHeading")}
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
                 <Link href="/datenschutz" className="transition hover:text-white">
-                  Datenschutz
+                  {t("legalPrivacy")}
                 </Link>
               </li>
               <li>
                 <Link href="/agb" className="transition hover:text-white">
-                  AGB
+                  {t("legalTerms")}
                 </Link>
               </li>
               <li>
                 <Link href="/impressum" className="transition hover:text-white">
-                  Impressum
+                  {t("legalImprint")}
                 </Link>
               </li>
               <li>
                 <Link href="/cookies" className="transition hover:text-white">
-                  Cookies
+                  {t("legalCookies")}
                 </Link>
               </li>
               <li>
@@ -136,7 +140,7 @@ export default function Footer({
                   onClick={resetCookieConsent}
                   className="text-left transition hover:text-white"
                 >
-                  Cookie-Einstellungen
+                  {t("legalCookieSettings")}
                 </button>
               </li>
             </ul>
@@ -146,7 +150,7 @@ export default function Footer({
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row">
           <p className="text-sm text-neutral-500">
-            &copy; {currentYear} {brandName}. Alle Rechte vorbehalten.
+            &copy; {currentYear} {brandName}. {t("copyright")}
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-neutral-500 transition hover:text-white">

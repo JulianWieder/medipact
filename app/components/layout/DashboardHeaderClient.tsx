@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
-import logo from "@/fotos/logo.jpg";
+import logo from "@/fotos/Medipact Logo für Mediation Online.png";
 
 type Props = {
   username: string;

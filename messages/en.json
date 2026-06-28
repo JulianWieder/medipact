@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "promo": "Neu: Ihren Streitfall in 5 Minuten starten – ohne Anwalt, ohne Risiko",
+    "promoShort": "Streitfall in 5 Minuten starten",
+    "start": "Start",
+    "about": "Über uns",
+    "konflikte": "Konflikte",
+    "konflikteTrennung": "Scheidung & Trennung",
+    "konflikteNachbarschaft": "Nachbarschaft",
+    "konflikteErbschaft": "Erbe & Familie",
+    "methode": "So funktioniert es",
+    "beispiele": "Beispiele",
+    "beispieleFallbeispiele": "Fallbeispiele",
+    "beispieleMatrix": "Mini-Matrix",
+    "login": "Mediation starten",
+    "menuOpen": "Menü öffnen",
+    "menuClose": "Menü schließen"
+  },
+  "footer": {
+    "ctaEyebrow": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
+    "ctaTitle": "Bereit, den Streit hinter sich zu lassen?",
+    "ctaButton": "Kostenlosen Account erstellen",
+    "tagline": "Konflikte lösen, nicht eskalieren.",
+    "productHeading": "Produkt",
+    "productPricing": "Preise",
+    "productMethod": "Wie es funktioniert",
+    "productCases": "Fallbeispiele",
+    "companyHeading": "Unternehmen",
+    "companyAbout": "Über uns",
+    "companyCareers": "Karriere",
+    "companyContact": "Kontakt",
+    "legalHeading": "Rechtlich",
+    "legalPrivacy": "Datenschutz",
+    "legalTerms": "AGB",
+    "legalImprint": "Impressum",
+    "legalCookies": "Cookies",
+    "legalCookieSettings": "Cookie-Einstellungen",
+    "copyright": "Alle Rechte vorbehalten."
+  },
+  "cookieConsent": {
+    "ariaLabel": "Cookie-Einstellungen",
+    "text": "Wir verwenden technisch notwendige Cookies, um medipact.de bereitzustellen. Mit Ihrer Einwilligung nutzen wir zusätzlich Analyse-Cookies, um die Nutzung der Plattform zu verstehen und zu verbessern. Details und Widerruf jederzeit in unserer <cookiePolicyLink>Cookie-Richtlinie</cookiePolicyLink>.",
+    "declineButton": "Nur notwendige",
+    "acceptButton": "Alle akzeptieren"
+  }
+}

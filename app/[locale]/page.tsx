@@ -1,10 +1,15 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/app/components/JsonLd";
 import { HeroScrollPin } from "@/app/components/HeroScrollPin";
 import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
 import type { Metadata } from "next";
-import heroPhoto from "../fotos/hero-mediation.png";
+import heroPhoto from "../../fotos/hero-mediation.png";
+
+// NOTE: this page's body copy (stats, headings, CTA text below) is still
+// hardcoded German — only the routing/provider plumbing was migrated in
+// this pass. See migration-notes.md for how to lift these into
+// messages/*.json the same way Header/Footer/CookieConsent were done.
 
 export const metadata: Metadata = {
   title:
@@ -165,7 +170,7 @@ export default function MedipactLanding() {
             </p>
 
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-              <Link
+              <a
                 href="/auth/register"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-500"
               >
@@ -183,7 +188,7 @@ export default function MedipactLanding() {
                     d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
                   />
                 </svg>
-              </Link>
+              </a>
             </div>
 
             <p className="mt-6 text-xs text-neutral-500">

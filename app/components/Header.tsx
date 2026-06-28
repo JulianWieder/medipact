@@ -1,50 +1,55 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import UnlocalizedLink from "next/link";
 import Image from "next/image";
-import logo from "@/fotos/logo.jpg";
-
-const navItems = [
-  { label: "Start", href: "/" },
-  { label: "Über uns", href: "/about" },
-  {
-    label: "Konflikte",
-    href: "/konflikte",
-    children: [
-      { label: "Scheidung & Trennung", href: "/konflikte/trennung" },
-      { label: "Nachbarschaft", href: "/konflikte/nachbarschaft" },
-      { label: "Erbe & Familie", href: "/konflikte/erbschaft" },
-    ],
-  },
-  { label: "So funktioniert es", href: "/methode" },
-  {
-    label: "Beispiele",
-    href: "/cases",
-    children: [
-      { label: "Fallbeispiele", href: "/cases" },
-      { label: "Mini-Matrix", href: "/cases#matrix" },
-    ],
-  },
-];
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import logo from "@/fotos/Medipact Logo für Mediation Online.png";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("nav");
+
+  // hrefs point at marketing routes inside the [locale] segment, so this
+  // list uses the locale-aware Link (@/i18n/navigation) below, not
+  // next/link. /auth/* links stay on plain next/link (UnlocalizedLink)
+  // because /auth is outside the locale routing — see migration-notes.md.
+  const navItems = [
+    { label: t("start"), href: "/" },
+    { label: t("about"), href: "/about" },
+    {
+      label: t("konflikte"),
+      href: "/konflikte",
+      children: [
+        { label: t("konflikteTrennung"), href: "/konflikte/trennung" },
+        { label: t("konflikteNachbarschaft"), href: "/konflikte/nachbarschaft" },
+        { label: t("konflikteErbschaft"), href: "/konflikte/erbschaft" },
+      ],
+    },
+    { label: t("methode"), href: "/methode" },
+    {
+      label: t("beispiele"),
+      href: "/cases",
+      children: [
+        { label: t("beispieleFallbeispiele"), href: "/cases" },
+        { label: t("beispieleMatrix"), href: "/cases#matrix" },
+      ],
+    },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Promo bar */}
       <div className="w-full bg-neutral-900 text-white">
-        <Link
+        <UnlocalizedLink
           href="/auth/register"
           className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-semibold tracking-wide text-neutral-100 transition hover:text-accent-300 sm:px-6 sm:text-sm"
         >
-          <span className="sm:hidden">Streitfall in 5 Minuten starten</span>
-          <span className="hidden sm:inline">
-            Neu: Ihren Streitfall in 5 Minuten starten – ohne Anwalt, ohne Risiko
-          </span>
+          <span className="sm:hidden">{t("promoShort")}</span>
+          <span className="hidden sm:inline">{t("promo")}</span>
           <span aria-hidden="true">→</span>
-        </Link>
+        </UnlocalizedLink>
       </div>
 
       <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
@@ -78,18 +83,18 @@ export default function Header() {
         </nav>
 
         {/* CTA */}
-        <Link
+        <UnlocalizedLink
           href="/auth/login"
           className="hidden rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700 md:inline-flex"
         >
-          Mediation starten
-        </Link>
+          {t("login")}
+        </UnlocalizedLink>
 
         {/* MOBILE TOGGLE */}
         <button
           type="button"
           className="inline-flex rounded-md p-2 text-neutral-800 md:hidden"
-          aria-label={open ? "Menü schließen" : "Menü öffnen"}
+          aria-label={open ? t("menuClose") : t("menuOpen")}
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((prev) => !prev)}
@@ -133,13 +138,13 @@ export default function Header() {
             ))}
           </ul>
 
-          <Link
+          <UnlocalizedLink
             href="/auth/login"
             className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
             onClick={() => setOpen(false)}
           >
-            Mediation starten
-          </Link>
+            {t("login")}
+          </UnlocalizedLink>
         </nav>
       )}
       </div>

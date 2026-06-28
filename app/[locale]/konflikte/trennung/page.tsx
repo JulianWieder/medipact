@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
-import { trennungPageContent } from "@/app/content/trennungPage";
+import { getTrennungPageContent } from "@/app/content/trennungPage.loader";
+import type { AppLocale } from "@/i18n/routing";
 import trennungPhoto from "@/fotos/trennung.jpg";
 
 export const metadata: Metadata = {
@@ -10,10 +11,16 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://medipact.de/konflikte/trennung" },
 };
 
-export default function TrennungPage() {
+export default async function TrennungPage({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}) {
+  const { locale } = await params;
+
   return (
     <MarketingPageTemplate
-      {...trennungPageContent}
+      {...getTrennungPageContent(locale)}
       heroImage={{
         src: trennungPhoto,
         alt: "Paar im Gespräch über eine Trennung",

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { WORKSPACE_NAV, WorkspaceSection } from "../types";
 import { cn } from "../ui";
-import logo from "@/fotos/logo.jpg";
+import logo from "@/fotos/Medipact Logo für Mediation Online.png";
 
 interface WorkspaceSidebarProps {
   active: WorkspaceSection;

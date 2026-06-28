@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { ConditionalHeader, ConditionalFooter } from "@/app/components/ConditionalHeader";
 import { JsonLd } from "@/app/components/JsonLd";
 import Analytics from "@/app/components/Analytics";
@@ -77,13 +79,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Resolved by middleware.ts for marketing routes (/, /de/..., /en/...).
+  // For /dashboard, /workspace, /auth/* — which sit outside the [locale]
+  // segment on purpose, see migration-notes.md — this falls back to the
+  // default locale ("de"), matching today's German-only behavior.
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="de" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
@@ -98,13 +107,15 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-        <JsonLd data={organizationSchema} />
-        <JsonLd data={websiteSchema} />
-        <Analytics />
-        <ConditionalHeader />
-        {children}
-        <ConditionalFooter />
-        <CookieConsent />
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <JsonLd data={organizationSchema} />
+          <JsonLd data={websiteSchema} />
+          <Analytics />
+          <ConditionalHeader />
+          {children}
+          <ConditionalFooter />
+          <CookieConsent />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
