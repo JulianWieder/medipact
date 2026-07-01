@@ -49,7 +49,7 @@ export const trennungPageContent = {
   process: [
     {
       title: "Situation klären",
-      text: "Du strukturierst gemeinsam, welche Themen wirklich geklärt werden müssen – sachlich und emotional.",
+      text: "Sie strukturieren gemeinsam, welche Themen wirklich geklärt werden müssen – sachlich und emotional.",
     },
     {
       title: "Gespräch ermöglichen",
@@ -81,7 +81,7 @@ export const trennungPageContent = {
 
   finalCtaTitle: "Klär die wichtigsten Fragen, bevor es eskaliert.",
   finalCtaText:
-    "Beschreibe kurz deine Situation und erhalte eine erste Einschätzung, wie du vorgehen kannst.",
+    "Beschreiben Sie kurz Ihre Situation und erhalten Sie eine erste Einschätzung, wie Sie vorgehen können.",
 
   finalCta: {
     label: "Jetzt starten",

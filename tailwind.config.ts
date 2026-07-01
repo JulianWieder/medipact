@@ -1,32 +1,12 @@
-import type { Config } from "tailwindcss";
-
-export default {
-  content: ["./app/**/*.{js,ts,jsx,tsx}"],
-  theme: {
-    container: {
-      center: true,
-      padding: {
-        DEFAULT: "1.5rem",
-        lg: "2rem",
-        xl: "2.5rem",
-      },
-    },
-    extend: {
-      colors: {
-        emerald: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#134e4a",
-        },
-      },
-    },
-  },
-  plugins: [],
-} satisfies Config;
+// Dieses Projekt läuft auf Tailwind CSS v4 (siehe postcss.config.mjs:
+// "@tailwindcss/postcss"), das CSS-first konfiguriert wird. Die gesamte
+// Theme-Konfiguration (Farben, Fonts, Container) lebt in `app/globals.css`
+// unter `@theme` bzw. `@utility container` — nicht hier.
+//
+// Diese Datei wird von nichts im Projekt importiert oder geladen (kein
+// `@config`-Directive in globals.css, kein Build-Skript referenziert sie).
+// Sie bleibt nur als No-Op stehen, weil Löschen in dieser Session ohne
+// explizite Freigabe nicht erlaubt war. Bitte NICHT weiter befüllen —
+// Änderungen hier haben keinen Effekt auf die Anwendung. Neue Farb-Tokens
+// gehören in app/globals.css (@theme), nicht hierher.
+export default {};

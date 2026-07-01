@@ -74,7 +74,7 @@ export const nachbarschaftPageContent = {
 
   finalCtaTitle: "Nachbarschaft klären, bevor es dauerhaft belastet.",
   finalCtaText:
-    "Beschreibe kurz deine Situation und finde heraus, wie ein sinnvoller nächster Schritt aussehen kann.",
+    "Beschreiben Sie kurz Ihre Situation und finden Sie heraus, wie ein sinnvoller nächster Schritt aussehen kann.",
   finalCta: {
     label: "Jetzt starten",
     href: "/kontakt",

@@ -136,8 +136,8 @@ const serviceSchema = {
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
-    price: "499",
-    description: "KI-Mediation ab €499",
+    price: "249",
+    description: "KI-Mediation ab €249",
   },
 };
 
@@ -179,7 +179,7 @@ export default function MethodePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 max-w-2xl">
             <div className="eyebrow mb-4">Warum medipact anders ist</div>
-            <h2 className="heading-2">Drei Gründe, warum es funktioniert.</h2>
+            <h2 className="heading-2">Drei Gründe, die den Unterschied machen.</h2>
           </div>
 
           <div className="grid gap-10 sm:grid-cols-3">

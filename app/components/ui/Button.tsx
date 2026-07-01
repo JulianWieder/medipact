@@ -23,14 +23,18 @@ type NativeButtonProps = BaseProps &
 
 type ButtonProps = LinkButtonProps | NativeButtonProps;
 
+// active:scale lebt hier zentral (statt pro Variante mit leicht
+// unterschiedlichen Werten dupliziert zu werden — vorher 0.96 bei primary,
+// 0.98 bei secondary, ohne erkennbaren Grund), damit sich alle
+// Button-Varianten beim Klicken gleich anfühlen.
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 active:scale-[0.96] disabled:opacity-50 disabled:pointer-events-none";
 
 const variants = {
   primary:
-    "bg-accent-500 text-white hover:bg-accent-600 hover:shadow-[0_10px_25px_-5px_rgba(20,184,166,0.4)] active:scale-[0.96] active:shadow-inner",
+    "bg-accent-500 text-white hover:bg-accent-600 hover:shadow-[0_10px_25px_-5px_rgba(20,184,166,0.4)] active:shadow-inner",
   secondary:
-    "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm active:scale-[0.98]",
+    "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm",
   ghost: "text-neutral-600 hover:text-accent-600 hover:bg-accent-50/30",
 };
 

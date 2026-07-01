@@ -92,7 +92,7 @@ export default function SituationCheck() {
   }
 
   return (
-    <Card className="rounded-[2rem] p-8 sm:p-10">
+    <Card className="sm:p-10">
       <p className="eyebrow mb-4">Schnell-Check</p>
       <h2 className="heading-2">Ist Mediation für Ihre Situation geeignet?</h2>
       <p className="mt-4 leading-7 text-neutral-600">

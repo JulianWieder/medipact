@@ -49,7 +49,7 @@
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
       "titleLine1": "Mediation online –",
       "titleLine2": "Konflikte fair, vertraulich und ohne Gericht lösen.",
-      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe – Schritt für Schritt zurück zu einem klaren Kopf und einer Lösung, mit der beide Seiten leben können.",
+      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe – Schritt für Schritt zu einer Lösung, mit der beide Seiten leben können.",
       "ctaPrimary": "Kostenlosen Account erstellen",
       "ctaSecondary": "So funktioniert es",
       "badgeVertraulich": "Vertraulich",
@@ -59,7 +59,7 @@
     "stats": [
       { "value": "6 Schritte", "label": "strukturierter Prozess" },
       { "value": "< 4 Wochen", "label": "typische Dauer" },
-      { "value": "ab €499", "label": "statt tausenden an Anwaltskosten" },
+      { "value": "ab €249", "label": "statt tausenden an Anwaltskosten" },
       { "value": "100 %", "label": "vertraulich & DSGVO-konform" }
     ],
     "bekanntAusLabel": "Bekannt aus",
@@ -83,7 +83,7 @@
         },
         "nachbarschaft": {
           "title": "Nachbarschaftsstreit",
-          "text": "Lärm, Grenzen oder Stellplätze: bevor aus Ärger eine jahrelange Fehde wird, moderiert medipact die Klärung."
+          "text": "Lärm, Grenzen oder Stellplätze: medipact moderiert die Klärung, bevor aus Ärger eine jahrelange Fehde wird."
         },
         "erbschaft": {
           "title": "Erbe & Familie",

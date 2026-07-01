@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { aboutPageContent } from "@/app/content/aboutPage";
 import { mediationsgesetzFacts } from "@/app/components/ui/DidYouKnowSection";
+import { FounderSection } from "@/app/components/FounderSection";
 import aboutPhoto from "@/fotos/medi_about.jpg";
 
 export const metadata: Metadata = {
@@ -13,13 +14,17 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <MarketingPageTemplate
-      {...aboutPageContent}
-      heroImage={{
-        src: aboutPhoto,
-        alt: "medipact – Mediation für private Konflikte",
-      }}
-      didYouKnowFacts={mediationsgesetzFacts}
-    />
+    <>
+      <MarketingPageTemplate
+        {...aboutPageContent}
+        heroImage={{
+          src: aboutPhoto,
+          alt: "medipact – Mediation für private Konflikte",
+        }}
+        didYouKnowFacts={mediationsgesetzFacts}
+        breadcrumbs={[{ label: "Über medipact" }]}
+      />
+      <FounderSection />
+    </>
   );
 }

@@ -70,19 +70,19 @@ export const aboutPageContent = {
       {
         title: "Erbe",
         text: "Vergangenheit wirkt weiter – in Erwartungen, Erfahrungen und unausgesprochenen Prägungen.",
-        href: "/erbe",
+        href: "/konflikte/erbschaft",
         cta: "Perspektive Erbe verstehen",
       },
       {
         title: "Nachbarschaft",
         text: "Konflikte entstehen im Miteinander – in Kommunikation, Rollen und täglichen Interaktionen.",
-        href: "/nachbarschaft",
+        href: "/konflikte/nachbarschaft",
         cta: "Zur Nachbarschaft",
       },
       {
         title: "Trennung",
         text: "Wenn etwas sich löst oder verändert, braucht es Klarheit für den nächsten Schritt.",
-        href: "/trennung",
+        href: "/konflikte/trennung",
         cta: "Trennung neu denken",
       },
     ],

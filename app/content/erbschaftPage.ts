@@ -74,7 +74,7 @@ export const erbschaftPageContent = {
 
   finalCtaTitle: "Erbe klären, bevor Familie zerbricht.",
   finalCtaText:
-    "Beschreibe kurz den Konflikt und finde heraus, welcher nächste Schritt sinnvoll ist.",
+    "Beschreiben Sie kurz den Konflikt und finden Sie heraus, welcher nächste Schritt sinnvoll ist.",
   finalCta: {
     label: "Jetzt starten",
     href: "/kontakt",

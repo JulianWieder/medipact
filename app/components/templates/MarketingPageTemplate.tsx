@@ -4,11 +4,13 @@ import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { ReactNode } from "react";
 import Image, { type StaticImageData } from "next/image";
+import NextLink from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import {
   DidYouKnowSection,
   type DidYouKnowFact,
 } from "@/app/components/ui/DidYouKnowSection";
+import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
 
 type PageImage = {
   src: StaticImageData;
@@ -69,6 +71,13 @@ type MarketingPageTemplateProps = {
    * final CTA. Omit to skip the section entirely (e.g. /konflikte/* pages
    * that don't need the extra institutional-trust beat). */
   didYouKnowFacts?: DidYouKnowFact[];
+  /** Optional breadcrumb trail (excluding "Start", which is prepended
+   * automatically). Adds a visible path back to parent pages plus matching
+   * BreadcrumbList JSON-LD, so the page isn't only reachable via the nav. */
+  breadcrumbs?: BreadcrumbItem[];
+  /** Optional links to related case studies, rendered above the final CTA
+   * so crawlers and users always have a next click instead of a dead end. */
+  relatedCases?: BreadcrumbItem[];
   finalCtaTitle: string;
   finalCtaText: string;
   finalCta: {
@@ -120,6 +129,8 @@ export function MarketingPageTemplate({
   faqTitle = "Häufige Fragen",
   faqs = [],
   didYouKnowFacts,
+  breadcrumbs,
+  relatedCases,
   finalCtaTitle,
   finalCtaText,
   finalCta,
@@ -131,6 +142,7 @@ export function MarketingPageTemplate({
           <ImagePinHero image={heroImage.src} imageAlt={heroImage.alt}>
             <div className="container">
               <div className="max-w-2xl">
+                {breadcrumbs && <Breadcrumbs items={breadcrumbs} variant="dark" />}
                 <div className="eyebrow text-accent-300">{eyebrow}</div>
 
                 <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
@@ -173,6 +185,7 @@ export function MarketingPageTemplate({
 
             <div className="container relative grid items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="max-w-3xl">
+                {breadcrumbs && <Breadcrumbs items={breadcrumbs} variant="light" />}
                 <div className="eyebrow">{eyebrow}</div>
 
                 <h1 className="heading-1 mt-8">
@@ -207,7 +220,7 @@ export function MarketingPageTemplate({
 
               <div>
                 {heroAside ?? (
-                  <Card className="rounded-[2rem] p-8">
+                  <Card>
                     <h3 className="heading-3">Produktvorschau</h3>
                     <p className="mt-4 leading-7 text-neutral-700">
                       Hier kann ein Video, ein Mockup oder eine Produktvorschau
@@ -230,7 +243,7 @@ export function MarketingPageTemplate({
 
             <div className="grid gap-6 md:grid-cols-2">
               {features.map((feature) => (
-                <Card key={feature.title} className="rounded-[2rem] p-8">
+                <Card key={feature.title}>
                   <h3 className="heading-3">{feature.title}</h3>
                   <p className="mt-4 leading-7 text-neutral-700">
                     {feature.text}
@@ -247,7 +260,7 @@ export function MarketingPageTemplate({
 
             <div className="space-y-5">
               {process.map((step, index) => (
-                <Card key={step.title} className="rounded-[2rem] p-8">
+                <Card key={step.title}>
                   <div className="flex gap-5">
                     <div className="min-w-fit rounded-2xl bg-gradient-to-br from-accent-600 to-accent-500 px-4 py-3 text-center font-bold text-white shadow-md">
                       {String(index + 1).padStart(2, "0")}
@@ -352,7 +365,7 @@ export function MarketingPageTemplate({
 
                   <div className="grid gap-6">
                     {trustPoints.map((point) => (
-                      <Card key={point.title} className="rounded-[2rem] p-8">
+                      <Card key={point.title}>
                         <h3 className="heading-3">{point.title}</h3>
                         <p className="mt-4 leading-7 text-neutral-700">
                           {point.text}
@@ -364,7 +377,7 @@ export function MarketingPageTemplate({
               ) : (
                 <div className="grid gap-6 md:grid-cols-3">
                   {trustPoints.map((point) => (
-                    <Card key={point.title} className="rounded-[2rem] p-8">
+                    <Card key={point.title}>
                       <h3 className="heading-3">{point.title}</h3>
                       <p className="mt-4 leading-7 text-neutral-700">
                         {point.text}
@@ -384,7 +397,7 @@ export function MarketingPageTemplate({
 
               <div className="space-y-4">
                 {faqs.map((faq) => (
-                  <Card key={faq.question} className="rounded-[2rem] p-8">
+                  <Card key={faq.question}>
                     <h3 className="heading-3">{faq.question}</h3>
                     <p className="mt-4 leading-7 text-neutral-700">
                       {faq.answer}
@@ -397,6 +410,25 @@ export function MarketingPageTemplate({
         )}
 
         {didYouKnowFacts && <DidYouKnowSection facts={didYouKnowFacts} />}
+
+        {relatedCases && relatedCases.length > 0 && (
+          <section className="section section-base border-t border-neutral-100">
+            <div className="container max-w-4xl">
+              <SectionLead eyebrow="Weiterlesen" title="Passende Fallbeispiele" center />
+              <div className="flex flex-wrap justify-center gap-4">
+                {relatedCases.map((item) => (
+                  <NextLink
+                    key={item.href}
+                    href={item.href ?? "#"}
+                    className="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:border-accent-300 hover:text-accent-700"
+                  >
+                    {item.label} →
+                  </NextLink>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section
           id="cta"

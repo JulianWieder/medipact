@@ -2,6 +2,8 @@
 
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
+import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
+import Link from "next/link";
 import { ReactNode } from "react";
 
 type Step = {
@@ -44,6 +46,11 @@ type CaseStudyTemplateProps = {
   negative: ComparisonBlock;
   quotesTitle?: string;
   quotes: Quote[];
+  /** Breadcrumb trail back to /cases and the relevant /konflikte/* category
+   * — keeps this page from being a dead end reachable only via deep links. */
+  breadcrumbs?: BreadcrumbItem[];
+  /** Links to 2-3 other case studies, shown just above the CTA. */
+  relatedCases?: BreadcrumbItem[];
   ctaTitle: string;
   ctaText: string;
   ctaHref: string;
@@ -103,6 +110,8 @@ export function CaseStudyTemplate({
   negative,
   quotesTitle = "Was die Beteiligten sagen",
   quotes = [],
+  breadcrumbs,
+  relatedCases,
   ctaTitle,
   ctaText,
   ctaHref,
@@ -135,6 +144,7 @@ export function CaseStudyTemplate({
 
           <div className="container relative">
             <div className="max-w-3xl">
+              {breadcrumbs && <Breadcrumbs items={breadcrumbs} variant="light" />}
               <div className="eyebrow">{eyebrow}</div>
 
               <h1 className="heading-1 mt-8">
@@ -162,14 +172,14 @@ export function CaseStudyTemplate({
             />
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="rounded-[2rem] p-8">
+              <Card>
                 <h3 className="heading-3">{perspectiveA.title}</h3>
                 <div className="mt-4 leading-8 text-neutral-700">
                   {perspectiveA.content}
                 </div>
               </Card>
 
-              <Card className="rounded-[2rem] p-8">
+              <Card>
                 <h3 className="heading-3">{perspectiveB.title}</h3>
                 <div className="mt-4 leading-8 text-neutral-700">
                   {perspectiveB.content}
@@ -182,7 +192,7 @@ export function CaseStudyTemplate({
         <section className="section section-base">
           <div className="container">
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="rounded-[2rem] p-8">
+              <Card>
                 <h3 className="heading-3">{factsTitle}</h3>
                 <ul className="mt-5 space-y-3 text-neutral-700">
                   {facts.map((item) => (
@@ -191,7 +201,7 @@ export function CaseStudyTemplate({
                 </ul>
               </Card>
 
-              <Card variant="danger" className="rounded-[2rem] p-8">
+              <Card variant="danger">
                 <h3 className="heading-3 text-red-900">{riskTitle}</h3>
                 <ul className="mt-5 space-y-3 text-red-700">
                   {risks.map((item) => (
@@ -214,7 +224,7 @@ export function CaseStudyTemplate({
 
             <div className="space-y-5">
               {steps.map((step) => (
-                <Card key={step.label} className="rounded-[2rem] p-8">
+                <Card key={step.label}>
                   <div className="flex gap-5">
                     <div className="min-w-fit rounded-2xl bg-gradient-to-br from-accent-600 to-accent-500 px-4 py-3 text-center font-bold text-white shadow-md">
                       {step.label}
@@ -244,7 +254,7 @@ export function CaseStudyTemplate({
               />
 
               <div className="grid gap-8 md:grid-cols-2">
-                <Card variant="warning" className="rounded-[2rem] p-8">
+                <Card variant="warning">
                   <h3 className="mb-4 text-2xl font-black text-orange-700">
                     {positive.title}
                   </h3>
@@ -258,7 +268,7 @@ export function CaseStudyTemplate({
                   </ul>
                 </Card>
 
-                <Card variant="danger" className="rounded-[2rem] p-8">
+                <Card variant="danger">
                   <h3 className="mb-4 text-2xl font-black text-red-700">
                     {negative.title}
                   </h3>
@@ -282,7 +292,7 @@ export function CaseStudyTemplate({
 
             <div className="space-y-6">
               {quotes.map((quote) => (
-                <Card key={quote.author} className="rounded-[2rem] p-8">
+                <Card key={quote.author}>
                   <p className="text-lg italic leading-8 text-neutral-700">
                     “{quote.text}”
                   </p>
@@ -294,6 +304,25 @@ export function CaseStudyTemplate({
             </div>
           </div>
         </section>
+
+        {relatedCases && relatedCases.length > 0 && (
+          <section className="section section-base border-t border-neutral-100">
+            <div className="container max-w-5xl">
+              <SectionHeader title="Weitere Fallbeispiele" center />
+              <div className="flex flex-wrap justify-center gap-4">
+                {relatedCases.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href ?? "#"}
+                    className="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:border-accent-300 hover:text-accent-700"
+                  >
+                    {item.label} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section id="cta" className="section section-strong">
           <div className="container max-w-4xl text-center">

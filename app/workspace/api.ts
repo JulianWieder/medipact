@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -216,13 +216,38 @@ export async function fetchAllFeedback(): Promise<FeedbackEntry[]> {
 // ── Rechnungen ────────────────────────────────────────────────────────────
 //
 // Ruft /api/invoices auf (siehe app/api/invoices/route.ts), das per
-// backendFetch an das medipact-api-Backend weiterleitet. Der Endpoint dort
-// existiert noch nicht — siehe Kommentar in ./types.ts für die erwartete
-// Response-Struktur.
+// backendFetch an das medipact-api-Backend weiterleitet (GET/POST /invoices,
+// PATCH /invoices/{id} in backend/app/routers/invoices.py).
 
 export async function fetchInvoices(): Promise<Invoice[]> {
   const res = await fetch("/api/invoices", { cache: "no-store" });
   if (!res.ok) return [];
   const data = await res.json().catch(() => null);
   return Array.isArray(data) ? data : [];
+}
+
+export async function createInvoice(payload: InvoiceCreateInput): Promise<Invoice> {
+  const res = await fetch("/api/invoices", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Rechnung konnte nicht erstellt werden");
+  }
+  return res.json();
+}
+
+export async function updateInvoice(id: number, payload: InvoiceUpdateInput): Promise<Invoice> {
+  const res = await fetch(`/api/invoices/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Rechnung konnte nicht aktualisiert werden");
+  }
+  return res.json();
 }

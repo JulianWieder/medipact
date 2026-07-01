@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import QuickCheck from "@/app/components/QuickCheck";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
+import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
 
@@ -58,6 +59,7 @@ export default function KonfliktePage() {
     <>
       <ImagePinHero image={konFormenPhoto} imageAlt="Verschiedene Formen privater Konflikte">
         <div className="container max-w-4xl">
+          <Breadcrumbs items={[{ label: "Konfliktarten" }]} variant="dark" />
           <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
@@ -172,10 +174,10 @@ export default function KonfliktePage() {
       <section className="section section-base">
         <div className="container">
           <div className="max-w-3xl">
-            <p className="eyebrow mb-4">Schnell-Check</p>
+            <p className="eyebrow mb-4">Eignung</p>
 
             <h2 className="heading-2 text-neutral-900">
-              Ist Mediation für Ihre Situation geeignet?
+              Wann passt Mediation – und wann eher nicht?
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-neutral-600">

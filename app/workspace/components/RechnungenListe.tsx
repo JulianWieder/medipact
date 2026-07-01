@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Invoice } from "../types";
 import { KPI, EmptyState, InvoiceStatusBadge, SectionHeader, WCard } from "../ui";
+import { fetchInvoices } from "../api";
+import { RechnungFormular } from "./RechnungFormular";
 
 function formatAmount(amount: number, currency: string) {
   return new Intl.NumberFormat("de-DE", {
@@ -16,119 +18,161 @@ function formatDate(iso?: string | null) {
   return new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" }).format(new Date(iso));
 }
 
+function formatTaxRate(rate: number) {
+  // z.B. 19 statt 19.0, aber 7.5 bleibt 7.5
+  return `${Number.isInteger(rate) ? rate : rate.toFixed(1)} %`;
+}
+
 export function RechnungenListe() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [backendMissing, setBackendMissing] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  function load() {
     setLoading(true);
-    fetch("/api/invoices", { cache: "no-store" })
-      .then(async (res) => {
-        if (cancelled) return;
-        if (res.status === 404) {
-          setBackendMissing(true);
-          setInvoices([]);
-          return;
-        }
-        const data = await res.json().catch(() => null);
-        setInvoices(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        if (!cancelled) setInvoices([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    setLoadError(false);
+    fetchInvoices()
+      .then(setInvoices)
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }
 
-  const totalPaid = invoices
+  useEffect(load, []);
+
+  function handleSaved(invoice: Invoice) {
+    setInvoices((prev) => {
+      const exists = prev.some((i) => i.id === invoice.id);
+      return exists
+        ? prev.map((i) => (i.id === invoice.id ? invoice : i))
+        : [invoice, ...prev];
+    });
+  }
+
+  const totalPaidGross = invoices
     .filter((i) => i.status === "paid")
-    .reduce((sum, i) => sum + i.amount, 0);
-  const totalOpen = invoices
+    .reduce((sum, i) => sum + i.gross_amount, 0);
+  const totalOpenGross = invoices
     .filter((i) => i.status === "open")
-    .reduce((sum, i) => sum + i.amount, 0);
+    .reduce((sum, i) => sum + i.gross_amount, 0);
   const currency = invoices[0]?.currency ?? "EUR";
 
   if (loading) {
     return <p className="px-6 py-10 text-sm italic text-neutral-400">Wird geladen…</p>;
   }
 
-  if (backendMissing) {
-    return (
-      <div className="p-6">
-        <EmptyState
-          icon="🧾"
-          text="Das Rechnungsmodul ist im Frontend angelegt, aber das Backend (medipact-api) stellt den Endpoint GET /invoices noch nicht bereit. Sobald er ergänzt ist, erscheinen hier automatisch alle Rechnungen."
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="p-6">
-      <SectionHeader label="Workspace" title="Rechnungen" />
+      <SectionHeader
+        label="Workspace"
+        title="Rechnungen"
+        action={
+          <button
+            onClick={() => {
+              setEditingInvoice(null);
+              setFormOpen(true);
+            }}
+            className="rounded-full bg-accent-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-accent-600"
+          >
+            + Neue Rechnung
+          </button>
+        }
+      />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KPI label="Bezahlt" value={formatAmount(totalPaid, currency)} sub={`${invoices.filter((i) => i.status === "paid").length} Rechnungen`} />
-        <KPI label="Offen" value={formatAmount(totalOpen, currency)} sub={`${invoices.filter((i) => i.status === "open").length} Rechnungen`} />
-        <KPI label="Gesamt" value={invoices.length} sub="Rechnungen insgesamt" />
-      </div>
-
-      {invoices.length === 0 ? (
-        <EmptyState icon="🧾" text="Noch keine Rechnungen vorhanden." />
+      {loadError ? (
+        <EmptyState icon="🧾" text="Rechnungen konnten nicht geladen werden. Bitte Seite neu laden oder später erneut versuchen." />
       ) : (
-        <WCard className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="border-b border-neutral-100 bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-400">
-              <tr>
-                <th className="px-4 py-3">Nr.</th>
-                <th className="px-4 py-3">Fall</th>
-                <th className="px-4 py-3">Empfänger</th>
-                <th className="px-4 py-3">Betrag</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Bezahlt am</th>
-                <th className="px-4 py-3 text-right">PDF</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/60">
-                  <td className="px-4 py-3 font-medium text-neutral-700">{inv.invoice_number}</td>
-                  <td className="px-4 py-3 text-neutral-600">{inv.mediation_title}</td>
-                  <td className="px-4 py-3 text-neutral-500">
-                    {inv.payer_name ?? inv.payer_email ?? "–"}
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-neutral-800">
-                    {formatAmount(inv.amount, inv.currency)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <InvoiceStatusBadge status={inv.status} />
-                  </td>
-                  <td className="px-4 py-3 text-neutral-500">{formatDate(inv.paid_at)}</td>
-                  <td className="px-4 py-3 text-right">
-                    {inv.pdf_url ? (
-                      <a
-                        href={inv.pdf_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs font-semibold text-accent-600 hover:underline"
-                      >
-                        Öffnen →
-                      </a>
-                    ) : (
-                      <span className="text-xs text-neutral-300">–</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </WCard>
+        <>
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KPI
+              label="Bezahlt (brutto)"
+              value={formatAmount(totalPaidGross, currency)}
+              sub={`${invoices.filter((i) => i.status === "paid").length} Rechnungen`}
+            />
+            <KPI
+              label="Offen (brutto)"
+              value={formatAmount(totalOpenGross, currency)}
+              sub={`${invoices.filter((i) => i.status === "open").length} Rechnungen`}
+            />
+            <KPI label="Gesamt" value={invoices.length} sub="Rechnungen insgesamt" />
+          </div>
+
+          {invoices.length === 0 ? (
+            <EmptyState icon="🧾" text="Noch keine Rechnungen vorhanden." />
+          ) : (
+            <WCard className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-neutral-100 bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                  <tr>
+                    <th className="px-4 py-3">Nr.</th>
+                    <th className="px-4 py-3">Fall</th>
+                    <th className="px-4 py-3">Teilnehmer</th>
+                    <th className="px-4 py-3">Netto</th>
+                    <th className="px-4 py-3">Steuer</th>
+                    <th className="px-4 py-3">Brutto</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Bezahlt am</th>
+                    <th className="px-4 py-3 text-right">Aktion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((inv) => (
+                    <tr key={inv.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/60">
+                      <td className="px-4 py-3 font-medium text-neutral-700">{inv.invoice_number}</td>
+                      <td className="px-4 py-3 text-neutral-600">{inv.mediation_title}</td>
+                      <td className="px-4 py-3 text-neutral-500">
+                        {inv.participant_name ?? inv.payer_name ?? inv.payer_email ?? "–"}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {formatAmount(inv.amount, inv.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-500">{formatTaxRate(inv.tax_rate)}</td>
+                      <td className="px-4 py-3 font-semibold text-neutral-800">
+                        {formatAmount(inv.gross_amount, inv.currency)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <InvoiceStatusBadge status={inv.status} />
+                      </td>
+                      <td className="px-4 py-3 text-neutral-500">{formatDate(inv.paid_at)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            onClick={() => {
+                              setEditingInvoice(inv);
+                              setFormOpen(true);
+                            }}
+                            className="text-xs font-semibold text-accent-600 hover:underline"
+                          >
+                            Bearbeiten
+                          </button>
+                          {inv.pdf_url && (
+                            <a
+                              href={inv.pdf_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs font-semibold text-neutral-500 hover:underline"
+                            >
+                              PDF
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </WCard>
+          )}
+        </>
+      )}
+
+      {formOpen && (
+        <RechnungFormular
+          invoice={editingInvoice}
+          onClose={() => setFormOpen(false)}
+          onSaved={handleSaved}
+        />
       )}
     </div>
   );

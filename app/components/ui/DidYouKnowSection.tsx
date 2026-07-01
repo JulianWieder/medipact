@@ -126,20 +126,28 @@ export const trennungFacts: DidYouKnowFact[] = [
 
 export const nachbarschaftFacts: DidYouKnowFact[] = [
   {
-    eyebrow: "Schlichtung ist in vielen Bundesländern Pflicht",
-    text: "In neun Bundesländern – u. a. NRW, Niedersachsen, Hessen und Rheinland-Pfalz – muss vor einer Nachbarschaftsklage zwingend ein Schlichtungsversuch bei der örtlichen Schiedsstelle erfolgen. Ohne diesen wird die Klage als unzulässig abgewiesen.",
+    eyebrow: "Lärm ist der Streitgrund Nr. 1",
+    text: "In Umfragen nennen rund 43 % der Deutschen Lärm oder Ruhestörung als Auslöser für Ärger mit Nachbarn – kein anderes Thema sorgt so häufig für Konflikte.",
   },
   {
-    eyebrow: "Schlichtung kostet fast nichts",
-    text: "Ein Schiedsamtsverfahren liegt meist deutlich unter 50 Euro – ein Bruchteil dessen, was ein Zivilprozess mit Anwalts- und Gerichtskosten verursachen kann.",
+    eyebrow: "Haustiere spalten die Nachbarschaft",
+    text: "Bellende Hunde, streunende Katzen oder Tiergeräusche sind mit rund 17 % der zweithäufigste Streitgrund zwischen Nachbarn – noch vor Bäumen, Grenzen oder Müll.",
+  },
+  {
+    eyebrow: "Bäume und Hecken wachsen sich zum Streit aus",
+    text: "Überhängende Äste und Wurzeln darf der betroffene Nachbar laut § 910 BGB abschneiden, wenn sie die Nutzung seines Grundstücks beeinträchtigen – ein Recht, das in der Praxis oft eskaliert statt zu klären.",
+  },
+  {
+    eyebrow: "Nicht jede Störung ist unzulässig",
+    text: "§ 906 BGB verpflichtet dazu, ortsübliche und nur unwesentliche Beeinträchtigungen – etwa normale Gartengeräusche – hinzunehmen. Wo genau diese Grenze verläuft, ist in der Praxis oft der eigentliche Streitpunkt.",
   },
   {
     eyebrow: "Nachbarrecht ist Ländersache",
     text: "Anders als das BGB regeln die Nachbarrechtsgesetze der einzelnen Bundesländer Details zu Grenzabständen, Hecken oder Lärmschutz – die Rechtslage unterscheidet sich also je nach Wohnort.",
   },
   {
-    eyebrow: "Über 190 Jahre Erfahrung mit Schlichtung",
-    text: "Das Schiedsamt geht auf das Jahr 1827 zurück, als Preußen das Amt des Schiedsmanns einführte – damit ist es Deutschlands älteste Institution der vorgerichtlichen Streitschlichtung und bis heute in den meisten Bundesländern aktiv.",
+    eyebrow: "Ein Schlichtungsversuch ist oft Pflicht",
+    text: "In neun Bundesländern muss vor einer Nachbarschaftsklage zwingend ein Schlichtungsversuch bei der örtlichen Schiedsstelle erfolgen – ein Zeichen dafür, dass der Gesetzgeber selbst eine außergerichtliche Klärung bevorzugt.",
   },
 ];
 

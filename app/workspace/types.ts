@@ -113,33 +113,27 @@ export interface FeedbackEntry {
 
 // ── Invoices ──────────────────────────────────────────────────────────────
 //
-// Erwartete Backend-Response für GET /invoices (siehe app/api/invoices/route.ts):
-// [{
-//   id: number,
-//   invoice_number: string,        // z. B. "RE-2026-0042"
-//   mediation_id: number,
-//   mediation_title: string,
-//   payer_name?: string,
-//   payer_email?: string,
-//   amount: number,                 // in EUR, z. B. 499.0
-//   currency: string,                // "EUR"
-//   status: "paid" | "open" | "refunded" | "failed",
-//   paypal_order_id?: string,
-//   issued_at: string,               // ISO-Datum
-//   paid_at?: string,                // ISO-Datum, falls bezahlt
-//   pdf_url?: string,                 // optionaler Direktlink zum PDF
-// }]
-// Dieses Modul existiert nur als Frontend-Oberfläche — das Backend
-// (medipact-api, separates Repo) muss /invoices noch implementieren.
+// Backend-Response für GET /invoices (siehe backend/app/routers/invoices.py
+// _serialize()). Jede Rechnung gehört zu genau einem Teilnehmer
+// (participant_id) UND dem Fall (mediation_id) – bei anteiliger Zahlung
+// bekommt jede Partei ihre eigene Rechnung. amount ist der Nettobetrag,
+// tax_rate ein frei editierbarer Prozentsatz; tax_amount/gross_amount werden
+// vom Backend daraus berechnet (keine eigenen DB-Spalten).
 
 export interface Invoice {
   id: number;
   invoice_number: string;
   mediation_id: number;
   mediation_title: string;
+  participant_id: number;
+  participant_name?: string | null;
+  participant_email?: string | null;
   payer_name?: string | null;
   payer_email?: string | null;
   amount: number;
+  tax_rate: number;
+  tax_amount: number;
+  gross_amount: number;
   currency: string;
   status: "paid" | "open" | "refunded" | "failed" | string;
   paypal_order_id?: string | null;
@@ -147,6 +141,21 @@ export interface Invoice {
   paid_at?: string | null;
   pdf_url?: string | null;
 }
+
+/** Payload für POST /invoices – siehe InvoiceCreate in backend/app/routers/invoices.py. */
+export interface InvoiceCreateInput {
+  mediation_id: number;
+  participant_id: number;
+  amount: number;
+  tax_rate: number;
+  currency?: string;
+  payer_name?: string | null;
+  payer_email?: string | null;
+  status?: string;
+}
+
+/** Payload für PATCH /invoices/{id} – alle Felder optional. */
+export type InvoiceUpdateInput = Partial<InvoiceCreateInput> & { pdf_url?: string | null };
 
 export const INVOICE_STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
   paid: {

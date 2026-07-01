@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
+import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import MiniMatrix from "@/app/components/MiniMatrix";
 import mediModernPhoto from "@/fotos/medi_modern.jpg";
 
@@ -164,6 +165,7 @@ export default function CasesPage() {
         imageAlt="Mediation in der Praxis – echte Fallbeispiele"
       >
         <div className="container max-w-3xl">
+          <Breadcrumbs items={[{ label: "Fallbeispiele" }]} variant="dark" />
           <p className="eyebrow mb-4 text-accent-300">Fallbeispiele</p>
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
