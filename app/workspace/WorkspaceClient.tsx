@@ -11,6 +11,7 @@ import { ParteienListe } from "./components/ParteienListe";
 import { ParteiDetail } from "./components/ParteiDetail";
 import { Kalender } from "./components/Kalender";
 import { RechnungenListe } from "./components/RechnungenListe";
+import { WorkflowManager } from "./components/WorkflowManager";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -337,6 +338,18 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
         <div className="flex-1 overflow-auto">
           <RechnungenListe />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Workflow Manager ────────────────────────────────────────────────────
+  if (section === "workflows") {
+    return (
+      <div className="flex h-full bg-neutral-50 text-neutral-900">
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <div className="flex-1 overflow-auto">
+          <WorkflowManager />
         </div>
       </div>
     );

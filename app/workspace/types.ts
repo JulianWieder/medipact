@@ -1,6 +1,6 @@
 // ── Workspace Types ───────────────────────────────────────────────────────
 
-export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "einstellungen";
+export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "workflows" | "einstellungen";
 
 export interface WorkspaceNavItem {
   id: WorkspaceSection;
@@ -14,6 +14,7 @@ export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   { id: "parteien", label: "Parteien", icon: "👥" },
   { id: "kalender", label: "Kalender", icon: "📅" },
   { id: "rechnungen", label: "Rechnungen", icon: "🧾" },
+  { id: "workflows", label: "Workflow Manager", icon: "🧭" },
   { id: "einstellungen", label: "Einstellungen", icon: "⚙" },
 ];
 
@@ -189,6 +190,36 @@ export const PHASES: { id: string; label: string; short: string }[] = [
   { id: "verhandlung", label: "Verhandlung", short: "5" },
   { id: "abschluss", label: "Abschluss", short: "6" },
 ];
+
+// ── Workflow Manager: Schritte pro Phase ────────────────────────────────────
+//
+// Vorlage für die einzelnen Schritte innerhalb einer Mediationsphase.
+// Aktuell ein reines Frontend-Konstrukt (siehe WorkflowManager.tsx, persistiert
+// per localStorage) — noch nicht mit dem Backend verbunden. Die "einleitung"
+// Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktuell
+// live getrackten Schritte wider; Änderungen hier wirken sich NICHT auf das
+// dortige Live-Tracking aus.
+
+export interface PhaseStep {
+  key: string;
+  label: string;
+}
+
+export const DEFAULT_PHASE_STEPS: Record<string, PhaseStep[]> = {
+  einleitung: [
+    { key: "intro", label: "Einführung" },
+    { key: "videocall", label: "Erstgespräch" },
+    { key: "einleitung", label: "Regeln" },
+    { key: "einleitung_rollen", label: "Rollen" },
+    { key: "einleitung_vertrauen", label: "Vertrauen" },
+    { key: "einleitung_ziel", label: "Ziel" },
+  ],
+  themensammlung: [],
+  interessen: [],
+  optionen: [],
+  verhandlung: [],
+  abschluss: [],
+};
 
 export function getPhaseIndex(phase: string | null): number {
   if (!phase) return -1;
