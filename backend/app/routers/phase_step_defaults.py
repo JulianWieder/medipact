@@ -37,6 +37,9 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "description": step.description,
         "placeholder": step.placeholder,
         "reflection_mode": step.reflection_mode,
+        "content_types": step.content_types.split(",") if step.content_types else None,
+        "video_url": step.video_url,
+        "feedback_occasion": step.feedback_occasion,
         "required_roles": step.required_roles.split(",") if step.required_roles else None,
         "position": step.position,
         "enabled": step.enabled,
@@ -53,6 +56,9 @@ class PhaseStepDefaultCreate(BaseModel):
     description: str = ""
     placeholder: str = ""
     reflection_mode: Optional[str] = None
+    content_types: Optional[list[str]] = None
+    video_url: Optional[str] = None
+    feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
     enabled: bool = True
 
@@ -62,6 +68,9 @@ class PhaseStepDefaultUpdate(BaseModel):
     description: Optional[str] = None
     placeholder: Optional[str] = None
     reflection_mode: Optional[str] = None
+    content_types: Optional[list[str]] = None
+    video_url: Optional[str] = None
+    feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
     enabled: Optional[bool] = None
 
@@ -148,6 +157,9 @@ def create_phase_step_default(
         description=payload.description,
         placeholder=payload.placeholder,
         reflection_mode=payload.reflection_mode,
+        content_types=",".join(payload.content_types) if payload.content_types else None,
+        video_url=payload.video_url,
+        feedback_occasion=payload.feedback_occasion,
         required_roles=",".join(payload.required_roles) if payload.required_roles else None,
         position=count,
         enabled=payload.enabled,
@@ -175,6 +187,9 @@ def update_phase_step_default(
     if "required_roles" in update_data:
         roles = update_data.pop("required_roles")
         step.required_roles = ",".join(roles) if roles else None
+    if "content_types" in update_data:
+        types = update_data.pop("content_types")
+        step.content_types = ",".join(types) if types else None
     for key, value in update_data.items():
         setattr(step, key, value)
 
@@ -197,28 +212,4 @@ def delete_phase_step_default(
 
     db.delete(step)
     db.commit()
-    return {"status": "deleted"}
-
-
-@router.post("/reorder")
-def reorder_phase_step_defaults(
-    payload: ReorderRequest,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_db_user),
-):
-    """Setzt die position für mehrere Steps in einem Batch (Drag & Drop im Admin-UI)."""
-    _require_admin(user)
-
-    ids = [item.id for item in payload.items]
-    steps = {
-        s.id: s
-        for s in db.query(PhaseStepDefault).filter(PhaseStepDefault.id.in_(ids)).all()
-    }
-    if len(steps) != len(ids):
-        raise HTTPException(status_code=404, detail="Mindestens ein Step wurde nicht gefunden")
-
-    for item in payload.items:
-        steps[item.id].position = item.position
-
-    db.commit()
-    return [_serialize(steps[item.id]) for item in payload.items]
+    return {"status"

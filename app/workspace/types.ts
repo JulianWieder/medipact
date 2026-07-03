@@ -58,10 +58,47 @@ export interface PhaseStepDefaultDto {
   description: string;
   placeholder: string;
   reflection_mode: string | null;
+  /** Inhaltsarten der Karte (siehe CONTENT_TYPES). null = noch nicht klassifiziert. */
+  content_types: string[] | null;
+  /** Vom Mediator hinterlegte Video-URL — nur relevant wenn "video" in content_types. */
+  video_url: string | null;
+  /** Fragebogen-Anlass — nur relevant wenn "feedback" in content_types. */
+  feedback_occasion: "after_videocall" | "before_contract" | null;
   required_roles: string[] | null;
   position: number;
   enabled: boolean;
 }
+
+// ── Inhaltsarten pro Workflow-Karte ───────────────────────────────────────
+//
+// Abgeleitet aus den real existierenden Bausteinen im Teilnehmer-Flow
+// (EinleitungClient.tsx): Content-Schritte kombinieren heute Lernvideo +
+// Texteingabe + Reflexion/Frage; dazu kommen die fixen Rahmen-Schritte
+// Terminvereinbarung, Videocall, Feedback-Fragebogen und Vertrag.
+// Mehrfachauswahl pro Karte ist ausdrücklich erlaubt.
+
+export interface ContentTypeDef {
+  id: string;
+  label: string;
+  /** Kurzform für die Badges auf den Karten-Nodes. */
+  short: string;
+  icon: string;
+  badge: string;
+}
+
+export const CONTENT_TYPES: ContentTypeDef[] = [
+  { id: "text", label: "Texteingabe", short: "Text", icon: "✎", badge: "bg-neutral-100 text-neutral-600 border-neutral-200" },
+  { id: "video", label: "Video (URL vom Mediator)", short: "Video", icon: "▶", badge: "bg-rose-50 text-rose-600 border-rose-200" },
+  { id: "frage", label: "Frage / Quiz", short: "Frage", icon: "?", badge: "bg-violet-50 text-violet-600 border-violet-200" },
+  { id: "videokonferenz", label: "Videokonferenz + Transkript", short: "Konferenz", icon: "🎥", badge: "bg-sky-50 text-sky-600 border-sky-200" },
+  { id: "feedback", label: "Feedback-Fragebogen", short: "Feedback", icon: "★", badge: "bg-amber-50 text-amber-600 border-amber-200" },
+  { id: "termin", label: "Terminvereinbarung", short: "Termin", icon: "📅", badge: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  { id: "vertrag", label: "Vertrag / Dokument", short: "Vertrag", icon: "§", badge: "bg-indigo-50 text-indigo-600 border-indigo-200" },
+];
+
+export const CONTENT_TYPE_BY_ID: Record<string, ContentTypeDef> = Object.fromEntries(
+  CONTENT_TYPES.map((t) => [t.id, t]),
+);
 
 export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "trennung", label: "Trennung & Scheidung" },
@@ -241,77 +278,4 @@ export const PHASES: { id: string; label: string; short: string }[] = [
 // Vorlage für die einzelnen Schritte innerhalb einer Mediationsphase.
 // Aktuell ein reines Frontend-Konstrukt (siehe WorkflowManager.tsx, persistiert
 // per localStorage) — noch nicht mit dem Backend verbunden. Die "einleitung"
-// Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktuell
-// live getrackten Schritte wider; Änderungen hier wirken sich NICHT auf das
-// dortige Live-Tracking aus.
-
-export interface PhaseStep {
-  key: string;
-  label: string;
-}
-
-export const DEFAULT_PHASE_STEPS: Record<string, PhaseStep[]> = {
-  einleitung: [
-    { key: "intro", label: "Einführung" },
-    { key: "videocall", label: "Erstgespräch" },
-    { key: "einleitung", label: "Regeln" },
-    { key: "einleitung_rollen", label: "Rollen" },
-    { key: "einleitung_vertrauen", label: "Vertrauen" },
-    { key: "einleitung_ziel", label: "Ziel" },
-  ],
-  themensammlung: [],
-  interessen: [],
-  optionen: [],
-  verhandlung: [],
-  abschluss: [],
-};
-
-export function getPhaseIndex(phase: string | null): number {
-  if (!phase) return -1;
-  return PHASES.findIndex((p) => p.id === phase);
-}
-
-// ── Config maps ───────────────────────────────────────────────────────────
-
-export const TYPE_LABEL: Record<string, string> = {
-  trennung: "Trennung & Scheidung",
-  erbschaft: "Erbschaftsstreit",
-  nachbarschaft: "Nachbarschaftskonflikt",
-};
-
-export const TYPE_COLOR: Record<string, string> = {
-  trennung: "bg-rose-50 text-rose-700 border-rose-200",
-  erbschaft: "bg-amber-50 text-amber-700 border-amber-200",
-  nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
-};
-
-export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
-  draft: {
-    label: "Entwurf",
-    dot: "bg-neutral-400",
-    badge: "bg-neutral-100 text-neutral-600 border-neutral-200",
-  },
-  pending: {
-    label: "Ausstehend",
-    dot: "bg-amber-400",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
-  },
-  active: {
-    label: "Aktiv",
-    dot: "bg-accent-500",
-    badge: "bg-accent-50 text-accent-700 border-accent-200",
-  },
-  completed: {
-    label: "Abgeschlossen",
-    dot: "bg-neutral-300",
-    badge: "bg-neutral-50 text-neutral-500 border-neutral-100",
-  },
-};
-
-export const ROLE_LABEL: Record<string, string> = {
-  owner: "Antragsteller",
-  initiator: "Antragsteller",
-  other_party: "Gegenpartei",
-  mediator: "Mediator",
-  observer: "Beobachter",
-};
+// Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktue

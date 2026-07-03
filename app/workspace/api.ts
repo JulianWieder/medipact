@@ -312,7 +312,12 @@ export async function createPhaseStepDefault(payload: {
 
 export async function updatePhaseStepDefault(
   id: number,
-  payload: Partial<Pick<PhaseStepDefaultDto, "title" | "description" | "enabled">>,
+  payload: Partial<
+    Pick<
+      PhaseStepDefaultDto,
+      "title" | "description" | "enabled" | "content_types" | "video_url" | "feedback_occasion"
+    >
+  >,
 ): Promise<PhaseStepDefaultDto> {
   const res = await fetch(`/api/admin/phase-step-defaults/${id}`, {
     method: "PATCH",
@@ -347,6 +352,4 @@ export async function setMediationVariant(
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ variant_key: variantKey }),
-  });
-  if (!res.ok) throw new Error("Variante konnte nicht zugeordnet werden");
-}
+  }

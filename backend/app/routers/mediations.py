@@ -870,6 +870,9 @@ def get_phase_steps(
                 "description": d.description,
                 "placeholder": d.placeholder,
                 "reflection_mode": d.reflection_mode,
+                "content_types": d.content_types.split(",") if d.content_types else None,
+                "video_url": d.video_url,
+                "feedback_occasion": d.feedback_occasion,
                 "custom": False,
             }
         )
@@ -884,6 +887,9 @@ def get_phase_steps(
                 "description": c.description,
                 "placeholder": "",
                 "reflection_mode": None,
+                "content_types": None,
+                "video_url": None,
+                "feedback_occasion": None,
                 "custom": True,
             }
         )
@@ -2057,16 +2063,4 @@ def set_mediation_variant(
                 status_code=400,
                 detail=(
                     f"Variante '{payload.variant_key}' existiert nicht (oder ist "
-                    f"deaktiviert) für Mediationstyp '{mediation.mediation_type}'"
-                ),
-            )
-
-    mediation.variant_key = payload.variant_key
-    db.commit()
-    db.refresh(mediation)
-
-    return {
-        "mediation_id": mediation.id,
-        "mediation_type": mediation.mediation_type,
-        "variant_key": mediation.variant_key,
-    }
+                    f"deaktiviert) für Mediationstyp '{m

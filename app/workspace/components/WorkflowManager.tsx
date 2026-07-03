@@ -19,7 +19,7 @@
 //
 // Weiterhin bewusst OHNE Verzweigungen/Gateways — eine lineare Kette pro Phase.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -36,10 +36,23 @@ import "@xyflow/react/dist/style.css";
 import {
   PHASES,
   MEDIATION_TYPES,
+  CONTENT_TYPES,
+  CONTENT_TYPE_BY_ID,
   type MediationCase,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
 } from "../types";
+
+// Ob für die gewählten Inhaltsarten eine Video-URL sinnvoll ist.
+function needsVideoUrl(types: string[]): boolean {
+  return types.includes("video") || types.includes("videokonferenz");
+}
+
+// Auswahl des Fragebogen-Anlasses, nur relevant wenn "feedback" gewählt ist.
+const FEEDBACK_OCCASIONS: { id: "after_videocall" | "before_contract"; label: string }[] = [
+  { id: "after_videocall", label: "Nach dem Gespräch" },
+  { id: "before_contract", label: "Vor dem Vertrag" },
+];
 import { SectionHeader, WCard, EmptyState, StatusBadge, cn } from "../ui";
 import {
   fetchAllMediations,
@@ -78,12 +91,39 @@ function slugify(label: string, existing: Set<string>): string {
 
 // ── Custom Node: ein einzelner Schritt als Kästchen im Flow ─────────────────
 
+// Badge-Zeile mit den Inhaltsarten einer Karte (Text/Video/Frage/…).
+function ContentTypeBadges({ types }: { types: string[] }) {
+  if (types.length === 0) return null;
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-1">
+      {types.map((id) => {
+        const def = CONTENT_TYPE_BY_ID[id];
+        if (!def) return null;
+        return (
+          <span
+            key={id}
+            className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-semibold ${def.badge}`}
+            title={def.label}
+          >
+            <span aria-hidden>{def.icon}</span>
+            {def.short}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 type StepNodeData = {
   label: string;
   stepKey: string;
+  contentTypes: string[];
+  videoUrl: string | null;
+  feedbackOccasion: "after_videocall" | "before_contract" | null;
   locked: boolean;
   isEditing: boolean;
   editingLabel: string;
+  isContentEditing: boolean;
   canMoveLeft: boolean;
   canMoveRight: boolean;
   onStartEdit: () => void;
@@ -91,7 +131,63 @@ type StepNodeData = {
   onSaveEdit: () => void;
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
+  onToggleContentEdit: () => void;
+  onToggleType: (typeId: string) => void;
+  onChangeVideoUrl: (url: string) => void;
+  onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") => void;
 };
+
+// Inline-Editor: Toggle-Chips für alle Inhaltsarten + optional Video-URL.
+function ContentTypeEditor({ step }: { step: StepNodeData }) {
+  return (
+    <div className="mt-2 rounded-lg border border-neutral-100 bg-neutral-50 p-2">
+      <div className="flex flex-wrap gap-1">
+        {CONTENT_TYPES.map((t) => {
+          const active = step.contentTypes.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              onClick={() => step.onToggleType(t.id)}
+              className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-semibold transition ${
+                active ? t.badge : "border-neutral-200 bg-white text-neutral-400 hover:text-neutral-600"
+              }`}
+              title={t.label}
+            >
+              <span aria-hidden>{t.icon}</span>
+              {t.short}
+            </button>
+          );
+        })}
+      </div>
+      {needsVideoUrl(step.contentTypes) && (
+        <input
+          value={step.videoUrl ?? ""}
+          onChange={(e) => step.onChangeVideoUrl(e.target.value)}
+          placeholder="Video-URL (vom Mediator) …"
+          className="mt-1.5 w-full rounded-md border border-neutral-200 px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
+        />
+      )}
+      {step.contentTypes.includes("feedback") && (
+        <div className="mt-1.5 flex items-center gap-1">
+          <span className="text-[9px] font-semibold text-neutral-400">Fragebogen:</span>
+          <select
+            value={step.feedbackOccasion ?? "after_videocall"}
+            onChange={(e) =>
+              step.onChangeFeedbackOccasion(e.target.value as "after_videocall" | "before_contract")
+            }
+            className="flex-1 rounded-md border border-neutral-200 px-1.5 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
+          >
+            {FEEDBACK_OCCASIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function StepNode({ data }: NodeProps) {
   const step = data as unknown as StepNodeData;
@@ -111,6 +207,7 @@ function StepNode({ data }: NodeProps) {
         <p className="mt-0.5 truncate font-mono text-[10px] text-neutral-300">
           {step.stepKey} · Basis
         </p>
+        <ContentTypeBadges types={step.contentTypes} />
       </div>
     );
   }
@@ -143,6 +240,9 @@ function StepNode({ data }: NodeProps) {
       )}
       <p className="mt-0.5 truncate font-mono text-[10px] text-neutral-300">{step.stepKey}</p>
 
+      {!step.isContentEditing && <ContentTypeBadges types={step.contentTypes} />}
+      {step.isContentEditing && <ContentTypeEditor step={step} />}
+
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <button
@@ -162,13 +262,26 @@ function StepNode({ data }: NodeProps) {
             →
           </button>
         </div>
-        <button
-          onClick={step.onDelete}
-          className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-500"
-          title="Löschen"
-        >
-          ✕
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={step.onToggleContentEdit}
+            className={`rounded p-1 transition ${
+              step.isContentEditing
+                ? "bg-accent-50 text-accent-600"
+                : "text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+            }`}
+            title="Inhaltsarten festlegen"
+          >
+            {step.isContentEditing ? "✓" : "⊞"}
+          </button>
+          <button
+            onClick={step.onDelete}
+            className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-500"
+            title="Löschen"
+          >
+            ✕
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -194,6 +307,8 @@ export function WorkflowManager() {
   const [creatingVariant, setCreatingVariant] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
+  // Welche Karte hat den Inhaltsart-Editor gerade offen.
+  const [contentEditId, setContentEditId] = useState<number | null>(null);
   const [savingCaseId, setSavingCaseId] = useState<number | null>(null);
 
   // ── Laden: Varianten + Fälle je Mediationsart ────────────────────────────
@@ -329,6 +444,55 @@ export function WorkflowManager() {
     [setEditableSteps, persistOrder],
   );
 
+  // ── Inhaltsarten pro Karte (persistieren sofort ins Backend) ─────────────
+  const toggleContentType = useCallback(
+    (id: number, typeId: string) => {
+      setEditableSteps((prev) => {
+        const step = prev.find((s) => s.id === id);
+        if (!step) return prev;
+        const current = step.content_types ?? [];
+        const nextSet = new Set(current);
+        if (nextSet.has(typeId)) nextSet.delete(typeId);
+        else nextSet.add(typeId);
+        // Reihenfolge gemäß CONTENT_TYPES bewahren (stabile Badge-Reihenfolge).
+        const next = CONTENT_TYPES.map((t) => t.id).filter((tid) => nextSet.has(tid));
+        updatePhaseStepDefault(id, { content_types: next }).catch(() =>
+          setError("Inhaltsarten konnten nicht gespeichert werden."),
+        );
+        return prev.map((s) => (s.id === id ? { ...s, content_types: next } : s));
+      });
+    },
+    [setEditableSteps],
+  );
+
+  // Video-URL: lokal sofort, Persistenz gebündelt (debounced) beim Tippen.
+  const videoUrlTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const changeVideoUrl = useCallback(
+    (id: number, url: string) => {
+      setEditableSteps((prev) => prev.map((s) => (s.id === id ? { ...s, video_url: url } : s)));
+      const timers = videoUrlTimers.current;
+      if (timers[id]) clearTimeout(timers[id]);
+      timers[id] = setTimeout(() => {
+        updatePhaseStepDefault(id, { video_url: url.trim() || null }).catch(() =>
+          setError("Video-URL konnte nicht gespeichert werden."),
+        );
+      }, 600);
+    },
+    [setEditableSteps],
+  );
+
+  const changeFeedbackOccasion = useCallback(
+    (id: number, occasion: "after_videocall" | "before_contract") => {
+      setEditableSteps((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, feedback_occasion: occasion } : s)),
+      );
+      updatePhaseStepDefault(id, { feedback_occasion: occasion }).catch(() =>
+        setError("Feedback-Anlass konnte nicht gespeichert werden."),
+      );
+    },
+    [setEditableSteps],
+  );
+
   // Reihenfolge nach dem Ziehen neu berechnen — nur editierbare Knoten sind
   // draggable; gesperrte Basis-Knoten stehen im Varianten-Scope fest davor.
   const handleNodeDragStop = useCallback(
@@ -413,9 +577,13 @@ export function WorkflowManager() {
           data: {
             label: step.title,
             stepKey: step.step_key,
+            contentTypes: step.content_types ?? [],
+            videoUrl: step.video_url,
+            feedbackOccasion: step.feedback_occasion,
             locked,
             isEditing: editingId === step.id,
             editingLabel,
+            isContentEditing: contentEditId === step.id,
             canMoveLeft: !locked && idx > lockedSteps.length,
             canMoveRight: !locked && idx < chain.length - 1,
             onStartEdit: () => startEdit(step.id, step.title),
@@ -423,11 +591,17 @@ export function WorkflowManager() {
             onSaveEdit: saveEdit,
             onDelete: () => removeStep(step.id),
             onMove: (dir: -1 | 1) => moveStep(step.id, dir),
+            onToggleContentEdit: () =>
+              setContentEditId((cur) => (cur === step.id ? null : step.id)),
+            onToggleType: (typeId: string) => toggleContentType(step.id, typeId),
+            onChangeVideoUrl: (url: string) => changeVideoUrl(step.id, url),
+            onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") =>
+              changeFeedbackOccasion(step.id, occasion),
           } satisfies StepNodeData,
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chain, lockedSteps.length, editingId, editingLabel, moveStep],
+    [chain, lockedSteps.length, editingId, editingLabel, contentEditId, moveStep, toggleContentType, changeVideoUrl, changeFeedbackOccasion],
   );
 
   const edges: Edge[] = useMemo(
@@ -515,183 +689,4 @@ export function WorkflowManager() {
           <input
             value={newVariantLabel}
             onChange={(e) => setNewVariantLabel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addVariant()}
-            placeholder="Neue Variante …"
-            className="w-40 rounded-full border border-dashed border-neutral-300 px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400"
-          />
-          <button
-            onClick={addVariant}
-            disabled={!newVariantLabel.trim() || creatingVariant}
-            className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-600 hover:bg-neutral-200 disabled:opacity-40"
-            title="Variante anlegen"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      <div className="flex gap-6">
-        {/* Phasen-Liste */}
-        <div className="flex w-56 shrink-0 flex-col gap-1">
-          {PHASES.map((phase, idx) => {
-            const active = phase.id === activePhase;
-            return (
-              <button
-                key={phase.id}
-                onClick={() => {
-                  setActivePhase(phase.id);
-                  setEditingId(null);
-                }}
-                className={cn(
-                  "flex items-center justify-between rounded-xl px-3 py-2.5 text-left transition",
-                  active ? "bg-accent-50 text-accent-700" : "text-neutral-500 hover:bg-neutral-50",
-                )}
-              >
-                <span className="flex items-center gap-2 text-sm font-medium">
-                  <span
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
-                      active ? "bg-accent-500 text-white" : "bg-neutral-200 text-neutral-500",
-                    )}
-                  >
-                    {idx + 1}
-                  </span>
-                  {phase.label}
-                </span>
-                {active && (
-                  <span className="text-[11px] text-neutral-400">{chain.length}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Canvas der aktiven Phase */}
-        <WCard className="flex-1 overflow-hidden p-0">
-          <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
-            <h4 className="text-sm font-semibold text-neutral-800">
-              {typeLabel}
-              {activeVariantLabel ? ` · Variante „${activeVariantLabel}"` : " · Basis"}
-              {" · "}
-              {activePhaseLabel}
-            </h4>
-            <span className="text-xs text-neutral-400">
-              {loadingSteps ? "Lädt …" : `${chain.length} Schritt(e)`}
-            </span>
-          </div>
-
-          {!loadingSteps && chain.length === 0 ? (
-            <div className="p-5">
-              <EmptyState
-                icon="🧭"
-                text={
-                  activeVariant
-                    ? "Diese Variante hat noch keine Zusatz-Schritte für diese Phase."
-                    : "Noch keine Schritte für diese Phase definiert."
-                }
-              />
-            </div>
-          ) : (
-            <div style={{ height: 320 }}>
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                nodeTypes={nodeTypes}
-                onNodeDragStop={handleNodeDragStop}
-                nodesConnectable={false}
-                edgesFocusable={false}
-                fitView
-                fitViewOptions={{ padding: 0.2 }}
-                proOptions={{ hideAttribution: true }}
-              >
-                <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#e2e8f0" />
-                <Controls showInteractive={false} />
-              </ReactFlow>
-            </div>
-          )}
-
-          {/* Neuen Schritt hinzufügen */}
-          <div className="flex items-center gap-2 border-t border-neutral-100 p-4">
-            <input
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addStep()}
-              placeholder={
-                activeVariant
-                  ? `Neuer Zusatz-Schritt für „${activeVariantLabel}" …`
-                  : "Neuer Basis-Schritt …"
-              }
-              className="flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
-            />
-            <button
-              onClick={addStep}
-              disabled={!newLabel.trim()}
-              className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-600 disabled:opacity-40"
-            >
-              Hinzufügen
-            </button>
-          </div>
-        </WCard>
-      </div>
-
-      {/* ── Fall-Zuordnung ── */}
-      <div className="mt-8">
-        <SectionHeader
-          label="Zuordnung"
-          title={`Fälle · ${typeLabel}`}
-          action={
-            <button
-              onClick={reloadCases}
-              className="text-xs font-medium text-neutral-400 hover:text-neutral-600 transition"
-            >
-              Aktualisieren
-            </button>
-          }
-        />
-        <WCard className="overflow-hidden p-0">
-          {typeCases.length === 0 ? (
-            <div className="p-5">
-              <EmptyState icon="⚖" text="Keine Fälle dieser Mediationsart vorhanden." />
-            </div>
-          ) : (
-            <ul className="divide-y divide-neutral-100">
-              {typeCases.map((c) => (
-                <li key={c.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-neutral-800">
-                      #{c.id} · {c.title}
-                    </p>
-                    <p className="text-xs text-neutral-400">
-                      {c.phase ? `Phase: ${c.phase}` : "Nicht gestartet"}
-                    </p>
-                  </div>
-                  <StatusBadge status={c.status} />
-                  <select
-                    value={c.variant_key ?? ""}
-                    onChange={(e) => assignCase(c.id, e.target.value)}
-                    disabled={savingCaseId === c.id}
-                    className="rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-50"
-                    title="Variante für diesen Fall"
-                  >
-                    <option value="">Basis-Workflow</option>
-                    {variants.map((v) => (
-                      <option key={v.key} value={v.key}>
-                        {v.label}
-                      </option>
-                    ))}
-                  </select>
-                </li>
-              ))}
-            </ul>
-          )}
-        </WCard>
-        <p className="mt-3 max-w-2xl text-xs text-neutral-400">
-          Die Variante bestimmt, welche Zusatz-Schritte ein Fall durchläuft (Basis + Variante).
-          Sie ist jederzeit umstellbar — bereits erledigte Schritte bleiben erhalten. Für
-          fall-spezifische Anpassungen (Schritte überspringen, Einzelschritte ergänzen) nutze die
-          Workflow-Regeln im jeweiligen Fall.
-        </p>
-      </div>
-    </div>
-  );
-}
+  

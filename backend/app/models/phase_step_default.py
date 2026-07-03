@@ -46,15 +46,12 @@ class PhaseStepDefault(Base):
     description = Column(Text, nullable=False, default="")
     placeholder = Column(Text, nullable=False, default="")
     reflection_mode = Column(String, nullable=True)
-    # Komma-separierte Rollenliste, z.B. "owner,other_party". NULL = Standard
-    # (owner, initiator, other_party) – analog zu MediationStepRule.required_roles.
-    required_roles = Column(String, nullable=True)
-    position = Column(Integer, nullable=False, default=0)
-    enabled = Column(Boolean, nullable=False, default=True)
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(
-        DateTime,
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
+    # Komma-separierte Liste der Inhaltsarten der Karte, z.B. "video,text,frage".
+    # Gültige Werte siehe Frontend CONTENT_TYPES (app/workspace/types.ts):
+    # text, video, frage, videokonferenz, feedback, termin, vertrag.
+    # NULL = noch nicht klassifiziert (Bestandsdaten). Mehrere Arten pro Schritt
+    # sind der Normalfall (heutige Konstellation: Video + Texteingabe + Reflexion).
+    content_types = Column(String, nullable=True)
+    # Video-URL, die der Mediator hinterlegt (nur relevant wenn "video" in
+    # content_types; Platzhalter-Feld, solange Videos extern gehostet werden).
+    video
