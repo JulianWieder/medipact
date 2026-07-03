@@ -2063,4 +2063,16 @@ def set_mediation_variant(
                 status_code=400,
                 detail=(
                     f"Variante '{payload.variant_key}' existiert nicht (oder ist "
-                    f"deaktiviert) für Mediationstyp '{m
+                    f"deaktiviert) für Mediationstyp '{mediation.mediation_type}'"
+                ),
+            )
+
+    mediation.variant_key = payload.variant_key
+    db.commit()
+    db.refresh(mediation)
+
+    return {
+        "mediation_id": mediation.id,
+        "mediation_type": mediation.mediation_type,
+        "variant_key": mediation.variant_key,
+    }

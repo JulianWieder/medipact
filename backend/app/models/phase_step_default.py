@@ -54,4 +54,21 @@ class PhaseStepDefault(Base):
     content_types = Column(String, nullable=True)
     # Video-URL, die der Mediator hinterlegt (nur relevant wenn "video" in
     # content_types; Platzhalter-Feld, solange Videos extern gehostet werden).
-    video
+    video_url = Column(String, nullable=True)
+    # Nur relevant, wenn "feedback" in content_types: welcher Fragebogen-Anlass
+    # angezeigt wird. Gültige Werte: "after_videocall" | "before_contract"
+    # (siehe FEEDBACK_QUESTIONS im Teilnehmer-Flow). NULL = Standard
+    # (after_videocall).
+    feedback_occasion = Column(String, nullable=True)
+    # Komma-separierte Rollenliste, z.B. "owner,other_party". NULL = Standard
+    # (owner, initiator, other_party) – analog zu MediationStepRule.required_roles.
+    required_roles = Column(String, nullable=True)
+    position = Column(Integer, nullable=False, default=0)
+    enabled = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )

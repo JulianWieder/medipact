@@ -278,4 +278,77 @@ export const PHASES: { id: string; label: string; short: string }[] = [
 // Vorlage für die einzelnen Schritte innerhalb einer Mediationsphase.
 // Aktuell ein reines Frontend-Konstrukt (siehe WorkflowManager.tsx, persistiert
 // per localStorage) — noch nicht mit dem Backend verbunden. Die "einleitung"
-// Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktue
+// Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktuell
+// live getrackten Schritte wider; Änderungen hier wirken sich NICHT auf das
+// dortige Live-Tracking aus.
+
+export interface PhaseStep {
+  key: string;
+  label: string;
+}
+
+export const DEFAULT_PHASE_STEPS: Record<string, PhaseStep[]> = {
+  einleitung: [
+    { key: "intro", label: "Einführung" },
+    { key: "videocall", label: "Erstgespräch" },
+    { key: "einleitung", label: "Regeln" },
+    { key: "einleitung_rollen", label: "Rollen" },
+    { key: "einleitung_vertrauen", label: "Vertrauen" },
+    { key: "einleitung_ziel", label: "Ziel" },
+  ],
+  themensammlung: [],
+  interessen: [],
+  optionen: [],
+  verhandlung: [],
+  abschluss: [],
+};
+
+export function getPhaseIndex(phase: string | null): number {
+  if (!phase) return -1;
+  return PHASES.findIndex((p) => p.id === phase);
+}
+
+// ── Config maps ───────────────────────────────────────────────────────────
+
+export const TYPE_LABEL: Record<string, string> = {
+  trennung: "Trennung & Scheidung",
+  erbschaft: "Erbschaftsstreit",
+  nachbarschaft: "Nachbarschaftskonflikt",
+};
+
+export const TYPE_COLOR: Record<string, string> = {
+  trennung: "bg-rose-50 text-rose-700 border-rose-200",
+  erbschaft: "bg-amber-50 text-amber-700 border-amber-200",
+  nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
+};
+
+export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
+  draft: {
+    label: "Entwurf",
+    dot: "bg-neutral-400",
+    badge: "bg-neutral-100 text-neutral-600 border-neutral-200",
+  },
+  pending: {
+    label: "Ausstehend",
+    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  active: {
+    label: "Aktiv",
+    dot: "bg-accent-500",
+    badge: "bg-accent-50 text-accent-700 border-accent-200",
+  },
+  completed: {
+    label: "Abgeschlossen",
+    dot: "bg-neutral-300",
+    badge: "bg-neutral-50 text-neutral-500 border-neutral-100",
+  },
+};
+
+export const ROLE_LABEL: Record<string, string> = {
+  owner: "Antragsteller",
+  initiator: "Antragsteller",
+  other_party: "Gegenpartei",
+  mediator: "Mediator",
+  observer: "Beobachter",
+};

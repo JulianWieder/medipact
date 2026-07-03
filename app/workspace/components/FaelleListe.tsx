@@ -121,4 +121,41 @@ export function FaelleListe({ isAdmin = false, selectedId, onSelect, statusFilte
           <button
             key={fall.id}
             onClick={() => onSelect(fall)}
-            
+            className={cn(
+              "w-full rounded-xl px-3 py-3 text-left transition",
+              selectedId === fall.id
+                ? "bg-accent-50 border border-accent-200"
+                : "hover:bg-neutral-50 border border-transparent",
+            )}
+          >
+            <div className="flex items-start justify-between gap-2 mb-1.5">
+              <span
+                className={cn(
+                  "text-sm font-semibold leading-snug",
+                  selectedId === fall.id ? "text-accent-800" : "text-neutral-800",
+                )}
+              >
+                {fall.title}
+              </span>
+              <StatusBadge status={fall.status} />
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <TypeBadge type={fall.mediation_type} />
+            </div>
+
+            <div className="flex items-center gap-2 mb-2">
+              <ProgressBar value={progress} />
+              <span className="text-xs text-neutral-400 shrink-0">{progress}%</span>
+            </div>
+
+            <div className="text-xs text-neutral-400">
+              <span className="font-mono">#{fall.id}</span> · Phase:{" "}
+              <span className="font-medium text-neutral-600">{phaseLabel}</span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

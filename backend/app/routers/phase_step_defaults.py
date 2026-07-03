@@ -212,4 +212,28 @@ def delete_phase_step_default(
 
     db.delete(step)
     db.commit()
-    return {"status"
+    return {"status": "deleted"}
+
+
+@router.post("/reorder")
+def reorder_phase_step_defaults(
+    payload: ReorderRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Setzt die position für mehrere Steps in einem Batch (Drag & Drop im Admin-UI)."""
+    _require_admin(user)
+
+    ids = [item.id for item in payload.items]
+    steps = {
+        s.id: s
+        for s in db.query(PhaseStepDefault).filter(PhaseStepDefault.id.in_(ids)).all()
+    }
+    if len(steps) != len(ids):
+        raise HTTPException(status_code=404, detail="Mindestens ein Step wurde nicht gefunden")
+
+    for item in payload.items:
+        steps[item.id].position = item.position
+
+    db.commit()
+    return [_serialize(steps[item.id]) for item in payload.items]

@@ -689,4 +689,189 @@ export function WorkflowManager() {
           <input
             value={newVariantLabel}
             onChange={(e) => setNewVariantLabel(e.target.value)}
-  
+            onKeyDown={(e) => e.key === "Enter" && addVariant()}
+            placeholder="Neue Variante …"
+            className="w-40 rounded-full border border-dashed border-neutral-300 px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400"
+          />
+          <button
+            onClick={addVariant}
+            disabled={!newVariantLabel.trim() || creatingVariant}
+            className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-600 hover:bg-neutral-200 disabled:opacity-40"
+            title="Variante anlegen"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div className="flex gap-6">
+        {/* Phasen-Liste */}
+        <div className="flex w-56 shrink-0 flex-col gap-1">
+          {PHASES.map((phase, idx) => {
+            const active = phase.id === activePhase;
+            return (
+              <button
+                key={phase.id}
+                onClick={() => {
+                  setActivePhase(phase.id);
+                  setEditingId(null);
+                  setContentEditId(null);
+                }}
+                className={cn(
+                  "flex items-center justify-between rounded-xl px-3 py-2.5 text-left transition",
+                  active ? "bg-accent-50 text-accent-700" : "text-neutral-500 hover:bg-neutral-50",
+                )}
+              >
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <span
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
+                      active ? "bg-accent-500 text-white" : "bg-neutral-200 text-neutral-500",
+                    )}
+                  >
+                    {idx + 1}
+                  </span>
+                  {phase.label}
+                </span>
+                {active && (
+                  <span className="text-[11px] text-neutral-400">{chain.length}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Canvas der aktiven Phase */}
+        <WCard className="flex-1 overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
+            <h4 className="text-sm font-semibold text-neutral-800">
+              {typeLabel}
+              {activeVariantLabel ? ` · Variante „${activeVariantLabel}"` : " · Basis"}
+              {" · "}
+              {activePhaseLabel}
+            </h4>
+            <span className="text-xs text-neutral-400">
+              {loadingSteps ? "Lädt …" : `${chain.length} Schritt(e)`}
+            </span>
+          </div>
+
+          <p className="border-b border-neutral-100 bg-neutral-50/60 px-5 py-2 text-[11px] text-neutral-400">
+            Titel anklicken zum Umbenennen · <span className="font-semibold">⊞</span> legt die
+            Inhaltsarten der Karte fest (Text, Video, Frage, Videokonferenz + Transkript, …).
+          </p>
+
+          {!loadingSteps && chain.length === 0 ? (
+            <div className="p-5">
+              <EmptyState
+                icon="🧭"
+                text={
+                  activeVariant
+                    ? "Diese Variante hat noch keine Zusatz-Schritte für diese Phase."
+                    : "Noch keine Schritte für diese Phase definiert."
+                }
+              />
+            </div>
+          ) : (
+            <div style={{ height: 320 }}>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                nodeTypes={nodeTypes}
+                onNodeDragStop={handleNodeDragStop}
+                nodesConnectable={false}
+                edgesFocusable={false}
+                fitView
+                fitViewOptions={{ padding: 0.2 }}
+                proOptions={{ hideAttribution: true }}
+              >
+                <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#e2e8f0" />
+                <Controls showInteractive={false} />
+              </ReactFlow>
+            </div>
+          )}
+
+          {/* Neuen Schritt hinzufügen */}
+          <div className="flex items-center gap-2 border-t border-neutral-100 p-4">
+            <input
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addStep()}
+              placeholder={
+                activeVariant
+                  ? `Neuer Zusatz-Schritt für „${activeVariantLabel}" …`
+                  : "Neuer Basis-Schritt …"
+              }
+              className="flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
+            />
+            <button
+              onClick={addStep}
+              disabled={!newLabel.trim()}
+              className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-600 disabled:opacity-40"
+            >
+              Hinzufügen
+            </button>
+          </div>
+        </WCard>
+      </div>
+
+      {/* ── Fall-Zuordnung ── */}
+      <div className="mt-8">
+        <SectionHeader
+          label="Zuordnung"
+          title={`Fälle · ${typeLabel}`}
+          action={
+            <button
+              onClick={reloadCases}
+              className="text-xs font-medium text-neutral-400 hover:text-neutral-600 transition"
+            >
+              Aktualisieren
+            </button>
+          }
+        />
+        <WCard className="overflow-hidden p-0">
+          {typeCases.length === 0 ? (
+            <div className="p-5">
+              <EmptyState icon="⚖" text="Keine Fälle dieser Mediationsart vorhanden." />
+            </div>
+          ) : (
+            <ul className="divide-y divide-neutral-100">
+              {typeCases.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-neutral-800">
+                      #{c.id} · {c.title}
+                    </p>
+                    <p className="text-xs text-neutral-400">
+                      {c.phase ? `Phase: ${c.phase}` : "Nicht gestartet"}
+                    </p>
+                  </div>
+                  <StatusBadge status={c.status} />
+                  <select
+                    value={c.variant_key ?? ""}
+                    onChange={(e) => assignCase(c.id, e.target.value)}
+                    disabled={savingCaseId === c.id}
+                    className="rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-50"
+                    title="Variante für diesen Fall"
+                  >
+                    <option value="">Basis-Workflow</option>
+                    {variants.map((v) => (
+                      <option key={v.key} value={v.key}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </select>
+                </li>
+              ))}
+            </ul>
+          )}
+        </WCard>
+        <p className="mt-3 max-w-2xl text-xs text-neutral-400">
+          Die Variante bestimmt, welche Zusatz-Schritte ein Fall durchläuft (Basis + Variante).
+          Sie ist jederzeit umstellbar — bereits erledigte Schritte bleiben erhalten. Für
+          fall-spezifische Anpassungen (Schritte überspringen, Einzelschritte ergänzen) nutze die
+          Workflow-Regeln im jeweiligen Fall.
+        </p>
+      </div>
+    </div>
+  );
+}

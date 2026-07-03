@@ -352,4 +352,6 @@ export async function setMediationVariant(
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ variant_key: variantKey }),
-  }
+  });
+  if (!res.ok) throw new Error("Variante konnte nicht zugeordnet werden");
+}
