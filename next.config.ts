@@ -7,9 +7,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  // Image optimization
+  // Image optimization: Next.js liefert Bilder automatisch als AVIF/WebP
+  // und in der zur Viewport-Größe passenden Auflösung aus (die `sizes`-Props
+  // in den Komponenten greifen erst dadurch). `unoptimized: true` hatte das
+  // komplett deaktiviert — 2-3 MB große Original-JPGs gingen 1:1 ans Handy.
   images: {
-    unoptimized: true, // Falls du noch keine Images hast
+    formats: ['image/avif', 'image/webp'],
   },
   // Security headers
   async headers() {

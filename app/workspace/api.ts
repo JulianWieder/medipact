@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -250,4 +250,117 @@ export async function updateInvoice(id: number, payload: InvoiceUpdateInput): Pr
     throw new Error(err?.detail ?? "Rechnung konnte nicht aktualisiert werden");
   }
   return res.json();
+}
+
+// ── Workflow-Designer: Varianten + Standard-Schritte + Fall-Zuordnung ─────
+// Nutzt die bestehenden Admin-API-Routes (Backend prüft mediator/admin).
+
+export async function fetchAllMediations(): Promise<MediationCase[]> {
+  const res = await fetch("/api/admin/mediations", { cache: "no-store" });
+  if (!res.ok) throw new Error("Fälle konnten nicht geladen werden");
+  const data = await res.json();
+  return (data ?? []).map((item: Record<string, unknown>) => ({
+    id: (item.mediation_id ?? item.id) as number,
+    mediation_id: (item.mediation_id ?? item.id) as number,
+    title: (item.title as string) ?? "Neue Mediation",
+    mediation_type: (item.mediation_type ?? "nachbarschaft") as string,
+    status: (item.status ?? "draft") as string,
+    phase: (item.phase ?? null) as string | null,
+    role: (item.role ?? "mediator") as string,
+    variant_key: (item.variant_key ?? null) as string | null,
+  }));
+}
+
+export async function fetchVariants(mediationType: string): Promise<MediationVariantDto[]> {
+  const res = await fetch(
+    `/api/admin/mediation-variants?mediation_type=${encodeURIComponent(mediationType)}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) throw new Error("Varianten konnten nicht geladen werden");
+  return res.json();
+}
+
+export async function createVariant(
+  mediationType: string,
+  label: string,
+  description = "",
+): Promise<MediationVariantDto> {
+  const res = await fetch("/api/admin/mediation-variants", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mediation_type: mediationType, label, description }),
+  });
+  if (!res.ok) throw new Error("Variante konnte nicht angelegt werden");
+  return res.json();
+}
+
+export async function fetchPhaseStepDefaults(
+  mediationType: string,
+  phase: string,
+  variantKey?: string | null,
+): Promise<PhaseStepDefaultDto[]> {
+  // Ohne variantKey liefert das Backend nur Basis-Schritte (variant_key IS
+  // NULL); mit variantKey ausschließlich die Zusatz-Schritte der Variante.
+  let url = `/api/admin/phase-step-defaults?mediation_type=${encodeURIComponent(mediationType)}&phase=${encodeURIComponent(phase)}`;
+  if (variantKey) url += `&variant_key=${encodeURIComponent(variantKey)}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Schritte konnten nicht geladen werden");
+  return res.json();
+}
+
+export async function createPhaseStepDefault(payload: {
+  mediation_type: string;
+  phase: string;
+  step_key: string;
+  title: string;
+  variant_key?: string | null;
+}): Promise<PhaseStepDefaultDto> {
+  const res = await fetch("/api/admin/phase-step-defaults", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Schritt konnte nicht angelegt werden");
+  return res.json();
+}
+
+export async function updatePhaseStepDefault(
+  id: number,
+  payload: Partial<Pick<PhaseStepDefaultDto, "title" | "description" | "enabled">>,
+): Promise<PhaseStepDefaultDto> {
+  const res = await fetch(`/api/admin/phase-step-defaults/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Schritt konnte nicht aktualisiert werden");
+  return res.json();
+}
+
+export async function deletePhaseStepDefault(id: number): Promise<void> {
+  const res = await fetch(`/api/admin/phase-step-defaults/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Schritt konnte nicht gelöscht werden");
+}
+
+export async function reorderPhaseStepDefaults(
+  items: { id: number; position: number }[],
+): Promise<void> {
+  const res = await fetch("/api/admin/phase-step-defaults/reorder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
+  });
+  if (!res.ok) throw new Error("Reihenfolge konnte nicht gespeichert werden");
+}
+
+export async function setMediationVariant(
+  mediationId: number,
+  variantKey: string | null,
+): Promise<void> {
+  const res = await fetch(`/api/mediations/${mediationId}/variant`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ variant_key: variantKey }),
+  });
+  if (!res.ok) throw new Error("Variante konnte nicht zugeordnet werden");
 }

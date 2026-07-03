@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backend";
 
-// GET /api/admin/phase-step-defaults?mediation_type=...&phase=...
+// GET /api/admin/phase-step-defaults?mediation_type=...&phase=...&variant_key=...
 export async function GET(request: NextRequest) {
   const mediationType = request.nextUrl.searchParams.get("mediation_type") ?? "";
   const phase = request.nextUrl.searchParams.get("phase") ?? "";
+  const variantKey = request.nextUrl.searchParams.get("variant_key");
 
-  const result = await backendFetch(
-    `/admin/phase-step-defaults?mediation_type=${encodeURIComponent(mediationType)}&phase=${encodeURIComponent(phase)}`,
-  );
+  let url = `/admin/phase-step-defaults?mediation_type=${encodeURIComponent(mediationType)}&phase=${encodeURIComponent(phase)}`;
+  if (variantKey) {
+    url += `&variant_key=${encodeURIComponent(variantKey)}`;
+  }
+
+  const result = await backendFetch(url);
 
   if (!result.ok) {
     return NextResponse.json(result.data, { status: result.status });

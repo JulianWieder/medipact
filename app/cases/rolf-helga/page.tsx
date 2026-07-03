@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+
+export const metadata: Metadata = {
+  title: "Fallbeispiel Scheidung nach 38 Jahren: Rolf & Helga | medipact",
+  description:
+    "Späte Scheidung mit Pension und ungleicher Rente: Wie Rolf & Helga per Mediation Altersvorsorge und Haus in 6 Monaten fair regelten – für €800 statt €26.500 Verfahrenskosten.",
+  alternates: { canonical: "https://medipact.de/cases/rolf-helga" },
+};
 
 export default function Page() {
   return (
@@ -13,6 +21,23 @@ export default function Page() {
       relatedCases={[
         { label: "Peter & Sarah", href: "/cases/peter-sarah" },
         { label: "Carla & Marco", href: "/cases/carla-marco" },
+      ]}
+      faq={[
+        {
+          question: "Was passiert mit der Rente bei einer späten Scheidung?",
+          answer:
+            "Im Versorgungsausgleich werden die in der Ehezeit erworbenen Rentenanwartschaften geteilt – auch Beamtenpensionen. Für Helga bedeutete die faire Regelung rund €1.200 monatlich im Alter.",
+        },
+        {
+          question: "Lohnt sich Mediation auch nach sehr langer Ehe?",
+          answer:
+            "Ja, gerade dann: Nach 38 Jahren gibt es viel gemeinsames Vermögen und Ansprüche. Rolf & Helga hatten in 6 Monaten Klarheit statt 2+ Jahre Verfahren – und sparten zusammen €25.700.",
+        },
+        {
+          question: "Wer bekommt das Haus bei einer Scheidung im Alter?",
+          answer:
+            "Das ist frei verhandelbar: Übernahme durch einen Partner mit Ausgleich, Verkauf oder Nießbrauch. Hier blieb das Haus bei Helga, mit klar geregeltem Ausgleich für Rolf.",
+        },
       ]}
     />
   );

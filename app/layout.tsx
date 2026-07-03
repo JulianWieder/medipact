@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -6,6 +7,25 @@ import { ConditionalHeader, ConditionalFooter } from "@/app/components/Condition
 import { JsonLd } from "@/app/components/JsonLd";
 import Analytics from "@/app/components/Analytics";
 import CookieConsent from "@/app/components/CookieConsent";
+
+// Self-hosted via next/font statt Google-Fonts-<link>: kein render-blockendes
+// externes Stylesheet mehr, kein Layout-Shift (size-adjust-Fallback), Fonts
+// kommen vom eigenen Server. Die CSS-Variablen werden in globals.css
+// (--font-body / --font-display) referenziert.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -92,21 +112,17 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${inter.variable} ${playfair.variable}`}
+    >
       <head>
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-        {/* Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
-      <body className="antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <body className="antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <JsonLd data={organizationSchema} />
           <JsonLd data={websiteSchema} />

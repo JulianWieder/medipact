@@ -31,7 +31,43 @@ export interface MediationCase {
   description?: string | null;
   priority?: string | null;
   role?: string;
+  /** Zuordnung zu einer Mediations-Variante (MediationVariant.key) — null = Basis-Workflow. */
+  variant_key?: string | null;
 }
+
+// ── Workflow-Designer (Backend: mediation_variants + phase_step_defaults) ──
+
+export interface MediationVariantDto {
+  id: number;
+  mediation_type: string;
+  key: string;
+  label: string;
+  description: string;
+  position: number;
+  enabled: boolean;
+}
+
+export interface PhaseStepDefaultDto {
+  id: number;
+  mediation_type: string;
+  phase: string;
+  step_key: string;
+  /** null = Standard-Schritt des Basistyps; sonst key der Variante. */
+  variant_key: string | null;
+  title: string;
+  description: string;
+  placeholder: string;
+  reflection_mode: string | null;
+  required_roles: string[] | null;
+  position: number;
+  enabled: boolean;
+}
+
+export const MEDIATION_TYPES: { id: string; label: string }[] = [
+  { id: "trennung", label: "Trennung & Scheidung" },
+  { id: "erbschaft", label: "Erbschaft" },
+  { id: "nachbarschaft", label: "Nachbarschaft" },
+];
 
 export interface MediationDetail extends MediationCase {
   participants?: Participant[];

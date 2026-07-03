@@ -1,11 +1,14 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.models.invoice import Invoice
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_note import MediationNote
@@ -14,8 +17,10 @@ from app.models.mediation_participant import MediationParticipant
 from app.models.mediation_step_rule import MediationStepRule
 from app.models.mediation_custom_step import MediationCustomStep
 from app.models.phase_step_default import PhaseStepDefault
+from app.models.mediation_variant import MediationVariant
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
+from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
 
 
@@ -235,6 +240,65 @@ def delete_workflow_rule(
     return {"status": "reset"}
 
 
+# ── Rechnungsadresse (pro Fall, am eigenen Teilnehmer-Datensatz) ──────────────
+#
+# Wird abgefragt, bevor ein Fall gestartet werden kann, weil der Start
+# (status -> "active", siehe update_mediation) automatisch eine Rechnung für
+# den startenden Teilnehmer anlegt und diese Adresse als Rechnungsempfänger
+# braucht (siehe Invoice.billing_* in models/invoice.py).
+
+def _serialize_billing_address(participant: MediationParticipant) -> dict:
+    return {
+        "billing_street": participant.billing_street,
+        "billing_postal_code": participant.billing_postal_code,
+        "billing_city": participant.billing_city,
+    }
+
+
+class BillingAddressUpdate(BaseModel):
+    billing_street: str
+    billing_postal_code: str
+    billing_city: str
+
+
+@router.get("/{mediation_id}/billing-address")
+def get_billing_address(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Liefert die Rechnungsadresse des AUFRUFENDEN Nutzers für diesen Fall."""
+    participant = _require_participant(mediation_id, current_user, db)
+    return _serialize_billing_address(participant)
+
+
+@router.patch("/{mediation_id}/billing-address")
+def update_billing_address(
+    mediation_id: int,
+    payload: BillingAddressUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Setzt/ändert die Rechnungsadresse des AUFRUFENDEN Nutzers für diesen Fall."""
+    participant = _require_participant(mediation_id, current_user, db)
+
+    street = payload.billing_street.strip()
+    postal_code = payload.billing_postal_code.strip()
+    city = payload.billing_city.strip()
+    if not street or not postal_code or not city:
+        raise HTTPException(
+            status_code=422,
+            detail="Straße, PLZ und Ort dürfen nicht leer sein",
+        )
+
+    participant.billing_street = street
+    participant.billing_postal_code = postal_code
+    participant.billing_city = city
+    db.commit()
+    db.refresh(participant)
+    return _serialize_billing_address(participant)
+
+
 def _mediation_price_eur(db: Session, mediation_id: int) -> float:
     """Preis für die Freischaltung: 499 € pro Teilnehmer (mind. 1)."""
     count = (
@@ -244,6 +308,60 @@ def _mediation_price_eur(db: Session, mediation_id: int) -> float:
     )
     count = max(count, 1)
     return round(settings.PRICE_PER_PARTICIPANT_EUR * count, 2)
+
+
+def _ensure_start_invoice(
+    db: Session, mediation: Mediation, participant: MediationParticipant, user: User
+) -> None:
+    """
+    Legt automatisch eine Rechnung an, wenn ein Fall gestartet wird (siehe
+    update_mediation unten). Rechnungsempfänger ist der Teilnehmer, der den
+    Fall startet (dessen Rechnungsadresse an dieser Stelle bereits Pflicht
+    ist, siehe /billing-address-Endpoints oben).
+
+    Idempotent: existiert für (mediation, participant) bereits eine
+    Rechnung (z.B. durch einen erneuten PATCH-Aufruf), wird keine zweite
+    angelegt.
+
+    Die Rechnung geht NICHT automatisch per E-Mail raus - sie steht zunächst
+    nur als PDF zum Ansehen/Ausdrucken bereit (GET /invoices/{id}/pdf). Erst
+    ein Mediator/Admin kann sie nach Prüfung explizit per E-Mail freigeben
+    (POST /invoices/{id}/send-email, siehe routers/invoices.py).
+
+    Steuersatz wird bewusst auf 0.0 als Platzhalter gesetzt (auf Wunsch von
+    Julian, da die USt-ID/Kleinunternehmer-Status noch nicht final geklärt
+    ist) - der Mediator/Admin muss den tatsächlichen Satz vor Freigabe im
+    Rechnungsformular prüfen und ggf. anpassen.
+    """
+    existing = (
+        db.query(Invoice)
+        .filter(
+            Invoice.mediation_id == mediation.id,
+            Invoice.participant_id == participant.id,
+        )
+        .first()
+    )
+    if existing:
+        return
+
+    invoice = Invoice(
+        invoice_number=_next_invoice_number(db),
+        mediation_id=mediation.id,
+        participant_id=participant.id,
+        payer_name=user.name,
+        payer_email=user.email,
+        billing_street=participant.billing_street,
+        billing_postal_code=participant.billing_postal_code,
+        billing_city=participant.billing_city,
+        amount=_mediation_price_eur(db, mediation.id),
+        tax_rate=0.0,
+        currency="EUR",
+        status="paid",
+        issued_at=datetime.now(timezone.utc),
+        paid_at=datetime.now(timezone.utc),
+    )
+    db.add(invoice)
+    db.commit()
 
 
 @router.post("")
@@ -281,6 +399,7 @@ def create_mediation(
         "id": db_mediation.id,
         "title": db_mediation.title,
         "mediation_type": db_mediation.mediation_type,
+        "variant_key": db_mediation.variant_key,
         "description": db_mediation.description,
         "priority": db_mediation.priority,
         "role": db_mediation.role,
@@ -321,11 +440,30 @@ def update_mediation(
             detail="Zahlung erforderlich, bevor die Mediation gestartet werden kann.",
         )
 
+    # "Fall wird gestartet" = Übergang nach status "active". Genau in diesem
+    # Moment wird automatisch eine Rechnung für den startenden Teilnehmer
+    # angelegt (siehe _ensure_start_invoice) - dafür muss die Rechnungsadresse
+    # vorher hinterlegt sein (siehe /billing-address-Endpoints oben).
+    starting_now = update_data.get("status") == "active" and mediation.status != "active"
+    if starting_now and not (
+        is_participant.billing_street
+        and is_participant.billing_postal_code
+        and is_participant.billing_city
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Bitte hinterlege zuerst deine Rechnungsadresse (Straße, PLZ, Ort), bevor du die Mediation startest.",
+        )
+
     for key, value in update_data.items():
         setattr(mediation, key, value)
 
     db.commit()
     db.refresh(mediation)
+
+    if starting_now:
+        _ensure_start_invoice(db, mediation, is_participant, user)
+
     return mediation
 
 
@@ -452,6 +590,7 @@ def get_my_mediations(
             "status": mediation.status,
             "phase": mediation.phase,
             "mediation_type": mediation.mediation_type,
+            "variant_key": mediation.variant_key,
             "is_my_turn": is_my_turn,
         })
 
@@ -474,6 +613,7 @@ def get_all_mediations(
             "id": m.id,
             "title": m.title,
             "mediation_type": m.mediation_type,
+            "variant_key": m.variant_key,
             "status": m.status,
             "phase": m.phase,
             "role": "mediator",
@@ -506,6 +646,7 @@ def get_mediation(
         "mediation_id": mediation.id,
         "title": mediation.title,
         "mediation_type": mediation.mediation_type,
+        "variant_key": mediation.variant_key,
         "description": mediation.description,
         "priority": mediation.priority,
         "status": mediation.status,
@@ -670,14 +811,32 @@ def get_phase_steps(
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
 
+    # Standard-Schritte (variant_key IS NULL) gelten immer; Schritte einer
+    # Variante kommen nur dazu, wenn dieser Fall ihr zugeordnet ist
+    # (mediations.variant_key). Varianten sind additiv, siehe MediationVariant.
+    variant_filter = PhaseStepDefault.variant_key.is_(None)
+    if mediation.variant_key:
+        variant_filter = or_(
+            variant_filter,
+            PhaseStepDefault.variant_key == mediation.variant_key,
+        )
     defaults = (
         db.query(PhaseStepDefault)
         .filter(
             PhaseStepDefault.mediation_type == mediation.mediation_type,
             PhaseStepDefault.phase == phase,
             PhaseStepDefault.enabled.is_(True),
+            variant_filter,
         )
-        .order_by(PhaseStepDefault.position, PhaseStepDefault.id)
+        # Basis-Schritte zuerst (in ihrer Reihenfolge), danach die Zusatz-
+        # Schritte der Variante (in ihrer eigenen Reihenfolge). Positionen
+        # werden pro Scope (variant_key) unabhängig ab 0 vergeben, daher
+        # nicht über beide Scopes hinweg mischen.
+        .order_by(
+            PhaseStepDefault.variant_key.isnot(None),
+            PhaseStepDefault.position,
+            PhaseStepDefault.id,
+        )
         .all()
     )
     custom_steps = (
@@ -1850,3 +2009,64 @@ WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-B
         raise HTTPException(status_code=500, detail="KI-Antwort konnte nicht verarbeitet werden")
 
     return result
+
+
+# ── Varianten-Zuordnung (Fall <-> MediationVariant) ─────────────────────────
+
+class VariantAssignRequest(BaseModel):
+    # key einer MediationVariant des passenden mediation_type — oder None,
+    # um die Zuordnung zu entfernen (Fall läuft wieder als Basis-Workflow).
+    variant_key: Optional[str] = None
+
+
+@router.put("/{mediation_id}/variant")
+def set_mediation_variant(
+    mediation_id: int,
+    payload: VariantAssignRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Ordnet einem Fall eine Mediations-Variante zu (oder entfernt sie).
+
+    Nur Mediatoren/Admins. Jederzeit änderbar — auch bei laufender Mediation:
+    bereits erledigte Schritte (MediationNote) bleiben erhalten, die
+    Schrittliste wird ab sofort mit den Schritten der neuen Variante
+    aufgelöst (siehe get_phase_steps). Per-Fall-Anpassungen über
+    MediationCustomStep/MediationStepRule sind davon unabhängig.
+    """
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    if payload.variant_key is not None:
+        variant = (
+            db.query(MediationVariant)
+            .filter(
+                MediationVariant.mediation_type == mediation.mediation_type,
+                MediationVariant.key == payload.variant_key,
+                MediationVariant.enabled.is_(True),
+            )
+            .first()
+        )
+        if not variant:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Variante '{payload.variant_key}' existiert nicht (oder ist "
+                    f"deaktiviert) für Mediationstyp '{mediation.mediation_type}'"
+                ),
+            )
+
+    mediation.variant_key = payload.variant_key
+    db.commit()
+    db.refresh(mediation)
+
+    return {
+        "mediation_id": mediation.id,
+        "mediation_type": mediation.mediation_type,
+        "variant_key": mediation.variant_key,
+    }

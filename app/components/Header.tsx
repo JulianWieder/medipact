@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -44,7 +44,26 @@ function NavLink({
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  // Mobil: Nav-Leiste beim Runterscrollen ausblenden, beim Hochscrollen
+  // sofort wieder zeigen ("auto-hide"). Auf md+ bleibt sie via CSS
+  // (md:translate-y-0) immer sichtbar.
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
   const t = useTranslations("nav");
+
+  useEffect(() => {
+    function onScroll() {
+      const y = window.scrollY;
+      // 96px Toleranz, damit die Leiste nicht sofort beim ersten Pixel
+      // verschwindet; kleine Scroll-Zitterbewegungen (<4px) ignorieren.
+      if (Math.abs(y - lastY.current) > 4) {
+        setHidden(y > lastY.current && y > 96);
+        lastY.current = y;
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navItems = [
     { label: t("start"), href: "/" },
@@ -70,8 +89,9 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      {/* Promo bar */}
+    <>
+      {/* Promo bar: bewusst NICHT sticky — scrollt weg und gibt auf dem
+          Handy die ~36px wieder frei, die vorher dauerhaft klebten. */}
       <div className="w-full bg-neutral-900 text-white">
         <UnlocalizedLink
           href="/auth/register"
@@ -83,8 +103,13 @@ export default function Header() {
         </UnlocalizedLink>
       </div>
 
+      <header
+        className={`sticky top-0 z-50 w-full transition-transform duration-200 md:translate-y-0 ${
+          hidden && !open ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
       <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5 md:py-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <Image
@@ -206,7 +231,7 @@ export default function Header() {
       {open && (
         <nav
           id="mobile-menu"
-          className="border-t border-neutral-200/80 bg-white px-6 py-4 md:hidden"
+          className="max-h-[calc(100dvh-60px)] overflow-y-auto border-t border-neutral-200/80 bg-white px-6 py-4 md:hidden"
         >
           <ul className="flex flex-col gap-1">
             {navItems.map((item) => (
@@ -251,6 +276,7 @@ export default function Header() {
         </nav>
       )}
       </div>
-    </header>
+      </header>
+    </>
   );
 }

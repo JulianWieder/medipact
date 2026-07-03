@@ -32,6 +32,7 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "mediation_type": step.mediation_type,
         "phase": step.phase,
         "step_key": step.step_key,
+        "variant_key": step.variant_key,
         "title": step.title,
         "description": step.description,
         "placeholder": step.placeholder,
@@ -46,6 +47,8 @@ class PhaseStepDefaultCreate(BaseModel):
     mediation_type: str
     phase: str
     step_key: str
+    # None = Standard-Schritt des Basistyps. Sonst: key einer MediationVariant.
+    variant_key: Optional[str] = None
     title: str
     description: str = ""
     placeholder: str = ""
@@ -76,20 +79,29 @@ class ReorderRequest(BaseModel):
 def list_phase_step_defaults(
     mediation_type: str,
     phase: str,
+    variant_key: Optional[str] = None,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Alle Default-Schritte für (mediation_type, phase), sortiert nach Reihenfolge."""
+    """
+    Default-Schritte für (mediation_type, phase), sortiert nach Reihenfolge.
+
+    Ohne variant_key werden nur die Standard-Schritte des Basistyps geliefert
+    (variant_key IS NULL). Mit variant_key werden ausschließlich die
+    zusätzlichen/abweichenden Schritte dieser Variante geliefert – diese
+    ergänzen im späteren Fall-Kontext die Standard-Schritte, ersetzen sie hier
+    aber nicht in der Anzeige (getrennte Listen im Designer).
+    """
     _require_admin(user)
-    steps = (
-        db.query(PhaseStepDefault)
-        .filter(
-            PhaseStepDefault.mediation_type == mediation_type,
-            PhaseStepDefault.phase == phase,
-        )
-        .order_by(PhaseStepDefault.position, PhaseStepDefault.id)
-        .all()
+    query = db.query(PhaseStepDefault).filter(
+        PhaseStepDefault.mediation_type == mediation_type,
+        PhaseStepDefault.phase == phase,
     )
+    if variant_key:
+        query = query.filter(PhaseStepDefault.variant_key == variant_key)
+    else:
+        query = query.filter(PhaseStepDefault.variant_key.is_(None))
+    steps = query.order_by(PhaseStepDefault.position, PhaseStepDefault.id).all()
     return [_serialize(s) for s in steps]
 
 
@@ -107,17 +119,22 @@ def create_phase_step_default(
             PhaseStepDefault.mediation_type == payload.mediation_type,
             PhaseStepDefault.phase == payload.phase,
             PhaseStepDefault.step_key == payload.step_key,
+            PhaseStepDefault.variant_key == payload.variant_key,
         )
         .first()
     )
     if existing:
-        raise HTTPException(status_code=409, detail="Step-Key existiert bereits für diesen Mediationstyp/Phase")
+        raise HTTPException(
+            status_code=409,
+            detail="Step-Key existiert bereits für diesen Mediationstyp/Phase/Variante",
+        )
 
     count = (
         db.query(PhaseStepDefault)
         .filter(
             PhaseStepDefault.mediation_type == payload.mediation_type,
             PhaseStepDefault.phase == payload.phase,
+            PhaseStepDefault.variant_key == payload.variant_key,
         )
         .count()
     )
@@ -126,6 +143,7 @@ def create_phase_step_default(
         mediation_type=payload.mediation_type,
         phase=payload.phase,
         step_key=payload.step_key,
+        variant_key=payload.variant_key,
         title=payload.title,
         description=payload.description,
         placeholder=payload.placeholder,

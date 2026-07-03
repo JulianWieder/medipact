@@ -3,8 +3,11 @@
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
+import { JsonLd } from "@/app/components/JsonLd";
 import Link from "next/link";
 import { ReactNode } from "react";
+
+const BASE_URL = "https://medipact.de";
 
 type Step = {
   label: string;
@@ -22,7 +25,18 @@ type ComparisonBlock = {
   items: string[];
 };
 
+type FaqItem = {
+  /** Frage exakt so formulieren, wie Nutzer sie googeln
+   * (z.B. "Wer trägt die Kosten bei einer Mediation?"). */
+  question: string;
+  /** Erster Satz = direkte Antwort in max. ~30 Wörtern — Google zieht diesen
+   * Satz für "Nutzer fragen auch"-Boxen und AI Overviews heran. */
+  answer: string;
+};
+
 type CaseStudyTemplateProps = {
+  /** Slug unter /cases/ — wird für die Article-JSON-LD-URL gebraucht. */
+  slug?: string;
   eyebrow?: string;
   title: string;
   titleHighlight?: string;
@@ -51,6 +65,9 @@ type CaseStudyTemplateProps = {
   breadcrumbs?: BreadcrumbItem[];
   /** Links to 2-3 other case studies, shown just above the CTA. */
   relatedCases?: BreadcrumbItem[];
+  /** Atomic FAQs: kurze Suchintentions-Fragen mit Direktantwort im ersten
+   * Satz. Rendert eine sichtbare FAQ-Sektion + FAQPage-JSON-LD. */
+  faq?: FaqItem[];
   ctaTitle: string;
   ctaText: string;
   ctaHref: string;
@@ -90,6 +107,7 @@ function SectionHeader({
 }
 
 export function CaseStudyTemplate({
+  slug,
   eyebrow = "Fallbeispiel",
   title,
   titleHighlight,
@@ -112,6 +130,7 @@ export function CaseStudyTemplate({
   quotes = [],
   breadcrumbs,
   relatedCases,
+  faq,
   ctaTitle,
   ctaText,
   ctaHref,
@@ -133,8 +152,57 @@ export function CaseStudyTemplate({
     );
   }
 
+  // Article statt TechArticle: TechArticle ist für technische Doku
+  // (Programmierung/How-tos) gedacht — für Mediations-Fallstudien ist
+  // Article der semantisch korrekte Typ.
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: titleHighlight ? `${title}: ${titleHighlight}` : title,
+    description: intro,
+    inLanguage: "de",
+    ...(slug && {
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `${BASE_URL}/cases/${slug}`,
+      },
+    }),
+    author: {
+      "@type": "Organization",
+      name: "medipact",
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "medipact",
+      url: BASE_URL,
+    },
+    about: {
+      "@type": "Thing",
+      name: "Mediation",
+    },
+  };
+
+  const faqSchema =
+    faq && faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faq.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.answer,
+            },
+          })),
+        }
+      : null;
+
   return (
     <>
+      <JsonLd data={articleSchema} />
+      {faqSchema && <JsonLd data={faqSchema} />}
       <main className="app-shell pt-[73px]">
         <section className="relative overflow-hidden section section-base">
           <div className="absolute inset-0 pointer-events-none">
@@ -304,6 +372,29 @@ export function CaseStudyTemplate({
             </div>
           </div>
         </section>
+
+        {faq && faq.length > 0 && (
+          <section className="section section-muted">
+            <div className="container max-w-4xl">
+              <SectionHeader
+                eyebrow="Häufige Fragen"
+                title="Kurz beantwortet"
+                center
+              />
+
+              <div className="space-y-5">
+                {faq.map((item) => (
+                  <Card key={item.question}>
+                    <h3 className="heading-3">{item.question}</h3>
+                    <p className="mt-3 leading-7 text-neutral-700">
+                      {item.answer}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {relatedCases && relatedCases.length > 0 && (
           <section className="section section-base border-t border-neutral-100">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import type { MediationCase, Participant, PhaseNoteGroup, FeedbackEntry } from "../types";
+import type { MediationCase, Participant, PhaseNoteGroup, FeedbackEntry, MediationVariantDto } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL } from "../types";
 import {
   StatusBadge,
@@ -23,6 +23,8 @@ import {
   fetchWorkflowRules,
   saveWorkflowRule,
   deleteWorkflowRule,
+  fetchVariants,
+  setMediationVariant,
   type WorkflowRulesResponse,
 } from "../api";
 
@@ -90,6 +92,35 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse">("overview");
+
+  // ── Mediations-Variante (Fall <-> Variante, jederzeit umstellbar) ──
+  const [variants, setVariants] = useState<MediationVariantDto[]>([]);
+  const [variantKey, setVariantKey] = useState<string | null>(fall.variant_key ?? null);
+  const [variantSaving, setVariantSaving] = useState(false);
+  const [variantError, setVariantError] = useState("");
+
+  useEffect(() => {
+    setVariantKey(fall.variant_key ?? null);
+    fetchVariants(fall.mediation_type)
+      .then((list) => setVariants(list.filter((v) => v.enabled)))
+      .catch(() => setVariants([]));
+  }, [fall.id, fall.mediation_type, fall.variant_key]);
+
+  async function handleVariantChange(nextKey: string) {
+    const value = nextKey === "" ? null : nextKey;
+    const previous = variantKey;
+    setVariantKey(value);
+    setVariantSaving(true);
+    setVariantError("");
+    try {
+      await setMediationVariant(fall.id, value);
+    } catch {
+      setVariantKey(previous);
+      setVariantError("Variante konnte nicht gespeichert werden");
+    } finally {
+      setVariantSaving(false);
+    }
+  }
 
   // Analyse
   type SwotData = {
@@ -477,6 +508,27 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
               <h2 className="text-xl font-semibold leading-snug">{fall.title}</h2>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
                 <TypeBadge type={fall.mediation_type} />
+                {/* Varianten-Zuordnung: bestimmt, welche Zusatz-Schritte aus dem
+                    Workflow Designer für diesen Fall gelten (Basis + Variante). */}
+                {variants.length > 0 && (
+                  <select
+                    value={variantKey ?? ""}
+                    onChange={(e) => handleVariantChange(e.target.value)}
+                    disabled={variantSaving}
+                    title="Mediations-Variante dieses Falls"
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-50 [&>option]:text-neutral-900"
+                  >
+                    <option value="">Basis-Workflow</option>
+                    {variants.map((v) => (
+                      <option key={v.key} value={v.key}>
+                        Variante: {v.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {variantError && (
+                  <span className="text-xs text-red-400">{variantError}</span>
+                )}
                 {fall.description && (
                   <span className="text-sm text-neutral-300">· {fall.description}</span>
                 )}

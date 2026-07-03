@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  const lastModified = new Date("2026-07-01");
+  const lastModified = new Date("2026-07-03");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -80,12 +80,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
-    {
-      url: `${BASE_URL}/cases/nachbarschaft`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
+    // /cases/nachbarschaft ist nur noch ein Redirect auf /cases —
+    // Redirects gehören nicht in die Sitemap.
     {
       url: `${BASE_URL}/cases/nachbarschaft-laerm`,
       lastModified,

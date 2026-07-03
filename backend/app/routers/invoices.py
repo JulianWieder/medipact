@@ -1,10 +1,14 @@
+import io
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.email import send_invoice_email
+from app.invoice_pdf import generate_invoice_pdf
 from app.models.invoice import Invoice
 from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
@@ -12,6 +16,8 @@ from app.models.user import User
 from app.security import get_current_db_user
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
+
+_ADMIN_ROLES = {"mediator", "admin"}
 
 
 class InvoiceCreate(BaseModel):
@@ -22,6 +28,9 @@ class InvoiceCreate(BaseModel):
     currency: str = "EUR"
     payer_name: str | None = None
     payer_email: str | None = None
+    billing_street: str | None = None
+    billing_postal_code: str | None = None
+    billing_city: str | None = None
     status: str = "open"  # i.d.R. "open" bei Erstellung, "paid" wird über die PayPal-Capture gesetzt
     paypal_order_id: str | None = None
 
@@ -36,6 +45,9 @@ class InvoiceUpdate(BaseModel):
     currency: str | None = None
     payer_name: str | None = None
     payer_email: str | None = None
+    billing_street: str | None = None
+    billing_postal_code: str | None = None
+    billing_city: str | None = None
     status: str | None = None
     paypal_order_id: str | None = None
     pdf_url: str | None = None
@@ -83,6 +95,9 @@ def _serialize(
         "participant_email": participant_user.email if participant_user else None,
         "payer_name": invoice.payer_name,
         "payer_email": invoice.payer_email,
+        "billing_street": invoice.billing_street,
+        "billing_postal_code": invoice.billing_postal_code,
+        "billing_city": invoice.billing_city,
         "amount": invoice.amount,
         "tax_rate": invoice.tax_rate,
         "tax_amount": tax_amount,
@@ -93,6 +108,7 @@ def _serialize(
         "issued_at": invoice.issued_at.isoformat(),
         "paid_at": invoice.paid_at.isoformat() if invoice.paid_at else None,
         "pdf_url": invoice.pdf_url,
+        "email_sent_at": invoice.email_sent_at.isoformat() if invoice.email_sent_at else None,
     }
 
 
@@ -145,6 +161,9 @@ def create_invoice(
         participant_id=payload.participant_id,
         payer_name=payload.payer_name,
         payer_email=payload.payer_email,
+        billing_street=payload.billing_street,
+        billing_postal_code=payload.billing_postal_code,
+        billing_city=payload.billing_city,
         amount=payload.amount,
         tax_rate=payload.tax_rate,
         currency=payload.currency,
@@ -253,3 +272,109 @@ def list_invoices(
         _serialize(invoice, mediation, participant_user)
         for invoice, mediation, _participant, participant_user in rows
     ]
+
+
+def _load_invoice_or_404(db: Session, invoice_id: int) -> Invoice:
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    return invoice
+
+
+def _can_view_invoice(db: Session, invoice: Invoice, user: User) -> bool:
+    """Mediator/Admin dürfen jede Rechnung sehen, eine Partei nur ihre eigene."""
+    if user.role in _ADMIN_ROLES:
+        return True
+    own_participation = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == invoice.mediation_id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+    if own_participation and own_participation.role in _ADMIN_ROLES:
+        return True
+    return bool(own_participation and own_participation.id == invoice.participant_id)
+
+
+@router.get("/{invoice_id}/pdf")
+def get_invoice_pdf(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Liefert die Rechnung als PDF – zum Ansehen/Ausdrucken. Wird live erzeugt,
+    nicht auf Platte gespeichert. Rechnungen gehen NIE automatisch per E-Mail
+    raus (siehe /send-email unten) – das hier ist der Weg, wie ein Nutzer
+    oder Mediator sie ohne E-Mail-Versand einsehen/drucken kann.
+    """
+    invoice = _load_invoice_or_404(db, invoice_id)
+    if not _can_view_invoice(db, invoice, current_user):
+        raise HTTPException(status_code=403, detail="Kein Zugriff auf diese Rechnung")
+
+    mediation = db.query(Mediation).filter(Mediation.id == invoice.mediation_id).first()
+    pdf_bytes = generate_invoice_pdf(invoice, mediation)
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{invoice.invoice_number}.pdf"',
+        },
+    )
+
+
+@router.post("/{invoice_id}/send-email")
+def send_invoice_email_endpoint(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Gibt eine Rechnung nach Prüfung frei und verschickt sie per E-Mail als
+    PDF-Anhang an payer_email. Nur Mediatoren/Admins – Rechnungen gehen sonst
+    nie automatisch per Mail raus (siehe _ensure_start_invoice in
+    routers/mediations.py: legt beim Fall-Start nur die Rechnung an, ohne
+    E-Mail-Versand).
+    """
+    invoice = _load_invoice_or_404(db, invoice_id)
+
+    own_participation = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == invoice.mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    is_mediator = current_user.role in _ADMIN_ROLES or (
+        own_participation is not None and own_participation.role in _ADMIN_ROLES
+    )
+    if not is_mediator:
+        raise HTTPException(status_code=403, detail="Nur Mediatoren dürfen Rechnungen per E-Mail freigeben")
+
+    if not invoice.payer_email:
+        raise HTTPException(
+            status_code=422,
+            detail="Für diese Rechnung ist keine E-Mail-Adresse hinterlegt.",
+        )
+
+    mediation = db.query(Mediation).filter(Mediation.id == invoice.mediation_id).first()
+    pdf_bytes = generate_invoice_pdf(invoice, mediation)
+
+    send_invoice_email(
+        to_email=invoice.payer_email,
+        to_name=invoice.payer_name or invoice.payer_email,
+        invoice_number=invoice.invoice_number,
+        mediation_title=(mediation.title if mediation else f"Mediation #{invoice.mediation_id}"),
+        pdf_bytes=pdf_bytes,
+    )
+
+    invoice.email_sent_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(invoice)
+
+    participant_user = _load_participant_user(db, invoice.participant_id)
+    return _serialize(invoice, mediation, participant_user)
