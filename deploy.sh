@@ -4,9 +4,13 @@ set -e
 cd ~/medipact
 
 echo "==> Git pull..."
+git checkout -- package-lock.json 2>/dev/null || true
 git stash
 git pull
 git stash pop 2>/dev/null || true
+
+echo "==> Dependencies..."
+npm ci
 
 echo "==> Frontend bauen..."
 npm run build

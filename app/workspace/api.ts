@@ -102,6 +102,7 @@ export async function fetchAllMediations(): Promise<MediationCase[]> {
     progress: (item.progress ?? 0) as number,
     description: (item.description ?? null) as string | null,
     role: (item.role ?? "mediator") as string,
+    variant_key: (item.variant_key ?? null) as string | null,
   }));
 }
 
@@ -254,22 +255,7 @@ export async function updateInvoice(id: number, payload: InvoiceUpdateInput): Pr
 
 // ── Workflow-Designer: Varianten + Standard-Schritte + Fall-Zuordnung ─────
 // Nutzt die bestehenden Admin-API-Routes (Backend prüft mediator/admin).
-
-export async function fetchAllMediations(): Promise<MediationCase[]> {
-  const res = await fetch("/api/admin/mediations", { cache: "no-store" });
-  if (!res.ok) throw new Error("Fälle konnten nicht geladen werden");
-  const data = await res.json();
-  return (data ?? []).map((item: Record<string, unknown>) => ({
-    id: (item.mediation_id ?? item.id) as number,
-    mediation_id: (item.mediation_id ?? item.id) as number,
-    title: (item.title as string) ?? "Neue Mediation",
-    mediation_type: (item.mediation_type ?? "nachbarschaft") as string,
-    status: (item.status ?? "draft") as string,
-    phase: (item.phase ?? null) as string | null,
-    role: (item.role ?? "mediator") as string,
-    variant_key: (item.variant_key ?? null) as string | null,
-  }));
-}
+// fetchAllMediations: siehe oben (Admin: alle Fälle).
 
 export async function fetchVariants(mediationType: string): Promise<MediationVariantDto[]> {
   const res = await fetch(
