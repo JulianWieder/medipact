@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import Image, { type StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
-import { FadeIn } from "@/app/components/ui/motion";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
 
 /**
@@ -58,20 +57,20 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
                 {t("tagline")}
               </p>
 
-              <FadeIn>
-                <h1 className="mt-3 text-3xl font-black leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl">
-                  {t("titleLine1")}
-                  <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                    {t("titleLine2")}
-                  </span>
-                </h1>
-              </FadeIn>
+              {/* Bewusst KEIN FadeIn: FadeIn SSRt mit opacity:0 und wird erst
+                  nach Hydration sichtbar — auf Mobile kostete das ~2s LCP
+                  (Render-Delay), weil H1/Intro Teil des LCP-Bereichs sind.
+                  Above-the-fold-Inhalte müssen mit dem ersten Paint stehen. */}
+              <h1 className="mt-3 text-3xl font-black leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl">
+                {t("titleLine1")}
+                <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
+                  {t("titleLine2")}
+                </span>
+              </h1>
 
-              <FadeIn delay={0.1}>
-                <p className="mt-3 max-w-xl text-base leading-7 text-neutral-200 sm:mt-6 sm:text-lg sm:leading-8">
-                  {t("intro")}
-                </p>
-              </FadeIn>
+              <p className="mt-3 max-w-xl text-base leading-7 text-neutral-200 sm:mt-6 sm:text-lg sm:leading-8">
+                {t("intro")}
+              </p>
             </motion.div>
 
             <motion.div style={{ opacity: ctaOpacity }}>
