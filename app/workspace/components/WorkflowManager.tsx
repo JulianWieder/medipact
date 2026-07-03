@@ -332,7 +332,7 @@ export function WorkflowManager() {
   // Reihenfolge nach dem Ziehen neu berechnen — nur editierbare Knoten sind
   // draggable; gesperrte Basis-Knoten stehen im Varianten-Scope fest davor.
   const handleNodeDragStop = useCallback(
-    (_event: React.MouseEvent, draggedNode: Node) => {
+    (_event: MouseEvent | TouchEvent, draggedNode: Node) => {
       setEditableSteps((prev) => {
         const fromIdx = prev.findIndex((s) => String(s.id) === draggedNode.id);
         if (fromIdx === -1) return prev;
