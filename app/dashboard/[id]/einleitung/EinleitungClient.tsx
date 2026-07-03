@@ -52,20 +52,68 @@ type PhaseStepFromAPI = {
   description: string;
   placeholder: string;
   reflection_mode: "simple" | "interactive" | null;
+  content_types: string[] | null;
+  video_url: string | null;
+  feedback_occasion: FeedbackOccasion | null;
   custom: boolean;
 };
 
-// Alle Schritte inkl. Intro, Terminvereinbarung, Video-Call, Feedback und Vertrag
 type FeedbackOccasion = "after_videocall" | "before_contract";
-type PhaseStep = "intro" | "terminvereinbarung" | "videocall" | "feedback_after_videocall" | ContentStepKey | "feedback_before_contract" | "contract";
 
-const FIXED_PHASE_STEPS_PREFIX: PhaseStep[] = [
-  "intro",
-  "terminvereinbarung",
-  "videocall",
-  "feedback_after_videocall",
-];
-const FIXED_PHASE_STEPS_SUFFIX: PhaseStep[] = ["feedback_before_contract", "contract"];
+// Schritt-Keys kommen jetzt frei aus dem Workflow Manager, daher string.
+type PhaseStep = string;
+
+// Welcher Baustein eine Karte rendert — abgeleitet aus ihren content_types.
+type StepKind = "content" | "termin" | "videokonferenz" | "feedback" | "vertrag";
+
+// Aufgelöster Schritt für den Teilnehmer-Flow. Reihenfolge, Vorhandensein und
+// Inhaltsart kommen vollständig aus phase_step_defaults (Workflow Manager) —
+// kein fest verdrahteter Rahmen mehr.
+type FlowStep = {
+  key: string;
+  title: string;
+  description: string;
+  placeholder: string;
+  reflection_mode: "simple" | "interactive" | null;
+  content_types: string[];
+  video_url: string | null;
+  feedback_occasion: FeedbackOccasion | null;
+  kind: StepKind;
+  hasText: boolean;
+  hasVideo: boolean;
+  hasFrage: boolean;
+};
+
+// Eine Karte kann mehrere Inhaltsarten kombinieren; der "Leitbaustein" bestimmt
+// den Haupt-Renderer. Spezial-Bausteine haben Vorrang vor reinem Text/Video.
+function resolveStepKind(ct: string[]): StepKind {
+  if (ct.includes("vertrag")) return "vertrag";
+  if (ct.includes("videokonferenz")) return "videokonferenz";
+  if (ct.includes("termin")) return "termin";
+  if (ct.includes("feedback")) return "feedback";
+  return "content";
+}
+
+function toFlowStep(s: PhaseStepFromAPI): FlowStep {
+  const ct = s.content_types ?? [];
+  return {
+    key: s.key,
+    title: s.title,
+    description: s.description,
+    placeholder: s.placeholder || "Deine Eingabe …",
+    reflection_mode: s.reflection_mode,
+    content_types: ct,
+    video_url: s.video_url ?? null,
+    feedback_occasion: s.feedback_occasion ?? null,
+    kind: resolveStepKind(ct),
+    // Ohne content_types (Bestand/Custom-Steps) bleibt es ein klassischer
+    // Text-Schritt; "frage" wird bis zu einem echten Quiz-Baustein wie Text
+    // behandelt (Note-Eingabe).
+    hasText: ct.length === 0 || ct.includes("text") || ct.includes("frage"),
+    hasVideo: ct.includes("video"),
+    hasFrage: ct.includes("frage"),
+  };
+}
 
 // ── Feedback-Fragen ────────────────────────────────────────────────────────────
 
@@ -597,23 +645,15 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [activeStep, setActiveStep] = useState<PhaseStep>("intro");
+  const [activeStep, setActiveStep] = useState<PhaseStep>("");
+  const [flow, setFlow] = useState<FlowStep[]>([]);
   const [contentSteps, setContentSteps] = useState<ContentStepDef[]>([]);
-  const phaseSteps = useMemo<PhaseStep[]>(
-    () => [
-      ...FIXED_PHASE_STEPS_PREFIX,
-      ...contentSteps.map((s) => s.key as ContentStepKey),
-      ...FIXED_PHASE_STEPS_SUFFIX,
-    ],
-    [contentSteps]
+  const phaseSteps = useMemo<PhaseStep[]>(() => flow.map((f) => f.key), [flow]);
+  const flowByKey = useMemo(
+    () => Object.fromEntries(flow.map((f) => [f.key, f])) as Record<string, FlowStep>,
+    [flow]
   );
-  const [stepModes, setStepModes] = useState<Record<PhaseStep, StepMode>>(
-    () =>
-      Object.fromEntries(FIXED_PHASE_STEPS_PREFIX.map((s) => [s, "input"])) as Record<
-        PhaseStep,
-        StepMode
-      >
-  );
+  const [stepModes, setStepModes] = useState<Record<PhaseStep, StepMode>>({});
 
   const [items, setItems] = useState<Record<ContentStepKey, Record<string, string[]>>>({});
   const [inputTexts, setInputTexts] = useState<Record<ContentStepKey, string>>({});
@@ -683,13 +723,19 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
         const stepsFromAPI: PhaseStepFromAPI[] = stepsRes.ok
           ? (await stepsRes.json()).steps ?? []
           : [];
-        const nextContentSteps: ContentStepDef[] = stepsFromAPI.map((s, idx) => ({
-          key: s.key,
-          number: idx + 1,
-          title: s.title,
-          description: s.description,
-          placeholder: s.placeholder || "Deine Eingabe …",
-        }));
+        const nextFlow: FlowStep[] = stepsFromAPI.map(toFlowStep);
+        setFlow(nextFlow);
+        // Nur Text-/Note-Karten brauchen Eingabe-Listen; Nummerierung läuft
+        // fortlaufend über diese Karten.
+        const nextContentSteps: ContentStepDef[] = nextFlow
+          .filter((f) => f.kind === "content" && f.hasText)
+          .map((f, idx) => ({
+            key: f.key,
+            number: idx + 1,
+            title: f.title,
+            description: f.description,
+            placeholder: f.placeholder,
+          }));
         setContentSteps(nextContentSteps);
 
         const notesResults = await Promise.all(
@@ -729,7 +775,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             string
           >
         );
-        await refreshAllStepStates(pData, nextContentSteps);
+        await refreshAllStepStates(pData, nextFlow);
         await refreshAppointments();
 
         // Bereits abgegebene Feedbacks laden
@@ -760,120 +806,111 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   }, [mediationId]);
 
   const refreshAllStepStates = useCallback(
-    async (pData?: Participant[], csOverride?: ContentStepDef[]) => {
+    async (pData?: Participant[], flowOverride?: FlowStep[]) => {
       const parties = pData ?? participants;
       if (parties.length === 0) return;
 
-      const cs = csOverride ?? contentSteps;
-      const localPhaseSteps: PhaseStep[] = [
-        ...FIXED_PHASE_STEPS_PREFIX,
-        ...cs.map((s) => s.key as ContentStepKey),
-        ...FIXED_PHASE_STEPS_SUFFIX,
-      ];
+      const flowSteps = flowOverride ?? flow;
+      if (flowSteps.length === 0) return;
 
       const me = parties.find((p) => p.name === currentUserName);
 
-      // "intro" und "videocall" als einfache Bestätigungsschritte prüfen
-      const simpleKeys: PhaseStep[] = ["intro", "videocall"];
-      const contentKeys: PhaseStep[] = cs.map((s) => s.key as ContentStepKey);
-      const allKeys: PhaseStep[] = [...simpleKeys, ...contentKeys];
-
-      // terminvereinbarung: done wenn ein Slot von allen bestätigt ist
-      const apptRes = await fetch(`/api/mediations/${mediationId}/appointment/slots`).then(r => r.ok ? r.json() : null);
+      // Termin: solange der Mediator keinen Slot vorgeschlagen hat, gilt der
+      // Schritt als übersprungen und blockiert nicht.
+      const apptRes = await fetch(`/api/mediations/${mediationId}/appointment/slots`).then((r) =>
+        r.ok ? r.json() : null
+      );
       if (apptRes) {
         setAppointmentSlots(apptRes.slots ?? []);
         setConfirmedSlot(apptRes.confirmed ?? null);
         setReservedSlot(apptRes.reserved ?? null);
       }
-      // Die Terminvereinbarung ist optional: der Mediator entscheidet, ob ein
-      // gemeinsamer Termin überhaupt nötig ist. Solange der Mediator noch
-      // keine Terminvorschläge erstellt hat, gilt der Schritt automatisch als
-      // erledigt (übersprungen) und blockiert den Fortschritt nicht.
       const noSlotsProposed = (apptRes?.slots?.length ?? 0) === 0;
-      const apptDone = !!(apptRes?.confirmed) || noSlotsProposed;
+      const apptDone = !!apptRes?.confirmed || noSlotsProposed;
 
+      // Karten, deren Status über Notizen/Bestätigung läuft: Inhalts-Karten
+      // (Text/Video-Bestätigung) und die Videokonferenz.
+      const statusKeys = flowSteps
+        .filter((s) => s.kind === "content" || s.kind === "videokonferenz")
+        .map((s) => s.key);
       const statuses = await Promise.all(
-        allKeys.map((key) =>
+        statusKeys.map((key) =>
           fetch(`/api/mediations/${mediationId}/step-status?phase=${key}&step=`)
             .then((r) => (r.ok ? r.json() : null))
             .then((data: StepStatus | null) => ({ key, data }))
         )
       );
-
-      // Statusmap für schnellen Zugriff
       const statusMap = Object.fromEntries(statuses.map(({ key, data }) => [key, data]));
 
       const newModes = { ...stepModes };
-      // terminvereinbarung
-      newModes["terminvereinbarung"] = apptDone ? "done" : "input";
-
-      // Schritte in der richtigen Reihenfolge auswerten,
-      // damit "intro" immer vor "terminvereinbarung" geprüft wird
       let firstIncomplete: PhaseStep | null = null;
 
-      for (const phaseStep of localPhaseSteps) {
-        if (phaseStep === "terminvereinbarung") {
-          if (!apptDone && !firstIncomplete) firstIncomplete = "terminvereinbarung";
+      for (const s of flowSteps) {
+        if (s.kind === "vertrag") continue; // Gating nach der Schleife
+
+        if (s.kind === "termin") {
+          newModes[s.key] = apptDone ? "done" : "input";
+          if (!apptDone && !firstIncomplete) firstIncomplete = s.key;
           continue;
         }
-        if (phaseStep === "contract") continue; // wird separat behandelt
 
-        // Feedback-Schritte: done wenn Feedback abgegeben (oder übersprungen = in submittedFeedbackOccasions)
-        if (phaseStep === "feedback_after_videocall" || phaseStep === "feedback_before_contract") {
-          const occasion: FeedbackOccasion = phaseStep === "feedback_after_videocall" ? "after_videocall" : "before_contract";
+        if (s.kind === "feedback") {
+          const occasion: FeedbackOccasion = s.feedback_occasion ?? "after_videocall";
           const fbDone = submittedFeedbackOccasions.has(occasion);
-          newModes[phaseStep] = fbDone ? "done" : "input";
-          if (!fbDone && !firstIncomplete) firstIncomplete = phaseStep;
+          newModes[s.key] = fbDone ? "done" : "input";
+          if (!fbDone && !firstIncomplete) firstIncomplete = s.key;
           continue;
         }
 
-        const data: StepStatus | null = statusMap[phaseStep] ?? null;
+        // content / videokonferenz → Note-/Bestätigungs-Status
+        const data: StepStatus | null = statusMap[s.key] ?? null;
         if (!data) continue;
-        const myStatus = me
-          ? data.participants.find((p) => p.participant_id === me.id)
-          : null;
+        const myStatus = me ? data.participants.find((p) => p.participant_id === me.id) : null;
         const mySubmitted = myStatus?.submitted ?? false;
 
         if (data.all_submitted) {
-          newModes[phaseStep] = "done";
+          newModes[s.key] = "done";
         } else if (mySubmitted) {
-          newModes[phaseStep] = "waiting";
-          if (!firstIncomplete) firstIncomplete = phaseStep;
+          newModes[s.key] = "waiting";
+          if (!firstIncomplete) firstIncomplete = s.key;
         } else {
-          newModes[phaseStep] = "input";
-          if (!firstIncomplete) firstIncomplete = phaseStep;
+          newModes[s.key] = "input";
+          if (!firstIncomplete) firstIncomplete = s.key;
         }
       }
 
-      const allContentDone = cs.every((s) => newModes[s.key] === "done");
-
-      if (allContentDone) {
-        const contractRes = await fetch(`/api/mediations/${mediationId}/contract`);
-        if (contractRes.ok) {
-          const cData = await contractRes.json();
-          if (cData.contract) {
-            setContract(cData.contract);
-            setSignatures(cData.signatures ?? []);
-            setAllSigned(cData.all_signed ?? false);
-            newModes["contract"] = cData.all_signed ? "done" : "input";
-          } else {
-            newModes["contract"] = "input";
+      // Vertrag-Karte(n) erst freigeben, wenn alle übrigen Schritte erledigt sind.
+      const contractSteps = flowSteps.filter((s) => s.kind === "vertrag");
+      const allPrevDone = flowSteps
+        .filter((s) => s.kind !== "vertrag")
+        .every((s) => newModes[s.key] === "done");
+      if (contractSteps.length > 0) {
+        if (allPrevDone) {
+          const contractRes = await fetch(`/api/mediations/${mediationId}/contract`);
+          let signed = false;
+          if (contractRes.ok) {
+            const cData = await contractRes.json();
+            if (cData.contract) {
+              setContract(cData.contract);
+              setSignatures(cData.signatures ?? []);
+              setAllSigned(cData.all_signed ?? false);
+              signed = !!cData.all_signed;
+            }
           }
+          for (const s of contractSteps) newModes[s.key] = signed ? "done" : "input";
+          if (!firstIncomplete && !signed) firstIncomplete = contractSteps[0].key;
+        } else {
+          for (const s of contractSteps) newModes[s.key] = "locked" as StepMode;
         }
-        if (!firstIncomplete) firstIncomplete = "contract";
-      } else {
-        newModes["contract"] = "locked" as StepMode;
       }
 
       setStepModes(newModes);
       if (firstIncomplete) {
         setActiveStep(firstIncomplete);
-      } else if (allContentDone && newModes["contract"] !== "done") {
-        setActiveStep("contract");
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mediationId, currentUserName, participants, contentSteps]
+    [mediationId, currentUserName, participants, flow, submittedFeedbackOccasions]
   );
 
   useEffect(() => {
@@ -924,7 +961,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   // ── Speichern & Abschicken ─────────────────────────────────────────────────
 
-  async function submitSimpleStep(phase: "intro" | "videocall") {
+  async function submitSimpleStep(phase: string) {
     if (!currentParticipant) return;
     setSaveState("saving");
     setError("");
@@ -1083,14 +1120,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   }
 
   function getPhaseStepLabel(step: PhaseStep): string {
-    if (step === "intro") return "Einführung";
-    if (step === "terminvereinbarung") return "Termin";
-    if (step === "videocall") return "Gespräch";
-    if (step === "feedback_after_videocall") return "Feedback";
-    if (step === "feedback_before_contract") return "Feedback";
-    if (step === "contract") return "Vertrag";
-    const cs = contentSteps.find((s) => s.key === step);
-    return cs ? cs.title : step;
+    const f = flowByKey[step];
+    if (!f) return step;
+    if (f.kind === "termin") return "Termin";
+    if (f.kind === "videokonferenz") return "Gespräch";
+    if (f.kind === "feedback") return "Feedback";
+    if (f.kind === "vertrag") return "Vertrag";
+    return f.title;
   }
 
   function getPhaseStepStatus(step: PhaseStep): "done" | "active" | "locked" {
@@ -1108,7 +1144,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
   // ── Hilfsfunktion: Schritt-Inhalt mit Fallback für custom/konfigurierte Schritte ──
 
   function getStepContent(
-    stepKey: ContentStepKey | "intro" | "videocall"
+    stepKey: string
   ): { videoTitle: string; videoDuration: string; emotional: string; sub?: string } {
     const known = (STEP_CONTENT as Record<string, (typeof STEP_CONTENT)[keyof typeof STEP_CONTENT]>)[
       stepKey
@@ -1122,7 +1158,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     };
   }
 
-  function renderStepHeader(stepKey: ContentStepKey | "intro" | "videocall") {
+  function renderStepHeader(stepKey: string) {
     const content = getStepContent(stepKey);
     return (
       <div className="space-y-5 mb-8">
@@ -1145,13 +1181,13 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   // ── Render: Intro-Schritt ──────────────────────────────────────────────────
 
-  function renderIntroStep() {
-    const mode = stepModes["intro"];
+  function renderIntroStep(stepKey: string) {
+    const mode = stepModes[stepKey];
     const introSubmitted = mode === "waiting" || mode === "done";
 
     return (
       <div className="space-y-6">
-        {renderStepHeader("intro")}
+        {renderStepHeader(stepKey)}
 
         <div className="rounded-2xl border border-blue-100 bg-blue-50/60 px-6 py-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">
@@ -1178,7 +1214,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </p>
         </div>
 
-        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("intro")} />}
+        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor(stepKey)} />}
 
         {mode === "done" && (
           <div className="flex items-center gap-3 rounded-2xl border border-accent-200 bg-accent-50 px-6 py-4">
@@ -1192,7 +1228,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <p className="text-sm font-semibold text-accent-800">
-              Alle haben die Einführung bestätigt. Weiter zum Erstgespräch.
+              Alle haben die Einführung bestätigt. Weiter zum nächsten Schritt.
             </p>
           </div>
         )}
@@ -1204,7 +1240,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             </p>
             <button
               type="button"
-              onClick={() => submitSimpleStep("intro")}
+              onClick={() => submitSimpleStep(stepKey)}
               disabled={saveState === "saving"}
               className="btn btn-primary disabled:opacity-60"
             >
@@ -1218,8 +1254,8 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
   // ── Render: Video-Call-Schritt ─────────────────────────────────────────────
 
-  function renderVideoCallStep() {
-    const mode = stepModes["videocall"];
+  function renderVideoCallStep(stepKey: string) {
+    const mode = stepModes[stepKey];
     const submitted = mode === "waiting" || mode === "done";
 
     // Einzigartiger Raumname auf Basis der Mediation-ID
@@ -1227,7 +1263,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
 
     return (
       <div className="space-y-6">
-        {renderStepHeader("videocall")}
+        {renderStepHeader(stepKey)}
 
         {/* Jitsi eingebettet */}
         <JitsiCall roomName={jitsiRoom} displayName={currentUserName} />
@@ -1274,7 +1310,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           </div>
         )}
 
-        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor("videocall")} />}
+        {mode === "waiting" && <WaitingBanner waitingFor={getWaitingFor(stepKey)} />}
 
         {mode === "done" && (
           <div className="flex items-center gap-3 rounded-2xl border border-accent-200 bg-accent-50 px-6 py-4">
@@ -1288,7 +1324,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <p className="text-sm font-semibold text-accent-800">
-              Erstes Gespräch abgeschlossen. Weiter zu Schritt 1.
+              Erstes Gespräch abgeschlossen. Weiter zum nächsten Schritt.
             </p>
           </div>
         )}
@@ -2027,9 +2063,115 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     );
   }
 
+  // ── Render: aktive Karte nach Inhaltsart (kind) ───────────────────────────
+  //
+  // Ersetzt die früher fest verdrahtete if-Kette (intro/termin/videocall/…).
+  // Welcher Baustein rendert, ergibt sich allein aus den content_types der
+  // Karte — Reihenfolge/Vorhandensein steuert der Workflow Manager.
+
+  function stepIntroBox(icon: string, title: string, subtitle?: string, tone: "accent" | "violet" = "accent") {
+    return (
+      <div className="mb-6">
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-sm ${
+              tone === "violet" ? "bg-violet-100 text-violet-700" : "bg-accent-100 text-accent-700"
+            }`}
+          >
+            {icon}
+          </div>
+          <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
+        </div>
+        {subtitle && <p className="mt-1 ml-11 text-sm text-neutral-500">{subtitle}</p>}
+      </div>
+    );
+  }
+
+  function renderActiveStep(step: FlowStep) {
+    switch (step.kind) {
+      case "termin":
+        return (
+          <>
+            {stepIntroBox(
+              "📅",
+              "Terminvereinbarung",
+              step.description || "Wählt gemeinsam einen Termin für das erste Gespräch."
+            )}
+            {renderTerminStep()}
+          </>
+        );
+      case "videokonferenz":
+        return (
+          <>
+            {stepIntroBox(
+              "🎥",
+              "Erstgespräch",
+              confirmedSlot
+                ? `Vereinbart für ${new Date(confirmedSlot.proposed_datetime).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} Uhr`
+                : "Euer erstes gemeinsames Gespräch per Video, mit Transkript."
+            )}
+            {renderVideoCallStep(step.key)}
+          </>
+        );
+      case "feedback": {
+        const occ: FeedbackOccasion = step.feedback_occasion ?? "after_videocall";
+        return (
+          <>
+            {stepIntroBox(
+              "📝",
+              occ === "before_contract" ? "Reflexion vor dem Vertrag" : "Kurzes Feedback",
+              occ === "before_contract"
+                ? "Kurze Einschätzung, bevor ihr den Mediationsvertrag unterzeichnet."
+                : "Wie war das erste Gespräch für dich?",
+              "violet"
+            )}
+            {renderFeedbackStep(occ)}
+          </>
+        );
+      }
+      case "vertrag":
+        return (
+          <>
+            {!allSigned && stepIntroBox("§", "Mediationsvertrag")}
+            {renderContractStep()}
+          </>
+        );
+      default: {
+        // Inhalts-Karte: mit Text/Frage → Note-Eingabe, sonst reine Video-Bestätigung.
+        if (step.hasText) {
+          const cs = contentSteps.find((c) => c.key === step.key);
+          if (!cs) return null;
+          return (
+            <div>
+              <div className="mb-6">
+                <div className="mb-2 flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
+                    {cs.number}
+                  </div>
+                  <h2 className="text-lg font-bold text-neutral-900">{cs.title}</h2>
+                </div>
+              </div>
+              {renderContentStep(cs)}
+            </div>
+          );
+        }
+        return (
+          <>
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-neutral-900">{step.title || "Willkommen"}</h2>
+              <p className="mt-1 text-sm text-neutral-500">Nimm dir einen Moment, bevor wir beginnen.</p>
+            </div>
+            {renderIntroStep(step.key)}
+          </>
+        );
+      }
+    }
+  }
+
   // ── Haupt-Render ───────────────────────────────────────────────────────────
 
   const phaseIndex = getPhaseIndex("einleitung");
+  const activeFlowStep = flowByKey[activeStep];
 
   return (
     <main className="app-shell pt-[73px]">
@@ -2101,19 +2243,19 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             <div className="mb-6">
               <p className="eyebrow mb-3">Mediation</p>
               <h1 className="heading-2 text-neutral-900">
-                {activeStep === "intro"
-                  ? "Willkommen. Du bist nicht allein."
-                  : activeStep === "terminvereinbarung"
-                  ? "Wählt euren Gesprächstermin"
-                  : activeStep === "videocall"
-                  ? "Euer erstes Gespräch"
-                  : activeStep === "feedback_after_videocall"
-                  ? "Wie war das erste Gespräch?"
-                  : activeStep === "feedback_before_contract"
-                  ? "Reflexion vor dem Vertrag"
-                  : activeStep === "contract"
-                  ? "Euer Mediationsvertrag"
-                  : contentSteps.find((s) => s.key === activeStep)?.title ?? "Nächster Schritt"}
+                {(() => {
+                  const f = activeFlowStep;
+                  if (!f) return "Willkommen. Du bist nicht allein.";
+                  if (f.kind === "termin") return "Wählt euren Gesprächstermin";
+                  if (f.kind === "videokonferenz") return "Euer erstes Gespräch";
+                  if (f.kind === "feedback")
+                    return f.feedback_occasion === "before_contract"
+                      ? "Reflexion vor dem Vertrag"
+                      : "Wie war das erste Gespräch?";
+                  if (f.kind === "vertrag") return "Euer Mediationsvertrag";
+                  if (f.kind === "content" && !f.hasText) return "Willkommen. Du bist nicht allein.";
+                  return f.title;
+                })()}
               </h1>
               <p className="mt-2 text-sm text-neutral-500">
                 Schritt {phaseSteps.indexOf(activeStep) + 1} von {phaseSteps.length}
@@ -2167,148 +2309,12 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
             </ol>
           </div>
 
-          {/* Aktiver Schritt-Inhalt */}
+          {/* Aktiver Schritt-Inhalt — Baustein ergibt sich aus der Inhaltsart */}
           <div className="mt-4 sm:mt-8 rounded-xl sm:rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4 sm:p-6">
-            {activeStep === "intro" && (
-              <>
-                <div className="mb-6">
-                  <h2 className="text-lg font-bold text-neutral-900">Willkommen</h2>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    Nimm dir einen Moment, bevor wir beginnen.
-                  </p>
-                </div>
-                {renderIntroStep()}
-              </>
-            )}
-
-            {activeStep === "terminvereinbarung" && (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-lg font-bold text-neutral-900">Terminvereinbarung</h2>
-                  </div>
-                  <p className="mt-1 ml-11 text-sm text-neutral-500">
-                    Wählt gemeinsam einen Termin für das erste Gespräch.
-                  </p>
-                </div>
-                {renderTerminStep()}
-              </>
-            )}
-
-            {activeStep === "videocall" && (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700">
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <h2 className="text-lg font-bold text-neutral-900">Erstgespräch</h2>
-                  </div>
-                  <p className="mt-1 ml-11 text-sm text-neutral-500">
-                    {confirmedSlot
-                      ? `Vereinbart für ${new Date(confirmedSlot.proposed_datetime).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} Uhr`
-                      : "Euer erstes gemeinsames Gespräch per Video."}
-                  </p>
-                </div>
-                {renderVideoCallStep()}
-              </>
-            )}
-
-            {activeStep === "feedback_after_videocall" && (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-lg font-bold text-neutral-900">Kurzes Feedback</h2>
-                  </div>
-                  <p className="mt-1 ml-11 text-sm text-neutral-500">
-                    Wie war das erste Gespräch für dich?
-                  </p>
-                </div>
-                {renderFeedbackStep("after_videocall")}
-              </>
-            )}
-
-            {contentSteps.map((cs) =>
-              activeStep === cs.key ? (
-                <div key={cs.key}>
-                  <div className="mb-6">
-                    <div className="mb-2 flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
-                        {cs.number}
-                      </div>
-                      <h2 className="text-lg font-bold text-neutral-900">{cs.title}</h2>
-                    </div>
-                  </div>
-                  {renderContentStep(cs)}
-                </div>
-              ) : null
-            )}
-
-            {activeStep === "feedback_before_contract" && (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-lg font-bold text-neutral-900">Reflexion vor dem Vertrag</h2>
-                  </div>
-                  <p className="mt-1 ml-11 text-sm text-neutral-500">
-                    Kurze Einschätzung bevor ihr den Mediationsvertrag unterzeichnet.
-                  </p>
-                </div>
-                {renderFeedbackStep("before_contract")}
-              </>
-            )}
-
-            {activeStep === "contract" && (
-              <>
-                {!allSigned && (
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </div>
-                    <h2 className="text-lg font-bold text-neutral-900">Mediationsvertrag</h2>
-                  </div>
-                )}
-                {renderContractStep()}
-              </>
+            {activeFlowStep ? (
+              renderActiveStep(activeFlowStep)
+            ) : (
+              <p className="py-8 text-center text-sm italic text-neutral-400">Wird geladen …</p>
             )}
           </div>
 
@@ -2354,3 +2360,4 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     </main>
   );
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
