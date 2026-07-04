@@ -748,7 +748,9 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                 <TypeBadge type={fall.mediation_type} />
                 {/* Varianten-Zuordnung: bestimmt, welche Zusatz-Schritte aus dem
                     Workflow Designer für diesen Fall gelten (Basis + Variante). */}
-                {variants.length > 0 && (
+                {/* Immer sichtbar: mind. "Basis-Workflow" – so ist die
+                    Workflow-Zuordnung direkt im Fall auffindbar. */}
+                {(
                   <select
                     value={variantKey ?? ""}
                     onChange={(e) => handleVariantChange(e.target.value)}
