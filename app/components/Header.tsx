@@ -86,6 +86,7 @@ export default function Header() {
         { label: t("beispieleMatrix"), href: "/cases#matrix" },
       ],
     },
+    { label: t("ratgeber"), href: "/ratgeber" },
   ];
 
   return (

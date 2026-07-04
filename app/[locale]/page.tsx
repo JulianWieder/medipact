@@ -5,6 +5,9 @@ import { HeroScrollPin } from "@/app/components/HeroScrollPin";
 import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
+import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
+import { EinladungsAssistent } from "@/app/components/EinladungsAssistent";
+import QuickCheck from "@/app/components/QuickCheck";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 
@@ -78,6 +81,8 @@ export default async function MedipactLanding() {
           </div>
         </section>
 
+        <ErsteHilfeBox />
+
         <section className="border-y border-neutral-100 bg-neutral-50 py-5">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-neutral-500 sm:gap-x-10">
@@ -108,6 +113,10 @@ export default async function MedipactLanding() {
         <ThemenTabs />
 
         <EmpfehlungenGrid />
+
+        <EinladungsAssistent />
+
+        <QuickCheck />
 
         <section
           id="process"

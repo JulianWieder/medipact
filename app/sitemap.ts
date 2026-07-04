@@ -80,6 +80,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/ratgeber`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/ratgeber/5-phasen-der-mediation`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/ratgeber/was-ist-mediation`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/ratgeber/was-ist-ein-mediator`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/ratgeber/mediation-kosten`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     // /cases/nachbarschaft ist nur noch ein Redirect auf /cases —
     // Redirects gehören nicht in die Sitemap.
     {

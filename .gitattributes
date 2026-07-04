@@ -1,0 +1,24 @@
+# Zeilenenden vereinheitlichen.
+#
+# Der Server ist Linux — Shell-Skripte MÜSSEN LF haben, sonst bricht bash mit
+# "$'\r': command not found" ab. Windows' autocrlf hatte hier CRLF eingefügt.
+#
+# `text=auto eol=lf` bedeutet: Git speichert alle Textdateien intern mit LF und
+# checkt sie auch unter Windows mit LF aus. Das beendet zugleich die ständige
+# "LF will be replaced by CRLF"-Churn im Arbeitsverzeichnis.
+
+* text=auto eol=lf
+
+# Explizit für Skripte (redundant, aber unmissverständlich):
+*.sh text eol=lf
+
+# Binärdateien nie anfassen:
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.db binary
