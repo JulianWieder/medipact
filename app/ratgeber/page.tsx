@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
+import ratgeberHero from "@/fotos/medi_ratgeber.jpg";
 
 export const metadata: Metadata = {
   title: "Ratgeber Mediation: Ablauf, Kosten & Wissen | medipact",
   description:
-    "Der medipact-Ratgeber erklärt Mediation verständlich: Ablauf und die 5 Phasen, die Rolle des Mediators, Kosten und wann sich ein Verfahren lohnt.",
+    "Der medipact-Ratgeber erklärt Mediation verständlich: Ablauf und Phasen, die Rolle des Mediators, Kosten und wann sich ein Verfahren lohnt.",
   alternates: { canonical: "https://medipact.de/ratgeber" },
 };
 
@@ -19,7 +21,7 @@ const collectionSchema = {
   "@type": "CollectionPage",
   name: "Ratgeber Mediation",
   description:
-    "Verständliche Artikel rund um Mediation: Ablauf, die 5 Phasen, die Rolle des Mediators und die Kosten.",
+    "Verständliche Artikel rund um Mediation: Ablauf und Phasen, die Rolle des Mediators und die Kosten.",
   url: `${BASE_URL}/ratgeber`,
   inLanguage: "de",
   hasPart: ratgeberArticles.map((a) => ({
@@ -34,28 +36,24 @@ export default function RatgeberUebersichtPage() {
     <>
       <JsonLd data={collectionSchema} />
 
-      <main className="app-shell pt-[73px]">
-        <section className="relative overflow-hidden section section-base">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-accent-100 blur-3xl opacity-60" />
-            <div className="absolute right-[-6rem] top-20 h-80 w-80 rounded-full bg-cyan-100 blur-3xl opacity-50" />
+      <main className="app-shell pt-0">
+        <ImagePinHero
+          image={ratgeberHero}
+          imageAlt="Ratgeber Mediation – Menschen im klärenden Gespräch"
+        >
+          <div className="container max-w-4xl">
+            <Breadcrumbs items={[{ label: "Ratgeber" }]} variant="dark" />
+            <p className="eyebrow mb-4 text-accent-300">Ratgeber</p>
+            <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              Mediation verständlich erklärt
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
+              Was ist Mediation, wie läuft sie ab und was kostet sie? In unserem Ratgeber
+              beantworten wir die wichtigsten Fragen rund um die außergerichtliche
+              Konfliktlösung – klar, praxisnah und ohne Fachchinesisch.
+            </p>
           </div>
-
-          <div className="container relative">
-            <div className="max-w-3xl">
-              <Breadcrumbs items={[{ label: "Ratgeber" }]} variant="light" />
-              <div className="eyebrow">Ratgeber</div>
-              <h1 className="heading-1 mt-8">
-                Mediation verständlich erklärt
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-700">
-                Was ist Mediation, wie läuft sie ab und was kostet sie? In unserem Ratgeber
-                beantworten wir die wichtigsten Fragen rund um die außergerichtliche
-                Konfliktlösung – klar, praxisnah und ohne Fachchinesisch.
-              </p>
-            </div>
-          </div>
-        </section>
+        </ImagePinHero>
 
         <section className="section section-base">
           <div className="container max-w-5xl">

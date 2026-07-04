@@ -48,29 +48,34 @@ export const ratgeberArticles: RatgeberArticle[] = [
   {
     slug: "5-phasen-der-mediation",
     category: "Mediation",
-    title: "Die 5 Phasen der Mediation – Ablauf einfach erklärt",
-    metaTitle: "Die 5 Phasen der Mediation: Ablauf einfach erklärt | medipact",
+    title: "Die Phasen der Mediation – das 7-Phasen-Modell erklärt",
+    metaTitle: "Die Phasen der Mediation: das 7-Phasen-Modell erklärt | medipact",
     description:
-      "Die 5 Phasen der Mediation im Überblick: von der Einleitung über Themensammlung und Interessenklärung bis zur Lösungssuche und Abschlussvereinbarung – verständlich erklärt.",
+      "Die Phasen der Mediation im Überblick – oft als 5 Phasen zusammengefasst, hier als ausführliches 7-Phasen-Modell: von der Vorbereitung über die Interessenklärung bis zur Umsetzung.",
     eyebrow: "Ratgeber · Mediation",
     updated: "2026-07-04",
-    readingMinutes: 7,
+    readingMinutes: 8,
     intro:
-      "Eine Mediation folgt einem klaren, immer gleichen Aufbau. Dieses Phasenmodell gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits. Hier gehen wir die fünf Phasen Schritt für Schritt durch.",
+      "Eine Mediation folgt einem klaren, aufeinander aufbauenden Ablauf. Häufig wird er als Fünf-Phasen-Modell zusammengefasst; ausführlicher betrachtet gliedert er sich in sieben Phasen – von der Vorbereitung bis zur Umsetzung. Dieses Modell gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits.",
     blocks: [
-      { type: "heading", text: "Was ist das Phasenmodell der Mediation?" },
+      { type: "heading", text: "Wie viele Phasen hat die Mediation – 5, 6 oder 7?" },
       {
         type: "paragraph",
-        text: "Mediation ist ein strukturiertes Verfahren zur Konfliktlösung, bei dem eine neutrale dritte Person – der Mediator – die Beteiligten dabei unterstützt, selbst eine Lösung zu finden. Damit dieser Prozess nicht im Kreis läuft, folgt er einem festen Ablauf. Am bekanntesten ist das Fünf-Phasen-Modell, das auf den Mediationsforscher Christoph Besemer zurückgeht. Manchmal ist auch von sechs Phasen die Rede – dann wird die letzte Phase nur in zwei Schritte aufgeteilt.",
+        text: "Mediation ist ein strukturiertes Verfahren zur Konfliktlösung, bei dem eine neutrale dritte Person – der Mediator – die Beteiligten dabei unterstützt, selbst eine Lösung zu finden. Damit dieser Prozess nicht im Kreis läuft, folgt er einem festen Ablauf. Am bekanntesten ist das Fünf-Phasen-Modell, das auf den Mediationsforscher Christoph Besemer zurückgeht. Zählt man die Vorbereitung davor und die Umsetzung danach mit und trennt die Abschlussphase in Bewertung und Vereinbarung, ergibt sich das ausführlichere Sieben-Phasen-Modell. Ob 5, 6 oder 7 – gemeint ist immer derselbe Prozess, nur unterschiedlich fein unterteilt.",
       },
       {
         type: "paragraph",
-        text: "Wichtig ist die Reihenfolge: Jede Phase baut auf der vorherigen auf. Erst wenn geklärt ist, worum es überhaupt geht und was den Parteien wirklich wichtig ist, ergibt die Suche nach Lösungen Sinn. Genau dieser Aufbau ist es, der Mediation von einem gewöhnlichen Streitgespräch unterscheidet.",
+        text: "Wichtig ist die Reihenfolge: Jede Phase baut auf der vorherigen auf. Erst wenn geklärt ist, worum es überhaupt geht und was den Parteien wirklich wichtig ist, ergibt die Suche nach Lösungen Sinn. Genau dieser Aufbau ist es, der Mediation von einem gewöhnlichen Streitgespräch unterscheidet. Im Folgenden die sieben Phasen im Detail.",
       },
-      { type: "heading", text: "Phase 1: Einleitung und Auftragsklärung" },
+      { type: "heading", text: "Phase 1: Vorbereitung und Arbeitsbündnis" },
       {
         type: "paragraph",
-        text: "In der ersten Phase geht es um den Rahmen. Der Mediator erklärt, wie das Verfahren abläuft und welche Rolle er einnimmt: Er moderiert das Gespräch, ergreift aber für keine Seite Partei und schlägt auch keine Lösung vor. Die Verantwortung für das Ergebnis bleibt bei den Beteiligten.",
+        text: "Noch vor dem eigentlichen Gespräch steht die Vorbereitung. Es wird geklärt, ob Mediation für den Konflikt überhaupt geeignet ist und ob alle Beteiligten freiwillig mitmachen. Der Mediator nimmt Kontakt zu beiden Seiten auf und schafft den organisatorischen Rahmen – erst wenn alle an Bord sind, kann die Mediation beginnen.",
+      },
+      { type: "heading", text: "Phase 2: Einleitung und Auftragsklärung" },
+      {
+        type: "paragraph",
+        text: "In der Einleitung geht es um den Rahmen. Der Mediator erklärt, wie das Verfahren abläuft und welche Rolle er einnimmt: Er moderiert das Gespräch, ergreift aber für keine Seite Partei und schlägt auch keine Lösung vor. Die Verantwortung für das Ergebnis bleibt bei den Beteiligten.",
       },
       {
         type: "paragraph",
@@ -85,7 +90,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
           "Eine Mediationsvereinbarung kann unterzeichnet werden",
         ],
       },
-      { type: "heading", text: "Phase 2: Themensammlung" },
+      { type: "heading", text: "Phase 3: Themensammlung" },
       {
         type: "paragraph",
         text: "Jetzt wird zusammengetragen, worüber überhaupt gesprochen werden soll. Beide Seiten schildern aus ihrer Sicht, welche Themen und Streitpunkte offen sind – zunächst ohne Bewertung und ohne Diskussion. Der Mediator sammelt, ordnet und fasst zusammen, damit eine gemeinsame Themenliste entsteht.",
@@ -94,7 +99,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
         type: "paragraph",
         text: "Diese Phase schafft Überblick. Oft zeigt sich hier bereits, dass hinter einem großen Streit mehrere kleinere, klar benennbare Themen stecken, die sich einzeln bearbeiten lassen.",
       },
-      { type: "heading", text: "Phase 3: Interessenklärung" },
+      { type: "heading", text: "Phase 4: Interessenklärung" },
       {
         type: "paragraph",
         text: "Diese Phase ist das Herzstück der Mediation. Hinter jeder Forderung – der sogenannten Position – steckt ein tieferliegendes Interesse: ein Bedürfnis, eine Sorge, ein Wunsch. Während Positionen sich oft gegenseitig ausschließen, lassen sich Interessen häufig miteinander vereinbaren.",
@@ -107,36 +112,41 @@ export const ratgeberArticles: RatgeberArticle[] = [
         type: "paragraph",
         text: "Der Mediator unterstützt diesen Schritt mit Fragen, spiegelt Aussagen und hilft, gegenseitiges Verständnis aufzubauen. Erst wenn die Interessen klar sind, ist die Grundlage für gute Lösungen gelegt.",
       },
-      { type: "heading", text: "Phase 4: Suche nach Lösungsoptionen" },
+      { type: "heading", text: "Phase 5: Suche nach Lösungsoptionen" },
       {
         type: "paragraph",
         text: "Nun werden Ideen entwickelt – möglichst viele und zunächst ohne Bewertung. Methoden wie Brainstorming helfen, kreativ zu werden und auch ungewöhnliche Optionen zuzulassen. Ziel ist es, Lösungen zu finden, die mehrere Interessen gleichzeitig erfüllen (Win-win), statt einen Kompromiss zu erzwingen, mit dem am Ende niemand zufrieden ist.",
       },
-      { type: "heading", text: "Phase 5: Bewertung und Abschlussvereinbarung" },
+      { type: "heading", text: "Phase 6: Bewertung und Verhandlung" },
       {
         type: "paragraph",
-        text: "In der letzten Phase werden die gesammelten Ideen bewertet: Ist die Lösung fair für alle? Ist sie praktisch umsetzbar? Die beste Option wird konkret ausgearbeitet – mit klaren Absprachen dazu, wer was bis wann tut. Das Ergebnis hält der Mediator in einer schriftlichen Abschlussvereinbarung fest, die von den Beteiligten unterzeichnet wird.",
+        text: "Die gesammelten Ideen werden nun bewertet und verhandelt: Ist die Lösung fair für alle? Ist sie praktisch umsetzbar? Was spricht dafür, was dagegen? Schritt für Schritt nähern sich die Parteien der Option, die beiden am besten gerecht wird, und arbeiten deren Details konkret aus – wer tut was bis wann.",
+      },
+      { type: "heading", text: "Phase 7: Abschlussvereinbarung und Umsetzung" },
+      {
+        type: "paragraph",
+        text: "Die beste Lösung wird in einer schriftlichen Abschlussvereinbarung festgehalten und von den Beteiligten unterzeichnet. Damit ist die Mediation abgeschlossen. In der Umsetzungsphase wird die Vereinbarung im Alltag gelebt; optional prüft ein Folgetermin, ob sie in der Praxis hält, und klärt offene Punkte.",
+      },
+      { type: "heading", text: "Fester Rahmen – individuell auf Ihren Fall angepasst" },
+      {
+        type: "paragraph",
+        text: "Grundsätzlich ist dieser Phasenablauf vorgegeben – er gibt der Mediation ihre bewährte, verlässliche Struktur. Bei medipact bleibt er aber nicht starr: Der Mediator passt den Ablauf über den Workflow individuell auf Ihren Fall an – einzelne Schritte lassen sich ergänzen, weglassen oder in der Reihenfolge verschieben, je nachdem, was Ihr Konflikt konkret braucht. So verbinden sich die Verlässlichkeit des Phasenmodells und die Flexibilität, die reale Konflikte oft verlangen.",
       },
       {
         type: "paragraph",
-        text: "Damit ist die Mediation abgeschlossen. Optional kann ein Folgetermin vereinbart werden, um zu prüfen, ob die Vereinbarung in der Praxis hält.",
-      },
-      { type: "heading", text: "Die 5 Phasen bei medipact" },
-      {
-        type: "paragraph",
-        text: "medipact bildet genau diesen bewährten Ablauf digital ab: Beide Seiten werden strukturiert durch Einleitung, Themensammlung, Interessen, Lösungsoptionen und Abschluss geführt – im eigenen Tempo, schriftlich und ohne dass sich die Gespräche im Kreis drehen. So bleibt die Struktur einer professionellen Mediation erhalten, wird aber deutlich zugänglicher.",
+        text: "So bildet medipact die bewährten Phasen der Mediation digital ab – beide Seiten werden strukturiert und im eigenen Tempo durch das Verfahren geführt, während der Mediator den Weg passgenau auf ihre Situation zuschneidet.",
       },
     ],
     faq: [
       {
         question: "Wie viele Phasen hat eine Mediation?",
         answer:
-          "Eine Mediation hat klassisch fünf Phasen: Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen und Abschlussvereinbarung. Manchmal wird die letzte Phase geteilt, dann spricht man von sechs Phasen.",
+          "Je nach Darstellung fünf, sechs oder sieben. Das ausführliche Sieben-Phasen-Modell umfasst: Vorbereitung, Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen, Bewertung und Verhandlung sowie Abschlussvereinbarung und Umsetzung.",
       },
       {
         question: "Was ist die wichtigste Phase der Mediation?",
         answer:
-          "Als Herzstück gilt die Interessenklärung (Phase 3). Hier wird herausgearbeitet, welche Bedürfnisse hinter den Forderungen stehen – die Grundlage für Lösungen, die für beide Seiten tragfähig sind.",
+          "Als Herzstück gilt die Interessenklärung. Hier wird herausgearbeitet, welche Bedürfnisse hinter den Forderungen stehen – die Grundlage für Lösungen, die für beide Seiten tragfähig sind.",
       },
       {
         question: "Muss man alle Phasen der Mediation durchlaufen?",
@@ -197,7 +207,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
       },
       {
         type: "callout",
-        text: "Den kompletten Ablauf erklären wir Schritt für Schritt im Artikel „Die 5 Phasen der Mediation“.",
+        text: "Den kompletten Ablauf erklären wir Schritt für Schritt im Artikel „Die Phasen der Mediation“.",
       },
       { type: "heading", text: "Wann ist Mediation sinnvoll?" },
       {
@@ -248,7 +258,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
       },
     ],
     related: [
-      { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
+      { label: "Die Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
       { label: "Was ist ein Mediator?", href: "/ratgeber/was-ist-ein-mediator" },
       { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     ],
@@ -344,7 +354,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
     ],
     related: [
       { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
-      { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
+      { label: "Die Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
       { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     ],
   },
@@ -429,7 +439,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
     ],
     related: [
       { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
-      { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
+      { label: "Die Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
       { label: "Preise ansehen", href: "/preise" },
     ],
   },
