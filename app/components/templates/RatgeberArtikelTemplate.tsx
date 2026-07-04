@@ -113,13 +113,22 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
                   </ul>
                 );
               }
-              // callout
+              if (block.type === "callout") {
+                return (
+                  <div
+                    key={i}
+                    className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 px-6 py-5 text-neutral-700 leading-7"
+                  >
+                    {block.text}
+                  </div>
+                );
+              }
+              // cta
               return (
-                <div
-                  key={i}
-                  className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 px-6 py-5 text-neutral-700 leading-7"
-                >
-                  {block.text}
+                <div key={i} className="mt-8">
+                  <Link href={block.href} className="btn btn-primary">
+                    {block.text}
+                  </Link>
                 </div>
               );
             })}

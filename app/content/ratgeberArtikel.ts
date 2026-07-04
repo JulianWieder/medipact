@@ -12,7 +12,8 @@ export type RatgeberBlock =
   | { type: "heading"; text: string; id?: string }
   | { type: "paragraph"; text: string }
   | { type: "list"; items: string[] }
-  | { type: "callout"; text: string };
+  | { type: "callout"; text: string }
+  | { type: "cta"; text: string; href: string };
 
 export type RatgeberFaq = {
   /** Frage so formulieren, wie Nutzer sie googeln. */
@@ -58,14 +59,14 @@ export const ratgeberArticles: RatgeberArticle[] = [
     intro:
       "Eine Mediation folgt einem klaren, aufeinander aufbauenden Ablauf. Häufig wird er als Fünf-Phasen-Modell zusammengefasst; ausführlicher betrachtet gliedert er sich in sieben Phasen – von der Vorbereitung bis zur Umsetzung. Dieses Modell gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits.",
     blocks: [
-      { type: "heading", text: "Wie viele Phasen hat die Mediation – 5, 6 oder 7?" },
+      { type: "heading", text: "Der Ablauf einer Mediation im Überblick" },
       {
         type: "paragraph",
-        text: "Mediation ist ein strukturiertes Verfahren zur Konfliktlösung, bei dem eine neutrale dritte Person – der Mediator – die Beteiligten dabei unterstützt, selbst eine Lösung zu finden. Damit dieser Prozess nicht im Kreis läuft, folgt er einem festen Ablauf. Am bekanntesten ist das Fünf-Phasen-Modell, das auf den Mediationsforscher Christoph Besemer zurückgeht. Zählt man die Vorbereitung davor und die Umsetzung danach mit und trennt die Abschlussphase in Bewertung und Vereinbarung, ergibt sich das ausführlichere Sieben-Phasen-Modell. Ob 5, 6 oder 7 – gemeint ist immer derselbe Prozess, nur unterschiedlich fein unterteilt.",
+        text: "Mediation ist ein strukturiertes Verfahren zur Konfliktlösung, bei dem eine neutrale dritte Person – der Mediator – die Beteiligten dabei unterstützt, selbst eine Lösung zu finden. Damit dieser Prozess nicht im Kreis läuft, folgt er einem festen Ablauf. Häufig wird er kurz als Fünf-Phasen-Modell (nach Christoph Besemer) beschrieben; zählt man Vorbereitung und Umsetzung mit, ergibt sich das ausführlichere Sieben-Phasen-Modell. Gemeint ist derselbe Prozess – wir gehen ihn hier in sieben Schritten durch.",
       },
       {
         type: "paragraph",
-        text: "Wichtig ist die Reihenfolge: Jede Phase baut auf der vorherigen auf. Erst wenn geklärt ist, worum es überhaupt geht und was den Parteien wirklich wichtig ist, ergibt die Suche nach Lösungen Sinn. Genau dieser Aufbau ist es, der Mediation von einem gewöhnlichen Streitgespräch unterscheidet. Im Folgenden die sieben Phasen im Detail.",
+        text: "Wichtig ist die Reihenfolge: Jede Phase baut auf der vorherigen auf. Erst wenn geklärt ist, worum es überhaupt geht und was den Parteien wirklich wichtig ist, ergibt die Suche nach Lösungen Sinn. Genau dieser Aufbau unterscheidet Mediation von einem gewöhnlichen Streitgespräch.",
       },
       { type: "heading", text: "Phase 1: Vorbereitung und Arbeitsbündnis" },
       {
@@ -127,21 +128,26 @@ export const ratgeberArticles: RatgeberArticle[] = [
         type: "paragraph",
         text: "Die beste Lösung wird in einer schriftlichen Abschlussvereinbarung festgehalten und von den Beteiligten unterzeichnet. Damit ist die Mediation abgeschlossen. In der Umsetzungsphase wird die Vereinbarung im Alltag gelebt; optional prüft ein Folgetermin, ob sie in der Praxis hält, und klärt offene Punkte.",
       },
-      { type: "heading", text: "Fester Rahmen – individuell auf Ihren Fall angepasst" },
+      { type: "heading", text: "Fester Phasen-Rahmen, individuell festgelegte Schritte" },
       {
         type: "paragraph",
-        text: "Grundsätzlich ist dieser Phasenablauf vorgegeben – er gibt der Mediation ihre bewährte, verlässliche Struktur. Bei medipact bleibt er aber nicht starr: Der Mediator passt den Ablauf über den Workflow individuell auf Ihren Fall an – einzelne Schritte lassen sich ergänzen, weglassen oder in der Reihenfolge verschieben, je nachdem, was Ihr Konflikt konkret braucht. So verbinden sich die Verlässlichkeit des Phasenmodells und die Flexibilität, die reale Konflikte oft verlangen.",
+        text: "Die sieben Phasen geben den verlässlichen Rahmen vor – diese Struktur bleibt. Was innerhalb einer Phase konkret passiert, legt bei medipact aber die Plattform individuell für Ihren Fall fest: Der Mediator bestimmt über den Workflow, welche Schritte eine Phase enthält, ergänzt sie, lässt Nicht-Zutreffendes weg oder sortiert um. So bekommt jeder Konflikt genau den Weg, den er braucht, ohne dass die bewährte Struktur verloren geht.",
+      },
+      { type: "heading", text: "Das Ziel: die gemeinsame Einigung" },
+      {
+        type: "paragraph",
+        text: "Bei allem bleibt das Ziel dasselbe – eine tragfähige Einigung, die beide Seiten mittragen. medipact macht dieses Ziel greifbar: Am Ende des Prozesses stehen fünf konkrete Lösungsvorschläge zur Auswahl, aus denen die Parteien gemeinsam wählen.",
       },
       {
-        type: "paragraph",
-        text: "So bildet medipact die bewährten Phasen der Mediation digital ab – beide Seiten werden strukturiert und im eigenen Tempo durch das Verfahren geführt, während der Mediator den Weg passgenau auf ihre Situation zuschneidet.",
+        type: "callout",
+        text: "Das Prinzip belohnt die Einigung: Wählen beide Seiten drei der fünf vorgeschlagenen Lösungen aus und einigen sich darauf, erhalten sie 15 % des Preises als Cashback zurück – ein klarer Anreiz für genau das, worauf es ankommt: gemeinsam eine Lösung zu finden.",
       },
     ],
     faq: [
       {
         question: "Wie viele Phasen hat eine Mediation?",
         answer:
-          "Je nach Darstellung fünf, sechs oder sieben. Das ausführliche Sieben-Phasen-Modell umfasst: Vorbereitung, Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen, Bewertung und Verhandlung sowie Abschlussvereinbarung und Umsetzung.",
+          "Ausführlich betrachtet sieben – kurz wird der Ablauf oft als Fünf-Phasen-Modell zusammengefasst. Die sieben Phasen sind: Vorbereitung, Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen, Bewertung und Verhandlung sowie Abschlussvereinbarung und Umsetzung.",
       },
       {
         question: "Was ist die wichtigste Phase der Mediation?",
@@ -400,19 +406,23 @@ export const ratgeberArticles: RatgeberArticle[] = [
         type: "paragraph",
         text: "In der Regel teilen sich die Konfliktparteien die Kosten – häufig je zur Hälfte, manchmal auch nach einem anderen vereinbarten Schlüssel. Weil beide Seiten vom Ergebnis profitieren, ist die hälftige Teilung der übliche Weg. Die genaue Aufteilung wird zu Beginn vereinbart.",
       },
-      { type: "heading", text: "Mediation vs. Gericht: der Kostenvergleich" },
+      { type: "heading", text: "Gericht, klassische Mediation oder medipact – der Kostenvergleich" },
       {
         type: "paragraph",
-        text: "Ein streitiges Gerichtsverfahren verursacht Gerichts- und Anwaltskosten, die sich am Streitwert orientieren und schnell hoch werden – dazu kommt oft eine Verfahrensdauer von Jahren. Mediation ist demgegenüber meist deutlich günstiger und schneller, weil sie auf Einigung statt auf Streit setzt. Hinzu kommt ein schwer bezifferbarer Vorteil: Eine einvernehmliche Lösung erhält die Beziehung, was gerade bei Familien, Nachbarn oder Geschäftspartnern viel wert ist.",
+        text: "Am teuersten ist fast immer der Weg vor Gericht. Gerichts- und Anwaltskosten richten sich nach dem Streitwert und summieren sich schnell auf mehrere Tausend Euro – bei hohen Streitwerten deutlich mehr. Dazu kommen eine Verfahrensdauer, die sich über Jahre ziehen kann, und ein öffentliches Verfahren, das die Beziehung der Beteiligten oft endgültig zerrüttet. Gerade bei Familien, Nachbarn oder Geschäftspartnern, die sich weiter begegnen, wiegt das schwer.",
       },
-      { type: "heading", text: "Was kostet Mediation bei medipact?" },
       {
         type: "paragraph",
-        text: "medipact setzt auf transparente, planbare Preise statt auf offene Stundenabrechnung. Weil das Verfahren online und strukturiert abläuft, ist es günstiger als eine klassische Vor-Ort-Mediation – ohne auf den bewährten Ablauf zu verzichten. Die aktuellen Preise finden Sie auf unserer Preisseite.",
+        text: "Eine klassische Mediation vor Ort ist günstiger als ein Prozess – aber ebenfalls mit spürbaren Kosten verbunden. Bei Abrechnung nach Stundensatz und mehreren Sitzungen kommt schnell ein vierstelliger Betrag zusammen. Sie ist fair, vertraulich und beziehungserhaltend, aber eben nicht billig.",
       },
       {
-        type: "callout",
-        text: "Aktuelle Preise und Leistungsumfang: siehe /preise. (Bitte konkrete Beträge vor Veröffentlichung mit der Preisseite abgleichen.)",
+        type: "paragraph",
+        text: "medipact liegt preislich deutlich unter beiden Wegen: Weil das Verfahren strukturiert und online abläuft, entfällt die offene Stundenabrechnung, und der Preis ist von Anfang an transparent und planbar. Ehrlich bleiben wir dabei trotzdem – kostenlos ist auch medipact nicht. Aber Sie zahlen einen klaren, überschaubaren Betrag statt der offenen Kosten eines Prozesses oder einer klassischen Vor-Ort-Mediation.",
+      },
+      {
+        type: "cta",
+        text: "Aktuelle Preise ansehen",
+        href: "/preise",
       },
     ],
     faq: [
