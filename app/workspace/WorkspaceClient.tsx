@@ -12,6 +12,7 @@ import { ParteiDetail } from "./components/ParteiDetail";
 import { Kalender } from "./components/Kalender";
 import { RechnungenListe } from "./components/RechnungenListe";
 import { WorkflowManager } from "./components/WorkflowManager";
+import { BenutzerManager } from "./components/AdminBereich";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -138,6 +139,9 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
 
   // Nutzerrolle: bestimmt ob Admin-Ansicht (alle Fälle) oder eigene Fälle
   const [isAdmin, setIsAdmin] = useState(false);
+  // isSuperAdmin ist strenger: nur echte Administratoren (role == "admin")
+  // sehen und betreten den Admin-Bereich.
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userRoleLabel, setUserRoleLabel] = useState("Mediator / Admin");
 
   // Phasenwechsel: Fall neu laden
@@ -155,6 +159,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
     fetchUserRole().then((info) => {
       if (info) {
         setIsAdmin(info.is_admin);
+        setIsSuperAdmin(!!info.is_superadmin);
         const labels: Record<string, string> = {
           admin: "Admin",
           mediator: "Mediator",
@@ -284,7 +289,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       <>
         {showLeitfaden && <LeitfadenModal onClose={() => setShowLeitfaden(false)} />}
         <div className="flex h-full bg-neutral-50 text-neutral-900">
-          <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+          <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
           <div className="flex-1 overflow-auto p-6">
             <WorkspaceDashboard
               isAdmin={isAdmin}
@@ -306,7 +311,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "einstellungen") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-lg">
             <p className="eyebrow mb-2">Workspace</p>
@@ -335,7 +340,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "rechnungen") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
         <div className="flex-1 overflow-auto">
           <RechnungenListe />
         </div>
@@ -347,9 +352,33 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "workflows") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
         <div className="flex-1 overflow-auto">
           <WorkflowManager />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Admin-Bereich (nur echte Administratoren) ────────────────────────────
+  if (section === "admin") {
+    return (
+      <div className="flex h-full bg-neutral-50 text-neutral-900">
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <div className="flex-1 overflow-auto">
+          {isSuperAdmin ? (
+            <BenutzerManager currentUserEmail={userEmail} />
+          ) : (
+            <div className="flex h-full items-center justify-center p-8">
+              <div className="text-center">
+                <div className="mb-3 text-4xl">🛡</div>
+                <p className="text-sm font-semibold text-neutral-700">Kein Zugriff</p>
+                <p className="mt-1 text-sm text-neutral-400">
+                  Der Admin-Bereich ist nur für Administratoren zugänglich.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -359,7 +388,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "kalender") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
         <div className="flex-1 overflow-auto p-6">
           <Kalender isAdmin={isAdmin} jumpToDate={kalenderDate} />
         </div>
@@ -370,7 +399,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Standard: Liste + Einzelansicht ─────────────────────────────────────
   return (
     <div className="flex h-full bg-neutral-50 text-neutral-900">
-      <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} />
+      <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
 
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">

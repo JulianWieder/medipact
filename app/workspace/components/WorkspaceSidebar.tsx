@@ -10,6 +10,8 @@ interface WorkspaceSidebarProps {
   active: WorkspaceSection;
   onSelect: (id: WorkspaceSection) => void;
   userEmail?: string;
+  /** Nur echte Administratoren sehen den Admin-Bereich. */
+  isSuperAdmin?: boolean;
 }
 
 const tooltipStyle = `
@@ -17,11 +19,15 @@ const tooltipStyle = `
   .ws-item:hover .ws-tooltip { opacity: 1; }
 `;
 
-const mainNav = WORKSPACE_NAV.filter((i) => i.id !== "einstellungen");
-const bottomNav = WORKSPACE_NAV.filter((i) => i.id === "einstellungen");
+// "admin" und "einstellungen" landen im unteren Bereich; "admin" nur für Admins.
+const mainNav = WORKSPACE_NAV.filter((i) => i.id !== "einstellungen" && i.id !== "admin");
 
-export function WorkspaceSidebar({ active, onSelect, userEmail }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ active, onSelect, userEmail, isSuperAdmin }: WorkspaceSidebarProps) {
   const [collapsed, setCollapsed] = useState(true);
+
+  const bottomNav = WORKSPACE_NAV.filter(
+    (i) => i.id === "einstellungen" || (i.id === "admin" && isSuperAdmin),
+  );
 
   return (
     <>

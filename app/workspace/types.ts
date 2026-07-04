@@ -1,6 +1,6 @@
 // ── Workspace Types ───────────────────────────────────────────────────────
 
-export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "workflows" | "einstellungen";
+export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "workflows" | "admin" | "einstellungen";
 
 export interface WorkspaceNavItem {
   id: WorkspaceSection;
@@ -15,6 +15,8 @@ export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   { id: "kalender", label: "Kalender", icon: "📅" },
   { id: "rechnungen", label: "Rechnungen", icon: "🧾" },
   { id: "workflows", label: "Workflow Manager", icon: "🧭" },
+  // Nur für echte Administratoren sichtbar (siehe WorkspaceSidebar / is_superadmin).
+  { id: "admin", label: "Administration", icon: "🛡" },
   { id: "einstellungen", label: "Einstellungen", icon: "⚙" },
 ];
 
@@ -291,6 +293,8 @@ export const INVOICE_STATUS_CONFIG: Record<string, { label: string; dot: string;
 export interface UserRoleInfo {
   role: string;
   is_admin: boolean;
+  /** Strenger als is_admin: nur echte Administratoren (role == "admin"). */
+  is_superadmin?: boolean;
   email: string;
   name: string;
 }
@@ -314,7 +318,6 @@ export const PHASES: { id: string; label: string; short: string }[] = [
 // Default-Schritte spiegeln die in FallDetail.tsx (EINLEITUNG_STEPS) aktuell
 // live getrackten Schritte wider; Änderungen hier wirken sich NICHT auf das
 // dortige Live-Tracking aus.
-
 export interface PhaseStep {
   key: string;
   label: string;

@@ -286,6 +286,10 @@ def get_my_role(
     return {
         "role": user.role,
         "is_admin": user.role in ("mediator", "admin"),
+        # is_superadmin ist bewusst strenger als is_admin: nur echte
+        # Administratoren (role == "admin") erhalten Zugriff auf den
+        # Admin-Bereich / Benutzermanager. Mediatoren nicht.
+        "is_superadmin": user.role == "admin",
         "email": user.email,
         "name": user.name,
     }
@@ -325,7 +329,6 @@ def get_all_users(
     current = db.query(User).filter(User.email == current_user_email).first()
     if not current or current.role not in ("mediator", "admin"):
         raise HTTPException(status_code=403, detail="Nur fuer Mediatoren und Admins")
-
     users = db.query(User).order_by(User.name).all()
     return [
         {
@@ -337,3 +340,86 @@ def get_all_users(
         }
         for u in users
     ]
+
+
+# ── Benutzermanager (nur echte Admins, role == "admin") ────────────────────
+#
+# Getrennt von der Mediator-Berechtigung: Mediatoren dürfen Fälle/Workflows
+# verwalten, aber NICHT Rollen anderer Nutzer ändern oder Nutzer löschen.
+
+ALLOWED_ROLES = ("party", "mediator", "admin")
+
+
+class UpdateUserRoleRequest(BaseModel):
+    role: str
+
+    @field_validator("role")
+    @classmethod
+    def role_valid(cls, v: str) -> str:
+        if v not in ALLOWED_ROLES:
+            raise ValueError(f"Ungültige Rolle. Erlaubt: {', '.join(ALLOWED_ROLES)}")
+        return v
+
+
+def _require_admin(db: Session, current_user_email: str) -> User:
+    """Stellt sicher, dass der aufrufende Nutzer ein echter Admin ist."""
+    current = db.query(User).filter(User.email == current_user_email).first()
+    if not current or current.role != "admin":
+        raise HTTPException(status_code=403, detail="Nur für Administratoren")
+    return current
+
+
+@router.patch("/users/{user_id}/role")
+def update_user_role(
+    user_id: int,
+    payload: UpdateUserRoleRequest,
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Ändert die Rolle eines Nutzers. Nur für Administratoren."""
+    admin = _require_admin(db, current_user_email)
+
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Nutzer nicht gefunden")
+
+    # Ein Admin darf sich nicht selbst herabstufen (sonst kann er sich
+    # aussperren) – bewusst blockiert.
+    if target.id == admin.id and payload.role != "admin":
+        raise HTTPException(
+            status_code=400,
+            detail="Du kannst deine eigene Admin-Rolle nicht entfernen.",
+        )
+
+    target.role = payload.role
+    db.commit()
+    return {
+        "id": target.id,
+        "name": target.name,
+        "email": target.email,
+        "role": target.role,
+        "is_verified": target.is_verified,
+    }
+
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Löscht einen Nutzer. Nur für Administratoren."""
+    admin = _require_admin(db, current_user_email)
+
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Nutzer nicht gefunden")
+
+    if target.id == admin.id:
+        raise HTTPException(
+            status_code=400, detail="Du kannst deinen eigenen Account nicht löschen."
+        )
+
+    db.delete(target)
+    db.commit()
+    return {"deleted": True, "id": user_id}

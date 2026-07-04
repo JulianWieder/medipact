@@ -196,6 +196,29 @@ export async function fetchAllUsers(): Promise<SystemUser[]> {
   return res.json();
 }
 
+/** Ändert die Rolle eines Nutzers. Nur für echte Administratoren (Backend prüft). */
+export async function updateUserRole(userId: number, role: string): Promise<SystemUser> {
+  const res = await fetch(`/api/admin/users/${userId}/role`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Rolle konnte nicht geändert werden");
+  }
+  return res.json();
+}
+
+/** Löscht einen Nutzer. Nur für echte Administratoren (Backend prüft). */
+export async function deleteUser(userId: number): Promise<void> {
+  const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Nutzer konnte nicht gelöscht werden");
+  }
+}
+
 // ── Kalender / Termine ────────────────────────────────────────────────────
 
 /** Alle Terminslots über alle Mediationen des eingeloggten Nutzers. */
