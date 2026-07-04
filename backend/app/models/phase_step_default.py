@@ -48,13 +48,29 @@ class PhaseStepDefault(Base):
     reflection_mode = Column(String, nullable=True)
     # Komma-separierte Liste der Inhaltsarten der Karte, z.B. "video,text,frage".
     # Gültige Werte siehe Frontend CONTENT_TYPES (app/workspace/types.ts):
-    # text, video, frage, videokonferenz, feedback, termin, vertrag.
+    # text, video, frage, videokonferenz, feedback, termin, vertrag, individuell.
+    # "individuell" markiert einen Schritt, dessen tatsächlicher Inhalt NICHT
+    # hier global gepflegt wird, sondern pro Fall (siehe MediationStepContent) –
+    # der Workflow Manager legt dann nur Struktur/Platzhalter fest.
     # NULL = noch nicht klassifiziert (Bestandsdaten). Mehrere Arten pro Schritt
     # sind der Normalfall (heutige Konstellation: Video + Texteingabe + Reflexion).
     content_types = Column(String, nullable=True)
     # Video-URL, die der Mediator hinterlegt (nur relevant wenn "video" in
     # content_types; Platzhalter-Feld, solange Videos extern gehostet werden).
     video_url = Column(String, nullable=True)
+    # Meeting-/Call-Link (nur relevant wenn "videokonferenz" in content_types),
+    # z.B. ein fester Videoraum für diesen Schritt.
+    meeting_url = Column(String, nullable=True)
+    # Konkreter Frage-/Quiz-Inhalt (nur relevant wenn "frage" in content_types).
+    question = Column(Text, nullable=True)
+    # Vorlagentext für einen Vertrags-/Dokument-Schritt (nur relevant wenn
+    # "vertrag" in content_types).
+    contract_template = Column(Text, nullable=True)
+    # Nur relevant für Ergebnis-Anzeige-Schritte (content_type "ergebnis"):
+    # Phase, deren (freigegebene) Ergebnisse dieser Schritt allen Teilnehmern
+    # anzeigen soll (globale Grundregel; konkrete Freigabe erfolgt pro Fall).
+    # NULL = keine feste Quelle (Mediator kuratiert frei pro Fall).
+    result_source_phase = Column(String, nullable=True)
     # Nur relevant, wenn "feedback" in content_types: welcher Fragebogen-Anlass
     # angezeigt wird. Gültige Werte: "after_videocall" | "before_contract"
     # (siehe FEEDBACK_QUESTIONS im Teilnehmer-Flow). NULL = Standard

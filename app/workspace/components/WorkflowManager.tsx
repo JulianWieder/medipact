@@ -19,7 +19,7 @@
 //
 // Weiterhin bewusst OHNE Verzweigungen/Gateways — eine lineare Kette pro Phase.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ReactFlow,
   Background,
@@ -38,24 +38,17 @@ import {
   MEDIATION_TYPES,
   CONTENT_TYPES,
   CONTENT_TYPE_BY_ID,
-  type MediationCase,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
 } from "../types";
-
-// Ob für die gewählten Inhaltsarten eine Video-URL sinnvoll ist.
-function needsVideoUrl(types: string[]): boolean {
-  return types.includes("video") || types.includes("videokonferenz");
-}
 
 // Auswahl des Fragebogen-Anlasses, nur relevant wenn "feedback" gewählt ist.
 const FEEDBACK_OCCASIONS: { id: "after_videocall" | "before_contract"; label: string }[] = [
   { id: "after_videocall", label: "Nach dem Gespräch" },
   { id: "before_contract", label: "Vor dem Vertrag" },
 ];
-import { SectionHeader, WCard, EmptyState, StatusBadge, cn } from "../ui";
+import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import {
-  fetchAllMediations,
   fetchVariants,
   createVariant,
   fetchPhaseStepDefaults,
@@ -63,7 +56,6 @@ import {
   updatePhaseStepDefault,
   deletePhaseStepDefault,
   reorderPhaseStepDefaults,
-  setMediationVariant,
 } from "../api";
 
 // ── Layout-Konstanten für die Kette (rein visuell) ───────────────────────────
@@ -118,7 +110,13 @@ type StepNodeData = {
   label: string;
   stepKey: string;
   contentTypes: string[];
+  description: string;
+  placeholder: string;
+  question: string;
+  contractTemplate: string;
+  resultSourcePhase: string | null;
   videoUrl: string | null;
+  meetingUrl: string | null;
   feedbackOccasion: "after_videocall" | "before_contract" | null;
   locked: boolean;
   isEditing: boolean;
@@ -134,11 +132,34 @@ type StepNodeData = {
   onToggleContentEdit: () => void;
   onToggleType: (typeId: string) => void;
   onChangeVideoUrl: (url: string) => void;
+  onChangeMeetingUrl: (url: string) => void;
+  onChangeDescription: (value: string) => void;
+  onChangePlaceholder: (value: string) => void;
+  onChangeQuestion: (value: string) => void;
+  onChangeContractTemplate: (value: string) => void;
+  onChangeResultSourcePhase: (phase: string) => void;
   onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") => void;
 };
 
-// Inline-Editor: Toggle-Chips für alle Inhaltsarten + optional Video-URL.
+// Kleines Label über einem Inhaltsfeld.
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="mb-1 mt-2 text-[9px] font-semibold uppercase tracking-wide text-neutral-400">
+      {children}
+    </p>
+  );
+}
+
+const FIELD_INPUT_CLASS =
+  "w-full rounded-md border border-neutral-200 px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400";
+
+// Inline-Editor: Toggle-Chips für alle Inhaltsarten + die je nach Auswahl
+// passenden Inhaltsfelder (Anleitungstext, Platzhalter, Frage, Vertragsvorlage,
+// Video-/Meeting-URL, Feedback-Anlass). Bei "individuell" wird der Inhalt nicht
+// hier, sondern pro Fall gepflegt – dann erscheint nur ein Hinweis.
 function ContentTypeEditor({ step }: { step: StepNodeData }) {
+  const isIndividual = step.contentTypes.includes("individuell");
+  const has = (id: string) => step.contentTypes.includes(id);
   return (
     <div className="mt-2 rounded-lg border border-neutral-100 bg-neutral-50 p-2">
       <div className="flex flex-wrap gap-1">
@@ -159,31 +180,128 @@ function ContentTypeEditor({ step }: { step: StepNodeData }) {
           );
         })}
       </div>
-      {needsVideoUrl(step.contentTypes) && (
-        <input
-          value={step.videoUrl ?? ""}
-          onChange={(e) => step.onChangeVideoUrl(e.target.value)}
-          placeholder="Video-URL (vom Mediator) …"
-          className="mt-1.5 w-full rounded-md border border-neutral-200 px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
-        />
-      )}
-      {step.contentTypes.includes("feedback") && (
-        <div className="mt-1.5 flex items-center gap-1">
-          <span className="text-[9px] font-semibold text-neutral-400">Fragebogen:</span>
-          <select
-            value={step.feedbackOccasion ?? "after_videocall"}
-            onChange={(e) =>
-              step.onChangeFeedbackOccasion(e.target.value as "after_videocall" | "before_contract")
-            }
-            className="flex-1 rounded-md border border-neutral-200 px-1.5 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
-          >
-            {FEEDBACK_OCCASIONS.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+
+      {isIndividual ? (
+        <div className="mt-2 rounded-md border border-teal-200 bg-teal-50 px-2 py-1.5 text-[10px] leading-relaxed text-teal-700">
+          <span className="font-semibold">✦ Individueller Schritt.</span> Der Inhalt
+          (eigenes Video, Meeting-Link, Text, Frage, Feedback) wird pro Fall in der
+          Fallansicht unter „Individuelle Inhalte" gepflegt. Hier legst du nur Titel
+          und Struktur fest.
         </div>
+      ) : (
+        <>
+          <FieldLabel>Anleitungstext (für Teilnehmer)</FieldLabel>
+          <textarea
+            value={step.description}
+            onChange={(e) => step.onChangeDescription(e.target.value)}
+            placeholder="Was soll der Teilnehmer in diesem Schritt tun / lesen?"
+            rows={2}
+            className={FIELD_INPUT_CLASS}
+          />
+
+          {has("text") && (
+            <>
+              <FieldLabel>Platzhalter im Eingabefeld</FieldLabel>
+              <input
+                value={step.placeholder}
+                onChange={(e) => step.onChangePlaceholder(e.target.value)}
+                placeholder="z.B. „Beschreibe hier deine Sicht …"
+                className={FIELD_INPUT_CLASS}
+              />
+            </>
+          )}
+
+          {has("frage") && (
+            <>
+              <FieldLabel>Frage / Quiz-Inhalt</FieldLabel>
+              <textarea
+                value={step.question}
+                onChange={(e) => step.onChangeQuestion(e.target.value)}
+                placeholder="Konkrete Frage(n) für diesen Schritt …"
+                rows={2}
+                className={FIELD_INPUT_CLASS}
+              />
+            </>
+          )}
+
+          {has("vertrag") && (
+            <>
+              <FieldLabel>Vertrags-/Dokumentvorlage</FieldLabel>
+              <textarea
+                value={step.contractTemplate}
+                onChange={(e) => step.onChangeContractTemplate(e.target.value)}
+                placeholder="Vorlagentext für den Vertrag / das Dokument …"
+                rows={3}
+                className={FIELD_INPUT_CLASS}
+              />
+            </>
+          )}
+
+          {has("ergebnis") && (
+            <div className="mt-2 rounded-md border border-cyan-200 bg-cyan-50 p-2">
+              <FieldLabel>Ergebnis-Quelle (Phase)</FieldLabel>
+              <select
+                value={step.resultSourcePhase ?? ""}
+                onChange={(e) => step.onChangeResultSourcePhase(e.target.value)}
+                className={FIELD_INPUT_CLASS}
+              >
+                <option value="">— frei (Mediator kuratiert pro Fall) —</option>
+                {PHASES.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-[9px] leading-relaxed text-cyan-700">
+                Zeigt allen Teilnehmern (Teile der) Ergebnisse aus dieser Phase –{" "}
+                <span className="font-semibold">erst nach Freigabe des Mediators pro Fall</span>.
+              </p>
+            </div>
+          )}
+
+          {has("video") && (
+            <>
+              <FieldLabel>Video-URL</FieldLabel>
+              <input
+                value={step.videoUrl ?? ""}
+                onChange={(e) => step.onChangeVideoUrl(e.target.value)}
+                placeholder="Video-URL (vom Mediator) …"
+                className={FIELD_INPUT_CLASS}
+              />
+            </>
+          )}
+
+          {has("videokonferenz") && (
+            <>
+              <FieldLabel>Meeting-/Call-Link</FieldLabel>
+              <input
+                value={step.meetingUrl ?? ""}
+                onChange={(e) => step.onChangeMeetingUrl(e.target.value)}
+                placeholder="Link zum Videoraum (z.B. Jitsi/Zoom) …"
+                className={FIELD_INPUT_CLASS}
+              />
+            </>
+          )}
+
+          {has("feedback") && (
+            <div className="mt-2 flex items-center gap-1">
+              <span className="text-[9px] font-semibold text-neutral-400">Fragebogen:</span>
+              <select
+                value={step.feedbackOccasion ?? "after_videocall"}
+                onChange={(e) =>
+                  step.onChangeFeedbackOccasion(e.target.value as "after_videocall" | "before_contract")
+                }
+                className="flex-1 rounded-md border border-neutral-200 px-1.5 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
+              >
+                {FEEDBACK_OCCASIONS.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -298,7 +416,6 @@ export function WorkflowManager() {
   const [variants, setVariants] = useState<MediationVariantDto[]>([]);
   const [baseSteps, setBaseSteps] = useState<PhaseStepDefaultDto[]>([]);
   const [variantSteps, setVariantSteps] = useState<PhaseStepDefaultDto[]>([]);
-  const [cases, setCases] = useState<MediationCase[]>([]);
 
   const [loadingSteps, setLoadingSteps] = useState(true);
   const [error, setError] = useState("");
@@ -309,25 +426,16 @@ export function WorkflowManager() {
   const [editingLabel, setEditingLabel] = useState("");
   // Welche Karte hat den Inhaltsart-Editor gerade offen.
   const [contentEditId, setContentEditId] = useState<number | null>(null);
-  const [savingCaseId, setSavingCaseId] = useState<number | null>(null);
 
-  // ── Laden: Varianten + Fälle je Mediationsart ────────────────────────────
+  // ── Laden: Varianten je Mediationsart ────────────────────────────────────
+  // (Die Fall↔Variante-Zuordnung wird bewusst NUR im Fall selbst gemacht,
+  //  siehe FallDetail – daher hier keine Fallliste mehr.)
   useEffect(() => {
     setActiveVariant(null);
     fetchVariants(mediationType)
       .then((list) => setVariants(list.filter((v) => v.enabled)))
       .catch(() => setVariants([]));
   }, [mediationType]);
-
-  const reloadCases = useCallback(() => {
-    fetchAllMediations()
-      .then(setCases)
-      .catch(() => setCases([]));
-  }, []);
-
-  useEffect(() => {
-    reloadCases();
-  }, [reloadCases]);
 
   // ── Laden: Schritte je (Art, Phase, Scope) ───────────────────────────────
   useEffect(() => {
@@ -465,16 +573,26 @@ export function WorkflowManager() {
     [setEditableSteps],
   );
 
-  // Video-URL: lokal sofort, Persistenz gebündelt (debounced) beim Tippen.
-  const videoUrlTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
-  const changeVideoUrl = useCallback(
-    (id: number, url: string) => {
-      setEditableSteps((prev) => prev.map((s) => (s.id === id ? { ...s, video_url: url } : s)));
-      const timers = videoUrlTimers.current;
-      if (timers[id]) clearTimeout(timers[id]);
-      timers[id] = setTimeout(() => {
-        updatePhaseStepDefault(id, { video_url: url.trim() || null }).catch(() =>
-          setError("Video-URL konnte nicht gespeichert werden."),
+  // Textfelder (Anleitung, Platzhalter, Frage, Vertragsvorlage, Video-/Meeting-URL):
+  // lokal sofort, Persistenz gebündelt (debounced) beim Tippen. Ein Timer pro
+  // (Schritt-ID, Feld), damit parallele Felder sich nicht gegenseitig verwerfen.
+  const textFieldTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const changeTextField = useCallback(
+    (
+      id: number,
+      field: "description" | "placeholder" | "question" | "contract_template" | "video_url" | "meeting_url",
+      value: string,
+    ) => {
+      setEditableSteps((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+      const timers = textFieldTimers.current;
+      const key = `${id}:${field}`;
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(() => {
+        // Leerstring bei URL-Feldern zu null normalisieren; Textfelder als "" halten.
+        const isUrl = field === "video_url" || field === "meeting_url";
+        const payloadValue = isUrl ? value.trim() || null : value;
+        updatePhaseStepDefault(id, { [field]: payloadValue }).catch(() =>
+          setError("Inhalt konnte nicht gespeichert werden."),
         );
       }, 600);
     },
@@ -488,6 +606,19 @@ export function WorkflowManager() {
       );
       updatePhaseStepDefault(id, { feedback_occasion: occasion }).catch(() =>
         setError("Feedback-Anlass konnte nicht gespeichert werden."),
+      );
+    },
+    [setEditableSteps],
+  );
+
+  const changeResultSourcePhase = useCallback(
+    (id: number, phase: string) => {
+      const value = phase || null;
+      setEditableSteps((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, result_source_phase: value } : s)),
+      );
+      updatePhaseStepDefault(id, { result_source_phase: value }).catch(() =>
+        setError("Ergebnis-Quelle konnte nicht gespeichert werden."),
       );
     },
     [setEditableSteps],
@@ -543,27 +674,6 @@ export function WorkflowManager() {
     }
   }
 
-  // ── Fall-Zuordnung ────────────────────────────────────────────────────────
-  async function assignCase(caseId: number, key: string) {
-    const value = key === "" ? null : key;
-    setSavingCaseId(caseId);
-    try {
-      await setMediationVariant(caseId, value);
-      setCases((prev) =>
-        prev.map((c) => (c.id === caseId ? { ...c, variant_key: value } : c)),
-      );
-    } catch {
-      setError("Fall-Zuordnung konnte nicht gespeichert werden.");
-    } finally {
-      setSavingCaseId(null);
-    }
-  }
-
-  const typeCases = useMemo(
-    () => cases.filter((c) => c.mediation_type === mediationType),
-    [cases, mediationType],
-  );
-
   // ── Nodes/Edges aus der Kette ableiten ────────────────────────────────────
   const nodes: Node[] = useMemo(
     () =>
@@ -578,7 +688,13 @@ export function WorkflowManager() {
             label: step.title,
             stepKey: step.step_key,
             contentTypes: step.content_types ?? [],
+            description: step.description ?? "",
+            placeholder: step.placeholder ?? "",
+            question: step.question ?? "",
+            contractTemplate: step.contract_template ?? "",
+            resultSourcePhase: step.result_source_phase,
             videoUrl: step.video_url,
+            meetingUrl: step.meeting_url,
             feedbackOccasion: step.feedback_occasion,
             locked,
             isEditing: editingId === step.id,
@@ -594,14 +710,22 @@ export function WorkflowManager() {
             onToggleContentEdit: () =>
               setContentEditId((cur) => (cur === step.id ? null : step.id)),
             onToggleType: (typeId: string) => toggleContentType(step.id, typeId),
-            onChangeVideoUrl: (url: string) => changeVideoUrl(step.id, url),
+            onChangeVideoUrl: (url: string) => changeTextField(step.id, "video_url", url),
+            onChangeMeetingUrl: (url: string) => changeTextField(step.id, "meeting_url", url),
+            onChangeDescription: (value: string) => changeTextField(step.id, "description", value),
+            onChangePlaceholder: (value: string) => changeTextField(step.id, "placeholder", value),
+            onChangeQuestion: (value: string) => changeTextField(step.id, "question", value),
+            onChangeContractTemplate: (value: string) =>
+              changeTextField(step.id, "contract_template", value),
+            onChangeResultSourcePhase: (phase: string) =>
+              changeResultSourcePhase(step.id, phase),
             onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") =>
               changeFeedbackOccasion(step.id, occasion),
           } satisfies StepNodeData,
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chain, lockedSteps.length, editingId, editingLabel, contentEditId, moveStep, toggleContentType, changeVideoUrl, changeFeedbackOccasion],
+    [chain, lockedSteps.length, editingId, editingLabel, contentEditId, moveStep, toggleContentType, changeTextField, changeResultSourcePhase, changeFeedbackOccasion],
   );
 
   const edges: Edge[] = useMemo(
@@ -814,64 +938,12 @@ export function WorkflowManager() {
         </WCard>
       </div>
 
-      {/* ── Fall-Zuordnung ── */}
-      <div className="mt-8">
-        <SectionHeader
-          label="Zuordnung"
-          title={`Fälle · ${typeLabel}`}
-          action={
-            <button
-              onClick={reloadCases}
-              className="text-xs font-medium text-neutral-400 hover:text-neutral-600 transition"
-            >
-              Aktualisieren
-            </button>
-          }
-        />
-        <WCard className="overflow-hidden p-0">
-          {typeCases.length === 0 ? (
-            <div className="p-5">
-              <EmptyState icon="⚖" text="Keine Fälle dieser Mediationsart vorhanden." />
-            </div>
-          ) : (
-            <ul className="divide-y divide-neutral-100">
-              {typeCases.map((c) => (
-                <li key={c.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-neutral-800">
-                      #{c.id} · {c.title}
-                    </p>
-                    <p className="text-xs text-neutral-400">
-                      {c.phase ? `Phase: ${c.phase}` : "Nicht gestartet"}
-                    </p>
-                  </div>
-                  <StatusBadge status={c.status} />
-                  <select
-                    value={c.variant_key ?? ""}
-                    onChange={(e) => assignCase(c.id, e.target.value)}
-                    disabled={savingCaseId === c.id}
-                    className="rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-50"
-                    title="Variante für diesen Fall"
-                  >
-                    <option value="">Basis-Workflow</option>
-                    {variants.map((v) => (
-                      <option key={v.key} value={v.key}>
-                        {v.label}
-                      </option>
-                    ))}
-                  </select>
-                </li>
-              ))}
-            </ul>
-          )}
-        </WCard>
-        <p className="mt-3 max-w-2xl text-xs text-neutral-400">
-          Die Variante bestimmt, welche Zusatz-Schritte ein Fall durchläuft (Basis + Variante).
-          Sie ist jederzeit umstellbar — bereits erledigte Schritte bleiben erhalten. Für
-          fall-spezifische Anpassungen (Schritte überspringen, Einzelschritte ergänzen) nutze die
-          Workflow-Regeln im jeweiligen Fall.
-        </p>
-      </div>
+      <p className="mt-6 max-w-2xl text-xs text-neutral-400">
+        Die Variante bestimmt, welche Zusatz-Schritte ein Fall durchläuft (Basis + Variante).
+        Die Zuordnung eines Falls zu einer Variante machst du direkt im jeweiligen Fall
+        (Fallansicht → Variante). Fall-spezifische Anpassungen (Schritte überspringen,
+        individuelle Inhalte) ebenfalls im Fall.
+      </p>
     </div>
   );
 }

@@ -16,6 +16,7 @@ from app.models.note_reaction import NoteReaction
 from app.models.mediation_participant import MediationParticipant
 from app.models.mediation_step_rule import MediationStepRule
 from app.models.mediation_custom_step import MediationCustomStep
+from app.models.mediation_step_content import MediationStepContent
 from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
@@ -848,6 +849,16 @@ def get_phase_steps(
         .order_by(MediationCustomStep.position, MediationCustomStep.id)
         .all()
     )
+    # Fallbezogener Inhalt für "individuelle" Schritte (step_key -> Eintrag).
+    step_contents = {
+        sc.step_key: sc
+        for sc in db.query(MediationStepContent)
+        .filter(
+            MediationStepContent.mediation_id == mediation_id,
+            MediationStepContent.phase == phase,
+        )
+        .all()
+    }
     rules = {
         r.step: r
         for r in db.query(MediationStepRule)
@@ -863,16 +874,38 @@ def get_phase_steps(
         rule = rules.get(d.step_key)
         if rule and rule.skip:
             continue
+        types = d.content_types.split(",") if d.content_types else None
+        is_individual = bool(types) and "individuell" in types
+        is_result = bool(types) and "ergebnis" in types
+        # Bei individuellen Schritten überschreibt der fallbezogene Inhalt die
+        # (leeren) globalen Vorgaben; sonst gelten die globalen Werte.
+        sc = step_contents.get(d.step_key)
+        # Ergebnis-Schritte: der pro Fall kuratierte Text wird NUR ausgeliefert,
+        # wenn der Mediator ihn freigegeben hat (released) – sonst greift die
+        # statische Beschreibung (Platzhalter/Einleitung), nie unfreigegebener Text.
+        result_released = bool(sc and sc.released)
+        if is_result:
+            description = sc.body_text if (result_released and sc and sc.body_text) else d.description
+        else:
+            description = sc.body_text if (sc and sc.body_text is not None) else d.description
         steps.append(
             {
                 "key": d.step_key,
                 "title": d.title,
-                "description": d.description,
+                "description": description,
                 "placeholder": d.placeholder,
                 "reflection_mode": d.reflection_mode,
-                "content_types": d.content_types.split(",") if d.content_types else None,
-                "video_url": d.video_url,
-                "feedback_occasion": d.feedback_occasion,
+                "content_types": types,
+                "video_url": (sc.video_url if sc and sc.video_url is not None else d.video_url),
+                "meeting_url": (sc.meeting_url if sc and sc.meeting_url is not None else d.meeting_url),
+                "question": (sc.question if sc and sc.question is not None else d.question),
+                "contract_template": d.contract_template,
+                "result_source_phase": d.result_source_phase,
+                "result_released": result_released,
+                "feedback_occasion": (
+                    sc.feedback_occasion if sc and sc.feedback_occasion is not None else d.feedback_occasion
+                ),
+                "individual": is_individual,
                 "custom": False,
             }
         )
@@ -880,21 +913,108 @@ def get_phase_steps(
         rule = rules.get(c.step_key)
         if rule and rule.skip:
             continue
+        sc = step_contents.get(c.step_key)
         steps.append(
             {
                 "key": c.step_key,
                 "title": c.title,
-                "description": c.description,
+                "description": (sc.body_text if sc and sc.body_text is not None else c.description),
                 "placeholder": "",
                 "reflection_mode": None,
                 "content_types": None,
-                "video_url": None,
-                "feedback_occasion": None,
+                "video_url": sc.video_url if sc else None,
+                "meeting_url": sc.meeting_url if sc else None,
+                "question": sc.question if sc else None,
+                "contract_template": None,
+                "result_source_phase": None,
+                "result_released": bool(sc and sc.released),
+                "feedback_occasion": sc.feedback_occasion if sc else None,
+                "individual": True,
                 "custom": True,
             }
         )
 
     return {"phase": phase, "mediation_type": mediation.mediation_type, "steps": steps}
+
+
+class SummarizeResultsRequest(BaseModel):
+    # Phase, deren eingereichte Eingaben zusammengefasst werden sollen.
+    # None = alle eingereichten Eingaben des Falls.
+    source_phase: Optional[str] = None
+
+
+@router.post("/{mediation_id}/summarize-results")
+def summarize_results(
+    mediation_id: int,
+    payload: SummarizeResultsRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """
+    Erzeugt per KI eine neutrale, teilnehmer-taugliche Zusammenfassung der
+    eingereichten Eingaben einer Quell-Phase. Nur Mediator/Owner/Admin.
+
+    Das Ergebnis ist ein VORSCHLAG: Der Mediator kuratiert den Text und gibt ihn
+    anschließend im Ergebnis-Schritt explizit frei (MediationStepContent.released),
+    erst dann sehen ihn die Teilnehmer.
+    """
+    import json as _json
+    import anthropic
+    from app.config import settings
+
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
+
+    participant = _require_participant(mediation_id, current_user, db)
+    if participant.role not in ("mediator", "owner", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren")
+
+    q = (
+        db.query(MediationNote, MediationParticipant, User)
+        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(
+            MediationNote.mediation_id == mediation_id,
+            MediationNote.submitted == True,  # noqa: E712
+        )
+    )
+    if payload.source_phase:
+        q = q.filter(MediationNote.phase == payload.source_phase)
+    rows = q.all()
+
+    inputs_text = ""
+    for note, _part, user in rows:
+        content = note.content
+        try:
+            parsed = _json.loads(content)
+            if isinstance(parsed, list):
+                content = " | ".join(str(x) for x in parsed if x)
+        except Exception:
+            pass
+        inputs_text += f"\n[{user.name} / {note.phase}]: {content}"
+
+    if not inputs_text.strip():
+        return {"summary": ""}
+
+    prompt = f"""Du bist ein neutraler Mediator. Fasse die folgenden Eingaben der
+Teilnehmer so zusammen, dass der Text ALLEN Teilnehmern gemeinsam angezeigt
+werden kann. Schreibe auf Deutsch, sachlich, respektvoll und ausgewogen, in
+kurzen Absätzen. Benenne gemeinsame Themen sowie unterschiedliche Sichtweisen,
+ohne Partei zu ergreifen und ohne Vorwürfe zuzuspitzen.
+
+EINGABEN:
+{inputs_text}
+
+Antworte NUR mit dem Zusammenfassungstext, ohne Vorrede und ohne Markdown."""
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=800,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    summary = message.content[0].text.strip()
+    return {"summary": summary}
 
 
 @router.post("/{mediation_id}/notes")

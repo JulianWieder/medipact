@@ -58,6 +58,9 @@ type PhaseStepFromAPI = {
   description: string;
   placeholder: string;
   reflection_mode: "simple" | "interactive" | null;
+  content_types?: string[] | null;
+  // Ergebnis-Schritte: true, sobald der Mediator den Inhalt freigegeben hat.
+  result_released?: boolean | null;
   custom: boolean;
 };
 
@@ -645,6 +648,11 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   // view[stepKey] = "input" | "waiting" | "reflection"
   const [stepView, setStepView] = useState<Record<string, StepView>>({});
 
+  // Ergebnis-Anzeige-Schritte (content_type "ergebnis"): read-only, zeigen den
+  // vom Mediator freigegebenen Text; keine Eingabe, nur „gesehen"-Bestätigung.
+  const [resultStepKeys, setResultStepKeys] = useState<Set<string>>(new Set());
+  const [resultReleasedByKey, setResultReleasedByKey] = useState<Record<string, boolean>>({});
+
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [advancing, setAdvancing] = useState(false);
@@ -681,6 +689,18 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           : [];
         const allDetails = phaseStepsFromAPI.map(toStepDetailFromAPI);
         setStepDetails(allDetails);
+
+        // Ergebnis-Anzeige-Schritte erfassen (read-only + Freigabe-Status).
+        const rSet = new Set<string>();
+        const rReleased: Record<string, boolean> = {};
+        for (const s of phaseStepsFromAPI) {
+          if ((s.content_types ?? []).includes("ergebnis")) {
+            rSet.add(s.key);
+            rReleased[s.key] = Boolean(s.result_released);
+          }
+        }
+        setResultStepKeys(rSet);
+        setResultReleasedByKey(rReleased);
 
         // Alle Notizen + step-status für alle Schritte laden
         const results = await Promise.all(
@@ -880,6 +900,16 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const myItems = currentParticipant ? (items[currentStep?.key ?? ""]?.[currentParticipant.id] ?? []) : [];
   const isLastStep = activeStepIndex === allStepDetails.length - 1;
   const allStepsReflected = allStepDetails.every((s) => stepView[s.key] === "reflection");
+
+  // Ergebnis-Schritt (read-only): freigegebener Text + „gesehen"-Bestätigung.
+  const isResultStep = currentStep ? resultStepKeys.has(currentStep.key) : false;
+  const resultReleased = currentStep ? (resultReleasedByKey[currentStep.key] ?? false) : false;
+  const myResultDone =
+    currentStep && currentParticipant
+      ? stepStatus[currentStep.key]?.participants.find(
+          (p) => p.participant_id === currentParticipant.id,
+        )?.submitted ?? false
+      : false;
 
   return (
     <main className="app-shell pt-[73px]">
@@ -1149,10 +1179,54 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                   </div>
                   <h2 className="text-lg font-bold text-neutral-900">{currentStep.title}</h2>
                 </div>
-                <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{currentStep.description}</p>
+                {!isResultStep && (
+                  <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{currentStep.description}</p>
+                )}
+
+                {/* Ergebnis-Ansicht (read-only, nur freigegebene Inhalte) */}
+                {isResultStep && (
+                  <div className="space-y-5">
+                    {resultReleased && currentStep.description ? (
+                      <div className="rounded-2xl border border-cyan-200 bg-cyan-50/50 p-5">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+                          {currentStep.description}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-neutral-200 p-6 text-center">
+                        <p className="text-sm text-neutral-400">
+                          Die Ergebnisse werden hier angezeigt, sobald dein Mediator sie freigegeben hat.
+                        </p>
+                      </div>
+                    )}
+                    {saveError && (
+                      <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{saveError}</p>
+                    )}
+                    <div className="flex justify-end">
+                      {myResultDone ? (
+                        !isLastStep ? (
+                          <button type="button" onClick={() => setActiveStepIndex((i) => i + 1)} className="btn btn-primary">
+                            Weiter
+                          </button>
+                        ) : (
+                          <span className="text-sm font-medium text-accent-600">✓ Gesehen</span>
+                        )
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => submitStep(currentStep.key)}
+                          disabled={saving}
+                          className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {saving ? "Wird gespeichert …" : "Verstanden – abschließen ✓"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Input-Ansicht */}
-                {view === "input" && (
+                {!isResultStep && view === "input" && (
                   <div className="space-y-5">
                     {/* Mein Input */}
                     <div className="rounded-2xl border border-accent-300 bg-white p-5 shadow-sm">
@@ -1228,12 +1302,12 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 )}
 
                 {/* Warte-Ansicht */}
-                {view === "waiting" && stepStatus[currentStep.key] && (
+                {!isResultStep && view === "waiting" && stepStatus[currentStep.key] && (
                   <WaitingView status={stepStatus[currentStep.key]} />
                 )}
 
                 {/* Reflexions-Ansicht */}
-                {view === "reflection" && (
+                {!isResultStep && view === "reflection" && (
                   <ReflectionView
                     step={currentStep}
                     phaseKey={phaseKey}

@@ -110,7 +110,7 @@ export default function Header() {
         }`}
       >
       <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5 md:py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 md:py-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <Image
@@ -118,10 +118,10 @@ export default function Header() {
             alt="Medipact Logo"
             width={36}
             height={36}
-            className="rounded-md object-cover"
+            className="h-7 w-7 rounded-md object-cover md:h-9 md:w-9"
             priority
           />
-          <span className="text-lg font-semibold tracking-tight text-neutral-900">
+          <span className="text-base font-semibold tracking-tight text-neutral-900 md:text-lg">
             Medipact
           </span>
         </Link>

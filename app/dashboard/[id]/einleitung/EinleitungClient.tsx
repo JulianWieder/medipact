@@ -55,6 +55,8 @@ type PhaseStepFromAPI = {
   content_types: string[] | null;
   video_url: string | null;
   feedback_occasion: FeedbackOccasion | null;
+  // Ergebnis-Schritte: true, sobald der Mediator den Inhalt freigegeben hat.
+  result_released?: boolean | null;
   custom: boolean;
 };
 
@@ -64,7 +66,7 @@ type FeedbackOccasion = "after_videocall" | "before_contract";
 type PhaseStep = string;
 
 // Welcher Baustein eine Karte rendert — abgeleitet aus ihren content_types.
-type StepKind = "content" | "termin" | "videokonferenz" | "feedback" | "vertrag";
+type StepKind = "content" | "termin" | "videokonferenz" | "feedback" | "vertrag" | "ergebnis";
 
 // Aufgelöster Schritt für den Teilnehmer-Flow. Reihenfolge, Vorhandensein und
 // Inhaltsart kommen vollständig aus phase_step_defaults (Workflow Manager) —
@@ -82,11 +84,13 @@ type FlowStep = {
   hasText: boolean;
   hasVideo: boolean;
   hasFrage: boolean;
+  resultReleased: boolean;
 };
 
 // Eine Karte kann mehrere Inhaltsarten kombinieren; der "Leitbaustein" bestimmt
 // den Haupt-Renderer. Spezial-Bausteine haben Vorrang vor reinem Text/Video.
 function resolveStepKind(ct: string[]): StepKind {
+  if (ct.includes("ergebnis")) return "ergebnis";
   if (ct.includes("vertrag")) return "vertrag";
   if (ct.includes("videokonferenz")) return "videokonferenz";
   if (ct.includes("termin")) return "termin";
@@ -112,6 +116,7 @@ function toFlowStep(s: PhaseStepFromAPI): FlowStep {
     hasText: ct.length === 0 || ct.includes("text") || ct.includes("frage"),
     hasVideo: ct.includes("video"),
     hasFrage: ct.includes("frage"),
+    resultReleased: Boolean(s.result_released),
   };
 }
 
@@ -831,7 +836,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
       // Karten, deren Status über Notizen/Bestätigung läuft: Inhalts-Karten
       // (Text/Video-Bestätigung) und die Videokonferenz.
       const statusKeys = flowSteps
-        .filter((s) => s.kind === "content" || s.kind === "videokonferenz")
+        .filter((s) => s.kind === "content" || s.kind === "videokonferenz" || s.kind === "ergebnis")
         .map((s) => s.key);
       const statuses = await Promise.all(
         statusKeys.map((key) =>
@@ -1126,6 +1131,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
     if (f.kind === "videokonferenz") return "Gespräch";
     if (f.kind === "feedback") return "Feedback";
     if (f.kind === "vertrag") return "Vertrag";
+    if (f.kind === "ergebnis") return "Ergebnisse";
     return f.title;
   }
 
@@ -2134,6 +2140,30 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
           <>
             {!allSigned && stepIntroBox("§", "Mediationsvertrag")}
             {renderContractStep()}
+          </>
+        );
+      case "ergebnis":
+        return (
+          <>
+            {stepIntroBox(
+              "◆",
+              step.title || "Ergebnisse",
+              "Von deinem Mediator freigegebene Ergebnisse.",
+            )}
+            {step.resultReleased && step.description ? (
+              <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50/50 p-5">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+                  {step.description}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-dashed border-neutral-200 p-6 text-center">
+                <p className="text-sm text-neutral-400">
+                  Die Ergebnisse werden hier angezeigt, sobald dein Mediator sie freigegeben hat.
+                </p>
+              </div>
+            )}
+            {renderIntroStep(step.key)}
           </>
         );
       default: {

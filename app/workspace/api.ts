@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -315,7 +315,18 @@ export async function updatePhaseStepDefault(
   payload: Partial<
     Pick<
       PhaseStepDefaultDto,
-      "title" | "description" | "enabled" | "content_types" | "video_url" | "feedback_occasion"
+      | "title"
+      | "description"
+      | "placeholder"
+      | "reflection_mode"
+      | "enabled"
+      | "content_types"
+      | "video_url"
+      | "meeting_url"
+      | "question"
+      | "contract_template"
+      | "result_source_phase"
+      | "feedback_occasion"
     >
   >,
 ): Promise<PhaseStepDefaultDto> {
@@ -354,4 +365,58 @@ export async function setMediationVariant(
     body: JSON.stringify({ variant_key: variantKey }),
   });
   if (!res.ok) throw new Error("Variante konnte nicht zugeordnet werden");
+}
+
+// ── Fallbezogener Inhalt individueller Schritte ───────────────────────────
+// Backend: GET/PUT /mediations/{id}/step-content (MediationStepContent).
+
+export async function fetchStepContent(
+  mediationId: number,
+  phase?: string,
+): Promise<StepContent[]> {
+  const url = phase
+    ? `/api/mediations/${mediationId}/step-content?phase=${encodeURIComponent(phase)}`
+    : `/api/mediations/${mediationId}/step-content`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => null);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function saveStepContent(
+  mediationId: number,
+  payload: {
+    phase: string;
+    step_key: string;
+    body_text?: string | null;
+    video_url?: string | null;
+    meeting_url?: string | null;
+    question?: string | null;
+    feedback_occasion?: "after_videocall" | "before_contract" | null;
+    released?: boolean;
+  },
+): Promise<StepContent> {
+  const res = await fetch(`/api/mediations/${mediationId}/step-content`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Inhalt konnte nicht gespeichert werden");
+  return res.json();
+}
+
+// KI-Zusammenfassung der eingereichten Eingaben einer Quell-Phase (Mediator).
+// Liefert einen Vorschlagstext, den der Mediator kuratiert und dann freigibt.
+export async function summarizeResults(
+  mediationId: number,
+  sourcePhase?: string | null,
+): Promise<string> {
+  const res = await fetch(`/api/mediations/${mediationId}/summarize-results`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source_phase: sourcePhase ?? null }),
+  });
+  if (!res.ok) throw new Error("Zusammenfassung konnte nicht erstellt werden");
+  const data = await res.json().catch(() => null);
+  return (data?.summary as string) ?? "";
 }

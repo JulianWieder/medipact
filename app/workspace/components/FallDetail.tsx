@@ -17,6 +17,7 @@ import {
 import {
   fetchParticipants,
   fetchAllNotes,
+  fetchNotes,
   advanceMediationPhase,
   inviteParty,
   fetchStepStatus,
@@ -25,6 +26,9 @@ import {
   deleteWorkflowRule,
   fetchVariants,
   setMediationVariant,
+  fetchStepContent,
+  saveStepContent,
+  summarizeResults,
   type WorkflowRulesResponse,
 } from "../api";
 
@@ -32,16 +36,6 @@ interface FallDetailProps {
   fall: MediationCase;
   onPhaseAdvanced?: () => void;
 }
-
-// ── Einleitung Schritte ────────────────────────────────────────────────────
-const EINLEITUNG_STEPS = [
-  { key: "intro", label: "Einführung" },
-  { key: "videocall", label: "Erstgespräch" },
-  { key: "einleitung", label: "Regeln" },
-  { key: "einleitung_rollen", label: "Rollen" },
-  { key: "einleitung_vertrauen", label: "Vertrauen" },
-  { key: "einleitung_ziel", label: "Ziel" },
-];
 
 // ── Contract types ─────────────────────────────────────────────────────────
 interface Contract {
@@ -119,6 +113,75 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
       setVariantError("Variante konnte nicht gespeichert werden");
     } finally {
       setVariantSaving(false);
+    }
+  }
+
+  // ── Individuelle Schritt-Inhalte (pro Fall) ──
+  // Werden direkt im Schritte-Tab bei den betroffenen Schritten gepflegt.
+  type StepContentDraft = {
+    body_text: string;
+    video_url: string;
+    meeting_url: string;
+    question: string;
+    feedback_occasion: "after_videocall" | "before_contract" | "";
+    released: boolean;
+  };
+  const [contentDrafts, setContentDrafts] = useState<Record<string, StepContentDraft>>({});
+  const [savingContentKey, setSavingContentKey] = useState<string | null>(null);
+  const [savedContentKey, setSavedContentKey] = useState<string | null>(null);
+  const [summarizingKey, setSummarizingKey] = useState<string | null>(null);
+
+  const emptyDraft: StepContentDraft = {
+    body_text: "",
+    video_url: "",
+    meeting_url: "",
+    question: "",
+    feedback_occasion: "",
+    released: false,
+  };
+
+  function updateDraft(mapKey: string, patch: Partial<StepContentDraft>) {
+    setContentDrafts((prev) => ({
+      ...prev,
+      [mapKey]: { ...(prev[mapKey] ?? emptyDraft), ...patch },
+    }));
+    setSavedContentKey(null);
+  }
+
+  // Speichert den fallbezogenen Inhalt eines Schritts (inkl. Freigabe-Flag).
+  async function handleSaveContent(phase: string, stepKey: string) {
+    const mapKey = `${phase}:${stepKey}`;
+    const draft = contentDrafts[mapKey] ?? emptyDraft;
+    setSavingContentKey(mapKey);
+    try {
+      await saveStepContent(fall.id, {
+        phase,
+        step_key: stepKey,
+        body_text: draft.body_text.trim() || null,
+        video_url: draft.video_url.trim() || null,
+        meeting_url: draft.meeting_url.trim() || null,
+        question: draft.question.trim() || null,
+        feedback_occasion: draft.feedback_occasion || null,
+        released: draft.released,
+      });
+      setSavedContentKey(mapKey);
+    } catch {
+      setAdvanceError("Inhalt konnte nicht gespeichert werden.");
+    } finally {
+      setSavingContentKey(null);
+    }
+  }
+
+  // KI-Zusammenfassung der Quell-Eingaben erzeugen und in den Entwurf übernehmen.
+  async function handleSummarize(mapKey: string, sourcePhase: string | null) {
+    setSummarizingKey(mapKey);
+    try {
+      const summary = await summarizeResults(fall.id, sourcePhase);
+      if (summary) updateDraft(mapKey, { body_text: summary });
+    } catch {
+      setAdvanceError("KI-Zusammenfassung fehlgeschlagen.");
+    } finally {
+      setSummarizingKey(null);
     }
   }
 
@@ -205,9 +268,32 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [isReleased, setIsReleased] = useState(false);
   const [contractError, setContractError] = useState("");
 
-  // Step status für Einleitung
+  // Schritte der Einleitungsphase: Inhalt (aus phase-steps), Abschluss-Status
+  // und Ergebnisse (Eingaben je Teilnehmer). Die Einleitung trackt jeden
+  // Schritt als Pseudo-Phase (phase=step.key, step=""), daher werden Status
+  // und Notizen über den step.key geladen.
+  type EinleitungStepDef = {
+    key: string;
+    title: string;
+    description: string;
+    content_types: string[];
+    video_url: string | null;
+    meeting_url: string | null;
+    question: string | null;
+    contract_template: string | null;
+    feedback_occasion: "after_videocall" | "before_contract" | null;
+    individual: boolean;
+  };
+  const [phaseStepDefs, setPhaseStepDefs] = useState<EinleitungStepDef[]>([]);
   const [stepStatuses, setStepStatuses] = useState<Record<string, StepStatusResult>>({});
+  const [stepNotes, setStepNotes] = useState<
+    Record<string, { participant_id: string; content: string; submitted: boolean }[]>
+  >({});
   const [loadingSteps, setLoadingSteps] = useState(false);
+
+  // Ergebnis-Anzeige-Schritte über ALLE Phasen (Freigabe erfolgt hier pro Fall).
+  type ResultStep = { phase: string; key: string; title: string; source_phase: string | null };
+  const [resultSteps, setResultSteps] = useState<ResultStep[]>([]);
 
   // Workflow-Konfiguration (wer muss welchen Schritt abschließen)
   const [workflowData, setWorkflowData] = useState<WorkflowRulesResponse | null>(null);
@@ -260,42 +346,194 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     if (activeTab === "termin") loadAppointments();
   }, [activeTab, loadContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadStepStatuses = useCallback(async () => {
-    setLoadingSteps(true);
-    const results: Record<string, StepStatusResult> = {};
-    await Promise.all(
-      EINLEITUNG_STEPS.map(async (s) => {
-        const data = await fetchStepStatus(fall.id, s.key, "");
-        results[s.key] = { participants: data.participants, allSubmitted: data.all_submitted };
-      })
-    );
-    setStepStatuses(results);
-    setLoadingSteps(false);
+  // Inhalt der Einleitungs-Schritte (Titel + vorgefüllter Standardinhalt +
+  // Flag "individuell") aus dem zusammengeführten phase-steps-Endpoint.
+  const loadStepDefs = useCallback(async (): Promise<EinleitungStepDef[]> => {
+    const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=einleitung`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json().catch(() => null);
+    const raw = (data?.steps ?? []) as Array<Record<string, unknown>>;
+    const defs: EinleitungStepDef[] = raw.map((s) => ({
+      key: String(s.key),
+      title: String(s.title ?? s.key),
+      description: (s.description as string) ?? "",
+      content_types: (s.content_types as string[] | null) ?? [],
+      video_url: (s.video_url as string | null) ?? null,
+      meeting_url: (s.meeting_url as string | null) ?? null,
+      question: (s.question as string | null) ?? null,
+      contract_template: (s.contract_template as string | null) ?? null,
+      feedback_occasion:
+        (s.feedback_occasion as "after_videocall" | "before_contract" | null) ?? null,
+      individual: Boolean(s.individual),
+    }));
+    setPhaseStepDefs(defs);
+    return defs;
   }, [fall.id]);
 
-  const loadWorkflowRules = useCallback(async () => {
-    const data = await fetchWorkflowRules(fall.id);
-    if (!data) return;
-    setWorkflowData(data);
-    const nextSelections: Record<string, Set<string>> = {};
-    const nextSkips: Record<string, boolean> = {};
-    for (const step of EINLEITUNG_STEPS) {
-      const rule = data.rules.find((r) => r.phase === step.key && r.step === "");
-      nextSelections[step.key] = rule?.required_roles
-        ? new Set(rule.required_roles)
-        : new Set(data.default_required_roles.filter((r) => data.available_roles.includes(r)));
-      nextSkips[step.key] = rule?.skip ?? false;
-    }
-    setRuleSelections(nextSelections);
-    setRuleSkips(nextSkips);
-  }, [fall.id]);
+  const loadStepStatuses = useCallback(
+    async (steps: EinleitungStepDef[]) => {
+      setLoadingSteps(true);
+      const results: Record<string, StepStatusResult> = {};
+      await Promise.all(
+        steps.map(async (s) => {
+          const data = await fetchStepStatus(fall.id, s.key, "");
+          results[s.key] = { participants: data.participants, allSubmitted: data.all_submitted };
+        }),
+      );
+      setStepStatuses(results);
+      setLoadingSteps(false);
+    },
+    [fall.id],
+  );
+
+  const loadWorkflowRules = useCallback(
+    async (steps: EinleitungStepDef[]) => {
+      const data = await fetchWorkflowRules(fall.id);
+      if (!data) return;
+      setWorkflowData(data);
+      const nextSelections: Record<string, Set<string>> = {};
+      const nextSkips: Record<string, boolean> = {};
+      for (const step of steps) {
+        const rule = data.rules.find((r) => r.phase === step.key && r.step === "");
+        nextSelections[step.key] = rule?.required_roles
+          ? new Set(rule.required_roles)
+          : new Set(data.default_required_roles.filter((r) => data.available_roles.includes(r)));
+        nextSkips[step.key] = rule?.skip ?? false;
+      }
+      setRuleSelections(nextSelections);
+      setRuleSkips(nextSkips);
+    },
+    [fall.id],
+  );
+
+  // Ergebnisse: Eingaben je Teilnehmer pro Schritt (phase=step.key, step="").
+  const loadStepNotes = useCallback(
+    async (steps: EinleitungStepDef[]) => {
+      const results: Record<
+        string,
+        { participant_id: string; content: string; submitted: boolean }[]
+      > = {};
+      await Promise.all(
+        steps.map(async (s) => {
+          const notes = await fetchNotes(fall.id, s.key, "");
+          results[s.key] = notes.map((n) => ({
+            participant_id: String(n.participant_id),
+            content: n.content,
+            submitted: n.submitted,
+          }));
+        }),
+      );
+      setStepNotes(results);
+    },
+    [fall.id],
+  );
+
+  // Individuelle Inhalte (pro Fall) für die individuellen Einleitungs-Schritte.
+  const loadStepDrafts = useCallback(
+    async (steps: EinleitungStepDef[]) => {
+      const existing = await fetchStepContent(fall.id, "einleitung");
+      setContentDrafts((prev) => {
+        const next = { ...prev };
+        for (const s of steps) {
+          if (!s.individual) continue;
+          const mapKey = `einleitung:${s.key}`;
+          const sc = existing.find((e) => e.step_key === s.key);
+          next[mapKey] = sc
+            ? {
+                body_text: sc.body_text ?? "",
+                video_url: sc.video_url ?? "",
+                meeting_url: sc.meeting_url ?? "",
+                question: sc.question ?? "",
+                feedback_occasion: sc.feedback_occasion ?? "",
+                released: sc.released ?? false,
+              }
+            : { ...emptyDraft };
+        }
+        return next;
+      });
+    },
+    [fall.id], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // Ergebnis-Anzeige-Schritte über ALLE Phasen sammeln + Entwürfe (inkl.
+  // Freigabe-Flag) vorbelegen. Unabhängig vom Notiz-/Status-Modell.
+  const loadResultSteps = useCallback(async () => {
+    const perPhase = await Promise.all(
+      PHASES.map(async (p) => {
+        const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=${p.id}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return [] as ResultStep[];
+        const data = await res.json().catch(() => null);
+        const raw = (data?.steps ?? []) as Array<{
+          key: string;
+          title: string;
+          content_types: string[] | null;
+          result_source_phase?: string | null;
+        }>;
+        return raw
+          .filter((s) => (s.content_types ?? []).includes("ergebnis"))
+          .map((s) => ({
+            phase: p.id,
+            key: s.key,
+            title: s.title,
+            source_phase: s.result_source_phase ?? null,
+          }));
+      }),
+    );
+    const flat = perPhase.flat();
+    setResultSteps(flat);
+    const existing = await fetchStepContent(fall.id);
+    setContentDrafts((prev) => {
+      const next = { ...prev };
+      for (const s of flat) {
+        const mapKey = `${s.phase}:${s.key}`;
+        const sc = existing.find((e) => e.phase === s.phase && e.step_key === s.key);
+        next[mapKey] = sc
+          ? {
+              body_text: sc.body_text ?? "",
+              video_url: sc.video_url ?? "",
+              meeting_url: sc.meeting_url ?? "",
+              question: sc.question ?? "",
+              feedback_occasion: sc.feedback_occasion ?? "",
+              released: sc.released ?? false,
+            }
+          : { ...emptyDraft };
+      }
+      return next;
+    });
+  }, [fall.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (activeTab === "steps") {
-      loadStepStatuses();
-      loadWorkflowRules();
-    }
-  }, [activeTab, loadStepStatuses, loadWorkflowRules]);
+    if (activeTab !== "steps") return;
+    (async () => {
+      const steps = await loadStepDefs();
+      await Promise.all([
+        loadStepStatuses(steps),
+        loadWorkflowRules(steps),
+        loadStepNotes(steps),
+        loadStepDrafts(steps),
+        loadResultSteps(),
+        loadFeedback(),
+      ]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, fall.id]);
+
+  // Manuelles Neuladen (Button im Tab).
+  const reloadStepsTab = useCallback(async () => {
+    const steps = await loadStepDefs();
+    await Promise.all([
+      loadStepStatuses(steps),
+      loadWorkflowRules(steps),
+      loadStepNotes(steps),
+      loadStepDrafts(steps),
+      loadResultSteps(),
+      loadFeedback(),
+    ]);
+  }, [loadStepDefs, loadStepStatuses, loadWorkflowRules, loadStepNotes, loadStepDrafts, loadResultSteps, loadFeedback]);
 
   function toggleRuleRole(stepKey: string, role: string) {
     setRuleSelections((prev) => {
@@ -320,7 +558,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
         skip: ruleSkips[stepKey] ?? false,
       });
       if (ok) {
-        await Promise.all([loadWorkflowRules(), loadStepStatuses()]);
+        await Promise.all([loadWorkflowRules(phaseStepDefs), loadStepStatuses(phaseStepDefs)]);
         setExpandedStepConfig(null);
       }
     } finally {
@@ -333,7 +571,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     try {
       const ok = await deleteWorkflowRule(fall.id, stepKey, "");
       if (ok) {
-        await Promise.all([loadWorkflowRules(), loadStepStatuses()]);
+        await Promise.all([loadWorkflowRules(phaseStepDefs), loadStepStatuses(phaseStepDefs)]);
       }
     } finally {
       setSavingRuleKey(null);
@@ -485,7 +723,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const tabs = [
     { id: "overview" as const, label: "Übersicht" },
     { id: "notes" as const, label: "Alle Notizen" },
-    { id: "steps" as const, label: "Schrittstatus" },
+    { id: "steps" as const, label: "Schritte & Ergebnisse" },
     { id: "termin" as const, label: "Termin" },
     { id: "contract" as const, label: "Vertrag" },
     { id: "feedback" as const, label: "Feedback" },
@@ -817,14 +1055,94 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
           {activeTab === "steps" && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Einleitungsphase - Schritte</p>
-                <button onClick={loadStepStatuses} className="text-xs text-accent-600 hover:text-accent-800 font-medium">↻ Aktualisieren</button>
+                <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Einleitungsphase · Inhalt & Ergebnisse</p>
+                <button onClick={reloadStepsTab} className="text-xs text-accent-600 hover:text-accent-800 font-medium">↻ Aktualisieren</button>
               </div>
+
+              {/* ── Ergebnis-Freigaben (alle Phasen) ── */}
+              {resultSteps.length > 0 && (
+                <div className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50/40 p-4 space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">◆ Ergebnis-Freigaben</p>
+                  <p className="text-xs text-neutral-500">
+                    Diese Schritte zeigen den Teilnehmern Ergebnisse – aber erst nach deiner
+                    Freigabe. Erzeuge/kuratiere den Text und gib ihn frei.
+                  </p>
+                  {resultSteps.map((rs) => {
+                    const mapKey = `${rs.phase}:${rs.key}`;
+                    const draft = contentDrafts[mapKey] ?? emptyDraft;
+                    const phaseLabel = PHASES.find((p) => p.id === rs.phase)?.label ?? rs.phase;
+                    const srcLabel = rs.source_phase
+                      ? PHASES.find((p) => p.id === rs.source_phase)?.label ?? rs.source_phase
+                      : null;
+                    const isSaving = savingContentKey === mapKey;
+                    const isSaved = savedContentKey === mapKey;
+                    const isSummarizing = summarizingKey === mapKey;
+                    return (
+                      <div key={mapKey} className="rounded-lg border border-neutral-200 bg-white p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-neutral-800">{rs.title}</span>
+                          <span
+                            className={
+                              draft.released
+                                ? "rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700"
+                                : "rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500"
+                            }
+                          >
+                            {draft.released ? "✓ Freigegeben" : "Entwurf – nicht sichtbar"}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-neutral-400">
+                          Phase: {phaseLabel}
+                          {srcLabel ? ` · Quelle: ${srcLabel}` : ""}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => handleSummarize(mapKey, rs.source_phase)}
+                            disabled={isSummarizing}
+                            className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50 transition"
+                          >
+                            {isSummarizing ? "KI fasst zusammen…" : "✦ KI-Zusammenfassung erzeugen"}
+                          </button>
+                        </div>
+                        <textarea
+                          value={draft.body_text}
+                          onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
+                          rows={4}
+                          placeholder="Freigegebener Ergebnistext für alle Teilnehmer …"
+                          className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                        />
+                        <label className="flex items-center gap-2 text-xs font-medium text-neutral-700">
+                          <input
+                            type="checkbox"
+                            checked={draft.released}
+                            onChange={(e) => updateDraft(mapKey, { released: e.target.checked })}
+                            className="h-3.5 w-3.5 rounded border-neutral-300"
+                          />
+                          Für alle Teilnehmer freigeben
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleSaveContent(rs.phase, rs.key)}
+                            disabled={isSaving}
+                            className="rounded-full bg-accent-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
+                          >
+                            {isSaving ? "Speichert…" : "Speichern"}
+                          </button>
+                          {isSaved && <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {loadingSteps ? (
                 <p className="text-sm italic text-neutral-400">Wird geladen…</p>
+              ) : phaseStepDefs.length === 0 ? (
+                <EmptyState icon="🧭" text="Keine Schritte für die Einleitungsphase definiert." />
               ) : (
                 <div className="space-y-3">
-                  {EINLEITUNG_STEPS.map((step) => {
+                  {phaseStepDefs.map((step) => {
                     const result = stepStatuses[step.key];
                     const entries = result?.participants ?? [];
                     const allDone = result?.allSubmitted ?? false;
@@ -832,11 +1150,33 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     const skipped = ruleSkips[step.key] ?? false;
                     const overridden = workflowData?.rules.some((r) => r.phase === step.key && r.step === "") ?? false;
                     const isExpanded = expandedStepConfig === step.key;
+                    const has = (id: string) => step.content_types.includes(id);
+                    const mapKey = `einleitung:${step.key}`;
+                    const draft = contentDrafts[mapKey] ?? emptyDraft;
+                    const isSavingContent = savingContentKey === mapKey;
+                    const isSavedContent = savedContentKey === mapKey;
+                    const nameFor = (pid: string) =>
+                      entries.find((e) => e.participant_id === pid)?.name ??
+                      participants.find((p) => p.id === pid)?.name ??
+                      "Teilnehmer";
+                    const noteEntries = (stepNotes[step.key] ?? []).filter((n) => n.content && n.content.trim());
+                    const OCCASION_LABEL: Record<string, string> = {
+                      after_videocall: "Nach dem Gespräch",
+                      before_contract: "Vor dem Vertrag",
+                    };
+                    const feedbackForStep = has("feedback")
+                      ? feedbackEntries.filter(
+                          (e) => e.occasion === (step.feedback_occasion ?? "after_videocall"),
+                        )
+                      : [];
                     return (
                       <div key={step.key} className={allDone ? "rounded-xl border border-accent-200 bg-accent-50/60 p-4" : "rounded-xl border border-neutral-200 bg-white p-4"}>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-neutral-800">{step.label}</span>
+                            <span className="text-sm font-semibold text-neutral-800">{step.title}</span>
+                            {step.individual && (
+                              <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-700">✦ Individuell</span>
+                            )}
                             {skipped && (
                               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500">Übersprungen</span>
                             )}
@@ -884,6 +1224,180 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                                 </span>
                               );
                             })}
+                          </div>
+                        )}
+
+                        {/* ── Inhalt des Schrittes ── */}
+                        {step.individual ? (
+                          <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50/50 p-3 space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-teal-700">
+                              Individueller Inhalt (nur dieser Fall)
+                            </p>
+                            <textarea
+                              value={draft.body_text}
+                              onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
+                              rows={2}
+                              placeholder="Text für diesen Fall …"
+                              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                            />
+                            {(has("video") || !has("videokonferenz")) && (
+                              <input
+                                value={draft.video_url}
+                                onChange={(e) => updateDraft(mapKey, { video_url: e.target.value })}
+                                placeholder="Video-URL (eigenes Video) …"
+                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                              />
+                            )}
+                            {has("videokonferenz") && (
+                              <input
+                                value={draft.meeting_url}
+                                onChange={(e) => updateDraft(mapKey, { meeting_url: e.target.value })}
+                                placeholder="Meeting-/Call-Link …"
+                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                              />
+                            )}
+                            {has("frage") && (
+                              <textarea
+                                value={draft.question}
+                                onChange={(e) => updateDraft(mapKey, { question: e.target.value })}
+                                rows={2}
+                                placeholder="Individuelle Frage für diesen Fall …"
+                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                              />
+                            )}
+                            {has("feedback") && (
+                              <select
+                                value={draft.feedback_occasion}
+                                onChange={(e) =>
+                                  updateDraft(mapKey, {
+                                    feedback_occasion: e.target.value as
+                                      | "after_videocall"
+                                      | "before_contract"
+                                      | "",
+                                  })
+                                }
+                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 transition"
+                              >
+                                <option value="">— kein Fragebogen —</option>
+                                <option value="after_videocall">Nach dem Gespräch</option>
+                                <option value="before_contract">Vor dem Vertrag</option>
+                              </select>
+                            )}
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleSaveContent("einleitung", step.key)}
+                                disabled={isSavingContent}
+                                className="rounded-full bg-accent-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
+                              >
+                                {isSavingContent ? "Speichert…" : "Inhalt speichern"}
+                              </button>
+                              {isSavedContent && (
+                                <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          (step.description ||
+                            step.video_url ||
+                            step.meeting_url ||
+                            step.question ||
+                            step.contract_template ||
+                            has("feedback")) && (
+                            <div className="mt-3 rounded-lg border border-neutral-100 bg-neutral-50/70 p-3 space-y-1.5 text-xs text-neutral-600">
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Inhalt</p>
+                              {step.description && (
+                                <p className="whitespace-pre-wrap">{step.description}</p>
+                              )}
+                              {step.question && (
+                                <p>
+                                  <span className="font-semibold">Frage:</span> {step.question}
+                                </p>
+                              )}
+                              {step.video_url && (
+                                <p>
+                                  <span className="font-semibold">Video:</span>{" "}
+                                  <a href={step.video_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
+                                    {step.video_url}
+                                  </a>
+                                </p>
+                              )}
+                              {step.meeting_url && (
+                                <p>
+                                  <span className="font-semibold">Meeting:</span>{" "}
+                                  <a href={step.meeting_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
+                                    {step.meeting_url}
+                                  </a>
+                                </p>
+                              )}
+                              {step.contract_template && (
+                                <p className="whitespace-pre-wrap">
+                                  <span className="font-semibold">Vorlage:</span> {step.contract_template}
+                                </p>
+                              )}
+                              {has("feedback") && (
+                                <p>
+                                  <span className="font-semibold">Feedback-Anlass:</span>{" "}
+                                  {OCCASION_LABEL[step.feedback_occasion ?? "after_videocall"]}
+                                </p>
+                              )}
+                            </div>
+                          )
+                        )}
+
+                        {/* ── Ergebnisse des Schrittes ── */}
+                        {(noteEntries.length > 0 || feedbackForStep.length > 0) && (
+                          <div className="mt-3 space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Ergebnisse</p>
+                            {noteEntries.map((n, i) => {
+                              let items: string[] = [];
+                              try {
+                                const parsed = JSON.parse(n.content);
+                                if (Array.isArray(parsed)) items = parsed.filter(Boolean);
+                              } catch {
+                                /* raw text */
+                              }
+                              return (
+                                <div key={`note-${i}`} className="rounded-lg border border-neutral-100 bg-white p-2.5">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-semibold text-neutral-800">{nameFor(n.participant_id)}</span>
+                                    {n.submitted && (
+                                      <span className="text-[10px] font-semibold text-accent-600">✓ Eingereicht</span>
+                                    )}
+                                  </div>
+                                  {items.length > 0 ? (
+                                    <ul className="space-y-0.5">
+                                      {items.map((it, j) => (
+                                        <li key={j} className="flex items-start gap-1.5 text-xs text-neutral-700">
+                                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent-400" />
+                                          {it}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <p className="text-xs text-neutral-700 whitespace-pre-wrap">{n.content}</p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {feedbackForStep.map((fb) => (
+                              <div key={`fb-${fb.id}`} className="rounded-lg border border-violet-100 bg-violet-50/50 p-2.5">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-semibold text-neutral-800">{fb.participant_name}</span>
+                                  <span className="text-[10px] text-violet-500">Feedback</span>
+                                </div>
+                                <div className="space-y-0.5">
+                                  {Object.entries(fb.answers).map(([k, v]) =>
+                                    v || v === 0 ? (
+                                      <div key={k} className="flex items-start gap-1.5 text-xs text-neutral-600">
+                                        <span className="text-neutral-400">·</span>
+                                        <span className="text-neutral-500">{k}:</span>
+                                        <span className="text-neutral-800">{String(v)}</span>
+                                      </div>
+                                    ) : null,
+                                  )}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
 

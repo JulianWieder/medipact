@@ -39,6 +39,10 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "reflection_mode": step.reflection_mode,
         "content_types": step.content_types.split(",") if step.content_types else None,
         "video_url": step.video_url,
+        "meeting_url": step.meeting_url,
+        "question": step.question,
+        "contract_template": step.contract_template,
+        "result_source_phase": step.result_source_phase,
         "feedback_occasion": step.feedback_occasion,
         "required_roles": step.required_roles.split(",") if step.required_roles else None,
         "position": step.position,
@@ -58,6 +62,10 @@ class PhaseStepDefaultCreate(BaseModel):
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
     video_url: Optional[str] = None
+    meeting_url: Optional[str] = None
+    question: Optional[str] = None
+    contract_template: Optional[str] = None
+    result_source_phase: Optional[str] = None
     feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
     enabled: bool = True
@@ -70,6 +78,10 @@ class PhaseStepDefaultUpdate(BaseModel):
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
     video_url: Optional[str] = None
+    meeting_url: Optional[str] = None
+    question: Optional[str] = None
+    contract_template: Optional[str] = None
+    result_source_phase: Optional[str] = None
     feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
     enabled: Optional[bool] = None
@@ -159,6 +171,10 @@ def create_phase_step_default(
         reflection_mode=payload.reflection_mode,
         content_types=",".join(payload.content_types) if payload.content_types else None,
         video_url=payload.video_url,
+        meeting_url=payload.meeting_url,
+        question=payload.question,
+        contract_template=payload.contract_template,
+        result_source_phase=payload.result_source_phase,
         feedback_occasion=payload.feedback_occasion,
         required_roles=",".join(payload.required_roles) if payload.required_roles else None,
         position=count,

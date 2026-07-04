@@ -62,11 +62,38 @@ export interface PhaseStepDefaultDto {
   content_types: string[] | null;
   /** Vom Mediator hinterlegte Video-URL — nur relevant wenn "video" in content_types. */
   video_url: string | null;
+  /** Meeting-/Call-Link — nur relevant wenn "videokonferenz" in content_types. */
+  meeting_url: string | null;
+  /** Konkreter Frage-/Quiz-Inhalt — nur relevant wenn "frage" in content_types. */
+  question: string | null;
+  /** Vorlagentext — nur relevant wenn "vertrag" in content_types. */
+  contract_template: string | null;
+  /** Quell-Phase der anzuzeigenden Ergebnisse — nur relevant wenn "ergebnis" in content_types. */
+  result_source_phase: string | null;
   /** Fragebogen-Anlass — nur relevant wenn "feedback" in content_types. */
   feedback_occasion: "after_videocall" | "before_contract" | null;
   required_roles: string[] | null;
   position: number;
   enabled: boolean;
+}
+
+// ── Fallbezogener Inhalt "individueller" Schritte ─────────────────────────
+//
+// Backend: MediationStepContent (GET/PUT /mediations/{id}/step-content).
+// Ein Schritt wird zentral als "individuell" markiert; sein tatsächlicher
+// Inhalt (eigenes Video, Meeting-Link, Text, Frage, Feedback) wird pro Fall
+// vom Mediator gepflegt und liegt hier.
+
+export interface StepContent {
+  phase: string;
+  step_key: string;
+  body_text: string | null;
+  video_url: string | null;
+  meeting_url: string | null;
+  question: string | null;
+  feedback_occasion: "after_videocall" | "before_contract" | null;
+  /** Ergebnis-Schritte: erst wenn true, sehen Teilnehmer body_text. */
+  released: boolean;
 }
 
 // ── Inhaltsarten pro Workflow-Karte ───────────────────────────────────────
@@ -94,6 +121,12 @@ export const CONTENT_TYPES: ContentTypeDef[] = [
   { id: "feedback", label: "Feedback-Fragebogen", short: "Feedback", icon: "★", badge: "bg-amber-50 text-amber-600 border-amber-200" },
   { id: "termin", label: "Terminvereinbarung", short: "Termin", icon: "📅", badge: "bg-emerald-50 text-emerald-600 border-emerald-200" },
   { id: "vertrag", label: "Vertrag / Dokument", short: "Vertrag", icon: "§", badge: "bg-indigo-50 text-indigo-600 border-indigo-200" },
+  // "individuell" markiert einen Schritt, dessen Inhalt NICHT global gepflegt
+  // wird, sondern pro Fall in der Fallansicht (siehe StepContent / FallDetail).
+  { id: "individuell", label: "Individuell (pro Fall befüllt)", short: "Individuell", icon: "✦", badge: "bg-teal-50 text-teal-600 border-teal-200" },
+  // "ergebnis" zeigt allen Teilnehmern (Teile der) Mediations-Ergebnisse an –
+  // erst nachdem der Mediator sie pro Fall freigegeben hat (StepContent.released).
+  { id: "ergebnis", label: "Ergebnis-Anzeige (Freigabe)", short: "Ergebnis", icon: "◆", badge: "bg-cyan-50 text-cyan-600 border-cyan-200" },
 ];
 
 export const CONTENT_TYPE_BY_ID: Record<string, ContentTypeDef> = Object.fromEntries(

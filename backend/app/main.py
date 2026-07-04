@@ -10,6 +10,7 @@ from app.routers import (
     mediation_variants,
     mediations,
     phase_step_defaults,
+    step_content,
 )
 
 app = FastAPI(title="Mediation API")
@@ -30,6 +31,7 @@ app.include_router(mediations.router)
 app.include_router(custom_steps.router)
 app.include_router(phase_step_defaults.router)
 app.include_router(mediation_variants.router)
+app.include_router(step_content.router)
 app.include_router(invoices.router)
 
 
