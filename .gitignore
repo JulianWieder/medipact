@@ -49,3 +49,5 @@ backend/migrate_now.py
 
 # legacy root-level components (moved to app/components/)
 /components/
+
+*.db
