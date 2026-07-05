@@ -302,6 +302,11 @@ export interface UserRoleInfo {
 // ── Phases ────────────────────────────────────────────────────────────────
 
 export const PHASES: { id: string; label: string; short: string }[] = [
+  // "einladung" ist die Vor-Phase (Einladung an die Gegenseite), die vor Start
+  // der eigentlichen Mediation läuft. Sie gehört NICHT zu den 6 Teilnehmer-
+  // Mediationsphasen, ist aber hier im Designer konfigurierbar (z.B. Video der
+  // Einladungs-Botschaft an/aus/Pflicht). Nicht mit "einleitung" verwechseln.
+  { id: "einladung", label: "Einladung", short: "0" },
   { id: "einleitung", label: "Einleitung", short: "1" },
   { id: "themensammlung", label: "Themensammlung", short: "2" },
   { id: "interessen", label: "Interessen", short: "3" },

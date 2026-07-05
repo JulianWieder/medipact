@@ -59,6 +59,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [titleSaving, setTitleSaving] = useState(false);
   const [titleSaved, setTitleSaved] = useState(false);
   const [generating, setGenerating] = useState(false);
+  // Video-Modus der Einladung, konfiguriert über die Phase "einladung" im
+  // Workflow Manager (optional | required | off). Default optional.
+  const [videoMode, setVideoMode] = useState<"optional" | "required" | "off">("optional");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
@@ -89,6 +92,26 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
     loadParticipants();
   }, [mediationId, currentUserName, router]);
+
+  // Video-Modus der Einladung aus der "einladung"-Phasenkonfiguration laden.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/mediations/${mediationId}/invite-settings`, { cache: "no-store" });
+        if (res.ok && !cancelled) {
+          const data = await res.json().catch(() => null);
+          const mode = data?.video_mode;
+          if (mode === "optional" || mode === "required" || mode === "off") setVideoMode(mode);
+        }
+      } catch {
+        // Fehler still ignorieren – Default "optional" bleibt.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mediationId]);
 
   const hasOtherParty = participants.some(
     (p) => p.role === "other_party" && p.invitationStatus === "accepted",
@@ -531,14 +554,17 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                     />
 
-                    <div className="mt-4">
-                      <InviteVideoRecorder
-                        mediationId={mediationId}
-                        videoToken={videoToken}
-                        onChange={setVideoToken}
-                        onTranscript={setPersonalMessage}
-                      />
-                    </div>
+                    {videoMode !== "off" && (
+                      <div className="mt-4">
+                        <InviteVideoRecorder
+                          mediationId={mediationId}
+                          videoToken={videoToken}
+                          onChange={setVideoToken}
+                          onTranscript={setPersonalMessage}
+                          required={videoMode === "required"}
+                        />
+                      </div>
+                    )}
 
                     <div className="mt-4 flex items-center justify-between gap-3">
                       <label htmlFor="invite-message" className="block text-sm font-semibold text-neutral-900">
@@ -622,11 +648,16 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                     <button
                       type="button"
                       onClick={createInvite}
-                      disabled={loading || !email.trim()}
+                      disabled={loading || !email.trim() || (videoMode === "required" && !videoToken)}
                       className="btn btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? "Wird erstellt..." : "Einladung erstellen"}
                     </button>
+                    {videoMode === "required" && !videoToken && (
+                      <p className="mt-2 text-center text-xs text-neutral-400">
+                        Eine Video-Botschaft ist für diese Einladung erforderlich.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

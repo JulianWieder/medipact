@@ -22,6 +22,7 @@ from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
+from app.models.phase_step_default import PhaseStepDefault
 from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
 
@@ -567,11 +568,46 @@ async def generate_invite_message_endpoint(
     )
 
 
-# Rollen, für die eine persönliche Video-Botschaft beim Erstellen der Einladung
-# verpflichtend ist (siehe create_invite). Aktuell leer = Video ist immer
-# optional; der Mechanismus bleibt erhalten, falls es später wieder Pflicht
-# werden soll (dann z.B. {"other_party"} eintragen).
-_VIDEO_REQUIRED_ROLES: set[str] = set()
+def effective_video_mode(db: Session, mediation_type: str) -> str:
+    """Leitet den Video-Modus der Einladung aus der Phase "einladung" ab, die im
+    Workflow Manager pro Mediationsart konfiguriert wird (phase_step_defaults).
+
+    Regeln (bewusst rückwärtskompatibel):
+      - Ist die Phase "einladung" noch NICHT konfiguriert (keine aktiven Schritte),
+        gilt "optional" – so wie bisher.
+      - Ist sie konfiguriert: "required", wenn ein aktiver Video-Schritt Pflicht-
+        Rollen gesetzt hat; sonst "optional", wenn es einen aktiven Video-Schritt
+        gibt; andernfalls "off" (kein Video in der Einladung).
+    """
+    steps = (
+        db.query(PhaseStepDefault)
+        .filter(
+            PhaseStepDefault.mediation_type == mediation_type,
+            PhaseStepDefault.phase == "einladung",
+            PhaseStepDefault.variant_key.is_(None),
+            PhaseStepDefault.enabled.is_(True),
+        )
+        .all()
+    )
+    if not steps:
+        return "optional"
+    video_steps = [s for s in steps if s.content_types and "video" in s.content_types.split(",")]
+    if not video_steps:
+        return "off"
+    if any(s.required_roles for s in video_steps):
+        return "required"
+    return "optional"
+
+
+@router.get("/mediations/{mediation_id}/invite-settings")
+def get_invite_settings_for_mediation(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    mediation=Depends(require_mediation_access),
+):
+    """Liefert der Einladungsseite den geltenden Video-Modus (optional|required|off)
+    für die Mediationsart dieses Falls. Für Teilnehmer zugänglich (nicht nur Admin)."""
+    return {"video_mode": effective_video_mode(db, mediation.mediation_type)}
 
 
 @router.post("/mediations/{mediation_id}/invites")
@@ -585,7 +621,7 @@ def create_invite(
     invite_limiter.check(request)
     token = create_invite_token()
 
-    if payload.role in _VIDEO_REQUIRED_ROLES and not payload.video_token:
+    if effective_video_mode(db, mediation.mediation_type) == "required" and not payload.video_token:
         raise HTTPException(
             status_code=400,
             detail="Eine persönliche Video-Botschaft ist für diese Einladung erforderlich.",
