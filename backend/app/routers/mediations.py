@@ -23,6 +23,7 @@ from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
+from app.services.llm import ai_complete
 
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
@@ -959,11 +960,6 @@ def summarize_results(
     erst dann sehen ihn die Teilnehmer.
     """
     import json as _json
-    import anthropic
-    from app.config import settings
-
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
 
     participant = _require_participant(mediation_id, current_user, db)
     if participant.role not in ("mediator", "owner", "admin"):
@@ -1007,13 +1003,7 @@ EINGABEN:
 
 Antworte NUR mit dem Zusammenfassungstext, ohne Vorrede und ohne Markdown."""
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    summary = message.content[0].text.strip()
+    summary = ai_complete(prompt, max_tokens=800)
     return {"summary": summary}
 
 
@@ -1213,12 +1203,6 @@ def generate_title(
     current_user: User = Depends(get_current_db_user),
 ):
     """Generiert einen kurzen, prägnanten Mediationstitel aus der Beschreibung."""
-    from app.config import settings
-    import anthropic
-
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
-
     type_labels = {
         "trennung": "Trennung & Scheidung",
         "erbschaft": "Erbschaftsstreit",
@@ -1233,13 +1217,7 @@ def generate_title(
         f"Antworte NUR mit dem Titel, ohne Anführungszeichen, ohne Erklärung."
     )
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=30,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    title = message.content[0].text.strip().strip('"').strip("'")
+    title = ai_complete(prompt, max_tokens=30).strip('"').strip("'")
     return {"title": title}
 
 
@@ -1261,12 +1239,6 @@ def reflect(
 ):
     _require_participant(mediation_id, current_user, db)
 
-    from app.config import settings
-    import anthropic
-
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
-
     parts = "\n\n".join(
         f"**{inp['name']} ({inp['role']}):**\n{inp['content']}"
         for inp in payload.inputs
@@ -1279,13 +1251,7 @@ def reflect(
         f"Hebe gemeinsame Punkte hervor. Keine Bewertung, kein Ratschlag.\n\n{parts}"
     )
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return {"reflection": message.content[0].text}
+    return {"reflection": ai_complete(prompt, max_tokens=1024)}
 
 
 # ── Mediationsvertrag ─────────────────────────────────────────────────────────
@@ -1337,12 +1303,6 @@ def generate_contract(
     if not notes:
         raise HTTPException(status_code=422, detail="Noch keine abgeschlossenen Eingaben in Phase 1")
 
-    from app.config import settings
-    import anthropic
-
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
-
     STEP_LABELS = {
         "einleitung": "Regeln",
         "einleitung_rollen": "Rollen",
@@ -1379,13 +1339,7 @@ def generate_contract(
         f"Eingaben der Parteien:\n\n{notes_text}"
     )
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1200,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    generated_text = message.content[0].text
+    generated_text = ai_complete(prompt, max_tokens=1200)
 
     # Speichern oder überschreiben
     existing = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
@@ -2011,11 +1965,6 @@ def analyse_mediation(
 ):
     """Generiert SWOT-Analyse + Gesprächstipps pro Teilnehmer für den Mediator."""
     import json as _json
-    import anthropic
-    from app.config import settings
-
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=503, detail="KI nicht konfiguriert")
 
     # Nur Mediator/Owner/Admin darf analysieren
     participant = _require_participant(mediation_id, current_user, db)
@@ -2114,14 +2063,7 @@ Erstelle eine Analyse mit folgendem JSON-Format (auf Deutsch):
 
 WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."""
 
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1500,
-        messages=[{"role": "user", "content": prompt}],
-    )
-
-    raw = message.content[0].text.strip()
+    raw = ai_complete(prompt, max_tokens=1500)
     # Markdown-Blöcke entfernen falls vorhanden
     if raw.startswith("```"):
         raw = raw.split("```")[1]

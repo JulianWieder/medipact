@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     # ── KI (Google Gemini) ───────────────────────────────────────────────────
     GEMINI_API_KEY: str = ""  # API-Key aus Google AI Studio
     GEMINI_MODEL: str = "gemini-1.5-flash"  # bei Bedarf via .env überschreiben
+    # Welcher Anbieter die KI-Textfunktionen bedient (Einladungstext, Reflexion,
+    # Zusammenfassung, Titel …): "claude" (Standard) oder "gemini". Umschalten per
+    # .env, ohne Code-Änderung – z.B. AI_PROVIDER=gemini für die Dev-Phase.
+    AI_PROVIDER: str = "claude"
     # Verzeichnis für hochgeladene Video-Botschaften bei Mediations-Einladungen
     # (z.B. /data/invite_videos in Docker, analog zu DB_PATH).
     INVITE_VIDEO_DIR: str = "media/invite_videos"

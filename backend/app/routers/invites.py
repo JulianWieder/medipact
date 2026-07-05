@@ -25,6 +25,7 @@ from app.models.user import User
 from app.models.phase_step_default import PhaseStepDefault
 from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
+from app.services.llm import ai_complete
 
 logger = logging.getLogger(__name__)
 
@@ -94,33 +95,22 @@ def paraphrase_personal_message(message: str, mediation_title: str) -> str:
     message = (message or "").strip()
     if not message:
         return message
-    if not settings.ANTHROPIC_API_KEY:
-        return message
 
+    prompt = (
+        "Du hilfst dabei, eine persönliche Nachricht innerhalb einer Einladungs-E-Mail zu einer "
+        "Mediation umzuformulieren. Behalte den Kerninhalt und die Absicht der Person exakt bei, "
+        "mache den Ton aber warm, wertschätzend und einladend. Ziel ist, dass die empfangende "
+        "Person sich registriert und sich die beigefügte persönliche Video-Botschaft ansieht. "
+        "Antworte NUR mit dem umformulierten Text (max. 80 Wörter), ohne Anführungszeichen, "
+        "ohne Erklärung, ohne Markdown.\n\n"
+        f"Mediationsthema: {mediation_title}\n\n"
+        f"Original-Nachricht:\n{message}"
+    )
     try:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-        prompt = (
-            "Du hilfst dabei, eine persönliche Nachricht innerhalb einer Einladungs-E-Mail zu einer "
-            "Mediation umzuformulieren. Behalte den Kerninhalt und die Absicht der Person exakt bei, "
-            "mache den Ton aber warm, wertschätzend und einladend. Ziel ist, dass die empfangende "
-            "Person sich registriert und sich die beigefügte persönliche Video-Botschaft ansieht. "
-            "Antworte NUR mit dem umformulierten Text (max. 80 Wörter), ohne Anführungszeichen, "
-            "ohne Erklärung, ohne Markdown.\n\n"
-            f"Mediationsthema: {mediation_title}\n\n"
-            f"Original-Nachricht:\n{message}"
-        )
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=300,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = "".join(
-            block.text for block in response.content if getattr(block, "type", None) == "text"
-        ).strip()
+        text = ai_complete(prompt, max_tokens=300)
         return text or message
     except Exception as exc:
+        # Nie blockieren: bei fehlendem Key/Fehler den Originaltext behalten.
         logger.error("Paraphrasierung der Einladungsnachricht fehlgeschlagen: %s", exc)
         return message
 
@@ -172,34 +162,19 @@ def improve_message_text(text: str) -> str:
     text = (text or "").strip()
     if not text:
         return text
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(
-            status_code=503,
-            detail="KI-Verbesserung ist nicht konfiguriert (ANTHROPIC_API_KEY fehlt).",
-        )
 
+    prompt = (
+        "Der folgende Text stammt aus der automatischen Transkription einer gesprochenen "
+        "Video-Nachricht (oder wurde von Hand geschrieben). Glätte ihn zu einem klaren, gut "
+        "lesbaren Text: entferne Füllwörter, Versprecher, Wiederholungen und Satzbrüche, "
+        "korrigiere Grammatik und Zeichensetzung. Behalte Inhalt, Tonfall und Ich-Perspektive "
+        "der Person exakt bei -- erfinde nichts hinzu und ändere die Aussage nicht. "
+        "Antworte NUR mit dem verbesserten Text, ohne Anführungszeichen, ohne Erklärung, "
+        "ohne Markdown.\n\n"
+        f"Text:\n{text}"
+    )
     try:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-        prompt = (
-            "Der folgende Text stammt aus der automatischen Transkription einer gesprochenen "
-            "Video-Nachricht (oder wurde von Hand geschrieben). Glätte ihn zu einem klaren, gut "
-            "lesbaren Text: entferne Füllwörter, Versprecher, Wiederholungen und Satzbrüche, "
-            "korrigiere Grammatik und Zeichensetzung. Behalte Inhalt, Tonfall und Ich-Perspektive "
-            "der Person exakt bei -- erfinde nichts hinzu und ändere die Aussage nicht. "
-            "Antworte NUR mit dem verbesserten Text, ohne Anführungszeichen, ohne Erklärung, "
-            "ohne Markdown.\n\n"
-            f"Text:\n{text}"
-        )
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        improved = "".join(
-            block.text for block in response.content if getattr(block, "type", None) == "text"
-        ).strip()
+        improved = ai_complete(prompt, max_tokens=400)
         return improved or text
     except HTTPException:
         raise
@@ -226,11 +201,6 @@ def generate_invite_content(
     description = (description or "").strip()
     if not description:
         raise HTTPException(status_code=400, detail="Bitte zuerst kurz beschreiben, worum es geht.")
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(
-            status_code=503,
-            detail="KI ist nicht konfiguriert (ANTHROPIC_API_KEY fehlt).",
-        )
 
     type_labels = {
         "trennung": "Trennung & Scheidung",
@@ -257,17 +227,9 @@ def generate_invite_content(
     )
 
     try:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = "".join(
-            block.text for block in response.content if getattr(block, "type", None) == "text"
-        ).strip()
+        raw = ai_complete(prompt, max_tokens=500)
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error("KI-Generierung des Einladungstexts fehlgeschlagen: %s", exc)
         raise HTTPException(
