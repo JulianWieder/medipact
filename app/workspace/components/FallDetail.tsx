@@ -29,12 +29,53 @@ import {
   fetchStepContent,
   saveStepContent,
   summarizeResults,
+  generateMeetLink,
   type WorkflowRulesResponse,
 } from "../api";
 
 interface FallDetailProps {
   fall: MediationCase;
   onPhaseAdvanced?: () => void;
+}
+
+// Button: erzeugt serverseitig einen Google-Meet-Raum und gibt den Link an den
+// Aufrufer zurück (der ihn ins meeting_url-Feld übernimmt + persistiert).
+function MeetLinkButton({
+  onLink,
+  summary,
+}: {
+  onLink: (url: string) => void;
+  summary?: string;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleClick() {
+    setError("");
+    setLoading(true);
+    try {
+      const url = await generateMeetLink(summary);
+      onLink(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Meet-Link konnte nicht erzeugt werden");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1 rounded-md border border-accent-300 bg-accent-50 px-2.5 py-1.5 text-xs font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
+      >
+        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
+      </button>
+      {error && <p className="mt-1 text-xs font-semibold text-red-600">{error}</p>}
+    </div>
+  );
 }
 
 // ── Contract types ─────────────────────────────────────────────────────────
@@ -102,14 +143,18 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
 
   async function handleVariantChange(nextKey: string) {
     const value = nextKey === "" ? null : nextKey;
-    const previous = variantKey;
-    setVariantKey(value);
     setVariantSaving(true);
     setVariantError("");
     try {
       await setMediationVariant(fall.id, value);
+      // variantKey erst NACH erfolgreichem Speichern setzen: die Variante
+      // bestimmt die effektive Schrittliste (siehe get_phase_steps). Der
+      // Schritte-Tab lädt bei Änderung von variantKey neu (Dependency unten),
+      // und sieht dann garantiert den bereits committeten Server-Stand –
+      // sonst würde ein optimistisches Update die Schritte der ALTEN Variante
+      // (bzw. leer) laden, bevor der PUT durch ist.
+      setVariantKey(value);
     } catch {
-      setVariantKey(previous);
       setVariantError("Variante konnte nicht gespeichert werden");
     } finally {
       setVariantSaving(false);
@@ -519,8 +564,11 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
         loadFeedback(),
       ]);
     })();
+    // variantKey in den Dependencies: wechselt der Mediator die zugeordnete
+    // Variante (Workflow), muss der Schritte-Tab die effektive Schrittliste
+    // neu laden – sonst bleiben die Schritte nach dem Zuordnen leer/stale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, fall.id]);
+  }, [activeTab, fall.id, variantKey]);
 
   // Manuelles Neuladen (Button im Tab).
   const reloadStepsTab = useCallback(async () => {
@@ -1251,12 +1299,18 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               />
                             )}
                             {has("videokonferenz") && (
-                              <input
-                                value={draft.meeting_url}
-                                onChange={(e) => updateDraft(mapKey, { meeting_url: e.target.value })}
-                                placeholder="Meeting-/Call-Link …"
-                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
-                              />
+                              <>
+                                <input
+                                  value={draft.meeting_url}
+                                  onChange={(e) => updateDraft(mapKey, { meeting_url: e.target.value })}
+                                  placeholder="Meeting-/Call-Link (z.B. Google Meet) …"
+                                  className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                                />
+                                <MeetLinkButton
+                                  summary={fall.title}
+                                  onLink={(url) => updateDraft(mapKey, { meeting_url: url })}
+                                />
+                              </>
                             )}
                             {has("frage") && (
                               <textarea

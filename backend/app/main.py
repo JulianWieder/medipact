@@ -5,6 +5,7 @@ from app.config import settings
 from app.routers import (
     auth,
     custom_steps,
+    integrations,
     invites,
     invoices,
     mediation_variants,
@@ -33,6 +34,7 @@ app.include_router(phase_step_defaults.router)
 app.include_router(mediation_variants.router)
 app.include_router(step_content.router)
 app.include_router(invoices.router)
+app.include_router(integrations.router)
 
 
 @app.get("/health")

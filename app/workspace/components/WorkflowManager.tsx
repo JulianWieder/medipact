@@ -56,6 +56,7 @@ import {
   updatePhaseStepDefault,
   deletePhaseStepDefault,
   reorderPhaseStepDefaults,
+  generateMeetLink,
 } from "../api";
 
 // ── Layout-Konstanten für die Kette (rein visuell) ───────────────────────────
@@ -157,6 +158,46 @@ const FIELD_INPUT_CLASS =
 // passenden Inhaltsfelder (Anleitungstext, Platzhalter, Frage, Vertragsvorlage,
 // Video-/Meeting-URL, Feedback-Anlass). Bei "individuell" wird der Inhalt nicht
 // hier, sondern pro Fall gepflegt – dann erscheint nur ein Hinweis.
+// Kleiner Button, der serverseitig einen Google-Meet-Raum erzeugt und den Link
+// über onLink zurückgibt (Feld füllen + persistieren übernimmt der Aufrufer).
+function MeetLinkButton({
+  onLink,
+  summary,
+}: {
+  onLink: (url: string) => void;
+  summary?: string;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleClick() {
+    setError("");
+    setLoading(true);
+    try {
+      const url = await generateMeetLink(summary);
+      onLink(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Meet-Link konnte nicht erzeugt werden");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mt-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1 rounded-md border border-accent-200 bg-accent-50 px-2 py-1 text-[10px] font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
+      >
+        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
+      </button>
+      {error && <p className="mt-1 text-[10px] font-semibold text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 function ContentTypeEditor({ step }: { step: StepNodeData }) {
   const isIndividual = step.contentTypes.includes("individuell");
   const has = (id: string) => step.contentTypes.includes(id);
@@ -277,8 +318,12 @@ function ContentTypeEditor({ step }: { step: StepNodeData }) {
               <input
                 value={step.meetingUrl ?? ""}
                 onChange={(e) => step.onChangeMeetingUrl(e.target.value)}
-                placeholder="Link zum Videoraum (z.B. Jitsi/Zoom) …"
+                placeholder="Link zum Videoraum (z.B. Google Meet/Jitsi/Zoom) …"
                 className={FIELD_INPUT_CLASS}
+              />
+              <MeetLinkButton
+                summary={step.label}
+                onLink={(url) => step.onChangeMeetingUrl(url)}
               />
             </>
           )}

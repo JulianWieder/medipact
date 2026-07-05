@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import hashlib
+import json
 import logging
 import mimetypes
 import os
@@ -40,6 +41,12 @@ class MessageImproveRequest(BaseModel):
     text: str
 
 
+class InviteGenerateRequest(BaseModel):
+    # Kurze, formlose Beschreibung des Nutzers, aus der Claude einen
+    # professionellen Einladungstext, eine Überschrift und einen Fall-Titel macht.
+    description: str
+
+
 class InviteCreate(BaseModel):
     invited_email: EmailStr
     role: str = "other_party"
@@ -49,6 +56,9 @@ class InviteCreate(BaseModel):
     # Rückgabewert von POST /mediations/{id}/invites/video — verknüpft eine
     # zuvor hochgeladene Video-Botschaft mit dieser Einladung.
     video_token: str | None = None
+    # Optionale Überschrift/Betreff der Einladung (vom Nutzer editierbar, per
+    # Claude vorgeschlagen). Ersetzt in der E-Mail die Standard-Überschrift.
+    invitation_heading: str | None = None
 
 
 def create_invite_token() -> str:
@@ -200,6 +210,103 @@ def improve_message_text(text: str) -> str:
         ) from exc
 
 
+def generate_invite_content(
+    description: str,
+    mediation_title: str,
+    mediation_type: str,
+) -> dict:
+    """Macht aus einer kurzen, formlosen Beschreibung des Nutzers einen
+    professionellen Einladungstext, eine Überschrift und einen Fall-Titel-Vorschlag.
+
+    Rückgabe: ``{"message", "subject", "title"}``. Der Nutzer kann alle Felder
+    danach frei überarbeiten (siehe Einladungsformular). Wirft HTTPException,
+    wenn keine KI konfiguriert ist oder die Anfrage fehlschlägt.
+    """
+    description = (description or "").strip()
+    if not description:
+        raise HTTPException(status_code=400, detail="Bitte zuerst kurz beschreiben, worum es geht.")
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="KI ist nicht konfiguriert (ANTHROPIC_API_KEY fehlt).",
+        )
+
+    type_labels = {
+        "trennung": "Trennung & Scheidung",
+        "erbschaft": "Erbschaftsstreit",
+        "nachbarschaft": "Nachbarschaftskonflikt",
+    }
+    type_label = type_labels.get(mediation_type, mediation_type or "Mediation")
+
+    prompt = (
+        "Du hilfst einer Person, die eine andere Konfliktpartei zu einer Mediation einlädt. "
+        "Aus der folgenden kurzen, formlosen Beschreibung sollst du drei Dinge erstellen:\n"
+        "1. \"message\": eine persönliche Einladungsnachricht in der ICH-Perspektive der "
+        "einladenden Person (max. 90 Wörter). Ton: warm, respektvoll, wertschätzend, "
+        "professionell, deeskalierend. Ziel ist, dass die andere Seite sich einlässt und "
+        "der Mediation beitritt. Keine Schuldzuweisungen.\n"
+        "2. \"subject\": eine kurze, sachliche Überschrift/Betreffzeile (max. 8 Wörter), "
+        "ohne Anführungszeichen.\n"
+        "3. \"title\": ein prägnanter Fall-Titel für die Mediation (max. 6 Wörter).\n\n"
+        f"Mediationsbereich: {type_label}\n"
+        f"Bisheriger Fall-Titel (nur Kontext): {mediation_title}\n\n"
+        f"Beschreibung der Person:\n{description}\n\n"
+        "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt mit genau den Schlüsseln "
+        "\"message\", \"subject\", \"title\" – ohne Markdown, ohne Code-Fences, ohne Erklärung."
+    )
+
+    try:
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = "".join(
+            block.text for block in response.content if getattr(block, "type", None) == "text"
+        ).strip()
+    except Exception as exc:
+        logger.error("KI-Generierung des Einladungstexts fehlgeschlagen: %s", exc)
+        raise HTTPException(
+            status_code=502,
+            detail="Einladungstext konnte nicht erstellt werden. Bitte später erneut versuchen.",
+        ) from exc
+
+    data = _parse_generated_json(raw)
+    # Fallback: konnte kein JSON gelesen werden, wird der Rohtext als Nachricht
+    # genutzt, damit der Nutzer nicht mit leeren Händen dasteht.
+    message = (data.get("message") or raw or "").strip()
+    subject = (data.get("subject") or "").strip()
+    title = (data.get("title") or "").strip()
+    return {"message": message, "subject": subject, "title": title}
+
+
+def _parse_generated_json(raw: str) -> dict:
+    """Liest das JSON-Objekt aus Claudes Antwort robust aus (auch mit Code-Fences)."""
+    if not raw:
+        return {}
+    text = raw.strip()
+    if text.startswith("```"):
+        # ```json ... ``` entfernen
+        text = text.strip("`")
+        if text.lower().startswith("json"):
+            text = text[4:]
+    try:
+        return json.loads(text)
+    except (ValueError, TypeError):
+        # Notfalls das erste {...} herausschneiden.
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(raw[start : end + 1])
+            except (ValueError, TypeError):
+                return {}
+        return {}
+
+
 def send_invite_email(
     to_email: str,
     invite_url: str,
@@ -207,6 +314,7 @@ def send_invite_email(
     role: str,
     personal_message: str | None = None,
     has_video: bool = False,
+    heading: str | None = None,
 ) -> None:
     """Send invitation email via SMTP. Logs errors without raising so invite creation always succeeds."""
     if not settings.SMTP_HOST or not settings.SMTP_USER:
@@ -234,6 +342,11 @@ def send_invite_email(
                 <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;">Persönliche Nachricht</p>
                 <p style="margin:0;font-size:15px;color:#0f172a;line-height:1.7;font-style:italic;">„{escaped_message}“</p>
               </div>"""
+
+    heading_text = (heading or "").strip() or "Du wurdest zu einer Mediation eingeladen"
+    heading_html = (
+        heading_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    )
 
     video_notice_html = ""
     if has_video:
@@ -273,7 +386,7 @@ def send_invite_email(
             <td style="padding:40px;">
               <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:1px;">Einladung</p>
               <h1 style="margin:0 0 24px;font-size:26px;font-weight:800;color:#0f172a;line-height:1.3;">
-                Du wurdest zu einer Mediation eingeladen
+                {heading_html}
               </h1>
               <p style="margin:0 0 16px;font-size:15px;color:#475569;line-height:1.7;">
                 Du wurdest als <strong style="color:#0f172a;">{role_label}</strong> zu folgendem Mediationsverfahren eingeladen:
@@ -439,9 +552,26 @@ async def improve_invite_message_endpoint(
     return {"text": improved}
 
 
+@router.post("/mediations/{mediation_id}/invites/message/generate")
+async def generate_invite_message_endpoint(
+    mediation_id: int,
+    payload: InviteGenerateRequest,
+    mediation=Depends(require_mediation_access),
+):
+    """Erzeugt aus einer kurzen Beschreibung einen professionellen Einladungstext,
+    eine Überschrift und einen Fall-Titel-Vorschlag (alle vom Nutzer editierbar)."""
+    return generate_invite_content(
+        payload.description,
+        mediation.title or "Neue Mediation",
+        getattr(mediation, "mediation_type", "") or "",
+    )
+
+
 # Rollen, für die eine persönliche Video-Botschaft beim Erstellen der Einladung
-# verpflichtend ist (siehe create_invite). Mediator/Beobachter bleiben optional.
-_VIDEO_REQUIRED_ROLES = {"other_party"}
+# verpflichtend ist (siehe create_invite). Aktuell leer = Video ist immer
+# optional; der Mechanismus bleibt erhalten, falls es später wieder Pflicht
+# werden soll (dann z.B. {"other_party"} eintragen).
+_VIDEO_REQUIRED_ROLES: set[str] = set()
 
 
 @router.post("/mediations/{mediation_id}/invites")
@@ -501,6 +631,7 @@ def create_invite(
         payload.role,
         personal_message=paraphrased_message,
         has_video=bool(video_filename),
+        heading=payload.invitation_heading,
     )
 
     return {

@@ -4,6 +4,7 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { StepImage } from "@/app/components/StepImage";
 import { JsonLd } from "@/app/components/JsonLd";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
+import { EinladungsAssistent } from "@/app/components/EinladungsAssistent";
 import whiteboardPhoto from "../../fotos/whiteboard-erklaerung.jpg";
 import step1Photo from "../../fotos/schritte/1.jpg";
 import step2Photo from "../../fotos/schritte/2.jpg";
@@ -238,6 +239,8 @@ export default function MethodePage() {
           </div>
         </div>
       </section>
+
+      <EinladungsAssistent />
 
       <section id="faq" className="section section-base">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">

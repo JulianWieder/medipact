@@ -54,6 +54,11 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [videoToken, setVideoToken] = useState("");
   const [improving, setImproving] = useState(false);
   const [improveError, setImproveError] = useState("");
+  const [invitationSubject, setInvitationSubject] = useState("");
+  const [titleSuggestion, setTitleSuggestion] = useState("");
+  const [titleSaving, setTitleSaving] = useState(false);
+  const [titleSaved, setTitleSaved] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
@@ -109,6 +114,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           invited_email: trimmedEmail,
           personal_message: personalMessage.trim() || undefined,
           video_token: videoToken || undefined,
+          invitation_heading: invitationSubject.trim() || undefined,
         }),
       });
 
@@ -156,6 +162,60 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       setImproveError("Server nicht erreichbar.");
     } finally {
       setImproving(false);
+    }
+  }
+
+  // Nutzer beschreibt kurz, worum es geht → Claude macht daraus einen
+  // professionellen Einladungstext + Überschrift + Fall-Titel-Vorschlag.
+  // Alle Felder bleiben danach frei editierbar.
+  async function generateInvitation() {
+    if (!personalMessage.trim()) return;
+    setGenerating(true);
+    setImproveError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/invites/message/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: personalMessage }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || typeof data?.message !== "string") {
+        setImproveError(data?.detail ?? data?.error ?? "Einladungstext konnte nicht erstellt werden.");
+        return;
+      }
+      setPersonalMessage(data.message);
+      if (typeof data.subject === "string" && data.subject.trim()) setInvitationSubject(data.subject);
+      if (typeof data.title === "string" && data.title.trim()) {
+        setTitleSuggestion(data.title);
+        setTitleSaved(false);
+      }
+    } catch {
+      setImproveError("Server nicht erreichbar.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  // Übernimmt den (ggf. editierten) Fall-Titel-Vorschlag als Titel der Mediation.
+  async function saveTitleSuggestion() {
+    if (!titleSuggestion.trim()) return;
+    setTitleSaving(true);
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/update`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: titleSuggestion.trim() }),
+      });
+      if (res.ok) {
+        setTitleSaved(true);
+      } else {
+        const data = await res.json().catch(() => null);
+        setImproveError(data?.detail ?? data?.error ?? "Titel konnte nicht gespeichert werden.");
+      }
+    } catch {
+      setImproveError("Server nicht erreichbar.");
+    } finally {
+      setTitleSaving(false);
     }
   }
 
@@ -477,7 +537,6 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                         videoToken={videoToken}
                         onChange={setVideoToken}
                         onTranscript={setPersonalMessage}
-                        required
                       />
                     </div>
 
@@ -485,43 +544,89 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       <label htmlFor="invite-message" className="block text-sm font-semibold text-neutral-900">
                         Persönliche Nachricht
                       </label>
-                      <button
-                        type="button"
-                        onClick={improveMessage}
-                        disabled={improving || !personalMessage.trim()}
-                        className="btn btn-ghost shrink-0 px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {improving ? "Wird verbessert…" : "✨ Mit KI verbessern"}
-                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={generateInvitation}
+                          disabled={generating || !personalMessage.trim()}
+                          className="btn btn-primary px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {generating ? "Formuliere…" : "✨ Professionell formulieren"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={improveMessage}
+                          disabled={improving || !personalMessage.trim()}
+                          className="btn btn-ghost px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {improving ? "…" : "Verbessern"}
+                        </button>
+                      </div>
                     </div>
                     <textarea
                       id="invite-message"
                       value={personalMessage}
                       onChange={(e) => setPersonalMessage(e.target.value)}
-                      placeholder="Wird automatisch aus deiner Video-Botschaft übertragen, sobald die Aufnahme fertig ist …"
+                      placeholder="Beschreibe kurz, worum es geht (Stichworte reichen) – oder nimm oben eine Video-Botschaft auf. Mit „Professionell formulieren“ macht Claude daraus eine freundliche Einladung, die du danach frei bearbeiten kannst."
                       className="mt-2 min-h-24 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                     />
                     <p className="mt-1 text-xs text-neutral-400">
-                      Automatisch aus der Video-Botschaft übertragen (per KI transkribiert). Du kannst den
-                      Text frei bearbeiten; er wird vor dem Versand zusätzlich von der KI freundlich umformuliert.
+                      Die Video-Botschaft ist optional. Kurz beschreiben → „Professionell formulieren“ →
+                      Text prüfen und anpassen. Vor dem Versand wird er zusätzlich freundlich umformuliert.
                     </p>
+
+                    <div className="mt-4">
+                      <label htmlFor="invite-subject" className="block text-sm font-semibold text-neutral-900">
+                        Überschrift der Einladung <span className="font-normal text-neutral-400">(optional)</span>
+                      </label>
+                      <input
+                        id="invite-subject"
+                        value={invitationSubject}
+                        onChange={(e) => setInvitationSubject(e.target.value)}
+                        placeholder="z.B. Einladung zu einem klärenden Gespräch"
+                        className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
+                      />
+                    </div>
+
+                    {titleSuggestion && (
+                      <div className="mt-4 rounded-xl border border-accent-200 bg-white p-3">
+                        <label htmlFor="invite-title" className="block text-xs font-semibold text-neutral-900">
+                          Vorgeschlagener Fall-Titel
+                        </label>
+                        <div className="mt-2 flex items-center gap-2">
+                          <input
+                            id="invite-title"
+                            value={titleSuggestion}
+                            onChange={(e) => {
+                              setTitleSuggestion(e.target.value);
+                              setTitleSaved(false);
+                            }}
+                            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-100"
+                          />
+                          <button
+                            type="button"
+                            onClick={saveTitleSuggestion}
+                            disabled={titleSaving || !titleSuggestion.trim() || titleSaved}
+                            className="btn btn-secondary shrink-0 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {titleSaved ? "✓ Übernommen" : titleSaving ? "…" : "Als Fall-Titel übernehmen"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {improveError && (
-                      <p className="mt-1 text-xs font-semibold text-red-600">{improveError}</p>
+                      <p className="mt-2 text-xs font-semibold text-red-600">{improveError}</p>
                     )}
 
                     <button
                       type="button"
                       onClick={createInvite}
-                      disabled={loading || !email.trim() || !videoToken}
+                      disabled={loading || !email.trim()}
                       className="btn btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? "Wird erstellt..." : "Einladung erstellen"}
                     </button>
-                    {!videoToken && (
-                      <p className="mt-2 text-center text-xs text-neutral-400">
-                        Eine Video-Botschaft ist erforderlich, bevor die Einladung erstellt werden kann.
-                      </p>
-                    )}
                   </div>
                 )}
               </div>

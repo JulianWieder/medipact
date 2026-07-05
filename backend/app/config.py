@@ -33,6 +33,20 @@ class Settings(BaseSettings):
     INVITE_VIDEO_DIR: str = "media/invite_videos"
     # Maximale Dateigröße für Einladungs-Videos in MB
     INVITE_VIDEO_MAX_MB: int = 50
+    # ── Google Meet (automatische Videokonferenz-Links) ──────────────────────
+    # Zentrales Google-Konto, über das medipact Kalendertermine mit Meet-Link
+    # anlegt. OAuth-Client aus der Google Cloud Console; Refresh-Token einmalig
+    # per scripts/google_meet_get_refresh_token.py erzeugen. Siehe
+    # docs/google-meet-setup.md. Solange leer, ist die Funktion deaktiviert und
+    # der "Meet-Link erzeugen"-Button meldet, dass Google noch nicht verbunden ist.
+    GOOGLE_OAUTH_CLIENT_ID: str = ""
+    GOOGLE_OAUTH_CLIENT_SECRET: str = ""
+    GOOGLE_OAUTH_REFRESH_TOKEN: str = ""
+    # Kalender, in dem die Termine angelegt werden ("primary" = Hauptkalender
+    # des zentralen Kontos).
+    GOOGLE_CALENDAR_ID: str = "primary"
+    # Zeitzone für die erzeugten Termine (IANA-Name).
+    GOOGLE_MEET_TIMEZONE: str = "Europe/Berlin"
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
     PAYPAL_CLIENT_ID: str = ""
     PAYPAL_CLIENT_SECRET: str = ""

@@ -276,6 +276,24 @@ export async function updateInvoice(id: number, payload: InvoiceUpdateInput): Pr
   return res.json();
 }
 
+// ── Google Meet (automatische Videokonferenz-Links) ──────────────────────
+
+/** Erzeugt serverseitig einen neuen Google-Meet-Link (nur Mediatoren/Admins). */
+export async function generateMeetLink(summary?: string): Promise<string> {
+  const res = await fetch("/api/integrations/google-meet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ summary: summary ?? null }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? err?.error ?? "Meet-Link konnte nicht erzeugt werden");
+  }
+  const data = await res.json();
+  if (!data?.meeting_url) throw new Error("Kein Meet-Link erhalten");
+  return data.meeting_url as string;
+}
+
 // ── Workflow-Designer: Varianten + Standard-Schritte + Fall-Zuordnung ─────
 // Nutzt die bestehenden Admin-API-Routes (Backend prüft mediator/admin).
 // fetchAllMediations: siehe oben (Admin: alle Fälle).

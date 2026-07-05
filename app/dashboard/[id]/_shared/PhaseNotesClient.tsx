@@ -4,6 +4,7 @@ import { hashId } from "@/lib/ids";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from "./phaseData";
+import StepContentBlocks from "./StepContentBlocks";
 
 type Props = {
   mediationId: string;
@@ -59,6 +60,13 @@ type PhaseStepFromAPI = {
   placeholder: string;
   reflection_mode: "simple" | "interactive" | null;
   content_types?: string[] | null;
+  // Inhaltsart-spezifische Felder (siehe StepContentBlocks). Das Backend liefert
+  // sie bereits pro Schritt; früher hat PhaseNotesClient sie ignoriert.
+  video_url?: string | null;
+  meeting_url?: string | null;
+  question?: string | null;
+  contract_template?: string | null;
+  feedback_occasion?: "after_videocall" | "before_contract" | null;
   // Ergebnis-Schritte: true, sobald der Mediator den Inhalt freigegeben hat.
   result_released?: boolean | null;
   custom: boolean;
@@ -653,6 +661,11 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const [resultStepKeys, setResultStepKeys] = useState<Set<string>>(new Set());
   const [resultReleasedByKey, setResultReleasedByKey] = useState<Record<string, boolean>>({});
 
+  // Voller Schritt-Datensatz vom Backend (inkl. content_types + Inhaltsart-
+  // Feldern), damit StepContentBlocks Video/Videokonferenz/Frage/… rendern
+  // kann. toStepDetailFromAPI verwirft diese Felder, daher separat gehalten.
+  const [stepMeta, setStepMeta] = useState<Record<string, PhaseStepFromAPI>>({});
+
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [advancing, setAdvancing] = useState(false);
@@ -689,6 +702,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           : [];
         const allDetails = phaseStepsFromAPI.map(toStepDetailFromAPI);
         setStepDetails(allDetails);
+        setStepMeta(Object.fromEntries(phaseStepsFromAPI.map((s) => [s.key, s])));
 
         // Ergebnis-Anzeige-Schritte erfassen (read-only + Freigabe-Status).
         const rSet = new Set<string>();
@@ -1182,6 +1196,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 {!isResultStep && (
                   <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{currentStep.description}</p>
                 )}
+
+                {/* Inhaltsart-Bausteine (Video / Videokonferenz / Frage) – aus der
+                    WorkflowManager-Konfiguration, in jeder Phase verfügbar. */}
+                {!isResultStep && <StepContentBlocks meta={stepMeta[currentStep.key]} />}
 
                 {/* Ergebnis-Ansicht (read-only, nur freigegebene Inhalte) */}
                 {isResultStep && (

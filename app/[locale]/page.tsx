@@ -6,7 +6,6 @@ import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
 import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
-import { EinladungsAssistent } from "@/app/components/EinladungsAssistent";
 import QuickCheck from "@/app/components/QuickCheck";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
@@ -113,8 +112,6 @@ export default async function MedipactLanding() {
         <ThemenTabs />
 
         <EmpfehlungenGrid />
-
-        <EinladungsAssistent />
 
         <QuickCheck />
 
