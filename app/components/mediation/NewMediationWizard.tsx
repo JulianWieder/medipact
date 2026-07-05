@@ -2,7 +2,7 @@
 
 import { encodeId } from "@/lib/ids";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { NewMediationConfig } from "@/lib/mediation-types/types";
@@ -27,6 +27,30 @@ export default function NewMediationWizard({ config }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState("");
+
+  // Angebotene Pakete (Preis hängt an Konflikttyp + Paket, siehe backend/app/pricing.py)
+  const [packages, setPackages] = useState<
+    { key: string; label: string; price_eur: number }[]
+  >([]);
+  const [selectedPackage, setSelectedPackage] = useState("online");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`/api/mediations/packages/${config.type}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        const pkgs: { key: string; label: string; price_eur: number }[] = data.packages ?? [];
+        setPackages(pkgs);
+        if (pkgs.length && !pkgs.some((p) => p.key === selectedPackage)) {
+          setSelectedPackage(pkgs[0].key);
+        }
+      } catch {
+        /* still ignorieren – Default "online" bleibt */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.type]);
 
   // Generiert KI-Titel sobald das erste Beschreibungsfeld ausgefüllt wird (on blur)
   const handleDescriptionBlur = async (value: string) => {
@@ -110,6 +134,7 @@ export default function NewMediationWizard({ config }: Props) {
           title: finalTitle || undefined,
           description: description || undefined,
           priority: priority || undefined,
+          package: selectedPackage || undefined,
         }),
       });
 
@@ -226,6 +251,40 @@ export default function NewMediationWizard({ config }: Props) {
                   <p className="mt-2 text-sm text-amber-600">{titleError}</p>
                 )}
               </label>
+
+              {packages.length > 0 && (
+                <div className="border-t border-neutral-100 pt-6">
+                  <span className="text-sm font-bold text-neutral-800">
+                    Paket wählen <span className="text-accent-600">*</span>
+                  </span>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    Bestimmt den Leistungsumfang und den Preis. Details siehe{" "}
+                    <Link href="/preise" className="underline" target="_blank">
+                      Preisübersicht
+                    </Link>
+                    .
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    {packages.map((pkg) => (
+                      <button
+                        key={pkg.key}
+                        type="button"
+                        onClick={() => setSelectedPackage(pkg.key)}
+                        className={`rounded-2xl border p-4 text-left transition ${
+                          selectedPackage === pkg.key
+                            ? "border-accent-500 ring-2 ring-accent-200"
+                            : "border-neutral-300 hover:border-neutral-400"
+                        }`}
+                      >
+                        <span className="block text-sm font-bold text-neutral-900">{pkg.label}</span>
+                        <span className="mt-1 block text-lg font-extrabold text-accent-600">
+                          {pkg.price_eur.toFixed(0)} €
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">

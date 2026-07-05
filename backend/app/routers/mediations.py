@@ -25,6 +25,8 @@ from app.prompts import get_prompt
 from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
+from app import pricing
+from app.services import billing
 
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
@@ -38,6 +40,9 @@ class MediationCreate(BaseModel):
     priority: Optional[str] = None
     role: Optional[str] = None
     status: str = "draft"
+    # Gewähltes Paket (online | hybrid | vollservice). Bestimmt zusammen mit
+    # mediation_type den Preis (siehe app/pricing.py).
+    package: Optional[str] = None
 
 
 class MediationUpdate(BaseModel):
@@ -46,6 +51,9 @@ class MediationUpdate(BaseModel):
     priority: Optional[str] = None
     status: Optional[str] = None
     phase: Optional[str] = None
+    # Paket (online|hybrid|vollservice) – solange der Fall noch nicht bezahlt ist,
+    # änderbar (z.B. im Erstell-Wizard). Wird serverseitig normalisiert.
+    package: Optional[str] = None
     # is_paid wird bewusst NICHT hier aufgenommen - darf nur über den
     # dedizierten /pay-Endpoint gesetzt werden, nicht über das generische Update.
 
@@ -303,14 +311,15 @@ def update_billing_address(
 
 
 def _mediation_price_eur(db: Session, mediation_id: int) -> float:
-    """Preis für die Freischaltung: 499 € pro Teilnehmer (mind. 1)."""
-    count = (
-        db.query(MediationParticipant)
-        .filter(MediationParticipant.mediation_id == mediation_id)
-        .count()
-    )
-    count = max(count, 1)
-    return round(settings.PRICE_PER_PARTICIPANT_EUR * count, 2)
+    """DEPRECATED – Summe der Grundbeträge aller zahlungspflichtigen Parteien.
+
+    Wird nur noch als grober Gesamtpreis (z.B. Übersicht) genutzt. Die tatsächliche
+    Abrechnung läuft pro Partei über app/services/billing.py.
+    """
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        return 0.0
+    return round(sum(billing.participant_base_due(db, mediation, p) for p in billing.owing_participants(db, mediation)), 2)
 
 
 def _ensure_start_invoice(
@@ -356,7 +365,7 @@ def _ensure_start_invoice(
         billing_street=participant.billing_street,
         billing_postal_code=participant.billing_postal_code,
         billing_city=participant.billing_city,
-        amount=_mediation_price_eur(db, mediation.id),
+        amount=billing.participant_final_due(db, mediation, participant),
         tax_rate=0.0,
         currency="EUR",
         status="paid",
@@ -384,6 +393,7 @@ def create_mediation(
         priority=mediation.priority,
         role=mediation.role,
         status=mediation.status,
+        package=pricing.normalize_package(mediation.package),
     )
     db.add(db_mediation)
     db.commit()
@@ -407,6 +417,7 @@ def create_mediation(
         "priority": db_mediation.priority,
         "role": db_mediation.role,
         "status": db_mediation.status,
+        "package": db_mediation.package,
     }
 
 
@@ -433,6 +444,13 @@ def update_mediation(
         raise HTTPException(status_code=404, detail="Mediation not found")
 
     update_data = payload.model_dump(exclude_none=True)
+
+    # Paket normalisieren; nach Bezahlung nicht mehr änderbar (Preis fixiert).
+    if "package" in update_data:
+        if mediation.is_paid:
+            update_data.pop("package")
+        else:
+            update_data["package"] = pricing.normalize_package(update_data["package"])
 
     # Phase 1 darf erst starten, wenn bezahlt wurde. Diese Prüfung greift
     # serverseitig, damit ein direkter API-Call (z.B. via Link) die Paywall
@@ -470,24 +488,128 @@ def update_mediation(
     return mediation
 
 
+@router.get("/packages/{mediation_type}")
+def list_packages(
+    mediation_type: str,
+    user: User = Depends(get_current_db_user),
+):
+    """Angebotene Pakete + Grundpreise für einen Konflikttyp (für die Paketwahl
+    bei der Fallerstellung). "packages" kollidiert nicht mit /{mediation_id},
+    da mediation_id ein int ist."""
+    return {
+        "mediation_type": mediation_type,
+        "billing_model": pricing.billing_model(mediation_type),
+        "packages": pricing.available_packages(mediation_type),
+    }
+
+
+class DiscountApplyRequest(BaseModel):
+    code: str
+
+
+def _payment_status_payload(db: Session, mediation: Mediation, me: MediationParticipant) -> dict:
+    """Vollständiger Bezahl-Status: eigener Anteil + Status aller Parteien."""
+    my_base = billing.participant_base_due(db, mediation, me)
+    my_final = billing.participant_final_due(db, mediation, me)
+
+    parties = []
+    for p in (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id == mediation.id)
+        .all()
+    ):
+        owes = pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(p))
+        u = db.query(User).filter(User.id == p.user_id).first()
+        parties.append({
+            "participant_id": p.id,
+            "role": p.role,
+            "name": (u.name if u else None),
+            "owes": owes,
+            "paid": bool(p.paid),
+            "amount_due_eur": billing.participant_final_due(db, mediation, p) if owes else 0.0,
+            "is_you": p.id == me.id,
+        })
+
+    return {
+        "mediation_type": mediation.mediation_type,
+        "package": mediation.package,
+        "billing_model": pricing.billing_model(mediation.mediation_type),
+        "case_base_price_eur": pricing.base_price(mediation.mediation_type, mediation.package),
+        "is_paid": bool(mediation.is_paid),
+        "all_owing_paid": billing.all_owing_paid(db, mediation),
+        "you": {
+            "owes": pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me)),
+            "base_due_eur": my_base,
+            "discount_code": me.discount_code,
+            "discount_amount_eur": round(me.discount_amount or 0.0, 2),
+            "amount_due_eur": my_final,
+            "paid": bool(me.paid),
+        },
+        "participants": parties,
+    }
+
+
+def _get_mediation_or_404(db: Session, mediation_id: int) -> Mediation:
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+    return mediation
+
+
 @router.get("/{mediation_id}/price")
 def get_mediation_price(
     mediation_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Liefert den aktuellen Preis zur Freischaltung (499 € pro Teilnehmer)."""
-    _require_participant(mediation_id, user, db)
-    count = (
-        db.query(MediationParticipant)
-        .filter(MediationParticipant.mediation_id == mediation_id)
-        .count()
-    )
-    return {
-        "price_eur": _mediation_price_eur(db, mediation_id),
-        "price_per_participant_eur": settings.PRICE_PER_PARTICIPANT_EUR,
-        "participant_count": max(count, 1),
-    }
+    """Bezahl-Status für die aktuelle Partei: eigener Anteil (nach Rabatt) plus
+    Status aller Parteien. Der Fall wird erst freigeschaltet, wenn alle
+    zahlungspflichtigen Parteien bezahlt haben."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    return _payment_status_payload(db, mediation, me)
+
+
+@router.post("/{mediation_id}/discount")
+def apply_discount(
+    mediation_id: int,
+    payload: DiscountApplyRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Wendet einen Rabattcode auf den eigenen Anteil an (löst ihn noch nicht ein –
+    das geschieht erst bei erfolgreicher Zahlung)."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+
+    base_due = billing.participant_base_due(db, mediation, me)
+    discount, code = billing.validate_discount(db, payload.code, mediation, base_due)
+
+    me.discount_code = code.code
+    me.discount_amount = discount
+    db.commit()
+    db.refresh(me)
+    return _payment_status_payload(db, mediation, me)
+
+
+@router.delete("/{mediation_id}/discount")
+def remove_discount(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Entfernt einen zuvor angewendeten (noch nicht bezahlten) Rabattcode."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    me.discount_code = None
+    me.discount_amount = 0.0
+    db.commit()
+    db.refresh(me)
+    return _payment_status_payload(db, mediation, me)
 
 
 class PayPalCaptureRequest(BaseModel):
@@ -500,21 +622,28 @@ async def create_paypal_order(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Erstellt eine PayPal-Order über den fälligen Betrag (499 €/Teilnehmer)."""
-    _require_participant(mediation_id, user, db)
-    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
-    if not mediation:
-        raise HTTPException(status_code=404, detail="Mediation not found")
-    if mediation.is_paid:
-        raise HTTPException(status_code=400, detail="Mediation ist bereits bezahlt.")
+    """Erstellt eine PayPal-Order über den EIGENEN Anteil dieser Partei (nach Rabatt)."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
 
-    price = _mediation_price_eur(db, mediation_id)
+    if not pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me)):
+        raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an.")
+
+    amount = billing.participant_final_due(db, mediation, me)
+    if amount <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Dein Anteil beträgt 0 € – nutze die kostenlose Freischaltung.",
+        )
+
     try:
-        order = await create_order(price, mediation_id)
+        order = await create_order(amount, mediation_id)
     except PayPalError as e:
         raise HTTPException(status_code=502, detail=str(e))
 
-    return {"order_id": order["id"], "price_eur": price}
+    return {"order_id": order["id"], "amount_eur": amount}
 
 
 @router.post("/{mediation_id}/pay/paypal/capture-order")
@@ -524,16 +653,13 @@ async def capture_paypal_order(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Erfasst eine vom Nutzer im PayPal-Fenster genehmigte Order.
+    """Erfasst die genehmigte PayPal-Order für den EIGENEN Anteil.
 
-    Erst wenn PayPal den Status "COMPLETED" zurückmeldet, wird die Mediation
-    als bezahlt markiert - die Bestätigung kommt also direkt von PayPal, nicht
-    vom Client.
+    Erst wenn PayPal "COMPLETED" meldet, gilt der Anteil als bezahlt. Der Fall
+    wird freigeschaltet, sobald ALLE zahlungspflichtigen Parteien bezahlt haben.
     """
-    _require_participant(mediation_id, user, db)
-    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
-    if not mediation:
-        raise HTTPException(status_code=404, detail="Mediation not found")
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
 
     try:
         result = await capture_order(payload.order_id)
@@ -546,10 +672,38 @@ async def capture_paypal_order(
             detail="Die Zahlung wurde von PayPal nicht als abgeschlossen gemeldet.",
         )
 
-    mediation.is_paid = True
-    db.commit()
+    amount = billing.participant_final_due(db, mediation, me)
+    billing.mark_participant_paid(db, me, amount=amount, order_id=payload.order_id)
+    billing.check_and_unlock(db, mediation)
     db.refresh(mediation)
-    return {"ok": True, "is_paid": mediation.is_paid}
+    return {"ok": True, **_payment_status_payload(db, mediation, me)}
+
+
+@router.post("/{mediation_id}/pay/free")
+def redeem_free(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Schaltet den eigenen Anteil ohne Zahlung frei, wenn er (z.B. durch einen
+    Voll-Rabattcode) 0 € beträgt."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+
+    amount = billing.participant_final_due(db, mediation, me)
+    owes = pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me))
+    if owes and amount > 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Es ist noch ein Betrag offen – bitte per PayPal bezahlen.",
+        )
+
+    billing.mark_participant_paid(db, me, amount=0.0)
+    billing.check_and_unlock(db, mediation)
+    db.refresh(mediation)
+    return {"ok": True, **_payment_status_payload(db, mediation, me)}
 
 
 @router.get("/me")

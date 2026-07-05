@@ -7,6 +7,7 @@ from app.routers import (
     auth,
     custom_steps,
     dev_test,
+    discounts,
     integrations,
     invites,
     invoices,
@@ -38,6 +39,7 @@ app.include_router(step_content.router)
 app.include_router(invoices.router)
 app.include_router(integrations.router)
 app.include_router(ai_prompts.router)
+app.include_router(discounts.router)
 
 # Dev-Test-Endpunkte (Gemini/Claude/PayPal). Über ENABLE_DEV_TEST steuerbar –
 # funktioniert auch auf dem Live-Server (nur per localhost:8000 erreichbar, da

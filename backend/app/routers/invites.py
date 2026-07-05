@@ -20,12 +20,14 @@ from app.config import settings
 from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
+from app.models.invite_meet_recording import InviteMeetRecording
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.models.phase_step_default import PhaseStepDefault
 from app.prompts import get_prompt
 from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
+from app.services import google_meet
 from app.services.llm import ai_complete
 
 logger = logging.getLogger(__name__)
@@ -50,6 +52,12 @@ class InviteGenerateRequest(BaseModel):
     description: str
 
 
+class MeetRecordingStartRequest(BaseModel):
+    # "video" oder "audio" – steuert nur die Darstellung; Meet nimmt technisch
+    # immer A/V auf (bei "audio" schaltet der Nutzer die Kamera aus).
+    kind: str = "video"
+
+
 class InviteCreate(BaseModel):
     invited_email: EmailStr
     role: str = "other_party"
@@ -59,6 +67,9 @@ class InviteCreate(BaseModel):
     # Rückgabewert von POST /mediations/{id}/invites/video — verknüpft eine
     # zuvor hochgeladene Video-Botschaft mit dieser Einladung.
     video_token: str | None = None
+    # Rückgabewert von POST /mediations/{id}/invites/meet-recording/start —
+    # verknüpft eine über Google Meet aufgenommene Botschaft mit dieser Einladung.
+    meet_recording_token: str | None = None
     # Optionale Überschrift/Betreff der Einladung (vom Nutzer editierbar, per
     # Claude vorgeschlagen). Ersetzt in der E-Mail die Standard-Überschrift.
     invitation_heading: str | None = None
@@ -477,6 +488,90 @@ async def transcribe_invite_video_endpoint(
     return {"transcript": transcript}
 
 
+@router.post("/mediations/{mediation_id}/invites/meet-recording/start")
+def start_meet_recording(
+    mediation_id: int,
+    payload: MeetRecordingStartRequest,
+    db: Session = Depends(get_db),
+    mediation=Depends(require_mediation_access),
+):
+    """Legt einen Meet-Raum an, der die Einladungs-Botschaft automatisch aufnimmt.
+
+    Der Einladende betritt den zurückgegebenen ``join_url``, spricht seine Botschaft,
+    verlässt den Raum wieder und ruft die Aufnahme danach per Status-Endpunkt ab.
+    Gibt einen ``token`` zurück, der beim Erstellen der Einladung mitgegeben wird.
+    """
+    kind = "audio" if (payload.kind or "").lower() == "audio" else "video"
+
+    space = google_meet.create_recording_space()
+
+    token = secrets.token_urlsafe(24)
+    recording = InviteMeetRecording(
+        mediation_id=mediation.id,
+        token=token,
+        space_name=space["space_name"],
+        meeting_uri=space["meeting_uri"],
+        kind=kind,
+        status="pending",
+    )
+    db.add(recording)
+    db.commit()
+
+    return {
+        "token": token,
+        "join_url": space["meeting_uri"],
+        "kind": kind,
+    }
+
+
+@router.get("/mediations/{mediation_id}/invites/meet-recording/{token}/status")
+def get_meet_recording_status(
+    mediation_id: int,
+    token: str,
+    db: Session = Depends(get_db),
+    mediation=Depends(require_mediation_access),
+):
+    """Pollt die Meet-Artefakte des Raums und meldet Fortschritt/Transkript.
+
+    Status: pending → recording → processing → ready. Sobald "ready", stehen
+    ``recording_uri`` (Drive-Playback-Link) und ``transcript`` bereit.
+    """
+    recording = (
+        db.query(InviteMeetRecording)
+        .filter(
+            InviteMeetRecording.token == token,
+            InviteMeetRecording.mediation_id == mediation.id,
+        )
+        .first()
+    )
+    if not recording:
+        raise HTTPException(status_code=404, detail="Aufnahme nicht gefunden")
+
+    # Schon fertig? Nicht erneut bei Google nachfragen.
+    if recording.status == "ready":
+        return {
+            "status": "ready",
+            "kind": recording.kind,
+            "recording_uri": recording.recording_uri,
+            "transcript": recording.transcript or "",
+        }
+
+    result = google_meet.fetch_recording_artifacts(recording.space_name)
+    recording.status = result["status"]
+    if result["status"] == "ready":
+        recording.recording_uri = result["recording_uri"]
+        recording.recording_file_id = result["recording_file_id"]
+        recording.transcript = result["transcript"]
+    db.commit()
+
+    return {
+        "status": recording.status,
+        "kind": recording.kind,
+        "recording_uri": recording.recording_uri,
+        "transcript": recording.transcript or "",
+    }
+
+
 @router.post("/mediations/{mediation_id}/invites/message/improve")
 async def improve_invite_message_endpoint(
     mediation_id: int,
@@ -542,7 +637,12 @@ def get_invite_settings_for_mediation(
 ):
     """Liefert der Einladungsseite den geltenden Video-Modus (optional|required|off)
     für die Mediationsart dieses Falls. Für Teilnehmer zugänglich (nicht nur Admin)."""
-    return {"video_mode": effective_video_mode(db, mediation.mediation_type)}
+    return {
+        "video_mode": effective_video_mode(db, mediation.mediation_type),
+        # Ist die serverseitige Meet-Aufnahme verbunden, bietet das Frontend statt
+        # der Browser-Aufnahme die Aufnahme über Google Meet an.
+        "meet_recording_available": google_meet.recording_is_configured(),
+    }
 
 
 @router.post("/mediations/{mediation_id}/invites")
@@ -572,6 +672,30 @@ def create_invite(
             raise HTTPException(status_code=404, detail="Hochgeladenes Video nicht gefunden")
         video_filename = payload.video_token
 
+    # Optional: über Google Meet aufgenommene Botschaft (Aufnahme liegt in Drive).
+    meet_recording_uri = None
+    meet_transcript = None
+    message_kind = None
+    if payload.meet_recording_token:
+        recording = (
+            db.query(InviteMeetRecording)
+            .filter(
+                InviteMeetRecording.token == payload.meet_recording_token,
+                InviteMeetRecording.mediation_id == mediation.id,
+            )
+            .first()
+        )
+        if not recording:
+            raise HTTPException(status_code=404, detail="Meet-Aufnahme nicht gefunden")
+        if recording.status != "ready" or not recording.recording_uri:
+            raise HTTPException(
+                status_code=400,
+                detail="Die Meet-Aufnahme ist noch nicht fertig. Bitte zuerst die Aufnahme abrufen.",
+            )
+        meet_recording_uri = recording.recording_uri
+        meet_transcript = recording.transcript
+        message_kind = recording.kind
+
     mediation_title = mediation.title or "Neue Mediation"
     paraphrased_message = None
     if payload.personal_message and payload.personal_message.strip():
@@ -586,6 +710,9 @@ def create_invite(
         personal_message=payload.personal_message,
         personal_message_paraphrased=paraphrased_message,
         video_filename=video_filename,
+        meet_recording_uri=meet_recording_uri,
+        meet_transcript=meet_transcript,
+        message_kind=message_kind,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
     )
 
@@ -601,7 +728,7 @@ def create_invite(
         mediation_title,
         payload.role,
         personal_message=paraphrased_message,
-        has_video=bool(video_filename),
+        has_video=bool(video_filename) or bool(meet_recording_uri),
         heading=payload.invitation_heading,
     )
 
@@ -699,7 +826,7 @@ def accept_invite_direct(
     return {
         "mediation_id": invite.mediation_id,
         "status": "accepted",
-        "has_video": bool(invite.video_filename),
+        **_invite_message_payload(invite),
     }
 
 
@@ -757,7 +884,20 @@ def accept_invite(
     return {
         "mediation_id": invite.mediation_id,
         "status": "accepted",
-        "has_video": bool(invite.video_filename),
+        **_invite_message_payload(invite),
+    }
+
+
+def _invite_message_payload(invite: MediationInvite) -> dict:
+    """Gemeinsame Felder für die Accept-Antworten: signalisiert, ob eine
+    Botschaft vorliegt und ob sie eine lokale Video-Datei oder eine Meet-Aufnahme
+    (Google-Drive-Link) ist."""
+    has_recording = bool(invite.meet_recording_uri)
+    return {
+        "has_video": bool(invite.video_filename) or has_recording,
+        "has_recording": has_recording,
+        "recording_uri": invite.meet_recording_uri,
+        "message_kind": invite.message_kind or "video",
     }
 
 
@@ -793,6 +933,35 @@ def get_my_invite_video(
         raise HTTPException(status_code=404, detail="Keine angenommene Einladung mit Video gefunden")
 
     return _video_file_response(invite)
+
+
+@router.get("/mediations/{mediation_id}/invites/me/recording")
+def get_my_invite_recording(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Gibt der eingeladenen Person den Google-Meet-Aufnahme-Link + Transkript ihrer
+    persönlichen Botschaft zurück -- erst nach Annahme der Einladung. Die Aufnahme
+    selbst liegt in Google Drive; hier wird nur der Playback-Link geliefert."""
+    invite = (
+        db.query(MediationInvite)
+        .filter(
+            MediationInvite.mediation_id == mediation_id,
+            func.lower(MediationInvite.invited_email) == user.email.lower(),
+            MediationInvite.status == "accepted",
+        )
+        .order_by(MediationInvite.accepted_at.desc())
+        .first()
+    )
+    if not invite or not invite.meet_recording_uri:
+        raise HTTPException(status_code=404, detail="Keine angenommene Einladung mit Aufnahme gefunden")
+
+    return {
+        "recording_uri": invite.meet_recording_uri,
+        "transcript": invite.meet_transcript or "",
+        "kind": invite.message_kind or "video",
+    }
 
 
 @router.get("/mediations/{mediation_id}/invites/{invite_id}/video")

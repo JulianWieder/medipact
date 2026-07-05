@@ -75,6 +75,64 @@ Kontos einen Termin mit Meet-Raum an und trägt den Link ins Feld ein.
   feinere Beitritts-Kontrollen später auf Google Workspace umstellen — die drei
   Env-Werte bleiben die einzigen Stellschrauben.
 
+## Meet-Aufnahme (Einladungs-Video-/Audio-Botschaft über Meet)
+
+Beim Einladen kann der/die Einladende eine persönliche Botschaft aufnehmen.
+Standardmäßig passiert das im Browser und die Datei landet auf dem medipact-Server.
+Alternativ kann die Botschaft **über einen Google-Meet-Raum aufgenommen** werden –
+dann bleibt die (oft große) Aufnahme in **Google Drive** des zentralen Kontos und
+wird von Google automatisch **transkribiert**. medipact speichert nur den
+Playback-Link + Transkript.
+
+> **Wichtig – zusätzliche Voraussetzungen gegenüber den reinen Meet-Links:**
+> Die Aufnahme über die API funktioniert **nicht mit einem kostenlosen
+> Gmail-Konto**. Nötig sind:
+>
+> - Ein **Google-Workspace-Tarif** mit Aufnahme-Berechtigung: **Business
+>   Standard**, **Enterprise** oder **Education Plus**.
+> - In der Admin-Konsole müssen **Aufnahme** und **Transkription** für die
+>   Organisationseinheit des zentralen Kontos **aktiviert** sein
+>   (Apps → Google Workspace → Google Meet → Meet-Videoeinstellungen).
+> - Im Cloud-Projekt zusätzlich die **Google Meet REST API** aktivieren
+>   (neben der Calendar API).
+> - Ein Refresh-Token mit den **zusätzlichen Meet-Scopes**
+>   (`meetings.space.created`, `meetings.space.readonly`).
+
+**Einrichtung:**
+
+1. Google Meet REST API aktivieren:
+   „APIs & Dienste" → „Bibliothek" → „Google Meet API" → **Aktivieren**.
+   Im OAuth-Zustimmungsbildschirm die beiden Scopes
+   `.../auth/meetings.space.created` und `.../auth/meetings.space.readonly`
+   ergänzen.
+2. Refresh-Token **mit Aufnahme-Scopes** neu erzeugen:
+
+   ```bash
+   cd backend
+   python scripts/google_meet_get_refresh_token.py \
+       --client-id DEINE_CLIENT_ID \
+       --client-secret DEIN_CLIENT_SECRET \
+       --with-recording
+   ```
+
+   (Falls das Konto den Zugriff schon einmal freigegeben hat und kein
+   `refresh_token` zurückkommt: unter
+   <https://myaccount.google.com/permissions> widerrufen und erneut ausführen.)
+3. In die Backend-`.env` zusätzlich setzen und Backend neu starten:
+
+   ```env
+   GOOGLE_MEET_RECORDING_ENABLED=true
+   ```
+
+Ist das Flag `true` und der Refresh-Token gültig, zeigt das Einladungsformular
+statt der Browser-Aufnahme den **Video/Audio-Umschalter mit „Aufnahme in Google
+Meet starten"**. Ablauf: Meet-Raum öffnet sich → Botschaft aufnehmen → Meeting
+beenden → „Aufnahme abrufen". Die Aufnahme ist **asynchron** (ein bis zwei
+Minuten Verarbeitung nach Meeting-Ende), bevor Link + Transkript verfügbar sind.
+
+Solange `GOOGLE_MEET_RECORDING_ENABLED` fehlt/`false` ist, bleibt die bisherige
+Browser-Aufnahme aktiv – nichts ändert sich.
+
 ## Kein Google-Setup? Kein Problem
 
 Solange die Env-Werte leer sind, ist die Funktion deaktiviert: der Button meldet

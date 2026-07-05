@@ -15,6 +15,9 @@ class Mediation(Base):
     status = Column(String, default="draft")
     phase = Column(String, nullable=True)
     is_paid = Column(Boolean, nullable=False, default=False, server_default="0")
+    # Gewähltes Paket (online | hybrid | vollservice), bei Fallerstellung gesetzt.
+    # Bestimmt zusammen mit mediation_type den Preis (siehe app/pricing.py).
+    package = Column(String, nullable=False, default="online", server_default="online")
     # Zuordnung Fall -> Mediations-Variante (MediationVariant.key innerhalb
     # des mediation_type dieses Falls). NULL = Basis-Workflow ohne Variante.
     # Jederzeit änderbar; wirkt auf die Step-Auflösung in get_phase_steps

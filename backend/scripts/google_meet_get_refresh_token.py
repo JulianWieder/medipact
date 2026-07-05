@@ -12,6 +12,9 @@ Ausführen (lokal, mit Browser):
         --client-id DEINE_CLIENT_ID \
         --client-secret DEIN_CLIENT_SECRET
 
+Für die Meet-AUFNAHME der Einladungs-Botschaft zusätzlich --with-recording
+anhängen (setzt Workspace-Tarif + aktivierte Meet REST API voraus).
+
 Das Skript öffnet den Google-Login. Melde dich mit dem ZENTRALEN Konto an
 (z.B. termine@medipact.de bzw. zunächst dein eigenes Konto), bestätige den
 Zugriff, und kopiere den ausgegebenen GOOGLE_OAUTH_REFRESH_TOKEN in die
@@ -34,7 +37,15 @@ import httpx
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
-SCOPE = "https://www.googleapis.com/auth/calendar.events"
+# Basis: reicht für die automatischen Meet-LINKS (Calendar-Termin mit Meet-Raum).
+BASE_SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+# Zusätzlich für die Meet-AUFNAHME der Einladungs-Botschaft (Raum anlegen +
+# Aufnahme/Transkript abrufen). Nur mit --with-recording anfordern, da diese
+# Scopes einen Workspace-Tarif + aktivierte Meet REST API voraussetzen.
+RECORDING_SCOPES = [
+    "https://www.googleapis.com/auth/meetings.space.created",
+    "https://www.googleapis.com/auth/meetings.space.readonly",
+]
 REDIRECT_HOST = "localhost"
 REDIRECT_PORT = 8765
 REDIRECT_URI = f"http://{REDIRECT_HOST}:{REDIRECT_PORT}/callback"
@@ -69,7 +80,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Google OAuth Refresh-Token erzeugen")
     parser.add_argument("--client-id", required=True)
     parser.add_argument("--client-secret", required=True)
+    parser.add_argument(
+        "--with-recording",
+        action="store_true",
+        help=(
+            "Zusätzlich die Meet-Aufnahme-Scopes anfordern (nur mit Workspace-Tarif "
+            "+ aktivierter Meet REST API). Für GOOGLE_MEET_RECORDING_ENABLED=true."
+        ),
+    )
     args = parser.parse_args()
+
+    scopes = BASE_SCOPES + (RECORDING_SCOPES if args.with_recording else [])
 
     state = secrets.token_urlsafe(16)
     _Handler.state_expected = state
@@ -78,7 +99,7 @@ def main() -> None:
         "client_id": args.client_id,
         "redirect_uri": REDIRECT_URI,
         "response_type": "code",
-        "scope": SCOPE,
+        "scope": " ".join(scopes),
         "access_type": "offline",       # -> Refresh-Token
         "prompt": "consent",            # erzwingt Refresh-Token auch bei Re-Auth
         "state": state,

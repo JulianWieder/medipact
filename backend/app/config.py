@@ -60,6 +60,19 @@ class Settings(BaseSettings):
     GOOGLE_CALENDAR_ID: str = "primary"
     # Zeitzone für die erzeugten Termine (IANA-Name).
     GOOGLE_MEET_TIMEZONE: str = "Europe/Berlin"
+    # ── Google-Meet-AUFNAHME (Einladungs-Video-/Audio-Botschaft via Meet) ────
+    # Anders als der reine Meet-LINK oben braucht die serverseitige AUFNAHME
+    # (spaces.create mit auto recording+transcription + Abruf der Artefakte)
+    # zusätzlich:
+    #   • einen Google-WORKSPACE-Tarif (Business Standard / Enterprise /
+    #     Education Plus) mit vom Admin aktivierter Aufnahme+Transkription,
+    #   • die aktivierte "Google Meet REST API" im Cloud-Projekt,
+    #   • einen Refresh-Token mit den zusätzlichen Meet-Scopes
+    #     (meetings.space.created + meetings.space.readonly), ggf. drive.readonly.
+    # Solange dieses Flag False ist, bleibt die Meet-Aufnahme deaktiviert und die
+    # UI fällt auf die bisherige Browser-Aufnahme zurück. Siehe
+    # docs/google-meet-setup.md (Abschnitt „Meet-Aufnahme").
+    GOOGLE_MEET_RECORDING_ENABLED: bool = False
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
     PAYPAL_CLIENT_ID: str = ""
     PAYPAL_CLIENT_SECRET: str = ""

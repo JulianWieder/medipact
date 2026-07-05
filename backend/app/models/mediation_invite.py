@@ -35,6 +35,14 @@ class MediationInvite(Base):
     # Wird der Gegenseite erst nach Annahme der Einladung im System zugänglich gemacht.
     video_filename = Column(String, nullable=True)
 
+    # Alternative zur lokal gespeicherten Video-Botschaft: eine über Google Meet
+    # aufgenommene Botschaft. Die Aufnahme selbst bleibt in Google Drive; hier
+    # steht nur der Playback-Link (Drive) und das von Meet erzeugte Transkript.
+    # `message_kind` = "video" oder "audio" (Umschalter beim Aufnehmen).
+    meet_recording_uri = Column(String, nullable=True)
+    meet_transcript = Column(Text, nullable=True)
+    message_kind = Column(String, nullable=True)
+
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     accepted_at = Column(DateTime, nullable=True)

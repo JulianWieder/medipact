@@ -11,3 +11,5 @@ from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_step_content import MediationStepContent
 from app.models.invoice import Invoice
 from app.models.ai_prompt import AiPrompt
+from app.models.invite_meet_recording import InviteMeetRecording
+from app.models.discount_code import DiscountCode

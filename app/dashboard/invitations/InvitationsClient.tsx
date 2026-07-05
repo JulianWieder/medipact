@@ -15,6 +15,10 @@ export default function InvitationsClient({ token }: Props) {
   const [error, setError] = useState("");
   const [mediationId, setMediationId] = useState<number | null>(null);
   const [hasVideo, setHasVideo] = useState(false);
+  // Bei einer über Google Meet aufgenommenen Botschaft liegt die Aufnahme in
+  // Google Drive; statt eines lokalen <video> zeigen wir einen Link + Transkript.
+  const [recordingUri, setRecordingUri] = useState("");
+  const [messageKind, setMessageKind] = useState<"video" | "audio">("video");
 
   async function acceptInvite() {
     setLoading(true);
@@ -39,6 +43,10 @@ export default function InvitationsClient({ token }: Props) {
       if (data.has_video) {
         setMediationId(data.mediation_id);
         setHasVideo(true);
+        if (data.has_recording) {
+          setRecordingUri(data.recording_uri ?? "");
+          setMessageKind(data.message_kind === "audio" ? "audio" : "video");
+        }
         return;
       }
 
@@ -81,15 +89,34 @@ export default function InvitationsClient({ token }: Props) {
               Schau dir die Nachricht an, bevor es weitergeht.
             </p>
 
-            <div className="mt-8 overflow-hidden rounded-2xl bg-neutral-900">
-              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-              <video
-                src={`/api/mediations/${mediationId}/invites/me/video`}
-                className="aspect-video w-full"
-                controls
-                autoPlay
-              />
-            </div>
+            {recordingUri ? (
+              // Meet-Aufnahme: liegt in Google Drive, öffnet sich in neuem Tab.
+              <div className="mt-8 rounded-2xl border border-neutral-200 bg-neutral-50 p-8 text-center">
+                <p className="text-4xl">{messageKind === "audio" ? "🎙️" : "🎥"}</p>
+                <p className="mt-3 text-neutral-600">
+                  Die {messageKind === "audio" ? "Audio-Botschaft" : "Video-Botschaft"} wurde über
+                  Google Meet aufgenommen und wird bei Google gespeichert.
+                </p>
+                <a
+                  href={recordingUri}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary mt-6 inline-block"
+                >
+                  {messageKind === "audio" ? "Audio-Botschaft anhören" : "Video-Botschaft ansehen"} →
+                </a>
+              </div>
+            ) : (
+              <div className="mt-8 overflow-hidden rounded-2xl bg-neutral-900">
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                  src={`/api/mediations/${mediationId}/invites/me/video`}
+                  className="aspect-video w-full"
+                  controls
+                  autoPlay
+                />
+              </div>
+            )}
 
             <button
               type="button"

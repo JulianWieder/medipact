@@ -4,6 +4,7 @@ import { hashId } from "@/lib/ids";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
+import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
 
 declare global {
   interface Window {
@@ -15,10 +16,32 @@ declare global {
   }
 }
 
-type PriceInfo = {
-  price_eur: number;
-  price_per_participant_eur: number;
-  participant_count: number;
+type PartyStatus = {
+  participant_id: number;
+  role: string;
+  name: string | null;
+  owes: boolean;
+  paid: boolean;
+  amount_due_eur: number;
+  is_you: boolean;
+};
+
+type PayStatus = {
+  mediation_type: string;
+  package: string;
+  billing_model: string;
+  case_base_price_eur: number;
+  is_paid: boolean;
+  all_owing_paid: boolean;
+  you: {
+    owes: boolean;
+    base_due_eur: number;
+    discount_code: string | null;
+    discount_amount_eur: number;
+    amount_due_eur: number;
+    paid: boolean;
+  };
+  participants: PartyStatus[];
 };
 
 type Props = {
@@ -52,6 +75,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [email, setEmail] = useState("");
   const [personalMessage, setPersonalMessage] = useState("");
   const [videoToken, setVideoToken] = useState("");
+  const [meetToken, setMeetToken] = useState("");
+  const [meetRecordingAvailable, setMeetRecordingAvailable] = useState(false);
   const [improving, setImproving] = useState(false);
   const [improveError, setImproveError] = useState("");
   const [invitationSubject, setInvitationSubject] = useState("");
@@ -65,7 +90,10 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
-  const [price, setPrice] = useState<PriceInfo | null>(null);
+  const [payStatus, setPayStatus] = useState<PayStatus | null>(null);
+  const [discountInput, setDiscountInput] = useState("");
+  const [discountBusy, setDiscountBusy] = useState(false);
+  const [discountError, setDiscountError] = useState("");
   const paypalContainerRef = useRef<HTMLDivElement>(null);
   const paypalRenderedRef = useRef(false);
 
@@ -103,6 +131,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           const data = await res.json().catch(() => null);
           const mode = data?.video_mode;
           if (mode === "optional" || mode === "required" || mode === "off") setVideoMode(mode);
+          setMeetRecordingAvailable(Boolean(data?.meet_recording_available));
         }
       } catch {
         // Fehler still ignorieren – Default "optional" bleibt.
@@ -137,6 +166,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           invited_email: trimmedEmail,
           personal_message: personalMessage.trim() || undefined,
           video_token: videoToken || undefined,
+          meet_recording_token: meetToken || undefined,
           invitation_heading: invitationSubject.trim() || undefined,
         }),
       });
@@ -242,28 +272,96 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
   }
 
-  // Preis laden, sobald die Gegenseite verbunden ist und noch nicht bezahlt wurde
+  async function loadPayStatus() {
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/price`, { cache: "no-store" });
+      if (res.ok) {
+        const data: PayStatus = await res.json();
+        setPayStatus(data);
+        if (data.is_paid) setIsPaid(true);
+      }
+    } catch {
+      // still ignorieren
+    }
+  }
+
+  // Bezahl-Status laden, sobald die Gegenseite verbunden ist und noch nicht freigeschaltet wurde
   useEffect(() => {
     if (!hasOtherParty || isPaid) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/mediations/${mediationId}/price`);
-        if (res.ok && !cancelled) {
-          setPrice(await res.json());
-        }
-      } catch {
-        // still ignorieren - PayPal-Buttons zeigen dann den Fallback-Preis
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    loadPayStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mediationId, hasOtherParty, isPaid]);
 
-  // PayPal JS SDK laden und die Buttons rendern, sobald der Preis bekannt ist
+  async function applyDiscount() {
+    if (!discountInput.trim()) return;
+    setDiscountBusy(true);
+    setDiscountError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/discount`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: discountInput.trim() }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setDiscountError(data?.detail ?? data?.error ?? "Rabattcode ungültig.");
+        return;
+      }
+      setPayStatus(data);
+    } catch {
+      setDiscountError("Server nicht erreichbar.");
+    } finally {
+      setDiscountBusy(false);
+    }
+  }
+
+  async function removeDiscount() {
+    setDiscountError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/discount`, { method: "DELETE" });
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        setPayStatus(data);
+        setDiscountInput("");
+      }
+    } catch {
+      setDiscountError("Server nicht erreichbar.");
+    }
+  }
+
+  async function redeemFree() {
+    setPaying(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/pay/free`, { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(data?.detail ?? data?.error ?? "Freischaltung fehlgeschlagen.");
+        return;
+      }
+      setPayStatus(data);
+      if (data.is_paid) setIsPaid(true);
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setPaying(false);
+    }
+  }
+
+  // Zeigt PayPal nur, wenn die aktuelle Partei einen offenen Betrag (> 0 €) hat.
+  const showPaypal =
+    !!payStatus && payStatus.you.owes && !payStatus.you.paid && payStatus.you.amount_due_eur > 0 && !isPaid;
+
+  // PayPal-Button für den EIGENEN Anteil rendern
   useEffect(() => {
-    if (!hasOtherParty || isPaid || !price || paypalRenderedRef.current) return;
+    if (!hasOtherParty || isPaid) return;
+    if (!showPaypal) {
+      // Kein offener Betrag (bezahlt oder per Rabatt 0 €) -> evtl. Button entfernen.
+      if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
+      paypalRenderedRef.current = false;
+      return;
+    }
+    if (paypalRenderedRef.current) return;
 
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     if (!clientId) {
@@ -303,7 +401,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 setError(`Zahlung fehlgeschlagen: ${raw ?? "Unbekannter Fehler"}`);
                 return;
               }
-              setIsPaid(true);
+              setPayStatus(body);
+              if (body.is_paid) setIsPaid(true);
             } catch {
               setError("Server nicht erreichbar.");
             } finally {
@@ -329,7 +428,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       script.addEventListener("load", renderButtons);
       document.body.appendChild(script);
     }
-  }, [mediationId, hasOtherParty, isPaid, price]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediationId, hasOtherParty, isPaid, showPaypal, payStatus?.you.amount_due_eur]);
 
   async function startMediation() {
     setAdvancing(true);
@@ -456,42 +556,143 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 <p className="text-sm font-semibold text-accent-800 mb-1">Alle Beteiligten sind verbunden</p>
                 <h2 className="text-xl font-bold text-neutral-900">Mediation freischalten</h2>
                 <p className="mt-2 max-w-xl mx-auto text-sm text-neutral-600">
-                  Bevor Phase 1 startet, ist eine einmalige Zahlung erforderlich.
+                  Jede Partei bezahlt ihren eigenen Anteil. Die Mediation startet,
+                  sobald alle zahlungspflichtigen Parteien bezahlt haben.
                 </p>
 
-                <p className="text-xs font-semibold uppercase tracking-widest text-accent-600 mt-6 mb-2">
-                  Dein Anteil
-                </p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold text-neutral-900 tracking-tight">
-                    {price ? price.price_per_participant_eur.toFixed(0) : "499"}
-                  </span>
-                  <span className="text-2xl font-bold text-neutral-900">€</span>
-                </div>
-                <p className="text-neutral-400 text-sm mt-1">
-                  einmalig pro Teilnehmer · inkl. MwSt.
-                </p>
-                <p className="mt-3 max-w-sm mx-auto text-xs text-neutral-500">
-                  Der Betrag wird zunächst nur reserviert (geblockt) und erst nach
-                  erfolgreicher Freischaltung tatsächlich abgebucht.
-                </p>
+                {!payStatus && (
+                  <p className="mt-6 text-sm text-neutral-400">Preis wird geladen…</p>
+                )}
 
-                <div className="mt-6 w-full max-w-sm mx-auto">
-                  <div ref={paypalContainerRef} />
-                  {paying && (
-                    <p className="mt-2 text-sm font-semibold text-neutral-500">Zahlung wird verarbeitet…</p>
-                  )}
-                </div>
+                {payStatus && payStatus.you.paid && (
+                  <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50 p-5">
+                    <p className="text-lg font-bold text-accent-700">Dein Anteil ist bezahlt ✓</p>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {payStatus.all_owing_paid
+                        ? "Alle Parteien haben bezahlt – die Mediation kann starten."
+                        : "Warten auf die Zahlung der anderen Seite …"}
+                    </p>
+                  </div>
+                )}
 
-                <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
-                  {["🔒 SSL-verschlüsselt", "⚡ Sofortiger Zugang", "📞 Support inklusive"].map(
-                    (badge) => (
-                      <span key={badge} className="text-xs text-neutral-400">
-                        {badge}
+                {payStatus && !payStatus.you.paid && !payStatus.you.owes && (
+                  <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
+                    <p className="text-base font-semibold text-neutral-800">Für dich fällt kein Betrag an.</p>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      Bei diesem Fall zahlt die andere Seite. Sobald das erledigt ist, geht es weiter.
+                    </p>
+                  </div>
+                )}
+
+                {payStatus && !payStatus.you.paid && payStatus.you.owes && (
+                  <>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-accent-600 mt-6 mb-2">
+                      Dein Anteil
+                    </p>
+                    <div className="flex items-baseline justify-center gap-1">
+                      {payStatus.you.discount_amount_eur > 0 && (
+                        <span className="mr-2 text-2xl font-semibold text-neutral-400 line-through">
+                          {payStatus.you.base_due_eur.toFixed(2)}
+                        </span>
+                      )}
+                      <span className="text-5xl font-extrabold text-neutral-900 tracking-tight">
+                        {payStatus.you.amount_due_eur.toFixed(2)}
                       </span>
-                    )
-                  )}
-                </div>
+                      <span className="text-2xl font-bold text-neutral-900">€</span>
+                    </div>
+                    <p className="text-neutral-400 text-sm mt-1">inkl. MwSt.</p>
+                    {payStatus.you.discount_amount_eur > 0 && (
+                      <p className="mt-1 text-sm font-semibold text-accent-700">
+                        Rabatt „{payStatus.you.discount_code}“: −{payStatus.you.discount_amount_eur.toFixed(2)} €
+                      </p>
+                    )}
+
+                    {/* Rabattcode */}
+                    <div className="mt-5 w-full max-w-sm mx-auto text-left">
+                      {payStatus.you.discount_code ? (
+                        <button
+                          type="button"
+                          onClick={removeDiscount}
+                          className="text-xs font-semibold text-neutral-500 underline"
+                        >
+                          Rabattcode entfernen
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={discountInput}
+                            onChange={(e) => setDiscountInput(e.target.value)}
+                            placeholder="Rabattcode"
+                            className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
+                          />
+                          <button
+                            type="button"
+                            onClick={applyDiscount}
+                            disabled={discountBusy || !discountInput.trim()}
+                            className="btn btn-secondary shrink-0 px-4 py-2 text-sm disabled:opacity-60"
+                          >
+                            {discountBusy ? "…" : "Anwenden"}
+                          </button>
+                        </div>
+                      )}
+                      {discountError && (
+                        <p className="mt-2 text-xs font-semibold text-red-600">{discountError}</p>
+                      )}
+                    </div>
+
+                    <p className="mt-4 max-w-sm mx-auto text-xs text-neutral-500">
+                      Der Betrag wird zunächst nur reserviert und erst nach erfolgreicher
+                      Freischaltung tatsächlich abgebucht.
+                    </p>
+
+                    <div className="mt-6 w-full max-w-sm mx-auto">
+                      {payStatus.you.amount_due_eur > 0 ? (
+                        <div ref={paypalContainerRef} />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={redeemFree}
+                          disabled={paying}
+                          className="btn btn-primary w-full disabled:opacity-60"
+                        >
+                          {paying ? "Wird freigeschaltet…" : "Kostenlos freischalten"}
+                        </button>
+                      )}
+                      {paying && payStatus.you.amount_due_eur > 0 && (
+                        <p className="mt-2 text-sm font-semibold text-neutral-500">Zahlung wird verarbeitet…</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Status aller Parteien */}
+                {payStatus && payStatus.participants.length > 0 && (
+                  <div className="mt-8 w-full max-w-sm mx-auto text-left">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-2">
+                      Status
+                    </p>
+                    <ul className="space-y-1">
+                      {payStatus.participants.map((p) => (
+                        <li key={p.participant_id} className="flex items-center justify-between text-sm">
+                          <span className="text-neutral-700">
+                            {p.name ?? p.role}
+                            {p.is_you && <span className="text-neutral-400"> (du)</span>}
+                          </span>
+                          <span className="font-semibold">
+                            {!p.owes ? (
+                              <span className="text-neutral-400">kein Betrag</span>
+                            ) : p.paid ? (
+                              <span className="text-accent-700">bezahlt ✓</span>
+                            ) : (
+                              <span className="text-neutral-500">offen · {p.amount_due_eur.toFixed(2)} €</span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               {error && (
                 <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
@@ -556,13 +757,22 @@ export default function MediationClient({ mediationId, userRole, currentUserName
 
                     {videoMode !== "off" && (
                       <div className="mt-4">
-                        <InviteVideoRecorder
-                          mediationId={mediationId}
-                          videoToken={videoToken}
-                          onChange={setVideoToken}
-                          onTranscript={setPersonalMessage}
-                          required={videoMode === "required"}
-                        />
+                        {meetRecordingAvailable ? (
+                          <InviteMeetRecorder
+                            mediationId={mediationId}
+                            onChange={setMeetToken}
+                            onTranscript={setPersonalMessage}
+                            required={videoMode === "required"}
+                          />
+                        ) : (
+                          <InviteVideoRecorder
+                            mediationId={mediationId}
+                            videoToken={videoToken}
+                            onChange={setVideoToken}
+                            onTranscript={setPersonalMessage}
+                            required={videoMode === "required"}
+                          />
+                        )}
                       </div>
                     )}
 
@@ -648,14 +858,14 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                     <button
                       type="button"
                       onClick={createInvite}
-                      disabled={loading || !email.trim() || (videoMode === "required" && !videoToken)}
+                      disabled={loading || !email.trim() || (videoMode === "required" && !(meetRecordingAvailable ? meetToken : videoToken))}
                       className="btn btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? "Wird erstellt..." : "Einladung erstellen"}
                     </button>
-                    {videoMode === "required" && !videoToken && (
+                    {videoMode === "required" && !(meetRecordingAvailable ? meetToken : videoToken) && (
                       <p className="mt-2 text-center text-xs text-neutral-400">
-                        Eine Video-Botschaft ist für diese Einladung erforderlich.
+                        Eine persönliche Botschaft ist für diese Einladung erforderlich.
                       </p>
                     )}
                   </div>
