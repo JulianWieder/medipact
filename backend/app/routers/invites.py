@@ -23,6 +23,7 @@ from app.models.mediation_invite import MediationInvite
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.models.phase_step_default import PhaseStepDefault
+from app.prompts import get_prompt
 from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
 from app.services.llm import ai_complete
@@ -96,16 +97,7 @@ def paraphrase_personal_message(message: str, mediation_title: str) -> str:
     if not message:
         return message
 
-    prompt = (
-        "Du hilfst dabei, eine persönliche Nachricht innerhalb einer Einladungs-E-Mail zu einer "
-        "Mediation umzuformulieren. Behalte den Kerninhalt und die Absicht der Person exakt bei, "
-        "mache den Ton aber warm, wertschätzend und einladend. Ziel ist, dass die empfangende "
-        "Person sich registriert und sich die beigefügte persönliche Video-Botschaft ansieht. "
-        "Antworte NUR mit dem umformulierten Text (max. 80 Wörter), ohne Anführungszeichen, "
-        "ohne Erklärung, ohne Markdown.\n\n"
-        f"Mediationsthema: {mediation_title}\n\n"
-        f"Original-Nachricht:\n{message}"
-    )
+    prompt = get_prompt("invite_paraphrase", mediation_title=mediation_title, message=message)
     try:
         text = ai_complete(prompt, max_tokens=300)
         return text or message
@@ -163,16 +155,7 @@ def improve_message_text(text: str) -> str:
     if not text:
         return text
 
-    prompt = (
-        "Der folgende Text stammt aus der automatischen Transkription einer gesprochenen "
-        "Video-Nachricht (oder wurde von Hand geschrieben). Glätte ihn zu einem klaren, gut "
-        "lesbaren Text: entferne Füllwörter, Versprecher, Wiederholungen und Satzbrüche, "
-        "korrigiere Grammatik und Zeichensetzung. Behalte Inhalt, Tonfall und Ich-Perspektive "
-        "der Person exakt bei -- erfinde nichts hinzu und ändere die Aussage nicht. "
-        "Antworte NUR mit dem verbesserten Text, ohne Anführungszeichen, ohne Erklärung, "
-        "ohne Markdown.\n\n"
-        f"Text:\n{text}"
-    )
+    prompt = get_prompt("invite_improve", text=text)
     try:
         improved = ai_complete(prompt, max_tokens=400)
         return improved or text
@@ -209,21 +192,11 @@ def generate_invite_content(
     }
     type_label = type_labels.get(mediation_type, mediation_type or "Mediation")
 
-    prompt = (
-        "Du hilfst einer Person, die eine andere Konfliktpartei zu einer Mediation einlädt. "
-        "Aus der folgenden kurzen, formlosen Beschreibung sollst du drei Dinge erstellen:\n"
-        "1. \"message\": eine persönliche Einladungsnachricht in der ICH-Perspektive der "
-        "einladenden Person (max. 90 Wörter). Ton: warm, respektvoll, wertschätzend, "
-        "professionell, deeskalierend. Ziel ist, dass die andere Seite sich einlässt und "
-        "der Mediation beitritt. Keine Schuldzuweisungen.\n"
-        "2. \"subject\": eine kurze, sachliche Überschrift/Betreffzeile (max. 8 Wörter), "
-        "ohne Anführungszeichen.\n"
-        "3. \"title\": ein prägnanter Fall-Titel für die Mediation (max. 6 Wörter).\n\n"
-        f"Mediationsbereich: {type_label}\n"
-        f"Bisheriger Fall-Titel (nur Kontext): {mediation_title}\n\n"
-        f"Beschreibung der Person:\n{description}\n\n"
-        "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt mit genau den Schlüsseln "
-        "\"message\", \"subject\", \"title\" – ohne Markdown, ohne Code-Fences, ohne Erklärung."
+    prompt = get_prompt(
+        "invite_generate",
+        type_label=type_label,
+        mediation_title=mediation_title,
+        description=description,
     )
 
     try:

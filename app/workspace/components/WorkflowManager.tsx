@@ -48,6 +48,7 @@ const FEEDBACK_OCCASIONS: { id: "after_videocall" | "before_contract"; label: st
   { id: "before_contract", label: "Vor dem Vertrag" },
 ];
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
+import AiPromptsEditor from "./AiPromptsEditor";
 import {
   fetchVariants,
   createVariant,
@@ -798,6 +799,8 @@ export function WorkflowManager() {
         Fälle einer Variante zu — Feinanpassungen für einen einzelnen Fall (Schritte
         überspringen, Zusatzschritte) machst du weiterhin direkt im Fall.
       </p>
+
+      <AiPromptsEditor />
 
       {error && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">

@@ -276,6 +276,45 @@ export async function updateInvoice(id: number, payload: InvoiceUpdateInput): Pr
   return res.json();
 }
 
+// ── KI-Prompts (im Workflow Manager editierbar) ──────────────────────────
+
+export interface AiPromptDto {
+  key: string;
+  label: string;
+  placeholders: string[];
+  default: string;
+  template: string;
+  is_custom: boolean;
+}
+
+export async function fetchAiPrompts(): Promise<AiPromptDto[]> {
+  const res = await fetch("/api/admin/ai-prompts", { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => null);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function saveAiPrompt(key: string, template: string): Promise<AiPromptDto> {
+  const res = await fetch(`/api/admin/ai-prompts/${encodeURIComponent(key)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Prompt konnte nicht gespeichert werden");
+  }
+  return res.json();
+}
+
+export async function resetAiPrompt(key: string): Promise<AiPromptDto> {
+  const res = await fetch(`/api/admin/ai-prompts/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Prompt konnte nicht zurückgesetzt werden");
+  return res.json();
+}
+
 // ── Google Meet (automatische Videokonferenz-Links) ──────────────────────
 
 /** Erzeugt serverseitig einen neuen Google-Meet-Link (nur Mediatoren/Admins). */

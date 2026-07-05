@@ -593,7 +593,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       id="invite-message"
                       value={personalMessage}
                       onChange={(e) => setPersonalMessage(e.target.value)}
-                      placeholder="Beschreibe kurz, worum es geht (Stichworte reichen) – oder nimm oben eine Video-Botschaft auf. Mit „Professionell formulieren“ macht Claude daraus eine freundliche Einladung, die du danach frei bearbeiten kannst."
+                      placeholder="Beschreibe kurz, worum es geht (Stichworte reichen) – oder nimm oben eine Video-Botschaft auf. Mit „Professionell formulieren“ macht die KI daraus eine freundliche Einladung, die du danach frei bearbeiten kannst."
                       className="mt-2 min-h-24 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
                     />
                     <p className="mt-1 text-xs text-neutral-400">

@@ -1868,7 +1868,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  <p className="text-sm text-neutral-400">Claude analysiert den Fall…</p>
+                  <p className="text-sm text-neutral-400">Die KI analysiert den Fall…</p>
                 </div>
               )}
 
@@ -1876,7 +1876,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                 <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-12 text-center">
                   <p className="text-2xl mb-3">✦</p>
                   <p className="text-sm font-semibold text-neutral-700 mb-1">SWOT-Analyse & Gesprächstipps</p>
-                  <p className="text-xs text-neutral-400 max-w-sm mx-auto">Claude analysiert alle Notizen und den Fallstatus und gibt dir eine SWOT-Analyse sowie individuelle Gesprächstipps für jeden Teilnehmer.</p>
+                  <p className="text-xs text-neutral-400 max-w-sm mx-auto">Die KI analysiert alle Notizen und den Fallstatus und gibt dir eine SWOT-Analyse sowie individuelle Gesprächstipps für jeden Teilnehmer.</p>
                 </div>
               )}
 

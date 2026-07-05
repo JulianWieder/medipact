@@ -21,6 +21,7 @@ from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
+from app.prompts import get_prompt
 from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
@@ -992,16 +993,7 @@ def summarize_results(
     if not inputs_text.strip():
         return {"summary": ""}
 
-    prompt = f"""Du bist ein neutraler Mediator. Fasse die folgenden Eingaben der
-Teilnehmer so zusammen, dass der Text ALLEN Teilnehmern gemeinsam angezeigt
-werden kann. Schreibe auf Deutsch, sachlich, respektvoll und ausgewogen, in
-kurzen Absätzen. Benenne gemeinsame Themen sowie unterschiedliche Sichtweisen,
-ohne Partei zu ergreifen und ohne Vorwürfe zuzuspitzen.
-
-EINGABEN:
-{inputs_text}
-
-Antworte NUR mit dem Zusammenfassungstext, ohne Vorrede und ohne Markdown."""
+    prompt = get_prompt("summarize_results", inputs_text=inputs_text)
 
     summary = ai_complete(prompt, max_tokens=800)
     return {"summary": summary}
@@ -1210,12 +1202,7 @@ def generate_title(
     }
     type_label = type_labels.get(payload.mediation_type, payload.mediation_type)
 
-    prompt = (
-        f"Du bist ein Mediationsassistent. Erstelle einen kurzen, prägnanten Titel (max. 6 Wörter) "
-        f"für eine Mediation im Bereich '{type_label}' auf Basis dieser Beschreibung:\n\n"
-        f"{payload.description}\n\n"
-        f"Antworte NUR mit dem Titel, ohne Anführungszeichen, ohne Erklärung."
-    )
+    prompt = get_prompt("generate_title", type_label=type_label, description=payload.description)
 
     title = ai_complete(prompt, max_tokens=30).strip('"').strip("'")
     return {"title": title}
@@ -1244,12 +1231,7 @@ def reflect(
         for inp in payload.inputs
         if inp.get("content", "").strip()
     )
-    prompt = (
-        f"Du bist ein neutraler Mediationsassistent. "
-        f"Fasse die folgenden Eingaben der Parteien zum Schritt '{payload.step_title}' "
-        f"sachlich, neutral und respektvoll zusammen. "
-        f"Hebe gemeinsame Punkte hervor. Keine Bewertung, kein Ratschlag.\n\n{parts}"
-    )
+    prompt = get_prompt("reflect", step_title=payload.step_title, parts=parts)
 
     return {"reflection": ai_complete(prompt, max_tokens=1024)}
 
@@ -1325,19 +1307,7 @@ def generate_contract(
 
     notes_text = "\n\n".join(parts)
 
-    prompt = (
-        "Du bist ein erfahrener Mediationsassistent. "
-        "Erstelle auf Basis der folgenden Eingaben der Parteien einen kurzen, klaren Mediationsvertrag auf Deutsch. "
-        "Der Vertrag soll:\n"
-        "- Die gemeinsamen Regeln für das Verfahren festhalten\n"
-        "- Die Rollen der Beteiligten klären\n"
-        "- Die Grundsätze (Freiwilligkeit, Vertraulichkeit, Eigenverantwortung, Neutralität) explizit nennen\n"
-        "- Besonders auf die Online-Besonderheiten eingehen (digitale Vertraulichkeit, Umgang mit technischen Problemen)\n"
-        "- Das gemeinsame Ziel der Mediation benennen\n"
-        "- In einem respektvollen, verbindlichen Ton gehalten sein\n"
-        "- Maximal 400 Wörter\n\n"
-        f"Eingaben der Parteien:\n\n{notes_text}"
-    )
+    prompt = get_prompt("contract", notes_text=notes_text)
 
     generated_text = ai_complete(prompt, max_tokens=1200)
 
@@ -2027,41 +1997,16 @@ def analyse_mediation(
         f"- {p['name']} ({p['role']})" for p in participants_info
     )
 
-    prompt = f"""Du bist ein erfahrener Mediationsexperte. Analysiere den folgenden Mediationsfall und gib eine strukturierte JSON-Antwort zurück.
-
-FALLDETAILS:
-- Titel: {mediation.title or 'Neue Mediation'}
-- Konfliktart: {type_label}
-- Aktuelle Phase: {current_phase}
-- Beschreibung: {mediation.description or 'Keine Beschreibung'}
-- Priorität/Dringlichkeit: {mediation.priority or 'Nicht angegeben'}
-
-BETEILIGTE:
-{participants_list}
-
-BISHERIGE NOTIZEN DER PARTEIEN:
-{notes_text if notes_text.strip() else 'Noch keine Notizen eingereicht.'}
-
-Erstelle eine Analyse mit folgendem JSON-Format (auf Deutsch):
-{{
-  "swot": {{
-    "staerken": ["...", "..."],
-    "schwaechen": ["...", "..."],
-    "chancen": ["...", "..."],
-    "risiken": ["...", "..."]
-  }},
-  "zusammenfassung": "2-3 Sätze zur Gesamtlage der Mediation",
-  "empfehlungen": ["...", "..."],
-  "teilnehmer_tipps": [
-    {{
-      "name": "Name des Teilnehmers",
-      "rolle": "Rolle",
-      "tipps": ["Konkreter Gesprächstipp 1", "Tipp 2", "Tipp 3"]
-    }}
-  ]
-}}
-
-WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."""
+    prompt = get_prompt(
+        "analyse",
+        title=mediation.title or "Neue Mediation",
+        type_label=type_label,
+        current_phase=current_phase,
+        description=mediation.description or "Keine Beschreibung",
+        priority=mediation.priority or "Nicht angegeben",
+        participants_list=participants_list,
+        notes_text=notes_text if notes_text.strip() else "Noch keine Notizen eingereicht.",
+    )
 
     raw = ai_complete(prompt, max_tokens=1500)
     # Markdown-Blöcke entfernen falls vorhanden

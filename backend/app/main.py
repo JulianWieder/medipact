@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import (
+    ai_prompts,
     auth,
     custom_steps,
     dev_test,
@@ -36,6 +37,7 @@ app.include_router(mediation_variants.router)
 app.include_router(step_content.router)
 app.include_router(invoices.router)
 app.include_router(integrations.router)
+app.include_router(ai_prompts.router)
 
 # Dev-Test-Endpunkte (Gemini/Claude/PayPal). Über ENABLE_DEV_TEST steuerbar –
 # funktioniert auch auf dem Live-Server (nur per localhost:8000 erreichbar, da
