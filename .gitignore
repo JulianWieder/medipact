@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# ── Node.js & Frontend Dependencies ─────────────────────────────────────────
 /node_modules
 /.pnp
 .pnp.*
@@ -9,45 +9,62 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+
+# ── Python & Backend Dependencies ───────────────────────────────────────────
 __pycache__/
 *.pyc
-# testing
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ── Testing & Debug ─────────────────────────────────────────────────────────
 /coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ── Next.js & Build Output ──────────────────────────────────────────────────
+/.next/
+/out/
+/build
+
+# ── Operating Systems & Misc ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.pem
+*.docx
+
+# ── Databases ───────────────────────────────────────────────────────────────
+*.db
+*.db-journal
+*.sqlite3
+backend/*.db
+backend/*.db.bak
+
+# ── ENV Files (HINWEIS: Absolut kritisch für deine API-Keys!) ──────────────
+.env
+.env.local
+.env.production
+.env.development
+*.env
+backend/.env
+# Erlaubt nur die Beispiel-Dateien (ohne echte Keys) im Repository
 !.env.example
 !backend/.env.example
 
-# vercel
+# ── Vercel & Deployment ─────────────────────────────────────────────────────
 .vercel
 
-# typescript
+# ── TypeScript ──────────────────────────────────────────────────────────────
 *.tsbuildinfo
 next-env.d.ts
-backend/*.db
-backend/*.db.bak
+
+# ── Custom Project Ignores ──────────────────────────────────────────────────
 backend/migrate_now.py
-*.docx
-
-# legacy root-level components (moved to app/components/)
 /components/
-
-*.db

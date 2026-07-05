@@ -1,4 +1,4 @@
-from pydantic import field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
     # Set to true in production to enforce a real SECRET_KEY
     PRODUCTION: bool = False
+    # Schaltet die Dev-Test-Endpunkte (/v1/chat/gemini, /v1/chat/claude,
+    # /v1/paypal/ping) frei – auch auf dem Live-Server. Unabhängig von PRODUCTION,
+    # damit man auf dem Server per localhost testen kann. Sicher, weil der Backend-
+    # Port in docker-compose auf 127.0.0.1 gebunden ist und nginx /v1 nicht proxyt.
+    # Standard aus; zum Testen auf true setzen, danach wieder auf false.
+    ENABLE_DEV_TEST: bool = False
     # ── SMTP email settings ──────────────────────────────────────────────────
     SMTP_HOST: str = ""          # e.g. mail.deine-domain.de
     SMTP_PORT: int = 587         # 587 = STARTTLS, 465 = SSL, 25 = plain
@@ -28,6 +34,9 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen + Paraphrasierung der Einladungsnachricht
     OPENAI_API_KEY: str = ""  # Für die Transkription der Einladungs-Video-Botschaft (Whisper)
     OPENAI_TRANSCRIBE_MODEL: str = "whisper-1"
+    # ── KI (Google Gemini) ───────────────────────────────────────────────────
+    GEMINI_API_KEY: str = ""  # API-Key aus Google AI Studio
+    GEMINI_MODEL: str = "gemini-1.5-flash"  # bei Bedarf via .env überschreiben
     # Verzeichnis für hochgeladene Video-Botschaften bei Mediations-Einladungen
     # (z.B. /data/invite_videos in Docker, analog zu DB_PATH).
     INVITE_VIDEO_DIR: str = "media/invite_videos"
@@ -50,8 +59,12 @@ class Settings(BaseSettings):
     # ── PayPal-Zahlungen ─────────────────────────────────────────────────────
     PAYPAL_CLIENT_ID: str = ""
     PAYPAL_CLIENT_SECRET: str = ""
-    # "sandbox" für Tests ohne echtes Geld, "live" für echte Zahlungen
-    PAYPAL_ENV: str = "sandbox"
+    # "sandbox" für Tests ohne echtes Geld, "live" für echte Zahlungen.
+    # Liest wahlweise PAYPAL_ENV oder (aus Kompatibilität) PAYPAL_MODE aus der .env.
+    PAYPAL_ENV: str = Field(
+        default="sandbox",
+        validation_alias=AliasChoices("PAYPAL_ENV", "PAYPAL_MODE"),
+    )
     # Preis pro Teilnehmer in EUR (einmalig, beim Freischalten der Mediation)
     PRICE_PER_PARTICIPANT_EUR: float = 499.0
 

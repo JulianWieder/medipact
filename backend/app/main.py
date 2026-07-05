@@ -5,6 +5,7 @@ from app.config import settings
 from app.routers import (
     auth,
     custom_steps,
+    dev_test,
     integrations,
     invites,
     invoices,
@@ -35,6 +36,12 @@ app.include_router(mediation_variants.router)
 app.include_router(step_content.router)
 app.include_router(invoices.router)
 app.include_router(integrations.router)
+
+# Dev-Test-Endpunkte (Gemini/Claude/PayPal). Über ENABLE_DEV_TEST steuerbar –
+# funktioniert auch auf dem Live-Server (nur per localhost:8000 erreichbar, da
+# der Port auf 127.0.0.1 gebunden ist und nginx /v1 nicht weiterleitet).
+if settings.ENABLE_DEV_TEST:
+    app.include_router(dev_test.router)
 
 
 @app.get("/health")
