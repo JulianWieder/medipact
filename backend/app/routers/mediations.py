@@ -1051,6 +1051,27 @@ def get_step_status(
     return {"participants": result, "all_submitted": all_submitted}
 
 
+def _is_visible(cond, flags) -> bool:
+    """Wertet eine visible_if-Bedingung gegen die Fall-Flags aus.
+
+    cond-Form: {"all": [{"flag": "glasl_zone", "eq": "lose_lose"}, ...]}
+    (alle Bedingungen müssen zutreffen). None/leer = immer sichtbar. Fehlt ein
+    Flag im Fall, gilt die Bedingung als NICHT erfüllt (tolerant: kein Crash).
+    """
+    if not cond or not isinstance(cond, dict):
+        return True
+    conditions = cond.get("all")
+    if not conditions or not isinstance(conditions, list):
+        return True
+    flag_map = flags if isinstance(flags, dict) else {}
+    for c in conditions:
+        if not isinstance(c, dict):
+            continue
+        if flag_map.get(c.get("flag")) != c.get("eq"):
+            return False
+    return True
+
+
 @router.get("/{mediation_id}/phase-steps")
 def get_phase_steps(
     mediation_id: int,
@@ -1140,6 +1161,10 @@ def get_phase_steps(
         rule = rules.get(d.step_key)
         if rule and rule.skip:
             continue
+        # Eskalations-/Segmentierungs-Filter: Schritte mit visible_if erscheinen
+        # nur, wenn die Fall-Flags die Bedingung erfüllen.
+        if not _is_visible(d.visible_if, mediation.flags):
+            continue
         types = d.content_types.split(",") if d.content_types else None
         is_individual = bool(types) and "individuell" in types
         is_result = bool(types) and "ergebnis" in types
@@ -1202,7 +1227,65 @@ def get_phase_steps(
             }
         )
 
-    return {"phase": phase, "mediation_type": mediation.mediation_type, "steps": steps}
+    return {
+        "phase": phase,
+        "mediation_type": mediation.mediation_type,
+        "flags": mediation.flags or {},
+        "steps": steps,
+    }
+
+
+class FlagsUpdate(BaseModel):
+    # Zu setzende/aktualisierende Flags (werden mit den bestehenden gemerged).
+    # Ein Flag auf None setzen entfernt es.
+    flags: dict
+
+
+@router.get("/{mediation_id}/flags")
+def get_flags(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+    return {"flags": mediation.flags or {}}
+
+
+@router.put("/{mediation_id}/flags")
+def set_flags(
+    mediation_id: int,
+    payload: FlagsUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Merged Flags in den Fall (Eskalations-/Segmentierungs-Steuerung).
+
+    Nur Mediator/Owner/Admin – Flags wirken auf ALLE Teilnehmer (welche Schritte
+    sichtbar sind), daher nicht durch eine einzelne Partei setzbar.
+    """
+    participant = _require_participant(mediation_id, current_user, db)
+    if participant.role not in _WORKFLOW_ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Nur Mediator/Owner dürfen Flags setzen")
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    current = dict(mediation.flags or {})
+    for key, value in payload.flags.items():
+        if value is None:
+            current.pop(key, None)
+        else:
+            current[key] = value
+    mediation.flags = current or None
+    # JSON-Spalte: Neuzuweisung nötig, damit SQLAlchemy die Änderung erkennt.
+    from sqlalchemy.orm.attributes import flag_modified
+
+    flag_modified(mediation, "flags")
+    db.commit()
+    return {"flags": mediation.flags or {}}
 
 
 class SummarizeResultsRequest(BaseModel):

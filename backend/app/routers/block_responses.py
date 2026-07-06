@@ -65,6 +65,77 @@ def _find_block(db: Session, mediation: Mediation, block_id: str):
                 return s, b
     return None, None
 
+
+def _apply_sets_flag(db: Session, mediation: Mediation, block: Optional[dict], value) -> None:
+    """Setzt automatisch ein Fall-Flag, wenn der Block config.sets_flag hat.
+
+    config.sets_flag = {"flag": "glasl_zone",
+                        "thresholds": [[3, "win_win"], [6, "win_lose"], [9, "lose_lose"]]}
+    Der Zahlenwert (z.B. Glasl-Skala 1–9) wird der ersten Schwelle zugeordnet,
+    deren Grenze er nicht überschreitet. Es wird nur ESKALIERT, nie deeskaliert
+    (die Reihenfolge in thresholds = Eskalationsgrad; höhere Zone bleibt bestehen).
+    """
+    cfg = (block.get("config") or {}) if block else {}
+    sf = cfg.get("sets_flag")
+    if not isinstance(sf, dict):
+        return
+    flag = sf.get("flag")
+    thresholds = sf.get("thresholds")
+    if not flag or not isinstance(thresholds, list) or not thresholds:
+        return
+    try:
+        num = float(value)
+    except (TypeError, ValueError):
+        return
+
+    zone = None
+    zone_index = None
+    for idx, item in enumerate(thresholds):
+        if not isinstance(item, (list, tuple)) or len(item) < 2:
+            continue
+        try:
+            if num <= float(item[0]):
+                zone, zone_index = item[1], idx
+                break
+        except (TypeError, ValueError):
+            continue
+    if zone is None:  # über allen Schwellen -> höchste (letzte) Zone
+        last = thresholds[-1]
+        if isinstance(last, (list, tuple)) and len(last) >= 2:
+            zone, zone_index = last[1], len(thresholds) - 1
+    if zone is None:
+        return
+
+    # Nur eskalieren: aktuelle Zone-Position bestimmen.
+    current = (mediation.flags or {}).get(flag)
+    current_index = None
+    for idx, item in enumerate(thresholds):
+        if isinstance(item, (list, tuple)) and len(item) >= 2 and item[1] == current:
+            current_index = idx
+            break
+    if current_index is not None and current_index >= zone_index:
+        return
+
+    flags = dict(mediation.flags or {})
+    flags[flag] = zone
+    mediation.flags = flags
+    from sqlalchemy.orm.attributes import flag_modified
+
+    flag_modified(mediation, "flags")
+    db.commit()
+
+
+def _maybe_set_flag_from_response(db: Session, mediation_id: int, payload) -> None:
+    """Nur bei numerischen Antworten: Block nachschlagen und ggf. Flag setzen."""
+    if not isinstance(payload.value, (int, float)) or isinstance(payload.value, bool):
+        return
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        return
+    _step, block = _find_block(db, mediation, payload.block_id)
+    _apply_sets_flag(db, mediation, block, payload.value)
+
+
 # Rollen, die im Namen des Falls (Mediator-Sicht) schreiben/alle Antworten lesen.
 _MEDIATOR_ROLES = {"mediator", "owner", "admin"}
 
@@ -178,6 +249,7 @@ def upsert_block_response(
             existing.block_type = payload.block_type
         db.commit()
         db.refresh(existing)
+        _maybe_set_flag_from_response(db, mediation_id, payload)
         return _serialize(existing)
 
     row = MediationBlockResponse(
@@ -195,6 +267,7 @@ def upsert_block_response(
     db.add(row)
     db.commit()
     db.refresh(row)
+    _maybe_set_flag_from_response(db, mediation_id, payload)
     return _serialize(row)
 
 

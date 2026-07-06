@@ -39,6 +39,11 @@ export interface MediationCase {
 
 // ── Workflow-Designer (Backend: mediation_variants + phase_step_defaults) ──
 
+/** Sichtbarkeitsbedingung eines Schritts/Blocks gegen die Fall-Flags. */
+export interface VisibleIf {
+  all?: { flag: string; eq: string | number | boolean }[];
+}
+
 /** Ein einzelner Block im Seitenaufbau eines Schritts (siehe blockTypes.ts). */
 export interface StepBlockDto {
   id: string;
@@ -95,6 +100,8 @@ export interface PhaseStepDefaultDto {
    * Einzelfelder. Sobald gesetzt, ist dies die maßgebliche Quelle.
    */
   blocks: StepBlockDto[] | null;
+  /** Sichtbarkeitsbedingung gegen die Fall-Flags (Eskalation/Segmentierung). null = immer sichtbar. */
+  visible_if: VisibleIf | null;
   /** Vom Mediator hinterlegte Video-URL — nur relevant wenn "video" in content_types. */
   video_url: string | null;
   /** Meeting-/Call-Link — nur relevant wenn "videokonferenz" in content_types. */
@@ -172,6 +179,7 @@ export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "trennung", label: "Trennung & Scheidung" },
   { id: "erbschaft", label: "Erbschaft" },
   { id: "nachbarschaft", label: "Nachbarschaft" },
+  { id: "geschaeft", label: "Geschäft & Organisation" },
 ];
 
 export interface MediationDetail extends MediationCase {
@@ -339,7 +347,7 @@ export const PHASES: { id: string; label: string; short: string }[] = [
   // der eigentlichen Mediation läuft. Sie gehört NICHT zu den 6 Teilnehmer-
   // Mediationsphasen, ist aber hier im Designer konfigurierbar (z.B. Video der
   // Einladungs-Botschaft an/aus/Pflicht). Nicht mit "einleitung" verwechseln.
-  { id: "einladung", label: "Einladung", short: "0" },
+  { id: "einladung", label: "Onboarding", short: "0" },
   { id: "einleitung", label: "Einleitung", short: "1" },
   { id: "themensammlung", label: "Themensammlung", short: "2" },
   { id: "interessen", label: "Interessen", short: "3" },
@@ -388,12 +396,14 @@ export const TYPE_LABEL: Record<string, string> = {
   trennung: "Trennung & Scheidung",
   erbschaft: "Erbschaftsstreit",
   nachbarschaft: "Nachbarschaftskonflikt",
+  geschaeft: "Geschäft & Organisation",
 };
 
 export const TYPE_COLOR: Record<string, string> = {
   trennung: "bg-rose-50 text-rose-700 border-rose-200",
   erbschaft: "bg-amber-50 text-amber-700 border-amber-200",
   nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
+  geschaeft: "bg-violet-50 text-violet-700 border-violet-200",
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {

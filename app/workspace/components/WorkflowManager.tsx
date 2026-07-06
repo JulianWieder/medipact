@@ -38,6 +38,7 @@ import {
   type MediationVariantDto,
   type PhaseStepDefaultDto,
   type StepBlockDto,
+  type VisibleIf,
 } from "../types";
 import {
   BLOCK_TYPES,
@@ -1080,6 +1081,56 @@ function StepPreview({ title, blocks }: { title: string; blocks: StepBlockDto[] 
   );
 }
 
+// Editor für die Sichtbarkeitsbedingung eines Schritts (Eskalation/Segmentierung).
+function VisibleIfEditor({
+  cond,
+  onChange,
+}: {
+  cond: VisibleIf | null | undefined;
+  onChange: (c: VisibleIf | null) => void;
+}) {
+  const first = cond?.all?.[0];
+  const flag = typeof first?.flag === "string" ? first.flag : "";
+  const eq = first ? String(first.eq ?? "") : "";
+  function upd(f: string, v: string) {
+    if (!f.trim()) {
+      onChange(null);
+      return;
+    }
+    onChange({ all: [{ flag: f.trim(), eq: v }] });
+  }
+  const inputCls =
+    "w-36 rounded-md border border-neutral-200 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400";
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs">
+      <span className="font-semibold text-neutral-500">👁 Sichtbar wenn Flag</span>
+      <input
+        value={flag}
+        onChange={(e) => upd(e.target.value, eq)}
+        placeholder="z.B. glasl_zone"
+        className={inputCls}
+      />
+      <span className="text-neutral-400">=</span>
+      <input
+        value={eq}
+        onChange={(e) => upd(flag, e.target.value)}
+        placeholder="z.B. lose_lose"
+        className={inputCls}
+      />
+      {flag ? (
+        <button
+          onClick={() => onChange(null)}
+          className="text-neutral-400 underline hover:text-neutral-600"
+        >
+          zurücksetzen (immer sichtbar)
+        </button>
+      ) : (
+        <span className="text-neutral-400">leer = immer sichtbar</span>
+      )}
+    </div>
+  );
+}
+
 // ── Der eigentliche Seiten-Designer (Palette + Blockliste + Vorschau) ────────
 function StepDesignerPanel({
   step,
@@ -1087,6 +1138,7 @@ function StepDesignerPanel({
   onRemoveBlock,
   onMoveBlock,
   onChangeBlockConfig,
+  onChangeVisibleIf,
   onAiFill,
   onClose,
 }: {
@@ -1095,6 +1147,7 @@ function StepDesignerPanel({
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, dir: -1 | 1) => void;
   onChangeBlockConfig: (blockId: string, patch: Record<string, unknown>) => void;
+  onChangeVisibleIf: (cond: VisibleIf | null) => void;
   onAiFill: () => Promise<void>;
   onClose: () => void;
 }) {
@@ -1141,6 +1194,8 @@ function StepDesignerPanel({
         </div>
       </div>
       {aiError && <p className="mb-3 text-xs font-semibold text-red-600">{aiError}</p>}
+
+      <VisibleIfEditor cond={step.visible_if} onChange={onChangeVisibleIf} />
 
       {/* Palette: Methoden nach Gruppe */}
       <div className="mb-5 rounded-xl border border-neutral-200 bg-white p-3">
@@ -1515,6 +1570,19 @@ export function WorkflowManager() {
     [mediationType, activePhase, mutateBlocks],
   );
 
+  // Sichtbarkeitsbedingung eines Schritts setzen (Eskalation/Segmentierung).
+  const changeVisibleIf = useCallback(
+    (id: number, cond: VisibleIf | null) => {
+      setEditableSteps((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, visible_if: cond } : s)),
+      );
+      updatePhaseStepDefault(id, { visible_if: cond }).catch(() =>
+        setError("Sichtbarkeit konnte nicht gespeichert werden."),
+      );
+    },
+    [setEditableSteps],
+  );
+
   // KI-Design-Assistent: erzeugt aus einer freien Instruktion einen komplett
   // neuen Schritt (Titel + Blöcke) in der aktiven Phase und öffnet ihn.
   const createStepFromAi = useCallback(
@@ -1831,6 +1899,7 @@ export function WorkflowManager() {
               onRemoveBlock={(bid) => removeBlock(designStep.id, bid)}
               onMoveBlock={(bid, dir) => moveBlock(designStep.id, bid, dir)}
               onChangeBlockConfig={(bid, patch) => changeBlockConfig(designStep.id, bid, patch)}
+              onChangeVisibleIf={(cond) => changeVisibleIf(designStep.id, cond)}
               onAiFill={() => aiFillBlocks(designStep.id, designStep.title)}
               onClose={() => setDesignStepId(null)}
             />

@@ -68,6 +68,12 @@ class PhaseStepDefault(Base):
     # Die tatsächlichen Antworten/Inhalte pro Fall liegen NICHT hier, sondern in
     # mediation_block_responses (Nutzer-/Mediator-/KI-Eingaben je Block).
     blocks = Column(JSON, nullable=True)
+    # Sichtbarkeitsbedingung gegen mediations.flags, z.B.
+    #   {"all": [{"flag": "glasl_zone", "eq": "lose_lose"}]}
+    # NULL = immer sichtbar. Wird in get_phase_steps ausgewertet (is_visible);
+    # erlaubt Eskalations-/Varianten-Schritte, die nur bei bestimmten Fall-Flags
+    # erscheinen.
+    visible_if = Column(JSON, nullable=True)
     # Video-URL, die der Mediator hinterlegt (nur relevant wenn "video" in
     # content_types; Platzhalter-Feld, solange Videos extern gehostet werden).
     video_url = Column(String, nullable=True)

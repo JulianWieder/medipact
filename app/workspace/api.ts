@@ -427,6 +427,7 @@ export async function updatePhaseStepDefault(
       | "enabled"
       | "content_types"
       | "blocks"
+      | "visible_if"
       | "video_url"
       | "meeting_url"
       | "question"
@@ -475,6 +476,30 @@ export async function reorderPhaseStepDefaults(
     body: JSON.stringify({ items }),
   });
   if (!res.ok) throw new Error("Reihenfolge konnte nicht gespeichert werden");
+}
+
+// ── Fall-Flags (Eskalation/Segmentierung) ──────────────────────────────────
+
+export async function fetchCaseFlags(mediationId: number): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/mediations/${mediationId}/flags`, { cache: "no-store" });
+  if (!res.ok) return {};
+  const data = await res.json().catch(() => null);
+  return (data?.flags as Record<string, unknown>) ?? {};
+}
+
+/** Merged Flags in den Fall (nur Mediator/Owner). value=null entfernt ein Flag. */
+export async function setCaseFlags(
+  mediationId: number,
+  flags: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/mediations/${mediationId}/flags`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flags }),
+  });
+  if (!res.ok) throw new Error("Flags konnten nicht gesetzt werden");
+  const data = await res.json().catch(() => null);
+  return (data?.flags as Record<string, unknown>) ?? {};
 }
 
 // ── Block-Antworten (pro Fall gespeicherter Block-Inhalt) ───────────────────

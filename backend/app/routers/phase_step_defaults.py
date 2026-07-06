@@ -75,6 +75,7 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "reflection_mode": step.reflection_mode,
         "content_types": step.content_types.split(",") if step.content_types else None,
         "blocks": step.blocks or None,
+        "visible_if": step.visible_if or None,
         "video_url": step.video_url,
         "meeting_url": step.meeting_url,
         "question": step.question,
@@ -99,6 +100,7 @@ class PhaseStepDefaultCreate(BaseModel):
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
     blocks: Optional[list[dict[str, Any]]] = None
+    visible_if: Optional[dict[str, Any]] = None
     video_url: Optional[str] = None
     meeting_url: Optional[str] = None
     question: Optional[str] = None
@@ -116,6 +118,7 @@ class PhaseStepDefaultUpdate(BaseModel):
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
     blocks: Optional[list[dict[str, Any]]] = None
+    visible_if: Optional[dict[str, Any]] = None
     video_url: Optional[str] = None
     meeting_url: Optional[str] = None
     question: Optional[str] = None
@@ -210,6 +213,7 @@ def create_phase_step_default(
         reflection_mode=payload.reflection_mode,
         content_types=",".join(payload.content_types) if payload.content_types else None,
         blocks=_normalize_blocks(payload.blocks),
+        visible_if=payload.visible_if,
         video_url=payload.video_url,
         meeting_url=payload.meeting_url,
         question=payload.question,

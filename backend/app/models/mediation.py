@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, Integer, String, Text
 
 from app.database import Base
 
@@ -23,3 +23,8 @@ class Mediation(Base):
     # Jederzeit änderbar; wirkt auf die Step-Auflösung in get_phase_steps
     # (Standard-Schritte + Schritte der gewählten Variante).
     variant_key = Column(String, nullable=True, index=True)
+    # Fall-Fakten/Flags als JSON-Objekt, z.B. {"glasl_zone": "win_lose",
+    # "kinder": true}. Steuern zusammen mit phase_step_defaults.visible_if,
+    # welche Schritte/Blöcke dieser Fall sieht (Eskalation, Segmentierung).
+    # NULL = keine Flags gesetzt (alles Unbedingte ist sichtbar).
+    flags = Column(JSON, nullable=True)

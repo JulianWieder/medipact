@@ -1,4 +1,4 @@
-export type MediationType = 'trennung' | 'erbschaft' | 'nachbarschaft'
+export type MediationType = 'trennung' | 'erbschaft' | 'nachbarschaft' | 'geschaeft'
 
 export interface FormField {
   id: string
