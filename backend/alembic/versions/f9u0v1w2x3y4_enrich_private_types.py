@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "f9u0v1w2x3y4"
-down_revision = "e8t9u0v1w2x3"
+down_revision = "e9flags1visif"
 branch_labels = None
 depends_on = None
 
@@ -377,26 +377,11 @@ def upgrade() -> None:
                     .where(psd.c.id == existing[0])
                     .values(title=title, description=description, blocks=blocks, updated_at=now)
                 )
-            else:
-                conn.execute(
-                    psd.insert().values(
-                        mediation_type=mtype,
-                        phase=phase,
-                        step_key=step_key,
-                        variant_key=None,
-                        title=title,
-                        description=description,
-                        placeholder="",
-                        reflection_mode=None,
-                        content_types=None,
-                        blocks=blocks,
-                        visible_if=None,
-                        position=0,
-                        enabled=True,
-                        created_at=now,
-                        updated_at=now,
-                    )
-                )
+            # Sonst: der basis_<phase>-Schritt existiert nicht (mehr) – z.B. weil
+            # die parallele Methoden-Migration e8t9u0v1w2x3 die Sammel-Schritte der
+            # Phasen 2–5 durch methodengetriebene Schritte ersetzt hat. In dem Fall
+            # NICHT neu anlegen, um Dubletten zu vermeiden (nur basis_abschluss,
+            # das die Methoden-Migration nicht anfasst, wird hier aktualisiert).
 
 
 def downgrade() -> None:

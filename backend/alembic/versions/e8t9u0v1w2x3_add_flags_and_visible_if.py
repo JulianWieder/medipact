@@ -5,15 +5,19 @@ phase_step_defaults.visible_if (JSON): Bedingung gegen die Flags, z.B.
 {"all": [{"flag": "glasl_zone", "eq": "lose_lose"}]}. NULL = immer sichtbar.
 get_phase_steps blendet Schritte aus, deren Bedingung nicht erfüllt ist.
 
-Revision ID: e8t9u0v1w2x3
-Revises: d7s8t9u0v1w2
+Revision ID: e9flags1visif
+Revises: e8t9u0v1w2x3
 Create Date: 2026-07-06
+
+Hinweis: ursprünglich als e8t9u0v1w2x3 angelegt; wegen Kollision mit der
+parallel entstandenen Migration e8t9u0v1w2x3_seed_method_steps_phases_2_5
+umbenannt und dahinter eingekettet.
 """
 from alembic import op
 import sqlalchemy as sa
 
-revision = "e8t9u0v1w2x3"
-down_revision = "d7s8t9u0v1w2"
+revision = "e9flags1visif"
+down_revision = "e8t9u0v1w2x3"
 branch_labels = None
 depends_on = None
 
