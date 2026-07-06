@@ -26,11 +26,14 @@ import {
   deleteWorkflowRule,
   fetchVariants,
   setMediationVariant,
+  fetchMediators,
+  setMediationMediator,
   fetchStepContent,
   saveStepContent,
   summarizeResults,
   generateMeetLink,
   type WorkflowRulesResponse,
+  type MediatorOption,
 } from "../api";
 
 interface FallDetailProps {
@@ -140,6 +143,44 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
       .then((list) => setVariants(list.filter((v) => v.enabled)))
       .catch(() => setVariants([]));
   }, [fall.id, fall.mediation_type, fall.variant_key]);
+
+  // ── Mediator-Zuordnung (immer genau einer; aus Nutzern mit Rolle "mediator") ──
+  const [mediators, setMediators] = useState<MediatorOption[]>([]);
+  const [mediatorUserId, setMediatorUserId] = useState<number | null>(null);
+  const [mediatorSaving, setMediatorSaving] = useState(false);
+  const [mediatorError, setMediatorError] = useState("");
+
+  useEffect(() => {
+    fetchMediators()
+      .then(setMediators)
+      .catch(() => setMediators([]));
+  }, []);
+
+  // Aktuellen Mediator aus der Teilnehmerliste (Rolle "mediator") ableiten und
+  // per E-Mail auf die Mediatoren-Liste (user_id) mappen.
+  useEffect(() => {
+    const current = participants.find((p) => p.role === "mediator");
+    if (!current?.email || mediators.length === 0) return;
+    const match = mediators.find(
+      (m) => m.email.toLowerCase() === current.email!.toLowerCase(),
+    );
+    if (match) setMediatorUserId(match.user_id);
+  }, [participants, mediators]);
+
+  async function handleMediatorChange(userId: number) {
+    setMediatorSaving(true);
+    setMediatorError("");
+    try {
+      await setMediationMediator(fall.id, userId);
+      setMediatorUserId(userId);
+      // Teilnehmerliste neu laden, damit der neue Mediator überall erscheint.
+      fetchParticipants(fall.id).then(setParticipants).catch(() => {});
+    } catch {
+      setMediatorError("Mediator konnte nicht geändert werden");
+    } finally {
+      setMediatorSaving(false);
+    }
+  }
 
   async function handleVariantChange(nextKey: string) {
     const value = nextKey === "" ? null : nextKey;
@@ -816,6 +857,26 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                 )}
                 {variantError && (
                   <span className="text-xs text-red-400">{variantError}</span>
+                )}
+                {/* Mediator-Zuordnung: immer genau ein Mediator, aus Nutzern mit Rolle "mediator". */}
+                <select
+                  value={mediatorUserId ?? ""}
+                  onChange={(e) => e.target.value && handleMediatorChange(Number(e.target.value))}
+                  disabled={mediatorSaving || mediators.length === 0}
+                  title="Mediator dieses Falls"
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-50 [&>option]:text-neutral-900"
+                >
+                  <option value="">
+                    {mediators.length === 0 ? "Kein Mediator verfügbar" : "Mediator wählen…"}
+                  </option>
+                  {mediators.map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      Mediator: {m.name}
+                    </option>
+                  ))}
+                </select>
+                {mediatorError && (
+                  <span className="text-xs text-red-400">{mediatorError}</span>
                 )}
                 {fall.description && (
                   <span className="text-sm text-neutral-300">· {fall.description}</span>

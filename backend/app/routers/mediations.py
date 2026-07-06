@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -376,6 +376,53 @@ def _ensure_start_invoice(
     db.commit()
 
 
+MEDIATOR_ROLE = "mediator"
+
+
+def _mediator_participant(db: Session, mediation_id: int) -> MediationParticipant | None:
+    return (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.role == MEDIATOR_ROLE,
+        )
+        .first()
+    )
+
+
+def _ensure_default_mediator(db: Session, mediation: Mediation) -> None:
+    """Ordnet dem Fall den Standard-Mediator (settings.DEFAULT_MEDIATOR_EMAIL) zu,
+    sofern noch kein Mediator zugeordnet ist UND dieser Nutzer existiert. Legt
+    bewusst KEINEN Nutzer automatisch an (siehe Produktentscheidung)."""
+    if _mediator_participant(db, mediation.id):
+        return
+    mediator_user = (
+        db.query(User)
+        .filter(func.lower(User.email) == settings.DEFAULT_MEDIATOR_EMAIL.lower())
+        .first()
+    )
+    if not mediator_user:
+        return
+    db.add(
+        MediationParticipant(
+            mediation_id=mediation.id,
+            user_id=mediator_user.id,
+            role=MEDIATOR_ROLE,
+        )
+    )
+    db.commit()
+
+
+def _serialize_mediator(db: Session, mediation_id: int) -> dict | None:
+    part = _mediator_participant(db, mediation_id)
+    if not part:
+        return None
+    u = db.query(User).filter(User.id == part.user_id).first()
+    if not u:
+        return None
+    return {"participant_id": part.id, "user_id": u.id, "name": u.name, "email": u.email}
+
+
 @router.post("")
 def create_mediation(
     mediation: MediationCreate,
@@ -406,6 +453,9 @@ def create_mediation(
     )
     db.add(participant)
     db.commit()
+
+    # Jeder Fall bekommt automatisch den Standard-Mediator zugeordnet (falls vorhanden).
+    _ensure_default_mediator(db, db_mediation)
 
     return {
         "mediation_id": db_mediation.id,
@@ -518,7 +568,11 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
         .filter(MediationParticipant.mediation_id == mediation.id)
         .all()
     ):
-        owes = pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(p))
+        # Nur zahlungspflichtige Parteien (owner/other_party) im Bezahl-Status listen;
+        # Mediator/Beobachter erscheinen hier nicht.
+        if not billing.is_paying_party(p):
+            continue
+        owes = billing.participant_owes(mediation, p)
         u = db.query(User).filter(User.id == p.user_id).first()
         parties.append({
             "participant_id": p.id,
@@ -538,7 +592,7 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
         "is_paid": bool(mediation.is_paid),
         "all_owing_paid": billing.all_owing_paid(db, mediation),
         "you": {
-            "owes": pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me)),
+            "owes": billing.participant_owes(mediation, me),
             "base_due_eur": my_base,
             "discount_code": me.discount_code,
             "discount_amount_eur": round(me.discount_amount or 0.0, 2),
@@ -628,7 +682,7 @@ async def create_paypal_order(
     if me.paid:
         raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
 
-    if not pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me)):
+    if not billing.participant_owes(mediation, me):
         raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an.")
 
     amount = billing.participant_final_due(db, mediation, me)
@@ -693,7 +747,7 @@ def redeem_free(
         raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
 
     amount = billing.participant_final_due(db, mediation, me)
-    owes = pricing.participant_owes(mediation.mediation_type, is_owner=billing.is_owner(me))
+    owes = billing.participant_owes(mediation, me)
     if owes and amount > 0:
         raise HTTPException(
             status_code=400,
@@ -778,6 +832,20 @@ def get_all_mediations(
         for m in rows
     ]
 
+@router.get("/mediators")
+def list_available_mediators(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Alle Nutzer mit Rolle 'mediator' – für die Mediator-Auswahl im Workspace.
+    Nur für Mediatoren/Admins. MUSS vor /{mediation_id} (int) stehen, sonst
+    würde "mediators" als mediation_id interpretiert (422)."""
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins zugänglich")
+    users = db.query(User).filter(User.role == "mediator").order_by(User.name).all()
+    return [{"user_id": u.id, "name": u.name, "email": u.email} for u in users]
+
+
 @router.get("/{mediation_id}")
 def get_mediation(
     mediation_id: int,
@@ -810,6 +878,7 @@ def get_mediation(
         "phase": mediation.phase,
         "role": is_participant.role,
         "is_paid": mediation.is_paid,
+        "mediator": _serialize_mediator(db, mediation.id),
     }
 
 
@@ -864,6 +933,47 @@ def get_mediation_participants(
             "invitationStatus": "pending",
         })
     return result
+
+
+class MediatorAssignRequest(BaseModel):
+    user_id: int
+
+
+@router.post("/{mediation_id}/mediator")
+def assign_mediator(
+    mediation_id: int,
+    payload: MediatorAssignRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Ordnet dem Fall einen Mediator zu bzw. wechselt ihn (nur Mediator/Admin).
+    Es bleibt immer genau ein Mediator-Teilnehmer übrig."""
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur Mediatoren/Admins dürfen den Mediator ändern.")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+
+    new_mediator = db.query(User).filter(User.id == payload.user_id).first()
+    if not new_mediator or new_mediator.role != "mediator":
+        raise HTTPException(status_code=400, detail="Ausgewählter Nutzer ist kein Mediator.")
+
+    # Alle bisherigen Mediator-Teilnehmer entfernen, damit genau einer übrig bleibt.
+    db.query(MediationParticipant).filter(
+        MediationParticipant.mediation_id == mediation_id,
+        MediationParticipant.role == MEDIATOR_ROLE,
+    ).delete(synchronize_session=False)
+
+    db.add(
+        MediationParticipant(
+            mediation_id=mediation_id,
+            user_id=new_mediator.id,
+            role=MEDIATOR_ROLE,
+        )
+    )
+    db.commit()
+    return {"ok": True, "mediator": _serialize_mediator(db, mediation_id)}
 
 
 # ── Notizen & Schritte ─────────────────────────────────────────────────────────
@@ -1052,6 +1162,7 @@ def get_phase_steps(
                 "placeholder": d.placeholder,
                 "reflection_mode": d.reflection_mode,
                 "content_types": types,
+                "blocks": d.blocks or None,
                 "video_url": (sc.video_url if sc and sc.video_url is not None else d.video_url),
                 "meeting_url": (sc.meeting_url if sc and sc.meeting_url is not None else d.meeting_url),
                 "question": (sc.question if sc and sc.question is not None else d.question),
@@ -1078,6 +1189,7 @@ def get_phase_steps(
                 "placeholder": "",
                 "reflection_mode": None,
                 "content_types": None,
+                "blocks": None,
                 "video_url": sc.video_url if sc else None,
                 "meeting_url": sc.meeting_url if sc else None,
                 "question": sc.question if sc else None,

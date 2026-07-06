@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     GOOGLE_CALENDAR_ID: str = "primary"
     # Zeitzone für die erzeugten Termine (IANA-Name).
     GOOGLE_MEET_TIMEZONE: str = "Europe/Berlin"
+    # ── Mediator-Zuordnung ───────────────────────────────────────────────────
+    # Jeder Fall bekommt automatisch diesen Mediator zugeordnet (sofern der
+    # Nutzer existiert). Später im Workspace aus allen Nutzern mit Rolle
+    # "mediator" änderbar.
+    DEFAULT_MEDIATOR_EMAIL: str = "jw_mediator@medipact.de"
     # ── Google-Meet-AUFNAHME (Einladungs-Video-/Audio-Botschaft via Meet) ────
     # Anders als der reine Meet-LINK oben braucht die serverseitige AUFNAHME
     # (spaces.create mit auto recording+transcription + Abruf der Artefakte)

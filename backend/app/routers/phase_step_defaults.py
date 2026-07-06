@@ -4,7 +4,7 @@ Phase (phase_step_defaults). Nur für Plattform-Admins/Mediatoren – das ist
 die globale Konfiguration, nicht der Pro-Fall-Override (siehe
 mediations.py: workflow-rules, custom_steps.py: custom-steps).
 """
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -26,6 +26,40 @@ def _require_admin(user: User) -> None:
         raise HTTPException(status_code=403, detail="Nur Admins können Phasen-Schritte konfigurieren")
 
 
+def _normalize_blocks(blocks: Optional[list]) -> Optional[list]:
+    """
+    Validiert die Block-Liste generisch (bewusst OHNE feste Typ-Union, damit
+    neue Blocktypen reine Frontend-Änderungen bleiben). Jeder Block braucht eine
+    id und einen type; config wird zu einem dict normalisiert, visible_if bleibt
+    optional. Unbekannte Felder werden verworfen.
+    """
+    if blocks is None:
+        return None
+    normalized: list[dict] = []
+    seen_ids: set[str] = set()
+    for i, raw in enumerate(blocks):
+        if not isinstance(raw, dict):
+            continue
+        btype = raw.get("type")
+        if not btype:
+            continue
+        bid = str(raw.get("id") or f"b{i + 1}")
+        # id-Kollisionen auflösen (stabile, eindeutige ids für Antwort-Zuordnung)
+        while bid in seen_ids:
+            bid = f"{bid}_{i}"
+        seen_ids.add(bid)
+        config = raw.get("config")
+        normalized.append(
+            {
+                "id": bid,
+                "type": str(btype),
+                "config": config if isinstance(config, dict) else {},
+                "visible_if": raw.get("visible_if") or None,
+            }
+        )
+    return normalized
+
+
 def _serialize(step: PhaseStepDefault) -> dict:
     return {
         "id": step.id,
@@ -38,6 +72,7 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "placeholder": step.placeholder,
         "reflection_mode": step.reflection_mode,
         "content_types": step.content_types.split(",") if step.content_types else None,
+        "blocks": step.blocks or None,
         "video_url": step.video_url,
         "meeting_url": step.meeting_url,
         "question": step.question,
@@ -61,6 +96,7 @@ class PhaseStepDefaultCreate(BaseModel):
     placeholder: str = ""
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
+    blocks: Optional[list[dict[str, Any]]] = None
     video_url: Optional[str] = None
     meeting_url: Optional[str] = None
     question: Optional[str] = None
@@ -77,6 +113,7 @@ class PhaseStepDefaultUpdate(BaseModel):
     placeholder: Optional[str] = None
     reflection_mode: Optional[str] = None
     content_types: Optional[list[str]] = None
+    blocks: Optional[list[dict[str, Any]]] = None
     video_url: Optional[str] = None
     meeting_url: Optional[str] = None
     question: Optional[str] = None
@@ -170,6 +207,7 @@ def create_phase_step_default(
         placeholder=payload.placeholder,
         reflection_mode=payload.reflection_mode,
         content_types=",".join(payload.content_types) if payload.content_types else None,
+        blocks=_normalize_blocks(payload.blocks),
         video_url=payload.video_url,
         meeting_url=payload.meeting_url,
         question=payload.question,
@@ -206,6 +244,8 @@ def update_phase_step_default(
     if "content_types" in update_data:
         types = update_data.pop("content_types")
         step.content_types = ",".join(types) if types else None
+    if "blocks" in update_data:
+        step.blocks = _normalize_blocks(update_data.pop("blocks"))
     for key, value in update_data.items():
         setattr(step, key, value)
 

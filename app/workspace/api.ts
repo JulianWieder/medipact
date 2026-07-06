@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent, BlockResponseDto } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -52,6 +52,29 @@ export async function fetchParticipants(mediationId: number): Promise<Participan
   const res = await fetch(`/api/mediations/${mediationId}/participants`, { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
+}
+
+export type MediatorOption = { user_id: number; name: string; email: string };
+
+export async function fetchMediators(): Promise<MediatorOption[]> {
+  const res = await fetch("/api/mediations/mediators", { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function setMediationMediator(
+  mediationId: number,
+  userId: number,
+): Promise<void> {
+  const res = await fetch(`/api/mediations/${mediationId}/mediator`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Mediator konnte nicht zugeordnet werden");
+  }
 }
 
 export async function inviteParty(
@@ -401,6 +424,7 @@ export async function updatePhaseStepDefault(
       | "reflection_mode"
       | "enabled"
       | "content_types"
+      | "blocks"
       | "video_url"
       | "meeting_url"
       | "question"
@@ -433,6 +457,47 @@ export async function reorderPhaseStepDefaults(
     body: JSON.stringify({ items }),
   });
   if (!res.ok) throw new Error("Reihenfolge konnte nicht gespeichert werden");
+}
+
+// ── Block-Antworten (pro Fall gespeicherter Block-Inhalt) ───────────────────
+
+/** Lädt die gespeicherten Block-Antworten eines Falls (optional gefiltert). */
+export async function fetchBlockResponses(
+  mediationId: number,
+  opts?: { phase?: string; stepKey?: string },
+): Promise<BlockResponseDto[]> {
+  const params = new URLSearchParams();
+  if (opts?.phase) params.set("phase", opts.phase);
+  if (opts?.stepKey) params.set("step_key", opts.stepKey);
+  const qs = params.toString();
+  const res = await fetch(
+    `/api/mediations/${mediationId}/block-responses${qs ? `?${qs}` : ""}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) throw new Error("Block-Antworten konnten nicht geladen werden");
+  return res.json();
+}
+
+/** Legt den Beitrag des aktuellen Autors zu einem Block an oder aktualisiert ihn. */
+export async function saveBlockResponse(
+  mediationId: number,
+  payload: {
+    phase: string;
+    step_key: string;
+    block_id: string;
+    block_type?: string;
+    value: unknown;
+    submitted?: boolean;
+    as_ai?: boolean;
+  },
+): Promise<BlockResponseDto> {
+  const res = await fetch(`/api/mediations/${mediationId}/block-responses`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Block-Antwort konnte nicht gespeichert werden");
+  return res.json();
 }
 
 export async function setMediationVariant(

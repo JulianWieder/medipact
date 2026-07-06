@@ -54,6 +54,7 @@ type Props = {
 type Participant = {
   id: string;
   name: string;
+  email?: string;
   role: string;
   invitationStatus: "accepted" | "pending";
 };
@@ -478,14 +479,33 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               </p>
             </div>
             <div className="mt-8 space-y-3">
-              {participants.map((participant) => (
+              {(() => {
+                const med = participants.find((p) => p.role === "mediator");
+                return med ? (
+                  <div className="flex items-center justify-between rounded-2xl border border-accent-200 bg-accent-50 px-5 py-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-accent-700">
+                        Dein Mediator
+                      </p>
+                      <p className="mt-1 font-semibold text-neutral-900">{med.name}</p>
+                      {med.email && <p className="text-sm text-neutral-500">{med.email}</p>}
+                    </div>
+                    <span className="rounded-full bg-accent-100 px-3 py-1 text-xs font-medium text-accent-700">
+                      Mediator
+                    </span>
+                  </div>
+                ) : null;
+              })()}
+              {participants.filter((p) => p.role !== "mediator").map((participant) => (
                 <div
                   key={participant.id}
                   className="card-muted flex items-center justify-between"
                 >
                   <div>
                     <p className="font-medium text-neutral-900">{participant.name}</p>
-                    <p className="text-sm text-neutral-500">{participant.role}</p>
+                    <p className="text-sm text-neutral-500">
+                      {roleLabel[participant.role] ?? participant.role}
+                    </p>
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${

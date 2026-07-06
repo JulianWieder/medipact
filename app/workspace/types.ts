@@ -39,6 +39,33 @@ export interface MediationCase {
 
 // ── Workflow-Designer (Backend: mediation_variants + phase_step_defaults) ──
 
+/** Ein einzelner Block im Seitenaufbau eines Schritts (siehe blockTypes.ts). */
+export interface StepBlockDto {
+  id: string;
+  type: string;
+  config: Record<string, unknown>;
+  visible_if?: unknown | null;
+}
+
+/**
+ * Gespeicherter Inhalt/Antwort je Block eines Falls (Backend:
+ * mediation_block_responses). Getrennt nach Autor (Partei/Mediator/KI), damit
+ * die Beiträge am Ende ausgewertet werden können.
+ */
+export interface BlockResponseDto {
+  id: number;
+  phase: string;
+  step_key: string;
+  block_id: string;
+  block_type: string | null;
+  author_key: string;
+  author_source: "user" | "mediator" | "ai" | string;
+  author_participant_id: number | null;
+  value: unknown;
+  submitted: boolean;
+  updated_at: string | null;
+}
+
 export interface MediationVariantDto {
   id: number;
   mediation_type: string;
@@ -62,6 +89,12 @@ export interface PhaseStepDefaultDto {
   reflection_mode: string | null;
   /** Inhaltsarten der Karte (siehe CONTENT_TYPES). null = noch nicht klassifiziert. */
   content_types: string[] | null;
+  /**
+   * Neuer dynamischer Seitenaufbau: geordnete Block-Liste (siehe blockTypes.ts).
+   * null/[] = noch nicht als Blöcke definiert -> Fallback auf content_types +
+   * Einzelfelder. Sobald gesetzt, ist dies die maßgebliche Quelle.
+   */
+  blocks: StepBlockDto[] | null;
   /** Vom Mediator hinterlegte Video-URL — nur relevant wenn "video" in content_types. */
   video_url: string | null;
   /** Meeting-/Call-Link — nur relevant wenn "videokonferenz" in content_types. */

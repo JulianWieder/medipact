@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from "./phaseData";
 import StepContentBlocks from "./StepContentBlocks";
+import StepBlocks from "./StepBlocks";
+import type { StepBlockDto } from "@/app/workspace/types";
 
 type Props = {
   mediationId: string;
@@ -60,6 +62,10 @@ type PhaseStepFromAPI = {
   placeholder: string;
   reflection_mode: "simple" | "interactive" | null;
   content_types?: string[] | null;
+  // Neuer dynamischer Seitenaufbau (siehe StepBlocks). Wenn gesetzt, wird der
+  // Schritt block-basiert gerendert; sonst greift der Legacy-Pfad
+  // (content_types + Einzelfelder via StepContentBlocks).
+  blocks?: StepBlockDto[] | null;
   // Inhaltsart-spezifische Felder (siehe StepContentBlocks). Das Backend liefert
   // sie bereits pro Schritt; früher hat PhaseNotesClient sie ignoriert.
   video_url?: string | null;
@@ -1197,9 +1203,20 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                   <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{currentStep.description}</p>
                 )}
 
-                {/* Inhaltsart-Bausteine (Video / Videokonferenz / Frage) – aus der
-                    WorkflowManager-Konfiguration, in jeder Phase verfügbar. */}
-                {!isResultStep && <StepContentBlocks meta={stepMeta[currentStep.key]} />}
+                {/* Schritt-Bausteine aus der WorkflowManager-Konfiguration.
+                    Neuer block-basierter Aufbau (mit Antwort-Speicherung), sonst
+                    Fallback auf die alten content_types-Bausteine. */}
+                {!isResultStep &&
+                  (stepMeta[currentStep.key]?.blocks?.length ? (
+                    <StepBlocks
+                      mediationId={mediationId}
+                      phase={phaseKey}
+                      stepKey={currentStep.key}
+                      blocks={stepMeta[currentStep.key]!.blocks!}
+                    />
+                  ) : (
+                    <StepContentBlocks meta={stepMeta[currentStep.key]} />
+                  ))}
 
                 {/* Ergebnis-Ansicht (read-only, nur freigegebene Inhalte) */}
                 {isResultStep && (

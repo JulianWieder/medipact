@@ -9,6 +9,7 @@ from app.models.mediation_custom_step import MediationCustomStep
 from app.models.mediation_step_rule import MediationStepRule
 from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_step_content import MediationStepContent
+from app.models.mediation_block_response import MediationBlockResponse
 from app.models.invoice import Invoice
 from app.models.ai_prompt import AiPrompt
 from app.models.invite_meet_recording import InviteMeetRecording

@@ -2,22 +2,21 @@
 
 // ── Workflow Manager ─────────────────────────────────────────────────────────
 //
-// Backend-verbundener Designer für Mediations-Workflows (ersetzt das frühere
-// localStorage-Mockup):
+// Backend-verbundener Designer für Mediations-Workflows.
 //
 //   1. Mediationsart wählen (trennung/erbschaft/nachbarschaft).
 //   2. Scope wählen: "Basis-Workflow" (gilt für jeden Fall des Typs) oder eine
-//      Variante (z.B. "Trennung mit Kindern") — Varianten sind additiv, ihre
-//      Schritte hängen hinter den Basis-Schritten (siehe get_phase_steps im
-//      Backend). Im Varianten-Scope werden Basis-Schritte gesperrt (grau)
-//      angezeigt, damit die effektive Kette sichtbar bleibt.
-//   3. Schritte pro Phase anlegen/umbenennen/löschen/umsortieren — gespeichert
-//      in phase_step_defaults (siehe AdminPhaseStepsClient für die Listenform).
-//   4. Fälle zuordnen: unten lassen sich alle Fälle der gewählten Mediationsart
-//      einer Variante zuordnen (mediations.variant_key). Pro-Fall-Anpassungen
-//      (Zusatzschritte, Skips) laufen weiterhin über den jeweiligen Fall.
+//      Variante (z.B. "Trennung mit Kindern") — Varianten sind additiv.
+//   3. Schritte pro Phase anlegen/umbenennen/löschen/umsortieren.
+//   4. NEU: Jeden Schritt als geordnete Liste von BLÖCKEN gestalten
+//      ("Seiten-Designer" unter dem Canvas): Methode aus der Palette wählen,
+//      Reihenfolge festlegen, pro Block die Felder pflegen, Live-Vorschau der
+//      Teilnehmer-Seite sehen. Die Methoden stehen zentral in blockTypes.ts —
+//      neue Methoden = reine Frontend-Ergänzung, keine Migration.
 //
-// Weiterhin bewusst OHNE Verzweigungen/Gateways — eine lineare Kette pro Phase.
+// Die tatsächlichen Antworten/Inhalte pro Fall (Nutzer/Mediator/KI) werden je
+// Block separat gespeichert (mediation_block_responses) und können am Ende
+// ausgewertet werden.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
@@ -36,17 +35,18 @@ import "@xyflow/react/dist/style.css";
 import {
   PHASES,
   MEDIATION_TYPES,
-  CONTENT_TYPES,
-  CONTENT_TYPE_BY_ID,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
+  type StepBlockDto,
 } from "../types";
-
-// Auswahl des Fragebogen-Anlasses, nur relevant wenn "feedback" gewählt ist.
-const FEEDBACK_OCCASIONS: { id: "after_videocall" | "before_contract"; label: string }[] = [
-  { id: "after_videocall", label: "Nach dem Gespräch" },
-  { id: "before_contract", label: "Vor dem Vertrag" },
-];
+import {
+  BLOCK_TYPES,
+  BLOCK_GROUPS,
+  BLOCK_TYPE_BY_ID,
+  makeBlock,
+  deriveBlocksFromLegacy,
+  type BlockTypeDef,
+} from "../blockTypes";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import AiPromptsEditor from "./AiPromptsEditor";
 import {
@@ -59,6 +59,12 @@ import {
   reorderPhaseStepDefaults,
   generateMeetLink,
 } from "../api";
+
+// Auswahl des Fragebogen-Anlasses (Block-Typ "feedback").
+const FEEDBACK_OCCASIONS: { id: "after_videocall" | "before_contract"; label: string }[] = [
+  { id: "after_videocall", label: "Nach dem Gespräch" },
+  { id: "before_contract", label: "Vor dem Vertrag" },
+];
 
 // ── Layout-Konstanten für die Kette (rein visuell) ───────────────────────────
 const NODE_WIDTH = 200;
@@ -83,19 +89,23 @@ function slugify(label: string, existing: Set<string>): string {
   return key;
 }
 
-// ── Custom Node: ein einzelner Schritt als Kästchen im Flow ─────────────────
+// Blöcke eines Schritts ableiten – bevorzugt `blocks`, sonst aus Legacy-Feldern.
+function stepBlocks(step: PhaseStepDefaultDto): StepBlockDto[] {
+  if (step.blocks && step.blocks.length) return step.blocks;
+  return deriveBlocksFromLegacy(step);
+}
 
-// Badge-Zeile mit den Inhaltsarten einer Karte (Text/Video/Frage/…).
-function ContentTypeBadges({ types }: { types: string[] }) {
-  if (types.length === 0) return null;
+// ── Badge-Zeile: die Blocktypen eines Schritts als Chips ─────────────────────
+function BlockBadges({ blocks }: { blocks: StepBlockDto[] }) {
+  if (blocks.length === 0) return null;
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
-      {types.map((id) => {
-        const def = CONTENT_TYPE_BY_ID[id];
+      {blocks.map((b, idx) => {
+        const def = BLOCK_TYPE_BY_ID[b.type];
         if (!def) return null;
         return (
           <span
-            key={id}
+            key={`${b.id}-${idx}`}
             className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-semibold ${def.badge}`}
             title={def.label}
           >
@@ -108,22 +118,15 @@ function ContentTypeBadges({ types }: { types: string[] }) {
   );
 }
 
+// ── Custom Node: ein Schritt als kompaktes Kästchen ─────────────────────────
 type StepNodeData = {
   label: string;
   stepKey: string;
-  contentTypes: string[];
-  description: string;
-  placeholder: string;
-  question: string;
-  contractTemplate: string;
-  resultSourcePhase: string | null;
-  videoUrl: string | null;
-  meetingUrl: string | null;
-  feedbackOccasion: "after_videocall" | "before_contract" | null;
+  blocks: StepBlockDto[];
   locked: boolean;
   isEditing: boolean;
   editingLabel: string;
-  isContentEditing: boolean;
+  isDesigning: boolean;
   canMoveLeft: boolean;
   canMoveRight: boolean;
   onStartEdit: () => void;
@@ -131,234 +134,13 @@ type StepNodeData = {
   onSaveEdit: () => void;
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
-  onToggleContentEdit: () => void;
-  onToggleType: (typeId: string) => void;
-  onChangeVideoUrl: (url: string) => void;
-  onChangeMeetingUrl: (url: string) => void;
-  onChangeDescription: (value: string) => void;
-  onChangePlaceholder: (value: string) => void;
-  onChangeQuestion: (value: string) => void;
-  onChangeContractTemplate: (value: string) => void;
-  onChangeResultSourcePhase: (phase: string) => void;
-  onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") => void;
+  onOpenDesigner: () => void;
 };
-
-// Kleines Label über einem Inhaltsfeld.
-function FieldLabel({ children }: { children: ReactNode }) {
-  return (
-    <p className="mb-1 mt-2 text-[9px] font-semibold uppercase tracking-wide text-neutral-400">
-      {children}
-    </p>
-  );
-}
-
-const FIELD_INPUT_CLASS =
-  "w-full rounded-md border border-neutral-200 px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400";
-
-// Inline-Editor: Toggle-Chips für alle Inhaltsarten + die je nach Auswahl
-// passenden Inhaltsfelder (Anleitungstext, Platzhalter, Frage, Vertragsvorlage,
-// Video-/Meeting-URL, Feedback-Anlass). Bei "individuell" wird der Inhalt nicht
-// hier, sondern pro Fall gepflegt – dann erscheint nur ein Hinweis.
-// Kleiner Button, der serverseitig einen Google-Meet-Raum erzeugt und den Link
-// über onLink zurückgibt (Feld füllen + persistieren übernimmt der Aufrufer).
-function MeetLinkButton({
-  onLink,
-  summary,
-}: {
-  onLink: (url: string) => void;
-  summary?: string;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleClick() {
-    setError("");
-    setLoading(true);
-    try {
-      const url = await generateMeetLink(summary);
-      onLink(url);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Meet-Link konnte nicht erzeugt werden");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="mt-1">
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={loading}
-        className="inline-flex items-center gap-1 rounded-md border border-accent-200 bg-accent-50 px-2 py-1 text-[10px] font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
-      >
-        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
-      </button>
-      {error && <p className="mt-1 text-[10px] font-semibold text-red-600">{error}</p>}
-    </div>
-  );
-}
-
-function ContentTypeEditor({ step }: { step: StepNodeData }) {
-  const isIndividual = step.contentTypes.includes("individuell");
-  const has = (id: string) => step.contentTypes.includes(id);
-  return (
-    <div className="mt-2 rounded-lg border border-neutral-100 bg-neutral-50 p-2">
-      <div className="flex flex-wrap gap-1">
-        {CONTENT_TYPES.map((t) => {
-          const active = step.contentTypes.includes(t.id);
-          return (
-            <button
-              key={t.id}
-              onClick={() => step.onToggleType(t.id)}
-              className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-semibold transition ${
-                active ? t.badge : "border-neutral-200 bg-white text-neutral-400 hover:text-neutral-600"
-              }`}
-              title={t.label}
-            >
-              <span aria-hidden>{t.icon}</span>
-              {t.short}
-            </button>
-          );
-        })}
-      </div>
-
-      {isIndividual ? (
-        <div className="mt-2 rounded-md border border-teal-200 bg-teal-50 px-2 py-1.5 text-[10px] leading-relaxed text-teal-700">
-          <span className="font-semibold">✦ Individueller Schritt.</span> Der Inhalt
-          (eigenes Video, Meeting-Link, Text, Frage, Feedback) wird pro Fall in der
-          Fallansicht unter „Individuelle Inhalte" gepflegt. Hier legst du nur Titel
-          und Struktur fest.
-        </div>
-      ) : (
-        <>
-          <FieldLabel>Anleitungstext (für Teilnehmer)</FieldLabel>
-          <textarea
-            value={step.description}
-            onChange={(e) => step.onChangeDescription(e.target.value)}
-            placeholder="Was soll der Teilnehmer in diesem Schritt tun / lesen?"
-            rows={2}
-            className={FIELD_INPUT_CLASS}
-          />
-
-          {has("text") && (
-            <>
-              <FieldLabel>Platzhalter im Eingabefeld</FieldLabel>
-              <input
-                value={step.placeholder}
-                onChange={(e) => step.onChangePlaceholder(e.target.value)}
-                placeholder="z.B. „Beschreibe hier deine Sicht …"
-                className={FIELD_INPUT_CLASS}
-              />
-            </>
-          )}
-
-          {has("frage") && (
-            <>
-              <FieldLabel>Frage / Quiz-Inhalt</FieldLabel>
-              <textarea
-                value={step.question}
-                onChange={(e) => step.onChangeQuestion(e.target.value)}
-                placeholder="Konkrete Frage(n) für diesen Schritt …"
-                rows={2}
-                className={FIELD_INPUT_CLASS}
-              />
-            </>
-          )}
-
-          {has("vertrag") && (
-            <>
-              <FieldLabel>Vertrags-/Dokumentvorlage</FieldLabel>
-              <textarea
-                value={step.contractTemplate}
-                onChange={(e) => step.onChangeContractTemplate(e.target.value)}
-                placeholder="Vorlagentext für den Vertrag / das Dokument …"
-                rows={3}
-                className={FIELD_INPUT_CLASS}
-              />
-            </>
-          )}
-
-          {has("ergebnis") && (
-            <div className="mt-2 rounded-md border border-cyan-200 bg-cyan-50 p-2">
-              <FieldLabel>Ergebnis-Quelle (Phase)</FieldLabel>
-              <select
-                value={step.resultSourcePhase ?? ""}
-                onChange={(e) => step.onChangeResultSourcePhase(e.target.value)}
-                className={FIELD_INPUT_CLASS}
-              >
-                <option value="">— frei (Mediator kuratiert pro Fall) —</option>
-                {PHASES.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-[9px] leading-relaxed text-cyan-700">
-                Zeigt allen Teilnehmern (Teile der) Ergebnisse aus dieser Phase –{" "}
-                <span className="font-semibold">erst nach Freigabe des Mediators pro Fall</span>.
-              </p>
-            </div>
-          )}
-
-          {has("video") && (
-            <>
-              <FieldLabel>Video-URL</FieldLabel>
-              <input
-                value={step.videoUrl ?? ""}
-                onChange={(e) => step.onChangeVideoUrl(e.target.value)}
-                placeholder="Video-URL (vom Mediator) …"
-                className={FIELD_INPUT_CLASS}
-              />
-            </>
-          )}
-
-          {has("videokonferenz") && (
-            <>
-              <FieldLabel>Meeting-/Call-Link</FieldLabel>
-              <input
-                value={step.meetingUrl ?? ""}
-                onChange={(e) => step.onChangeMeetingUrl(e.target.value)}
-                placeholder="Link zum Videoraum (z.B. Google Meet/Jitsi/Zoom) …"
-                className={FIELD_INPUT_CLASS}
-              />
-              <MeetLinkButton
-                summary={step.label}
-                onLink={(url) => step.onChangeMeetingUrl(url)}
-              />
-            </>
-          )}
-
-          {has("feedback") && (
-            <div className="mt-2 flex items-center gap-1">
-              <span className="text-[9px] font-semibold text-neutral-400">Fragebogen:</span>
-              <select
-                value={step.feedbackOccasion ?? "after_videocall"}
-                onChange={(e) =>
-                  step.onChangeFeedbackOccasion(e.target.value as "after_videocall" | "before_contract")
-                }
-                className="flex-1 rounded-md border border-neutral-200 px-1.5 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-accent-400"
-              >
-                {FEEDBACK_OCCASIONS.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
 
 function StepNode({ data }: NodeProps) {
   const step = data as unknown as StepNodeData;
 
   if (step.locked) {
-    // Basis-Schritt im Varianten-Scope: sichtbar, aber nicht editierbar —
-    // bearbeitet wird er im Scope "Basis-Workflow".
     return (
       <div
         className="rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 px-3 py-2.5 opacity-70"
@@ -371,14 +153,17 @@ function StepNode({ data }: NodeProps) {
         <p className="mt-0.5 truncate font-mono text-[10px] text-neutral-300">
           {step.stepKey} · Basis
         </p>
-        <ContentTypeBadges types={step.contentTypes} />
+        <BlockBadges blocks={step.blocks} />
       </div>
     );
   }
 
   return (
     <div
-      className="rounded-xl border-2 border-neutral-200 bg-white px-3 py-2.5 shadow-sm transition hover:border-accent-300"
+      className={cn(
+        "rounded-xl border-2 bg-white px-3 py-2.5 shadow-sm transition",
+        step.isDesigning ? "border-accent-400 ring-2 ring-accent-100" : "border-neutral-200 hover:border-accent-300",
+      )}
       style={{ width: NODE_WIDTH }}
     >
       <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-neutral-300" />
@@ -404,8 +189,7 @@ function StepNode({ data }: NodeProps) {
       )}
       <p className="mt-0.5 truncate font-mono text-[10px] text-neutral-300">{step.stepKey}</p>
 
-      {!step.isContentEditing && <ContentTypeBadges types={step.contentTypes} />}
-      {step.isContentEditing && <ContentTypeEditor step={step} />}
+      <BlockBadges blocks={step.blocks} />
 
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -428,15 +212,16 @@ function StepNode({ data }: NodeProps) {
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={step.onToggleContentEdit}
-            className={`rounded p-1 transition ${
-              step.isContentEditing
-                ? "bg-accent-50 text-accent-600"
-                : "text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-            }`}
-            title="Inhaltsarten festlegen"
+            onClick={step.onOpenDesigner}
+            className={cn(
+              "rounded px-2 py-1 text-[11px] font-semibold transition",
+              step.isDesigning
+                ? "bg-accent-500 text-white"
+                : "bg-accent-50 text-accent-600 hover:bg-accent-100",
+            )}
+            title="Seite dieses Schritts gestalten"
           >
-            {step.isContentEditing ? "✓" : "⊞"}
+            Gestalten
           </button>
           <button
             onClick={step.onDelete}
@@ -453,9 +238,465 @@ function StepNode({ data }: NodeProps) {
 
 const nodeTypes: NodeTypes = { step: StepNode };
 
+// ── Kleiner Google-Meet-Link-Button (für Block "videokonferenz") ─────────────
+function MeetLinkButton({ onLink, summary }: { onLink: (url: string) => void; summary?: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  async function handleClick() {
+    setError("");
+    setLoading(true);
+    try {
+      const url = await generateMeetLink(summary);
+      onLink(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Meet-Link konnte nicht erzeugt werden");
+    } finally {
+      setLoading(false);
+    }
+  }
+  return (
+    <div className="mt-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1 rounded-md border border-accent-200 bg-accent-50 px-2 py-1 text-[11px] font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
+      >
+        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
+      </button>
+      {error && <p className="mt-1 text-[11px] font-semibold text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+// ── Feld-Bausteine für den Block-Editor ─────────────────────────────────────
+const INPUT_CLASS =
+  "w-full rounded-md border border-neutral-200 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400";
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="mb-1 mt-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+      {children}
+    </p>
+  );
+}
+
+// Liest ein config-Feld als String (tolerant gegenüber undefined/anderen Typen).
+function cfgStr(config: Record<string, unknown>, key: string): string {
+  const v = config[key];
+  return typeof v === "string" ? v : "";
+}
+
+// ── Konfig-Felder je Blocktyp ────────────────────────────────────────────────
+function BlockConfigEditor({
+  block,
+  onChange,
+}: {
+  block: StepBlockDto;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  const c = block.config ?? {};
+  switch (block.type) {
+    case "textausgabe":
+      return (
+        <>
+          <FieldLabel>Text für die Teilnehmer</FieldLabel>
+          <textarea
+            value={cfgStr(c, "text")}
+            onChange={(e) => onChange({ text: e.target.value })}
+            rows={3}
+            placeholder="Was sollen die Teilnehmer hier lesen?"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "video":
+      return (
+        <>
+          <FieldLabel>Video-URL</FieldLabel>
+          <input
+            value={cfgStr(c, "url")}
+            onChange={(e) => onChange({ url: e.target.value })}
+            placeholder="YouTube/Vimeo/Datei-URL …"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "texteingabe":
+      return (
+        <>
+          <FieldLabel>Beschriftung (optional)</FieldLabel>
+          <input
+            value={cfgStr(c, "label")}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="z.B. Deine Sicht der Dinge"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Platzhalter im Eingabefeld</FieldLabel>
+          <input
+            value={cfgStr(c, "placeholder")}
+            onChange={(e) => onChange({ placeholder: e.target.value })}
+            placeholder="z.B. Beschreibe hier …"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "frage":
+      return (
+        <>
+          <FieldLabel>Frage</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="Konkrete Frage an die Teilnehmer …"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "video_aufnahme":
+      return (
+        <>
+          <FieldLabel>Aufnahme-Auftrag (optional)</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="Worüber soll die Person eine Videobotschaft aufnehmen?"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "videokonferenz":
+      return (
+        <>
+          <FieldLabel>Meeting-/Call-Link</FieldLabel>
+          <input
+            value={cfgStr(c, "url")}
+            onChange={(e) => onChange({ url: e.target.value })}
+            placeholder="Link zum Videoraum (Google Meet/Jitsi/Zoom) …"
+            className={INPUT_CLASS}
+          />
+          <MeetLinkButton summary="Videokonferenz" onLink={(url) => onChange({ url })} />
+        </>
+      );
+    case "feedback":
+      return (
+        <>
+          <FieldLabel>Fragebogen-Anlass</FieldLabel>
+          <select
+            value={cfgStr(c, "occasion") || "after_videocall"}
+            onChange={(e) => onChange({ occasion: e.target.value })}
+            className={INPUT_CLASS}
+          >
+            {FEEDBACK_OCCASIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </>
+      );
+    case "vertrag":
+      return (
+        <>
+          <FieldLabel>Vertrags-/Dokumentvorlage</FieldLabel>
+          <textarea
+            value={cfgStr(c, "template")}
+            onChange={(e) => onChange({ template: e.target.value })}
+            rows={3}
+            placeholder="Vorlagentext für den Vertrag / das Dokument …"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "ergebnis":
+      return (
+        <>
+          <FieldLabel>Ergebnis-Quelle (Phase)</FieldLabel>
+          <select
+            value={cfgStr(c, "source_phase")}
+            onChange={(e) => onChange({ source_phase: e.target.value })}
+            className={INPUT_CLASS}
+          >
+            <option value="">— frei (Mediator kuratiert pro Fall) —</option>
+            {PHASES.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] leading-relaxed text-cyan-700">
+            Zeigt (Teile der) Ergebnisse dieser Phase — erst nach Freigabe des Mediators pro Fall.
+          </p>
+        </>
+      );
+    case "ki_prompt":
+      return (
+        <>
+          <FieldLabel>KI-Auftrag (Prompt)</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={3}
+            placeholder="Was soll die KI in diesem Schritt tun? (Die Ausgabe wird pro Fall gespeichert.)"
+            className={INPUT_CLASS}
+          />
+          <label className="mt-2 flex items-center gap-2 text-[11px] text-neutral-600">
+            <input
+              type="checkbox"
+              checked={block.config?.autorun === true}
+              onChange={(e) => onChange({ autorun: e.target.checked })}
+            />
+            Automatisch ausführen, sobald die Eingaben des Schritts vorliegen
+          </label>
+        </>
+      );
+    case "individuell":
+      return (
+        <p className="mt-1 rounded-md border border-pink-200 bg-pink-50 px-2 py-1.5 text-[11px] leading-relaxed text-pink-700">
+          Der Inhalt dieses Blocks wird pro Fall in der Fallansicht gepflegt.
+        </p>
+      );
+    default:
+      return (
+        <p className="mt-1 text-[11px] text-neutral-400">Keine Felder für diesen Blocktyp.</p>
+      );
+  }
+}
+
+// ── Live-Vorschau der Teilnehmer-Seite (nicht interaktiv) ────────────────────
+function PreviewBlock({ block }: { block: StepBlockDto }) {
+  const c = block.config ?? {};
+  const def = BLOCK_TYPE_BY_ID[block.type];
+  const text = (k: string) => cfgStr(c, k);
+  switch (block.type) {
+    case "textausgabe":
+      return (
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+          {text("text") || <span className="text-neutral-300">Textausgabe …</span>}
+        </p>
+      );
+    case "video":
+      return (
+        <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-900 text-sm text-white/80">
+          ▶ {text("url") ? "Video" : "Video-URL fehlt"}
+        </div>
+      );
+    case "texteingabe":
+      return (
+        <div>
+          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">
+            {text("placeholder") || "Texteingabe …"}
+          </div>
+        </div>
+      );
+    case "frage":
+      return (
+        <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-violet-600">Frage</p>
+          <p className="text-sm text-neutral-800">{text("prompt") || <span className="text-neutral-300">Frage …</span>}</p>
+        </div>
+      );
+    case "video_aufnahme":
+      return (
+        <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-orange-600">⏺ Video aufnehmen</p>
+          <p className="text-sm text-neutral-700">{text("prompt") || "Videobotschaft aufnehmen"}</p>
+        </div>
+      );
+    case "videokonferenz":
+      return (
+        <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-sky-600">Videokonferenz</p>
+          <span className="inline-block rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white">🎥 Videoraum beitreten</span>
+        </div>
+      );
+    case "termin":
+      return (
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-3 text-sm text-teal-700">📅 Terminvereinbarung</div>
+      );
+    case "feedback":
+      return (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-3 text-sm text-amber-700">★ Feedback-Fragebogen</div>
+      );
+    case "vertrag":
+      return (
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3 text-sm text-indigo-700">§ Vertrag / Dokument</div>
+      );
+    case "ergebnis":
+      return (
+        <div className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-3 text-sm text-cyan-700">◆ Ergebnis-Anzeige (nach Freigabe)</div>
+      );
+    case "ki_prompt":
+      return (
+        <div className="rounded-2xl border border-dashed border-fuchsia-300 bg-fuchsia-50/50 p-3 text-[11px] text-fuchsia-700">
+          ✨ KI-Block — läuft im Hintergrund, für Teilnehmer nicht sichtbar.
+        </div>
+      );
+    case "individuell":
+      return (
+        <div className="rounded-2xl border border-dashed border-pink-300 bg-pink-50/50 p-3 text-[11px] text-pink-700">
+          ✦ Individueller Block — Inhalt pro Fall.
+        </div>
+      );
+    default:
+      return def ? (
+        <div className="rounded-xl border border-neutral-200 p-3 text-sm text-neutral-500">{def.label}</div>
+      ) : null;
+  }
+}
+
+function StepPreview({ title, blocks }: { title: string; blocks: StepBlockDto[] }) {
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Vorschau (Teilnehmer)</p>
+      <h5 className="mb-3 text-base font-semibold text-neutral-800">{title}</h5>
+      {blocks.length === 0 ? (
+        <p className="text-sm text-neutral-400">Noch keine Blöcke — links eine Methode hinzufügen.</p>
+      ) : (
+        <div className="space-y-3">
+          {blocks.map((b) => (
+            <PreviewBlock key={b.id} block={b} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Der eigentliche Seiten-Designer (Palette + Blockliste + Vorschau) ────────
+function StepDesignerPanel({
+  step,
+  onAddBlock,
+  onRemoveBlock,
+  onMoveBlock,
+  onChangeBlockConfig,
+  onClose,
+}: {
+  step: PhaseStepDefaultDto;
+  onAddBlock: (type: string) => void;
+  onRemoveBlock: (blockId: string) => void;
+  onMoveBlock: (blockId: string, dir: -1 | 1) => void;
+  onChangeBlockConfig: (blockId: string, patch: Record<string, unknown>) => void;
+  onClose: () => void;
+}) {
+  const blocks = stepBlocks(step);
+  return (
+    <div className="border-t border-neutral-100 bg-neutral-50/50 p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-accent-600">Seiten-Designer</p>
+          <h4 className="text-sm font-semibold text-neutral-800">
+            Schritt „{step.title}" gestalten
+          </h4>
+        </div>
+        <button
+          onClick={onClose}
+          className="rounded-lg border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-500 hover:bg-white"
+        >
+          Schließen
+        </button>
+      </div>
+
+      {/* Palette: Methoden nach Gruppe */}
+      <div className="mb-5 rounded-xl border border-neutral-200 bg-white p-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+          Methode hinzufügen
+        </p>
+        <div className="space-y-2">
+          {BLOCK_GROUPS.map((group) => {
+            const items = BLOCK_TYPES.filter((b) => b.group === group);
+            if (items.length === 0) return null;
+            return (
+              <div key={group} className="flex flex-wrap items-center gap-1.5">
+                <span className="w-32 shrink-0 text-[10px] font-semibold text-neutral-400">{group}</span>
+                {items.map((def: BlockTypeDef) => (
+                  <button
+                    key={def.type}
+                    onClick={() => onAddBlock(def.type)}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition hover:brightness-95 ${def.badge}`}
+                    title={def.hint}
+                  >
+                    <span aria-hidden>{def.icon}</span>
+                    {def.label}
+                    <span className="text-neutral-400">＋</span>
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        {/* Blockliste */}
+        <div className="space-y-2">
+          {blocks.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-center text-sm text-neutral-400">
+              Noch keine Blöcke. Wähle oben eine Methode.
+            </div>
+          ) : (
+            blocks.map((b, idx) => {
+              const def = BLOCK_TYPE_BY_ID[b.type];
+              return (
+                <div key={b.id} className="rounded-xl border border-neutral-200 bg-white p-3">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                        def?.badge ?? "border-neutral-200 bg-neutral-50 text-neutral-500"
+                      }`}
+                    >
+                      <span aria-hidden>{def?.icon ?? "▪"}</span>
+                      {def?.label ?? b.type}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onMoveBlock(b.id, -1)}
+                        disabled={idx === 0}
+                        className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-20"
+                        title="Nach oben"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => onMoveBlock(b.id, 1)}
+                        disabled={idx === blocks.length - 1}
+                        className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-20"
+                        title="Nach unten"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        onClick={() => onRemoveBlock(b.id)}
+                        className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-500"
+                        title="Block entfernen"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  {def?.hint && <p className="mt-1 text-[10px] leading-snug text-neutral-400">{def.hint}</p>}
+                  <BlockConfigEditor block={b} onChange={(patch) => onChangeBlockConfig(b.id, patch)} />
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Live-Vorschau */}
+        <div className="lg:sticky lg:top-4 lg:self-start">
+          <StepPreview title={step.title} blocks={blocks} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Hauptkomponente ──────────────────────────────────────────────────────────
 export function WorkflowManager() {
   const [mediationType, setMediationType] = useState(MEDIATION_TYPES[0].id);
-  // null = Basis-Workflow, sonst MediationVariant.key
   const [activeVariant, setActiveVariant] = useState<string | null>(null);
   const [activePhase, setActivePhase] = useState(PHASES[0].id);
 
@@ -470,12 +711,9 @@ export function WorkflowManager() {
   const [creatingVariant, setCreatingVariant] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
-  // Welche Karte hat den Inhaltsart-Editor gerade offen.
-  const [contentEditId, setContentEditId] = useState<number | null>(null);
+  // Welcher Schritt ist gerade im Seiten-Designer offen.
+  const [designStepId, setDesignStepId] = useState<number | null>(null);
 
-  // ── Laden: Varianten je Mediationsart ────────────────────────────────────
-  // (Die Fall↔Variante-Zuordnung wird bewusst NUR im Fall selbst gemacht,
-  //  siehe FallDetail – daher hier keine Fallliste mehr.)
   useEffect(() => {
     setActiveVariant(null);
     fetchVariants(mediationType)
@@ -483,11 +721,11 @@ export function WorkflowManager() {
       .catch(() => setVariants([]));
   }, [mediationType]);
 
-  // ── Laden: Schritte je (Art, Phase, Scope) ───────────────────────────────
   useEffect(() => {
     let cancelled = false;
     setLoadingSteps(true);
     setError("");
+    setDesignStepId(null);
     const loads: Promise<PhaseStepDefaultDto[]>[] = [
       fetchPhaseStepDefaults(mediationType, activePhase),
     ];
@@ -511,21 +749,15 @@ export function WorkflowManager() {
     };
   }, [mediationType, activePhase, activeVariant]);
 
-  // Im Basis-Scope sind die Basis-Schritte editierbar; im Varianten-Scope
-  // werden sie gesperrt vorangestellt und nur die Varianten-Schritte editiert.
   const editableSteps = activeVariant ? variantSteps : baseSteps;
   const lockedSteps = activeVariant ? baseSteps : [];
   const setEditableSteps = activeVariant ? setVariantSteps : setBaseSteps;
-  const chain = useMemo(
-    () => [...lockedSteps, ...editableSteps],
-    [lockedSteps, editableSteps],
-  );
+  const chain = useMemo(() => [...lockedSteps, ...editableSteps], [lockedSteps, editableSteps]);
 
   const activePhaseLabel = PHASES.find((p) => p.id === activePhase)?.label ?? activePhase;
-  const typeLabel =
-    MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
+  const typeLabel = MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
 
-  // ── Schritt-Aktionen (persistieren sofort ins Backend) ───────────────────
+  // ── Schritt-Aktionen ──────────────────────────────────────────────────────
   async function addStep() {
     const label = newLabel.trim();
     if (!label) return;
@@ -550,6 +782,7 @@ export function WorkflowManager() {
     try {
       await deletePhaseStepDefault(id);
       setEditableSteps((prev) => prev.filter((s) => s.id !== id));
+      setDesignStepId((cur) => (cur === id ? null : cur));
     } catch {
       setError("Schritt konnte nicht gelöscht werden.");
     }
@@ -574,14 +807,11 @@ export function WorkflowManager() {
     }
   }
 
-  const persistOrder = useCallback(
-    (list: PhaseStepDefaultDto[]) => {
-      reorderPhaseStepDefaults(list.map((s, idx) => ({ id: s.id, position: idx }))).catch(() =>
-        setError("Reihenfolge konnte nicht gespeichert werden."),
-      );
-    },
-    [],
-  );
+  const persistOrder = useCallback((list: PhaseStepDefaultDto[]) => {
+    reorderPhaseStepDefaults(list.map((s, idx) => ({ id: s.id, position: idx }))).catch(() =>
+      setError("Reihenfolge konnte nicht gespeichert werden."),
+    );
+  }, []);
 
   const moveStep = useCallback(
     (id: number, dir: -1 | 1) => {
@@ -598,102 +828,97 @@ export function WorkflowManager() {
     [setEditableSteps, persistOrder],
   );
 
-  // ── Inhaltsarten pro Karte (persistieren sofort ins Backend) ─────────────
-  const toggleContentType = useCallback(
-    (id: number, typeId: string) => {
-      setEditableSteps((prev) => {
-        const step = prev.find((s) => s.id === id);
-        if (!step) return prev;
-        const current = step.content_types ?? [];
-        const nextSet = new Set(current);
-        if (nextSet.has(typeId)) nextSet.delete(typeId);
-        else nextSet.add(typeId);
-        // Reihenfolge gemäß CONTENT_TYPES bewahren (stabile Badge-Reihenfolge).
-        const next = CONTENT_TYPES.map((t) => t.id).filter((tid) => nextSet.has(tid));
-        updatePhaseStepDefault(id, { content_types: next }).catch(() =>
-          setError("Inhaltsarten konnten nicht gespeichert werden."),
-        );
-        return prev.map((s) => (s.id === id ? { ...s, content_types: next } : s));
-      });
-    },
-    [setEditableSteps],
-  );
+  // ── Blöcke eines Schritts mutieren (debounced persistiert) ────────────────
+  const blockTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const persistBlocks = useCallback((id: number, blocks: StepBlockDto[]) => {
+    const timers = blockTimers.current;
+    if (timers[id]) clearTimeout(timers[id]);
+    timers[id] = setTimeout(() => {
+      updatePhaseStepDefault(id, { blocks }).catch(() =>
+        setError("Blöcke konnten nicht gespeichert werden."),
+      );
+    }, 400);
+  }, []);
 
-  // Textfelder (Anleitung, Platzhalter, Frage, Vertragsvorlage, Video-/Meeting-URL):
-  // lokal sofort, Persistenz gebündelt (debounced) beim Tippen. Ein Timer pro
-  // (Schritt-ID, Feld), damit parallele Felder sich nicht gegenseitig verwerfen.
-  const textFieldTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const changeTextField = useCallback(
-    (
-      id: number,
-      field: "description" | "placeholder" | "question" | "contract_template" | "video_url" | "meeting_url",
-      value: string,
-    ) => {
-      setEditableSteps((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
-      const timers = textFieldTimers.current;
-      const key = `${id}:${field}`;
-      if (timers[key]) clearTimeout(timers[key]);
-      timers[key] = setTimeout(() => {
-        // Leerstring bei URL-Feldern zu null normalisieren; Textfelder als "" halten.
-        const isUrl = field === "video_url" || field === "meeting_url";
-        const payloadValue = isUrl ? value.trim() || null : value;
-        updatePhaseStepDefault(id, { [field]: payloadValue }).catch(() =>
-          setError("Inhalt konnte nicht gespeichert werden."),
-        );
-      }, 600);
-    },
-    [setEditableSteps],
-  );
-
-  const changeFeedbackOccasion = useCallback(
-    (id: number, occasion: "after_videocall" | "before_contract") => {
+  const mutateBlocks = useCallback(
+    (id: number, fn: (cur: StepBlockDto[]) => StepBlockDto[]) => {
       setEditableSteps((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, feedback_occasion: occasion } : s)),
-      );
-      updatePhaseStepDefault(id, { feedback_occasion: occasion }).catch(() =>
-        setError("Feedback-Anlass konnte nicht gespeichert werden."),
+        prev.map((s) => {
+          if (s.id !== id) return s;
+          const cur = stepBlocks(s);
+          const next = fn(cur);
+          persistBlocks(id, next);
+          return { ...s, blocks: next };
+        }),
       );
     },
-    [setEditableSteps],
+    [setEditableSteps, persistBlocks],
   );
 
-  const changeResultSourcePhase = useCallback(
-    (id: number, phase: string) => {
-      const value = phase || null;
+  const addBlock = useCallback(
+    (id: number, type: string) => mutateBlocks(id, (cur) => [...cur, makeBlock(type)]),
+    [mutateBlocks],
+  );
+  const removeBlock = useCallback(
+    (id: number, blockId: string) => mutateBlocks(id, (cur) => cur.filter((b) => b.id !== blockId)),
+    [mutateBlocks],
+  );
+  const moveBlock = useCallback(
+    (id: number, blockId: string, dir: -1 | 1) =>
+      mutateBlocks(id, (cur) => {
+        const list = [...cur];
+        const idx = list.findIndex((b) => b.id === blockId);
+        const target = idx + dir;
+        if (idx < 0 || target < 0 || target >= list.length) return cur;
+        [list[idx], list[target]] = [list[target], list[idx]];
+        return list;
+      }),
+    [mutateBlocks],
+  );
+  const changeBlockConfig = useCallback(
+    (id: number, blockId: string, patch: Record<string, unknown>) =>
+      mutateBlocks(id, (cur) =>
+        cur.map((b) => (b.id === blockId ? { ...b, config: { ...b.config, ...patch } } : b)),
+      ),
+    [mutateBlocks],
+  );
+
+  // Beim Öffnen des Designers: hat der Schritt noch keine blocks, aus Legacy
+  // ableiten und einmal persistieren, damit ab jetzt blocks maßgeblich sind.
+  const openDesigner = useCallback(
+    (id: number) => {
+      setDesignStepId((cur) => (cur === id ? null : id));
       setEditableSteps((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, result_source_phase: value } : s)),
-      );
-      updatePhaseStepDefault(id, { result_source_phase: value }).catch(() =>
-        setError("Ergebnis-Quelle konnte nicht gespeichert werden."),
+        prev.map((s) => {
+          if (s.id !== id) return s;
+          if (s.blocks && s.blocks.length) return s;
+          const derived = deriveBlocksFromLegacy(s);
+          persistBlocks(id, derived);
+          return { ...s, blocks: derived };
+        }),
       );
     },
-    [setEditableSteps],
+    [setEditableSteps, persistBlocks],
   );
 
-  // Reihenfolge nach dem Ziehen neu berechnen — nur editierbare Knoten sind
-  // draggable; gesperrte Basis-Knoten stehen im Varianten-Scope fest davor.
   const handleNodeDragStop = useCallback(
     (_event: MouseEvent | TouchEvent, draggedNode: Node) => {
       setEditableSteps((prev) => {
         const fromIdx = prev.findIndex((s) => String(s.id) === draggedNode.id);
         if (fromIdx === -1) return prev;
-
         const offset = lockedSteps.length;
         const dragged = prev[fromIdx];
         const others = prev.filter((s) => String(s.id) !== draggedNode.id);
         const draggedX = draggedNode.position.x;
-
         let insertAt = others.length;
         for (let i = 0; i < others.length; i += 1) {
           const originalIdx = prev.findIndex((s) => s.id === others[i].id);
-          const otherCenterX =
-            (offset + originalIdx) * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH / 2;
+          const otherCenterX = (offset + originalIdx) * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH / 2;
           if (draggedX < otherCenterX) {
             insertAt = i;
             break;
           }
         }
-
         const reordered = [...others];
         reordered.splice(insertAt, 0, dragged);
         persistOrder(reordered);
@@ -703,7 +928,6 @@ export function WorkflowManager() {
     [setEditableSteps, lockedSteps.length, persistOrder],
   );
 
-  // ── Varianten anlegen ─────────────────────────────────────────────────────
   async function addVariant() {
     const label = newVariantLabel.trim();
     if (!label) return;
@@ -720,7 +944,7 @@ export function WorkflowManager() {
     }
   }
 
-  // ── Nodes/Edges aus der Kette ableiten ────────────────────────────────────
+  // ── Nodes/Edges ────────────────────────────────────────────────────────────
   const nodes: Node[] = useMemo(
     () =>
       chain.map((step, idx) => {
@@ -733,19 +957,11 @@ export function WorkflowManager() {
           data: {
             label: step.title,
             stepKey: step.step_key,
-            contentTypes: step.content_types ?? [],
-            description: step.description ?? "",
-            placeholder: step.placeholder ?? "",
-            question: step.question ?? "",
-            contractTemplate: step.contract_template ?? "",
-            resultSourcePhase: step.result_source_phase,
-            videoUrl: step.video_url,
-            meetingUrl: step.meeting_url,
-            feedbackOccasion: step.feedback_occasion,
+            blocks: stepBlocks(step),
             locked,
             isEditing: editingId === step.id,
             editingLabel,
-            isContentEditing: contentEditId === step.id,
+            isDesigning: designStepId === step.id,
             canMoveLeft: !locked && idx > lockedSteps.length,
             canMoveRight: !locked && idx < chain.length - 1,
             onStartEdit: () => startEdit(step.id, step.title),
@@ -753,25 +969,12 @@ export function WorkflowManager() {
             onSaveEdit: saveEdit,
             onDelete: () => removeStep(step.id),
             onMove: (dir: -1 | 1) => moveStep(step.id, dir),
-            onToggleContentEdit: () =>
-              setContentEditId((cur) => (cur === step.id ? null : step.id)),
-            onToggleType: (typeId: string) => toggleContentType(step.id, typeId),
-            onChangeVideoUrl: (url: string) => changeTextField(step.id, "video_url", url),
-            onChangeMeetingUrl: (url: string) => changeTextField(step.id, "meeting_url", url),
-            onChangeDescription: (value: string) => changeTextField(step.id, "description", value),
-            onChangePlaceholder: (value: string) => changeTextField(step.id, "placeholder", value),
-            onChangeQuestion: (value: string) => changeTextField(step.id, "question", value),
-            onChangeContractTemplate: (value: string) =>
-              changeTextField(step.id, "contract_template", value),
-            onChangeResultSourcePhase: (phase: string) =>
-              changeResultSourcePhase(step.id, phase),
-            onChangeFeedbackOccasion: (occasion: "after_videocall" | "before_contract") =>
-              changeFeedbackOccasion(step.id, occasion),
+            onOpenDesigner: () => openDesigner(step.id),
           } satisfies StepNodeData,
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chain, lockedSteps.length, editingId, editingLabel, contentEditId, moveStep, toggleContentType, changeTextField, changeResultSourcePhase, changeFeedbackOccasion],
+    [chain, lockedSteps.length, editingId, editingLabel, designStepId, moveStep, openDesigner],
   );
 
   const edges: Edge[] = useMemo(
@@ -790,14 +993,16 @@ export function WorkflowManager() {
     ? variants.find((v) => v.key === activeVariant)?.label ?? activeVariant
     : null;
 
+  const designStep = designStepId !== null ? editableSteps.find((s) => s.id === designStepId) ?? null : null;
+
   return (
     <div className="p-6 max-w-6xl">
       <SectionHeader label="Workspace" title="Workflow Manager" />
       <p className="mb-5 max-w-2xl text-sm text-neutral-500">
-        Designe pro Mediationsart den Basis-Workflow und beliebige Varianten (z.B.
-        &bdquo;Trennung mit Kindern&ldquo;). Varianten ergänzen die Basis-Schritte. Unten ordnest du
-        Fälle einer Variante zu — Feinanpassungen für einen einzelnen Fall (Schritte
-        überspringen, Zusatzschritte) machst du weiterhin direkt im Fall.
+        Designe pro Mediationsart den Basis-Workflow und beliebige Varianten. Jeden Schritt
+        gestaltest du als geordnete Liste von <span className="font-semibold">Blöcken</span>
+        {" "}(Textausgabe, Texteingabe, Video, Frage, Videokonferenz, KI-Prompt …) mit
+        Live-Vorschau — klick dazu bei einem Schritt auf <span className="font-semibold">„Gestalten"</span>.
       </p>
 
       <AiPromptsEditor />
@@ -811,7 +1016,7 @@ export function WorkflowManager() {
         </div>
       )}
 
-      {/* ── Mediationsart ── */}
+      {/* Mediationsart */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {MEDIATION_TYPES.map((t) => (
           <button
@@ -829,7 +1034,7 @@ export function WorkflowManager() {
         ))}
       </div>
 
-      {/* ── Scope: Basis-Workflow / Varianten ── */}
+      {/* Scope: Basis / Varianten */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <button
           onClick={() => setActiveVariant(null)}
@@ -887,7 +1092,7 @@ export function WorkflowManager() {
                 onClick={() => {
                   setActivePhase(phase.id);
                   setEditingId(null);
-                  setContentEditId(null);
+                  setDesignStepId(null);
                 }}
                 className={cn(
                   "flex items-center justify-between rounded-xl px-3 py-2.5 text-left transition",
@@ -905,15 +1110,13 @@ export function WorkflowManager() {
                   </span>
                   {phase.label}
                 </span>
-                {active && (
-                  <span className="text-[11px] text-neutral-400">{chain.length}</span>
-                )}
+                {active && <span className="text-[11px] text-neutral-400">{chain.length}</span>}
               </button>
             );
           })}
         </div>
 
-        {/* Canvas der aktiven Phase */}
+        {/* Canvas + Designer */}
         <WCard className="flex-1 overflow-hidden p-0">
           <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
             <h4 className="text-sm font-semibold text-neutral-800">
@@ -928,8 +1131,8 @@ export function WorkflowManager() {
           </div>
 
           <p className="border-b border-neutral-100 bg-neutral-50/60 px-5 py-2 text-[11px] text-neutral-400">
-            Titel anklicken zum Umbenennen · <span className="font-semibold">⊞</span> legt die
-            Inhaltsarten der Karte fest (Text, Video, Frage, Videokonferenz + Transkript, …).
+            Titel anklicken zum Umbenennen · <span className="font-semibold">„Gestalten"</span> öffnet den
+            Seiten-Designer für diesen Schritt (Blöcke + Live-Vorschau).
           </p>
 
           {!loadingSteps && chain.length === 0 ? (
@@ -962,6 +1165,18 @@ export function WorkflowManager() {
             </div>
           )}
 
+          {/* Seiten-Designer des gewählten Schritts */}
+          {designStep && (
+            <StepDesignerPanel
+              step={designStep}
+              onAddBlock={(type) => addBlock(designStep.id, type)}
+              onRemoveBlock={(bid) => removeBlock(designStep.id, bid)}
+              onMoveBlock={(bid, dir) => moveBlock(designStep.id, bid, dir)}
+              onChangeBlockConfig={(bid, patch) => changeBlockConfig(designStep.id, bid, patch)}
+              onClose={() => setDesignStepId(null)}
+            />
+          )}
+
           {/* Neuen Schritt hinzufügen */}
           <div className="flex items-center gap-2 border-t border-neutral-100 p-4">
             <input
@@ -987,10 +1202,9 @@ export function WorkflowManager() {
       </div>
 
       <p className="mt-6 max-w-2xl text-xs text-neutral-400">
-        Die Variante bestimmt, welche Zusatz-Schritte ein Fall durchläuft (Basis + Variante).
-        Die Zuordnung eines Falls zu einer Variante machst du direkt im jeweiligen Fall
-        (Fallansicht → Variante). Fall-spezifische Anpassungen (Schritte überspringen,
-        individuelle Inhalte) ebenfalls im Fall.
+        Die Blöcke eines Schritts bestimmen, was die Teilnehmer sehen und eingeben. Eingabe-,
+        Aufnahme- und KI-Blöcke speichern ihren Inhalt pro Fall separat — Grundlage für die
+        spätere Auswertung (wo liegen die Reibungspunkte, wo ist eine Einigung möglich).
       </p>
     </div>
   );

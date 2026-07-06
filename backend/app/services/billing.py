@@ -19,17 +19,36 @@ from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
 
 
+# Nur diese Rollen sind zahlungspflichtige Parteien. Mediator/Beobachter zahlen
+# nicht und zählen weder bei der Anteilsaufteilung (split) noch bei der
+# Freischaltbedingung (alle bezahlt) mit.
+PAYING_ROLES = {"owner", "other_party"}
+
+
+def is_paying_party(participant: MediationParticipant) -> bool:
+    return (participant.role or "").lower() in PAYING_ROLES
+
+
 def _participant_count(db: Session, mediation_id: int) -> int:
-    return max(
+    """Anzahl zahlungspflichtiger Parteien (ohne Mediator/Beobachter)."""
+    parts = (
         db.query(MediationParticipant)
         .filter(MediationParticipant.mediation_id == mediation_id)
-        .count(),
-        1,
+        .all()
     )
+    return max(sum(1 for p in parts if is_paying_party(p)), 1)
 
 
 def is_owner(participant: MediationParticipant) -> bool:
     return (participant.role or "").lower() == "owner"
+
+
+def participant_owes(mediation: Mediation, participant: MediationParticipant) -> bool:
+    """Ob diese konkrete Partei zahlungspflichtig ist: nur echte Parteien
+    (owner/other_party) und je nach Abrechnungsmodell (einmalig = nur Owner)."""
+    if not is_paying_party(participant):
+        return False
+    return pricing.participant_owes(mediation.mediation_type, is_owner=is_owner(participant))
 
 
 def participant_base_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
@@ -56,11 +75,7 @@ def owing_participants(db: Session, mediation: Mediation) -> list[MediationParti
         .filter(MediationParticipant.mediation_id == mediation.id)
         .all()
     )
-    return [
-        p
-        for p in parts
-        if pricing.participant_owes(mediation.mediation_type, is_owner=is_owner(p))
-    ]
+    return [p for p in parts if participant_owes(mediation, p)]
 
 
 def all_owing_paid(db: Session, mediation: Mediation) -> bool:
