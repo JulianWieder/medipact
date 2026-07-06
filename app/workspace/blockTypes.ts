@@ -212,7 +212,7 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     defaultConfig: { prompt: "", min: 1, max: 10, minLabel: "", maxLabel: "" },
     capturesResponse: true,
     responseAuthor: "user",
-    hint: "Bewertung auf einer Skala, z.B. „Wie wichtig ist dir das?" (1–10).",
+    hint: "Bewertung auf einer Skala, z.B. Wichtigkeit von 1 bis 10.",
   },
   {
     type: "ranking",
