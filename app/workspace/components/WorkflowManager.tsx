@@ -1232,6 +1232,82 @@ function StepDesignerPanel({
           <StepPreview title={step.title} blocks={blocks} />
         </div>
       </div>
+
+      <details className="mt-5 rounded-xl border border-neutral-200 bg-white">
+        <summary className="cursor-pointer px-4 py-2.5 text-sm font-semibold text-neutral-700">
+          🤖 System-KI-Prompts bearbeiten (global)
+        </summary>
+        <div className="border-t border-neutral-100 p-2">
+          <AiPromptsEditor />
+        </div>
+      </details>
+    </div>
+  );
+}
+
+// ── KI-Design-Assistent (Chat-Eingabe zum Erzeugen ganzer Schritte) ─────────
+function DesignChat({
+  phaseLabel,
+  onSubmit,
+}: {
+  phaseLabel: string;
+  onSubmit: (instruction: string) => Promise<void>;
+}) {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState("");
+
+  async function send() {
+    const t = text.trim();
+    if (!t) return;
+    setError("");
+    setDone("");
+    setLoading(true);
+    try {
+      await onSubmit(t);
+      setText("");
+      setDone("Schritt erstellt und unten im Designer geöffnet.");
+    } catch {
+      setError("Der Schritt konnte nicht erstellt werden.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mb-6 rounded-2xl border border-fuchsia-200 bg-fuchsia-50/40 p-4">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="text-sm font-semibold text-fuchsia-800">✨ KI-Design-Assistent</span>
+        <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-700">
+          Phase: {phaseLabel}
+        </span>
+      </div>
+      <p className="mb-2 text-xs text-fuchsia-700">
+        Beschreibe, welchen Schritt du brauchst – die KI baut ihn aus Blöcken und legt ihn in
+        der aktiven Phase an. Danach kannst du ihn frei anpassen.
+      </p>
+      <div className="flex items-end gap-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send();
+          }}
+          rows={2}
+          placeholder="z.B. Erstelle einen Schritt zur Interessenklärung mit einer Wichtigkeits-Skala und einer KI-Analyse der Interessen."
+          className="flex-1 rounded-xl border border-fuchsia-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-fuchsia-400"
+        />
+        <button
+          onClick={send}
+          disabled={loading || !text.trim()}
+          className="rounded-xl bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-fuchsia-700 disabled:opacity-40"
+        >
+          {loading ? "Baut …" : "Schritt bauen"}
+        </button>
+      </div>
+      {error && <p className="mt-1 text-xs font-semibold text-red-600">{error}</p>}
+      {done && <p className="mt-1 text-xs font-semibold text-emerald-600">{done}</p>}
     </div>
   );
 }
@@ -1439,6 +1515,32 @@ export function WorkflowManager() {
     [mediationType, activePhase, mutateBlocks],
   );
 
+  // KI-Design-Assistent: erzeugt aus einer freien Instruktion einen komplett
+  // neuen Schritt (Titel + Blöcke) in der aktiven Phase und öffnet ihn.
+  const createStepFromAi = useCallback(
+    async (instruction: string) => {
+      const { title, blocks } = await generateStepBlocks({
+        mediation_type: mediationType,
+        phase: activePhase,
+        instruction,
+      });
+      const label = (title && title.trim()) || instruction.slice(0, 48) || "Neuer Schritt";
+      const existing = new Set(chain.map((s) => s.step_key));
+      const step_key = slugify(label, existing);
+      const created = await createPhaseStepDefault({
+        mediation_type: mediationType,
+        phase: activePhase,
+        step_key,
+        title: label,
+        variant_key: activeVariant,
+        blocks,
+      });
+      setEditableSteps((prev) => [...prev, created]);
+      setDesignStepId(created.id);
+    },
+    [mediationType, activePhase, activeVariant, chain, setEditableSteps],
+  );
+
   // Beim Öffnen des Designers: hat der Schritt noch keine blocks, aus Legacy
   // ableiten und einmal persistieren, damit ab jetzt blocks maßgeblich sind.
   const openDesigner = useCallback(
@@ -1561,7 +1663,7 @@ export function WorkflowManager() {
         Live-Vorschau — klick dazu bei einem Schritt auf <span className="font-semibold">„Gestalten"</span>.
       </p>
 
-      <AiPromptsEditor />
+      <DesignChat phaseLabel={activePhaseLabel} onSubmit={createStepFromAi} />
 
       {error && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">

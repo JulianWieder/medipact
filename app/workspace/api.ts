@@ -403,6 +403,8 @@ export async function createPhaseStepDefault(payload: {
   step_key: string;
   title: string;
   variant_key?: string | null;
+  blocks?: import("./types").StepBlockDto[];
+  description?: string;
 }): Promise<PhaseStepDefaultDto> {
   const res = await fetch("/api/admin/phase-step-defaults", {
     method: "POST",
@@ -443,13 +445,13 @@ export async function updatePhaseStepDefault(
   return res.json();
 }
 
-/** Lässt die KI eine Blockliste als Startpunkt für einen Schritt generieren. */
+/** Lässt die KI einen Titel + eine Blockliste als Startpunkt für einen Schritt generieren. */
 export async function generateStepBlocks(payload: {
   mediation_type: string;
   phase: string;
   title?: string;
   instruction?: string;
-}): Promise<{ blocks: import("./types").StepBlockDto[] }> {
+}): Promise<{ title?: string; blocks: import("./types").StepBlockDto[] }> {
   const res = await fetch("/api/admin/phase-step-defaults/generate-blocks", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

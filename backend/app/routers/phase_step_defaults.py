@@ -368,24 +368,31 @@ def generate_blocks(
         "Erzeuge eine sinnvolle, in sich schlüssige Abfolge von 3 bis 6 Blöcken für "
         "diese Seite. Beginne in der Regel mit einer kurzen Textausgabe (Anleitung), "
         "füge passende Eingaben hinzu und – wo hilfreich – einen KI-Analyseblock. "
+        "Schlage außerdem einen kurzen, prägnanten Titel für den Schritt vor. "
         "Schreibe auf Deutsch, warm und verständlich.\n\n"
         f"{_BLOCK_SPEC}\n"
-        "Antworte AUSSCHLIESSLICH mit einem JSON-Array. Jedes Element: "
-        '{"type": "<einer der Typen>", "config": { ... }}. '
-        "Keine Erklärung, kein Markdown, nur das JSON-Array."
+        "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt der Form "
+        '{"title": "<kurzer Schritt-Titel>", "blocks": [ {"type": "<einer der Typen>", '
+        '"config": { ... }}, ... ]}. Keine Erklärung, kein Markdown, nur das JSON-Objekt.'
     )
 
     raw = ai_complete(prompt, max_tokens=1100)
-    start = raw.find("[")
-    end = raw.rfind("]")
-    parsed: list = []
+    start = raw.find("{")
+    end = raw.rfind("}")
+    title = ""
+    parsed_blocks: list = []
     if start != -1 and end != -1 and end > start:
         try:
-            candidate = json.loads(raw[start : end + 1])
-            if isinstance(candidate, list):
-                parsed = candidate
+            obj = json.loads(raw[start : end + 1])
+            if isinstance(obj, dict):
+                if isinstance(obj.get("title"), str):
+                    title = obj["title"].strip()
+                if isinstance(obj.get("blocks"), list):
+                    parsed_blocks = obj["blocks"]
+            elif isinstance(obj, list):
+                parsed_blocks = obj
         except (ValueError, TypeError):
-            parsed = []
+            parsed_blocks = []
 
-    blocks = _normalize_blocks(parsed) or []
-    return {"blocks": blocks}
+    blocks = _normalize_blocks(parsed_blocks) or []
+    return {"title": title, "blocks": blocks}
