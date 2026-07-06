@@ -7,19 +7,63 @@ Mediator-Notizen und KI-Ausgaben. Getrennt nach Autor (jede Partei, Mediator,
 KI), damit die Beiträge am Ende nebeneinander auswertbar sind – dort werden die
 Reibungspunkte und Einigungschancen sichtbar.
 """
+import os
+import secrets
+from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import DB_PATH, get_db
+from app.models.mediation import Mediation
+from app.models.mediation_block_purchase import MediationBlockPurchase
 from app.models.mediation_block_response import MediationBlockResponse
+from app.models.mediation_note import MediationNote
 from app.models.mediation_participant import MediationParticipant
+from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
+from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_db_user
+from app.services.llm import ai_complete
 
 router = APIRouter(prefix="/mediations", tags=["block_responses"])
+
+# Max. Upload-Größe für Datei-Blöcke.
+_MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+_UPLOAD_DIR = DB_PATH.parent / "block_uploads"
+
+
+def _get_mediation(mediation_id: int, db: Session) -> Mediation:
+    m = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not m:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+    return m
+
+
+def _find_block(db: Session, mediation: Mediation, block_id: str):
+    """Sucht einen Block anhand seiner id in den (für diesen Fall geltenden)
+    phase_step_defaults. Gibt (step, block_dict) oder (None, None) zurück."""
+    variant_filter = PhaseStepDefault.variant_key.is_(None)
+    if mediation.variant_key:
+        variant_filter = or_(variant_filter, PhaseStepDefault.variant_key == mediation.variant_key)
+    steps = (
+        db.query(PhaseStepDefault)
+        .filter(
+            PhaseStepDefault.mediation_type == mediation.mediation_type,
+            PhaseStepDefault.enabled.is_(True),
+            variant_filter,
+        )
+        .all()
+    )
+    for s in steps:
+        for b in s.blocks or []:
+            if isinstance(b, dict) and b.get("id") == block_id:
+                return s, b
+    return None, None
 
 # Rollen, die im Namen des Falls (Mediator-Sicht) schreiben/alle Antworten lesen.
 _MEDIATOR_ROLES = {"mediator", "owner", "admin"}
@@ -152,3 +196,273 @@ def upsert_block_response(
     db.commit()
     db.refresh(row)
     return _serialize(row)
+
+
+# ── Bonus-Leistungen (kostenpflichtige "bezahlung"-Blöcke) ──────────────────
+
+class BonusOrderRequest(BaseModel):
+    block_id: str
+
+
+class BonusCaptureRequest(BaseModel):
+    block_id: str
+    order_id: str
+
+
+def _block_price(block: dict) -> tuple[float, str, str]:
+    cfg = block.get("config") or {}
+    try:
+        price = float(cfg.get("price") or 0)
+    except (TypeError, ValueError):
+        price = 0.0
+    currency = str(cfg.get("currency") or "EUR")
+    title = str(cfg.get("title") or "Bonus-Leistung")
+    return price, currency, title
+
+
+@router.get("/{mediation_id}/bonus-purchases")
+def list_bonus_purchases(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Käufe der aktuellen Partei (für die Freischaltung im Frontend)."""
+    own = _require_participant(mediation_id, current_user, db)
+    rows = (
+        db.query(MediationBlockPurchase)
+        .filter(
+            MediationBlockPurchase.mediation_id == mediation_id,
+            MediationBlockPurchase.participant_id == own.id,
+        )
+        .all()
+    )
+    return [
+        {
+            "block_id": r.block_id,
+            "step_key": r.step_key,
+            "title": r.title,
+            "amount": r.amount,
+            "currency": r.currency,
+            "paid": r.paid,
+        }
+        for r in rows
+    ]
+
+
+@router.post("/{mediation_id}/bonus/create-order")
+async def create_bonus_order(
+    mediation_id: int,
+    payload: BonusOrderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    mediation = _get_mediation(mediation_id, db)
+    _step, block = _find_block(db, mediation, payload.block_id)
+    if not block or block.get("type") != "bezahlung":
+        raise HTTPException(status_code=404, detail="Bonus-Block nicht gefunden")
+    price, _currency, _title = _block_price(block)
+    if price <= 0:
+        raise HTTPException(status_code=400, detail="Diese Leistung ist kostenlos")
+    try:
+        order = await create_order(price, mediation_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return {"order_id": order["id"], "amount": price}
+
+
+@router.post("/{mediation_id}/bonus/capture-order")
+async def capture_bonus_order(
+    mediation_id: int,
+    payload: BonusCaptureRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    own = _require_participant(mediation_id, current_user, db)
+    mediation = _get_mediation(mediation_id, db)
+    step, block = _find_block(db, mediation, payload.block_id)
+    if not block or block.get("type") != "bezahlung":
+        raise HTTPException(status_code=404, detail="Bonus-Block nicht gefunden")
+    price, currency, title = _block_price(block)
+    try:
+        result = await capture_order(payload.order_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    if result.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail="Zahlung nicht abgeschlossen")
+
+    existing = (
+        db.query(MediationBlockPurchase)
+        .filter(
+            MediationBlockPurchase.mediation_id == mediation_id,
+            MediationBlockPurchase.participant_id == own.id,
+            MediationBlockPurchase.block_id == payload.block_id,
+        )
+        .first()
+    )
+    if existing:
+        existing.paid = True
+        existing.amount = price
+        existing.currency = currency
+        existing.title = title
+        existing.step_key = step.step_key if step else existing.step_key
+        existing.paypal_order_id = payload.order_id
+        existing.paid_at = datetime.now(timezone.utc)
+    else:
+        db.add(
+            MediationBlockPurchase(
+                mediation_id=mediation_id,
+                participant_id=own.id,
+                step_key=step.step_key if step else "",
+                block_id=payload.block_id,
+                title=title,
+                amount=price,
+                currency=currency,
+                paid=True,
+                paypal_order_id=payload.order_id,
+                paid_at=datetime.now(timezone.utc),
+            )
+        )
+    db.commit()
+    return {"paid": True}
+
+
+# ── KI-Block serverseitig ausführen ─────────────────────────────────────────
+
+class BlockAiRequest(BaseModel):
+    phase: str
+    step_key: str
+    block_id: str
+
+
+@router.post("/{mediation_id}/block-ai/run")
+def run_block_ai(
+    mediation_id: int,
+    payload: BlockAiRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Führt den Prompt eines KI-Blocks über die Eingaben des Falls aus und
+    speichert die Ausgabe als KI-Beitrag (author_key='ai'). Nur Mediator/Owner."""
+    own = _require_participant(mediation_id, current_user, db)
+    if own.role not in _MEDIATOR_ROLES:
+        raise HTTPException(status_code=403, detail="Nur Mediator/Owner dürfen KI-Blöcke ausführen")
+    mediation = _get_mediation(mediation_id, db)
+    _step, block = _find_block(db, mediation, payload.block_id)
+    if not block:
+        raise HTTPException(status_code=404, detail="Block nicht gefunden")
+    prompt = str((block.get("config") or {}).get("prompt") or "").strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Kein Prompt im Block hinterlegt")
+
+    # Kontext sammeln: eingereichte Notizen + Text-Block-Antworten der Parteien.
+    parts: list[str] = []
+    notes = (
+        db.query(MediationNote)
+        .filter(MediationNote.mediation_id == mediation_id, MediationNote.submitted.is_(True))
+        .all()
+    )
+    for n in notes:
+        if n.content:
+            parts.append(f"[{n.phase}] {n.content}")
+    responses = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation_id,
+            MediationBlockResponse.author_source != "ai",
+        )
+        .all()
+    )
+    for r in responses:
+        v = r.value
+        if isinstance(v, (str, int, float)):
+            text = str(v)
+        elif isinstance(v, list):
+            text = ", ".join(str(x) for x in v)
+        elif isinstance(v, dict):
+            text = "; ".join(f"{k}: {val}" for k, val in v.items())
+        else:
+            text = ""
+        if text.strip():
+            parts.append(f"[{r.phase}/{r.block_type}] {text}")
+
+    inputs_text = "\n".join(parts) if parts else "(noch keine Eingaben)"
+    full_prompt = f"{prompt}\n\nEingaben der Parteien:\n{inputs_text}"
+    output = ai_complete(full_prompt, max_tokens=800)
+
+    # Als KI-Beitrag speichern (author_key='ai').
+    existing = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation_id,
+            MediationBlockResponse.step_key == payload.step_key,
+            MediationBlockResponse.block_id == payload.block_id,
+            MediationBlockResponse.author_key == "ai",
+        )
+        .first()
+    )
+    if existing:
+        existing.value = output
+        existing.submitted = True
+        existing.phase = payload.phase
+        existing.block_type = block.get("type")
+    else:
+        db.add(
+            MediationBlockResponse(
+                mediation_id=mediation_id,
+                phase=payload.phase,
+                step_key=payload.step_key,
+                block_id=payload.block_id,
+                block_type=block.get("type"),
+                author_key="ai",
+                author_source="ai",
+                author_participant_id=None,
+                value=output,
+                submitted=True,
+            )
+        )
+    db.commit()
+    return {"value": output}
+
+
+# ── Datei-Upload für Datei-Blöcke ───────────────────────────────────────────
+
+@router.post("/{mediation_id}/block-upload")
+async def block_upload(
+    mediation_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    contents = await file.read()
+    if len(contents) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="Datei zu groß (max. 25 MB)")
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    # nur harmlose Extension übernehmen (keine Pfadtrenner o.ä.)
+    if not ext or len(ext) > 12 or "/" in ext or "\\" in ext:
+        ext = ""
+    token = f"{mediation_id}_{secrets.token_hex(16)}{ext}"
+    _UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    with open(_UPLOAD_DIR / token, "wb") as out:
+        out.write(contents)
+    return {
+        "url": f"/api/mediations/{mediation_id}/block-file?token={token}",
+        "name": file.filename or token,
+    }
+
+
+@router.get("/{mediation_id}/block-file")
+def block_file(
+    mediation_id: int,
+    token: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    if not token.startswith(f"{mediation_id}_") or "/" in token or "\\" in token or ".." in token:
+        raise HTTPException(status_code=400, detail="Ungültiger Token")
+    path = _UPLOAD_DIR / token
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Datei nicht gefunden")
+    return FileResponse(path)

@@ -4,6 +4,7 @@ Phase (phase_step_defaults). Nur für Plattform-Admins/Mediatoren – das ist
 die globale Konfiguration, nicht der Pro-Fall-Override (siehe
 mediations.py: workflow-rules, custom_steps.py: custom-steps).
 """
+import json
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,6 +15,7 @@ from app.database import get_db
 from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
 from app.security import get_current_db_user
+from app.services.llm import ai_complete
 
 router = APIRouter(prefix="/admin/phase-step-defaults", tags=["phase_step_defaults"])
 
@@ -293,3 +295,97 @@ def reorder_phase_step_defaults(
 
     db.commit()
     return [_serialize(steps[item.id]) for item in payload.items]
+
+
+# ── KI-Vorbefüllung: Blöcke für einen Schritt generieren ────────────────────
+
+_BLOCK_SPEC = """Verfügbare Blocktypen (type -> erlaubte config-Felder):
+- textausgabe {text}            Erklär-/Anleitungstext für die Teilnehmer
+- video {url}                   Video einbetten
+- bild {url, caption}
+- texteingabe {label, placeholder}   Freitext-Eingabe der Partei
+- frage {prompt}                Offene Frage
+- auswahl {prompt, options:[...], multi:false}
+- skala {prompt, min, max, minLabel, maxLabel}
+- ranking {prompt, options:[...]}
+- liste {prompt, placeholder}   Partei sammelt beliebig viele Einträge
+- betrag {label, currency}
+- vertrauliche_notiz {prompt}   nur der Mediator sieht die Eingabe
+- datei_upload {prompt}
+- zustimmung {text}             ankreuzbare Bestätigung
+- unterschrift {statement}
+- videokonferenz {url}
+- termin {}
+- feedback {occasion}           occasion = "after_videocall" oder "before_contract"
+- vertrag {template}
+- hinweis {text, variant}       variant = "info" | "warnung" | "erfolg"
+- akkordeon {title, text}
+- gate {text}
+- ki_zusammenfassung {prompt}   laufen im Hintergrund, für Teilnehmer unsichtbar
+- ki_reframing {prompt}
+- ki_interessen {prompt}
+- ki_optionen {prompt}
+- ki_gemeinsamkeiten {prompt}
+"""
+
+_PHASE_HINT = {
+    "einladung": "Vor-Phase: Begrüßung/Einladung.",
+    "einleitung": "Rahmen, Gesprächsregeln, Ziele klären.",
+    "themensammlung": "Wertfrei alle strittigen Themen sammeln.",
+    "interessen": "Interessen und Bedürfnisse hinter den Positionen herausarbeiten.",
+    "optionen": "Möglichst viele Lösungsoptionen sammeln, ohne zu bewerten.",
+    "verhandlung": "Optionen bewerten und eine tragfähige Lösung verhandeln.",
+    "abschluss": "Ergebnis festhalten, Vereinbarung, Abschluss.",
+}
+
+
+class GenerateBlocksRequest(BaseModel):
+    mediation_type: str
+    phase: str
+    title: str = ""
+    instruction: Optional[str] = None
+
+
+@router.post("/generate-blocks")
+def generate_blocks(
+    payload: GenerateBlocksRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Erzeugt per KI eine Blockliste als Startpunkt für einen Schritt.
+
+    Gibt {"blocks": [...]} zurück (bereits normalisiert). Der Aufrufer entscheidet,
+    ob er die Blöcke übernimmt. Nur Admins/Mediatoren.
+    """
+    _require_admin(user)
+
+    phase_hint = _PHASE_HINT.get(payload.phase, "")
+    extra = f"\nZusätzliche Anweisung des Mediators: {payload.instruction}" if payload.instruction else ""
+    prompt = (
+        "Du gestaltest die Seite eines Schritts in einer Online-Mediation. "
+        f"Mediationstyp: {payload.mediation_type}. Phase: {payload.phase} ({phase_hint}). "
+        f"Titel des Schritts: {payload.title or '(ohne Titel)'}.{extra}\n\n"
+        "Erzeuge eine sinnvolle, in sich schlüssige Abfolge von 3 bis 6 Blöcken für "
+        "diese Seite. Beginne in der Regel mit einer kurzen Textausgabe (Anleitung), "
+        "füge passende Eingaben hinzu und – wo hilfreich – einen KI-Analyseblock. "
+        "Schreibe auf Deutsch, warm und verständlich.\n\n"
+        f"{_BLOCK_SPEC}\n"
+        "Antworte AUSSCHLIESSLICH mit einem JSON-Array. Jedes Element: "
+        '{"type": "<einer der Typen>", "config": { ... }}. '
+        "Keine Erklärung, kein Markdown, nur das JSON-Array."
+    )
+
+    raw = ai_complete(prompt, max_tokens=1100)
+    start = raw.find("[")
+    end = raw.rfind("]")
+    parsed: list = []
+    if start != -1 and end != -1 and end > start:
+        try:
+            candidate = json.loads(raw[start : end + 1])
+            if isinstance(candidate, list):
+                parsed = candidate
+        except (ValueError, TypeError):
+            parsed = []
+
+    blocks = _normalize_blocks(parsed) or []
+    return {"blocks": blocks}

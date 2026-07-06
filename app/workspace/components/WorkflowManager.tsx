@@ -58,6 +58,7 @@ import {
   deletePhaseStepDefault,
   reorderPhaseStepDefaults,
   generateMeetLink,
+  generateStepBlocks,
 } from "../api";
 
 // Auswahl des Fragebogen-Anlasses (Block-Typ "feedback").
@@ -287,6 +288,59 @@ function cfgStr(config: Record<string, unknown>, key: string): string {
   return typeof v === "string" ? v : "";
 }
 
+// Liest ein config-Feld als Zahl (tolerant).
+function cfgNum(config: Record<string, unknown>, key: string, fallback = 0): number {
+  const v = config[key];
+  return typeof v === "number" && !Number.isNaN(v) ? v : fallback;
+}
+
+// Liest ein config-Feld als String-Array (tolerant).
+function cfgArr(config: Record<string, unknown>, key: string): string[] {
+  const v = config[key];
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+
+// Editor für eine Liste von Optionen (für Auswahl / Ranking).
+function OptionListEditor({
+  options,
+  onChange,
+}: {
+  options: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <div className="mt-1 space-y-1">
+      {options.map((opt, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <input
+            value={opt}
+            onChange={(e) => {
+              const next = [...options];
+              next[i] = e.target.value;
+              onChange(next);
+            }}
+            placeholder={`Option ${i + 1}`}
+            className={INPUT_CLASS}
+          />
+          <button
+            onClick={() => onChange(options.filter((_, j) => j !== i))}
+            className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-500"
+            title="Option entfernen"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...options, ""])}
+        className="rounded-md border border-dashed border-neutral-300 px-2 py-1 text-[11px] font-semibold text-neutral-500 hover:bg-white"
+      >
+        + Option
+      </button>
+    </div>
+  );
+}
+
 // ── Konfig-Felder je Blocktyp ────────────────────────────────────────────────
 function BlockConfigEditor({
   block,
@@ -431,7 +485,327 @@ function BlockConfigEditor({
           </p>
         </>
       );
+    case "auswahl":
+      return (
+        <>
+          <FieldLabel>Frage / Aufgabe</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="z.B. Welche Regelung bevorzugst du?"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Antwortoptionen</FieldLabel>
+          <OptionListEditor options={cfgArr(c, "options")} onChange={(options) => onChange({ options })} />
+          <label className="mt-2 flex items-center gap-2 text-[11px] text-neutral-600">
+            <input
+              type="checkbox"
+              checked={c.multi === true}
+              onChange={(e) => onChange({ multi: e.target.checked })}
+            />
+            Mehrfachauswahl erlauben
+          </label>
+        </>
+      );
+    case "skala":
+      return (
+        <>
+          <FieldLabel>Frage</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="z.B. Wie wichtig ist dir dieser Punkt?"
+            className={INPUT_CLASS}
+          />
+          <div className="mt-1 flex gap-2">
+            <div className="flex-1">
+              <FieldLabel>Min</FieldLabel>
+              <input
+                type="number"
+                value={cfgNum(c, "min", 1)}
+                onChange={(e) => onChange({ min: Number(e.target.value) })}
+                className={INPUT_CLASS}
+              />
+            </div>
+            <div className="flex-1">
+              <FieldLabel>Max</FieldLabel>
+              <input
+                type="number"
+                value={cfgNum(c, "max", 10)}
+                onChange={(e) => onChange({ max: Number(e.target.value) })}
+                className={INPUT_CLASS}
+              />
+            </div>
+          </div>
+          <div className="mt-1 flex gap-2">
+            <div className="flex-1">
+              <FieldLabel>Label links</FieldLabel>
+              <input
+                value={cfgStr(c, "minLabel")}
+                onChange={(e) => onChange({ minLabel: e.target.value })}
+                placeholder="z.B. unwichtig"
+                className={INPUT_CLASS}
+              />
+            </div>
+            <div className="flex-1">
+              <FieldLabel>Label rechts</FieldLabel>
+              <input
+                value={cfgStr(c, "maxLabel")}
+                onChange={(e) => onChange({ maxLabel: e.target.value })}
+                placeholder="z.B. sehr wichtig"
+                className={INPUT_CLASS}
+              />
+            </div>
+          </div>
+        </>
+      );
+    case "ranking":
+      return (
+        <>
+          <FieldLabel>Aufgabe</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="z.B. Bringe diese Themen in deine Reihenfolge."
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Zu sortierende Punkte</FieldLabel>
+          <OptionListEditor options={cfgArr(c, "options")} onChange={(options) => onChange({ options })} />
+        </>
+      );
+    case "liste":
+      return (
+        <>
+          <FieldLabel>Aufgabe</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="z.B. Sammle alle Themen, die dir wichtig sind."
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Platzhalter je Eintrag</FieldLabel>
+          <input
+            value={cfgStr(c, "placeholder")}
+            onChange={(e) => onChange({ placeholder: e.target.value })}
+            placeholder="z.B. Ein Thema …"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "betrag":
+      return (
+        <>
+          <FieldLabel>Beschriftung</FieldLabel>
+          <input
+            value={cfgStr(c, "label")}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="z.B. Wert der Immobilie"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Einheit / Währung</FieldLabel>
+          <input
+            value={cfgStr(c, "currency") || "€"}
+            onChange={(e) => onChange({ currency: e.target.value })}
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "vertrauliche_notiz":
+      return (
+        <>
+          <FieldLabel>Frage / Aufgabe</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="Was möchtest du nur dem Mediator mitteilen?"
+            className={INPUT_CLASS}
+          />
+          <p className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] text-slate-600">
+            🔒 Sichtbar nur für den Mediator – die Gegenseite sieht diese Eingabe nicht.
+          </p>
+        </>
+      );
+    case "datei_upload":
+      return (
+        <>
+          <FieldLabel>Aufgabe</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="z.B. Lade den Grundbuchauszug hoch."
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Erlaubte Dateitypen (optional)</FieldLabel>
+          <input
+            value={cfgStr(c, "accept")}
+            onChange={(e) => onChange({ accept: e.target.value })}
+            placeholder="z.B. .pdf,.jpg,.png"
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "bild":
+      return (
+        <>
+          <FieldLabel>Bild-URL</FieldLabel>
+          <input
+            value={cfgStr(c, "url")}
+            onChange={(e) => onChange({ url: e.target.value })}
+            placeholder="https://…"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Bildunterschrift (optional)</FieldLabel>
+          <input
+            value={cfgStr(c, "caption")}
+            onChange={(e) => onChange({ caption: e.target.value })}
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "zustimmung":
+      return (
+        <>
+          <FieldLabel>Bestätigungstext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "text")}
+            onChange={(e) => onChange({ text: e.target.value })}
+            rows={2}
+            placeholder="z.B. Ich akzeptiere die Gesprächsregeln."
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "unterschrift":
+      return (
+        <>
+          <FieldLabel>Erklärung über der Unterschrift</FieldLabel>
+          <textarea
+            value={cfgStr(c, "statement")}
+            onChange={(e) => onChange({ statement: e.target.value })}
+            rows={2}
+            placeholder="z.B. Ich bestätige die obigen Angaben."
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "hinweis":
+      return (
+        <>
+          <FieldLabel>Hinweistext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "text")}
+            onChange={(e) => onChange({ text: e.target.value })}
+            rows={2}
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Art</FieldLabel>
+          <select
+            value={cfgStr(c, "variant") || "info"}
+            onChange={(e) => onChange({ variant: e.target.value })}
+            className={INPUT_CLASS}
+          >
+            <option value="info">Info</option>
+            <option value="warnung">Warnung</option>
+            <option value="erfolg">Erfolg</option>
+          </select>
+        </>
+      );
+    case "akkordeon":
+      return (
+        <>
+          <FieldLabel>Titel (immer sichtbar)</FieldLabel>
+          <input
+            value={cfgStr(c, "title")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="z.B. Mehr erfahren"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Inhalt (ausklappbar)</FieldLabel>
+          <textarea
+            value={cfgStr(c, "text")}
+            onChange={(e) => onChange({ text: e.target.value })}
+            rows={3}
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "gate":
+      return (
+        <>
+          <FieldLabel>Wartetext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "text")}
+            onChange={(e) => onChange({ text: e.target.value })}
+            rows={2}
+            placeholder="z.B. Es geht weiter, sobald beide Parteien bestätigt haben."
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    case "bezahlung":
+      return (
+        <>
+          <FieldLabel>Titel der Leistung</FieldLabel>
+          <input
+            value={cfgStr(c, "title")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="z.B. Gutachten durch Sachverständige"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Beschreibung</FieldLabel>
+          <textarea
+            value={cfgStr(c, "description")}
+            onChange={(e) => onChange({ description: e.target.value })}
+            rows={2}
+            placeholder="Was ist enthalten?"
+            className={INPUT_CLASS}
+          />
+          <div className="mt-1 flex gap-2">
+            <div className="flex-1">
+              <FieldLabel>Preis</FieldLabel>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={cfgNum(c, "price", 0)}
+                onChange={(e) => onChange({ price: Number(e.target.value) })}
+                className={INPUT_CLASS}
+              />
+            </div>
+            <div className="w-24">
+              <FieldLabel>Währung</FieldLabel>
+              <input
+                value={cfgStr(c, "currency") || "EUR"}
+                onChange={(e) => onChange({ currency: e.target.value })}
+                className={INPUT_CLASS}
+              />
+            </div>
+          </div>
+          <FieldLabel>Freigeschalteter Inhalt (nach Zahlung)</FieldLabel>
+          <textarea
+            value={cfgStr(c, "unlock_text")}
+            onChange={(e) => onChange({ unlock_text: e.target.value })}
+            rows={2}
+            placeholder="Text/Anleitung, die erst nach der Zahlung sichtbar wird."
+            className={INPUT_CLASS}
+          />
+          <p className="mt-1 text-[10px] text-amber-700">
+            Der Preis wird serverseitig aus dieser Konfiguration gelesen (nicht manipulierbar).
+          </p>
+        </>
+      );
     case "ki_prompt":
+    case "ki_zusammenfassung":
+    case "ki_reframing":
+    case "ki_interessen":
+    case "ki_optionen":
+    case "ki_gemeinsamkeiten":
       return (
         <>
           <FieldLabel>KI-Auftrag (Prompt)</FieldLabel>
@@ -529,10 +903,150 @@ function PreviewBlock({ block }: { block: StepBlockDto }) {
       return (
         <div className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-3 text-sm text-cyan-700">◆ Ergebnis-Anzeige (nach Freigabe)</div>
       );
+    case "auswahl": {
+      const opts = cfgArr(c, "options");
+      return (
+        <div>
+          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
+          <div className="space-y-1">
+            {(opts.length ? opts : ["Option 1", "Option 2"]).map((o, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm text-neutral-600">
+                <span className={c.multi ? "h-3.5 w-3.5 rounded border border-neutral-300" : "h-3.5 w-3.5 rounded-full border border-neutral-300"} />
+                {o}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    case "skala": {
+      const min = cfgNum(c, "min", 1);
+      const max = cfgNum(c, "max", 10);
+      return (
+        <div>
+          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
+          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+            <span>{text("minLabel") || min}</span>
+            <span>{text("maxLabel") || max}</span>
+          </div>
+          <input type="range" min={min} max={max} disabled className="w-full" />
+        </div>
+      );
+    }
+    case "ranking": {
+      const opts = cfgArr(c, "options");
+      return (
+        <div>
+          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
+          <div className="space-y-1">
+            {(opts.length ? opts : ["Punkt A", "Punkt B"]).map((o, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-sm text-neutral-600">
+                <span className="text-neutral-300">≡</span>
+                {o}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    case "liste":
+      return (
+        <div>
+          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
+          <div className="rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-sm text-neutral-400">
+            + {text("placeholder") || "Eintrag hinzufügen"}
+          </div>
+        </div>
+      );
+    case "betrag":
+      return (
+        <div>
+          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
+          <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">
+            <span>{text("currency") || "€"}</span>0,00
+          </div>
+        </div>
+      );
+    case "vertrauliche_notiz":
+      return (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">🔒 Nur für den Mediator</p>
+          <p className="text-sm text-neutral-700">{text("prompt") || "Vertrauliche Notiz …"}</p>
+        </div>
+      );
+    case "datei_upload":
+      return (
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3">
+          <p className="mb-1 text-sm text-neutral-700">{text("prompt") || "Datei hochladen"}</p>
+          <span className="inline-block rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-sm text-indigo-600">📎 Datei auswählen</span>
+        </div>
+      );
+    case "bild":
+      return text("url") ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={text("url")} alt={text("caption")} className="max-h-48 rounded-xl border border-neutral-200" />
+      ) : (
+        <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-neutral-300 text-sm text-neutral-400">🖼 Bild-URL fehlt</div>
+      );
+    case "zustimmung":
+      return (
+        <label className="flex items-start gap-2 text-sm text-neutral-700">
+          <span className="mt-0.5 h-4 w-4 rounded border border-neutral-300" />
+          {text("text") || "Ich stimme zu."}
+        </label>
+      );
+    case "unterschrift":
+      return (
+        <div className="rounded-2xl border border-neutral-200 p-3">
+          <p className="mb-2 text-sm text-neutral-600">{text("statement") || "Ich bestätige die Angaben."}</p>
+          <div className="rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-sm text-neutral-400">✍ Name eingeben …</div>
+        </div>
+      );
+    case "hinweis": {
+      const variant = cfgStr(c, "variant") || "info";
+      const styles: Record<string, string> = {
+        info: "border-blue-200 bg-blue-50 text-blue-800",
+        warnung: "border-amber-200 bg-amber-50 text-amber-800",
+        erfolg: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      };
+      return (
+        <div className={`rounded-2xl border p-3 text-sm ${styles[variant] ?? styles.info}`}>
+          {text("text") || "Hinweistext …"}
+        </div>
+      );
+    }
+    case "akkordeon":
+      return (
+        <details className="rounded-2xl border border-neutral-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-medium text-neutral-700">{text("title") || "Mehr erfahren"}</summary>
+          <p className="mt-2 text-sm text-neutral-600">{text("text")}</p>
+        </details>
+      );
+    case "gate":
+      return (
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-3 text-sm text-blue-700">
+          ⏸ {text("text") || "Wartet, bis beide Parteien bestätigt haben."}
+        </div>
+      );
+    case "bezahlung":
+      return (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50/70 p-3">
+          <p className="text-sm font-semibold text-amber-800">💳 {text("title") || "Bonus-Leistung"}</p>
+          {text("description") && <p className="mt-0.5 text-xs text-amber-700">{text("description")}</p>}
+          <span className="mt-2 inline-block rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white">
+            Kostenpflichtig freischalten · {cfgNum(c, "price", 0).toFixed(2)} {text("currency") || "EUR"}
+          </span>
+        </div>
+      );
     case "ki_prompt":
+    case "ki_zusammenfassung":
+    case "ki_reframing":
+    case "ki_interessen":
+    case "ki_optionen":
+    case "ki_gemeinsamkeiten":
       return (
         <div className="rounded-2xl border border-dashed border-fuchsia-300 bg-fuchsia-50/50 p-3 text-[11px] text-fuchsia-700">
-          ✨ KI-Block — läuft im Hintergrund, für Teilnehmer nicht sichtbar.
+          ✨ {def?.label ?? "KI-Block"} — läuft im Hintergrund, für Teilnehmer nicht sichtbar.
         </div>
       );
     case "individuell":
@@ -573,6 +1087,7 @@ function StepDesignerPanel({
   onRemoveBlock,
   onMoveBlock,
   onChangeBlockConfig,
+  onAiFill,
   onClose,
 }: {
   step: PhaseStepDefaultDto;
@@ -580,9 +1095,25 @@ function StepDesignerPanel({
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, dir: -1 | 1) => void;
   onChangeBlockConfig: (blockId: string, patch: Record<string, unknown>) => void;
+  onAiFill: () => Promise<void>;
   onClose: () => void;
 }) {
   const blocks = stepBlocks(step);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  async function handleAiFill() {
+    setAiError("");
+    setAiLoading(true);
+    try {
+      await onAiFill();
+    } catch {
+      setAiError("KI-Vorbefüllen fehlgeschlagen.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <div className="border-t border-neutral-100 bg-neutral-50/50 p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -592,13 +1123,24 @@ function StepDesignerPanel({
             Schritt „{step.title}" gestalten
           </h4>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded-lg border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-500 hover:bg-white"
-        >
-          Schließen
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAiFill}
+            disabled={aiLoading}
+            className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100 disabled:opacity-50"
+            title="Blöcke für diesen Schritt per KI vorschlagen (ersetzt die aktuellen Blöcke)"
+          >
+            {aiLoading ? "KI erzeugt …" : "✨ Per KI vorbefüllen"}
+          </button>
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-500 hover:bg-white"
+          >
+            Schließen
+          </button>
+        </div>
       </div>
+      {aiError && <p className="mb-3 text-xs font-semibold text-red-600">{aiError}</p>}
 
       {/* Palette: Methoden nach Gruppe */}
       <div className="mb-5 rounded-xl border border-neutral-200 bg-white p-3">
@@ -881,6 +1423,20 @@ export function WorkflowManager() {
         cur.map((b) => (b.id === blockId ? { ...b, config: { ...b.config, ...patch } } : b)),
       ),
     [mutateBlocks],
+  );
+
+  // KI-Vorbefüllung: erzeugt eine Blockliste für den Schritt und ersetzt die
+  // aktuellen Blöcke (der Mediator kann danach frei nachjustieren).
+  const aiFillBlocks = useCallback(
+    async (id: number, title: string) => {
+      const { blocks } = await generateStepBlocks({
+        mediation_type: mediationType,
+        phase: activePhase,
+        title,
+      });
+      if (blocks && blocks.length) mutateBlocks(id, () => blocks);
+    },
+    [mediationType, activePhase, mutateBlocks],
   );
 
   // Beim Öffnen des Designers: hat der Schritt noch keine blocks, aus Legacy
@@ -1173,6 +1729,7 @@ export function WorkflowManager() {
               onRemoveBlock={(bid) => removeBlock(designStep.id, bid)}
               onMoveBlock={(bid, dir) => moveBlock(designStep.id, bid, dir)}
               onChangeBlockConfig={(bid, patch) => changeBlockConfig(designStep.id, bid, patch)}
+              onAiFill={() => aiFillBlocks(designStep.id, designStep.title)}
               onClose={() => setDesignStepId(null)}
             />
           )}

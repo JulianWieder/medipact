@@ -443,6 +443,22 @@ export async function updatePhaseStepDefault(
   return res.json();
 }
 
+/** Lässt die KI eine Blockliste als Startpunkt für einen Schritt generieren. */
+export async function generateStepBlocks(payload: {
+  mediation_type: string;
+  phase: string;
+  title?: string;
+  instruction?: string;
+}): Promise<{ blocks: import("./types").StepBlockDto[] }> {
+  const res = await fetch("/api/admin/phase-step-defaults/generate-blocks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("KI-Vorbefüllen fehlgeschlagen");
+  return res.json();
+}
+
 export async function deletePhaseStepDefault(id: number): Promise<void> {
   const res = await fetch(`/api/admin/phase-step-defaults/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Schritt konnte nicht gelöscht werden");
@@ -497,6 +513,79 @@ export async function saveBlockResponse(
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Block-Antwort konnte nicht gespeichert werden");
+  return res.json();
+}
+
+/** Lädt eine Datei für einen Datei-Upload-Block hoch. */
+export async function uploadBlockFile(
+  mediationId: number,
+  file: File,
+): Promise<{ url: string; name: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`/api/mediations/${mediationId}/block-upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error("Datei konnte nicht hochgeladen werden");
+  return res.json();
+}
+
+/** Führt einen KI-Block serverseitig aus (nur Mediator/Owner) und speichert die Ausgabe. */
+export async function runBlockAi(
+  mediationId: number,
+  payload: { phase: string; step_key: string; block_id: string },
+): Promise<{ value: string }> {
+  const res = await fetch(`/api/mediations/${mediationId}/block-ai/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("KI-Block konnte nicht ausgeführt werden");
+  return res.json();
+}
+
+// ── Bonus-Leistungen (kostenpflichtige Bonus-Blöcke) ────────────────────────
+
+export interface BonusPurchaseDto {
+  block_id: string;
+  step_key: string;
+  title: string;
+  amount: number;
+  currency: string;
+  paid: boolean;
+}
+
+export async function fetchBonusPurchases(mediationId: number): Promise<BonusPurchaseDto[]> {
+  const res = await fetch(`/api/mediations/${mediationId}/bonus-purchases`, { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function createBonusOrder(
+  mediationId: number,
+  blockId: string,
+): Promise<{ order_id: string; amount: number }> {
+  const res = await fetch(`/api/mediations/${mediationId}/bonus/create-order`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ block_id: blockId }),
+  });
+  if (!res.ok) throw new Error("Bonus-Order konnte nicht erstellt werden");
+  return res.json();
+}
+
+export async function captureBonusOrder(
+  mediationId: number,
+  blockId: string,
+  orderId: string,
+): Promise<{ paid: boolean }> {
+  const res = await fetch(`/api/mediations/${mediationId}/bonus/capture-order`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ block_id: blockId, order_id: orderId }),
+  });
+  if (!res.ok) throw new Error("Bonus-Zahlung konnte nicht abgeschlossen werden");
   return res.json();
 }
 
