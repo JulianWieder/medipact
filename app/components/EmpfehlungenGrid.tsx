@@ -1,17 +1,18 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
 import Image, { type StaticImageData } from "next/image";
+import { ArrowLink } from "@/app/components/ui/ArrowLink";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
+import geschaeftPhoto from "../../fotos/medi_modern.jpg";
 
-type CardKey = "trennung" | "nachbarschaft" | "erbschaft";
+type CardKey = "trennung" | "nachbarschaft" | "erbschaft" | "geschaeft";
 
 const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
   { key: "trennung", href: "/konflikte/trennung", image: trennungPhoto },
   { key: "nachbarschaft", href: "/konflikte/nachbarschaft", image: nachbarnPhoto },
   { key: "erbschaft", href: "/konflikte/erbschaft", image: erbschaftPhoto },
+  { key: "geschaeft", href: "/konflikte/geschaeft", image: geschaeftPhoto },
 ];
 
 /**
@@ -20,9 +21,8 @@ const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
  * one-line casesTeaser on the homepage.
  *
  * Only /konflikte/trennung is migrated into app/[locale]/ today (see
- * isMigratedLocalePath, i18n/routing.ts) — nachbarschaft/erbschaft are not,
- * so each card's primary link picks locale-aware vs. plain next/link per
- * href, same pattern as Header.tsx's NavLink.
+ * isMigratedLocalePath, i18n/routing.ts) — the locale-aware vs. plain link
+ * choice per href lives centrally in ArrowLink (app/components/ui/ArrowLink).
  */
 export async function EmpfehlungenGrid() {
   const t = await getTranslations("home.empfehlungen");
@@ -35,7 +35,7 @@ export async function EmpfehlungenGrid() {
           <h2 className="heading-2">{t("title")}</h2>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
           {cards.map(({ key, href, image }) => (
             <article
               key={key}
@@ -61,33 +61,7 @@ export async function EmpfehlungenGrid() {
                 </p>
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
-                  {isMigratedLocalePath(href) ? (
-                    <Link
-                      href={href}
-                      className="group/cta inline-flex items-center gap-1.5 text-accent-700 transition hover:text-accent-800"
-                    >
-                      {t("ctaPrimary")}
-                      <span
-                        aria-hidden="true"
-                        className="inline-block transition-transform duration-300 group-hover/cta:translate-x-1"
-                      >
-                        →
-                      </span>
-                    </Link>
-                  ) : (
-                    <a
-                      href={href}
-                      className="group/cta inline-flex items-center gap-1.5 text-accent-700 transition hover:text-accent-800"
-                    >
-                      {t("ctaPrimary")}
-                      <span
-                        aria-hidden="true"
-                        className="inline-block transition-transform duration-300 group-hover/cta:translate-x-1"
-                      >
-                        →
-                      </span>
-                    </a>
-                  )}
+                  <ArrowLink href={href}>{t("ctaPrimary")}</ArrowLink>
                   <a href="/auth/register" className="text-neutral-500 transition hover:text-neutral-800">
                     {t("ctaSecondary")}
                   </a>

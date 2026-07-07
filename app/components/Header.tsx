@@ -75,6 +75,7 @@ export default function Header() {
         { label: t("konflikteTrennung"), href: "/konflikte/trennung" },
         { label: t("konflikteNachbarschaft"), href: "/konflikte/nachbarschaft" },
         { label: t("konflikteErbschaft"), href: "/konflikte/erbschaft" },
+        { label: t("konflikteGeschaeft"), href: "/konflikte/geschaeft" },
       ],
     },
     { label: t("methode"), href: "/methode" },

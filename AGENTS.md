@@ -45,6 +45,31 @@ scroll/tab wiring whenever a new marketing page wants the same feel.
   history) — verify anything new against a source before adding it, don't
   invent medipact-specific statistics.
 
+Three small, standardized building blocks in `app/components/ui/` — use these
+instead of hand-rolling the same markup per call-site:
+
+- **`ArrowLink.tsx`** — text link with the animated "→" (slides right on
+  hover). Locale-aware like `Button.tsx` (picks next-intl vs. plain link via
+  `isMigratedLocalePath`). `tone="accent" | "light" | "muted"` — use `light`
+  in dark `section-strong` blocks. Translation strings must NOT contain a
+  trailing "→"; the component renders the arrow itself.
+- **`FeatureCard.tsx`** — small feature/benefit card (title + short text,
+  optional icon) with the standard hover (accent border, slight lift). Used
+  by `ThemenTabs`; use it wherever feature/trust lists render as cards.
+- **`NumberedSteps.tsx`** — numbered step row (01/02/03, accent circle,
+  connector line on desktop). `tone="dark"` for `section-strong`. Used in the
+  homepage process section (steps come from `home.processSteps` in
+  `messages/*.json`); reuse for "So funktioniert es" sections elsewhere.
+
 When adding a similar effect to another page, build a small page-specific
 component on top of these primitives (don't fork their internals) so
 the underlying animation behavior stays consistent across the site.
+
+## Konflikt-Typen auf den Marketing-Seiten
+
+There are FOUR conflict types (matching the backend `mediation_type`s):
+trennung, nachbarschaft, erbschaft, geschaeft ("Team & Organisation",
+`/konflikte/geschaeft`, content in `app/content/geschaeftPage.ts`). When a
+page lists conflict types (ThemenTabs, EmpfehlungenGrid, Header dropdown,
+`/konflikte` overview, sitemap, metadata descriptions), include all four —
+geschaeft was added last and is easy to forget.

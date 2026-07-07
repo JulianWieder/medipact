@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  const lastModified = new Date("2026-07-03");
+  const lastModified = new Date("2026-07-07");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -70,6 +70,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/konflikte/erbschaft`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/konflikte/geschaeft`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,

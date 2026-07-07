@@ -5,12 +5,15 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TabSwitcher, CrossfadePanel } from "@/app/components/ui/TabSwitcher";
+import { FeatureCard } from "@/app/components/ui/FeatureCard";
 import { trennungPageContent } from "@/app/content/trennungPage";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
+import { geschaeftPageContent } from "@/app/content/geschaeftPage";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
+import geschaeftPhoto from "../../fotos/medi_modern.jpg";
 
 type ThemaContent = {
   eyebrow: string;
@@ -48,6 +51,13 @@ const themen: Thema[] = [
     href: "/konflikte/erbschaft",
     image: erbschaftPhoto,
     content: erbschaftPageContent,
+  },
+  {
+    key: "geschaeft",
+    label: "Team & Organisation",
+    href: "/konflikte/geschaeft",
+    image: geschaeftPhoto,
+    content: geschaeftPageContent,
   },
 ];
 
@@ -115,14 +125,7 @@ export function ThemenTabs() {
 
               <div className="mt-6 grid gap-3">
                 {thema.content.features.map((f) => (
-                  <div key={f.title} className="app-surface p-4 sm:p-5">
-                    <p className="text-sm font-semibold text-neutral-900">
-                      {f.title}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-neutral-600">
-                      {f.text}
-                    </p>
-                  </div>
+                  <FeatureCard key={f.title} title={f.title} text={f.text} />
                 ))}
               </div>
 

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/app/components/JsonLd";
+import { ArrowLink } from "@/app/components/ui/ArrowLink";
+import { NumberedSteps, type NumberedStep } from "@/app/components/ui/NumberedSteps";
 import { HeroScrollPin } from "@/app/components/HeroScrollPin";
 import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   title:
     "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
   description:
-    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. Medipact hilft bei Trennung, Nachbarschaftsstreit und Erbschaft nach dem Harvard-Prinzip.",
+    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. Medipact hilft bei Trennung, Nachbarschaftsstreit, Erbschaft und Team-Konflikten nach dem Harvard-Prinzip.",
   alternates: {
     canonical: "https://medipact.de",
   },
@@ -34,7 +35,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation",
   description:
-    "KI-gestützte Mediation für private Konflikte bei Trennung, Scheidung, Nachbarschaftsstreit und Erbschaft. Nach dem Harvard-Prinzip.",
+    "KI-gestützte Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten. Nach dem Harvard-Prinzip.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -53,6 +54,7 @@ export default async function MedipactLanding() {
   const t = await getTranslations("home");
   const stats = t.raw("stats") as { value: string; label: string }[];
   const bekanntAusTags = t.raw("bekanntAusTags") as string[];
+  const processSteps = t.raw("processSteps") as NumberedStep[];
 
   return (
     <>
@@ -68,7 +70,7 @@ export default async function MedipactLanding() {
                   key={s.label}
                   className="px-2 py-2 text-center first:pl-0 sm:px-6 sm:first:pl-0 sm:last:pr-0"
                 >
-                  <div className="text-xl font-black text-neutral-900 sm:text-2xl">
+                  <div className="bg-gradient-to-br from-neutral-900 to-accent-700 bg-clip-text text-xl font-black text-transparent sm:text-2xl">
                     {s.value}
                   </div>
                   <div className="mt-1 text-xs leading-snug text-neutral-500">
@@ -119,20 +121,20 @@ export default async function MedipactLanding() {
           id="process"
           className="section section-muted border-y border-neutral-200 text-center scroll-mt-20"
         >
-          <div className="mx-auto max-w-2xl px-6 lg:px-8">
-            <div className="eyebrow mb-4 justify-center">
-              {t("processEyebrow")}
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl">
+              <div className="eyebrow mb-4 justify-center">
+                {t("processEyebrow")}
+              </div>
+              <h2 className="heading-2">{t("processTitle")}</h2>
+              <p className="mt-5 text-lg leading-8 text-neutral-700">
+                {t("processText")}
+              </p>
             </div>
-            <h2 className="heading-2">{t("processTitle")}</h2>
-            <p className="mt-5 text-lg leading-8 text-neutral-700">
-              {t("processText")}
-            </p>
-            <Link
-              href="/methode"
-              className="mt-8 inline-flex font-semibold text-accent-700 hover:underline"
-            >
+            <NumberedSteps steps={processSteps} className="mt-12" />
+            <ArrowLink href="/methode" className="mt-10 text-base">
               {t("processLink")}
-            </Link>
+            </ArrowLink>
           </div>
         </section>
 
@@ -140,12 +142,7 @@ export default async function MedipactLanding() {
           <div className="mx-auto max-w-2xl px-6 lg:px-8">
             <p className="text-base text-neutral-700">
               {t("trustText")}{" "}
-              <Link
-                href="/about"
-                className="font-semibold text-accent-700 hover:underline"
-              >
-                {t("trustLink")}
-              </Link>
+              <ArrowLink href="/about">{t("trustLink")}</ArrowLink>
             </p>
           </div>
         </section>
@@ -167,7 +164,7 @@ export default async function MedipactLanding() {
               {t("ctaText")}
             </p>
 
-            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <a
                 href="/auth/register"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-500"
@@ -187,6 +184,9 @@ export default async function MedipactLanding() {
                   />
                 </svg>
               </a>
+              <ArrowLink href="/preise" tone="light" className="px-4 py-4 text-base">
+                {t("ctaSecondaryLabel")}
+              </ArrowLink>
             </div>
 
             <p className="mt-6 text-xs text-neutral-500">{t("ctaDisclaimer")}</p>

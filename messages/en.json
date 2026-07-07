@@ -8,6 +8,7 @@
     "konflikteTrennung": "Scheidung & Trennung",
     "konflikteNachbarschaft": "Nachbarschaft",
     "konflikteErbschaft": "Erbe & Familie",
+    "konflikteGeschaeft": "Team & Organisation",
     "methode": "So funktioniert es",
     "beispiele": "Beispiele",
     "beispieleFallbeispiele": "Fallbeispiele",
@@ -46,7 +47,7 @@
   },
   "home": {
     "hero": {
-      "badge": "Für Trennung, Nachbarschaft und Erbe",
+      "badge": "Für Trennung, Nachbarschaft, Erbe und Team-Konflikte",
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
       "titleLine1": "Mediation online –",
       "titleLine2": "Konflikte fair, vertraulich und ohne Gericht lösen.",
@@ -58,10 +59,22 @@
       "badgeLoesungsorientiert": "Lösungsorientiert"
     },
     "stats": [
-      { "value": "6 Schritte", "label": "strukturierter Prozess" },
-      { "value": "< 4 Wochen", "label": "typische Dauer" },
-      { "value": "ab €249", "label": "statt tausenden an Anwaltskosten" },
-      { "value": "100 %", "label": "vertraulich & DSGVO-konform" }
+      {
+        "value": "6 Schritte",
+        "label": "strukturierter Prozess"
+      },
+      {
+        "value": "< 4 Wochen",
+        "label": "typische Dauer"
+      },
+      {
+        "value": "ab €249",
+        "label": "statt tausenden an Anwaltskosten"
+      },
+      {
+        "value": "100 %",
+        "label": "vertraulich & DSGVO-konform"
+      }
     ],
     "bekanntAusLabel": "Bekannt aus",
     "bekanntAusTags": [
@@ -89,19 +102,38 @@
         "erbschaft": {
           "title": "Erbe & Familie",
           "text": "Erbstreitigkeiten belasten Familien oft länger als das Erbe selbst wert ist. Medipact hilft, eine Lösung zu finden, mit der alle weiterleben können."
+        },
+        "geschaeft": {
+          "title": "Team & Organisation",
+          "text": "Konflikte im Team oder zwischen Abteilungen lähmen die Arbeit. Medipact klärt strukturiert – Diagnose zuerst, dann der passende Weg."
         }
       }
     },
     "processEyebrow": "So funktioniert es",
     "processTitle": "In 6 klaren Schritten zur möglichen Einigung.",
     "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
-    "processLink": "So funktioniert medipact →",
+    "processSteps": [
+      {
+        "title": "Konflikt schildern",
+        "text": "Sie beschreiben die Situation aus Ihrer Sicht – vertraulich und in Ihrem Tempo. Die Gegenseite wird fair eingeladen."
+      },
+      {
+        "title": "Geführter Prozess",
+        "text": "Sechs strukturierte Phasen nach dem Harvard-Prinzip: von der Themensammlung über Interessen bis zu fairen Optionen."
+      },
+      {
+        "title": "Verbindliche Vereinbarung",
+        "text": "Am Ende steht eine konkrete Vereinbarung: wer macht was bis wann – festgehalten und von beiden Seiten bestätigt."
+      }
+    ],
+    "processLink": "So funktioniert medipact",
     "trustText": "Vertraulich, DSGVO-konform und mit menschlicher Mediation als Rückfalloption –",
-    "trustLink": "mehr über medipact erfahren →",
+    "trustLink": "mehr über medipact erfahren",
     "ctaBadge": "Jetzt starten",
     "ctaTitle": "Der Streit muss nicht größer werden.",
     "ctaText": "Starten Sie ruhig, vertraulich und unverbindlich. Der erste Schritt ist nicht die Einigung – sondern wieder Klarheit.",
     "ctaButton": "Kostenlosen Account erstellen",
+    "ctaSecondaryLabel": "Preise & Pakete ansehen",
     "ctaDisclaimer": "Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar"
   }
 }
