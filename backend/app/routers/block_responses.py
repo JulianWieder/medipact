@@ -69,19 +69,51 @@ def _find_block(db: Session, mediation: Mediation, block_id: str):
 def _apply_sets_flag(db: Session, mediation: Mediation, block: Optional[dict], value) -> None:
     """Setzt automatisch ein Fall-Flag, wenn der Block config.sets_flag hat.
 
-    config.sets_flag = {"flag": "glasl_zone",
-                        "thresholds": [[3, "win_win"], [6, "win_lose"], [9, "lose_lose"]]}
-    Der Zahlenwert (z.B. Glasl-Skala 1–9) wird der ersten Schwelle zugeordnet,
-    deren Grenze er nicht überschreitet. Es wird nur ESKALIERT, nie deeskaliert
-    (die Reihenfolge in thresholds = Eskalationsgrad; höhere Zone bleibt bestehen).
+    Zwei Modi:
+
+    a) Numerisch (Skala) – nur eskalierend:
+       config.sets_flag = {"flag": "glasl_zone",
+                           "thresholds": [[3, "win_win"], [6, "win_lose"], [9, "lose_lose"]]}
+       Der Zahlenwert (z.B. Glasl-Skala 1–9) wird der ersten Schwelle zugeordnet,
+       deren Grenze er nicht überschreitet. Es wird nur ESKALIERT, nie deeskaliert
+       (die Reihenfolge in thresholds = Eskalationsgrad; höhere Zone bleibt bestehen).
+
+    b) Kategorial (Auswahl) – direkt gesetzt/überschreibbar:
+       config.sets_flag = {"flag": "business_scope",
+                           "map": {"Team & Abteilung": "intern",
+                                   "Verträge & Lieferanten (B2B)": "b2b", …}}
+       Die (String-)Antwort wird über map auf den Flag-Wert abgebildet. Kein
+       Eskalations-Ranking – eine neue Auswahl überschreibt den alten Wert
+       (die Teilnehmer sollen ihre Einordnung korrigieren können).
     """
     cfg = (block.get("config") or {}) if block else {}
     sf = cfg.get("sets_flag")
     if not isinstance(sf, dict):
         return
     flag = sf.get("flag")
+    if not flag:
+        return
+
+    # ── Modus b: kategoriales Mapping (z.B. auswahl-Block) ──────────────────
+    mapping = sf.get("map")
+    if isinstance(mapping, dict):
+        zone = mapping.get(str(value))
+        if zone is None:
+            return
+        if (mediation.flags or {}).get(flag) == zone:
+            return
+        flags = dict(mediation.flags or {})
+        flags[flag] = zone
+        mediation.flags = flags
+        from sqlalchemy.orm.attributes import flag_modified
+
+        flag_modified(mediation, "flags")
+        db.commit()
+        return
+
+    # ── Modus a: numerische Schwellen (z.B. skala-Block) ────────────────────
     thresholds = sf.get("thresholds")
-    if not flag or not isinstance(thresholds, list) or not thresholds:
+    if not isinstance(thresholds, list) or not thresholds:
         return
     try:
         num = float(value)
@@ -126,8 +158,9 @@ def _apply_sets_flag(db: Session, mediation: Mediation, block: Optional[dict], v
 
 
 def _maybe_set_flag_from_response(db: Session, mediation_id: int, payload) -> None:
-    """Nur bei numerischen Antworten: Block nachschlagen und ggf. Flag setzen."""
-    if not isinstance(payload.value, (int, float)) or isinstance(payload.value, bool):
+    """Bei numerischen (Skala) und String-Antworten (Auswahl): Block nachschlagen
+    und ggf. Flag setzen – siehe _apply_sets_flag (thresholds- vs. map-Modus)."""
+    if isinstance(payload.value, bool) or not isinstance(payload.value, (int, float, str)):
         return
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:

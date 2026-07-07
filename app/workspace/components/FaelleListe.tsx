@@ -122,12 +122,15 @@ export function FaelleListe({ isAdmin = false, selectedId, onSelect, statusFilte
             key={fall.id}
             onClick={() => onSelect(fall)}
             className={cn(
-              "w-full rounded-xl px-3 py-3 text-left transition",
+              "relative w-full rounded-xl px-3 py-3 text-left transition",
               selectedId === fall.id
                 ? "bg-accent-50 border border-accent-200"
                 : "hover:bg-neutral-50 border border-transparent",
             )}
           >
+            {selectedId === fall.id && (
+              <span className="absolute bottom-3 left-0 top-3 w-1 rounded-r-full bg-accent-500" />
+            )}
             <div className="flex items-start justify-between gap-2 mb-1.5">
               <span
                 className={cn(

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
-import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR } from "../types";
-import { TypeBadge, StatusBadge, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
+import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR, MEDIATION_TYPES } from "../types";
+import { TypeBadge, StatusBadge, WCard, RowCard, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
 import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
 import { PremiumHero } from "@/app/components/ui/premium";
 
@@ -151,6 +151,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
         ]}
       />
 
+      <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
       {/* Aktuelle Fälle */}
       <WCard className="p-5">
         <SectionHeader
@@ -170,11 +171,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
               const currentPhase = phaseIdx >= 0 ? PHASES[phaseIdx].label : "Noch nicht gestartet";
 
               return (
-                <button
-                  key={fall.id}
-                  onClick={() => onSelectFall(fall)}
-                  className="w-full text-left rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition"
-                >
+                <RowCard key={fall.id} onClick={() => onSelectFall(fall)}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
                       <div className="font-semibold text-sm text-neutral-800">{fall.title}</div>
@@ -192,7 +189,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                     Phase:{" "}
                     <span className="font-medium text-neutral-600">{currentPhase}</span>
                   </div>
-                </button>
+                </RowCard>
               );
             })}
           </div>
@@ -212,11 +209,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
               const dt = new Date(termin.proposed_datetime);
               const color = TYPE_COLOR[termin.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
               return (
-                <button
-                  key={termin.id}
-                  onClick={() => onSelectTermin?.(dt)}
-                  className="w-full text-left flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition"
-                >
+                <RowCard key={termin.id} onClick={() => onSelectTermin?.(dt)} className="flex items-center gap-3">
                   <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-accent-50 py-2">
                     <span className="text-[11px] font-semibold text-accent-600">
                       {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
@@ -231,13 +224,15 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                       {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
                     </span>
                   </div>
-                </button>
+                </RowCard>
               );
             })}
           </div>
         )}
       </WCard>
+      </div>
 
+      <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
       {/* Feedback aus allen Fällen */}
       <WCard className="p-5">
         <SectionHeader label="Kundenerlebnis" title="Feedback aus allen Fällen" />
@@ -262,12 +257,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
             {feedbackGroups.map((group) => {
               const fall = faelle.find((f) => f.id === group.mediationId);
               return (
-                <button
-                  key={group.key}
-                  onClick={() => fall && onSelectFall(fall)}
-                  className="w-full text-left rounded-2xl border border-neutral-200 bg-white p-4 hover:border-accent-200 hover:shadow-sm transition disabled:cursor-default"
-                  disabled={!fall}
-                >
+                <RowCard key={group.key} onClick={() => fall && onSelectFall(fall)} disabled={!fall}>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
                       <div className="font-semibold text-sm text-neutral-800">{group.participantName}</div>
@@ -304,7 +294,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                       );
                     })}
                   </div>
-                </button>
+                </RowCard>
               );
             })}
           </div>
@@ -316,13 +306,16 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
         <WCard className="p-5">
           <SectionHeader label="Statistik" title="Fälle nach Konfliktart" />
           <div className="space-y-3">
-            {["trennung", "erbschaft", "nachbarschaft"].map((type) => {
+            {MEDIATION_TYPES.map(({ id: type, label }) => {
               const count = faelle.filter((m) => m.mediation_type === type).length;
               const pct = faelle.length > 0 ? Math.round((count / faelle.length) * 100) : 0;
               return (
                 <div key={type}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-neutral-600">{TYPE_LABEL[type]}</span>
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-600">
+                      <span className={cn("h-2 w-2 shrink-0 rounded-full border", TYPE_COLOR[type])} />
+                      {TYPE_LABEL[type] ?? label}
+                    </span>
                     <span className="text-xs text-neutral-400">{count} Fälle</span>
                   </div>
                   <ProgressBar value={pct} />
@@ -332,6 +325,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
           </div>
         </WCard>
       )}
+      </div>
     </div>
   );
 }

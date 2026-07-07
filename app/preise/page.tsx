@@ -3,9 +3,9 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title: "Preise – Mediation ab €249 | medipact",
+  title: "Preise – Mediation ab €249, Business-Pauschale für Unternehmen | medipact",
   description:
-    "Transparente Preise für Mediation bei Scheidung, Nachbarschaftsstreit und Erbe. Drei Modelle – vom geführten Online-Prozess bis zur vollständig persönlich begleiteten Mediation. Alle Parteien zahlen anteilig.",
+    "Transparente Preise für Mediation bei Scheidung, Nachbarschaftsstreit, Erbe und Business-Konflikten. Drei Modelle plus Business-Pauschale für Unternehmen: €5.000/Monat mit bis zu 150 Mediationen. Alle Parteien zahlen anteilig.",
   alternates: { canonical: "https://medipact.de/preise" },
 };
 
@@ -97,7 +97,7 @@ export default function Preise() {
 
                   <div className="flex justify-between items-center mt-4">
                     <span className="font-medium text-neutral-900">
-                      Geschäftspartner-Konflikt
+                      Business-Konflikt (Team & B2B)
                     </span>
                     <span className="text-lg font-bold text-accent-600">
                       €399
@@ -364,6 +364,78 @@ export default function Preise() {
           </div>
         </section>
 
+        {/* BUSINESS-PAUSCHALE */}
+        <section className="section section-strong">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-300 mb-6">
+                  Für Unternehmen
+                </div>
+                <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
+                  Business-Pauschale.
+                  <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
+                    Ein Preis, alle Konflikte.
+                  </span>
+                </h2>
+                <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-300">
+                  Für HR-Abteilungen, große Organisationen und Verbände mit
+                  laufendem Klärungsbedarf: eine feste Monatspauschale statt
+                  Einzelabrechnung – intern (Team, Führung, Gesellschafter,
+                  Nachfolge) und extern mit Geschäftspartnern (B2B).
+                </p>
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {[
+                    "Team- & Abteilungsmediation",
+                    "Führung & Betriebsrat",
+                    "Gesellschafter & Nachfolge",
+                    "Verträge & Lieferanten (B2B)",
+                    "IT- & Großprojekte (B2B)",
+                    "M&A & Post-Merger (B2B)",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-2.5 text-sm text-neutral-200">
+                      <span className="mt-0.5 font-bold text-accent-400">✓</span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur sm:p-10">
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
+                  Business-Pauschale
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-5xl font-black tracking-tight text-white">€5.000</span>
+                  <span className="text-base font-semibold text-neutral-400">/ Monat</span>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+                  Bis zu <strong className="text-white">150 Mediationen pro Monat</strong>{" "}
+                  – rechnerisch ab rund €33 pro Fall statt €399 einzeln.
+                </p>
+                <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
+                  <p><span className="font-bold text-accent-400">✓</span> Alle Business-Konfliktarten, intern & B2B</p>
+                  <p><span className="font-bold text-accent-400">✓</span> Strikt vertraulich – kein Image-Schaden am Markt</p>
+                  <p><span className="font-bold text-accent-400">✓</span> Methodenwahl nach Diagnose: facilitativ, evaluativ, transformativ, Shuttle</p>
+                  <p><span className="font-bold text-accent-400">✓</span> Monatlich kündbar</p>
+                </div>
+                <a
+                  href="mailto:hallo@medipact.de?subject=Business-Pauschale%20anfragen"
+                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-accent-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-accent-500"
+                >
+                  Business-Pauschale anfragen
+                </a>
+                <a
+                  href="/konflikte/geschaeft"
+                  className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
+                >
+                  Mehr zur Business-Mediation →
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* VERGLEICH TABELLE */}
         <section className="section section-muted">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -488,6 +560,10 @@ export default function Preise() {
                 {
                   q: "Was kostet es, einen Rechtsanwalt oder Gutachter hinzuzuziehen?",
                   a: "Bei Bedarf buchen Sie gezielt einen Rechtsanwalt (ab €190/Std.) oder einen Psychologen bzw. Gutachter (ab €170/Std.) dazu. Im Vollservice ist eine anwaltliche Ersteinschätzung bereits enthalten. Sie zahlen nur, wenn Sie es tatsächlich nutzen – klar abgerechnet pro Stunde.",
+                },
+                {
+                  q: "Was ist die Business-Pauschale für Unternehmen?",
+                  a: "Unternehmen mit laufendem Klärungsbedarf zahlen €5.000 pro Monat und können damit bis zu 150 Mediationen monatlich durchführen – interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Pauschale kosten €399. Die Pauschale ist monatlich kündbar.",
                 },
                 {
                   q: "Gibt es versteckte Kosten?",

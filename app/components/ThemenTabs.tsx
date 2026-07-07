@@ -13,7 +13,7 @@ import { geschaeftPageContent } from "@/app/content/geschaeftPage";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
-import geschaeftPhoto from "../../fotos/medi_modern.jpg";
+import geschaeftPhoto from "../../fotos/medi_buiness.jpg";
 
 type ThemaContent = {
   eyebrow: string;
@@ -124,7 +124,8 @@ export function ThemenTabs() {
               </p>
 
               <div className="mt-6 grid gap-3">
-                {thema.content.features.map((f) => (
+                {/* max. 3 Karten im Tab – die volle Liste steht auf der Detailseite */}
+                {thema.content.features.slice(0, 3).map((f) => (
                   <FeatureCard key={f.title} title={f.title} text={f.text} />
                 ))}
               </div>

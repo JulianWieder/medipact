@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { geschaeftPageContent } from "@/app/content/geschaeftPage";
 import { JsonLd } from "@/app/components/JsonLd";
-import teamPhoto from "@/fotos/medi_modern.jpg";
+import teamPhoto from "@/fotos/medi_buiness.jpg";
 import konfliktPhoto from "@/fotos/kon_formen.jpg";
 
 export const metadata: Metadata = {
-  title: "Team-Konflikt lösen – Mediation für Organisationen | medipact",
+  title: "Business-Mediation – Team, Gesellschafter & B2B-Konflikte | medipact",
   description:
-    "Konflikte im Team, zwischen Abteilungen oder mit Führungskräften strukturiert klären: Diagnose nach Konfliktart und Eskalationsstufe, dann Moderation oder externe Mediation. Für Unternehmen und Organisationen.",
+    "Wirtschaftsmediation für Unternehmen: intern (Team, Führung, Gesellschafter, Nachfolge) und B2B (Lieferanten, IT-Großprojekte, M&A). Vertraulich und schneller als Gericht – ab €399 pro Fall oder als Business-Pauschale.",
   alternates: { canonical: "https://medipact.de/konflikte/geschaeft" },
 };
 
@@ -21,9 +21,9 @@ const serviceSchema = {
     name: "medipact",
     url: "https://medipact.de",
   },
-  serviceType: "Mediation bei Team- und Organisationskonflikten",
+  serviceType: "Wirtschaftsmediation (intern und B2B)",
   description:
-    "KI-gestützte Mediation bei Konflikten in Teams und Organisationen – mit strukturierter Diagnose (Konfliktart, Glasl-Eskalationsstufe) und zwei Wegen: mediativ orientierte Führung oder externe, allparteiliche Mediation.",
+    "KI-gestützte Wirtschaftsmediation: innerbetrieblich (Team- und Abteilungsmediation, Führungsmediation, Gesellschafter, Unternehmensnachfolge) und B2B (Vertrags- und Lieferantenstreit, IT- und Großprojekte, M&A). Diagnose nach Konfliktart und Glasl-Eskalationsstufe, methodisch facilitativ, evaluativ, transformativ oder als Shuttle-Mediation.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

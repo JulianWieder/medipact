@@ -1,6 +1,6 @@
 # Fälle & Phasen-Inhalte (Workflow Manager)
 
-Stand: 2026-07-07 (nach Migration `i2x3y4z5a6b7`). Dieses Dokument beschreibt,
+Stand: 2026-07-07 (nach Migration `j3y4z5a6b7c8`). Dieses Dokument beschreibt,
 welche Standard-Inhalte die vier Fall-Typen in allen Phasen haben, wo sie
 gepflegt werden und wie die Seed-Migrationen zusammenhängen.
 
@@ -92,24 +92,33 @@ Ein Schritt pro Phase, Diagnose-getrieben:
 
 - **Onboarding** `g_onboarding`: Einordnung (Verlustängste, Rollen,
   Struktur) + Prozess-Überblick (Diagnose zuerst) + Vorbereitung
-  (konkrete Situationen notieren, Beobachtung statt Bewertung).
+  (konkrete Situationen notieren, Beobachtung statt Bewertung) +
+  **Einsatzfeld-Auswahl** (Team & Abteilung / Führung & Betriebsrat /
+  Gesellschafter & Nachfolge / Verträge & Lieferanten / IT- & Großprojekt /
+  M&A) mit `sets_flag`-**map** → Flag `business_scope` = `intern` | `b2b`
+  (kategorialer sets_flag-Modus, siehe block_responses.py).
 - **Einleitung** `g_einleitung`: Regeln, Allparteilichkeit,
   „Veränderungsschmerz verstehen“ (Akkordeon), Videokonferenz.
-- **Themensammlung** `g_diagnose`: Konfliktart (Sach-/Beziehungs-/Rollen-/
+- **Themensammlung** `g_diagnose` (+ `g_b2b_fakten` nur bei
+  `business_scope=b2b`: strittige Punkte/SLA-Liste, Vertragslage-Text,
+  Datei-Upload für Vertrag/Schriftverkehr): Konfliktart (Sach-/Beziehungs-/Rollen-/
   Strukturkonflikt), Glasl-Skala 1–9 mit `sets_flag: glasl_zone`
   (win_win ≤3, win_lose ≤6, lose_lose ≤9), systemische Fragen
   (Funktion des Konflikts, verdeckte Gewinne), vertrauliche Notiz.
 - **Interessen** `g_interessen`: Harvard-Grundtext, Kern-Frage,
   KI-Interessen; + Einigungs-Skala, Perspektivwechsel-Frage,
-  KI-Gemeinsamkeiten.
+  KI-Gemeinsamkeiten, transformativer Hinweis (Beziehung & Kommunikation).
 - **Optionen** `g_optionen`: Liste + KI-Optionen; + Brainstorming-Regel
   (inkl. struktureller Lösungen) und Win-Win-Frage.
 - **Verhandlung** `g_verhandlung`: bevorzugte Lösung, BATNA,
   KI-Gemeinsamkeiten; + Ranking, Tragfähigkeits-Skala,
   Umsetzungs-Zustimmung. Dazu zwei Eskalations-Schritte mit `visible_if`:
   `g_esk_extern` (glasl_zone=win_lose → externe Mediation empfohlen,
-  Bezahl-Block 149 €) und `g_esk_grenzen` (lose_lose → Grenzen der
-  Mediation: Machtwort/Trennung/arbeitsrechtlich).
+  Bezahl-Block 149 €, + Shuttle-Mediation-Hinweis) und `g_esk_grenzen`
+  (lose_lose → Grenzen der Mediation: Machtwort/Trennung/arbeitsrechtlich).
+  Zusätzlich `g_b2b_evaluativ` nur bei `business_scope=b2b`: evaluatives
+  Element (Erklärung, Frage zur vertretbaren Lösung, Bezahl-Block
+  „Rechtliche Ersteinschätzung" 190 €).
 - **Abschluss** `g_abschluss`: Vertrag (Maßnahmen/wer-was-bis-wann/
   Follow-up), Unterschrift, Termin, Feedback; + Wirkungs-Frage fürs Team.
 
@@ -130,6 +139,7 @@ Onboarding-Schritt).
 | `g0v1w2x3y4z5` | Typ `geschaeft` komplett (inkl. Diagnose, Eskalation, 2 Varianten) |
 | `h1w2x3y4z5a6` | Typspezifische Blöcke in die Methoden-Schritte gemergt (Bereiche, BATNA, Rechts-Hinweise) |
 | `i2x3y4z5a6b7` | Kontext-Vertiefung aller 4 Typen in allen Phasen (Onboarding-Ablauf/Vorbereitung, Einleitungs-Kontext, Eisberg-Hinweise, Options-Denkanstöße, geschaeft-Parität, Abschluss-Wirkungsfrage/Folgetermin) |
+| `j3y4z5a6b7c8` | Business-Fokus geschaeft: Einsatzfeld-Auswahl → Flag `business_scope` (intern/b2b), B2B-Schritte `g_b2b_fakten`/`g_b2b_evaluativ` (visible_if), Shuttle- & Transformativ-Hinweise. Dazu Backend: sets_flag-**map**-Modus für auswahl-Blöcke |
 
 Alle Anreicherungs-Migrationen sind idempotent (Insert/Append nur, wenn
 step_key bzw. Block-id fehlt) und ändern manuell bearbeitete Schritte nicht

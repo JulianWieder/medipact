@@ -404,7 +404,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="flex h-12 shrink-0 items-center border-b border-neutral-200 bg-white px-4 gap-4">
+        <div className="flex h-12 shrink-0 items-center gap-4 border-b border-neutral-200 bg-white/90 px-4 backdrop-blur">
           {/* Tab-Toggle */}
           <div className="flex items-center gap-0.5 bg-neutral-100 rounded-lg p-0.5">
             <button

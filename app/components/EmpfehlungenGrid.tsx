@@ -4,7 +4,7 @@ import { ArrowLink } from "@/app/components/ui/ArrowLink";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
-import geschaeftPhoto from "../../fotos/medi_modern.jpg";
+import geschaeftPhoto from "../../fotos/medi_buiness.jpg";
 
 type CardKey = "trennung" | "nachbarschaft" | "erbschaft" | "geschaeft";
 

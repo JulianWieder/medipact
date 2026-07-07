@@ -113,7 +113,7 @@ export function KPI({
     return (
       <button
         onClick={onClick}
-        className="relative w-full rounded-2xl border border-neutral-200 bg-white/60 p-4 text-left transition-colors duration-300 hover:border-neutral-300"
+        className="relative w-full rounded-2xl border border-neutral-200 bg-white/60 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-200 hover:shadow-md hover:shadow-accent-900/5"
       >
         {content}
         <span
@@ -147,6 +147,39 @@ export function WCard({
     >
       {children}
     </div>
+  );
+}
+
+// ── Row Card ──────────────────────────────────────────────────────────────
+// Standardisierte klickbare Listen-Karte (Dashboard-Listen, Detail-Reihen):
+// weiße Karte mit dem einheitlichen Hover des Design-Systems (Akzent-Rahmen,
+// leichtes Anheben, weicher Schatten) — statt den Button-Stil pro Call-Site
+// zu wiederholen. Für nicht-klickbare Karten weiterhin WCard verwenden.
+
+export function RowCard({
+  onClick,
+  disabled,
+  className = "",
+  children,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "w-full rounded-2xl border border-neutral-200 bg-white p-4 text-left transition-all duration-300",
+        "hover:-translate-y-0.5 hover:border-accent-200 hover:shadow-md hover:shadow-accent-900/5",
+        "disabled:cursor-default disabled:hover:translate-y-0 disabled:hover:border-neutral-200 disabled:hover:shadow-none",
+        className,
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
