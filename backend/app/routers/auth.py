@@ -337,6 +337,7 @@ def get_all_users(
             "email": u.email,
             "role": u.role,
             "is_verified": u.is_verified,
+            "organization_id": u.organization_id,
         }
         for u in users
     ]

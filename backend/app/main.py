@@ -14,6 +14,7 @@ from app.routers import (
     invoices,
     mediation_variants,
     mediations,
+    organizations,
     phase_step_defaults,
     step_content,
 )
@@ -42,6 +43,7 @@ app.include_router(invoices.router)
 app.include_router(integrations.router)
 app.include_router(ai_prompts.router)
 app.include_router(discounts.router)
+app.include_router(organizations.router)
 
 # Dev-Test-Endpunkte (Gemini/Claude/PayPal). Über ENABLE_DEV_TEST steuerbar –
 # funktioniert auch auf dem Live-Server (nur per localhost:8000 erreichbar, da

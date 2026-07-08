@@ -110,3 +110,66 @@ def participant_due(
         return round(price / max(participant_count, 1), 2)
     # per_party (Default)
     return round(price, 2)
+
+
+# ── Mandanten-Abos ───────────────────────────────────────────────────────────
+#
+# Ein Mandant (Organization) hat einen Abo-Plan; der Monatspreis richtet sich
+# nach der Anzahl der Mediatoren im Mandanten:
+#   Monatspreis = base_eur + per_mediator_eur × max(0, Mediatoren − included_mediators)
+# ``max_mediators`` = None bedeutet unbegrenzt. Zahlen sind – wie oben –
+# bewusst NUR hier gepflegt.
+# TODO(Julian): Platzhalter-Preise prüfen/anpassen, sobald sie feststehen.
+
+ABO_PLANS: tuple[str, ...] = ("starter", "praxis", "kanzlei")
+DEFAULT_ABO_PLAN = "starter"
+
+ABO_PLAN_LABELS = {
+    "starter": "Starter",
+    "praxis": "Praxis",
+    "kanzlei": "Kanzlei",
+}
+
+ABO_PRICING: dict[str, dict] = {
+    #            Grundpreis  je weiterer Mediator  inklusive  max (None = unbegrenzt)
+    "starter": {"base_eur": 49.0,  "per_mediator_eur": 49.0, "included_mediators": 1, "max_mediators": 1},
+    "praxis":  {"base_eur": 99.0,  "per_mediator_eur": 39.0, "included_mediators": 2, "max_mediators": 10},
+    "kanzlei": {"base_eur": 249.0, "per_mediator_eur": 29.0, "included_mediators": 5, "max_mediators": None},
+}
+
+
+def normalize_abo_plan(plan: str | None) -> str:
+    p = (plan or "").strip().lower()
+    return p if p in ABO_PLANS else DEFAULT_ABO_PLAN
+
+
+def abo_plan_allows(plan: str, mediator_count: int) -> bool:
+    """Ob der Plan die gegebene Mediatoren-Anzahl zulässt."""
+    cfg = ABO_PRICING[normalize_abo_plan(plan)]
+    limit = cfg["max_mediators"]
+    return limit is None or mediator_count <= int(limit)
+
+
+def organization_monthly_price(plan: str, mediator_count: int) -> float:
+    """Monatlicher Abo-Preis eines Mandanten (EUR) bei ``mediator_count``
+    Mediatoren. Mediatoren über ``included_mediators`` kosten je
+    ``per_mediator_eur`` zusätzlich."""
+    cfg = ABO_PRICING[normalize_abo_plan(plan)]
+    extra = max(0, int(mediator_count) - int(cfg["included_mediators"]))
+    return round(float(cfg["base_eur"]) + extra * float(cfg["per_mediator_eur"]), 2)
+
+
+def abo_plan_options() -> list[dict]:
+    """Alle Pläne inkl. Konditionen – für Auswahl-UIs im Frontend."""
+    out = []
+    for key in ABO_PLANS:
+        cfg = ABO_PRICING[key]
+        out.append({
+            "key": key,
+            "label": ABO_PLAN_LABELS[key],
+            "base_eur": float(cfg["base_eur"]),
+            "per_mediator_eur": float(cfg["per_mediator_eur"]),
+            "included_mediators": int(cfg["included_mediators"]),
+            "max_mediators": cfg["max_mediators"],
+        })
+    return out

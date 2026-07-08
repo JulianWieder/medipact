@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image, { type StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
+import { BackgroundGradientAnimation } from "@/app/components/ui/BackgroundGradientAnimation";
 
 /**
  * Homepage hero, built on the standard ScrollPinFrame/useScrollPin pattern
@@ -44,6 +45,10 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+      {/* Stripe-Style: langsam wandernde Farb-Blobs über dem abgedunkelten
+          Foto (screen-Blend = nur aufhellender Farbschimmer, Text bleibt
+          lesbar). Reine CSS-Animation, kein JS (LCP-safe, s.o.). */}
+      <BackgroundGradientAnimation className="absolute inset-0 opacity-50 mix-blend-screen" />
 
       <div className="relative flex h-full items-center">
         <div className="mx-auto w-full max-w-7xl px-6 py-10 sm:py-20 lg:px-8">

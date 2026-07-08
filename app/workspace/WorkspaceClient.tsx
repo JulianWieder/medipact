@@ -13,6 +13,7 @@ import { Kalender } from "./components/Kalender";
 import { RechnungenListe } from "./components/RechnungenListe";
 import { WorkflowManager } from "./components/WorkflowManager";
 import { BenutzerManager } from "./components/AdminBereich";
+import { MandantenManager } from "./components/MandantenManager";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -367,7 +368,10 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
         <div className="flex-1 overflow-auto">
           {isSuperAdmin ? (
-            <BenutzerManager currentUserEmail={userEmail} />
+            <>
+              <BenutzerManager currentUserEmail={userEmail} />
+              <MandantenManager />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center">

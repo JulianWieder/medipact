@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent, BlockResponseDto } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent, BlockResponseDto, Organization, AboPlan } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -239,6 +239,87 @@ export async function deleteUser(userId: number): Promise<void> {
   if (!res.ok) {
     const err = await res.json().catch(() => null);
     throw new Error(err?.detail ?? "Nutzer konnte nicht gelöscht werden");
+  }
+}
+
+// ── Mandanten (Organizations) ─────────────────────────────────────────────
+
+/** Alle Mandanten (Admin) bzw. eigener Mandant (Mediator). */
+export async function fetchOrganizations(): Promise<Organization[]> {
+  const res = await fetch("/api/organizations", { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+/** Mandant inkl. Mitgliederliste. */
+export async function fetchOrganization(orgId: number): Promise<Organization> {
+  const res = await fetch(`/api/organizations/${orgId}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Mandant konnte nicht geladen werden");
+  return res.json();
+}
+
+/** Alle Abo-Pläne inkl. Konditionen. */
+export async function fetchAboPlans(): Promise<AboPlan[]> {
+  const res = await fetch("/api/organizations/plans", { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function createOrganization(name: string, plan: string): Promise<Organization> {
+  const res = await fetch("/api/organizations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, plan }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Mandant konnte nicht angelegt werden");
+  }
+  return res.json();
+}
+
+export async function updateOrganization(
+  orgId: number,
+  payload: { name?: string; plan?: string },
+): Promise<Organization> {
+  const res = await fetch(`/api/organizations/${orgId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Mandant konnte nicht geändert werden");
+  }
+  return res.json();
+}
+
+export async function deleteOrganization(orgId: number): Promise<void> {
+  const res = await fetch(`/api/organizations/${orgId}`, { method: "DELETE" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Mandant konnte nicht gelöscht werden");
+  }
+}
+
+export async function addOrganizationMember(orgId: number, userId: number): Promise<Organization> {
+  const res = await fetch(`/api/organizations/${orgId}/members`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Nutzer konnte nicht zugeordnet werden");
+  }
+  return res.json();
+}
+
+export async function removeOrganizationMember(orgId: number, userId: number): Promise<void> {
+  const res = await fetch(`/api/organizations/${orgId}/members/${userId}`, { method: "DELETE" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Zuordnung konnte nicht gelöst werden");
   }
 }
 

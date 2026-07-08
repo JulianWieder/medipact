@@ -231,6 +231,30 @@ export interface SystemUser {
   email: string;
   role: string;
   is_verified: boolean;
+  /** Mandanten-Zuordnung (organizations.id); null = kein Mandant. */
+  organization_id?: number | null;
+}
+
+// ── Mandanten (Organizations) ──────────────────────────────────────────────
+
+export interface Organization {
+  id: number;
+  name: string;
+  plan: string;
+  plan_label: string;
+  mediator_count: number;
+  monthly_price_eur: number;
+  created_at: string | null;
+  members?: { id: number; name: string; email: string; role: string }[];
+}
+
+export interface AboPlan {
+  key: string;
+  label: string;
+  base_eur: number;
+  per_mediator_eur: number;
+  included_mediators: number;
+  max_mediators: number | null;
 }
 
 // ── Appointments ─────────────────────────────────────────────────────────

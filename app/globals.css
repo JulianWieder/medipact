@@ -356,3 +356,48 @@
     );
   }
 }
+/* ------------------------------------------------------------
+   Stripe-Style Gradient-Blobs (BackgroundGradientAnimation.tsx)
+   Nur transform wird animiert (GPU) – kein Repaint/Layout.
+   ------------------------------------------------------------ */
+.gradient-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  will-change: transform;
+}
+.gradient-blob-1 {
+  animation: blob-drift-1 26s ease-in-out infinite;
+}
+.gradient-blob-2 {
+  animation: blob-drift-2 32s ease-in-out infinite;
+}
+.gradient-blob-3 {
+  animation: blob-drift-3 38s ease-in-out infinite;
+}
+.gradient-blob-4 {
+  animation: blob-drift-1 44s ease-in-out infinite reverse;
+}
+
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(12%, 8%, 0) scale(1.15); }
+  66%      { transform: translate3d(-6%, 14%, 0) scale(0.9); }
+}
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(-14%, -10%, 0) scale(0.9); }
+  66%      { transform: translate3d(10%, -6%, 0) scale(1.2); }
+}
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-12%, -14%, 0) scale(1.18); }
+}
+
+/* Barrierefreiheit: Nutzer mit reduzierter Bewegung sehen einen
+   statischen Verlauf statt der Animation. */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-blob {
+    animation: none !important;
+  }
+}
