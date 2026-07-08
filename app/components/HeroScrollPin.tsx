@@ -6,7 +6,7 @@ import Image, { type StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
 import { BackgroundGradientAnimation } from "@/app/components/ui/BackgroundGradientAnimation";
-import { StripeGradient } from "@/app/components/ui/StripeGradient";
+import { GradientSwirl } from "@/app/components/ui/GradientSwirl";
 
 /**
  * Homepage hero, built on the standard ScrollPinFrame/useScrollPin pattern
@@ -46,12 +46,11 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
-      {/* Stripe-Style: CSS-Blobs rendern mit dem ersten Paint (LCP-safe),
-          darüber blendet nach Hydration der WebGL-Mesh-Gradient ein — der
-          "echte" Stripe-Effekt mit fließenden Wellen und Tiefe. screen-Blend
-          = nur aufhellender Farbschimmer, Text bleibt lesbar. */}
-      <BackgroundGradientAnimation className="absolute inset-0 opacity-50 mix-blend-screen" />
-      <StripeGradient className="absolute inset-0 opacity-50 mix-blend-screen" />
+      {/* Dezenter Farbschimmer: CSS-Blobs bleiben (Server-render, LCP-safe),
+          aber zurückgenommen. Als Akzent dreht sich rechts ein kleiner
+          weicher Gradient-Wirbel (WebGL, blendet nach Hydration ein). */}
+      <BackgroundGradientAnimation className="absolute inset-0 opacity-30 mix-blend-screen" />
+      <GradientSwirl className="absolute right-[6%] top-1/2 hidden h-[24rem] w-[24rem] -translate-y-1/2 mix-blend-screen lg:block" />
 
       <div className="relative flex h-full items-center">
         <div className="mx-auto w-full max-w-7xl px-6 py-10 sm:py-20 lg:px-8">
