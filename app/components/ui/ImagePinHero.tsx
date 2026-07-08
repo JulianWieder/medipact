@@ -1,22 +1,22 @@
 "use client";
 
 import { useRef } from "react";
-import Image, { type StaticImageData } from "next/image";
-import { motion, useTransform } from "framer-motion";
+import type { StaticImageData } from "next/image";
+import { useTransform } from "framer-motion";
 import type { ReactNode } from "react";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
+import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
 
 /**
- * Standard pattern: full-bleed image hero that pins while scrolling and
- * slowly zooms (ai.gov-style). Thin wrapper around ScrollPinFrame/useScrollPin
- * for the "background photo + gradient overlay + headline" hero used across
- * medipact's marketing pages (homepage, /konflikte, /preise, /karriere,
- * /kontakt, /cases, and the konflikte sub-pages via MarketingPageTemplate).
+ * Standard pattern: full-bleed hero that pins while scrolling and slowly
+ * zooms. Hintergrund-Look kommt zentral aus HeroBackdrop (gleicher Baustein
+ * wie HeroScrollPin auf der Startseite) — Look-Änderungen dort machen.
+ * Genutzt von den Marketing-Seiten (/konflikte, /preise, /karriere,
+ * /kontakt, /cases, /ratgeber, /methode und MarketingPageTemplate).
  *
  * Pass the foreground content (eyebrow, h1, intro, CTAs, ...) as children;
- * it's rendered on top of the image/gradient, vertically centered in the
- * pinned viewport. For per-element fade/parallax on top of the pin (like
- * the homepage hero's staggered text fade), call useScrollPin directly
+ * it's rendered on top, vertically centered in the pinned viewport. For
+ * per-element fade/parallax on top of the pin, call useScrollPin directly
  * instead — see HeroScrollPin.tsx.
  */
 export function ImagePinHero({
@@ -33,7 +33,11 @@ export function ImagePinHero({
   imageAlt: string;
   /** Total scroll-through height in vh. Bigger = slower/longer pin effect. */
   heightVh?: number;
-  /** "strong" = darker/wider gradient, for centered/short copy (e.g. /kontakt). */
+  /**
+   * Historisch (heller Foto-Hero mit Gradient-Overlay). Der Look kommt
+   * inzwischen zentral aus HeroBackdrop — Prop bleibt für bestehende
+   * Call-Sites akzeptiert, hat aber keine Wirkung mehr.
+   */
   overlayStrength?: "default" | "strong";
   contentClassName?: string;
   children: ReactNode;
@@ -41,29 +45,13 @@ export function ImagePinHero({
   const ref = useRef<HTMLDivElement>(null);
   const scrollYProgress = useScrollPin(ref);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  void overlayStrength;
 
   return (
-    <ScrollPinFrame ref={ref} id={id} heightVh={heightVh}>
-      <motion.div className="absolute inset-0" style={{ scale: imageScale }}>
-        <Image
-          src={image}
-          alt={imageAlt}
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover" }}
-        />
-      </motion.div>
-      <div
-        className={
-          overlayStrength === "strong"
-            ? "absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/70 to-neutral-950/40"
-            : "absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20"
-        }
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+    <ScrollPinFrame ref={ref} id={id} heightVh={heightVh} className="bg-neutral-950">
+      <HeroBackdrop image={image} imageAlt={imageAlt} scale={imageScale} />
 
-      <div className={`relative flex h-full items-center ${contentClassName}`}>
+      <div className={`relative z-20 flex h-full items-center ${contentClassName}`}>
         {children}
       </div>
     </ScrollPinFrame>

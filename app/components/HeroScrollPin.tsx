@@ -2,116 +2,97 @@
 
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
-import Image, { type StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
-import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
-import { BackgroundGradientAnimation } from "@/app/components/ui/BackgroundGradientAnimation";
-import { GradientSwirl } from "@/app/components/ui/GradientSwirl";
+import {
+  ScrollPinFrame,
+  useScrollPin,
+} from "@/app/components/ui/ScrollPinSection";
+import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
 
-/**
- * Homepage hero, built on the standard ScrollPinFrame/useScrollPin pattern
- * (see app/components/ui/ScrollPinSection.tsx). Page-specific part is
- * just the layout + which values fade/zoom on which schedule. Copy lives
- * in messages/*.json under "home.hero" (see migration-notes.md).
- */
 export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
   const ref = useRef<HTMLDivElement>(null);
   const scrollYProgress = useScrollPin(ref);
   const t = useTranslations("home.hero");
   const badges = [
-    { label: t("badgeVertraulich"), color: "bg-accent-300" },
-    { label: t("badgeBezahlbar"), color: "bg-accent-300" },
-    { label: t("badgeLoesungsorientiert"), color: "bg-accent-300" },
+    { label: t("badgeVertraulich") },
+    { label: t("badgeBezahlbar") },
+    { label: t("badgeLoesungsorientiert") },
   ];
 
-  // Eyebrow + headline fade and drift up first...
-  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const textY = useTransform(scrollYProgress, [0, 0.5], [0, -36]);
-  // ...CTAs + trust badges stay legible a little longer.
-  const ctaOpacity = useTransform(scrollYProgress, [0.15, 0.6], [1, 0]);
-  // The image itself slowly zooms while pinned.
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const textY = useTransform(scrollYProgress, [0, 0.4], [0, -20]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.1, 0.5], [1, 0]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
 
   return (
-    <ScrollPinFrame ref={ref} id="top" heightVh={150} className="scroll-mt-20">
-      <motion.div className="absolute inset-0" style={{ scale: imageScale }}>
-        <Image
-          src={heroPhoto}
-          alt="Paar in einer Mediationssitzung – Weg zur Einigung"
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover" }}
-        />
-      </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
-      {/* Dezenter Farbschimmer: CSS-Blobs bleiben (Server-render, LCP-safe),
-          aber zurückgenommen. Als Akzent dreht sich rechts ein kleiner
-          weicher Gradient-Wirbel (WebGL, blendet nach Hydration ein). */}
-      <BackgroundGradientAnimation className="absolute inset-0 opacity-30 mix-blend-screen" />
-      <GradientSwirl className="absolute right-[6%] top-1/2 hidden h-[24rem] w-[24rem] -translate-y-1/2 mix-blend-screen lg:block" />
+    <ScrollPinFrame
+      ref={ref}
+      id="top"
+      heightVh={150}
+      className="scroll-mt-20 bg-neutral-950"
+    >
+      {/* Hintergrund (Foto + Gradients + Wirbel) kommt zentral aus HeroBackdrop —
+          derselbe Baustein wie in ImagePinHero auf allen Unterseiten. */}
+      <HeroBackdrop
+        image={heroPhoto}
+        imageAlt="Paar in einer Mediationssitzung"
+        scale={imageScale}
+      />
 
-      <div className="relative flex h-full items-center">
-        <div className="mx-auto w-full max-w-7xl px-6 py-10 sm:py-20 lg:px-8">
-          <div className="max-w-2xl">
+      {/* Content */}
+      <div className="relative flex h-full items-center z-20">
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Text-Spalte (links) */}
+          <div className="max-w-2xl lg:col-span-8">
             <motion.div style={{ opacity: textOpacity, y: textY }}>
-              <div className="inline-flex items-center gap-2 rounded border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white/80 backdrop-blur-sm">
-                {t("badge")}
+              {/* Puristischer Micro-Badge */}
+              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-accent-300">
+                <span>//</span> {t("badge")}
               </div>
 
-              <p className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-accent-300 sm:mt-6">
-                {t("tagline")}
-              </p>
-
-              {/* Bewusst KEIN FadeIn: FadeIn SSRt mit opacity:0 und wird erst
-                  nach Hydration sichtbar — auf Mobile kostete das ~2s LCP
-                  (Render-Delay), weil H1/Intro Teil des LCP-Bereichs sind.
-                  Above-the-fold-Inhalte müssen mit dem ersten Paint stehen. */}
-              <h1 className="mt-3 text-3xl font-black leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl">
-                {t("titleLine1")}
-                <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
+              {/* Klare Typografie */}
+              <h1 className="mt-4 text-4xl font-black leading-[1.1] tracking-tight text-white sm:text-6xl">
+                {t("titleLine1")}{" "}
+                <span className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
                   {t("titleLine2")}
                 </span>
               </h1>
 
-              <p className="mt-3 max-w-xl text-base leading-7 text-neutral-200 sm:mt-6 sm:text-lg sm:leading-8">
+              <p className="mt-6 text-base leading-8 text-neutral-400 sm:text-lg max-w-xl">
                 {t("intro")}
               </p>
             </motion.div>
 
             <motion.div style={{ opacity: ctaOpacity }}>
-              <div className="mt-6 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
-                {/* /auth and /methode are both outside the [locale] segment
-                    (only "/" and "/konflikte/trennung" are migrated — see
-                    isMigratedLocalePath in i18n/routing.ts), so plain <a>
-                    tags are correct here, not the locale-aware Link. */}
+              {/* Minimalistische Buttons */}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <a
                   href="/auth/register"
-                  className="inline-flex items-center justify-center rounded-2xl bg-accent-500 px-6 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-accent-400 sm:px-8 sm:py-4"
+                  className="inline-flex items-center justify-center rounded-lg bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-400 sm:px-8 sm:py-3.5"
                 >
                   {t("ctaPrimary")}
                 </a>
                 <a
                   href="/methode"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/50 hover:bg-white/20 sm:px-8 sm:py-4"
+                  className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:px-8 sm:py-3.5"
                 >
                   {t("ctaSecondary")}
                 </a>
               </div>
 
-              <div className="mt-5 hidden flex-wrap gap-3 text-sm text-white/90 sm:mt-8 sm:flex">
-                {badges.map(({ label, color }) => (
-                  <div
-                    key={label}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-sm"
-                  >
-                    <span className={`h-2 w-2 rounded-full ${color}`} />
-                    {label}
-                  </div>
+              {/* Super flache Footer-Labels */}
+              <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-600 border-t border-white/5 pt-6">
+                {badges.map(({ label }) => (
+                  <span key={label}>{label}</span>
                 ))}
               </div>
             </motion.div>
+          </div>
+
+          {/* Platzhalter-Spalte (rechts) - lässt dem Wirbel Raum */}
+          <div className="hidden lg:col-span-4 lg:block">
+            {/* Hier könnte ein sehr dezentes UI-Element oder Code-Snippet schweben, muss aber nicht. */}
           </div>
         </div>
       </div>

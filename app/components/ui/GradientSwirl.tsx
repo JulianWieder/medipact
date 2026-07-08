@@ -34,20 +34,22 @@ void main() {
   vec2 uv = (gl_FragCoord.xy / u_res) * 2.0 - 1.0;
   float r = length(uv);
   float a = atan(uv.y, uv.x);
-  float t = u_time * 0.22;
+  float t = u_time * 0.16;
 
   // Log-Spirale: Arme winden sich zur Mitte, drehen langsam.
   float phase = a + 3.5 * log(r + 0.18) - t;
-  phase += 0.25 * sin(t * 0.7 + r * 4.0); // leichtes organisches Atmen
+  phase += 0.45 * sin(t * 0.9 + r * 4.0); // organisches Atmen (mehr Bewegung)
   float arms = 0.5 + 0.5 * sin(2.0 * phase);
   arms = smoothstep(0.15, 0.95, arms); // weiche, breite Bänder
+  arms = mix(0.5, arms, 0.7); // Kontrast: 0 = flach, 1 = voll
 
   vec3 col = mix(u_c0, u_c1, arms);
-  col = mix(col, u_c2, smoothstep(0.55, 1.0, arms) * (1.0 - r) * 0.9);
+  col = mix(col, u_c2, smoothstep(0.55, 1.0, arms) * (1.0 - r) * 0.5);
   col = mix(col, u_c3, smoothstep(0.45, 1.0, r) * 0.3); // kühler Rand
 
   // Weicher radialer Falloff: außen komplett transparent, Mitte sanft.
   float alpha = smoothstep(1.0, 0.35, r) * 0.85;
+  col *= 0.75; // Gesamthelligkeit etwas runter
   gl_FragColor = vec4(col * alpha, alpha); // premultiplied
 }
 `;

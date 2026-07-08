@@ -57,7 +57,12 @@ export const ScrollPinFrame = forwardRef<
     <section
       ref={ref}
       id={id}
-      className={`relative isolate overflow-hidden ${className}`}
+      // KEIN overflow-hidden hier: das macht die Section zum "Scroll-Container"
+      // und bricht position:sticky des inneren Frames → der Hero pinnt nicht
+      // und die Rest-Höhe (heightVh − 100vh) liegt als leerer Streifen unter
+      // dem Frame (sichtbar, sobald die Section eine bg-Farbe hat). Das
+      // innere sticky-div clippt selbst (overflow-hidden), z.B. den Zoom.
+      className={`relative isolate ${className}`}
       style={{ height: `${heightVh}vh` }}
     >
       <div className="sticky top-0 h-screen h-[100dvh] w-full overflow-hidden">
