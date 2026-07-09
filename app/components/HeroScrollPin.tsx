@@ -32,8 +32,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       heightVh={150}
       className="scroll-mt-20 bg-neutral-950"
     >
-      {/* Hintergrund (Foto + Gradients + Wirbel) kommt zentral aus HeroBackdrop —
-          derselbe Baustein wie in ImagePinHero auf allen Unterseiten. */}
+      {/* Hintergrund (Foto + Gradients + Wirbel) kommt zentral aus HeroBackdrop */}
       <HeroBackdrop
         image={heroPhoto}
         imageAlt="Paar in einer Mediationssitzung"
@@ -46,9 +45,9 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
           {/* Text-Spalte (links) */}
           <div className="max-w-2xl lg:col-span-8">
             <motion.div style={{ opacity: textOpacity, y: textY }}>
-              {/* Puristischer Micro-Badge */}
-              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-accent-300">
-                <span>//</span> {t("badge")}
+              {/* Puristischer Micro-Badge - Akzentfarbe leicht verstärkt für Lesbarkeit */}
+              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-accent-400">
+                <span className="text-neutral-500">//</span> {t("badge")}
               </div>
 
               {/* Klare Typografie */}
@@ -59,32 +58,39 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
                 </span>
               </h1>
 
-              <p className="mt-6 text-base leading-8 text-neutral-400 sm:text-lg max-w-xl">
+              {/* Kontrast erhöht: text-neutral-400 -> text-neutral-200 */}
+              <p className="mt-6 text-base leading-8 text-neutral-200 sm:text-lg max-w-xl">
                 {t("intro")}
               </p>
             </motion.div>
 
             <motion.div style={{ opacity: ctaOpacity }}>
-              {/* Minimalistische Buttons */}
+              {/* Buttons mit geschärften Kontrasten */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <a
                   href="/auth/register"
-                  className="inline-flex items-center justify-center rounded-lg bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-400 sm:px-8 sm:py-3.5"
+                  className="inline-flex items-center justify-center rounded-lg bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-400 active:scale-[0.98] sm:px-8 sm:py-3.5"
                 >
                   {t("ctaPrimary")}
                 </a>
+                {/* Sekundärer Button: Sichtbarkeit durch stärkere Border und Opacity erhöht */}
                 <a
                   href="/methode"
-                  className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:px-8 sm:py-3.5"
+                  className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/20 hover:border-white/30 active:scale-[0.98] sm:px-8 sm:py-3.5"
                 >
                   {t("ctaSecondary")}
                 </a>
               </div>
 
-              {/* Super flache Footer-Labels */}
-              <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-600 border-t border-white/5 pt-6">
+              {/* Footer-Labels: Trennlinie und Text deutlich sichtbarer gemacht */}
+              <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-400 border-t border-white/10 pt-6">
                 {badges.map(({ label }) => (
-                  <span key={label}>{label}</span>
+                  <span
+                    key={label}
+                    className="hover:text-neutral-200 transition-colors"
+                  >
+                    {label}
+                  </span>
                 ))}
               </div>
             </motion.div>
@@ -92,7 +98,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
 
           {/* Platzhalter-Spalte (rechts) - lässt dem Wirbel Raum */}
           <div className="hidden lg:col-span-4 lg:block">
-            {/* Hier könnte ein sehr dezentes UI-Element oder Code-Snippet schweben, muss aber nicht. */}
+            {/* Raum für visuelle Effekte im Hintergrund */}
           </div>
         </div>
       </div>
