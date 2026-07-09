@@ -51,7 +51,7 @@
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
       "titleLine1": "Mediation online –",
       "titleLine2": "Konflikte fair, vertraulich und ohne Gericht lösen.",
-      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe – Schritt für Schritt zu einer Lösung, mit der beide Seiten leben können.",
+      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe sowie in Business Konflikten – Schritt für Schritt zu einer Lösung, mit der beide Seiten leben können.",
       "ctaPrimary": "Kostenlosen Account erstellen",
       "ctaSecondary": "So funktioniert es",
       "badgeVertraulich": "Vertraulich",
@@ -64,7 +64,7 @@
         "label": "strukturierter Prozess"
       },
       {
-        "value": "< 4 Wochen",
+        "value": "< 4 Monate",
         "label": "typische Dauer"
       },
       {
@@ -76,7 +76,7 @@
         "label": "vertraulich & DSGVO-konform"
       }
     ],
-    "bekanntAusLabel": "Bekannt aus",
+    "bekanntAusLabel": "Methode",
     "bekanntAusTags": [
       "Harvard-Methode",
       "DSGVO-konform",
@@ -104,8 +104,8 @@
           "text": "Erbstreitigkeiten belasten Familien oft länger als das Erbe selbst wert ist. Medipact hilft, eine Lösung zu finden, mit der alle weiterleben können."
         },
         "geschaeft": {
-          "title": "Team & Organisation",
-          "text": "Konflikte im Team, unter Gesellschaftern oder mit Geschäftspartnern (B2B): Medipact klärt strukturiert – vertraulich und schneller als ein Gerichtsverfahren."
+          "title": "Unternehmen & B2B",
+          "text": "Konflikte im Team, unter Gesellschaftern oder mit Partnern? Medipact klärt geschäftliche Dispute strukturiert, vertraulich und nervenschonender als jedes Gerichtsverfahren."
         }
       }
     },

@@ -33,7 +33,7 @@ export function HeroBackdrop({
 
       {/* 2. Lesbarkeits-Gradient links – JETZT KRÄFTIGER FÜR DIE SCHRIFT */}
       {/* Startet bei 60% Schwarz links und blendet schnell aus, damit das Bild in der Mitte hell bleibt */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-r from-neutral-950/60 via-neutral-950/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-neutral-950/80 via-neutral-950/20 to-transparent pointer-events-none" />
 
       {/* 3. Vertikaler Fade nach unten */}
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent pointer-events-none" />

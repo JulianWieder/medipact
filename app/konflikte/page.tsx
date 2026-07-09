@@ -31,7 +31,7 @@ const conflictTypes = [
     href: "/konflikte/erbschaft",
   },
   {
-    title: "Team & Organisation",
+    title: "Business",
     text: "Wenn Konflikte im Team, zwischen Abteilungen oder mit Führungskräften die Zusammenarbeit lähmen.",
     href: "/konflikte/geschaeft",
   },
@@ -62,16 +62,17 @@ const problemPoints = [
 export default function KonfliktePage() {
   return (
     <>
-      <ImagePinHero image={konFormenPhoto} imageAlt="Verschiedene Formen privater Konflikte">
+      <ImagePinHero
+        image={konFormenPhoto}
+        imageAlt="Verschiedene Formen privater Konflikte"
+      >
         <div className="container max-w-4xl">
           <Breadcrumbs items={[{ label: "Konfliktarten" }]} variant="dark" />
           <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Konflikte haben viele Formen.{" "}
-            <span className="text-accent-300">
-              Mediation schafft Klarheit.
-            </span>
+            <span className="text-accent-300">Mediation schafft Klarheit.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
@@ -104,9 +105,9 @@ export default function KonfliktePage() {
               Private Konflikte brauchen keinen jahrelangen Kampf.
             </h2>
             <p className="mt-5 text-lg leading-8 text-neutral-600">
-              Gerade bei Trennung, Erbe oder Nachbarschaft geht es nicht nur
-              um Recht. Es geht um Stress, Geld, Familie und Alltag. Genau
-              hier setzt Medipact an.
+              Gerade bei Trennung, Erbe oder Nachbarschaft geht es nicht nur um
+              Recht. Es geht um Stress, Geld, Familie und Alltag. Genau hier
+              setzt Medipact an.
             </p>
           </div>
 
@@ -130,7 +131,9 @@ export default function KonfliktePage() {
                   <div className="mb-4 text-3xl font-black text-neutral-100">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <p className="text-base leading-7 text-neutral-700">{point}</p>
+                  <p className="text-base leading-7 text-neutral-700">
+                    {point}
+                  </p>
                 </div>
               ))}
             </div>

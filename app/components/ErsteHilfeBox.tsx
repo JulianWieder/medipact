@@ -8,7 +8,6 @@ import Link from "next/link";
 // einem Satz. Die Fragen sind als W-Fragen-Überschriften (h3) formuliert, weil
 // Google genau solche Kurzantworten in "Nutzer fragen auch" und KI-Antworten
 // zieht.
-
 const steps = [
   {
     num: "1",
@@ -17,7 +16,7 @@ const steps = [
   },
   {
     num: "2",
-    title: "Erstgespräch vereinbaren",
+    title: "Andere Seite einladen und Interessen erarbeiten",
     text: "Die andere Seite wird neutral eingeladen. Gemeinsam legen Sie einen Termin für das erste Gespräch fest.",
   },
   {
@@ -47,11 +46,13 @@ export function ErsteHilfeBox() {
     <section className="section section-base scroll-mt-20" id="so-gehts">
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <div className="eyebrow mb-4 justify-center">In 3 Schritten starten</div>
+          <div className="eyebrow mb-4 justify-center">
+            In 3 Schritten starten
+          </div>
           <h2 className="heading-2">So starten Sie Ihre Mediation</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-neutral-600">
-            Kein kompliziertes Verfahren – ein klarer, geführter Weg vom ersten Klick bis zur
-            Einigung.
+            Kein kompliziertes Verfahren – ein klarer, geführter Weg vom ersten
+            Klick bis zur Einigung.
           </p>
         </div>
 
@@ -65,8 +66,12 @@ export function ErsteHilfeBox() {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-600 text-lg font-black text-white shadow-md">
                 {step.num}
               </div>
-              <h3 className="mt-5 text-lg font-bold text-neutral-900">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600">{step.text}</p>
+              <h3 className="mt-5 text-lg font-bold text-neutral-900">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                {step.text}
+              </p>
               {i < steps.length - 1 && (
                 <span
                   aria-hidden
@@ -82,9 +87,14 @@ export function ErsteHilfeBox() {
         {/* Atomic FAQ – Direktantworten in je einem Satz */}
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {atomicFaq.map((item) => (
-            <div key={item.q} className="rounded-2xl border border-accent-100 bg-accent-50/50 p-6">
+            <div
+              key={item.q}
+              className="rounded-2xl border border-accent-100 bg-accent-50/50 p-6"
+            >
               <h3 className="text-sm font-bold text-neutral-900">{item.q}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600">{item.a}</p>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                {item.a}
+              </p>
             </div>
           ))}
         </div>

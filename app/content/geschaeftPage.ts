@@ -9,8 +9,9 @@
 
 export const geschaeftPageContent = {
   eyebrow: "Business-Mediation",
-  title: "Wenn Konflikte das Geschäft blockieren.",
-  titleHighlight: "Im Team, unter Gesellschaftern – oder mit Geschäftspartnern.",
+  title: "Wenn Konflikte das Unternehmen blockieren.",
+  titleHighlight:
+    "Im Team, unter Gesellschaftern – oder mit Geschäftspartnern.",
   intro:
     "Ob innerbetrieblich oder über die Unternehmensgrenze hinaus (B2B): Konflikte kosten Arbeitsfähigkeit, Geld und Partnerschaften. Medipact klärt strukturiert – strikt vertraulich und deutlich schneller als ein Gerichtsverfahren.",
 
@@ -59,7 +60,7 @@ export const geschaeftPageContent = {
   process: [
     {
       title: "Diagnose zuerst",
-      text: "Konfliktart (Sach-, Beziehungs-, Rollen- oder Strukturkonflikt) und Eskalationsstufe nach Glasl werden strukturiert erfasst – bevor irgendjemand über Lösungen spricht.",
+      text: "Konfliktart (Sach-, Beziehungs-, Rollen- oder Strukturkonflikt) und Eskalationsstufe werden strukturiert erfasst – bevor irgendjemand über Lösungen spricht.",
     },
     {
       title: "Der passende Ansatz",
@@ -129,6 +130,16 @@ export const geschaeftPageContent = {
 
   faqTitle: "Häufige Fragen zur Business-Mediation",
   faqs: [
+    {
+      question: "Welchen Zeitaufwand müssen wir für das Verfahren einplanen?",
+      answer:
+        "Da unser geführter Prozess digital und asynchron gestartet wird, entfallen lange Terminabsprachen. Die Parteien bearbeiten die strukturierte Fallaufnahme flexibel im eigenen Tempo. Eine Klärung wird so oft innerhalb weniger Tage statt Wochen erzielt – spürbar schneller als bei klassischen Präsenz-Mediationen.",
+    },
+    {
+      question: "Was passiert, wenn eine Partei die Mediation abbricht?",
+      answer:
+        "Die Teilnahme ist stets freiwillig. Sollte der strukturierte Prozess ins Stocken geraten oder eine Partei abbrechen, liefert medipact bis dahin eine klare, sachliche Dokumentation der Standpunkte. Das spart Zeit und Kosten, falls der Konflikt danach intern durch Führungskräfte gelöst oder rechtlich übergeben werden muss.",
+    },
     {
       question: "Was kostet Business-Mediation bei medipact?",
       answer:
