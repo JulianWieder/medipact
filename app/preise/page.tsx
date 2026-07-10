@@ -3,7 +3,8 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title: "Preise – Mediation ab €249, Business-Pauschale für Unternehmen | medipact",
+  title:
+    "Preise – Mediation ab €249, Business-Pauschale für Unternehmen | medipact",
   description:
     "Transparente Preise für Mediation bei Scheidung, Nachbarschaftsstreit, Erbe und Business-Konflikten. Drei Modelle plus Business-Pauschale für Unternehmen: €5.000/Monat mit bis zu 150 Mediationen. Alle Parteien zahlen anteilig.",
   alternates: { canonical: "https://medipact.de/preise" },
@@ -14,7 +15,10 @@ export default function Preise() {
     <>
       <main className="app-shell pt-[73px]">
         {/* HERO */}
-        <ImagePinHero image={preisPhoto} imageAlt="Faire, transparente Preise bei medipact">
+        <ImagePinHero
+          image={preisPhoto}
+          imageAlt="Faire, transparente Preise bei medipact"
+        >
           <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
@@ -24,9 +28,9 @@ export default function Preise() {
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
-                Sie wissen vorher genau, was auf Sie zukommt. Alle
-                Parteien zahlen anteilig – keine versteckten Kosten, keine
-                Überraschungen am Ende.
+                Sie wissen vorher genau, was auf Sie zukommt. Alle Parteien
+                zahlen anteilig – keine versteckten Kosten, keine Überraschungen
+                am Ende.
               </p>
             </div>
           </div>
@@ -166,9 +170,8 @@ export default function Preise() {
                   <span className="block text-accent-600">Unterstützt</span>
                 </h2>
                 <p className="text-neutral-600 mb-8">
-                  Der geführte Prozess bereitet alles vor – ein echter
-                  Mediator begleitet Sie persönlich durch die entscheidenden
-                  Gespräche.
+                  Der geführte Prozess bereitet alles vor – ein echter Mediator
+                  begleitet Sie persönlich durch die entscheidenden Gespräche.
                 </p>
 
                 {/* Preise */}
@@ -205,9 +208,9 @@ export default function Preise() {
                     <p className="text-xs text-neutral-700">
                       Wird es rechtlich oder emotional komplex, buchen Sie bei
                       Bedarf gezielt dazu: Rechtsanwalt ab{" "}
-                      <strong>€190 / Std.</strong>, Psychologe oder Gutachter
-                      ab <strong>€170 / Std.</strong> – nur wenn Sie es
-                      wirklich brauchen, transparent abgerechnet.
+                      <strong>€190 / Std.</strong>, Psychologe oder Gutachter ab{" "}
+                      <strong>€170 / Std.</strong> – nur wenn Sie es wirklich
+                      brauchen, transparent abgerechnet.
                     </p>
                   </div>
                 </div>
@@ -244,8 +247,8 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
-                      <strong>Persönlicher Support</strong> – Jemand ist für
-                      Sie da
+                      <strong>Persönlicher Support</strong> – Jemand ist für Sie
+                      da
                     </span>
                   </div>
                 </div>
@@ -270,8 +273,7 @@ export default function Preise() {
                 <p className="text-neutral-600 mb-8">
                   Für sehr komplexe Scheidungen und Trennungen – mit Vermögen,
                   Firma, Kindern oder hohem Konfliktniveau. Eine feste
-                  Ansprechperson begleitet Sie durchgehend, von Anfang bis
-                  Ende.
+                  Ansprechperson begleitet Sie durchgehend, von Anfang bis Ende.
                 </p>
 
                 {/* Preise */}
@@ -326,8 +328,8 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
-                      <strong>5 Std. Mediator inklusive</strong> – mehr Raum
-                      für komplexe Themen
+                      <strong>5 Std. Mediator inklusive</strong> – mehr Raum für
+                      komplexe Themen
                     </span>
                   </div>
                   <div className="flex gap-3">
@@ -375,7 +377,7 @@ export default function Preise() {
                 <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
                   Business-Pauschale.
                   <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                    Ein Preis, alle Konflikte.
+                    Ein Preis, alle Businees Konflikte.
                   </span>
                 </h2>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-300">
@@ -393,8 +395,13 @@ export default function Preise() {
                     "IT- & Großprojekte (B2B)",
                     "M&A & Post-Merger (B2B)",
                   ].map((item) => (
-                    <div key={item} className="flex items-start gap-2.5 text-sm text-neutral-200">
-                      <span className="mt-0.5 font-bold text-accent-400">✓</span>
+                    <div
+                      key={item}
+                      className="flex items-start gap-2.5 text-sm text-neutral-200"
+                    >
+                      <span className="mt-0.5 font-bold text-accent-400">
+                        ✓
+                      </span>
                       {item}
                     </div>
                   ))}
@@ -406,18 +413,34 @@ export default function Preise() {
                   Business-Pauschale
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-5xl font-black tracking-tight text-white">€5.000</span>
-                  <span className="text-base font-semibold text-neutral-400">/ Monat</span>
+                  <span className="text-5xl font-black tracking-tight text-white">
+                    €5.000
+                  </span>
+                  <span className="text-base font-semibold text-neutral-400">
+                    / Monat
+                  </span>
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-                  Bis zu <strong className="text-white">150 Mediationen pro Monat</strong>{" "}
+                  Bis zu{" "}
+                  <strong className="text-white">
+                    150 Mediationen pro Monat
+                  </strong>{" "}
                   – rechnerisch ab rund €33 pro Fall statt €399 einzeln.
                 </p>
                 <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
-                  <p><span className="font-bold text-accent-400">✓</span> Alle Business-Konfliktarten, intern & B2B</p>
-                  <p><span className="font-bold text-accent-400">✓</span> Strikt vertraulich – kein Image-Schaden am Markt</p>
-                  <p><span className="font-bold text-accent-400">✓</span> Methodenwahl nach Diagnose: facilitativ, evaluativ, transformativ, Shuttle</p>
-                  <p><span className="font-bold text-accent-400">✓</span> Monatlich kündbar</p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Alle
+                    Business-Konfliktarten, intern & B2B
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Strikt
+                    vertraulich – kein Image-Schaden am Markt
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Methodenwahl nach Diagnose: facilitativ, evaluativ,
+                    transformativ, Shuttle
+                  </p>
                 </div>
                 <a
                   href="mailto:hallo@medipact.de?subject=Business-Pauschale%20anfragen"
@@ -563,7 +586,7 @@ export default function Preise() {
                 },
                 {
                   q: "Was ist die Business-Pauschale für Unternehmen?",
-                  a: "Unternehmen mit laufendem Klärungsbedarf zahlen €5.000 pro Monat und können damit bis zu 150 Mediationen monatlich durchführen – interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Pauschale kosten €399. Die Pauschale ist monatlich kündbar.",
+                  a: "Unternehmen mit laufendem Klärungsbedarf zahlen €5.000 pro Monat und können damit bis zu 150 Mediationen monatlich durchführen – interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Pauschale kosten €399.",
                 },
                 {
                   q: "Gibt es versteckte Kosten?",

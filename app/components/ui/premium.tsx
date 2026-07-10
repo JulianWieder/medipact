@@ -28,22 +28,52 @@ export interface StatItem {
   onClick?: () => void;
   /** Markiert die Kachel als aktiv (z.B. aktiver Filter). */
   active?: boolean;
+  /** Kleine Delta-Zeile unter dem Wert, z.B. "+2 diese Woche" (Stripe-Stil). */
+  delta?: string;
+  /** Mini-Balken-Sparkline (Werte 0–100), z.B. Fortschritt je Fall. */
+  trend?: number[];
 }
 
-function StatTile({ label, value, sub, highlight, onClick, active }: StatItem) {
+/** Winzige Balken-Sparkline im Stripe-Stil (Werte 0–100). */
+export function BarSparkline({
+  values,
+  className,
+}: {
+  values: number[];
+  className?: string;
+}) {
+  if (!values.length) return null;
+  return (
+    <span className={cn("inline-flex h-6 items-end gap-[3px]", className)} aria-hidden>
+      {values.slice(0, 12).map((v, i) => (
+        <span
+          key={i}
+          className="w-[4px] rounded-sm bg-accent-300/70"
+          style={{ height: `${Math.max(12, Math.min(100, v))}%` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function StatTile({ label, value, sub, highlight, onClick, active, delta, trend }: StatItem) {
   const content = (
     <>
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
         {label}
       </p>
-      <p
-        className={cn(
-          "mt-3 font-display text-4xl font-medium tracking-tight lg:text-5xl",
-          highlight || active ? "text-accent-300" : "text-white",
-        )}
-      >
-        {value}
-      </p>
+      <div className="mt-3 flex items-end gap-3">
+        <p
+          className={cn(
+            "font-display text-4xl font-medium tracking-tight tabular-nums lg:text-5xl",
+            highlight || active ? "text-accent-300" : "text-white",
+          )}
+        >
+          {value}
+        </p>
+        {trend && trend.length > 0 && <BarSparkline values={trend} className="mb-1.5" />}
+      </div>
+      {delta && <p className="mt-2 text-xs font-medium text-accent-300">{delta}</p>}
       {sub && <p className="mt-2 text-sm font-light text-neutral-400">{sub}</p>}
     </>
   );
@@ -287,4 +317,178 @@ export function PremiumCard({
     );
   }
   return <div className={classes}>{children}</div>;
+}
+
+// ── StatusDot ─────────────────────────────────────────────────────────────
+// Stripe-artiger Status: kleiner farbiger Punkt + Text statt umrandeter
+// Badge. Ruhiger als OutlinePill, besonders in dichten Listen.
+
+const statusDotTones: Record<string, { dot: string; text: string }> = {
+  teal: { dot: "bg-accent-500", text: "text-accent-700" },
+  amber: { dot: "bg-amber-500", text: "text-amber-700" },
+  sky: { dot: "bg-sky-400", text: "text-sky-700" },
+  neutral: { dot: "bg-neutral-300", text: "text-neutral-500" },
+  red: { dot: "bg-red-500", text: "text-red-700" },
+};
+
+export function StatusDot({
+  label,
+  tone = "neutral",
+  pulse,
+  className,
+}: {
+  label: React.ReactNode;
+  tone?: keyof typeof statusDotTones;
+  pulse?: boolean;
+  className?: string;
+}) {
+  const t = statusDotTones[tone] ?? statusDotTones.neutral;
+  return (
+    <span className={cn("inline-flex w-fit items-center gap-1.5 text-xs font-medium", t.text, className)}>
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", t.dot, pulse && "animate-pulse")} />
+      {label}
+    </span>
+  );
+}
+
+// ── SegmentedControl ──────────────────────────────────────────────────────
+// Stripe-artige segmentierte Filter-Leiste (Alle · Laufend · …) mit
+// optionalen Zählern. `activeKey === null` bedeutet "Alle".
+
+export interface Segment {
+  key: string | null;
+  label: string;
+  count?: number;
+}
+
+export function SegmentedControl({
+  segments,
+  activeKey,
+  onChange,
+  className,
+}: {
+  segments: Segment[];
+  activeKey: string | null;
+  onChange: (key: string | null) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-neutral-200 bg-neutral-50 p-1",
+        className,
+      )}
+      role="tablist"
+    >
+      {segments.map((s) => {
+        const active = activeKey === s.key;
+        return (
+          <button
+            key={s.key ?? "__all__"}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(s.key)}
+            className={cn(
+              "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200",
+              active
+                ? "bg-white text-neutral-900 shadow-[0_1px_4px_rgba(15,23,42,0.12)]"
+                : "text-neutral-500 hover:text-neutral-900",
+            )}
+          >
+            {s.label}
+            {typeof s.count === "number" && (
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] tabular-nums",
+                  active ? "bg-neutral-100 text-neutral-600" : "bg-neutral-200/70 text-neutral-500",
+                )}
+              >
+                {s.count}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────
+// Grauer Lade-Platzhalter in exakter Layout-Form (Stripe-Stil) statt
+// Spinner/Ladetext. `tone="dark"` für den dunklen Hero.
+
+export function Skeleton({
+  className,
+  tone = "light",
+}: {
+  className?: string;
+  tone?: "light" | "dark";
+}) {
+  return (
+    <span
+      className={cn(
+        "block animate-pulse rounded-lg",
+        tone === "dark" ? "bg-white/10" : "bg-neutral-200/80",
+        className,
+      )}
+      aria-hidden
+    />
+  );
+}
+
+// ── SlideOver ─────────────────────────────────────────────────────────────
+// Detail-Panel, das von rechts hereinfährt (Stripe-Stil): schnelle Vorschau
+// ohne Seitenwechsel. Schließt per Backdrop-Klick oder Escape.
+
+export function SlideOver({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div
+        className="absolute inset-0 bg-neutral-900/40 backdrop-blur-[2px] transition-opacity"
+        onClick={onClose}
+        aria-hidden
+      />
+      <aside
+        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-[-20px_0_60px_-20px_rgba(15,23,42,0.3)] animate-[slideover-in_0.25s_ease-out]"
+        role="dialog"
+        aria-modal="true"
+      >
+        <style>{`@keyframes slideover-in { from { transform: translateX(2rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+        <div className="flex items-start justify-between gap-4 border-b border-neutral-200 p-6">
+          <div className="min-w-0">{title}</div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Schließen"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+      </aside>
+    </div>
+  );
 }

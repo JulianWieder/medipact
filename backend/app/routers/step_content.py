@@ -14,10 +14,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.mediation import Mediation
 from app.models.mediation_step_content import MediationStepContent
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.security import get_current_db_user
+from app.services import billing
 
 router = APIRouter(tags=["step_content"])
 
@@ -37,6 +39,17 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     if not p:
         raise HTTPException(status_code=403, detail="Kein Zugriff auf diese Mediation")
     return p
+
+
+def _require_paid_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
+    """Wie `_require_participant`, erzwingt aber zusätzlich die Paywall
+    (Mediator/Admin ausgenommen, siehe billing.ensure_unlocked)."""
+    participant = _require_participant(mediation_id, user, db)
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+    billing.ensure_unlocked(mediation, participant, user)
+    return participant
 
 
 def _serialize(c: MediationStepContent) -> dict:
@@ -74,7 +87,7 @@ def list_step_content(
     Alle fallbezogenen Inhalte zurückgeben – optional auf eine Phase gefiltert.
     Für alle Teilnehmer des Falls lesbar.
     """
-    _require_participant(mediation_id, user, db)
+    _require_paid_participant(mediation_id, user, db)
 
     query = db.query(MediationStepContent).filter(
         MediationStepContent.mediation_id == mediation_id
@@ -93,7 +106,7 @@ def upsert_step_content(
     user: User = Depends(get_current_db_user),
 ):
     """Fallbezogenen Inhalt eines Schritts anlegen oder aktualisieren."""
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_paid_participant(mediation_id, user, db)
     if participant.role not in _ALLOWED_ROLES:
         raise HTTPException(status_code=403, detail="Nur der Mediator kann Inhalte pflegen")
 

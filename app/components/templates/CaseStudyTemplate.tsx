@@ -20,6 +20,16 @@ type Quote = {
   author: string;
 };
 
+type StoryChapter = {
+  /** Kleine Kapitel-Zeile über dem Titel, z.B. "Kapitel 1 · Der Anruf". */
+  kicker?: string;
+  title: string;
+  /** Erzählende Absätze — Szenen, Dialoge, innere Perspektive. */
+  paragraphs: string[];
+  /** Optionales Pull-Quote, das groß zwischen den Absätzen steht. */
+  quote?: Quote;
+};
+
 type ComparisonBlock = {
   title: string;
   items: string[];
@@ -47,6 +57,11 @@ type CaseStudyTemplateProps = {
     title: string;
     content: ReactNode;
   }[];
+  /** Überschrift der Erzähl-Sektion, Default "Die Geschichte". */
+  storyTitle?: string;
+  storyIntro?: string;
+  /** Erzählkapitel — machen aus dem Fallbeispiel eine echte Geschichte. */
+  chapters?: StoryChapter[];
   factsTitle?: string;
   facts: string[];
   riskTitle?: string;
@@ -115,6 +130,9 @@ export function CaseStudyTemplate({
   situationTitle,
   situationIntro,
   perspectives,
+  storyTitle = "Die Geschichte",
+  storyIntro,
+  chapters,
   factsTitle = "Eckdaten",
   facts = [],
   riskTitle = "Ohne Mediation",
@@ -240,22 +258,70 @@ export function CaseStudyTemplate({
             />
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <h3 className="heading-3">{perspectiveA.title}</h3>
-                <div className="mt-4 leading-8 text-neutral-700">
-                  {perspectiveA.content}
-                </div>
-              </Card>
-
-              <Card>
-                <h3 className="heading-3">{perspectiveB.title}</h3>
-                <div className="mt-4 leading-8 text-neutral-700">
-                  {perspectiveB.content}
-                </div>
-              </Card>
+              {[perspectiveA, perspectiveB].map((perspective) => (
+                <Card key={perspective.title}>
+                  <span
+                    aria-hidden
+                    className="block font-display text-5xl leading-none text-accent-300"
+                  >
+                    “
+                  </span>
+                  <div className="mt-2 italic leading-8 text-neutral-700">
+                    {perspective.content}
+                  </div>
+                  <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                    {perspective.title}
+                  </p>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
+
+        {chapters && chapters.length > 0 && (
+          <section className="section section-base">
+            <div className="container max-w-3xl">
+              <SectionHeader
+                eyebrow="So hat es sich zugetragen"
+                title={storyTitle}
+                description={storyIntro}
+              />
+
+              <div className="space-y-16">
+                {chapters.map((chapter, index) => (
+                  <article key={chapter.title}>
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent-600">
+                      {chapter.kicker ?? `Kapitel ${index + 1}`}
+                    </p>
+                    <h3 className="heading-3 mt-3">{chapter.title}</h3>
+
+                    <div className="mt-5 space-y-5">
+                      {chapter.paragraphs.map((paragraph, pIndex) => (
+                        <p
+                          key={pIndex}
+                          className="text-[1.0625rem] leading-8 text-neutral-700"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+
+                    {chapter.quote && (
+                      <blockquote className="mt-8 border-l-4 border-accent-400 pl-6">
+                        <p className="font-display text-xl leading-relaxed text-neutral-800 sm:text-2xl">
+                          “{chapter.quote.text}”
+                        </p>
+                        <cite className="mt-3 block text-sm font-semibold not-italic text-neutral-500">
+                          — {chapter.quote.author}
+                        </cite>
+                      </blockquote>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="section section-base">
           <div className="container">
@@ -290,24 +356,23 @@ export function CaseStudyTemplate({
               center
             />
 
-            <div className="space-y-5">
+            <ol className="relative mx-auto max-w-3xl space-y-12 border-l-2 border-accent-200 pl-8 sm:pl-10">
               {steps.map((step) => (
-                <Card key={step.label}>
-                  <div className="flex gap-5">
-                    <div className="min-w-fit rounded-2xl bg-gradient-to-br from-accent-600 to-accent-500 px-4 py-3 text-center font-bold text-white shadow-md">
-                      {step.label}
-                    </div>
-
-                    <div>
-                      <h3 className="heading-3">{step.title}</h3>
-                      <p className="mt-3 leading-7 text-neutral-700">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+                <li key={step.label} className="relative">
+                  <span
+                    aria-hidden
+                    className="absolute -left-[2.65rem] top-1 h-4 w-4 rounded-full border-4 border-white bg-accent-500 shadow ring-1 ring-accent-200 sm:-left-[3.15rem]"
+                  />
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-600">
+                    {step.label}
+                  </p>
+                  <h3 className="heading-3 mt-2">{step.title}</h3>
+                  <p className="mt-3 leading-7 text-neutral-700">
+                    {step.description}
+                  </p>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
         </section>
 

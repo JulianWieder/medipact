@@ -8,7 +8,7 @@ import mediModernPhoto from "@/fotos/medi_modern.jpg";
 export const metadata: Metadata = {
   title: "Fallbeispiele – So löst Mediation echte Konflikte | medipact",
   description:
-    "Echte Fallbeispiele aus Trennung, Erbschaft und Nachbarschaftsstreit: Wie Mediation in wenigen Monaten zu fairen Lösungen führt – statt jahrelangem Streit.",
+    "Echte Fallbeispiele aus Trennung, Erbschaft, Nachbarschaft und Unternehmen: Wie Mediation in wenigen Monaten zu fairen Lösungen führt – statt jahrelangem Streit.",
   alternates: { canonical: "https://medipact.de/cases" },
 };
 
@@ -85,6 +85,30 @@ const erbschaftCases: CaseCard[] = [
     titleHighlight: "Unternehmen erben – retten oder verkaufen?",
     intro:
       "20 Mitarbeiter, drei Erben, gegensätzliche Pläne. Ohne Einigung droht der Verkauf.",
+  },
+];
+
+const geschaeftCases: CaseCard[] = [
+  {
+    slug: "gesellschafter-streit",
+    title: "Stefan & Tobias",
+    titleHighlight: "Gesellschafter-Patt in der Softwareagentur",
+    intro:
+      "Je 50% der Anteile, zwei Strategien, komplette Blockade. Gelöst in 3 Monaten — Firma und Freundschaft intakt.",
+  },
+  {
+    slug: "team-konflikt",
+    title: "Vertrieb gegen Entwicklung",
+    titleHighlight: "Ein Teamkonflikt legt den Mittelständler lahm",
+    intro:
+      "Krankmeldungen, drei Kündigungen, verhärtete Fronten. Nach 6 Wochen Teammediation: wieder arbeitsfähig.",
+  },
+  {
+    slug: "b2b-projektstreit",
+    title: "Maschinenbauer & IT-Dienstleister",
+    titleHighlight: "ERP-Projekt vor dem Scherbenhaufen",
+    intro:
+      "14 Monate Verzug, €400.000 strittige Nachträge. Statt 3–5 Jahre Prozess: Projekt gerettet in 10 Wochen.",
   },
 ];
 
@@ -174,9 +198,9 @@ export default function CasesPage() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-            Anonymisierte Fallbeispiele aus Trennung, Erbschaft und
-            Nachbarschaftsstreit — mit den Perspektiven beider Seiten, dem
-            Ablauf und dem Ergebnis.
+            Anonymisierte Fallbeispiele aus Trennung, Erbschaft,
+            Nachbarschaft und Unternehmen — erzählt als echte Geschichten:
+            mit den Perspektiven beider Seiten, dem Weg und dem Ergebnis.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
@@ -212,6 +236,13 @@ export default function CasesPage() {
         title="Wenn der Alltag zum täglichen Streit wird"
         text="Drei Beispiele, wie Lärm-, Grenz- und Parkkonflikte zwischen Nachbarn ohne Gericht gelöst wurden."
         cases={nachbarschaftCases}
+      />
+
+      <CaseSection
+        eyebrow="Team & Organisation"
+        title="Wenn Konflikte das Geschäft blockieren"
+        text="Drei Beispiele aus Unternehmen: Gesellschafter-Patt, Teamkonflikt und festgefahrenes B2B-Projekt — gelöst in Wochen statt Jahren."
+        cases={geschaeftCases}
       />
 
       <MiniMatrix />

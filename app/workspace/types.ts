@@ -214,12 +214,26 @@ export interface MediationNote {
 
 export interface PhaseNoteGroup {
   phase: string;
+  /** Anzeigename vom Backend (Workspace-Labels, z.B. "Onboarding"). */
+  phase_label?: string;
   notes: {
     participant_id: string;
     participant_name: string;
     step: string;
     content: string;
     submitted: boolean;
+  }[];
+  /** Antworten aus dynamischen Block-Schritten – inkl. Mediator- und KI-Beiträgen. */
+  block_responses?: {
+    step_key: string;
+    step_title: string;
+    block_id: string;
+    block_type: string | null;
+    author_source: "user" | "mediator" | "ai";
+    author_name: string;
+    value: unknown;
+    submitted: boolean;
+    updated_at: string | null;
   }[];
 }
 

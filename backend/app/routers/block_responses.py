@@ -28,6 +28,7 @@ from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_db_user
+from app.services import billing
 from app.services.llm import ai_complete
 
 router = APIRouter(prefix="/mediations", tags=["block_responses"])
@@ -187,6 +188,16 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     return p
 
 
+def _require_paid_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
+    """Wie `_require_participant`, erzwingt aber zusätzlich die Paywall: bei noch
+    nicht bezahltem Fall wird für zahlungspflichtige Parteien mit 402 abgewiesen
+    (Mediator/Admin ausgenommen, siehe billing.ensure_unlocked)."""
+    participant = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation(mediation_id, db)
+    billing.ensure_unlocked(mediation, participant, user)
+    return participant
+
+
 def _serialize(r: MediationBlockResponse) -> dict:
     return {
         "id": r.id,
@@ -228,7 +239,7 @@ def list_block_responses(
     freigegebene/geteilte Beiträge nicht automatisch – der Einfachheit halber
     liefert dieser Endpunkt für Parteien nur die EIGENEN Antworten zurück.
     """
-    own = _require_participant(mediation_id, current_user, db)
+    own = _require_paid_participant(mediation_id, current_user, db)
     query = db.query(MediationBlockResponse).filter(
         MediationBlockResponse.mediation_id == mediation_id
     )
@@ -250,7 +261,7 @@ def upsert_block_response(
     current_user: User = Depends(get_current_db_user),
 ):
     """Legt den Beitrag des aktuellen Autors zu einem Block an oder aktualisiert ihn."""
-    own = _require_participant(mediation_id, current_user, db)
+    own = _require_paid_participant(mediation_id, current_user, db)
     is_mediator = own.role in _MEDIATOR_ROLES
 
     if payload.as_ai:
@@ -450,7 +461,7 @@ def run_block_ai(
 ):
     """Führt den Prompt eines KI-Blocks über die Eingaben des Falls aus und
     speichert die Ausgabe als KI-Beitrag (author_key='ai'). Nur Mediator/Owner."""
-    own = _require_participant(mediation_id, current_user, db)
+    own = _require_paid_participant(mediation_id, current_user, db)
     if own.role not in _MEDIATOR_ROLES:
         raise HTTPException(status_code=403, detail="Nur Mediator/Owner dürfen KI-Blöcke ausführen")
     mediation = _get_mediation(mediation_id, db)
@@ -540,7 +551,7 @@ async def block_upload(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
     contents = await file.read()
     if len(contents) > _MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=400, detail="Datei zu groß (max. 25 MB)")
@@ -565,7 +576,7 @@ def block_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
     if not token.startswith(f"{mediation_id}_") or "/" in token or "\\" in token or ".." in token:
         raise HTTPException(status_code=400, detail="Ungültiger Token")
     path = _UPLOAD_DIR / token

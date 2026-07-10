@@ -17,6 +17,40 @@ from app import pricing
 from app.models.discount_code import DiscountCode
 from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
+from app.models.user import User
+
+
+# Rollen, die auch bei noch NICHT bezahltem Fall auf die Inhalte zugreifen
+# dürfen: der (fallbezogene) Mediator zur Vorbereitung und globale Admins für
+# Support. Zahlungspflichtige Parteien (owner/other_party) sowie Beobachter
+# werden bis zur Bezahlung (mediation.is_paid) konsequent geblockt.
+_UNLOCK_EXEMPT_ROLES = {"mediator", "admin"}
+
+
+def ensure_unlocked(
+    mediation: Mediation,
+    participant: MediationParticipant,
+    user: User | None = None,
+) -> None:
+    """Erzwingt die Paywall: wirft 402, wenn der Fall noch nicht bezahlt ist.
+
+    Diese Prüfung MUSS an jedem Endpunkt sitzen, der bezahlte Mediations-Inhalte
+    liefert oder verändert (Schritte, Blöcke, Notizen, KI-Läufe, Vertrag,
+    Termine, Feedback, …). Ohne sie lässt sich die Paywall trivial umgehen,
+    indem die Content-APIs direkt – unter Umgehung des Frontends – aufgerufen
+    werden. Ausgenommen sind nur Mediator (fallbezogen) und globale Admins.
+    """
+    if mediation.is_paid:
+        return
+    role = (participant.role or "").lower()
+    if role in _UNLOCK_EXEMPT_ROLES:
+        return
+    if user is not None and (user.role or "").lower() == "admin":
+        return
+    raise HTTPException(
+        status_code=402,
+        detail="Zahlung erforderlich, bevor auf die Inhalte der Mediation zugegriffen werden kann.",
+    )
 
 
 # Nur diese Rollen sind zahlungspflichtige Parteien. Mediator/Beobachter zahlen

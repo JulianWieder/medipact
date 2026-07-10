@@ -17,6 +17,7 @@ from app.models.mediation_participant import MediationParticipant
 from app.models.mediation_step_rule import MediationStepRule
 from app.models.mediation_custom_step import MediationCustomStep
 from app.models.mediation_step_content import MediationStepContent
+from app.models.mediation_block_response import MediationBlockResponse
 from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
@@ -85,6 +86,19 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     if not p:
         raise HTTPException(status_code=403, detail="Not allowed")
     return p
+
+
+def _require_paid_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
+    """Wie `_require_participant`, erzwingt aber zusätzlich die Paywall: bei noch
+    nicht bezahltem Fall wird für Parteien mit 402 abgewiesen (Mediator/Admin
+    ausgenommen, siehe billing.ensure_unlocked). An allen Endpunkten verwenden,
+    die bezahlte Mediations-Inhalte liefern oder verändern."""
+    participant = _require_participant(mediation_id, user, db)
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+    billing.ensure_unlocked(mediation, participant, user)
+    return participant
 
 
 # ── Workflow-Regeln (konfigurierbar pro Fall, ohne Code-Änderung) ──────────────
@@ -986,7 +1000,7 @@ def get_notes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
     notes = (
         db.query(MediationNote)
         .filter(
@@ -1010,7 +1024,7 @@ def get_step_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     participants = (
         db.query(MediationParticipant, User)
@@ -1093,7 +1107,7 @@ def get_phase_steps(
     Ersetzt die fr\u00fcher statische Liste aus phaseData.ts/EinleitungClient.tsx
     im Frontend \u2013 die Konfiguration kommt jetzt vollst\u00e4ndig vom Backend.
     """
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
@@ -1247,7 +1261,7 @@ def get_flags(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
@@ -1266,7 +1280,7 @@ def set_flags(
     Nur Mediator/Owner/Admin – Flags wirken auf ALLE Teilnehmer (welche Schritte
     sichtbar sind), daher nicht durch eine einzelne Partei setzbar.
     """
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
     if participant.role not in _WORKFLOW_ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Nur Mediator/Owner dürfen Flags setzen")
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
@@ -1286,6 +1300,53 @@ def set_flags(
     flag_modified(mediation, "flags")
     db.commit()
     return {"flags": mediation.flags or {}}
+
+
+def _save_ai_output(
+    db: Session,
+    mediation_id: int,
+    phase: str,
+    step_key: str,
+    block_id: str,
+    block_type: str,
+    value,
+) -> None:
+    """Persistiert eine KI-Ausgabe als MediationBlockResponse (author='ai'),
+    damit sie – wie alle anderen Eingaben – im Workspace-Fallmanager unter
+    „Alle Eingaben" einsehbar bleibt. Pro (step_key, block_id) genau ein
+    KI-Eintrag; ein erneuter Lauf überschreibt den alten (updated_at zeigt
+    den letzten Stand)."""
+    existing = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation_id,
+            MediationBlockResponse.step_key == step_key,
+            MediationBlockResponse.block_id == block_id,
+            MediationBlockResponse.author_key == "ai",
+        )
+        .first()
+    )
+    if existing:
+        existing.value = value
+        existing.phase = phase
+        existing.block_type = block_type
+        existing.submitted = True
+    else:
+        db.add(
+            MediationBlockResponse(
+                mediation_id=mediation_id,
+                phase=phase,
+                step_key=step_key,
+                block_id=block_id,
+                block_type=block_type,
+                author_key="ai",
+                author_source="ai",
+                author_participant_id=None,
+                value=value,
+                submitted=True,
+            )
+        )
+    db.commit()
 
 
 class SummarizeResultsRequest(BaseModel):
@@ -1311,7 +1372,7 @@ def summarize_results(
     """
     import json as _json
 
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
     if participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
@@ -1345,6 +1406,18 @@ def summarize_results(
     prompt = get_prompt("summarize_results", inputs_text=inputs_text)
 
     summary = ai_complete(prompt, max_tokens=800)
+    # KI-Ausgabe dauerhaft ablegen (einsehbar im Workspace unter „Alle Eingaben").
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    scope = payload.source_phase or "alle"
+    _save_ai_output(
+        db,
+        mediation_id,
+        phase=payload.source_phase or (mediation.phase if mediation and mediation.phase else "einleitung"),
+        step_key="__ki__",
+        block_id=f"zusammenfassung:{scope}",
+        block_type="ki-zusammenfassung",
+        value=summary,
+    )
     return {"summary": summary}
 
 
@@ -1355,7 +1428,7 @@ def save_note(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    own_participant = _require_participant(mediation_id, current_user, db)
+    own_participant = _require_paid_participant(mediation_id, current_user, db)
 
     if str(own_participant.id) != payload.participant_id:
         raise HTTPException(status_code=403, detail="Du kannst nur deine eigene Notiz speichern")
@@ -1403,6 +1476,13 @@ def get_all_phase_notes(
     if not is_participant and current_user.role not in ("mediator", "admin"):
         raise HTTPException(status_code=403, detail="Not allowed")
 
+    # Paywall: eine zahlungspflichtige Partei darf die Inhalte erst nach Bezahlung
+    # sehen; globale Mediator/Admin (ohne Teilnehmer-Eintrag) sind ausgenommen.
+    if is_participant is not None:
+        mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+        if mediation:
+            billing.ensure_unlocked(mediation, is_participant, current_user)
+
     rows = (
         db.query(MediationNote, MediationParticipant, User)
         .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
@@ -1416,28 +1496,103 @@ def get_all_phase_notes(
     grouped: dict[str, list] = defaultdict(list)
     for note, participant, user in rows:
         grouped[note.phase].append({
+            "participant_id": str(participant.id),
             "participant_name": user.name,
             "step": note.step,
             "content": note.content,
             "submitted": note.submitted,
         })
 
+    # ── Block-Antworten (dynamische Schritte) inkl. KI-Beiträge ─────────────
+    # Jede Eingabe über Block-Schritte landet in mediation_block_responses –
+    # getrennt nach Autor (Partei / Mediator / KI). Hier werden sie zusammen
+    # mit den klassischen Notizen ausgeliefert, damit der Fallmanager im
+    # Workspace ALLE Eingaben eines Falls zeigt.
+    participant_names: dict[int, str] = {
+        p.id: u.name
+        for p, u in (
+            db.query(MediationParticipant, User)
+            .join(User, MediationParticipant.user_id == User.id)
+            .filter(MediationParticipant.mediation_id == mediation_id)
+            .all()
+        )
+    }
+    # step_key -> Titel (globale Defaults + fallbezogene Zusatz-Schritte).
+    step_titles: dict[str, str] = {
+        d.step_key: d.title
+        for d in db.query(PhaseStepDefault).filter(PhaseStepDefault.enabled.is_(True)).all()
+    }
+    step_titles.update({
+        c.step_key: c.title
+        for c in db.query(MediationCustomStep)
+        .filter(MediationCustomStep.mediation_id == mediation_id)
+        .all()
+    })
+    step_titles["__ki__"] = "KI-Auswertung"
+
+    # Sichtbarkeit wie in list_block_responses: Mediator/Owner/Admin sehen alle
+    # Beiträge, eine Konfliktpartei nur die eigenen.
+    is_case_manager = current_user.role in ("mediator", "admin") or (
+        is_participant is not None and is_participant.role in ("mediator", "owner", "admin")
+    )
+    grouped_blocks: dict[str, list] = defaultdict(list)
+    block_query = db.query(MediationBlockResponse).filter(
+        MediationBlockResponse.mediation_id == mediation_id
+    )
+    if not is_case_manager and is_participant is not None:
+        block_query = block_query.filter(
+            MediationBlockResponse.author_participant_id == is_participant.id
+        )
+    block_rows = (
+        block_query
+        .order_by(
+            MediationBlockResponse.phase,
+            MediationBlockResponse.step_key,
+            MediationBlockResponse.block_id,
+        )
+        .all()
+    )
+    for r in block_rows:
+        if r.author_source == "ai":
+            author_name = "KI"
+        else:
+            author_name = participant_names.get(r.author_participant_id or -1, "Unbekannt")
+        grouped_blocks[r.phase].append({
+            "step_key": r.step_key,
+            "step_title": step_titles.get(r.step_key, r.step_key),
+            "block_id": r.block_id,
+            "block_type": r.block_type,
+            "author_source": r.author_source,
+            "author_name": author_name,
+            "value": r.value,
+            "submitted": r.submitted,
+            "updated_at": r.updated_at.isoformat() if r.updated_at else None,
+        })
+
+    # Anzeigenamen identisch zum Workspace-Designer (app/workspace/types.ts).
     PHASE_LABELS = {
+        "einladung": "Onboarding",
         "einleitung": "Einleitung",
         "themensammlung": "Themensammlung",
-        "interessenanalyse": "Interessenanalyse",
-        "optionsentwicklung": "Optionsentwicklung",
-        "vereinbarung": "Vereinbarung",
+        "interessen": "Interessen",
+        "optionen": "Optionen",
+        "verhandlung": "Verhandlung",
         "abschluss": "Abschluss",
     }
+    phase_order = list(PHASE_LABELS.keys())
 
+    all_phases = sorted(
+        set(grouped.keys()) | set(grouped_blocks.keys()),
+        key=lambda p: (phase_order.index(p) if p in phase_order else len(phase_order), p),
+    )
     return [
         {
             "phase": phase,
-            "phase_label": PHASE_LABELS.get(phase, phase.capitalize()),
-            "notes": notes,
+            "phase_label": PHASE_LABELS.get(phase, step_titles.get(phase, phase.capitalize())),
+            "notes": grouped.get(phase, []),
+            "block_responses": grouped_blocks.get(phase, []),
         }
-        for phase, notes in grouped.items()
+        for phase in all_phases
     ]
 
 
@@ -1459,7 +1614,7 @@ def save_reaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    from_participant = _require_participant(mediation_id, current_user, db)
+    from_participant = _require_paid_participant(mediation_id, current_user, db)
 
     if payload.action not in ("accept", "reject", "trade"):
         raise HTTPException(status_code=422, detail="action muss accept, reject oder trade sein")
@@ -1507,7 +1662,7 @@ def get_reactions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     rows = (
         db.query(NoteReaction)
@@ -1573,7 +1728,7 @@ def reflect(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     parts = "\n\n".join(
         f"**{inp['name']} ({inp['role']}):**\n{inp['content']}"
@@ -1616,6 +1771,10 @@ def generate_contract(
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+
+    # Paywall: Partei erst nach Bezahlung; globale Mediator/Admin ausgenommen.
+    if participant is not None:
+        billing.ensure_unlocked(mediation, participant, current_user)
 
     # Alle Phase-1-Notizen laden
     phase_keys = ["einleitung", "einleitung_rollen", "einleitung_vertrauen", "einleitung_ziel"]
@@ -1685,7 +1844,7 @@ def get_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     # Prüfen ob aktueller User Mediator/Admin in dieser Mediation ist
     caller_participant = (
@@ -1794,7 +1953,7 @@ def sign_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
 
     contract = db.query(MediationContract).filter(MediationContract.mediation_id == mediation_id).first()
     if not contract:
@@ -1979,7 +2138,7 @@ def propose_appointment(
     current_user: User = Depends(get_current_db_user),
 ):
     """Schlägt 3 Terminoptionen vor (alte werden ersetzt)."""
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     old_slots = db.query(MediationAppointmentSlot).filter(
         MediationAppointmentSlot.mediation_id == mediation_id
@@ -2021,7 +2180,7 @@ def vote_appointment_slot(
     current_user: User = Depends(get_current_db_user),
 ):
     """Speichert die Zu- oder Absage eines Teilnehmers zu einem Terminslot (Upsert)."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
 
     slot = db.query(MediationAppointmentSlot).filter(
         MediationAppointmentSlot.id == payload.slot_id,
@@ -2063,7 +2222,7 @@ def get_appointment_slots(
     ist erst gesetzt, wenn der Mediator final bestätigt hat – nur dann ist
     der Termin verbindlich.
     """
-    _require_participant(mediation_id, current_user, db)
+    _require_paid_participant(mediation_id, current_user, db)
 
     slots = db.query(MediationAppointmentSlot).filter(
         MediationAppointmentSlot.mediation_id == mediation_id
@@ -2195,7 +2354,7 @@ def save_feedback(
     import json as _json
     import datetime as _dt
 
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
 
     if payload.occasion not in ("after_videocall", "before_contract"):
         raise HTTPException(status_code=422, detail="Ungültiger Anlass")
@@ -2221,7 +2380,7 @@ def get_my_feedback(
     current_user: User = Depends(get_current_db_user),
 ):
     """Gibt zurück, für welche Anlässe der aktuelle Teilnehmer bereits Feedback abgegeben hat."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
 
     occasions = (
         db.query(MediationFeedback.occasion)
@@ -2244,8 +2403,8 @@ def get_feedback(
     """Gibt alle Feedback-Einträge eines Falls zurück (chronologisch), inkl. Teilnehmername/-rolle."""
     import json as _json
 
-    # Sicherstellen, dass der aktuelle Nutzer Teil dieses Falls ist.
-    _require_participant(mediation_id, current_user, db)
+    # Sicherstellen, dass der aktuelle Nutzer Teil dieses Falls ist (und bezahlt hat).
+    _require_paid_participant(mediation_id, current_user, db)
 
     rows = (
         db.query(MediationFeedback, MediationParticipant, User)
@@ -2286,7 +2445,7 @@ def analyse_mediation(
     import json as _json
 
     # Nur Mediator/Owner/Admin darf analysieren
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_paid_participant(mediation_id, current_user, db)
     if participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
@@ -2370,6 +2529,16 @@ def analyse_mediation(
     except Exception:
         raise HTTPException(status_code=500, detail="KI-Antwort konnte nicht verarbeitet werden")
 
+    # KI-Ausgabe dauerhaft ablegen (einsehbar im Workspace unter „Alle Eingaben").
+    _save_ai_output(
+        db,
+        mediation_id,
+        phase=mediation.phase or "einleitung",
+        step_key="__ki__",
+        block_id="analyse",
+        block_type="ki-analyse",
+        value=result,
+    )
     return result
 
 

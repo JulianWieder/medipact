@@ -107,6 +107,26 @@ interface StepStatusResult {
   allSubmitted: boolean;
 }
 
+/** Block-Antwort-Wert (JSON: String/Liste/Objekt) lesbar formatieren. */
+function formatBlockValue(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map((v) => String(v)).join(", ");
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([k, v]) => `${k}: ${typeof v === "object" && v !== null ? JSON.stringify(v, null, 1) : String(v)}`)
+      .join("\n");
+  }
+  return String(value);
+}
+
+/** Badge-Farben je Autor-Quelle für die Eingaben-Übersicht. */
+const AUTHOR_BADGE: Record<string, string> = {
+  ai: "bg-violet-100 text-violet-700",
+  mediator: "bg-sky-100 text-sky-700",
+  user: "bg-accent-100 text-accent-700",
+};
+
 const WORKFLOW_ROLE_LABEL: Record<string, string> = {
   initiator: "Antragsteller",
   other_party: "Andere Seite",
@@ -811,7 +831,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   // ── Tabs ───────────────────────────────────────────────────────────────────
   const tabs = [
     { id: "overview" as const, label: "Übersicht" },
-    { id: "notes" as const, label: "Alle Notizen" },
+    { id: "notes" as const, label: "Alle Eingaben" },
     { id: "steps" as const, label: "Schritte & Ergebnisse" },
     { id: "termin" as const, label: "Termin" },
     { id: "contract" as const, label: "Vertrag" },
@@ -1113,16 +1133,19 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
               {loadingNotes ? (
                 <p className="text-sm italic text-neutral-400">Wird geladen…</p>
               ) : allPhaseNotes.length === 0 ? (
-                <EmptyState icon="📝" text="Noch keine Notizen in diesem Fall." />
+                <EmptyState icon="📝" text="Noch keine Eingaben in diesem Fall." />
               ) : (
                 <div className="space-y-6">
                   {allPhaseNotes.map((group) => {
-                    const phaseLabel = PHASES.find((p) => p.id === group.phase)?.label ?? group.phase;
+                    const phaseLabel =
+                      group.phase_label ??
+                      PHASES.find((p) => p.id === group.phase)?.label ??
+                      group.phase;
                     const phaseNum = PHASES.findIndex((p) => p.id === group.phase) + 1;
                     return (
                       <div key={group.phase}>
                         <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-600 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-[9px] font-bold">{phaseNum}</span>
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-[9px] font-bold">{phaseNum > 0 ? phaseNum : "·"}</span>
                           {phaseLabel}
                         </div>
                         <div className="space-y-2 pl-7">
@@ -1153,6 +1176,38 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               </div>
                             );
                           })}
+                          {/* Block-Antworten (dynamische Schritte) inkl. Mediator- und KI-Beiträge */}
+                          {(group.block_responses ?? []).map((br, i) => (
+                            <div
+                              key={`br-${i}`}
+                              className={
+                                br.author_source === "ai"
+                                  ? "rounded-xl border border-violet-100 bg-violet-50/60 p-3 text-sm"
+                                  : "rounded-xl border border-accent-100 bg-accent-50/60 p-3 text-sm"
+                              }
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${AUTHOR_BADGE[br.author_source] ?? AUTHOR_BADGE.user}`}>
+                                    {br.author_source === "ai" ? "🤖 KI" : br.author_name}
+                                  </span>
+                                  <span className="text-[10px] text-neutral-400 bg-neutral-100 rounded px-1 py-0.5">
+                                    {br.step_title}
+                                    {br.block_type ? ` · ${br.block_type}` : ""}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {br.updated_at && (
+                                    <span className="text-[10px] text-neutral-400">
+                                      {new Date(br.updated_at).toLocaleDateString("de-DE")}
+                                    </span>
+                                  )}
+                                  {br.submitted && <span className="text-[10px] font-semibold text-accent-600">✓ Eingereicht</span>}
+                                </div>
+                              </div>
+                              <p className="text-xs text-neutral-700 whitespace-pre-wrap mt-1">{formatBlockValue(br.value)}</p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     );

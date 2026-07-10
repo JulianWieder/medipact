@@ -3,7 +3,18 @@
 import { encodeId } from "@/lib/ids";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { PremiumHero, PillButton, ArrowLink, ThinProgressBar, OutlinePill, PremiumCard } from "@/app/components/ui/premium";
+import {
+  PremiumHero,
+  PillButton,
+  ThinProgressBar,
+  OutlinePill,
+  StatusDot,
+  SegmentedControl,
+  Skeleton,
+  SlideOver,
+  cn,
+} from "@/app/components/ui/premium";
+import { PHASES } from "@/app/workspace/types";
 
 interface Mediation {
   id: string | number;
@@ -26,17 +37,18 @@ interface PendingInvite {
   expires_at: string;
 }
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  active: { label: "Laufend", className: "border-accent-300 text-accent-700" },
-  pending: { label: "Ausstehend", className: "border-amber-300 text-amber-700" },
-  draft: { label: "Entwurf", className: "border-sky-300 text-sky-700" },
-  completed: {
-    label: "Abgeschlossen",
-    className: "border-neutral-300 text-neutral-600",
-  },
+// Stripe-Stil: kleiner farbiger Punkt + Text statt Outline-Badge.
+const statusConfig: Record<string, { label: string; tone: "teal" | "amber" | "sky" | "neutral" }> = {
+  active: { label: "Laufend", tone: "teal" },
+  pending: { label: "Ausstehend", tone: "amber" },
+  draft: { label: "Entwurf", tone: "sky" },
+  completed: { label: "Abgeschlossen", tone: "neutral" },
 };
 
-const fallbackStatus = { label: "Unbekannt", className: "border-neutral-300 text-neutral-500" };
+const fallbackStatus: { label: string; tone: "teal" | "amber" | "sky" | "neutral" } = {
+  label: "Unbekannt",
+  tone: "neutral",
+};
 
 const roleLabel: Record<string, string> = {
   other_party: "Gegenpartei",
@@ -44,6 +56,14 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
   initiator: "Antragsteller",
 };
+
+/** Phasen-Key (z.B. "einladung") → Anzeigename aus dem Workspace ("Onboarding").
+ *  Gleiche Quelle wie der Workflow-Designer, damit Dashboard und Workspace
+ *  identische Phasennamen zeigen. */
+function phaseLabel(phase?: string): string {
+  if (!phase) return "Entwurf";
+  return PHASES.find((p) => p.id === phase)?.label ?? phase;
+}
 
 const typeLabel: Record<string, string> = {
   trennung: "Trennung & Scheidung",
@@ -59,6 +79,7 @@ export default function DashboardClient() {
   const [acceptError, setAcceptError] = useState<string>("");
   const [videoModalMediationId, setVideoModalMediationId] = useState<number | null>(null);
   const [filter, setFilter] = useState<{ key: string; label: string } | null>(null);
+  const [selected, setSelected] = useState<Mediation | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -92,7 +113,7 @@ export default function DashboardClient() {
             }) => ({
               id: item.mediation_id ?? item.id,
               title: item.title ?? "Neue Mediation",
-              phase: item.phase ?? "Entwurf",
+              phase: item.phase,
               status: item.status ?? "pending",
               progress: item.progress ?? 10,
               conflict_type: item.mediation_type,
@@ -169,6 +190,8 @@ export default function DashboardClient() {
         highlight: data.some((m) => m.is_my_turn),
         active: filter?.key === "my_turn",
         onClick: () => toggleFilter("my_turn", "Deine Eingabe"),
+        // Mini-Sparkline: Fortschritt der Fälle, die auf dich warten
+        trend: data.filter((m) => m.is_my_turn).map((m) => m.progress ?? 0),
       },
       {
         label: "Warte auf Gegenpartei",
@@ -176,6 +199,9 @@ export default function DashboardClient() {
         sub: "Ball liegt bei der anderen Seite",
         active: filter?.key === "waiting",
         onClick: () => toggleFilter("waiting", "Warte auf Gegenpartei"),
+        trend: data
+          .filter((m) => m.status === "active" && !m.is_my_turn)
+          .map((m) => m.progress ?? 0),
       },
       {
         label: "Ausstehend",
@@ -201,11 +227,88 @@ export default function DashboardClient() {
     return predicate ? data.filter(predicate) : data;
   }, [data, filter]);
 
+  // Stripe-artige "Erste Schritte"-Checkliste: aus vorhandenen Daten
+  // abgeleitet, verschwindet sobald alle Schritte erledigt sind.
+  const onboarding = useMemo(() => {
+    const hasCase = data.length > 0;
+    const hasStarted = data.some((m) => m.status === "active" || m.status === "completed");
+    const hasSubmitted = data.some(
+      (m) => (m.status === "active" && !m.is_my_turn) || m.status === "completed",
+    );
+    const steps = [
+      { label: "Konto erstellt", done: true },
+      {
+        label: "Mediation angelegt oder Einladung angenommen",
+        done: hasCase,
+        action: !hasCase ? { label: "Neue Mediation starten", href: "/dashboard/mediation/new" } : undefined,
+      },
+      { label: "Verfahren gestartet", done: hasStarted },
+      { label: "Erste Eingabe gemacht", done: hasSubmitted },
+    ];
+    return { steps, doneCount: steps.filter((s) => s.done).length };
+  }, [data]);
+  const showOnboarding = onboarding.doneCount < onboarding.steps.length;
+
+  const segments = useMemo(
+    () => [
+      { key: null, label: "Alle", count: data.length },
+      { key: "my_turn", label: "Deine Eingabe", count: data.filter((m) => m.is_my_turn).length },
+      {
+        key: "waiting",
+        label: "Warte auf Gegenpartei",
+        count: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
+      },
+      {
+        key: "pending",
+        label: "Ausstehend",
+        count: data.filter((m) => m.status === "pending" || m.status === "draft").length,
+      },
+      { key: "completed", label: "Abgeschlossen", count: data.filter((m) => m.status === "completed").length },
+    ],
+    [data],
+  );
+
+  const segmentLabels: Record<string, string> = {
+    my_turn: "Deine Eingabe",
+    waiting: "Warte auf Gegenpartei",
+    pending: "Ausstehend",
+    completed: "Abgeschlossen",
+  };
+
   if (loading) {
+    // Skeleton in exakter Layout-Form statt Ladetext (Stripe-Stil).
     return (
       <main className="app-shell pt-[73px]">
-        <section className="container flex h-[60vh] items-center justify-center">
-          <p className="text-sm font-light text-neutral-400">Mediationen werden geladen…</p>
+        <div className="bg-neutral-900">
+          <div className="container py-16 lg:py-24">
+            <Skeleton tone="dark" className="h-3 w-24" />
+            <Skeleton tone="dark" className="mt-5 h-10 w-72 max-w-full" />
+            <Skeleton tone="dark" className="mt-4 h-4 w-96 max-w-full" />
+            <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-10 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i}>
+                  <Skeleton tone="dark" className="h-3 w-20" />
+                  <Skeleton tone="dark" className="mt-4 h-10 w-14" />
+                  <Skeleton tone="dark" className="mt-3 h-3 w-24" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <section className="container py-16 lg:py-20">
+          <Skeleton className="h-9 w-96 max-w-full rounded-full" />
+          <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className={cn("flex items-center gap-6 px-5 py-5", i > 0 && "border-t border-neutral-100")}
+              >
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="ml-auto h-3 w-20" />
+                <Skeleton className="hidden h-3 w-28 sm:block" />
+              </div>
+            ))}
+          </div>
         </section>
       </main>
     );
@@ -291,21 +394,68 @@ export default function DashboardClient() {
           </div>
         )}
 
-        {/* ── Meine Mediationen ─────────────────────────────────────── */}
-        {filter && (
-          <div className="mb-6 flex items-center gap-3">
-            <OutlinePill label={`Filter: ${filter.label}`} className="border-neutral-300 text-neutral-700" />
-            <button
-              type="button"
-              onClick={() => setFilter(null)}
-              className="text-xs font-semibold text-neutral-400 underline-offset-2 transition-colors hover:text-neutral-900 hover:underline"
-            >
-              Filter zurücksetzen
-            </button>
+        {/* ── Erste Schritte (Onboarding-Checkliste, Stripe-Stil) ────── */}
+        {showOnboarding && (
+          <div className="mb-14 rounded-2xl border border-neutral-200 bg-white p-6 lg:p-8">
+            <div className="mb-1 flex items-center justify-between gap-4">
+              <h2 className="font-display text-xl font-medium text-neutral-900">Erste Schritte</h2>
+              <span className="text-sm font-medium tabular-nums text-neutral-500">
+                {onboarding.doneCount} von {onboarding.steps.length}
+              </span>
+            </div>
+            <p className="mb-5 text-sm font-light text-neutral-500">
+              So kommst du in deinem Mediationsverfahren voran.
+            </p>
+            <ThinProgressBar
+              value={(onboarding.doneCount / onboarding.steps.length) * 100}
+              tone="accent"
+            />
+            <ul className="mt-6 space-y-3">
+              {onboarding.steps.map((step) => (
+                <li key={step.label} className="flex items-center gap-3">
+                  {step.done ? (
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[10px] font-bold text-white">
+                      ✓
+                    </span>
+                  ) : (
+                    <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-neutral-300" />
+                  )}
+                  <span
+                    className={cn(
+                      "text-sm",
+                      step.done ? "font-light text-neutral-400 line-through decoration-neutral-300" : "font-medium text-neutral-800",
+                    )}
+                  >
+                    {step.label}
+                  </span>
+                  {!step.done && step.action && (
+                    <a
+                      href={step.action.href}
+                      className="ml-auto text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
+                    >
+                      {step.action.label} →
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        <div className="space-y-3">
+        {/* ── Meine Mediationen ─────────────────────────────────────── */}
+        {data.length > 0 && (
+          <div className="mb-6">
+            <SegmentedControl
+              segments={segments}
+              activeKey={filter?.key ?? null}
+              onChange={(key) =>
+                setFilter(key ? { key, label: segmentLabels[key] ?? key } : null)
+              }
+            />
+          </div>
+        )}
+
+        <div>
           {data.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
               <p className="text-lg font-light text-neutral-500">
@@ -323,84 +473,150 @@ export default function DashboardClient() {
               </p>
             </div>
           ) : (
-            visibleData.map((mediation) => {
-              const status = mediation.status ?? "pending";
-              const config = statusConfig[status] ?? fallbackStatus;
-              const isActive = status === "active";
-              const waitingForOther = isActive && !mediation.is_my_turn;
+            /* Stripe-Stil: dichte, hover-bare Zeilen mit Haarlinien statt Karten.
+               Klick öffnet das Slide-over-Panel für eine schnelle Vorschau. */
+            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+              <div className="hidden border-b border-neutral-200 bg-neutral-50/60 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400 sm:grid sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6">
+                <span>Fall</span>
+                <span>Status</span>
+                <span className="text-right">Fortschritt</span>
+                <span />
+              </div>
+              {visibleData.map((mediation, i) => {
+                const status = mediation.status ?? "pending";
+                const config = statusConfig[status] ?? fallbackStatus;
+                const waitingForOther = status === "active" && !mediation.is_my_turn;
 
-              return (
-                <PremiumCard
-                  key={`mediation-${mediation.id}`}
-                  href={`/dashboard/${encodeId(Number(mediation.id))}`}
-                  emphasis={mediation.is_my_turn ? "amber" : "neutral"}
-                >
-                  <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
-                    <div>
-                      <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                        <div>
-                          <h2 className="font-display text-2xl font-medium tracking-tight text-neutral-900">
-                            {mediation.title ||
-                              mediation.conflict_type ||
-                              "Neue Mediation"}
-                          </h2>
+                return (
+                  <button
+                    key={`mediation-${mediation.id}`}
+                    type="button"
+                    onClick={() => setSelected(mediation)}
+                    className={cn(
+                      "grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
+                      i > 0 && "border-t border-neutral-100",
+                      mediation.is_my_turn && "bg-amber-50/40 hover:bg-amber-50/70",
+                    )}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-neutral-900">
+                        {mediation.title || mediation.conflict_type || "Neue Mediation"}
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
+                        {phaseLabel(mediation.phase)}
+                      </span>
+                    </span>
 
-                          <p className="mt-2.5 text-sm font-light text-neutral-500">
-                            Phase:{" "}
-                            <span className="font-medium text-neutral-700">
-                              {mediation.phase || "Entwurf"}
-                            </span>
-                          </p>
-                        </div>
+                    <span className="hidden flex-col gap-1 sm:flex">
+                      <StatusDot label={config.label} tone={config.tone} />
+                      {mediation.is_my_turn && (
+                        <StatusDot label="Deine Eingabe" tone="amber" pulse />
+                      )}
+                      {waitingForOther && (
+                        <span className="text-[11px] font-light text-neutral-400">
+                          Warte auf Gegenpartei
+                        </span>
+                      )}
+                    </span>
 
-                        <div className="flex flex-wrap gap-2">
-                          <OutlinePill label={config.label} className={config.className} />
-                          {mediation.is_my_turn && (
-                            <OutlinePill
-                              label="Deine Eingabe"
-                              className="border-amber-300 text-amber-700"
-                              dot="animate-pulse bg-amber-500"
-                            />
-                          )}
-                          {waitingForOther && (
-                            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
-                              <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                              </svg>
-                              Warte auf Gegenpartei
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-6">
-                        <div className="mb-2 flex items-center justify-between">
-                          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-                            Fortschritt
-                          </p>
-                          <span className="text-sm font-semibold text-neutral-900">
-                            {mediation.progress ?? 0}%
-                          </span>
-                        </div>
-
+                    <span className="hidden items-center justify-end gap-3 sm:flex">
+                      <span className="w-20">
                         <ThinProgressBar value={mediation.progress ?? 0} />
-                      </div>
-                    </div>
+                      </span>
+                      <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-900">
+                        {mediation.progress ?? 0}%
+                      </span>
+                    </span>
 
-                    <div className="flex flex-col gap-3 md:items-end">
-                      <ArrowLink>
-                        {mediation.is_my_turn ? "Eingabe machen" : waitingForOther ? "Ansehen" : "Fortsetzen"}
-                      </ArrowLink>
-                    </div>
-                  </div>
-                </PremiumCard>
-              );
-            })
+                    <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                      ›
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
       </section>
     </main>
+
+    {/* ── Slide-over: Fall-Vorschau ohne Seitenwechsel (Stripe-Stil) ── */}
+    <SlideOver
+      open={selected !== null}
+      onClose={() => setSelected(null)}
+      title={
+        selected && (
+          <>
+            <p className="eyebrow mb-2">Fall-Vorschau</p>
+            <h2 className="truncate font-display text-xl font-medium text-neutral-900">
+              {selected.title || selected.conflict_type || "Neue Mediation"}
+            </h2>
+          </>
+        )
+      }
+    >
+      {selected && (
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <StatusDot
+              label={(statusConfig[selected.status ?? "pending"] ?? fallbackStatus).label}
+              tone={(statusConfig[selected.status ?? "pending"] ?? fallbackStatus).tone}
+            />
+            {selected.is_my_turn && <StatusDot label="Deine Eingabe" tone="amber" pulse />}
+          </div>
+
+          <dl className="space-y-4 border-t border-neutral-100 pt-6">
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="text-xs font-medium uppercase tracking-wide text-neutral-400">Phase</dt>
+              <dd className="text-sm font-medium text-neutral-800">{phaseLabel(selected.phase)}</dd>
+            </div>
+            {selected.conflict_type && (
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-xs font-medium uppercase tracking-wide text-neutral-400">Art</dt>
+                <dd className="text-sm font-medium text-neutral-800">
+                  {typeLabel[selected.conflict_type] ?? selected.conflict_type}
+                </dd>
+              </div>
+            )}
+            {selected.role && (
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-xs font-medium uppercase tracking-wide text-neutral-400">Deine Rolle</dt>
+                <dd className="text-sm font-medium text-neutral-800">
+                  {roleLabel[selected.role] ?? selected.role}
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          <div className="border-t border-neutral-100 pt-6">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Fortschritt</p>
+              <span className="text-sm font-semibold tabular-nums text-neutral-900">
+                {selected.progress ?? 0}%
+              </span>
+            </div>
+            <ThinProgressBar value={selected.progress ?? 0} />
+          </div>
+
+          {selected.description && (
+            <div className="border-t border-neutral-100 pt-6">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Beschreibung
+              </p>
+              <p className="text-sm font-light leading-relaxed text-neutral-600">
+                {selected.description}
+              </p>
+            </div>
+          )}
+
+          <div className="border-t border-neutral-100 pt-6">
+            <PillButton href={`/dashboard/${encodeId(Number(selected.id))}`} className="w-full">
+              {selected.is_my_turn ? "Eingabe machen" : "Fall öffnen"} →
+            </PillButton>
+          </div>
+        </div>
+      )}
+    </SlideOver>
 
     {videoModalMediationId !== null && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/80 p-4 backdrop-blur-sm">

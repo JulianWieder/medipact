@@ -51,8 +51,9 @@ export default function GeschaeftPage() {
           { label: "Team & Organisation" },
         ]}
         relatedCases={[
-          { label: "Unternehmen erben", href: "/cases/familie-weber" },
-          { label: "Alle Konfliktarten", href: "/konflikte" },
+          { label: "Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
+          { label: "Teamkonflikt im Mittelstand", href: "/cases/team-konflikt" },
+          { label: "B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
           { label: "Preise für Unternehmen", href: "/preise" },
         ]}
       />
