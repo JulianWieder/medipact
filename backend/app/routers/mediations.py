@@ -2542,6 +2542,298 @@ def analyse_mediation(
     return result
 
 
+# ── Fall-Analyse: Phasen-Zusammenfassungen + SWOT zur Finalisierung ─────────
+
+PHASE_LABELS_ANALYSE = {
+    "einladung": "Onboarding",
+    "einleitung": "Einleitung",
+    "themensammlung": "Themensammlung",
+    "interessen": "Interessen",
+    "optionen": "Optionen",
+    "verhandlung": "Verhandlung",
+    "abschluss": "Abschluss",
+}
+
+TYPE_LABELS_ANALYSE = {
+    "trennung": "Trennung & Scheidung",
+    "erbschaft": "Erbschaftsstreit",
+    "nachbarschaft": "Nachbarschaftskonflikt",
+    "geschaeft": "Geschäftskonflikt",
+}
+
+
+def _collect_inputs_text(db: Session, mediation_id: int, phase: str | None = None) -> str:
+    """Sammelt alle Eingaben der Streitparteien UND des Mediators als Klartext –
+    klassische Notizen (MediationNote) plus Block-Antworten (dynamische
+    Schritte), KI-Beiträge ausgenommen. Optional auf eine Phase gefiltert.
+    Dieser Text ist exakt das, was der Analyse-Prompt als Eingaben erhält."""
+    import json as _json
+
+    role_labels = {
+        "mediator": "Mediator",
+        "owner": "Partei",
+        "admin": "Admin",
+        "participant": "Partei",
+    }
+
+    lines: list[str] = []
+
+    # Klassische Notizen (eingereicht)
+    note_q = (
+        db.query(MediationNote, MediationParticipant, User)
+        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(
+            MediationNote.mediation_id == mediation_id,
+            MediationNote.submitted == True,  # noqa: E712
+        )
+    )
+    if phase:
+        note_q = note_q.filter(MediationNote.phase == phase)
+    for note, part, user in note_q.order_by(MediationNote.phase, MediationNote.step).all():
+        content = note.content
+        try:
+            parsed = _json.loads(content)
+            if isinstance(parsed, list):
+                content = " | ".join(str(x) for x in parsed if x)
+        except Exception:
+            pass
+        role = role_labels.get(part.role, part.role or "Partei")
+        label = PHASE_LABELS_ANALYSE.get(note.phase, note.phase)
+        lines.append(f"[{user.name} ({role}) / Phase {label} / Schritt {note.step}]: {content}")
+
+    # Block-Antworten (dynamische Schritte) – ohne KI-Beiträge
+    participant_info = {
+        p.id: (u.name, role_labels.get(p.role, p.role or "Partei"))
+        for p, u in (
+            db.query(MediationParticipant, User)
+            .join(User, MediationParticipant.user_id == User.id)
+            .filter(MediationParticipant.mediation_id == mediation_id)
+            .all()
+        )
+    }
+    block_q = db.query(MediationBlockResponse).filter(
+        MediationBlockResponse.mediation_id == mediation_id,
+        MediationBlockResponse.author_source != "ai",
+    )
+    if phase:
+        block_q = block_q.filter(MediationBlockResponse.phase == phase)
+    for r in block_q.order_by(
+        MediationBlockResponse.phase,
+        MediationBlockResponse.step_key,
+        MediationBlockResponse.block_id,
+    ).all():
+        value = r.value
+        if isinstance(value, (dict, list)):
+            try:
+                value = _json.dumps(value, ensure_ascii=False)
+            except Exception:
+                value = str(value)
+        if value is None or not str(value).strip():
+            continue
+        name, role = participant_info.get(
+            r.author_participant_id or -1, ("Unbekannt", "Partei")
+        )
+        if r.author_source == "mediator":
+            role = "Mediator"
+        label = PHASE_LABELS_ANALYSE.get(r.phase, r.phase)
+        lines.append(
+            f"[{name} ({role}) / Phase {label} / Schritt {r.step_key} / Block {r.block_id}]: {value}"
+        )
+
+    return "\n".join(lines)
+
+
+class PhaseAnalyseRequest(BaseModel):
+    phase: str
+
+
+@router.post("/{mediation_id}/analyse-phase")
+def analyse_phase(
+    mediation_id: int,
+    payload: PhaseAnalyseRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """KI-Zusammenfassung der Eingaben (Parteien + Mediator) EINER Phase.
+
+    Gibt neben der Zusammenfassung auch den vollständigen Prompt zurück, der an
+    die KI gesendet wurde (Transparenz). Das Ergebnis wird als
+    MediationBlockResponse (author='ai') gespeichert und kann über
+    GET /analysen jederzeit wieder geladen werden."""
+    participant = _require_paid_participant(mediation_id, current_user, db)
+    if participant.role not in ("mediator", "owner", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren")
+
+    if payload.phase not in PHASE_LABELS_ANALYSE:
+        raise HTTPException(status_code=422, detail="Unbekannte Phase")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+
+    inputs_text = _collect_inputs_text(db, mediation_id, phase=payload.phase)
+    if not inputs_text.strip():
+        return {
+            "phase": payload.phase,
+            "summary": None,
+            "prompt": None,
+            "message": "In dieser Phase liegen noch keine Eingaben vor.",
+        }
+
+    phase_label = PHASE_LABELS_ANALYSE[payload.phase]
+    type_label = TYPE_LABELS_ANALYSE.get(
+        mediation.mediation_type or "", mediation.mediation_type or ""
+    )
+    prompt = get_prompt(
+        "phase_analyse",
+        title=mediation.title or "Neue Mediation",
+        type_label=type_label,
+        phase_label=phase_label,
+        inputs_text=inputs_text,
+    )
+
+    summary = ai_complete(prompt, max_tokens=900)
+
+    saved_at = datetime.now(timezone.utc).isoformat()
+    _save_ai_output(
+        db,
+        mediation_id,
+        phase=payload.phase,
+        step_key="__ki__",
+        block_id=f"phasen-analyse:{payload.phase}",
+        block_type="ki-phasen-analyse",
+        value={"summary": summary, "prompt": prompt, "saved_at": saved_at},
+    )
+    return {
+        "phase": payload.phase,
+        "summary": summary,
+        "prompt": prompt,
+        "saved_at": saved_at,
+    }
+
+
+@router.post("/{mediation_id}/analyse-swot")
+def analyse_swot(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """SWOT-Analyse zur Fall-Finalisierung & Ziel über ALLE Eingaben
+    (Parteien + Mediator, alle Phasen). Gibt den gesendeten Prompt mit zurück
+    und speichert das Ergebnis dauerhaft."""
+    import json as _json
+
+    participant = _require_paid_participant(mediation_id, current_user, db)
+    if participant.role not in ("mediator", "owner", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren")
+
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
+
+    participants_with_users = (
+        db.query(MediationParticipant, User)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationParticipant.mediation_id == mediation_id)
+        .all()
+    )
+    participants_list = "\n".join(
+        f"- {u.name} ({p.role})" for p, u in participants_with_users
+    )
+
+    inputs_text = _collect_inputs_text(db, mediation_id)
+    type_label = TYPE_LABELS_ANALYSE.get(
+        mediation.mediation_type or "", mediation.mediation_type or ""
+    )
+    current_phase = PHASE_LABELS_ANALYSE.get(
+        mediation.phase or "", mediation.phase or "Unbekannt"
+    )
+
+    prompt = get_prompt(
+        "swot_ziel",
+        title=mediation.title or "Neue Mediation",
+        type_label=type_label,
+        current_phase=current_phase,
+        description=mediation.description or "Keine Beschreibung",
+        participants_list=participants_list or "- Keine Angaben",
+        inputs_text=inputs_text if inputs_text.strip() else "Noch keine Eingaben vorhanden.",
+    )
+
+    raw = ai_complete(prompt, max_tokens=1500)
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+
+    try:
+        result = _json.loads(raw)
+    except Exception:
+        raise HTTPException(status_code=500, detail="KI-Antwort konnte nicht verarbeitet werden")
+
+    saved_at = datetime.now(timezone.utc).isoformat()
+    stored = dict(result)
+    stored["prompt"] = prompt
+    stored["saved_at"] = saved_at
+    _save_ai_output(
+        db,
+        mediation_id,
+        phase=mediation.phase or "einleitung",
+        step_key="__ki__",
+        block_id="swot-finalisierung",
+        block_type="ki-swot-ziel",
+        value=stored,
+    )
+
+    result["prompt"] = prompt
+    result["saved_at"] = saved_at
+    return result
+
+
+@router.get("/{mediation_id}/analysen")
+def get_saved_analyses(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Lädt alle gespeicherten Fall-Analysen (Phasen-Zusammenfassungen + SWOT),
+    inkl. des jeweils an die KI gesendeten Prompts."""
+    participant = _require_paid_participant(mediation_id, current_user, db)
+    if participant.role not in ("mediator", "owner", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren")
+
+    rows = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation_id,
+            MediationBlockResponse.author_key == "ai",
+            MediationBlockResponse.block_type.in_(
+                ["ki-phasen-analyse", "ki-swot-ziel"]
+            ),
+        )
+        .all()
+    )
+
+    phasen: dict[str, dict] = {}
+    swot = None
+    for r in rows:
+        value = r.value if isinstance(r.value, dict) else {}
+        updated = r.updated_at.isoformat() if r.updated_at else None
+        if r.block_type == "ki-phasen-analyse":
+            phase_key = r.block_id.split(":", 1)[1] if ":" in r.block_id else r.phase
+            phasen[phase_key] = {
+                "summary": value.get("summary"),
+                "prompt": value.get("prompt"),
+                "saved_at": value.get("saved_at") or updated,
+            }
+        elif r.block_type == "ki-swot-ziel":
+            swot = dict(value)
+            swot.setdefault("saved_at", updated)
+
+    return {"phasen": phasen, "swot": swot}
+
+
 # ── Varianten-Zuordnung (Fall <-> MediationVariant) ─────────────────────────
 
 class VariantAssignRequest(BaseModel):

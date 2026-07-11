@@ -121,6 +121,57 @@ DEFAULT_PROMPTS: dict[str, dict] = {
             "Eingaben der Parteien:\n\n{notes_text}"
         ),
     },
+    "phase_analyse": {
+        "label": "Fall-Analyse: KI-Zusammenfassung einer Phase (Parteien + Mediator)",
+        "placeholders": ["title", "type_label", "phase_label", "inputs_text"],
+        "template": (
+            "Du bist ein erfahrener, neutraler Mediationsexperte. Fasse für den Mediator "
+            "die folgenden Eingaben aus der Phase '{phase_label}' des Mediationsfalls "
+            "'{title}' (Konfliktart: {type_label}) zusammen.\n\n"
+            "Die Eingaben stammen von den Streitparteien und ggf. vom Mediator. "
+            "Arbeite heraus:\n"
+            "- Die zentralen Aussagen und Anliegen jeder Partei\n"
+            "- Gemeinsamkeiten und Unterschiede der Sichtweisen\n"
+            "- Offene Punkte oder Spannungsfelder, die in dieser Phase sichtbar wurden\n\n"
+            "Schreibe auf Deutsch, sachlich, ausgewogen und ohne Partei zu ergreifen, "
+            "in kurzen Absätzen (max. 250 Wörter).\n\n"
+            "EINGABEN DER PHASE '{phase_label}':\n{inputs_text}\n\n"
+            "Antworte NUR mit dem Zusammenfassungstext, ohne Vorrede und ohne Markdown."
+        ),
+    },
+    "swot_ziel": {
+        "label": "Fall-Analyse: SWOT zur Fall-Finalisierung & Ziel (JSON)",
+        "placeholders": [
+            "title", "type_label", "current_phase", "description",
+            "participants_list", "inputs_text",
+        ],
+        "template": (
+            "Du bist ein erfahrener Mediationsexperte. Analysiere den folgenden Mediationsfall "
+            "mit Blick auf die FINALISIERUNG des Falls: Wie realistisch ist eine Einigung, "
+            "was ist das gemeinsame Ziel und was muss noch passieren, um den Fall erfolgreich "
+            "abzuschließen?\n\n"
+            "FALLDETAILS:\n"
+            "- Titel: {title}\n"
+            "- Konfliktart: {type_label}\n"
+            "- Aktuelle Phase: {current_phase}\n"
+            "- Beschreibung: {description}\n\n"
+            "BETEILIGTE:\n{participants_list}\n\n"
+            "ALLE BISHERIGEN EINGABEN (Parteien + Mediator, nach Phasen):\n{inputs_text}\n\n"
+            "Erstelle eine Analyse mit folgendem JSON-Format (auf Deutsch):\n"
+            "{{\n"
+            "  \"ziel\": \"Das aus den Eingaben erkennbare gemeinsame Ziel der Mediation (1-2 Sätze)\",\n"
+            "  \"zusammenfassung\": \"2-3 Sätze: Wie weit ist der Fall, wie realistisch ist eine Einigung?\",\n"
+            "  \"swot\": {{\n"
+            "    \"staerken\": [\"Was spricht für eine erfolgreiche Finalisierung\", \"...\"],\n"
+            "    \"schwaechen\": [\"Was erschwert die Finalisierung aktuell\", \"...\"],\n"
+            "    \"chancen\": [\"Welche Möglichkeiten sollten genutzt werden\", \"...\"],\n"
+            "    \"risiken\": [\"Was kann die Einigung noch gefährden\", \"...\"]\n"
+            "  }},\n"
+            "  \"finalisierung\": [\"Konkreter Schritt 1 zur Fall-Finalisierung\", \"Schritt 2\", \"Schritt 3\"]\n"
+            "}}\n\n"
+            "WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."
+        ),
+    },
     "analyse": {
         "label": "Mediator-Analyse: SWOT + Gesprächstipps (JSON)",
         "placeholders": [

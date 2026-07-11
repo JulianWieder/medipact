@@ -298,36 +298,99 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     chancen: string[];
     risiken: string[];
   };
-  type TeilnehmerTipp = {
-    name: string;
-    rolle: string;
-    tipps: string[];
+  type PhaseAnalyse = {
+    summary?: string | null;
+    prompt?: string | null;
+    saved_at?: string | null;
+    message?: string | null;
   };
-  type AnalyseResult = {
-    swot: SwotData;
-    zusammenfassung: string;
-    empfehlungen: string[];
-    teilnehmer_tipps: TeilnehmerTipp[];
+  type SwotZielResult = {
+    ziel?: string;
+    zusammenfassung?: string;
+    swot?: Partial<SwotData>;
+    finalisierung?: string[];
+    prompt?: string | null;
+    saved_at?: string | null;
   };
-  const [analyseResult, setAnalyseResult] = useState<AnalyseResult | null>(null);
-  const [analyseLoading, setAnalyseLoading] = useState(false);
+  const [phaseAnalysen, setPhaseAnalysen] = useState<Record<string, PhaseAnalyse>>({});
+  const [swotResult, setSwotResult] = useState<SwotZielResult | null>(null);
+  // Phase-id oder "swot" – welcher Analyse-Lauf gerade läuft
+  const [analyseLoadingKey, setAnalyseLoadingKey] = useState<string | null>(null);
   const [analyseError, setAnalyseError] = useState("");
+  // Für welche Analyse der gesendete KI-Prompt aufgeklappt ist
+  const [openPromptKey, setOpenPromptKey] = useState<string | null>(null);
+  const [analysenLoaded, setAnalysenLoaded] = useState(false);
 
-  async function handleGenerateAnalyse() {
-    setAnalyseLoading(true);
+  // Gespeicherte Analysen beim ersten Öffnen des Tabs laden
+  useEffect(() => {
+    if (activeTab !== "analyse" || analysenLoaded) return;
+    setAnalysenLoaded(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/mediations/${fall.id}/analysen`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.phasen) setPhaseAnalysen(data.phasen);
+        if (data?.swot) setSwotResult(data.swot);
+      } catch {
+        /* gespeicherte Analysen sind optional */
+      }
+    })();
+  }, [activeTab, analysenLoaded, fall.id]);
+
+  function formatSavedAt(iso?: string | null): string {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "";
+    }
+  }
+
+  async function handleAnalysePhase(phase: string) {
+    setAnalyseLoadingKey(phase);
     setAnalyseError("");
     try {
-      const res = await fetch(`/api/mediations/${fall.id}/analyse`, { method: "POST" });
+      const res = await fetch(`/api/mediations/${fall.id}/analyse-phase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phase }),
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setAnalyseError(body?.detail ?? "Analyse fehlgeschlagen");
         return;
       }
-      setAnalyseResult(await res.json());
+      const data = await res.json();
+      setPhaseAnalysen((prev) => ({ ...prev, [phase]: data }));
     } catch {
       setAnalyseError("Server nicht erreichbar.");
     } finally {
-      setAnalyseLoading(false);
+      setAnalyseLoadingKey(null);
+    }
+  }
+
+  async function handleAnalyseSwot() {
+    setAnalyseLoadingKey("swot");
+    setAnalyseError("");
+    try {
+      const res = await fetch(`/api/mediations/${fall.id}/analyse-swot`, { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setAnalyseError(body?.detail ?? "Analyse fehlgeschlagen");
+        return;
+      }
+      setSwotResult(await res.json());
+    } catch {
+      setAnalyseError("Server nicht erreichbar.");
+    } finally {
+      setAnalyseLoadingKey(null);
     }
   }
 
@@ -2069,17 +2132,8 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
           )}
           {/* ── Tab: Analyse ── */}
           {activeTab === "analyse" && (
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">KI-gestützte Mediationsanalyse</p>
-                <button
-                  onClick={handleGenerateAnalyse}
-                  disabled={analyseLoading}
-                  className="rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-600 disabled:opacity-50 transition"
-                >
-                  {analyseLoading ? "Wird analysiert…" : analyseResult ? "↻ Neu analysieren" : "✦ Analyse starten"}
-                </button>
-              </div>
+            <div className="space-y-8">
+              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">KI-gestützte Fall-Analyse</p>
 
               {analyseError && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-3">
@@ -2087,35 +2141,135 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                 </div>
               )}
 
-              {analyseLoading && (
-                <div className="flex flex-col items-center gap-3 py-12 text-center">
-                  <svg className="h-8 w-8 animate-spin text-violet-400" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <p className="text-sm text-neutral-400">Die KI analysiert den Fall…</p>
+              {/* ── Zusammenfassung je Phase ── */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Zusammenfassung je Phase</p>
+                  <p className="mt-1 text-xs text-neutral-400">
+                    Die KI fasst die Eingaben der Streitparteien und des Mediators der jeweiligen Phase zusammen.
+                    Jede Analyse wird automatisch gespeichert – inklusive der Daten, die an die KI gesendet wurden.
+                  </p>
                 </div>
-              )}
 
-              {!analyseLoading && !analyseResult && (
-                <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-12 text-center">
-                  <p className="text-2xl mb-3">✦</p>
-                  <p className="text-sm font-semibold text-neutral-700 mb-1">SWOT-Analyse & Gesprächstipps</p>
-                  <p className="text-xs text-neutral-400 max-w-sm mx-auto">Die KI analysiert alle Notizen und den Fallstatus und gibt dir eine SWOT-Analyse sowie individuelle Gesprächstipps für jeden Teilnehmer.</p>
-                </div>
-              )}
+                {PHASES.map((phase) => {
+                  const a = phaseAnalysen[phase.id];
+                  const loading = analyseLoadingKey === phase.id;
+                  const promptOpen = openPromptKey === phase.id;
+                  return (
+                    <div key={phase.id} className="rounded-xl border border-neutral-200 bg-white p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[10px] font-bold text-violet-700">
+                            {phase.short}
+                          </span>
+                          <p className="text-sm font-semibold text-neutral-800">{phase.label}</p>
+                          {a?.saved_at && (
+                            <span className="text-[10px] text-neutral-400">Gespeichert: {formatSavedAt(a.saved_at)}</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleAnalysePhase(phase.id)}
+                          disabled={analyseLoadingKey !== null}
+                          className="shrink-0 rounded-full bg-violet-500 px-3.5 py-1.5 text-[11px] font-semibold text-white hover:bg-violet-600 disabled:opacity-50 transition"
+                        >
+                          {loading ? "Wird analysiert…" : a?.summary ? "↻ Neu zusammenfassen" : "✦ Zusammenfassen"}
+                        </button>
+                      </div>
 
-              {!analyseLoading && analyseResult && (
-                <div className="space-y-5">
-                  {/* Zusammenfassung */}
-                  <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600 mb-2">Gesamtlage</p>
-                    <p className="text-sm text-neutral-700 leading-relaxed">{analyseResult.zusammenfassung}</p>
-                  </div>
+                      {loading && (
+                        <p className="mt-3 text-xs text-neutral-400">Die KI fasst die Eingaben dieser Phase zusammen…</p>
+                      )}
 
-                  {/* SWOT */}
+                      {!loading && a?.message && !a.summary && (
+                        <p className="mt-3 text-xs text-neutral-400">{a.message}</p>
+                      )}
+
+                      {!loading && a?.summary && (
+                        <p className="mt-3 whitespace-pre-line rounded-lg bg-violet-50/60 p-3 text-xs leading-relaxed text-neutral-700">
+                          {a.summary}
+                        </p>
+                      )}
+
+                      {!loading && a?.prompt && (
+                        <div className="mt-3">
+                          <button
+                            onClick={() => setOpenPromptKey(promptOpen ? null : phase.id)}
+                            className="text-[11px] font-semibold text-violet-600 hover:text-violet-800 transition"
+                          >
+                            {promptOpen ? "▾ An die KI gesendete Daten verbergen" : "▸ An die KI gesendete Daten anzeigen"}
+                          </button>
+                          {promptOpen && (
+                            <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-[11px] leading-relaxed text-neutral-600">
+                              {a.prompt}
+                            </pre>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ── SWOT zur Fall-Finalisierung & Ziel ── */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-3">SWOT-Analyse</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">SWOT zur Fall-Finalisierung &amp; Ziel</p>
+                    <p className="mt-1 text-xs text-neutral-400">
+                      Die KI bewertet auf Basis aller Eingaben, wie realistisch eine Einigung ist, welches Ziel
+                      erkennbar ist und was zur Finalisierung des Falls noch fehlt.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleAnalyseSwot}
+                    disabled={analyseLoadingKey !== null}
+                    className="shrink-0 rounded-full bg-violet-500 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-600 disabled:opacity-50 transition"
+                  >
+                    {analyseLoadingKey === "swot" ? "Wird analysiert…" : swotResult ? "↻ Neu analysieren" : "✦ SWOT erstellen"}
+                  </button>
+                </div>
+
+                {analyseLoadingKey === "swot" && (
+                  <div className="flex flex-col items-center gap-3 py-10 text-center">
+                    <svg className="h-8 w-8 animate-spin text-violet-400" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    <p className="text-sm text-neutral-400">Die KI analysiert den gesamten Fall…</p>
+                  </div>
+                )}
+
+                {analyseLoadingKey !== "swot" && !swotResult && (
+                  <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-6 py-10 text-center">
+                    <p className="text-2xl mb-3">✦</p>
+                    <p className="text-sm font-semibold text-neutral-700 mb-1">SWOT-Analyse zur Fall-Finalisierung</p>
+                    <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+                      Noch keine SWOT-Analyse gespeichert. Die Analyse nutzt alle Eingaben der Parteien und des
+                      Mediators über alle Phasen hinweg.
+                    </p>
+                  </div>
+                )}
+
+                {analyseLoadingKey !== "swot" && swotResult && (
+                  <div className="space-y-4">
+                    {swotResult.saved_at && (
+                      <p className="text-[10px] text-neutral-400">Gespeichert: {formatSavedAt(swotResult.saved_at)}</p>
+                    )}
+
+                    {swotResult.ziel && (
+                      <div className="rounded-xl border border-accent-200 bg-accent-50 p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-accent-700 mb-2">Ziel der Mediation</p>
+                        <p className="text-sm text-neutral-700 leading-relaxed">{swotResult.ziel}</p>
+                      </div>
+                    )}
+
+                    {swotResult.zusammenfassung && (
+                      <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600 mb-2">Stand der Finalisierung</p>
+                        <p className="text-sm text-neutral-700 leading-relaxed">{swotResult.zusammenfassung}</p>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                       {([
                         { key: "staerken", label: "Stärken", color: "border-accent-200 bg-accent-50", dot: "bg-accent-500", text: "text-accent-700" },
@@ -2126,7 +2280,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                         <div key={key} className={`rounded-xl border p-4 ${color}`}>
                           <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${text}`}>{label}</p>
                           <ul className="space-y-1.5">
-                            {(analyseResult.swot[key] ?? []).map((item, i) => (
+                            {(swotResult.swot?.[key] ?? []).map((item, i) => (
                               <li key={i} className="flex items-start gap-2 text-xs text-neutral-700">
                                 <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
                                 {item}
@@ -2136,54 +2290,39 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                         </div>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Empfehlungen */}
-                  {analyseResult.empfehlungen?.length > 0 && (
-                    <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-2">Empfehlungen für den Mediator</p>
-                      <ul className="space-y-2">
-                        {analyseResult.empfehlungen.map((e, i) => (
-                          <li key={i} className="flex items-start gap-2 text-xs text-neutral-700">
-                            <span className="mt-0.5 shrink-0 text-violet-400">→</span>
-                            {e}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Gesprächstipps pro Teilnehmer */}
-                  {analyseResult.teilnehmer_tipps?.length > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-3">Gesprächstipps pro Teilnehmer</p>
-                      <div className="space-y-3">
-                        {analyseResult.teilnehmer_tipps.map((t, i) => (
-                          <div key={i} className="rounded-xl border border-neutral-200 bg-white p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
-                                {t.name.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="text-sm font-semibold text-neutral-800">{t.name}</p>
-                                <p className="text-[10px] text-neutral-400">{t.rolle}</p>
-                              </div>
-                            </div>
-                            <ul className="space-y-1.5">
-                              {t.tipps.map((tip, j) => (
-                                <li key={j} className="flex items-start gap-2 text-xs text-neutral-600">
-                                  <span className="mt-0.5 shrink-0 text-violet-400">·</span>
-                                  {tip}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
+                    {(swotResult.finalisierung?.length ?? 0) > 0 && (
+                      <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-2">Schritte zur Fall-Finalisierung</p>
+                        <ul className="space-y-2">
+                          {(swotResult.finalisierung ?? []).map((e, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-neutral-700">
+                              <span className="mt-0.5 shrink-0 text-violet-400">→</span>
+                              {e}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+
+                    {swotResult.prompt && (
+                      <div>
+                        <button
+                          onClick={() => setOpenPromptKey(openPromptKey === "swot" ? null : "swot")}
+                          className="text-[11px] font-semibold text-violet-600 hover:text-violet-800 transition"
+                        >
+                          {openPromptKey === "swot" ? "▾ An die KI gesendete Daten verbergen" : "▸ An die KI gesendete Daten anzeigen"}
+                        </button>
+                        {openPromptKey === "swot" && (
+                          <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-[11px] leading-relaxed text-neutral-600">
+                            {swotResult.prompt}
+                          </pre>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
