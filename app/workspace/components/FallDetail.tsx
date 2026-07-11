@@ -14,10 +14,10 @@ import {
   EmptyState,
   cn,
 } from "../ui";
+import { StatusDot, SegmentedControl, Skeleton, SlideOver } from "@/app/components/ui/premium";
 import {
   fetchParticipants,
   fetchAllNotes,
-  fetchNotes,
   advanceMediationPhase,
   inviteParty,
   fetchStepStatus,
@@ -374,11 +374,14 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [isReleased, setIsReleased] = useState(false);
   const [contractError, setContractError] = useState("");
 
-  // Schritte der Einleitungsphase: Inhalt (aus phase-steps), Abschluss-Status
-  // und Ergebnisse (Eingaben je Teilnehmer). Die Einleitung trackt jeden
-  // Schritt als Pseudo-Phase (phase=step.key, step=""), daher werden Status
-  // und Notizen über den step.key geladen.
-  type EinleitungStepDef = {
+  // Schritte ALLER Phasen: die Schrittlisten kommen fertig zusammengeführt vom
+  // Backend (phase-steps = WorkflowManager-Konfiguration inkl. Variante,
+  // Custom-Schritten und visible_if). Der Tab zeigt eine Phase zur Zeit.
+  //
+  // Tracking-Eigenheit: die Einleitung trackt jeden Schritt als Pseudo-Phase
+  // (notes/status mit phase=step.key, step=""), alle anderen Phasen mit
+  // (phase=<phase>, step=<step.key>). `trackingParams` kapselt das.
+  type PhaseStepDef = {
     key: string;
     title: string;
     description: string;
@@ -389,21 +392,38 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     contract_template: string | null;
     feedback_occasion: "after_videocall" | "before_contract" | null;
     individual: boolean;
+    result_source_phase: string | null;
   };
-  const [phaseStepDefs, setPhaseStepDefs] = useState<EinleitungStepDef[]>([]);
+  const [phaseSteps, setPhaseSteps] = useState<Record<string, PhaseStepDef[]>>({});
+  // Alle Zustands-Maps sind mit `${phase}:${step.key}` verschlüsselt.
   const [stepStatuses, setStepStatuses] = useState<Record<string, StepStatusResult>>({});
-  const [stepNotes, setStepNotes] = useState<
-    Record<string, { participant_id: string; content: string; submitted: boolean }[]>
-  >({});
   const [loadingSteps, setLoadingSteps] = useState(false);
+  // Aktive Phase im Schritte-Tab: startet bei der aktuellen Fall-Phase.
+  const [stepsPhase, setStepsPhase] = useState<string>(() =>
+    PHASES.some((p) => p.id === fall.phase) ? (fall.phase as string) : "einleitung",
+  );
+  // SlideOver: `${phase}:${key}` des geöffneten Schritts.
+  const [openStepKey, setOpenStepKey] = useState<string | null>(null);
+
+  /** notes/step-status/workflow-rules-Parameter für einen Schritt. */
+  const trackingParams = (phase: string, stepKey: string) =>
+    phase === "einleitung" ? { phase: stepKey, step: "" } : { phase, step: stepKey };
+  const mapKeyOf = (phase: string, stepKey: string) => `${phase}:${stepKey}`;
 
   // Ergebnis-Anzeige-Schritte über ALLE Phasen (Freigabe erfolgt hier pro Fall).
   type ResultStep = { phase: string; key: string; title: string; source_phase: string | null };
-  const [resultSteps, setResultSteps] = useState<ResultStep[]>([]);
+  const resultSteps: ResultStep[] = React.useMemo(
+    () =>
+      PHASES.flatMap((p) =>
+        (phaseSteps[p.id] ?? [])
+          .filter((s) => s.content_types.includes("ergebnis"))
+          .map((s) => ({ phase: p.id, key: s.key, title: s.title, source_phase: s.result_source_phase })),
+      ),
+    [phaseSteps],
+  );
 
   // Workflow-Konfiguration (wer muss welchen Schritt abschließen)
   const [workflowData, setWorkflowData] = useState<WorkflowRulesResponse | null>(null);
-  const [expandedStepConfig, setExpandedStepConfig] = useState<string | null>(null);
   const [ruleSelections, setRuleSelections] = useState<Record<string, Set<string>>>({});
   const [ruleSkips, setRuleSkips] = useState<Record<string, boolean>>({});
   const [savingRuleKey, setSavingRuleKey] = useState<string | null>(null);
@@ -452,110 +472,106 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     if (activeTab === "termin") loadAppointments();
   }, [activeTab, loadContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Inhalt der Einleitungs-Schritte (Titel + vorgefüllter Standardinhalt +
-  // Flag "individuell") aus dem zusammengeführten phase-steps-Endpoint.
-  const loadStepDefs = useCallback(async (): Promise<EinleitungStepDef[]> => {
-    const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=einleitung`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json().catch(() => null);
-    const raw = (data?.steps ?? []) as Array<Record<string, unknown>>;
-    const defs: EinleitungStepDef[] = raw.map((s) => ({
-      key: String(s.key),
-      title: String(s.title ?? s.key),
-      description: (s.description as string) ?? "",
-      content_types: (s.content_types as string[] | null) ?? [],
-      video_url: (s.video_url as string | null) ?? null,
-      meeting_url: (s.meeting_url as string | null) ?? null,
-      question: (s.question as string | null) ?? null,
-      contract_template: (s.contract_template as string | null) ?? null,
-      feedback_occasion:
-        (s.feedback_occasion as "after_videocall" | "before_contract" | null) ?? null,
-      individual: Boolean(s.individual),
-    }));
-    setPhaseStepDefs(defs);
-    return defs;
+  // Schrittlisten ALLER Phasen aus dem zusammengeführten phase-steps-Endpoint
+  // (= WorkflowManager-Konfiguration für diesen Fall, inkl. Variante).
+  const loadAllPhaseSteps = useCallback(async (): Promise<Record<string, PhaseStepDef[]>> => {
+    const entries = await Promise.all(
+      PHASES.map(async (p): Promise<[string, PhaseStepDef[]]> => {
+        const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=${p.id}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return [p.id, []];
+        const data = await res.json().catch(() => null);
+        const raw = (data?.steps ?? []) as Array<Record<string, unknown>>;
+        const defs: PhaseStepDef[] = raw.map((s) => ({
+          key: String(s.key),
+          title: String(s.title ?? s.key),
+          description: (s.description as string) ?? "",
+          content_types: (s.content_types as string[] | null) ?? [],
+          video_url: (s.video_url as string | null) ?? null,
+          meeting_url: (s.meeting_url as string | null) ?? null,
+          question: (s.question as string | null) ?? null,
+          contract_template: (s.contract_template as string | null) ?? null,
+          feedback_occasion:
+            (s.feedback_occasion as "after_videocall" | "before_contract" | null) ?? null,
+          individual: Boolean(s.individual),
+          result_source_phase: (s.result_source_phase as string | null) ?? null,
+        }));
+        return [p.id, defs];
+      }),
+    );
+    const map = Object.fromEntries(entries) as Record<string, PhaseStepDef[]>;
+    setPhaseSteps(map);
+    return map;
   }, [fall.id]);
 
   const loadStepStatuses = useCallback(
-    async (steps: EinleitungStepDef[]) => {
-      setLoadingSteps(true);
+    async (all: Record<string, PhaseStepDef[]>) => {
       const results: Record<string, StepStatusResult> = {};
       await Promise.all(
-        steps.map(async (s) => {
-          const data = await fetchStepStatus(fall.id, s.key, "");
-          results[s.key] = { participants: data.participants, allSubmitted: data.all_submitted };
-        }),
+        Object.entries(all).flatMap(([phase, steps]) =>
+          steps.map(async (s) => {
+            const p = trackingParams(phase, s.key);
+            const data = await fetchStepStatus(fall.id, p.phase, p.step);
+            results[mapKeyOf(phase, s.key)] = {
+              participants: data.participants,
+              allSubmitted: data.all_submitted,
+            };
+          }),
+        ),
       );
       setStepStatuses(results);
-      setLoadingSteps(false);
     },
-    [fall.id],
+    [fall.id], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const loadWorkflowRules = useCallback(
-    async (steps: EinleitungStepDef[]) => {
+    async (all: Record<string, PhaseStepDef[]>) => {
       const data = await fetchWorkflowRules(fall.id);
       if (!data) return;
       setWorkflowData(data);
       const nextSelections: Record<string, Set<string>> = {};
       const nextSkips: Record<string, boolean> = {};
-      for (const step of steps) {
-        const rule = data.rules.find((r) => r.phase === step.key && r.step === "");
-        nextSelections[step.key] = rule?.required_roles
-          ? new Set(rule.required_roles)
-          : new Set(data.default_required_roles.filter((r) => data.available_roles.includes(r)));
-        nextSkips[step.key] = rule?.skip ?? false;
+      for (const [phase, steps] of Object.entries(all)) {
+        for (const step of steps) {
+          const p = trackingParams(phase, step.key);
+          const rule = data.rules.find((r) => r.phase === p.phase && r.step === p.step);
+          const mapKey = mapKeyOf(phase, step.key);
+          nextSelections[mapKey] = rule?.required_roles
+            ? new Set(rule.required_roles)
+            : new Set(data.default_required_roles.filter((r) => data.available_roles.includes(r)));
+          nextSkips[mapKey] = rule?.skip ?? false;
+        }
       }
       setRuleSelections(nextSelections);
       setRuleSkips(nextSkips);
     },
-    [fall.id],
+    [fall.id], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // Ergebnisse: Eingaben je Teilnehmer pro Schritt (phase=step.key, step="").
-  const loadStepNotes = useCallback(
-    async (steps: EinleitungStepDef[]) => {
-      const results: Record<
-        string,
-        { participant_id: string; content: string; submitted: boolean }[]
-      > = {};
-      await Promise.all(
-        steps.map(async (s) => {
-          const notes = await fetchNotes(fall.id, s.key, "");
-          results[s.key] = notes.map((n) => ({
-            participant_id: String(n.participant_id),
-            content: n.content,
-            submitted: n.submitted,
-          }));
-        }),
-      );
-      setStepNotes(results);
-    },
-    [fall.id],
-  );
-
-  // Individuelle Inhalte (pro Fall) für die individuellen Einleitungs-Schritte.
+  // Fallbezogene Inhalte + Ergebnis-Freigaben (inkl. Freigabe-Flag) für
+  // individuelle Schritte und Ergebnis-Schritte ALLER Phasen vorbelegen.
   const loadStepDrafts = useCallback(
-    async (steps: EinleitungStepDef[]) => {
-      const existing = await fetchStepContent(fall.id, "einleitung");
+    async (all: Record<string, PhaseStepDef[]>) => {
+      const existing = await fetchStepContent(fall.id);
       setContentDrafts((prev) => {
         const next = { ...prev };
-        for (const s of steps) {
-          if (!s.individual) continue;
-          const mapKey = `einleitung:${s.key}`;
-          const sc = existing.find((e) => e.step_key === s.key);
-          next[mapKey] = sc
-            ? {
-                body_text: sc.body_text ?? "",
-                video_url: sc.video_url ?? "",
-                meeting_url: sc.meeting_url ?? "",
-                question: sc.question ?? "",
-                feedback_occasion: sc.feedback_occasion ?? "",
-                released: sc.released ?? false,
-              }
-            : { ...emptyDraft };
+        for (const [phase, steps] of Object.entries(all)) {
+          for (const s of steps) {
+            if (!s.individual && !s.content_types.includes("ergebnis")) continue;
+            const mapKey = mapKeyOf(phase, s.key);
+            const sc = existing.find((e) => e.phase === phase && e.step_key === s.key);
+            next[mapKey] = sc
+              ? {
+                  body_text: sc.body_text ?? "",
+                  video_url: sc.video_url ?? "",
+                  meeting_url: sc.meeting_url ?? "",
+                  question: sc.question ?? "",
+                  feedback_occasion: sc.feedback_occasion ?? "",
+                  released: sc.released ?? false,
+                }
+              : { ...emptyDraft };
+          }
         }
         return next;
       });
@@ -563,128 +579,93 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     [fall.id], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // Ergebnis-Anzeige-Schritte über ALLE Phasen sammeln + Entwürfe (inkl.
-  // Freigabe-Flag) vorbelegen. Unabhängig vom Notiz-/Status-Modell.
-  const loadResultSteps = useCallback(async () => {
-    const perPhase = await Promise.all(
-      PHASES.map(async (p) => {
-        const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=${p.id}`, {
-          cache: "no-store",
-        });
-        if (!res.ok) return [] as ResultStep[];
-        const data = await res.json().catch(() => null);
-        const raw = (data?.steps ?? []) as Array<{
-          key: string;
-          title: string;
-          content_types: string[] | null;
-          result_source_phase?: string | null;
-        }>;
-        return raw
-          .filter((s) => (s.content_types ?? []).includes("ergebnis"))
-          .map((s) => ({
-            phase: p.id,
-            key: s.key,
-            title: s.title,
-            source_phase: s.result_source_phase ?? null,
-          }));
-      }),
-    );
-    const flat = perPhase.flat();
-    setResultSteps(flat);
-    const existing = await fetchStepContent(fall.id);
-    setContentDrafts((prev) => {
-      const next = { ...prev };
-      for (const s of flat) {
-        const mapKey = `${s.phase}:${s.key}`;
-        const sc = existing.find((e) => e.phase === s.phase && e.step_key === s.key);
-        next[mapKey] = sc
-          ? {
-              body_text: sc.body_text ?? "",
-              video_url: sc.video_url ?? "",
-              meeting_url: sc.meeting_url ?? "",
-              question: sc.question ?? "",
-              feedback_occasion: sc.feedback_occasion ?? "",
-              released: sc.released ?? false,
-            }
-          : { ...emptyDraft };
-      }
-      return next;
-    });
-  }, [fall.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Kompletter Ladelauf des Schritte-Tabs. Die Teilnehmer-Eingaben (Notizen +
+  // Block-Antworten inkl. KI) kommen gesammelt aus notes/all (loadAllNotes).
+  const reloadStepsTab = useCallback(async () => {
+    setLoadingSteps(true);
+    try {
+      const all = await loadAllPhaseSteps();
+      await Promise.all([
+        loadStepStatuses(all),
+        loadWorkflowRules(all),
+        loadStepDrafts(all),
+        loadAllNotes(),
+        loadFeedback(),
+      ]);
+    } finally {
+      setLoadingSteps(false);
+    }
+  }, [loadAllPhaseSteps, loadStepStatuses, loadWorkflowRules, loadStepDrafts, loadAllNotes, loadFeedback]);
 
   useEffect(() => {
     if (activeTab !== "steps") return;
-    (async () => {
-      const steps = await loadStepDefs();
-      await Promise.all([
-        loadStepStatuses(steps),
-        loadWorkflowRules(steps),
-        loadStepNotes(steps),
-        loadStepDrafts(steps),
-        loadResultSteps(),
-        loadFeedback(),
-      ]);
-    })();
+    reloadStepsTab();
     // variantKey in den Dependencies: wechselt der Mediator die zugeordnete
     // Variante (Workflow), muss der Schritte-Tab die effektive Schrittliste
     // neu laden – sonst bleiben die Schritte nach dem Zuordnen leer/stale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, fall.id, variantKey]);
 
-  // Manuelles Neuladen (Button im Tab).
-  const reloadStepsTab = useCallback(async () => {
-    const steps = await loadStepDefs();
-    await Promise.all([
-      loadStepStatuses(steps),
-      loadWorkflowRules(steps),
-      loadStepNotes(steps),
-      loadStepDrafts(steps),
-      loadResultSteps(),
-      loadFeedback(),
-    ]);
-  }, [loadStepDefs, loadStepStatuses, loadWorkflowRules, loadStepNotes, loadStepDrafts, loadResultSteps, loadFeedback]);
-
-  function toggleRuleRole(stepKey: string, role: string) {
+  function toggleRuleRole(mapKey: string, role: string) {
     setRuleSelections((prev) => {
-      const next = new Set(prev[stepKey] ?? []);
+      const next = new Set(prev[mapKey] ?? []);
       if (next.has(role)) next.delete(role);
       else next.add(role);
-      return { ...prev, [stepKey]: next };
+      return { ...prev, [mapKey]: next };
     });
   }
 
-  function toggleRuleSkip(stepKey: string) {
-    setRuleSkips((prev) => ({ ...prev, [stepKey]: !prev[stepKey] }));
+  function toggleRuleSkip(mapKey: string) {
+    setRuleSkips((prev) => ({ ...prev, [mapKey]: !prev[mapKey] }));
   }
 
-  async function handleSaveRule(stepKey: string) {
-    setSavingRuleKey(stepKey);
+  async function handleSaveRule(phase: string, stepKey: string) {
+    const mapKey = mapKeyOf(phase, stepKey);
+    setSavingRuleKey(mapKey);
     try {
+      const p = trackingParams(phase, stepKey);
       const ok = await saveWorkflowRule(fall.id, {
-        phase: stepKey,
-        step: "",
-        required_roles: Array.from(ruleSelections[stepKey] ?? []),
-        skip: ruleSkips[stepKey] ?? false,
+        phase: p.phase,
+        step: p.step,
+        required_roles: Array.from(ruleSelections[mapKey] ?? []),
+        skip: ruleSkips[mapKey] ?? false,
       });
       if (ok) {
-        await Promise.all([loadWorkflowRules(phaseStepDefs), loadStepStatuses(phaseStepDefs)]);
-        setExpandedStepConfig(null);
+        await Promise.all([loadWorkflowRules(phaseSteps), loadStepStatuses(phaseSteps)]);
       }
     } finally {
       setSavingRuleKey(null);
     }
   }
 
-  async function handleResetRule(stepKey: string) {
-    setSavingRuleKey(stepKey);
+  async function handleResetRule(phase: string, stepKey: string) {
+    const mapKey = mapKeyOf(phase, stepKey);
+    setSavingRuleKey(mapKey);
     try {
-      const ok = await deleteWorkflowRule(fall.id, stepKey, "");
+      const p = trackingParams(phase, stepKey);
+      const ok = await deleteWorkflowRule(fall.id, p.phase, p.step);
       if (ok) {
-        await Promise.all([loadWorkflowRules(phaseStepDefs), loadStepStatuses(phaseStepDefs)]);
+        await Promise.all([loadWorkflowRules(phaseSteps), loadStepStatuses(phaseSteps)]);
       }
     } finally {
       setSavingRuleKey(null);
     }
+  }
+
+  // Eingaben (klassische Notizen + Block-Antworten inkl. Mediator/KI) eines
+  // Schritts aus den bereits geladenen notes/all-Gruppen heraussuchen.
+  function answersForStep(phase: string, step: PhaseStepDef) {
+    const noteGroupPhase = phase === "einleitung" ? step.key : phase;
+    const notes = allPhaseNotes
+      .filter((g) => g.phase === noteGroupPhase)
+      .flatMap((g) => g.notes)
+      .filter((n) => (phase === "einleitung" ? true : n.step === step.key))
+      .filter((n) => n.content && n.content.trim());
+    const blocks = allPhaseNotes
+      .filter((g) => g.phase === phase || g.phase === step.key)
+      .flatMap((g) => g.block_responses ?? [])
+      .filter((b) => b.step_key === step.key);
+    return { notes, blocks };
   }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -1220,156 +1201,205 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
           {/* ── Tab: Schrittstatus ── */}
           {activeTab === "steps" && (
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Einleitungsphase · Inhalt & Ergebnisse</p>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Schritte & Ergebnisse · alle Phasen</p>
                 <button onClick={reloadStepsTab} className="text-xs text-accent-600 hover:text-accent-800 font-medium">↻ Aktualisieren</button>
               </div>
 
-              {/* ── Ergebnis-Freigaben (alle Phasen) ── */}
+              {/* Phasen-Auswahl: Schrittlisten kommen dynamisch aus dem
+                  WorkflowManager (phase-steps, inkl. Variante + Custom-Schritte). */}
+              <SegmentedControl
+                className="mb-5"
+                segments={PHASES.map((p) => ({
+                  key: p.id,
+                  label: p.label,
+                  count: (phaseSteps[p.id] ?? []).length,
+                }))}
+                activeKey={stepsPhase}
+                onChange={(key) => setStepsPhase(key ?? "einleitung")}
+              />
+
+              {/* ── Ergebnis-Freigaben: Überblick über alle Phasen ── */}
               {resultSteps.length > 0 && (
-                <div className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50/40 p-4 space-y-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">◆ Ergebnis-Freigaben</p>
-                  <p className="text-xs text-neutral-500">
+                <div className="mb-5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">◆ Ergebnis-Freigaben</p>
+                  <p className="mt-1 mb-2 text-xs text-neutral-500">
                     Diese Schritte zeigen den Teilnehmern Ergebnisse – aber erst nach deiner
-                    Freigabe. Erzeuge/kuratiere den Text und gib ihn frei.
+                    Freigabe. Schritt öffnen, Text kuratieren, freigeben.
                   </p>
-                  {resultSteps.map((rs) => {
-                    const mapKey = `${rs.phase}:${rs.key}`;
-                    const draft = contentDrafts[mapKey] ?? emptyDraft;
-                    const phaseLabel = PHASES.find((p) => p.id === rs.phase)?.label ?? rs.phase;
-                    const srcLabel = rs.source_phase
-                      ? PHASES.find((p) => p.id === rs.source_phase)?.label ?? rs.source_phase
-                      : null;
-                    const isSaving = savingContentKey === mapKey;
-                    const isSaved = savedContentKey === mapKey;
-                    const isSummarizing = summarizingKey === mapKey;
-                    return (
-                      <div key={mapKey} className="rounded-lg border border-neutral-200 bg-white p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-neutral-800">{rs.title}</span>
-                          <span
-                            className={
-                              draft.released
-                                ? "rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700"
-                                : "rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500"
-                            }
-                          >
-                            {draft.released ? "✓ Freigegeben" : "Entwurf – nicht sichtbar"}
+                  <div className="divide-y divide-neutral-200/70">
+                    {resultSteps.map((rs) => {
+                      const rsKey = mapKeyOf(rs.phase, rs.key);
+                      const draft = contentDrafts[rsKey] ?? emptyDraft;
+                      const phaseLabel = PHASES.find((p) => p.id === rs.phase)?.label ?? rs.phase;
+                      return (
+                        <button
+                          key={rsKey}
+                          type="button"
+                          onClick={() => {
+                            setStepsPhase(rs.phase);
+                            setOpenStepKey(rsKey);
+                          }}
+                          className="flex w-full items-center justify-between gap-3 px-2 py-2 text-left transition hover:bg-white"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-medium text-neutral-800">{rs.title}</span>
+                            <span className="text-[10px] text-neutral-400">Phase: {phaseLabel}</span>
                           </span>
-                        </div>
-                        <p className="text-[10px] text-neutral-400">
-                          Phase: {phaseLabel}
-                          {srcLabel ? ` · Quelle: ${srcLabel}` : ""}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            onClick={() => handleSummarize(mapKey, rs.source_phase)}
-                            disabled={isSummarizing}
-                            className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50 transition"
-                          >
-                            {isSummarizing ? "KI fasst zusammen…" : "✦ KI-Zusammenfassung erzeugen"}
-                          </button>
-                        </div>
-                        <textarea
-                          value={draft.body_text}
-                          onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
-                          rows={4}
-                          placeholder="Freigegebener Ergebnistext für alle Teilnehmer …"
-                          className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
-                        />
-                        <label className="flex items-center gap-2 text-xs font-medium text-neutral-700">
-                          <input
-                            type="checkbox"
-                            checked={draft.released}
-                            onChange={(e) => updateDraft(mapKey, { released: e.target.checked })}
-                            className="h-3.5 w-3.5 rounded border-neutral-300"
-                          />
-                          Für alle Teilnehmer freigeben
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleSaveContent(rs.phase, rs.key)}
-                            disabled={isSaving}
-                            className="rounded-full bg-accent-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
-                          >
-                            {isSaving ? "Speichert…" : "Speichern"}
-                          </button>
-                          {isSaved && <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
+                          <span className="flex shrink-0 items-center gap-2">
+                            <StatusDot
+                              tone={draft.released ? "teal" : "amber"}
+                              label={draft.released ? "Freigegeben" : "Entwurf – nicht sichtbar"}
+                            />
+                            <span className="text-neutral-300">›</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
+              {/* ── Schritt-Zeilen der gewählten Phase ── */}
               {loadingSteps ? (
-                <p className="text-sm italic text-neutral-400">Wird geladen…</p>
-              ) : phaseStepDefs.length === 0 ? (
-                <EmptyState icon="🧭" text="Keine Schritte für die Einleitungsphase definiert." />
+                <div className="space-y-2">
+                  {[0, 1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-14 w-full" />
+                  ))}
+                </div>
+              ) : (phaseSteps[stepsPhase] ?? []).length === 0 ? (
+                <EmptyState icon="🧭" text="Keine Schritte für diese Phase definiert – im Workflow Manager pflegbar." />
               ) : (
-                <div className="space-y-3">
-                  {phaseStepDefs.map((step) => {
-                    const result = stepStatuses[step.key];
+                <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl border border-neutral-200">
+                  {(phaseSteps[stepsPhase] ?? []).map((step) => {
+                    const mapKey = mapKeyOf(stepsPhase, step.key);
+                    const result = stepStatuses[mapKey];
                     const entries = result?.participants ?? [];
                     const allDone = result?.allSubmitted ?? false;
-                    const requiredRoles = ruleSelections[step.key] ?? new Set<string>();
-                    const skipped = ruleSkips[step.key] ?? false;
-                    const overridden = workflowData?.rules.some((r) => r.phase === step.key && r.step === "") ?? false;
-                    const isExpanded = expandedStepConfig === step.key;
-                    const has = (id: string) => step.content_types.includes(id);
-                    const mapKey = `einleitung:${step.key}`;
+                    const skipped = ruleSkips[mapKey] ?? false;
+                    const trk = trackingParams(stepsPhase, step.key);
+                    const overridden =
+                      workflowData?.rules.some((r) => r.phase === trk.phase && r.step === trk.step) ?? false;
+                    const isResult = step.content_types.includes("ergebnis");
                     const draft = contentDrafts[mapKey] ?? emptyDraft;
-                    const isSavingContent = savingContentKey === mapKey;
-                    const isSavedContent = savedContentKey === mapKey;
-                    const nameFor = (pid: string) =>
-                      entries.find((e) => e.participant_id === pid)?.name ??
-                      participants.find((p) => p.id === pid)?.name ??
-                      "Teilnehmer";
-                    const noteEntries = (stepNotes[step.key] ?? []).filter((n) => n.content && n.content.trim());
-                    const OCCASION_LABEL: Record<string, string> = {
-                      after_videocall: "Nach dem Gespräch",
-                      before_contract: "Vor dem Vertrag",
-                    };
-                    const feedbackForStep = has("feedback")
-                      ? feedbackEntries.filter(
-                          (e) => e.occasion === (step.feedback_occasion ?? "after_videocall"),
-                        )
-                      : [];
+                    const { notes, blocks } = answersForStep(stepsPhase, step);
+                    const answerCount = notes.length + blocks.length;
                     return (
-                      <div key={step.key} className={allDone ? "rounded-xl border border-accent-200 bg-accent-50/60 p-4" : "rounded-xl border border-neutral-200 bg-white p-4"}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-neutral-800">{step.title}</span>
+                      <button
+                        key={step.key}
+                        type="button"
+                        onClick={() => setOpenStepKey(mapKey)}
+                        className="flex w-full items-center gap-4 bg-white px-4 py-3.5 text-left transition hover:bg-neutral-50"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="truncate text-sm font-semibold text-neutral-800">{step.title}</span>
                             {step.individual && (
                               <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-700">✦ Individuell</span>
                             )}
-                            {skipped && (
-                              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500">Übersprungen</span>
+                            {isResult && (
+                              <StatusDot
+                                tone={draft.released ? "teal" : "amber"}
+                                label={draft.released ? "Freigegeben" : "Freigabe offen"}
+                              />
                             )}
                             {overridden && !skipped && (
                               <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">Angepasst</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3">
-                            {skipped ? (
-                              <span className="text-[10px] font-bold text-neutral-500">– übersprungen</span>
-                            ) : allDone ? (
-                              <span className="text-[10px] font-bold text-accent-600">✓ Alle fertig</span>
-                            ) : entries.length === 0 ? (
-                              <span className="text-[10px] text-neutral-400">Noch keine Daten</span>
-                            ) : (
-                              <span className="text-[10px] font-semibold text-amber-600">{entries.filter((e) => e.submitted).length}/{entries.length} eingereicht</span>
-                            )}
-                            <button
-                              onClick={() => setExpandedStepConfig(isExpanded ? null : step.key)}
-                              className="text-xs text-neutral-400 hover:text-accent-600"
-                              title="Wer muss diesen Schritt abschließen?"
-                            >
-                              ⚙
-                            </button>
-                          </div>
+                          <p className="mt-0.5 text-[11px] text-neutral-400">
+                            {answerCount > 0
+                              ? `${answerCount} Eingabe${answerCount === 1 ? "" : "n"}`
+                              : "Noch keine Eingaben"}
+                          </p>
                         </div>
-                        {entries.length > 0 && (
+                        <div className="flex shrink-0 items-center gap-3">
+                          {skipped ? (
+                            <StatusDot tone="neutral" label="Übersprungen" />
+                          ) : allDone ? (
+                            <StatusDot tone="teal" label="Fertig" />
+                          ) : entries.length === 0 ? (
+                            <StatusDot tone="neutral" label="Offen" />
+                          ) : (
+                            <StatusDot
+                              tone="amber"
+                              label={`${entries.filter((e) => e.submitted).length}/${entries.length} eingereicht`}
+                            />
+                          )}
+                          <span className="text-neutral-300">›</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* ── SlideOver: Eingaben, Inhalt, Freigabe & Regeln eines Schritts ── */}
+              {(() => {
+                if (!openStepKey) return null;
+                const sepIdx = openStepKey.indexOf(":");
+                const oPhase = openStepKey.slice(0, sepIdx);
+                const oKey = openStepKey.slice(sepIdx + 1);
+                const step = (phaseSteps[oPhase] ?? []).find((s) => s.key === oKey);
+                if (!step) return null;
+                const mapKey = openStepKey;
+                const has = (id: string) => step.content_types.includes(id);
+                const result = stepStatuses[mapKey];
+                const entries = result?.participants ?? [];
+                const allDone = result?.allSubmitted ?? false;
+                const skipped = ruleSkips[mapKey] ?? false;
+                const requiredRoles = ruleSelections[mapKey] ?? new Set<string>();
+                const trk = trackingParams(oPhase, oKey);
+                const overridden =
+                  workflowData?.rules.some((r) => r.phase === trk.phase && r.step === trk.step) ?? false;
+                const draft = contentDrafts[mapKey] ?? emptyDraft;
+                const isSaving = savingContentKey === mapKey;
+                const isSaved = savedContentKey === mapKey;
+                const isSummarizing = summarizingKey === mapKey;
+                const phaseLabel = PHASES.find((p) => p.id === oPhase)?.label ?? oPhase;
+                const srcLabel = step.result_source_phase
+                  ? PHASES.find((p) => p.id === step.result_source_phase)?.label ?? step.result_source_phase
+                  : null;
+                const { notes, blocks } = answersForStep(oPhase, step);
+                const feedbackForStep = has("feedback")
+                  ? feedbackEntries.filter(
+                      (e) => e.occasion === (step.feedback_occasion ?? "after_videocall"),
+                    )
+                  : [];
+                const OCCASION_LABEL: Record<string, string> = {
+                  after_videocall: "Nach dem Gespräch",
+                  before_contract: "Vor dem Vertrag",
+                };
+                return (
+                  <SlideOver
+                    open
+                    onClose={() => setOpenStepKey(null)}
+                    title={
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+                          {phaseLabel}
+                        </p>
+                        <h3 className="mt-0.5 text-base font-semibold text-neutral-900">{step.title}</h3>
+                        <div className="mt-1.5">
+                          {skipped ? (
+                            <StatusDot tone="neutral" label="Übersprungen" />
+                          ) : allDone ? (
+                            <StatusDot tone="teal" label="Alle fertig" />
+                          ) : (
+                            <StatusDot
+                              tone="amber"
+                              label={`${entries.filter((e) => e.submitted).length}/${entries.length} eingereicht`}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    }
+                  >
+                    <div className="space-y-6">
+                      {/* ── Teilnehmer-Status ── */}
+                      {entries.length > 0 && (
+                        <section>
+                          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">Teilnehmer</p>
                           <div className="flex flex-wrap gap-2">
                             {entries.map((e) => {
                               const isRequired = requiredRoles.has(e.role);
@@ -1391,136 +1421,189 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               );
                             })}
                           </div>
-                        )}
+                        </section>
+                      )}
 
-                        {/* ── Inhalt des Schrittes ── */}
-                        {step.individual ? (
-                          <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50/50 p-3 space-y-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-teal-700">
-                              Individueller Inhalt (nur dieser Fall)
-                            </p>
-                            <textarea
-                              value={draft.body_text}
-                              onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
-                              rows={2}
-                              placeholder="Text für diesen Fall …"
+                      {/* ── Inhalt des Schrittes ── */}
+                      {step.individual ? (
+                        <section className="rounded-xl border border-teal-200 bg-teal-50/50 p-3 space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700">
+                            Individueller Inhalt (nur dieser Fall)
+                          </p>
+                          <textarea
+                            value={draft.body_text}
+                            onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
+                            rows={3}
+                            placeholder="Text für diesen Fall …"
+                            className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                          />
+                          {(has("video") || !has("videokonferenz")) && (
+                            <input
+                              value={draft.video_url}
+                              onChange={(e) => updateDraft(mapKey, { video_url: e.target.value })}
+                              placeholder="Video-URL (eigenes Video) …"
                               className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
                             />
-                            {(has("video") || !has("videokonferenz")) && (
+                          )}
+                          {has("videokonferenz") && (
+                            <>
                               <input
-                                value={draft.video_url}
-                                onChange={(e) => updateDraft(mapKey, { video_url: e.target.value })}
-                                placeholder="Video-URL (eigenes Video) …"
+                                value={draft.meeting_url}
+                                onChange={(e) => updateDraft(mapKey, { meeting_url: e.target.value })}
+                                placeholder="Meeting-/Call-Link (z.B. Google Meet) …"
                                 className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
                               />
-                            )}
-                            {has("videokonferenz") && (
-                              <>
-                                <input
-                                  value={draft.meeting_url}
-                                  onChange={(e) => updateDraft(mapKey, { meeting_url: e.target.value })}
-                                  placeholder="Meeting-/Call-Link (z.B. Google Meet) …"
-                                  className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
-                                />
-                                <MeetLinkButton
-                                  summary={fall.title}
-                                  onLink={(url) => updateDraft(mapKey, { meeting_url: url })}
-                                />
-                              </>
-                            )}
-                            {has("frage") && (
-                              <textarea
-                                value={draft.question}
-                                onChange={(e) => updateDraft(mapKey, { question: e.target.value })}
-                                rows={2}
-                                placeholder="Individuelle Frage für diesen Fall …"
-                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                              <MeetLinkButton
+                                summary={fall.title}
+                                onLink={(url) => updateDraft(mapKey, { meeting_url: url })}
                               />
+                            </>
+                          )}
+                          {has("frage") && (
+                            <textarea
+                              value={draft.question}
+                              onChange={(e) => updateDraft(mapKey, { question: e.target.value })}
+                              rows={2}
+                              placeholder="Individuelle Frage für diesen Fall …"
+                              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                            />
+                          )}
+                          {has("feedback") && (
+                            <select
+                              value={draft.feedback_occasion}
+                              onChange={(e) =>
+                                updateDraft(mapKey, {
+                                  feedback_occasion: e.target.value as
+                                    | "after_videocall"
+                                    | "before_contract"
+                                    | "",
+                                })
+                              }
+                              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 transition"
+                            >
+                              <option value="">— kein Fragebogen —</option>
+                              <option value="after_videocall">Nach dem Gespräch</option>
+                              <option value="before_contract">Vor dem Vertrag</option>
+                            </select>
+                          )}
+                          <div className="flex items-center gap-3 pt-1">
+                            <button
+                              onClick={() => handleSaveContent(oPhase, oKey)}
+                              disabled={isSaving}
+                              className="rounded-full bg-accent-500 px-4 py-2 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
+                            >
+                              {isSaving ? "Speichert…" : "Inhalt speichern"}
+                            </button>
+                            {isSaved && (
+                              <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>
+                            )}
+                          </div>
+                        </section>
+                      ) : (
+                        (step.description ||
+                          step.video_url ||
+                          step.meeting_url ||
+                          step.question ||
+                          step.contract_template ||
+                          has("feedback")) && (
+                          <section className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-3 space-y-1.5 text-xs text-neutral-600">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">Inhalt</p>
+                            {step.description && (
+                              <p className="whitespace-pre-wrap">{step.description}</p>
+                            )}
+                            {step.question && (
+                              <p>
+                                <span className="font-semibold">Frage:</span> {step.question}
+                              </p>
+                            )}
+                            {step.video_url && (
+                              <p>
+                                <span className="font-semibold">Video:</span>{" "}
+                                <a href={step.video_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
+                                  {step.video_url}
+                                </a>
+                              </p>
+                            )}
+                            {step.meeting_url && (
+                              <p>
+                                <span className="font-semibold">Meeting:</span>{" "}
+                                <a href={step.meeting_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
+                                  {step.meeting_url}
+                                </a>
+                              </p>
+                            )}
+                            {step.contract_template && (
+                              <p className="whitespace-pre-wrap">
+                                <span className="font-semibold">Vorlage:</span> {step.contract_template}
+                              </p>
                             )}
                             {has("feedback") && (
-                              <select
-                                value={draft.feedback_occasion}
-                                onChange={(e) =>
-                                  updateDraft(mapKey, {
-                                    feedback_occasion: e.target.value as
-                                      | "after_videocall"
-                                      | "before_contract"
-                                      | "",
-                                  })
-                                }
-                                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 transition"
-                              >
-                                <option value="">— kein Fragebogen —</option>
-                                <option value="after_videocall">Nach dem Gespräch</option>
-                                <option value="before_contract">Vor dem Vertrag</option>
-                              </select>
+                              <p>
+                                <span className="font-semibold">Feedback-Anlass:</span>{" "}
+                                {OCCASION_LABEL[step.feedback_occasion ?? "after_videocall"]}
+                              </p>
                             )}
-                            <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => handleSaveContent("einleitung", step.key)}
-                                disabled={isSavingContent}
-                                className="rounded-full bg-accent-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
-                              >
-                                {isSavingContent ? "Speichert…" : "Inhalt speichern"}
-                              </button>
-                              {isSavedContent && (
-                                <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          (step.description ||
-                            step.video_url ||
-                            step.meeting_url ||
-                            step.question ||
-                            step.contract_template ||
-                            has("feedback")) && (
-                            <div className="mt-3 rounded-lg border border-neutral-100 bg-neutral-50/70 p-3 space-y-1.5 text-xs text-neutral-600">
-                              <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Inhalt</p>
-                              {step.description && (
-                                <p className="whitespace-pre-wrap">{step.description}</p>
-                              )}
-                              {step.question && (
-                                <p>
-                                  <span className="font-semibold">Frage:</span> {step.question}
-                                </p>
-                              )}
-                              {step.video_url && (
-                                <p>
-                                  <span className="font-semibold">Video:</span>{" "}
-                                  <a href={step.video_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
-                                    {step.video_url}
-                                  </a>
-                                </p>
-                              )}
-                              {step.meeting_url && (
-                                <p>
-                                  <span className="font-semibold">Meeting:</span>{" "}
-                                  <a href={step.meeting_url} target="_blank" rel="noreferrer" className="text-accent-600 underline break-all">
-                                    {step.meeting_url}
-                                  </a>
-                                </p>
-                              )}
-                              {step.contract_template && (
-                                <p className="whitespace-pre-wrap">
-                                  <span className="font-semibold">Vorlage:</span> {step.contract_template}
-                                </p>
-                              )}
-                              {has("feedback") && (
-                                <p>
-                                  <span className="font-semibold">Feedback-Anlass:</span>{" "}
-                                  {OCCASION_LABEL[step.feedback_occasion ?? "after_videocall"]}
-                                </p>
-                              )}
-                            </div>
-                          )
-                        )}
+                          </section>
+                        )
+                      )}
 
-                        {/* ── Ergebnisse des Schrittes ── */}
-                        {(noteEntries.length > 0 || feedbackForStep.length > 0) && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Ergebnisse</p>
-                            {noteEntries.map((n, i) => {
+                      {/* ── Ergebnis-Freigabe (nur Ergebnis-Schritte) ── */}
+                      {has("ergebnis") && (
+                        <section className="rounded-xl border border-cyan-200 bg-cyan-50/40 p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">◆ Ergebnis-Freigabe</p>
+                            <StatusDot
+                              tone={draft.released ? "teal" : "amber"}
+                              label={draft.released ? "Freigegeben" : "Entwurf – nicht sichtbar"}
+                            />
+                          </div>
+                          {srcLabel && (
+                            <p className="text-[10px] text-neutral-400">Quelle: {srcLabel}</p>
+                          )}
+                          <button
+                            onClick={() => handleSummarize(mapKey, step.result_source_phase)}
+                            disabled={isSummarizing}
+                            className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50 transition"
+                          >
+                            {isSummarizing ? "KI fasst zusammen…" : "✦ KI-Zusammenfassung erzeugen"}
+                          </button>
+                          <textarea
+                            value={draft.body_text}
+                            onChange={(e) => updateDraft(mapKey, { body_text: e.target.value })}
+                            rows={5}
+                            placeholder="Freigegebener Ergebnistext für alle Teilnehmer …"
+                            className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100 transition"
+                          />
+                          <label className="flex items-center gap-2 text-xs font-medium text-neutral-700">
+                            <input
+                              type="checkbox"
+                              checked={draft.released}
+                              onChange={(e) => updateDraft(mapKey, { released: e.target.checked })}
+                              className="h-3.5 w-3.5 rounded border-neutral-300"
+                            />
+                            Für alle Teilnehmer freigeben
+                          </label>
+                          <div className="flex items-center gap-3 pt-1">
+                            <button
+                              onClick={() => handleSaveContent(oPhase, oKey)}
+                              disabled={isSaving}
+                              className="rounded-full bg-accent-500 px-4 py-2 text-xs font-semibold text-white hover:bg-accent-600 disabled:opacity-50 transition"
+                            >
+                              {isSaving ? "Speichert…" : "Speichern & Freigabe übernehmen"}
+                            </button>
+                            {isSaved && <span className="text-xs font-medium text-accent-600">✓ Gespeichert</span>}
+                          </div>
+                        </section>
+                      )}
+
+                      {/* ── Eingaben der Teilnehmer (Notizen + Block-Antworten inkl. KI) ── */}
+                      <section>
+                        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">Eingaben</p>
+                        {notes.length === 0 && blocks.length === 0 && feedbackForStep.length === 0 ? (
+                          <p className="text-xs italic text-neutral-400">Noch keine Eingaben der Teilnehmer zu diesem Schritt.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {notes.map((n, i) => {
                               let items: string[] = [];
                               try {
                                 const parsed = JSON.parse(n.content);
@@ -1531,7 +1614,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               return (
                                 <div key={`note-${i}`} className="rounded-lg border border-neutral-100 bg-white p-2.5">
                                   <div className="flex items-center justify-between mb-1">
-                                    <span className="text-xs font-semibold text-neutral-800">{nameFor(n.participant_id)}</span>
+                                    <span className="text-xs font-semibold text-neutral-800">{n.participant_name}</span>
                                     {n.submitted && (
                                       <span className="text-[10px] font-semibold text-accent-600">✓ Eingereicht</span>
                                     )}
@@ -1551,6 +1634,36 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                                 </div>
                               );
                             })}
+                            {blocks.map((br, i) => (
+                              <div
+                                key={`br-${i}`}
+                                className={
+                                  br.author_source === "ai"
+                                    ? "rounded-lg border border-violet-100 bg-violet-50/60 p-2.5"
+                                    : "rounded-lg border border-neutral-100 bg-white p-2.5"
+                                }
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${AUTHOR_BADGE[br.author_source] ?? AUTHOR_BADGE.user}`}>
+                                      {br.author_source === "ai" ? "🤖 KI" : br.author_name}
+                                    </span>
+                                    {br.block_type && (
+                                      <span className="text-[10px] text-neutral-400 bg-neutral-100 rounded px-1 py-0.5">{br.block_type}</span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {br.updated_at && (
+                                      <span className="text-[10px] text-neutral-400">
+                                        {new Date(br.updated_at).toLocaleDateString("de-DE")}
+                                      </span>
+                                    )}
+                                    {br.submitted && <span className="text-[10px] font-semibold text-accent-600">✓ Eingereicht</span>}
+                                  </div>
+                                </div>
+                                <p className="text-xs text-neutral-700 whitespace-pre-wrap">{formatBlockValue(br.value)}</p>
+                              </div>
+                            ))}
                             {feedbackForStep.map((fb) => (
                               <div key={`fb-${fb.id}`} className="rounded-lg border border-violet-100 bg-violet-50/50 p-2.5">
                                 <div className="flex items-center justify-between mb-1">
@@ -1572,73 +1685,69 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                             ))}
                           </div>
                         )}
+                      </section>
 
-                        {isExpanded && (
-                          <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-                            <p className="mb-2 text-xs font-semibold text-neutral-600">
-                              Wer muss diesen Schritt abschließen, damit er als erledigt gilt?
-                            </p>
-                            <label className="mb-2 flex items-center gap-2 text-xs font-medium text-neutral-700">
-                              <input
-                                type="checkbox"
-                                checked={skipped}
-                                onChange={() => toggleRuleSkip(step.key)}
-                                className="h-3.5 w-3.5 rounded border-neutral-300"
-                              />
-                              Schritt für diesen Fall überspringen
-                            </label>
-                            {!skipped && (
-                              <div className="mb-3 flex flex-wrap gap-2">
-                                {(workflowData?.available_roles ?? []).map((role) => (
-                                  <label
-                                    key={role}
-                                    className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs text-neutral-700"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={requiredRoles.has(role)}
-                                      onChange={() => toggleRuleRole(step.key, role)}
-                                      className="h-3.5 w-3.5 rounded border-neutral-300"
-                                    />
-                                    {WORKFLOW_ROLE_LABEL[role] ?? role}
-                                  </label>
-                                ))}
-                              </div>
-                            )}
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleSaveRule(step.key)}
-                                disabled={savingRuleKey === step.key}
-                                className="rounded-lg bg-accent-600 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      {/* ── Anforderungen (wer muss abschließen / überspringen) ── */}
+                      <section className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+                        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+                          Anforderungen
+                        </p>
+                        <p className="mb-2 text-xs font-semibold text-neutral-600">
+                          Wer muss diesen Schritt abschließen, damit er als erledigt gilt?
+                        </p>
+                        <label className="mb-2 flex items-center gap-2 text-xs font-medium text-neutral-700">
+                          <input
+                            type="checkbox"
+                            checked={skipped}
+                            onChange={() => toggleRuleSkip(mapKey)}
+                            className="h-3.5 w-3.5 rounded border-neutral-300"
+                          />
+                          Schritt für diesen Fall überspringen
+                        </label>
+                        {!skipped && (
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            {(workflowData?.available_roles ?? []).map((role) => (
+                              <label
+                                key={role}
+                                className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs text-neutral-700"
                               >
-                                {savingRuleKey === step.key ? "Speichert …" : "Speichern"}
-                              </button>
-                              {overridden && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleResetRule(step.key)}
-                                  disabled={savingRuleKey === step.key}
-                                  className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  Zurücksetzen
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => setExpandedStepConfig(null)}
-                                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-neutral-600"
-                              >
-                                Abbrechen
-                              </button>
-                            </div>
+                                <input
+                                  type="checkbox"
+                                  checked={requiredRoles.has(role)}
+                                  onChange={() => toggleRuleRole(mapKey, role)}
+                                  className="h-3.5 w-3.5 rounded border-neutral-300"
+                                />
+                                {WORKFLOW_ROLE_LABEL[role] ?? role}
+                              </label>
+                            ))}
                           </div>
                         )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSaveRule(oPhase, oKey)}
+                            disabled={savingRuleKey === mapKey}
+                            className="rounded-lg bg-accent-600 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {savingRuleKey === mapKey ? "Speichert …" : "Speichern"}
+                          </button>
+                          {overridden && (
+                            <button
+                              type="button"
+                              onClick={() => handleResetRule(oPhase, oKey)}
+                              disabled={savingRuleKey === mapKey}
+                              className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Zurücksetzen
+                            </button>
+                          )}
+                        </div>
+                      </section>
+                    </div>
+                  </SlideOver>
+                );
+              })()}
+
             </div>
           )}
 
