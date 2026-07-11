@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR, MEDIATION_TYPES } from "../types";
-import { TypeBadge, StatusBadge, WCard, RowCard, ListRow, LoadingRows, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
+import { StatusBadge, WCard, RowCard, ListRow, LoadingRows, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
 import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
 import { PremiumHero } from "@/app/components/ui/premium";
 
