@@ -239,7 +239,12 @@ def list_block_responses(
     freigegebene/geteilte Beiträge nicht automatisch – der Einfachheit halber
     liefert dieser Endpunkt für Parteien nur die EIGENEN Antworten zurück.
     """
-    own = _require_paid_participant(mediation_id, current_user, db)
+    # Onboarding-Phase ("einladung") ist vor der Zahlung nutzbar (Start-Flow);
+    # alle anderen Phasen bleiben paywall-geschützt.
+    if phase == "einladung":
+        own = _require_participant(mediation_id, current_user, db)
+    else:
+        own = _require_paid_participant(mediation_id, current_user, db)
     query = db.query(MediationBlockResponse).filter(
         MediationBlockResponse.mediation_id == mediation_id
     )
@@ -261,7 +266,11 @@ def upsert_block_response(
     current_user: User = Depends(get_current_db_user),
 ):
     """Legt den Beitrag des aktuellen Autors zu einem Block an oder aktualisiert ihn."""
-    own = _require_paid_participant(mediation_id, current_user, db)
+    # Antworten der Onboarding-Phase (Start-Intake) sind vor der Zahlung erlaubt.
+    if payload.phase == "einladung":
+        own = _require_participant(mediation_id, current_user, db)
+    else:
+        own = _require_paid_participant(mediation_id, current_user, db)
     is_mediator = own.role in _MEDIATOR_ROLES
 
     if payload.as_ai:

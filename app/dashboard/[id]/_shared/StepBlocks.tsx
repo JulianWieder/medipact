@@ -421,6 +421,16 @@ export default function StepBlocks({
           </div>
         );
       }
+      case "datum": {
+        const label = cfgStr(c, "label");
+        return (
+          <div key={block.id}>
+            {label && <p className="mb-1 text-sm font-medium text-neutral-700">{label}<SavedHint id={block.id} /></p>}
+            <input type="date" value={str} onChange={(e) => setVal(block, e.target.value, true)} className="w-48 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400" />
+            {cfgStr(c, "help") && <p className="mt-1 text-xs text-neutral-400">{cfgStr(c, "help")}</p>}
+          </div>
+        );
+      }
       case "betrag":
         return (
           <div key={block.id}>

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getConfig } from "@/lib/mediation-types/registry";
 import { mediationRegistry } from "@/lib/mediation-types/registry";
 import { MediationType } from "@/lib/mediation-types/types";
-import NewMediationWizard from "@/app/components/mediation/NewMediationWizard";
+import StartFlowClient from "@/app/dashboard/mediation/new/StartFlowClient";
 
 export function generateStaticParams() {
   return Object.keys(mediationRegistry).map((type) => ({ type }));
@@ -22,5 +22,5 @@ export default async function NewMediationByTypePage({
   const { type } = await params;
   const config = getConfig(type as MediationType);
 
-  return <NewMediationWizard config={config} />;
+  return <StartFlowClient config={config} />;
 }

@@ -396,6 +396,25 @@ function BlockConfigEditor({
           />
         </>
       );
+    case "datum":
+      return (
+        <>
+          <FieldLabel>Beschriftung</FieldLabel>
+          <input
+            value={cfgStr(c, "label")}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="z.B. Datum der Trennung"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Hilfetext (optional)</FieldLabel>
+          <input
+            value={cfgStr(c, "help")}
+            onChange={(e) => onChange({ help: e.target.value })}
+            placeholder="z.B. Falls unklar: einfach überspringen."
+            className={INPUT_CLASS}
+          />
+        </>
+      );
     case "frage":
       return (
         <>
@@ -872,6 +891,14 @@ function PreviewBlock({ block }: { block: StepBlockDto }) {
         <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-3">
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-violet-600">Frage</p>
           <p className="text-sm text-neutral-800">{text("prompt") || <span className="text-neutral-300">Frage …</span>}</p>
+        </div>
+      );
+    case "datum":
+      return (
+        <div>
+          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
+          <div className="w-44 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">tt.mm.jjjj</div>
+          {text("help") && <p className="mt-1 text-[11px] text-neutral-400">{text("help")}</p>}
         </div>
       );
     case "video_aufnahme":

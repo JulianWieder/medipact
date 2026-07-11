@@ -239,6 +239,18 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     hint: "Teilnehmer fügt beliebig viele Punkte zu einer Liste hinzu (z.B. Themen).",
   },
   {
+    type: "datum",
+    label: "Datum",
+    short: "Datum",
+    icon: "📆",
+    group: "Eingabe",
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    defaultConfig: { label: "", help: "" },
+    capturesResponse: true,
+    responseAuthor: "user",
+    hint: "Datumsauswahl (z.B. Trennungsdatum, Erbfall) – wichtig für Fristen.",
+  },
+  {
     type: "betrag",
     label: "Betrag / Zahl",
     short: "Betrag",

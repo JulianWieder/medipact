@@ -1143,7 +1143,13 @@ def get_phase_steps(
     Ersetzt die fr\u00fcher statische Liste aus phaseData.ts/EinleitungClient.tsx
     im Frontend \u2013 die Konfiguration kommt jetzt vollst\u00e4ndig vom Backend.
     """
-    _require_paid_participant(mediation_id, current_user, db)
+    # Die Onboarding-/Intake-Phase ("einladung") ist bewusst VOR der Zahlung
+    # zugänglich – sie führt zur Zahlung hin (Start-Flow). Alle anderen Phasen
+    # bleiben paywall-geschützt (siehe billing.ensure_unlocked).
+    if phase == "einladung":
+        _require_participant(mediation_id, current_user, db)
+    else:
+        _require_paid_participant(mediation_id, current_user, db)
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:

@@ -2,11 +2,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getConfig } from "@/lib/mediation-types/registry";
-import NewMediationWizard from "@/app/components/mediation/NewMediationWizard";
+import StartFlowClient from "@/app/dashboard/mediation/new/StartFlowClient";
 
 export default async function ErbschaftPage() {
   const session = await auth();
   if (!session?.user) redirect("/auth/login");
   const config = getConfig("erbschaft");
-  return <NewMediationWizard config={config} />;
+  return <StartFlowClient config={config} />;
 }
