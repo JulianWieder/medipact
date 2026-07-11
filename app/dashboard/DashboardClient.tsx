@@ -236,14 +236,14 @@ export default function DashboardClient() {
       (m) => (m.status === "active" && !m.is_my_turn) || m.status === "completed",
     );
     const steps = [
-      { label: "Konto erstellt", done: true },
+      { label: "Konto erstellt", done: true, action: undefined as { label: string; href: string } | undefined },
       {
         label: "Mediation angelegt oder Einladung angenommen",
         done: hasCase,
         action: !hasCase ? { label: "Neue Mediation starten", href: "/dashboard/mediation/new" } : undefined,
       },
-      { label: "Verfahren gestartet", done: hasStarted },
-      { label: "Erste Eingabe gemacht", done: hasSubmitted },
+      { label: "Verfahren gestartet", done: hasStarted, action: undefined },
+      { label: "Erste Eingabe gemacht", done: hasSubmitted, action: undefined },
     ];
     return { steps, doneCount: steps.filter((s) => s.done).length };
   }, [data]);
@@ -251,7 +251,7 @@ export default function DashboardClient() {
 
   const segments = useMemo(
     () => [
-      { key: null, label: "Alle", count: data.length },
+      { key: null as string | null, label: "Alle", count: data.length },
       { key: "my_turn", label: "Deine Eingabe", count: data.filter((m) => m.is_my_turn).length },
       {
         key: "waiting",
@@ -423,7 +423,9 @@ export default function DashboardClient() {
                   <span
                     className={cn(
                       "text-sm",
-                      step.done ? "font-light text-neutral-400 line-through decoration-neutral-300" : "font-medium text-neutral-800",
+                      step.done
+                        ? "font-light text-neutral-400 line-through decoration-neutral-300"
+                        : "font-medium text-neutral-800",
                     )}
                   >
                     {step.label}
@@ -493,7 +495,7 @@ export default function DashboardClient() {
                     type="button"
                     onClick={() => setSelected(mediation)}
                     className={cn(
-                      "grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
+                      "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
                       i > 0 && "border-t border-neutral-100",
                       mediation.is_my_turn && "bg-amber-50/40 hover:bg-amber-50/70",
                     )}

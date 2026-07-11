@@ -170,6 +170,29 @@ export const erbschaftFacts: DidYouKnowFact[] = [
   },
 ];
 
+export const geschaeftFacts: DidYouKnowFact[] = [
+  {
+    eyebrow: "Konflikte fressen Arbeitszeit",
+    text: "Laut der KPMG-Konfliktkostenstudie verbringen Mitarbeitende 10–15 % ihrer Arbeitszeit mit Konfliktbewältigung – bei Führungskräften sind es je nach Eskalationsgrad sogar 30–50 %. Ungelöste Konflikte sind damit ein messbarer Kostenfaktor.",
+  },
+  {
+    eyebrow: "Die Wirtschaft setzt selbst auf Mediation",
+    text: "Im Round Table Mediation und Konfliktmanagement der deutschen Wirtschaft haben sich seit 2008 zahlreiche Großunternehmen zusammengeschlossen, um Konflikte systematisch außergerichtlich zu klären – Mediation ist dort längst etabliertes Managementinstrument.",
+  },
+  {
+    eyebrow: "Verschwiegenheit ist gesetzlich verankert",
+    text: "§ 4 MediationsG verpflichtet Mediator:innen zur Verschwiegenheit über alles, was ihnen im Verfahren bekannt wird. Anders als ein öffentliches Gerichtsverfahren bleibt der Konflikt so vollständig unter Verschluss – ohne Image-Schaden am Markt.",
+  },
+  {
+    eyebrow: "Auch Gerichte empfehlen Mediation",
+    text: "Nach § 278a ZPO kann das Gericht den Parteien jederzeit eine Mediation vorschlagen und das Verfahren dafür ruhen lassen – der Gesetzgeber selbst sieht die außergerichtliche Klärung als gleichwertigen Weg.",
+  },
+  {
+    eyebrow: "Schneller als der Rechtsweg",
+    text: "Erstinstanzliche Zivilverfahren vor den Landgerichten dauern im Schnitt deutlich über ein Jahr, mit Berufung oft mehrere Jahre. Eine Wirtschaftsmediation ist dagegen häufig in wenigen Wochen abgeschlossen – und die Geschäftsbeziehung läuft währenddessen weiter.",
+  },
+];
+
 function FactCounter({ index, total }: { index: number; total: number }) {
   return (
     <div className="font-display text-sm tracking-[0.2em] text-accent-300">

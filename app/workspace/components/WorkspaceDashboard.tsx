@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR, MEDIATION_TYPES } from "../types";
-import { TypeBadge, StatusBadge, WCard, RowCard, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
+import { TypeBadge, StatusBadge, WCard, RowCard, ListRow, LoadingRows, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
 import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
 import { PremiumHero } from "@/app/components/ui/premium";
 
@@ -22,6 +22,12 @@ const FEEDBACK_EMOJI_MAP: Record<number, string> = {
 
 /** Schlüssel, die als 0–10 Skala interpretiert werden, für die Sales-/Vertrauenssignale. */
 const TRUST_SIGNAL_KEYS = ["vertrauen_in_prozess", "abschlusssicherheit", "einigung_wahrscheinlichkeit"];
+
+/** Fortschritt eines Falls: explizit gesetzter Wert oder aus der Phase abgeleitet. */
+function fallProgress(fall: MediationCase): number {
+  const phaseIdx = getPhaseIndex(fall.phase);
+  return fall.progress ?? (phaseIdx >= 0 ? Math.round(((phaseIdx + 1) / 6) * 100) : 0);
+}
 
 interface WorkspaceDashboardProps {
   isAdmin?: boolean;
@@ -64,7 +70,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
     .sort((a, b) => new Date(a.proposed_datetime).getTime() - new Date(b.proposed_datetime).getTime())
     .slice(0, 5);
 
-  const active = faelle.filter((m) => m.status === "active").length;
+  const aktiveFaelle = faelle.filter((m) => m.status === "active");
+  const active = aktiveFaelle.length;
   const pending = faelle.filter((m) => m.status === "pending" || m.status === "draft").length;
   const completed = faelle.filter((m) => m.status === "completed").length;
 
@@ -129,6 +136,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
             value: active,
             sub: "laufende Mediationen",
             onClick: () => onFilterStatus?.(["active"], "Aktive Fälle"),
+            // Mini-Sparkline: Fortschritt je aktivem Fall (Stripe-Stil)
+            trend: aktiveFaelle.map(fallProgress),
           },
           {
             label: "Ausstehend",
@@ -152,44 +161,53 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
       />
 
       <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
-      {/* Aktuelle Fälle */}
+      {/* Aktuelle Fälle — dichte Zeilen im Hairline-Container (Stripe-Stil) */}
       <WCard className="p-5">
         <SectionHeader
           label="Aktuelle Arbeit"
           title="Laufende & ausstehende Fälle"
         />
         {loading ? (
-          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
+          <LoadingRows rows={3} framed />
         ) : upcoming.length === 0 ? (
           <EmptyState icon="⚖" text="Keine laufenden Fälle." />
         ) : (
-          <div className="space-y-3">
-            {upcoming.map((fall) => {
+          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+            {upcoming.map((fall, i) => {
               const phaseIdx = getPhaseIndex(fall.phase);
-              const progress =
-                fall.progress ?? (phaseIdx >= 0 ? Math.round(((phaseIdx + 1) / 6) * 100) : 0);
+              const progress = fallProgress(fall);
               const currentPhase = phaseIdx >= 0 ? PHASES[phaseIdx].label : "Noch nicht gestartet";
 
               return (
-                <RowCard key={fall.id} onClick={() => onSelectFall(fall)}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <div className="font-semibold text-sm text-neutral-800">{fall.title}</div>
-                      <div className="mt-0.5 flex items-center gap-2 flex-wrap">
-                        <TypeBadge type={fall.mediation_type} />
-                      </div>
-                    </div>
-                    <StatusBadge status={fall.status} />
+                <ListRow key={fall.id} first={i === 0} onClick={() => onSelectFall(fall)}>
+                  <div className="grid grid-cols-[minmax(0,1fr)_20px] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_110px_150px_20px] sm:gap-6">
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-neutral-900">
+                        {fall.title}
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
+                        {TYPE_LABEL[fall.mediation_type] ?? fall.mediation_type} · {currentPhase}
+                      </span>
+                    </span>
+
+                    <span className="hidden sm:block">
+                      <StatusBadge status={fall.status} />
+                    </span>
+
+                    <span className="hidden items-center justify-end gap-3 sm:flex">
+                      <span className="w-16">
+                        <ProgressBar value={progress} />
+                      </span>
+                      <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-900">
+                        {progress}%
+                      </span>
+                    </span>
+
+                    <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                      ›
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <ProgressBar value={progress} />
-                    <span className="text-xs text-neutral-400 shrink-0">{progress}%</span>
-                  </div>
-                  <div className="mt-1 text-xs text-neutral-400">
-                    Phase:{" "}
-                    <span className="font-medium text-neutral-600">{currentPhase}</span>
-                  </div>
-                </RowCard>
+                </ListRow>
               );
             })}
           </div>
@@ -200,7 +218,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
       <WCard className="p-5">
         <SectionHeader label="Kalender" title="Nächste Termine" />
         {termineLoading ? (
-          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
+          <LoadingRows rows={2} framed />
         ) : naechsteTermine.length === 0 ? (
           <EmptyState icon="📅" text="Keine anstehenden Termine." />
         ) : (
@@ -211,10 +229,10 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
               return (
                 <RowCard key={termin.id} onClick={() => onSelectTermin?.(dt)} className="flex items-center gap-3">
                   <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-accent-50 py-2">
-                    <span className="text-[11px] font-semibold text-accent-600">
+                    <span className="text-[11px] font-semibold text-accent-600 tabular-nums">
                       {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                     </span>
-                    <span className="text-xs font-bold text-accent-700">
+                    <span className="text-xs font-bold text-accent-700 tabular-nums">
                       {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
@@ -249,7 +267,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
         )}
 
         {feedbackLoading ? (
-          <p className="text-sm italic text-neutral-400">Wird geladen…</p>
+          <LoadingRows rows={2} framed />
         ) : feedbackGroups.length === 0 ? (
           <EmptyState icon="💬" text="Noch kein Feedback eingegangen." />
         ) : (
@@ -273,7 +291,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                       const isAlert = entry.answers.weiterer_termin === "Ja, bitte";
                       return (
                         <div key={entry.id} className="flex items-center gap-2 text-xs">
-                          <span className="shrink-0 text-neutral-400 w-[88px]">
+                          <span className="shrink-0 text-neutral-400 w-[88px] tabular-nums">
                             {new Date(entry.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                           </span>
                           <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
@@ -281,7 +299,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                           </span>
                           {trustKey && (
                             <span className="text-neutral-600">
-                              Vertrauen/Erfolg: <span className="font-semibold text-neutral-800">{entry.answers[trustKey]}/10</span>
+                              Vertrauen/Erfolg: <span className="font-semibold text-neutral-800 tabular-nums">{entry.answers[trustKey]}/10</span>
                             </span>
                           )}
                           {emojiKey && (
@@ -316,7 +334,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                       <span className={cn("h-2 w-2 shrink-0 rounded-full border", TYPE_COLOR[type])} />
                       {TYPE_LABEL[type] ?? label}
                     </span>
-                    <span className="text-xs text-neutral-400">{count} Fälle</span>
+                    <span className="text-xs text-neutral-400 tabular-nums">{count} Fälle</span>
                   </div>
                   <ProgressBar value={pct} />
                 </div>

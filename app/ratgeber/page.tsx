@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
-import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
+import { ratgeberArticles, ratgeberCategories } from "@/app/content/ratgeberArtikel";
 import ratgeberHero from "@/fotos/medi_ratgeber.jpg";
 
 export const metadata: Metadata = {
@@ -55,33 +55,35 @@ export default function RatgeberUebersichtPage() {
           </div>
         </ImagePinHero>
 
-        <section className="section section-base">
-          <div className="container max-w-5xl">
-            <div className="eyebrow mb-6">Kategorie · Mediation</div>
-            <div className="grid gap-6 md:grid-cols-2">
-              {ratgeberArticles.map((a) => (
-                <Link
-                  key={a.slug}
-                  href={`/ratgeber/${a.slug}`}
-                  className="group flex flex-col rounded-3xl border border-neutral-100 bg-white p-7 transition hover:border-accent-200 hover:shadow-md"
-                >
-                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-accent-700">
-                    {a.category}
-                  </span>
-                  <h2 className="mt-3 text-xl font-bold leading-snug text-neutral-900 group-hover:text-accent-700">
-                    {a.title}
-                  </h2>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-600">
-                    {a.description}
-                  </p>
-                  <span className="mt-5 text-sm font-semibold text-accent-700">
-                    Artikel lesen →
-                  </span>
-                </Link>
-              ))}
+        {ratgeberCategories.map(({ category, articles }) => (
+          <section key={category} className="section section-base">
+            <div className="container max-w-5xl">
+              <div className="eyebrow mb-6">Kategorie · {category}</div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {articles.map((a) => (
+                  <Link
+                    key={a.slug}
+                    href={`/ratgeber/${a.slug}`}
+                    className="group flex flex-col rounded-3xl border border-neutral-100 bg-white p-7 transition hover:border-accent-200 hover:shadow-md"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-accent-700">
+                      {a.category}
+                    </span>
+                    <h2 className="mt-3 text-xl font-bold leading-snug text-neutral-900 group-hover:text-accent-700">
+                      {a.title}
+                    </h2>
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-600">
+                      {a.description}
+                    </p>
+                    <span className="mt-5 text-sm font-semibold text-accent-700">
+                      Artikel lesen →
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ))}
 
         <section className="section section-strong text-center">
           <div className="container max-w-3xl">

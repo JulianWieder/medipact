@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
 
 const BASE_URL = "https://medipact.de";
 
@@ -11,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  const lastModified = new Date("2026-07-07");
+  const lastModified = new Date("2026-07-11");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -91,30 +92,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/ratgeber/5-phasen-der-mediation`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/ratgeber/was-ist-mediation`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/ratgeber/was-ist-ein-mediator`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/ratgeber/mediation-kosten`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
     },
     // /cases/nachbarschaft ist nur noch ein Redirect auf /cases —
     // Redirects gehören nicht in die Sitemap.
@@ -210,5 +187,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  return staticRoutes;
+  // Ratgeber-Artikel automatisch aus dem Content generieren —
+  // neue Artikel in app/content/ratgeber/ landen ohne Zutun in der Sitemap.
+  const ratgeberRoutes: MetadataRoute.Sitemap = ratgeberArticles.map((a) => ({
+    url: `${BASE_URL}/ratgeber/${a.slug}`,
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...ratgeberRoutes];
 }

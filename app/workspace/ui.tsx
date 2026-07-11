@@ -4,7 +4,7 @@
 
 import React from "react";
 import { STATUS_CONFIG, TYPE_LABEL, TYPE_COLOR, ROLE_LABEL, INVOICE_STATUS_CONFIG } from "./types";
-import { OutlinePill, ThinProgressBar } from "@/app/components/ui/premium";
+import { OutlinePill, ThinProgressBar, StatusDot, Skeleton } from "@/app/components/ui/premium";
 
 // ── Utilities ─────────────────────────────────────────────────────────────
 
@@ -13,10 +13,31 @@ export function cn(...classes: (string | false | null | undefined)[]) {
 }
 
 // ── Status Badge ──────────────────────────────────────────────────────────
+// Standardisiert (Stripe-Stil): kleiner farbiger Punkt + Text statt
+// umrandeter Pille — gleiche Optik wie im Teilnehmer-Dashboard.
+
+type DotTone = "teal" | "amber" | "sky" | "neutral" | "red";
+
+/** Fall-Status → StatusDot-Tone. Gleiche Zuordnung wie im
+ *  Teilnehmer-Dashboard (DashboardClient), damit beide Bereiche
+ *  identische Statusfarben zeigen. */
+const STATUS_TONE: Record<string, DotTone> = {
+  draft: "sky",
+  pending: "amber",
+  active: "teal",
+  completed: "neutral",
+};
+
+const INVOICE_STATUS_TONE: Record<string, DotTone> = {
+  paid: "teal",
+  open: "amber",
+  refunded: "sky",
+  failed: "red",
+};
 
 export function StatusBadge({ status }: { status: string | null | undefined }) {
   const cfg = STATUS_CONFIG[status ?? "draft"] ?? STATUS_CONFIG.draft;
-  return <OutlinePill label={cfg.label} className={cfg.badge} dot={cfg.dot} />;
+  return <StatusDot label={cfg.label} tone={STATUS_TONE[status ?? "draft"] ?? "neutral"} />;
 }
 
 // ── Type Badge ────────────────────────────────────────────────────────────
@@ -31,7 +52,7 @@ export function TypeBadge({ type }: { type: string | null | undefined }) {
 
 export function InvoiceStatusBadge({ status }: { status: string | null | undefined }) {
   const cfg = INVOICE_STATUS_CONFIG[status ?? "open"] ?? INVOICE_STATUS_CONFIG.open;
-  return <OutlinePill label={cfg.label} className={cfg.badge} dot={cfg.dot} />;
+  return <StatusDot label={cfg.label} tone={INVOICE_STATUS_TONE[status ?? "open"] ?? "neutral"} />;
 }
 
 // ── Role Badge ────────────────────────────────────────────────────────────
@@ -99,7 +120,7 @@ export function KPI({
       <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{label}</div>
       <div
         className={cn(
-          "mt-2.5 font-display text-2xl font-medium tracking-tight",
+          "mt-2.5 font-display text-2xl font-medium tracking-tight tabular-nums",
           active ? "text-accent-600" : "text-neutral-900",
         )}
       >
@@ -181,6 +202,70 @@ export function RowCard({
       {children}
     </button>
   );
+}
+
+// ── List Row ──────────────────────────────────────────────────────────────
+// Stripe-Stil: dichte, hover-bare Zeile für Listen im Hairline-Container
+// (`<div className="overflow-hidden rounded-2xl border border-neutral-200
+// bg-white">`). Gegenstück zur Zeilen-Liste im Teilnehmer-Dashboard.
+
+export function ListRow({
+  onClick,
+  disabled,
+  first,
+  emphasis,
+  className = "",
+  children,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+  /** Erste Zeile im Container (keine obere Haarlinie). */
+  first?: boolean;
+  /** Amber-Hinterlegung für Zeilen, die Aufmerksamkeit brauchen. */
+  emphasis?: "amber";
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "group block w-full px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50",
+        !first && "border-t border-neutral-100",
+        emphasis === "amber" && "bg-amber-50/40 hover:bg-amber-50/70",
+        "disabled:cursor-default disabled:hover:bg-transparent",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Loading Rows ──────────────────────────────────────────────────────────
+// Standardisierter Skeleton-Ladezustand für Listen (statt "Wird geladen…").
+
+export function LoadingRows({ rows = 3, framed = false }: { rows?: number; framed?: boolean }) {
+  const body = (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          key={i}
+          className={cn("flex items-center gap-4 px-5 py-4", i > 0 && "border-t border-neutral-100")}
+        >
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="ml-auto h-3 w-16" />
+          <Skeleton className="hidden h-3 w-24 sm:block" />
+        </div>
+      ))}
+    </>
+  );
+  if (framed) {
+    return <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">{body}</div>;
+  }
+  return <div>{body}</div>;
 }
 
 // ── Progress Bar ──────────────────────────────────────────────────────────

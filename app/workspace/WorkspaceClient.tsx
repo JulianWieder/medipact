@@ -258,6 +258,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           selectedId={selectedFall?.id}
           statusFilter={faelleFilter}
           onClearFilter={() => setFaelleFilter(null)}
+          onSetFilter={(statuses, label) => setFaelleFilter({ statuses, label })}
           onSelect={(m) => {
             setSelectedFall(m);
             setTab("einzelansicht");

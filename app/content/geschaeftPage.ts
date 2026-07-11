@@ -7,6 +7,8 @@
 // konflikt.md und docs/faelle-phasen-inhalte.md. Preise: /preise (Einzelfall
 // €399, Business-Pauschale €5.000/Monat mit bis zu 150 Mediationen).
 
+import { geschaeftFacts } from "@/app/components/ui/DidYouKnowSection";
+
 export const geschaeftPageContent = {
   eyebrow: "Business-Mediation",
   title: "Wenn Konflikte das Unternehmen blockieren.",
@@ -127,6 +129,8 @@ export const geschaeftPageContent = {
       text: "Ziel ist eine Lösung, mit der man weiter zusammenarbeiten kann – im Team wie mit dem Geschäftspartner.",
     },
   ],
+
+  didYouKnowFacts: geschaeftFacts,
 
   faqTitle: "Häufige Fragen zur Business-Mediation",
   faqs: [
