@@ -1,7 +1,7 @@
 // Client-side API helpers – rufen die Next.js API-Routes auf,
 // die ihrerseits über backendFetch mit dem Backend kommunizieren.
 
-import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent, BlockResponseDto, Organization, AboPlan } from "./types";
+import type { MediationCase, MediationDetail, Participant, MediationNote, PhaseNoteGroup, UserRoleInfo, SystemUser, AppointmentEvent, FeedbackEntry, Invoice, InvoiceCreateInput, InvoiceUpdateInput, MediationVariantDto, PhaseStepDefaultDto, StepContent, BlockResponseDto, Organization, AboPlan, DashboardUebersicht } from "./types";
 
 // ── Mediations ────────────────────────────────────────────────────────────
 
@@ -761,4 +761,13 @@ export async function summarizeResults(
   if (!res.ok) throw new Error("Zusammenfassung konnte nicht erstellt werden");
   const data = await res.json().catch(() => null);
   return (data?.summary as string) ?? "";
+}
+
+// ── Workspace-Dashboard: Eingriffs-Signale + Neuigkeiten ────────────────────
+
+/** Aggregierte Dashboard-Übersicht: pro Fall Eingriffs-Signale + Neuigkeiten-Feed. */
+export async function fetchDashboardUebersicht(): Promise<DashboardUebersicht | null> {
+  const res = await fetch("/api/mediations/dashboard", { cache: "no-store" });
+  if (!res.ok) return null;
+  return res.json();
 }

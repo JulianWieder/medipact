@@ -474,3 +474,40 @@ export const ROLE_LABEL: Record<string, string> = {
   mediator: "Mediator",
   observer: "Beobachter",
 };
+
+// ── Workspace-Dashboard: Eingriffs-Signale + Neuigkeiten ────────────────────
+
+export interface DashboardSignal {
+  severity: "hoch" | "mittel" | "niedrig" | string;
+  code: string;
+  text: string;
+}
+
+export interface DashboardFall {
+  id: number;
+  title: string;
+  mediation_type: string;
+  status: string;
+  phase: string | null;
+  parteien: number;
+  signals: DashboardSignal[];
+  attention_score: number;
+  letzte_aktivitaet: string | null;
+  inaktiv_tage: number | null;
+  naechster_termin: string | null;
+}
+
+export interface DashboardNews {
+  when: string;
+  kind: "eingabe" | "ki" | "feedback" | "termin" | "vertrag" | "zahlung" | "einladung" | string;
+  mediation_id: number;
+  mediation_title: string;
+  actor: string;
+  text: string;
+  detail: string;
+}
+
+export interface DashboardUebersicht {
+  faelle: DashboardFall[];
+  neuigkeiten: DashboardNews[];
+}

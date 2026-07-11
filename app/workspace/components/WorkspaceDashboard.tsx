@@ -1,33 +1,60 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AppointmentEvent, MediationCase, FeedbackEntry } from "../types";
+import type { AppointmentEvent, MediationCase, DashboardUebersicht, DashboardFall } from "../types";
 import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR, MEDIATION_TYPES } from "../types";
 import { StatusBadge, WCard, RowCard, ListRow, LoadingRows, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
-import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchAllFeedback } from "../api";
+import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchDashboardUebersicht } from "../api";
 import { PremiumHero } from "@/app/components/ui/premium";
-
-const FEEDBACK_OCCASION_LABELS: Record<string, string> = {
-  after_videocall: "Nach dem Erstgespräch",
-  before_contract: "Vor dem Vertragsabschluss",
-};
-
-const FEEDBACK_EMOJI_MAP: Record<number, string> = {
-  1: "😔",
-  2: "😕",
-  3: "😐",
-  4: "🙂",
-  5: "😊",
-};
-
-/** Schlüssel, die als 0–10 Skala interpretiert werden, für die Sales-/Vertrauenssignale. */
-const TRUST_SIGNAL_KEYS = ["vertrauen_in_prozess", "abschlusssicherheit", "einigung_wahrscheinlichkeit"];
 
 /** Fortschritt eines Falls: explizit gesetzter Wert oder aus der Phase abgeleitet. */
 function fallProgress(fall: MediationCase): number {
   const phaseIdx = getPhaseIndex(fall.phase);
   return fall.progress ?? (phaseIdx >= 0 ? Math.round(((phaseIdx + 1) / 6) * 100) : 0);
 }
+
+/** DashboardFall → MediationCase (für die Navigation in den Fall). */
+function toCase(f: DashboardFall): MediationCase {
+  return {
+    id: f.id,
+    mediation_id: f.id,
+    title: f.title,
+    mediation_type: f.mediation_type,
+    status: f.status,
+    phase: f.phase,
+  };
+}
+
+/** Relative Zeitangabe für den Neuigkeiten-Feed. */
+function relTime(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "";
+  const diffMin = Math.round((Date.now() - t) / 60000);
+  if (diffMin < 1) return "gerade eben";
+  if (diffMin < 60) return `vor ${diffMin} Min.`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `vor ${diffH} Std.`;
+  const diffD = Math.round(diffH / 24);
+  if (diffD === 1) return "gestern";
+  if (diffD < 14) return `vor ${diffD} Tagen`;
+  return new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+const SEVERITY_STYLE: Record<string, { dot: string; text: string; chip: string }> = {
+  hoch: { dot: "bg-red-500", text: "text-red-700", chip: "border-red-200 bg-red-50 text-red-700" },
+  mittel: { dot: "bg-amber-400", text: "text-amber-800", chip: "border-amber-200 bg-amber-50 text-amber-800" },
+  niedrig: { dot: "bg-neutral-300", text: "text-neutral-500", chip: "border-neutral-200 bg-neutral-50 text-neutral-500" },
+};
+
+const NEWS_ICON: Record<string, string> = {
+  eingabe: "📝",
+  ki: "✦",
+  feedback: "💬",
+  termin: "📅",
+  vertrag: "📄",
+  zahlung: "💶",
+  einladung: "✉️",
+};
 
 interface WorkspaceDashboardProps {
   isAdmin?: boolean;
@@ -44,8 +71,8 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
   const [loading, setLoading] = useState(true);
   const [termine, setTermine] = useState<AppointmentEvent[]>([]);
   const [termineLoading, setTermineLoading] = useState(true);
-  const [feedback, setFeedback] = useState<FeedbackEntry[]>([]);
-  const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [dash, setDash] = useState<DashboardUebersicht | null>(null);
+  const [dashLoading, setDashLoading] = useState(true);
 
   useEffect(() => {
     (isAdmin ? fetchAllMediations() : fetchMediations())
@@ -60,9 +87,9 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
   }, [isAdmin]);
 
   useEffect(() => {
-    fetchAllFeedback()
-      .then(setFeedback)
-      .finally(() => setFeedbackLoading(false));
+    fetchDashboardUebersicht()
+      .then(setDash)
+      .finally(() => setDashLoading(false));
   }, [isAdmin]);
 
   const naechsteTermine = termine
@@ -75,52 +102,20 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
   const pending = faelle.filter((m) => m.status === "pending" || m.status === "draft").length;
   const completed = faelle.filter((m) => m.status === "completed").length;
 
-  const upcoming = faelle
-    .filter((m) => m.status === "active" || m.status === "pending")
-    .sort((a, b) => getPhaseIndex(b.phase) - getPhaseIndex(a.phase))
-    .slice(0, 5);
+  // ── Eingriffs-Signale: Fälle mit hoch/mittel-Signalen, nach Dringlichkeit ──
+  const dashFaelle = dash?.faelle ?? [];
+  const attentionFaelle = dashFaelle
+    .filter((f) => f.signals.some((s) => s.severity === "hoch" || s.severity === "mittel"))
+    .sort((a, b) => b.attention_score - a.attention_score);
+  const attentionCount = attentionFaelle.length;
 
-  // ── Feedback-Aggregation: pro Teilnehmer & Fall einen Zeitverlauf bilden ──
-  type FeedbackGroup = {
-    key: string;
-    mediationId?: number;
-    mediationTitle: string;
-    participantName: string;
-    participantRole: string;
-    entries: FeedbackEntry[];
-  };
-  const feedbackGroupsMap = new Map<string, FeedbackGroup>();
-  for (const entry of feedback) {
-    const key = `${entry.mediation_id ?? "?"}-${entry.participant_id ?? entry.participant_name}`;
-    if (!feedbackGroupsMap.has(key)) {
-      feedbackGroupsMap.set(key, {
-        key,
-        mediationId: entry.mediation_id,
-        mediationTitle: entry.mediation_title ?? "Unbekannter Fall",
-        participantName: entry.participant_name,
-        participantRole: entry.participant_role,
-        entries: [],
-      });
-    }
-    feedbackGroupsMap.get(key)!.entries.push(entry);
-  }
-  const feedbackGroups = Array.from(feedbackGroupsMap.values())
-    .map((g) => ({
-      ...g,
-      // Innerhalb einer Gruppe chronologisch aufsteigend, damit der
-      // Zeitverlauf (z.B. Erstgespräch → vor Vertragsabschluss) lesbar ist.
-      entries: [...g.entries].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      ),
-    }))
-    .sort((a, b) => {
-      const aLatest = new Date(a.entries[a.entries.length - 1].created_at).getTime();
-      const bLatest = new Date(b.entries[b.entries.length - 1].created_at).getTime();
-      return bLatest - aLatest;
-    })
-    .slice(0, 6);
+  // ── Verfahrens-Überblick: laufende + ausstehende Fälle, dringendste zuerst ──
+  const dashById = new Map(dashFaelle.map((f) => [f.id, f]));
+  const laufende = dashFaelle
+    .filter((f) => f.status === "active" || f.status === "pending" || f.status === "draft")
+    .sort((a, b) => b.attention_score - a.attention_score || getPhaseIndex(b.phase) - getPhaseIndex(a.phase));
 
-  const feedbackWantsAppointment = feedback.filter((e) => e.answers.weiterer_termin === "Ja, bitte").length;
+  const neuigkeiten = dash?.neuigkeiten ?? [];
 
   return (
     <div className="space-y-6">
@@ -140,6 +135,11 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
             trend: aktiveFaelle.map(fallProgress),
           },
           {
+            label: "Eingriff empfohlen",
+            value: attentionCount,
+            sub: attentionCount === 1 ? "Fall mit Signalen" : "Fälle mit Signalen",
+          },
+          {
             label: "Ausstehend",
             value: pending,
             sub: "noch nicht gestartet",
@@ -151,198 +151,237 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
             sub: "beendete Verfahren",
             onClick: () => onFilterStatus?.(["completed"], "Abgeschlossen"),
           },
-          {
-            label: "Gesamt",
-            value: faelle.length,
-            sub: "alle Fälle",
-            onClick: () => onFilterStatus?.(null, "Alle Fälle"),
-          },
         ]}
       />
 
       <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
-      {/* Aktuelle Fälle — dichte Zeilen im Hairline-Container (Stripe-Stil) */}
-      <WCard className="p-5">
-        <SectionHeader
-          label="Aktuelle Arbeit"
-          title="Laufende & ausstehende Fälle"
-        />
-        {loading ? (
-          <LoadingRows rows={3} framed />
-        ) : upcoming.length === 0 ? (
-          <EmptyState icon="⚖" text="Keine laufenden Fälle." />
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-            {upcoming.map((fall, i) => {
-              const phaseIdx = getPhaseIndex(fall.phase);
-              const progress = fallProgress(fall);
-              const currentPhase = phaseIdx >= 0 ? PHASES[phaseIdx].label : "Noch nicht gestartet";
-
-              return (
-                <ListRow key={fall.id} first={i === 0} onClick={() => onSelectFall(fall)}>
-                  <div className="grid grid-cols-[minmax(0,1fr)_20px] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_110px_150px_20px] sm:gap-6">
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-neutral-900">
-                        {fall.title}
-                      </span>
-                      <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
-                        {TYPE_LABEL[fall.mediation_type] ?? fall.mediation_type} · {currentPhase}
-                      </span>
-                    </span>
-
-                    <span className="hidden sm:block">
-                      <StatusBadge status={fall.status} />
-                    </span>
-
-                    <span className="hidden items-center justify-end gap-3 sm:flex">
-                      <span className="w-16">
-                        <ProgressBar value={progress} />
-                      </span>
-                      <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-900">
-                        {progress}%
-                      </span>
-                    </span>
-
-                    <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
-                      ›
-                    </span>
-                  </div>
-                </ListRow>
-              );
-            })}
-          </div>
-        )}
-      </WCard>
-
-      {/* Nächste Termine */}
-      <WCard className="p-5">
-        <SectionHeader label="Kalender" title="Nächste Termine" />
-        {termineLoading ? (
-          <LoadingRows rows={2} framed />
-        ) : naechsteTermine.length === 0 ? (
-          <EmptyState icon="📅" text="Keine anstehenden Termine." />
-        ) : (
-          <div className="space-y-2">
-            {naechsteTermine.map((termin) => {
-              const dt = new Date(termin.proposed_datetime);
-              const color = TYPE_COLOR[termin.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
-              return (
-                <RowCard key={termin.id} onClick={() => onSelectTermin?.(dt)} className="flex items-center gap-3">
-                  <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-accent-50 py-2">
-                    <span className="text-[11px] font-semibold text-accent-600 tabular-nums">
-                      {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
-                    </span>
-                    <span className="text-xs font-bold text-accent-700 tabular-nums">
-                      {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-neutral-800 truncate">{termin.mediation_title}</div>
-                    <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
-                      {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
-                    </span>
-                  </div>
-                </RowCard>
-              );
-            })}
-          </div>
-        )}
-      </WCard>
-      </div>
-
-      <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_1fr]">
-      {/* Feedback aus allen Fällen */}
-      <WCard className="p-5">
-        <SectionHeader label="Kundenerlebnis" title="Feedback aus allen Fällen" />
-
-        {feedbackWantsAppointment > 0 && (
-          <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xs font-semibold text-amber-800">
-              {feedbackWantsAppointment} {feedbackWantsAppointment === 1 ? "Rückmeldung wünscht" : "Rückmeldungen wünschen"} einen weiteren Termin vor dem Vertragsabschluss.
-            </p>
-          </div>
-        )}
-
-        {feedbackLoading ? (
-          <LoadingRows rows={2} framed />
-        ) : feedbackGroups.length === 0 ? (
-          <EmptyState icon="💬" text="Noch kein Feedback eingegangen." />
-        ) : (
-          <div className="space-y-3">
-            {feedbackGroups.map((group) => {
-              const fall = faelle.find((f) => f.id === group.mediationId);
-              return (
-                <RowCard key={group.key} onClick={() => fall && onSelectFall(fall)} disabled={!fall}>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div>
-                      <div className="font-semibold text-sm text-neutral-800">{group.participantName}</div>
-                      <div className="text-xs text-neutral-400">{group.mediationTitle}</div>
-                    </div>
-                  </div>
-
-                  {/* Zeitverlauf: ein Punkt pro Einreichung, chronologisch */}
-                  <div className="space-y-2">
-                    {group.entries.map((entry) => {
-                      const trustKey = TRUST_SIGNAL_KEYS.find((k) => entry.answers[k] !== undefined);
-                      const emojiKey = entry.answers.gefuehl !== undefined ? "gefuehl" : entry.answers.gehoert_gefuehl !== undefined ? "gehoert_gefuehl" : null;
-                      const isAlert = entry.answers.weiterer_termin === "Ja, bitte";
-                      return (
-                        <div key={entry.id} className="flex items-center gap-2 text-xs">
-                          <span className="shrink-0 text-neutral-400 w-[88px] tabular-nums">
-                            {new Date(entry.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
-                          </span>
-                          <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
-                            {FEEDBACK_OCCASION_LABELS[entry.occasion] ?? entry.occasion}
-                          </span>
-                          {trustKey && (
-                            <span className="text-neutral-600">
-                              Vertrauen/Erfolg: <span className="font-semibold text-neutral-800 tabular-nums">{entry.answers[trustKey]}/10</span>
-                            </span>
-                          )}
-                          {emojiKey && (
-                            <span>{FEEDBACK_EMOJI_MAP[Number(entry.answers[emojiKey])] ?? ""}</span>
-                          )}
-                          {isAlert && (
-                            <span className="font-semibold text-amber-700">⚠ weiterer Termin gewünscht</span>
-                          )}
+        {/* ── Linke Spalte: Eingreifen + Verfahrens-Überblick ── */}
+        <div className="space-y-6 min-w-0">
+          {/* Eingreifen empfohlen */}
+          <WCard className="p-5">
+            <SectionHeader label="Handlungsbedarf" title="Hier solltest du eingreifen" />
+            {dashLoading ? (
+              <LoadingRows rows={2} framed />
+            ) : attentionFaelle.length === 0 ? (
+              <EmptyState icon="✓" text="Aktuell keine dringenden Signale – alle Verfahren laufen ruhig." />
+            ) : (
+              <div className="space-y-3">
+                {attentionFaelle.map((f) => {
+                  const phaseIdx = getPhaseIndex(f.phase);
+                  const wichtig = f.signals
+                    .filter((s) => s.severity === "hoch" || s.severity === "mittel")
+                    .sort((a, b) => (a.severity === "hoch" ? 0 : 1) - (b.severity === "hoch" ? 0 : 1));
+                  const hochCount = wichtig.filter((s) => s.severity === "hoch").length;
+                  return (
+                    <RowCard key={f.id} onClick={() => onSelectFall(toCase(f))}>
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "h-2 w-2 shrink-0 rounded-full",
+                                hochCount > 0 ? "bg-red-500" : "bg-amber-400"
+                              )}
+                            />
+                            <span className="truncate text-sm font-semibold text-neutral-900">{f.title}</span>
+                          </div>
+                          <div className="mt-0.5 text-xs text-neutral-400">
+                            {TYPE_LABEL[f.mediation_type] ?? f.mediation_type}
+                            {phaseIdx >= 0 ? ` · Phase ${PHASES[phaseIdx].short}: ${PHASES[phaseIdx].label}` : ""}
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </RowCard>
-              );
-            })}
-          </div>
-        )}
-      </WCard>
+                        <StatusBadge status={f.status} />
+                      </div>
+                      <ul className="space-y-1.5">
+                        {wichtig.map((s, i) => {
+                          const st = SEVERITY_STYLE[s.severity] ?? SEVERITY_STYLE.niedrig;
+                          return (
+                            <li key={i} className="flex items-start gap-2 text-xs">
+                              <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", st.dot)} />
+                              <span className={cn("leading-relaxed", st.text)}>{s.text}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </RowCard>
+                  );
+                })}
+              </div>
+            )}
+          </WCard>
 
-      {/* Typ-Verteilung */}
-      {faelle.length > 0 && (
-        <WCard className="p-5">
-          <SectionHeader label="Statistik" title="Fälle nach Konfliktart" />
-          <div className="space-y-3">
-            {MEDIATION_TYPES.map(({ id: type, label }) => {
-              const count = faelle.filter((m) => m.mediation_type === type).length;
-              const pct = faelle.length > 0 ? Math.round((count / faelle.length) * 100) : 0;
-              return (
-                <div key={type}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-600">
-                      <span className={cn("h-2 w-2 shrink-0 rounded-full border", TYPE_COLOR[type])} />
-                      {TYPE_LABEL[type] ?? label}
-                    </span>
-                    <span className="text-xs text-neutral-400 tabular-nums">{count} Fälle</span>
-                  </div>
-                  <ProgressBar value={pct} />
-                </div>
-              );
-            })}
-          </div>
-        </WCard>
-      )}
+          {/* Verfahren im Überblick */}
+          <WCard className="p-5">
+            <SectionHeader label="Verfahren" title="Alle laufenden Verfahren im Überblick" />
+            {dashLoading || loading ? (
+              <LoadingRows rows={3} framed />
+            ) : laufende.length === 0 ? (
+              <EmptyState icon="⚖" text="Keine laufenden Fälle." />
+            ) : (
+              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                {laufende.map((f, i) => {
+                  const phaseIdx = getPhaseIndex(f.phase);
+                  const progress = phaseIdx >= 0 ? Math.round(((phaseIdx + 1) / 6) * 100) : 0;
+                  const currentPhase = phaseIdx >= 0 ? PHASES[phaseIdx].label : "Noch nicht gestartet";
+                  const hoch = f.signals.filter((s) => s.severity === "hoch").length;
+                  const mittel = f.signals.filter((s) => s.severity === "mittel").length;
+                  return (
+                    <ListRow key={f.id} first={i === 0} onClick={() => onSelectFall(toCase(f))}>
+                      <div className="grid grid-cols-[minmax(0,1fr)_20px] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_120px_110px_150px_20px] sm:gap-5">
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span className="block truncate text-sm font-medium text-neutral-900">{f.title}</span>
+                            {hoch > 0 && (
+                              <span className="shrink-0 rounded-full border border-red-200 bg-red-50 px-1.5 py-px text-[10px] font-bold text-red-700 tabular-nums">
+                                {hoch} !
+                              </span>
+                            )}
+                            {mittel > 0 && (
+                              <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-bold text-amber-800 tabular-nums">
+                                {mittel}
+                              </span>
+                            )}
+                          </span>
+                          <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
+                            {TYPE_LABEL[f.mediation_type] ?? f.mediation_type} · {currentPhase}
+                            {f.parteien > 0 ? ` · ${f.parteien} Parteien` : ""}
+                          </span>
+                        </span>
+
+                        <span className="hidden text-right text-[11px] text-neutral-400 sm:block">
+                          {f.letzte_aktivitaet
+                            ? (f.inaktiv_tage === 0 ? "heute aktiv" : `Aktivität ${relTime(f.letzte_aktivitaet)}`)
+                            : "keine Aktivität"}
+                        </span>
+
+                        <span className="hidden sm:block">
+                          <StatusBadge status={f.status} />
+                        </span>
+
+                        <span className="hidden items-center justify-end gap-3 sm:flex">
+                          <span className="w-16">
+                            <ProgressBar value={progress} />
+                          </span>
+                          <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-900">
+                            {progress}%
+                          </span>
+                        </span>
+
+                        <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                          ›
+                        </span>
+                      </div>
+                    </ListRow>
+                  );
+                })}
+              </div>
+            )}
+          </WCard>
+        </div>
+
+        {/* ── Rechte Spalte: Neuigkeiten + Termine + Statistik ── */}
+        <div className="space-y-6 min-w-0">
+          {/* Neuigkeiten */}
+          <WCard className="p-5">
+            <SectionHeader label="Aktivität" title="Neuigkeiten aus allen Fällen" />
+            {dashLoading ? (
+              <LoadingRows rows={3} framed />
+            ) : neuigkeiten.length === 0 ? (
+              <EmptyState icon="🕊" text="Noch keine Aktivität in deinen Fällen." />
+            ) : (
+              <div className="space-y-1">
+                {neuigkeiten.slice(0, 12).map((n, i) => {
+                  const fall = dashById.get(n.mediation_id);
+                  return (
+                    <button
+                      key={`${n.when}-${i}`}
+                      onClick={() => fall && onSelectFall(toCase(fall))}
+                      className="group flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-neutral-50"
+                    >
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-sm">
+                        {NEWS_ICON[n.kind] ?? "•"}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-xs leading-snug text-neutral-800">
+                          {n.actor && <span className="font-semibold">{n.actor} </span>}
+                          {n.text}
+                        </span>
+                        {n.detail && (
+                          <span className="mt-0.5 block truncate text-[11px] italic text-neutral-400">
+                            „{n.detail}“
+                          </span>
+                        )}
+                        <span className="mt-0.5 block text-[10px] text-neutral-400">
+                          {n.mediation_title} · {relTime(n.when)}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </WCard>
+
+          {/* Nächste Termine */}
+          <WCard className="p-5">
+            <SectionHeader label="Kalender" title="Nächste Termine" />
+            {termineLoading ? (
+              <LoadingRows rows={2} framed />
+            ) : naechsteTermine.length === 0 ? (
+              <EmptyState icon="📅" text="Keine anstehenden Termine." />
+            ) : (
+              <div className="space-y-2">
+                {naechsteTermine.map((termin) => {
+                  const dt = new Date(termin.proposed_datetime);
+                  const color = TYPE_COLOR[termin.mediation_type] ?? "bg-neutral-50 text-neutral-600 border-neutral-200";
+                  return (
+                    <RowCard key={termin.id} onClick={() => onSelectTermin?.(dt)} className="flex items-center gap-3">
+                      <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-xl bg-accent-50 py-2">
+                        <span className="text-[11px] font-semibold text-accent-600 tabular-nums">
+                          {dt.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
+                        </span>
+                        <span className="text-xs font-bold text-accent-700 tabular-nums">
+                          {dt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-neutral-800 truncate">{termin.mediation_title}</div>
+                        <span className={`mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${color}`}>
+                          {TYPE_LABEL[termin.mediation_type] ?? termin.mediation_type}
+                        </span>
+                      </div>
+                    </RowCard>
+                  );
+                })}
+              </div>
+            )}
+          </WCard>
+
+          {/* Typ-Verteilung */}
+          {faelle.length > 0 && (
+            <WCard className="p-5">
+              <SectionHeader label="Statistik" title="Fälle nach Konfliktart" />
+              <div className="space-y-3">
+                {MEDIATION_TYPES.map(({ id: type, label }) => {
+                  const count = faelle.filter((m) => m.mediation_type === type).length;
+                  const pct = faelle.length > 0 ? Math.round((count / faelle.length) * 100) : 0;
+                  return (
+                    <div key={type}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-600">
+                          <span className={cn("h-2 w-2 shrink-0 rounded-full border", TYPE_COLOR[type])} />
+                          {TYPE_LABEL[type] ?? label}
+                        </span>
+                        <span className="text-xs text-neutral-400 tabular-nums">{count} Fälle</span>
+                      </div>
+                      <ProgressBar value={pct} />
+                    </div>
+                  );
+                })}
+              </div>
+            </WCard>
+          )}
+        </div>
       </div>
     </div>
   );

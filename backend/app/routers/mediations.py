@@ -2542,6 +2542,428 @@ def analyse_mediation(
     return result
 
 
+# ── Workspace-Dashboard: Eingriffs-Signale + Neuigkeiten-Feed ────────────────
+
+def _dash_naive(dt):
+    """DB-DateTimes vereinheitlichen (naiv, UTC) für Differenzen/Sortierung."""
+    if dt is None:
+        return None
+    return dt.replace(tzinfo=None) if dt.tzinfo else dt
+
+
+def _dash_snippet(value, limit: int = 140) -> str:
+    """Kurzer, menschenlesbarer Auszug aus einem Block-/Notiz-Inhalt."""
+    import json as _json
+
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        s = value
+    elif isinstance(value, list):
+        s = " | ".join(str(x) for x in value if x)
+    elif isinstance(value, dict):
+        s = (
+            value.get("summary")
+            or value.get("text")
+            or value.get("zusammenfassung")
+            or value.get("transcript")
+            or ""
+        )
+        if not s:
+            try:
+                s = _json.dumps(value, ensure_ascii=False)
+            except Exception:
+                s = str(value)
+    else:
+        s = str(value)
+    s = " ".join(str(s).split())
+    return s[:limit] + ("…" if len(s) > limit else "")
+
+
+@router.get("/dashboard/uebersicht")
+def dashboard_uebersicht(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Aggregierte Übersicht für das Workspace-Dashboard (nur Mediator/Admin).
+
+    Liefert pro Fall Eingriffs-Signale (wo muss der Mediator handeln?) und
+    einen detaillierten Neuigkeiten-Feed über alle Fälle:
+      - signals: Zahlung ausstehend, unbeantwortete Einladungen, Feedback-
+        Alarme (Terminwunsch, niedriges Vertrauen, negative Stimmung),
+        Inaktivität, einseitige Beteiligung in der aktuellen Phase,
+        fehlender Termin.
+      - neuigkeiten: Eingaben, KI-Auswertungen, Feedback, Terminvorschläge und
+        -antworten, Vertrag/Unterschriften, Zahlungen, Einladungen — jeweils
+        mit Autor, Fall, Phase, Zeitstempel und Inhalts-Auszug.
+    Admins sehen alle Fälle, Mediatoren die Fälle, an denen sie beteiligt sind.
+    """
+    import json as _json
+
+    if current_user.role not in ("mediator", "admin"):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins zugänglich")
+
+    now = datetime.utcnow()
+
+    if current_user.role == "admin":
+        mediations = db.query(Mediation).order_by(Mediation.id.desc()).all()
+    else:
+        own_ids = [
+            p.mediation_id
+            for p in db.query(MediationParticipant)
+            .filter(MediationParticipant.user_id == current_user.id)
+            .all()
+        ]
+        mediations = (
+            db.query(Mediation)
+            .filter(Mediation.id.in_(own_ids))
+            .order_by(Mediation.id.desc())
+            .all()
+        ) if own_ids else []
+
+    med_by_id = {m.id: m for m in mediations}
+    med_ids = list(med_by_id.keys())
+    if not med_ids:
+        return {"faelle": [], "neuigkeiten": []}
+
+    # ── Basisdaten in wenigen Queries laden ─────────────────────────────────
+    part_rows = (
+        db.query(MediationParticipant, User)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationParticipant.mediation_id.in_(med_ids))
+        .all()
+    )
+    parts_by_med: dict[int, list] = {}
+    part_name: dict[int, str] = {}
+    for p, u in part_rows:
+        parts_by_med.setdefault(p.mediation_id, []).append((p, u))
+        part_name[p.id] = u.name
+
+    invites = (
+        db.query(MediationInvite)
+        .filter(MediationInvite.mediation_id.in_(med_ids))
+        .all()
+    )
+    blocks = (
+        db.query(MediationBlockResponse)
+        .filter(MediationBlockResponse.mediation_id.in_(med_ids))
+        .all()
+    )
+    notes = (
+        db.query(MediationNote)
+        .filter(
+            MediationNote.mediation_id.in_(med_ids),
+            MediationNote.submitted == True,  # noqa: E712
+        )
+        .all()
+    )
+    feedbacks = (
+        db.query(MediationFeedback)
+        .filter(MediationFeedback.mediation_id.in_(med_ids))
+        .all()
+    )
+    slots = (
+        db.query(MediationAppointmentSlot)
+        .filter(MediationAppointmentSlot.mediation_id.in_(med_ids))
+        .all()
+    )
+    slot_med = {s.id: s.mediation_id for s in slots}
+    votes = (
+        db.query(MediationAppointmentVote)
+        .filter(MediationAppointmentVote.slot_id.in_(list(slot_med.keys())))
+        .all()
+    ) if slot_med else []
+    contracts = (
+        db.query(MediationContract)
+        .filter(MediationContract.mediation_id.in_(med_ids))
+        .all()
+    )
+    contract_med = {c.id: c.mediation_id for c in contracts}
+    signatures = (
+        db.query(MediationContractSignature)
+        .filter(MediationContractSignature.contract_id.in_(list(contract_med.keys())))
+        .all()
+    ) if contract_med else []
+
+    occasion_labels = {
+        "after_videocall": "Nach dem Erstgespräch",
+        "before_contract": "Vor dem Vertragsabschluss",
+    }
+    trust_keys = ("vertrauen_in_prozess", "abschlusssicherheit", "einigung_wahrscheinlichkeit")
+    mood_keys = ("gefuehl", "gehoert_gefuehl")
+
+    # ── Neuigkeiten-Feed sammeln ────────────────────────────────────────────
+    events: list[tuple] = []  # (when, dict)
+
+    def add_event(when, mediation_id, kind, actor, text, detail=""):
+        when = _dash_naive(when)
+        if when is None:
+            return
+        m = med_by_id.get(mediation_id)
+        if not m:
+            return
+        events.append((when, {
+            "when": when.isoformat(),
+            "kind": kind,
+            "mediation_id": mediation_id,
+            "mediation_title": m.title or "Neue Mediation",
+            "actor": actor,
+            "text": text,
+            "detail": detail,
+        }))
+
+    step_titles: dict[str, str] = {
+        d.step_key: d.title
+        for d in db.query(PhaseStepDefault).filter(PhaseStepDefault.enabled.is_(True)).all()
+    }
+    step_titles["__ki__"] = "KI-Auswertung"
+
+    for r in blocks:
+        phase_label = PHASE_LABELS_ANALYSE.get(r.phase, r.phase)
+        step_title = step_titles.get(r.step_key, r.step_key)
+        if r.author_source == "ai":
+            add_event(
+                r.updated_at, r.mediation_id, "ki", "KI",
+                f"KI-Auswertung gespeichert ({step_title}, Phase {phase_label})",
+                _dash_snippet(r.value),
+            )
+        else:
+            actor = part_name.get(r.author_participant_id or -1, "Unbekannt")
+            status_txt = "eingereicht" if r.submitted else "gespeichert (Entwurf)"
+            add_event(
+                r.updated_at, r.mediation_id, "eingabe", actor,
+                f"Eingabe {status_txt} – {step_title}, Phase {phase_label}",
+                _dash_snippet(r.value),
+            )
+
+    for f in feedbacks:
+        try:
+            answers = _json.loads(f.answers)
+        except (TypeError, ValueError):
+            answers = {}
+        actor = part_name.get(f.participant_id or -1, "Unbekannt")
+        bits = []
+        for k in trust_keys:
+            if answers.get(k) is not None:
+                bits.append(f"Vertrauen/Erfolg {answers[k]}/10")
+                break
+        if answers.get("weiterer_termin") == "Ja, bitte":
+            bits.append("wünscht weiteren Termin")
+        add_event(
+            f.created_at, f.mediation_id, "feedback", actor,
+            f"Feedback abgegeben ({occasion_labels.get(f.occasion, f.occasion)})",
+            " · ".join(bits),
+        )
+
+    for s in slots:
+        dt = _dash_naive(s.proposed_datetime)
+        add_event(
+            s.created_at, s.mediation_id, "termin", "",
+            f"Terminvorschlag: {dt.strftime('%d.%m.%Y %H:%M') if dt else '—'}",
+        )
+    for v in votes:
+        med_id = slot_med.get(v.slot_id)
+        if med_id is None:
+            continue
+        actor = part_name.get(v.participant_id or -1, "Unbekannt")
+        add_event(
+            v.voted_at, med_id, "termin", actor,
+            "hat dem Terminvorschlag zugestimmt" if v.accepted else "hat den Terminvorschlag abgelehnt",
+        )
+
+    for c in contracts:
+        add_event(c.created_at, c.mediation_id, "vertrag", "", "Vertragsentwurf erstellt")
+    for sig in signatures:
+        med_id = contract_med.get(sig.contract_id)
+        if med_id is None:
+            continue
+        add_event(sig.signed_at, med_id, "vertrag", sig.signed_name, "hat den Vertrag unterschrieben")
+
+    for p, u in part_rows:
+        if p.paid and p.paid_at:
+            add_event(p.paid_at, p.mediation_id, "zahlung", u.name, "Zahlung eingegangen")
+
+    for inv in invites:
+        who = inv.invited_email or "unbekannte E-Mail"
+        add_event(inv.created_at, inv.mediation_id, "einladung", "", f"Einladung an {who} versendet")
+
+    events.sort(key=lambda e: e[0], reverse=True)
+    neuigkeiten = [e[1] for e in events[:30]]
+
+    # ── Eingriffs-Signale pro Fall ──────────────────────────────────────────
+    # Letzte Aktivität je Fall (Parteien/Mediator, ohne KI)
+    last_activity: dict[int, datetime] = {}
+
+    def bump_activity(med_id, when):
+        when = _dash_naive(when)
+        if when is None:
+            return
+        if med_id not in last_activity or when > last_activity[med_id]:
+            last_activity[med_id] = when
+
+    for r in blocks:
+        if r.author_source != "ai":
+            bump_activity(r.mediation_id, r.updated_at)
+    for f in feedbacks:
+        bump_activity(f.mediation_id, f.created_at)
+    for v in votes:
+        med_id = slot_med.get(v.slot_id)
+        if med_id is not None:
+            bump_activity(med_id, v.voted_at)
+    for sig in signatures:
+        med_id = contract_med.get(sig.contract_id)
+        if med_id is not None:
+            bump_activity(med_id, sig.signed_at)
+
+    # Zukünftige Termine je Fall
+    next_slot: dict[int, datetime] = {}
+    for s in slots:
+        dt = _dash_naive(s.proposed_datetime)
+        if dt and dt >= now and (s.mediation_id not in next_slot or dt < next_slot[s.mediation_id]):
+            next_slot[s.mediation_id] = dt
+
+    # Eingaben in der aktuellen Phase je Fall/Partei (für einseitige Beteiligung)
+    phase_contrib: dict[tuple, bool] = {}
+    for r in blocks:
+        if r.author_source != "ai" and r.author_participant_id and r.submitted:
+            phase_contrib[(r.mediation_id, r.phase, r.author_participant_id)] = True
+    for n in notes:
+        phase_contrib[(n.mediation_id, n.phase, n.participant_id)] = True
+
+    faelle_out = []
+    for m in mediations:
+        parts = parts_by_med.get(m.id, [])
+        parteien = [(p, u) for p, u in parts if p.role not in ("mediator", "admin")]
+        signals: list[dict] = []
+
+        if m.status in ("active", "pending"):
+            # Zahlung ausstehend (blockiert die Inhalte der Partei)
+            unpaid = [u.name for p, u in parteien if (p.amount_due or 0) > 0 and not p.paid]
+            if unpaid:
+                signals.append({
+                    "severity": "hoch",
+                    "code": "zahlung",
+                    "text": f"Zahlung ausstehend: {', '.join(unpaid)} — Inhalte für diese Partei gesperrt",
+                })
+
+            # Unbeantwortete Einladungen
+            for inv in invites:
+                if inv.mediation_id != m.id or inv.status != "pending":
+                    continue
+                created = _dash_naive(inv.created_at)
+                days = (now - created).days if created else 0
+                if days >= 3:
+                    who = inv.invited_email or "eine Partei"
+                    signals.append({
+                        "severity": "hoch" if days >= 7 else "mittel",
+                        "code": "einladung",
+                        "text": f"Einladung an {who} seit {days} Tagen unbeantwortet — nachfassen oder erneut senden",
+                    })
+
+            # Feedback-Alarme (jeweils letzter Eintrag pro Teilnehmer)
+            latest_fb: dict[int, MediationFeedback] = {}
+            for f in feedbacks:
+                if f.mediation_id != m.id:
+                    continue
+                prev = latest_fb.get(f.participant_id)
+                if prev is None or _dash_naive(f.created_at) > _dash_naive(prev.created_at):
+                    latest_fb[f.participant_id] = f
+            for f in latest_fb.values():
+                try:
+                    answers = _json.loads(f.answers)
+                except (TypeError, ValueError):
+                    answers = {}
+                name = part_name.get(f.participant_id or -1, "Teilnehmer")
+                if answers.get("weiterer_termin") == "Ja, bitte":
+                    signals.append({
+                        "severity": "hoch",
+                        "code": "feedback",
+                        "text": f"{name} wünscht einen weiteren Termin vor dem Vertragsabschluss",
+                    })
+                for k in trust_keys:
+                    v = answers.get(k)
+                    try:
+                        v = int(v)
+                    except (TypeError, ValueError):
+                        continue
+                    if v <= 4:
+                        signals.append({
+                            "severity": "hoch",
+                            "code": "feedback",
+                            "text": f"{name}: niedriges Vertrauen in den Prozess ({v}/10) — Gespräch suchen",
+                        })
+                    break
+                for k in mood_keys:
+                    v = answers.get(k)
+                    try:
+                        v = int(v)
+                    except (TypeError, ValueError):
+                        continue
+                    if v <= 2:
+                        signals.append({
+                            "severity": "mittel",
+                            "code": "feedback",
+                            "text": f"{name}: negative Stimmung im letzten Feedback",
+                        })
+                    break
+
+        if m.status == "active":
+            # Inaktivität
+            la = last_activity.get(m.id)
+            if la is None:
+                signals.append({
+                    "severity": "mittel",
+                    "code": "inaktiv",
+                    "text": "Noch keine Eingaben der Parteien — Einstieg begleiten",
+                })
+            else:
+                days = (now - la).days
+                if days >= 7:
+                    signals.append({
+                        "severity": "hoch" if days >= 14 else "mittel",
+                        "code": "inaktiv",
+                        "text": f"Keine Aktivität seit {days} Tagen — Parteien aktivieren",
+                    })
+
+            # Einseitige Beteiligung in der aktuellen Phase
+            if m.phase and len(parteien) >= 2:
+                contributed = [u.name for p, u in parteien if phase_contrib.get((m.id, m.phase, p.id))]
+                missing = [u.name for p, u in parteien if not phase_contrib.get((m.id, m.phase, p.id))]
+                if contributed and missing:
+                    phase_label = PHASE_LABELS_ANALYSE.get(m.phase, m.phase)
+                    signals.append({
+                        "severity": "mittel",
+                        "code": "einseitig",
+                        "text": f"Phase {phase_label}: {', '.join(missing)} hat noch nichts eingereicht (im Gegensatz zu {', '.join(contributed)})",
+                    })
+
+            # Kein anstehender Termin
+            if m.id not in next_slot:
+                signals.append({
+                    "severity": "niedrig",
+                    "code": "termin",
+                    "text": "Kein anstehender Termin geplant",
+                })
+
+        score = sum({"hoch": 3, "mittel": 2, "niedrig": 1}.get(s["severity"], 0) for s in signals)
+        la = last_activity.get(m.id)
+        faelle_out.append({
+            "id": m.id,
+            "title": m.title or "Neue Mediation",
+            "mediation_type": m.mediation_type,
+            "status": m.status,
+            "phase": m.phase,
+            "parteien": len(parteien),
+            "signals": signals,
+            "attention_score": score,
+            "letzte_aktivitaet": la.isoformat() if la else None,
+            "inaktiv_tage": (now - la).days if la else None,
+            "naechster_termin": next_slot[m.id].isoformat() if m.id in next_slot else None,
+        })
+
+    return {"faelle": faelle_out, "neuigkeiten": neuigkeiten}
+
+
 # ── Fall-Analyse: Phasen-Zusammenfassungen + SWOT zur Finalisierung ─────────
 
 PHASE_LABELS_ANALYSE = {
