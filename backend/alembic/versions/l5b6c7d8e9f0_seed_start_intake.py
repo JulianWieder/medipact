@@ -25,7 +25,8 @@ im Designer tolerant ignoriert):
   • map_to: "description" | "priority"  → fließt in mediation.description/priority
   • title (bei textausgabe)             → große Kapitel-/Intro-Überschrift
 
-Idempotent: legt start_intake nur an, wenn er für den Typ fehlt; bestehende
+Idempotent (Upsert): legt start_intake an, wenn er fehlt; ersetzt veraltete
+Seed-Inhalte (erkannt an der ersten Block-id); bestehende
 einladung-Schritte werden dann um +1 nach hinten geschoben (start_intake = 0).
 
 Revision ID: l5b6c7d8e9f0
@@ -235,51 +236,118 @@ def _blocks_for(t):
                  "Drohungen, laufende Verfahren?"),
             ),
         ]
-    # geschaeft
+    # geschaeft — eigenständiger Business-Intake ("Lagebesprechung"):
+    # Wirtschaftsmediation fragt anders als Familienmediation. Fachlich:
+    # Auftrags-/Mandatsklärung (welche Rolle hat die anfragende Person?),
+    # Systemdiagnose (Ebene nach Sache/Beziehung/Rolle/Struktur), Eskalations-
+    # grad nach Glasl (setzt via sets_flag das Fall-Flag glasl_zone, das die
+    # Eskalations-Schritte in der Verhandlungsphase steuert), Konfliktkosten,
+    # Fristen. Eigene Kapitel: Die Lage → Das System → Der Weg.
     return [
-        _intro(
-            "Konflikte im Geschäft kosten doppelt: Geld und Energie. Die "
-            "nächsten fünf Minuten gehören Ihrer Sicht der Lage: ein "
-            "strukturiertes Gespräch, keine Formular-Batterie. Wir fragen, "
-            "was ein erfahrener Wirtschaftsmediator im ersten Gespräch fragen "
-            "würde. Alles bleibt vertraulich."
-        ),
-        _RAHMEN,
-        *_geschichte(
-            ("Was ist die Lage? Beschreiben Sie den Konflikt so, wie Sie ihn "
-             "einem vertrauten Sparringspartner schildern würden — Zahlen und "
-             "Details kommen später."),
-            ("Wer ist beteiligt — und in welchen Rollen (Gesellschafter, "
-             "Geschäftsführung, Team, Kunde, Lieferant)?"),
-        ),
-        _KAP2,
-        _b("st_f_ebene", "auswahl",
+        _b("gs_intro", "textausgabe",
+           title="Zeit für eine Lagebesprechung.",
+           text=(
+               "Ungelöste Konflikte in Organisationen kosten dreifach: Geld, "
+               "Tempo und gute Leute. Die nächsten fünf Minuten sind Ihr "
+               "strukturiertes Erstgespräch — die Fragen, die ein erfahrener "
+               "Wirtschaftsmediator im ersten Briefing stellt. Vertraulich, "
+               "klar, ohne Umwege."
+           )),
+        _b("gs_rahmen", "zustimmung", text=(
+            "Der Rahmen, damit Klärung überhaupt möglich wird: FREIWILLIGKEIT "
+            "(Mediation wirkt nur, wenn die Beteiligten sie wollen — auch bei "
+            "Hierarchie). VERTRAULICHKEIT (Ihre Angaben dienen der Mediation — "
+            "sie sind kein Berichtswesen an Vorgesetzte oder die Organisation). "
+            "ALLPARTEILICHKEIT (die Mediation steht auf keiner Seite — auch "
+            "nicht auf der des Auftraggebers). ERGEBNISOFFENHEIT (tragfähige "
+            "Lösungen entstehen im Prozess, nicht per Anweisung). Wichtig: "
+            "Mediation ersetzt keine arbeitsrechtliche Beratung. Auf dieser "
+            "Grundlage möchte ich arbeiten."
+        )),
+        _b("gs_kap1", "textausgabe",
+           title="Kapitel 1 · Die Lage",
+           text=(
+               "Erst das Briefing: Was ist los, wer steckt drin, und von wo aus "
+               "schauen Sie darauf? Noch keine Bewertung — nur die Lage."
+           )),
+        _b("gs_lage", "frage", map_to="description", prompt=(
+            "Was ist die Lage? Beschreiben Sie den Konflikt wie in einem "
+            "vertraulichen Briefing an einen externen Sparringspartner — "
+            "Zahlen und Details kommen später."
+        )),
+        _b("gs_beteiligte", "frage", prompt=(
+            "Wer ist beteiligt — mit welchen Rollen und Berichtslinien "
+            "(Gesellschafter, Geschäftsführung, Teamleitung, Team, Kunde, "
+            "Lieferant)? Gibt es ein Hierarchiegefälle zwischen den Parteien?"
+        )),
+        _b("gs_rolle", "auswahl",
+           prompt="Und Sie selbst — welche Rolle haben Sie in diesem Konflikt?",
+           options=["Ich bin selbst Konfliktpartei",
+                    "Ich bin Führungskraft der Beteiligten",
+                    "Ich bin HR / interne Vermittlung",
+                    "Ich bin Gesellschafter:in / Inhaber:in"],
+           multi=False),
+        _b("gs_kap2", "textausgabe",
+           title="Kapitel 2 · Das System",
+           text=(
+               "Organisationskonflikte haben selten EINE Ursache. Jetzt geht es "
+               "um Ebene, Verlauf und das, was der Konflikt schon heute kostet."
+           )),
+        _b("gs_ebene", "auswahl",
            prompt="Auf welcher Ebene liegt der Konflikt vor allem?",
            options=["Sache (Zahlen, Verträge, Leistung)",
                     "Beziehung (Vertrauen, Kommunikation)",
                     "Rolle (Zuständigkeit, Anerkennung)",
-                    "Struktur (Prozesse, Verantwortung)"],
+                    "Struktur (Prozesse, Verantwortung, Ressourcen)"],
            multi=True),
-        _b("st_f_druck", "skala",
-           prompt="Wie hoch ist der wirtschaftliche bzw. organisatorische Druck?",
-           min=1, max=10, minLabel="läuft nebenher", maxLabel="existenzbedrohend"),
-        _b("st_f_frist", "frage", prompt=(
-            "Gibt es Fristen oder Termine, die Druck machen — Verträge, "
-            "Gesellschafterversammlung, Projekt-Deadlines?"
+        _b("gs_verlauf", "frage", prompt=(
+            "Seit wann läuft das — und wie hat es sich entwickelt? Was wurde "
+            "schon versucht (Gespräche, Moderation, Machtwort), und warum hat "
+            "es nicht gereicht?"
         )),
-        *_blick(
-            "z. B. Zahlungsfrage, Zusammenarbeit im Team, Gesellschafterfrage",
-            ("Gibt es akute Eskalationen — angedrohte Kündigungen, Anwälte, "
-             "blockierte Entscheidungen, drohende Trennung von Partnern?"),
-        ),
+        _b("gs_eskalation", "skala",
+           prompt=("Wo steht der Konflikt heute? Ihre ehrliche Einschätzung "
+                   "auf der Eskalationstreppe."),
+           min=1, max=9,
+           minLabel="1 · man redet noch sachlich",
+           maxLabel="9 · Schaden wird in Kauf genommen",
+           sets_flag={"flag": "glasl_zone",
+                      "thresholds": [[1, "win_win"], [4, "win_lose"], [7, "lose_lose"]]}),
+        _b("gs_wirkung", "frage", prompt=(
+            "Was kostet der Konflikt schon heute — liegengebliebene Projekte, "
+            "Fluktuation, Krankenstand, verlorene Kunden, Ihre eigene Energie?"
+        )),
+        _b("gs_kap3", "textausgabe",
+           title="Kapitel 3 · Der Weg",
+           text=(
+               "Zum Schluss der Blick nach vorn: Was zuerst, was steht auf dem "
+               "Spiel, und woran misst sich der Erfolg?"
+           )),
+        _b("gs_dringend", "frage", map_to="priority", prompt=(
+            "Was muss zuerst gelöst werden? Wenn in den nächsten Wochen nur "
+            "EIN Knoten platzen dürfte — welcher?"
+        ), placeholder="z. B. Zusammenarbeit im Team, Zahlungsfrage, Gesellschafterfrage"),
+        _b("gs_risiken", "frage", prompt=(
+            "Was steht auf dem Spiel, wenn nichts passiert — angedrohte "
+            "Kündigungen, eingeschaltete Anwälte, Compliance-Themen, "
+            "blockierte Entscheidungen, harte Fristen?"
+        )),
+        _b("gs_ziel", "frage", prompt=(
+            "Angenommen, in drei Monaten ist das geklärt: Woran merken es die "
+            "Beteiligten — und woran merkt es die Organisation (Zahlen, "
+            "Stimmung, Tempo)?"
+        )),
+        _b("gs_zuversicht", "skala",
+           prompt=("Wie zuversichtlich sind Sie heute, dass eine tragfähige "
+                   "Lösung möglich ist?"),
+           min=1, max=10, minLabel="kaum vorstellbar", maxLabel="sehr zuversichtlich"),
     ]
-
 
 TITLES = {
     "trennung": "Ihr Start — die Trennung sortieren",
     "erbschaft": "Ihr Start — den Erbfall sortieren",
     "nachbarschaft": "Ihr Start — den Konflikt sortieren",
-    "geschaeft": "Ihr Start — die Lage sortieren",
+    "geschaeft": "Ihr Start — die Lagebesprechung",
 }
 
 
@@ -321,6 +389,22 @@ def upgrade() -> None:
             )
         ).first()
         if exists:
+            # Schon geseedet: nur aktualisieren, wenn der Inhalt noch das alte
+            # geteilte Gerüst ist (Marker: erste Block-id weicht ab) — manuelle
+            # Designer-Anpassungen mit gleicher Marker-id bleiben unberührt.
+            row = conn.execute(
+                sa.select(psd.c.id, psd.c.blocks).where(psd.c.id == exists[0])
+            ).first()
+            blocks = _blocks_for(t)
+            current = row[1] or []
+            want_first = blocks[0]["id"]
+            have_first = current[0].get("id") if current and isinstance(current[0], dict) else None
+            if have_first != want_first:
+                conn.execute(
+                    psd.update()
+                    .where(psd.c.id == exists[0])
+                    .values(blocks=blocks, title=TITLES[t], updated_at=now)
+                )
             continue
 
         # Bestehende Onboarding-Schritte nach hinten schieben, Intake ganz nach vorn.
