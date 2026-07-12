@@ -112,10 +112,15 @@ def participant_due(
     return round(price, 2)
 
 
-# ── Mandanten-Abos ───────────────────────────────────────────────────────────
+# ── Business-Abos (Firmenkunden) ─────────────────────────────────────────────
 #
-# Ein Mandant (Organization) hat einen Abo-Plan; der Monatspreis richtet sich
-# nach der Anzahl der Mediatoren im Mandanten:
+# Ein Firmenkunde (Organization) hat einen Abo-Plan; das Abo schaltet die
+# internen Fälle des Unternehmens frei (Fälle inklusive, keine Pro-Partei-
+# Paywall – siehe app/services/billing.py). Der Monatspreis wird aktuell noch
+# nach der Anzahl der Firmen-Mediatoren berechnet – die endgültige Preisachse
+# (Sitze/Mitarbeiter vs. parallele Fälle vs. Flat) ist eine offene Produkt-
+# Entscheidung (siehe docs/business-mandanten-spec.md, §7/§10). Bis dahin bleibt
+# die bestehende Formel bestehen:
 #   Monatspreis = base_eur + per_mediator_eur × max(0, Mediatoren − included_mediators)
 # ``max_mediators`` = None bedeutet unbegrenzt. Zahlen sind – wie oben –
 # bewusst NUR hier gepflegt.
@@ -124,10 +129,13 @@ def participant_due(
 ABO_PLANS: tuple[str, ...] = ("starter", "praxis", "kanzlei")
 DEFAULT_ABO_PLAN = "starter"
 
+# Anzeige-Labels der Business-Pläne. Schlüssel bleiben stabil (DB-Werte in
+# organizations.plan); nur die Labels wurden auf Firmenkunden umgestellt
+# (früher Anbieter-/Kanzlei-Framing).
 ABO_PLAN_LABELS = {
     "starter": "Starter",
-    "praxis": "Praxis",
-    "kanzlei": "Kanzlei",
+    "praxis": "Team",
+    "kanzlei": "Unternehmen",
 }
 
 ABO_PRICING: dict[str, dict] = {

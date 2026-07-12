@@ -14,6 +14,7 @@ import { RechnungenListe } from "./components/RechnungenListe";
 import { WorkflowManager } from "./components/WorkflowManager";
 import { BenutzerManager } from "./components/AdminBereich";
 import { MandantenManager } from "./components/MandantenManager";
+import { FirmOnboardingWizard, FirmOnboardingChecklist } from "./components/FirmOnboarding";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
 
@@ -143,6 +144,11 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // isSuperAdmin ist strenger: nur echte Administratoren (role == "admin")
   // sehen und betreten den Admin-Bereich.
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  // Firmen-Admin: eingeschränkter, org-begrenzter Workspace-Zugriff.
+  const [isFirmAdmin, setIsFirmAdmin] = useState(false);
+  // Firmen-Onboarding: Vollbild-Wizard (1. Login) + Dashboard-Checkliste.
+  const [showFirmWizard, setShowFirmWizard] = useState(false);
+  const [firmOnbRefresh, setFirmOnbRefresh] = useState(0);
   const [userRoleLabel, setUserRoleLabel] = useState("Mediator / Admin");
 
   // Phasenwechsel: Fall neu laden
@@ -161,8 +167,17 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       if (info) {
         setIsAdmin(info.is_admin);
         setIsSuperAdmin(!!info.is_superadmin);
+        setIsFirmAdmin(!!info.is_firm_admin);
+        if (info.is_firm_admin) {
+          try {
+            const seen = typeof window !== "undefined" &&
+              window.localStorage.getItem(`medipact_firm_onboarding_seen_${info.email}`);
+            if (!seen) setShowFirmWizard(true);
+          } catch {}
+        }
         const labels: Record<string, string> = {
           admin: "Admin",
+          firm_admin: "Firmen-Admin",
           mediator: "Mediator",
           party: "Partei",
         };
@@ -170,6 +185,14 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       }
     });
   }, []);
+
+  function closeFirmWizard() {
+    try {
+      if (userEmail) window.localStorage.setItem(`medipact_firm_onboarding_seen_${userEmail}`, "1");
+    } catch {}
+    setShowFirmWizard(false);
+    setFirmOnbRefresh((n) => n + 1);
+  }
 
   function handleSelectSection(id: WorkspaceSection) {
     setSection(id);
@@ -289,10 +312,23 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "dashboard") {
     return (
       <>
-        {showLeitfaden && <LeitfadenModal onClose={() => setShowLeitfaden(false)} />}
+        {showLeitfaden && !isFirmAdmin && <LeitfadenModal onClose={() => setShowLeitfaden(false)} />}
+        {showFirmWizard && (
+          <FirmOnboardingWizard
+            onClose={closeFirmWizard}
+            onFinished={() => setFirmOnbRefresh((n) => n + 1)}
+          />
+        )}
         <div className="flex h-full bg-neutral-50 text-neutral-900">
-          <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+          <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
           <div className="flex-1 overflow-auto p-6">
+            {isFirmAdmin && (
+              <FirmOnboardingChecklist
+                onOpenWizard={() => setShowFirmWizard(true)}
+                onNavigate={handleSelectSection}
+                refreshKey={firmOnbRefresh}
+              />
+            )}
             <WorkspaceDashboard
               isAdmin={isAdmin}
               onSelectFall={(m) => {
@@ -313,7 +349,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "einstellungen") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-lg">
             <p className="eyebrow mb-2">Workspace</p>
@@ -342,7 +378,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "rechnungen") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
         <div className="flex-1 overflow-auto">
           <RechnungenListe />
         </div>
@@ -354,7 +390,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "workflows") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
         <div className="flex-1 overflow-auto">
           <WorkflowManager />
         </div>
@@ -366,12 +402,12 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "admin") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
         <div className="flex-1 overflow-auto">
-          {isSuperAdmin ? (
+          {isSuperAdmin || isFirmAdmin ? (
             <>
-              <BenutzerManager currentUserEmail={userEmail} />
-              <MandantenManager />
+              <BenutzerManager currentUserEmail={userEmail} isFirmAdmin={isFirmAdmin} />
+              {isSuperAdmin && <MandantenManager />}
             </>
           ) : (
             <div className="flex h-full items-center justify-center p-8">
@@ -393,7 +429,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   if (section === "kalender") {
     return (
       <div className="flex h-full bg-neutral-50 text-neutral-900">
-        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+        <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
         <div className="flex-1 overflow-auto p-6">
           <Kalender isAdmin={isAdmin} jumpToDate={kalenderDate} />
         </div>
@@ -404,7 +440,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   // ── Standard: Liste + Einzelansicht ─────────────────────────────────────
   return (
     <div className="flex h-full bg-neutral-50 text-neutral-900">
-      <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} />
+      <WorkspaceSidebar active={section} onSelect={handleSelectSection} userEmail={userEmail} isSuperAdmin={isSuperAdmin} isFirmAdmin={isFirmAdmin} />
 
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">

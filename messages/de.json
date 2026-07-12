@@ -135,5 +135,21 @@
     "ctaButton": "Kostenlosen Account erstellen",
     "ctaSecondaryLabel": "Preise & Pakete ansehen",
     "ctaDisclaimer": "Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar"
+  },
+  "newsletter": {
+    "eyebrow": "Newsletter",
+    "title": "Wissen, das Konflikte löst – direkt in Ihr Postfach",
+    "text": "Praktische Impulse zu fairer Kommunikation, Mediation und Konfliktlösung. Ein- bis zweimal im Monat, kostenlos und jederzeit abbestellbar.",
+    "placeholder": "Ihre E-Mail-Adresse",
+    "button": "Anmelden",
+    "footerHeading": "Newsletter",
+    "footerText": "Impulse zu fairer Konfliktlösung – ein- bis zweimal im Monat.",
+    "footerButton": "Abonnieren",
+    "submitting": "Wird gesendet …",
+    "success": "Fast geschafft – vielen Dank für Ihre Anmeldung!",
+    "error": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+    "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "consent": "Mit der Anmeldung stimmen Sie dem Erhalt des Newsletters zu. Details in der",
+    "privacyLink": "Datenschutzerklärung."
   }
 }

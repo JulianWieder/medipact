@@ -7,8 +7,11 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.email import send_verification_email, send_password_reset_email
+from app.models.organization import Organization
 from app.models.user import User
 from app.rate_limit import auth_limiter
+from app.services import tenancy
+from app import pricing
 from app.security import (
     create_access_token,
     create_refresh_token,
@@ -20,6 +23,13 @@ from app.security import (
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/plans")
+def public_business_plans():
+    """Öffentliche Liste der Business-Abo-Pläne inkl. Konditionen – für die
+    Tarif-Auswahl in der Unternehmens-Registrierung (kein Login nötig)."""
+    return pricing.abo_plan_options()
 
 
 class RegisterRequest(BaseModel):
@@ -285,11 +295,17 @@ def get_my_role(
         raise HTTPException(status_code=404, detail="User not found")
     return {
         "role": user.role,
-        "is_admin": user.role in ("mediator", "admin"),
+        # is_admin = Workspace-Zugang (Fälle/Workflows verwalten): Mediatoren,
+        # Firmen-Admins und globale Admins.
+        "is_admin": user.role in ("mediator", "admin", "firm_admin"),
         # is_superadmin ist bewusst strenger als is_admin: nur echte
-        # Administratoren (role == "admin") erhalten Zugriff auf den
-        # Admin-Bereich / Benutzermanager. Mediatoren nicht.
+        # Administratoren (role == "admin") erhalten Zugriff auf den globalen
+        # Admin-Bereich (alle Firmen). Mediatoren/Firmen-Admins nicht.
         "is_superadmin": user.role == "admin",
+        # Firmen-Admin: eingeschränkter, auf das eigene Unternehmen begrenzter
+        # Zugriff (eigene Fälle + org-scoped Benutzermanager).
+        "is_firm_admin": user.role == "firm_admin",
+        "organization_id": user.organization_id,
         "email": user.email,
         "name": user.name,
     }
@@ -325,11 +341,20 @@ def get_all_users(
     db: Session = Depends(get_db),
     current_user_email: str = Depends(get_current_user),
 ):
-    """Alle registrierten Nutzer - nur fuer Mediatoren und Admins."""
+    """Registrierte Nutzer - fuer Mediatoren, Firmen-Admins und Admins.
+
+    Tenant-Scoping: firm_admin und Firmen-Mediatoren sehen nur die Nutzer ihres
+    eigenen Unternehmens. Globale Admins und Pool-Mediatoren sehen alle."""
     current = db.query(User).filter(User.email == current_user_email).first()
-    if not current or current.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nur fuer Mediatoren und Admins")
-    users = db.query(User).order_by(User.name).all()
+    if not current or current.role not in ("mediator", "admin", "firm_admin"):
+        raise HTTPException(status_code=403, detail="Nur fuer Mediatoren, Firmen-Admins und Admins")
+    query = db.query(User)
+    if tenancy.is_tenant_scoped(current):
+        # Firmen-Admin/Firmen-Mediator ohne Unternehmen sieht keine Nutzer.
+        if current.organization_id is None:
+            return []
+        query = query.filter(User.organization_id == current.organization_id)
+    users = query.order_by(User.name).all()
     return [
         {
             "id": u.id,
@@ -348,7 +373,19 @@ def get_all_users(
 # Getrennt von der Mediator-Berechtigung: Mediatoren dürfen Fälle/Workflows
 # verwalten, aber NICHT Rollen anderer Nutzer ändern oder Nutzer löschen.
 
-ALLOWED_ROLES = ("party", "mediator", "admin")
+ALLOWED_ROLES = ("party", "mediator", "admin", "firm_admin")
+# Rollen, die ein Firmen-Admin innerhalb seines Unternehmens vergeben darf.
+FIRM_ADMIN_ASSIGNABLE_ROLES = ("party", "mediator")
+
+# Anzeige-Labels aller bekannten Rollen – SINGLE SOURCE fürs Frontend-Dropdown
+# (siehe GET /auth/roles). Neue Rolle hier + in ALLOWED_ROLES eintragen, dann
+# erscheint sie automatisch im Benutzermanager.
+ROLE_LABELS = {
+    "party": "Partei",
+    "mediator": "Mediator",
+    "firm_admin": "Firmen-Admin",
+    "admin": "Administrator",
+}
 
 
 class UpdateUserRoleRequest(BaseModel):
@@ -363,11 +400,49 @@ class UpdateUserRoleRequest(BaseModel):
 
 
 def _require_admin(db: Session, current_user_email: str) -> User:
-    """Stellt sicher, dass der aufrufende Nutzer ein echter Admin ist."""
+    """Stellt sicher, dass der aufrufende Nutzer ein echter (globaler) Admin ist."""
     current = db.query(User).filter(User.email == current_user_email).first()
     if not current or current.role != "admin":
         raise HTTPException(status_code=403, detail="Nur für Administratoren")
     return current
+
+
+def _require_user_manager(db: Session, current_user_email: str) -> User:
+    """Nutzerverwaltung: globaler Admin ODER Firmen-Admin (org-begrenzt)."""
+    current = db.query(User).filter(User.email == current_user_email).first()
+    if not current or current.role not in ("admin", "firm_admin"):
+        raise HTTPException(status_code=403, detail="Nur für Administratoren")
+    return current
+
+
+def _assert_can_manage_target(manager: User, target: User) -> None:
+    """Firmen-Admin darf nur Nutzer der eigenen Org verwalten und keine (globalen/
+    Firmen-)Admins anfassen. Globaler Admin darf alles."""
+    if tenancy.is_global_admin(manager):
+        return
+    if target.organization_id != manager.organization_id or manager.organization_id is None:
+        raise HTTPException(status_code=403, detail="Kein Zugriff auf Nutzer eines anderen Unternehmens.")
+    if target.role in ("admin", "firm_admin"):
+        raise HTTPException(status_code=403, detail="Firmen-Admins können keine Administratoren verwalten.")
+
+
+@router.get("/roles")
+def list_assignable_roles(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Rollen fürs Benutzermanager-Dropdown – dynamisch je nach Rolle des
+    Aufrufers. Globaler Admin: alle Rollen; Firmen-Admin: nur party/mediator.
+    ``labels`` liefert Anzeige-Labels aller bekannten Rollen (auch fremde)."""
+    manager = _require_user_manager(db, current_user_email)
+    if tenancy.is_global_admin(manager):
+        assignable = list(ALLOWED_ROLES)
+    else:  # firm_admin
+        assignable = list(FIRM_ADMIN_ASSIGNABLE_ROLES)
+    return {
+        "assignable": [{"id": r, "label": ROLE_LABELS.get(r, r)} for r in assignable],
+        "labels": ROLE_LABELS,
+    }
 
 
 @router.patch("/users/{user_id}/role")
@@ -377,19 +452,26 @@ def update_user_role(
     db: Session = Depends(get_db),
     current_user_email: str = Depends(get_current_user),
 ):
-    """Ändert die Rolle eines Nutzers. Nur für Administratoren."""
-    admin = _require_admin(db, current_user_email)
+    """Ändert die Rolle eines Nutzers. Globaler Admin: jede Rolle, jeden Nutzer.
+    Firmen-Admin: nur Nutzer der eigenen Org, nur Rollen party/mediator."""
+    manager = _require_user_manager(db, current_user_email)
 
     target = db.query(User).filter(User.id == user_id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Nutzer nicht gefunden")
 
-    # Ein Admin darf sich nicht selbst herabstufen (sonst kann er sich
-    # aussperren) – bewusst blockiert.
-    if target.id == admin.id and payload.role != "admin":
+    _assert_can_manage_target(manager, target)
+
+    if not tenancy.is_global_admin(manager) and payload.role not in FIRM_ADMIN_ASSIGNABLE_ROLES:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Firmen-Admins können nur folgende Rollen vergeben: {', '.join(FIRM_ADMIN_ASSIGNABLE_ROLES)}.",
+        )
+
+    if target.id == manager.id and payload.role != manager.role:
         raise HTTPException(
             status_code=400,
-            detail="Du kannst deine eigene Admin-Rolle nicht entfernen.",
+            detail="Du kannst deine eigene Rolle hier nicht ändern.",
         )
 
     target.role = payload.role
@@ -400,6 +482,7 @@ def update_user_role(
         "email": target.email,
         "role": target.role,
         "is_verified": target.is_verified,
+        "organization_id": target.organization_id,
     }
 
 
@@ -409,18 +492,193 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user_email: str = Depends(get_current_user),
 ):
-    """Löscht einen Nutzer. Nur für Administratoren."""
-    admin = _require_admin(db, current_user_email)
+    """Löscht einen Nutzer. Globaler Admin: jeden. Firmen-Admin: nur eigene Org."""
+    manager = _require_user_manager(db, current_user_email)
 
     target = db.query(User).filter(User.id == user_id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Nutzer nicht gefunden")
 
-    if target.id == admin.id:
+    if target.id == manager.id:
         raise HTTPException(
             status_code=400, detail="Du kannst deinen eigenen Account nicht löschen."
         )
 
+    _assert_can_manage_target(manager, target)
+
     db.delete(target)
     db.commit()
     return {"deleted": True, "id": user_id}
+
+
+# ── Firmen-Mitglieder anlegen (Firmen-Admin / globaler Admin) ───────────────
+#
+# Ein Firmen-Admin legt Firmen-Mediatoren und Mitarbeiter (Beteiligte) in seinem
+# Unternehmen an. Der neue Nutzer bekommt die organization_id des Firmen-Admins
+# und setzt sein Passwort über die zugesandte "Passwort setzen"-Mail selbst.
+
+class OrgMemberCreateRequest(BaseModel):
+    name: str
+    email: EmailStr
+    role: str = "party"
+    organization_id: int | None = None
+
+    @field_validator("name")
+    @classmethod
+    def name_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Name darf nicht leer sein")
+        return v.strip()
+
+    @field_validator("role")
+    @classmethod
+    def role_valid(cls, v: str) -> str:
+        if v not in FIRM_ADMIN_ASSIGNABLE_ROLES:
+            raise ValueError(
+                f"Ungültige Rolle. Erlaubt: {', '.join(FIRM_ADMIN_ASSIGNABLE_ROLES)}"
+            )
+        return v
+
+
+@router.post("/org-members", status_code=201)
+def create_org_member(
+    payload: OrgMemberCreateRequest,
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    manager = _require_user_manager(db, current_user_email)
+
+    if tenancy.is_global_admin(manager):
+        org_id = payload.organization_id
+        if org_id is None:
+            raise HTTPException(status_code=400, detail="organization_id erforderlich.")
+    else:
+        org_id = manager.organization_id
+        if org_id is None:
+            raise HTTPException(status_code=400, detail="Dein Account ist keinem Unternehmen zugeordnet.")
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        raise HTTPException(status_code=404, detail="Unternehmen nicht gefunden")
+
+    existing = db.query(User).filter(User.email == str(payload.email)).first()
+    if existing:
+        if existing.organization_id not in (None, org_id) and not tenancy.is_global_admin(manager):
+            raise HTTPException(status_code=409, detail="Nutzer gehört bereits zu einem anderen Unternehmen.")
+        existing.organization_id = org_id
+        if existing.role == "party":
+            existing.role = payload.role
+        db.commit()
+        db.refresh(existing)
+        return {
+            "id": existing.id, "name": existing.name, "email": existing.email,
+            "role": existing.role, "is_verified": existing.is_verified,
+            "organization_id": existing.organization_id, "invited": False,
+        }
+
+    reset_token = secrets.token_urlsafe(32)
+    user = User(
+        name=payload.name,
+        email=str(payload.email),
+        hashed_password=hash_password(secrets.token_urlsafe(24)),
+        role=payload.role,
+        organization_id=org_id,
+        is_verified=True,
+        password_reset_token=reset_token,
+        password_reset_token_expires=datetime.utcnow() + timedelta(days=7),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    try:
+        send_password_reset_email(str(payload.email), payload.name, reset_token)
+    except Exception as exc:
+        print(f"[EMAIL ERROR] {exc}")
+
+    return {
+        "id": user.id, "name": user.name, "email": user.email, "role": user.role,
+        "is_verified": user.is_verified, "organization_id": user.organization_id,
+        "invited": True,
+    }
+
+
+# ── Firmenkunden-Onboarding: Self-Service-Registrierung ─────────────────────
+#
+# Legt in einem Schritt das Unternehmen an und macht den registrierenden Nutzer
+# zum Firmen-Admin. Bestätigung per E-Mail wie bei /register.
+
+class RegisterCompanyRequest(BaseModel):
+    company_name: str
+    name: str
+    email: EmailStr
+    password: str
+    # Granulare Firmendaten (Schritt Firma + Ansprechpartner + Tarif).
+    plan: str = pricing.DEFAULT_ABO_PLAN
+    billing_email: str | None = None
+    # Position des Ansprechpartners (nur informativ, aktuell nicht persistiert).
+    position: str | None = None
+
+    @field_validator("company_name", "name")
+    @classmethod
+    def not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Darf nicht leer sein")
+        return v.strip()
+
+    @field_validator("plan")
+    @classmethod
+    def plan_valid(cls, v: str) -> str:
+        return pricing.normalize_abo_plan(v)
+
+    @field_validator("password")
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Passwort muss mindestens 8 Zeichen lang sein")
+        return v
+
+
+@router.post("/register-company", response_model=RegisterResponse)
+def register_company(
+    request: Request, payload: RegisterCompanyRequest, db: Session = Depends(get_db)
+):
+    auth_limiter.check(request)
+
+    if db.query(User).filter(User.email == str(payload.email)).first():
+        raise HTTPException(status_code=400, detail="Email ist bereits registriert")
+    if db.query(Organization).filter(Organization.name == payload.company_name).first():
+        raise HTTPException(status_code=409, detail="Ein Unternehmen mit diesem Namen existiert bereits.")
+
+    org = Organization(
+        name=payload.company_name,
+        plan=payload.plan,
+        billing_email=(payload.billing_email.strip() if payload.billing_email else None) or None,
+    )
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+
+    token = secrets.token_urlsafe(32)
+    user = User(
+        name=payload.name,
+        email=str(payload.email),
+        hashed_password=hash_password(payload.password),
+        role="firm_admin",
+        organization_id=org.id,
+        is_verified=False,
+        verification_token=token,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    try:
+        send_verification_email(str(payload.email), payload.name, token)
+    except Exception as exc:
+        print(f"[EMAIL ERROR] {exc}")
+
+    return RegisterResponse(
+        message="Unternehmen registriert. Bitte bestätige deine E-Mail-Adresse.",
+        email=str(payload.email),
+    )

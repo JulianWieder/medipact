@@ -1,4 +1,4 @@
-from sqlalchemy import JSON, Boolean, Column, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Text
 
 from app.database import Base
 
@@ -9,6 +9,13 @@ class Mediation(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, default="Neue Mediation")
     mediation_type = Column(String, nullable=False)
+    # Zuordnung Fall -> Firmenkunde (organizations.id). NULL = privater B2C-Fall
+    # (bestehendes Verhalten: Pro-Partei-Paywall). Gesetzt = Firmenfall: unterliegt
+    # Tenant-Scoping (nur eigenes Unternehmen sichtbar) und wird über das aktive
+    # Firmen-Abo freigeschaltet statt über Parteizahlungen (siehe services/billing.py).
+    organization_id = Column(
+        Integer, ForeignKey("organizations.id"), nullable=True, index=True
+    )
     description = Column(Text, nullable=True)
     priority = Column(Text, nullable=True)
     role = Column(String, nullable=True)
@@ -24,7 +31,7 @@ class Mediation(Base):
     # (Standard-Schritte + Schritte der gewählten Variante).
     variant_key = Column(String, nullable=True, index=True)
     # Fall-Fakten/Flags als JSON-Objekt, z.B. {"glasl_zone": "win_lose",
-    # "kinder": true}. Steuern zusammen mit phase_step_defaults.visible_if,
-    # welche Schritte/Blöcke dieser Fall sieht (Eskalation, Segmentierung).
-    # NULL = keine Flags gesetzt (alles Unbedingte ist sichtbar).
+    # "abo": "ja"}. Steuern zusammen mit phase_step_defaults.visible_if,
+    # welche Schritte/Blöcke dieser Fall sieht (Eskalation, Segmentierung,
+    # Abo- vs. Einzel-Mediation). NULL = keine Flags (alles Unbedingte sichtbar).
     flags = Column(JSON, nullable=True)

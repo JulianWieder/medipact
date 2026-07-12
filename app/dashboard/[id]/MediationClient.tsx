@@ -51,6 +51,8 @@ type Props = {
   userRole: string;
   currentUserName?: string;
   initialIsPaid?: boolean;
+  // Firmenfall (Abo-Modell): organizations.id, NULL/undefined = privater B2C-Fall.
+  initialOrganizationId?: number | null;
 };
 
 type Participant = {
@@ -140,7 +142,7 @@ function StepCard({
   );
 }
 
-export default function MediationClient({ mediationId, userRole, currentUserName, initialIsPaid = false }: Props) {
+export default function MediationClient({ mediationId, userRole, currentUserName, initialIsPaid = false, initialOrganizationId = null }: Props) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -198,7 +200,14 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             // Einleitung weiterleiten – vorher braucht sie diese Seite, um ihre
             // Rechnungsdaten zu hinterlegen und den eigenen Anteil zu bezahlen.
             if (me?.role === "other_party" && initialIsPaid) {
-              router.replace(`/dashboard/${hashId(mediationId)}/einleitung`);
+              // Abo-Fälle (Firmen-Abo): Beteiligte durchlaufen zuerst den
+              // schlanken Business-Start (Grundkonfiguration + Rahmen +
+              // Kurz-Intake) statt direkt in die Einleitung zu springen.
+              router.replace(
+                initialOrganizationId != null
+                  ? `/dashboard/${hashId(mediationId)}/start`
+                  : `/dashboard/${hashId(mediationId)}/einleitung`,
+              );
               return;
             }
           }
@@ -208,7 +217,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       }
     }
     loadParticipants();
-  }, [mediationId, currentUserName, router, initialIsPaid]);
+  }, [mediationId, currentUserName, router, initialIsPaid, initialOrganizationId]);
 
   // Rechnungsdaten des eingeloggten Teilnehmers laden.
   useEffect(() => {

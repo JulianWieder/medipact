@@ -28,6 +28,8 @@ from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
 from app import pricing
 from app.services import billing
+from app.services import tenancy
+from app.models.organization import Organization
 
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
@@ -458,6 +460,32 @@ def create_mediation(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Firmenkontext: Ersteller gehört zu einem Unternehmen -> Firmenfall.
+    # Firmenkunden legen ausschließlich Business-Mediationen ("geschaeft") an;
+    # der Fall wird über das Firmen-Abo freigeschaltet (is_paid=True).
+    org_id = user.organization_id
+    # Abo-Gate: Im Abo-Modell muss ZUERST die unternehmensweite
+    # Grundkonfiguration vorgenommen und akzeptiert sein (Julian, 2026-07-12).
+    # Einzel-B2C-Fälle (org_id NULL) sind davon nicht betroffen.
+    if org_id is not None:
+        from app.models.organization import Organization
+
+        org = db.query(Organization).filter(Organization.id == org_id).first()
+        if org is None or not getattr(org, "base_config_accepted_at", None):
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "Bitte zuerst die Grundkonfiguration Ihres Unternehmens "
+                    "vornehmen und akzeptieren – danach können Abo-Fälle "
+                    "angelegt werden."
+                ),
+            )
+    if org_id is not None and mediation.mediation_type != "geschaeft":
+        raise HTTPException(
+            status_code=422,
+            detail="Firmenkunden können nur Business-Mediationen (Team & Organisation) anlegen.",
+        )
+
     db_mediation = Mediation(
         title=mediation.title or "Neue Mediation",
         mediation_type=mediation.mediation_type,
@@ -466,6 +494,12 @@ def create_mediation(
         role=mediation.role,
         status=mediation.status,
         package=pricing.normalize_package(mediation.package),
+        organization_id=org_id,
+        is_paid=(org_id is not None),
+        # Abo-Fälle bekommen das Flag abo=ja: dadurch greift der schlanke
+        # Abo-Start (phase_step_defaults geschaeft/abo_start, visible_if)
+        # statt des B2C-Intakes mit Paketwahl.
+        flags=({"abo": "ja"} if org_id is not None else None),
     )
     db.add(db_mediation)
     db.commit()
@@ -863,11 +897,21 @@ def get_all_mediations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Alle Mediationen ohne Teilnehmerfilter – nur für Mediatoren und Admins."""
-    if current_user.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins zugänglich")
+    """Fälle ohne Teilnehmerfilter – für Mediatoren, Firmen-Admins und Admins.
 
-    rows = db.query(Mediation).order_by(Mediation.id.desc()).all()
+    Tenant-Scoping: firm_admin und Firmen-Mediatoren sehen nur die Fälle ihres
+    eigenen Unternehmens. Globale Admins und Pool-Mediatoren sehen alle."""
+    if current_user.role not in ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren, Firmen-Admins und Admins zugänglich")
+
+    query = db.query(Mediation)
+    if tenancy.is_tenant_scoped(current_user):
+        # Firmen-Admin/Firmen-Mediator ohne Unternehmen sieht NICHTS (kein
+        # versehentlicher Zugriff auf private B2C-Fälle mit organization_id NULL).
+        if current_user.organization_id is None:
+            return []
+        query = query.filter(Mediation.organization_id == current_user.organization_id)
+    rows = query.order_by(Mediation.id.desc()).all()
     return [
         {
             "mediation_id": m.id,
@@ -889,10 +933,23 @@ def list_available_mediators(
 ):
     """Alle Nutzer mit Rolle 'mediator' – für die Mediator-Auswahl im Workspace.
     Nur für Mediatoren/Admins. MUSS vor /{mediation_id} (int) stehen, sonst
-    würde "mediators" als mediation_id interpretiert (422)."""
-    if current_user.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins zugänglich")
-    users = db.query(User).filter(User.role == "mediator").order_by(User.name).all()
+    würde "mediators" als mediation_id interpretiert (422).
+
+    Tenant-Scoping: firm_admin/Firmen-Mediatoren erhalten die Mediatoren ihrer
+    eigenen Org sowie medipact-Pool-Mediatoren (organization_id IS NULL)."""
+    if current_user.role not in ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren, Firmen-Admins und Admins zugänglich")
+    query = db.query(User).filter(User.role == "mediator")
+    if tenancy.is_tenant_scoped(current_user):
+        if current_user.organization_id is None:
+            return []
+        query = query.filter(
+            or_(
+                User.organization_id == current_user.organization_id,
+                User.organization_id.is_(None),
+            )
+        )
+    users = query.order_by(User.name).all()
     return [{"user_id": u.id, "name": u.name, "email": u.email} for u in users]
 
 
@@ -910,12 +967,13 @@ def get_mediation(
         )
         .first()
     )
-    if not is_participant:
-        raise HTTPException(status_code=403, detail="Not allowed")
-
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
+
+    # Zugriff: Teilnehmer ODER (firm_admin/Firmen-Mediator der eigenen Org).
+    if not is_participant and not tenancy.can_view_mediation(current_user, mediation):
+        raise HTTPException(status_code=403, detail="Not allowed")
 
     return {
         "mediation_id": mediation.id,
@@ -926,8 +984,9 @@ def get_mediation(
         "priority": mediation.priority,
         "status": mediation.status,
         "phase": mediation.phase,
-        "role": is_participant.role,
+        "role": is_participant.role if is_participant else current_user.role,
         "is_paid": mediation.is_paid,
+        "organization_id": mediation.organization_id,
         "mediator": _serialize_mediator(db, mediation.id),
     }
 
@@ -947,7 +1006,9 @@ def get_mediation_participants(
         .first()
     )
     if not is_participant:
-        raise HTTPException(status_code=403, detail="Not allowed")
+        mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+        if not tenancy.can_view_mediation(current_user, mediation):
+            raise HTTPException(status_code=403, detail="Not allowed")
 
     confirmed = (
         db.query(MediationParticipant, User)
@@ -996,18 +1057,27 @@ def assign_mediator(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Ordnet dem Fall einen Mediator zu bzw. wechselt ihn (nur Mediator/Admin).
+    """Ordnet dem Fall einen Mediator zu bzw. wechselt ihn (Mediator/Firmen-Admin/Admin).
     Es bleibt immer genau ein Mediator-Teilnehmer übrig."""
-    if current_user.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nur Mediatoren/Admins dürfen den Mediator ändern.")
+    if current_user.role not in ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE):
+        raise HTTPException(status_code=403, detail="Nur Mediatoren/Firmen-Admins/Admins dürfen den Mediator ändern.")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
 
+    if tenancy.is_tenant_scoped(current_user) and not tenancy.can_view_mediation(current_user, mediation):
+        raise HTTPException(status_code=403, detail="Kein Zugriff auf diesen Fall.")
+
     new_mediator = db.query(User).filter(User.id == payload.user_id).first()
     if not new_mediator or new_mediator.role != "mediator":
         raise HTTPException(status_code=400, detail="Ausgewählter Nutzer ist kein Mediator.")
+
+    if mediation.organization_id is not None and new_mediator.organization_id not in (
+        None,
+        mediation.organization_id,
+    ):
+        raise HTTPException(status_code=400, detail="Mediator gehört zu einem anderen Unternehmen.")
 
     # Alle bisherigen Mediator-Teilnehmer entfernen, damit genau einer übrig bleibt.
     db.query(MediationParticipant).filter(
@@ -3322,12 +3392,15 @@ def set_mediation_variant(
     aufgelöst (siehe get_phase_steps). Per-Fall-Anpassungen über
     MediationCustomStep/MediationStepRule sind davon unabhängig.
     """
-    if current_user.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nur für Mediatoren und Admins")
+    if current_user.role not in ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE):
+        raise HTTPException(status_code=403, detail="Nur für Mediatoren, Firmen-Admins und Admins")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
+
+    if tenancy.is_tenant_scoped(current_user) and not tenancy.can_view_mediation(current_user, mediation):
+        raise HTTPException(status_code=403, detail="Kein Zugriff auf diesen Fall.")
 
     if payload.variant_key is not None:
         variant = (

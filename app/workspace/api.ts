@@ -219,6 +219,18 @@ export async function fetchAllUsers(): Promise<SystemUser[]> {
   return res.json();
 }
 
+/** Rollen fürs Benutzermanager-Dropdown – dynamisch vom Backend (Single Source
+ * ALLOWED_ROLES). ``assignable`` = was der aktuelle Nutzer vergeben darf,
+ * ``labels`` = Anzeige-Labels aller bekannten Rollen. */
+export async function fetchAssignableRoles(): Promise<{
+  assignable: { id: string; label: string }[];
+  labels: Record<string, string>;
+}> {
+  const res = await fetch("/api/admin/roles", { cache: "no-store" });
+  if (!res.ok) return { assignable: [], labels: {} };
+  return res.json();
+}
+
 /** Ändert die Rolle eines Nutzers. Nur für echte Administratoren (Backend prüft). */
 export async function updateUserRole(userId: number, role: string): Promise<SystemUser> {
   const res = await fetch(`/api/admin/users/${userId}/role`, {
@@ -240,6 +252,54 @@ export async function deleteUser(userId: number): Promise<void> {
     const err = await res.json().catch(() => null);
     throw new Error(err?.detail ?? "Nutzer konnte nicht gelöscht werden");
   }
+}
+
+/** Legt ein Firmen-Mitglied (Mediator/Mitarbeiter) im eigenen Unternehmen an.
+ * Firmen-Admin: eigene Org (organizationId ignoriert). Globaler Admin: organizationId erforderlich. */
+export async function createOrgMember(payload: {
+  name: string;
+  email: string;
+  role: string;
+  organization_id?: number | null;
+}): Promise<SystemUser & { invited?: boolean }> {
+  const res = await fetch("/api/admin/org-members", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Mitglied konnte nicht angelegt werden");
+  }
+  return res.json();
+}
+
+/** Legt einen Firmen-Fall an (Business-Track: mediation_type="geschaeft").
+ * Das Backend stempelt automatisch die Org des Firmen-Admins + schaltet über
+ * das Firmen-Abo frei. Der Ersteller wird als Beobachter (Manager) geführt. */
+export async function createMediationCase(payload: {
+  title: string;
+  description?: string;
+  priority?: string;
+}): Promise<{ id: number; mediation_id: number }> {
+  const res = await fetch("/api/mediations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: payload.title,
+      description: payload.description ?? null,
+      priority: payload.priority ?? null,
+      mediation_type: "geschaeft",
+      role: "observer",
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Fall konnte nicht angelegt werden");
+  }
+  const data = await res.json();
+  const id = (data.id ?? data.mediation_id) as number;
+  return { id, mediation_id: (data.mediation_id ?? id) as number };
 }
 
 // ── Mandanten (Organizations) ─────────────────────────────────────────────
@@ -280,7 +340,7 @@ export async function createOrganization(name: string, plan: string): Promise<Or
 
 export async function updateOrganization(
   orgId: number,
-  payload: { name?: string; plan?: string },
+  payload: { name?: string; plan?: string; billing_email?: string; is_active?: boolean },
 ): Promise<Organization> {
   const res = await fetch(`/api/organizations/${orgId}`, {
     method: "PATCH",
@@ -321,6 +381,66 @@ export async function removeOrganizationMember(orgId: number, userId: number): P
     const err = await res.json().catch(() => null);
     throw new Error(err?.detail ?? "Zuordnung konnte nicht gelöst werden");
   }
+}
+
+// ── Firmen-Onboarding-Finalisierung (Vertrag + Zahlung, unternehmensweit) ──
+
+export interface OrgOnboardingStatus {
+  organization_id: number;
+  plan: string;
+  plan_label: string;
+  amount_eur: number;
+  currency: string;
+  contract_signed: boolean;
+  contract_signer_name: string | null;
+  paid: boolean;
+  payment_method: string | null;
+  complete: boolean;
+}
+
+export async function fetchOrgOnboarding(orgId: number): Promise<OrgOnboardingStatus | null> {
+  const res = await fetch(`/api/organizations/${orgId}/onboarding`, { cache: "no-store" });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function signOrgContract(orgId: number, signerName: string): Promise<Organization> {
+  const res = await fetch(`/api/organizations/${orgId}/onboarding/sign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ signer_name: signerName }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Vertrag konnte nicht unterschrieben werden");
+  }
+  return res.json();
+}
+
+export async function createOrgOnboardingOrder(orgId: number): Promise<{ order_id: string; amount_eur: number; currency: string }> {
+  const res = await fetch(`/api/organizations/${orgId}/onboarding/paypal/create-order`, { method: "POST" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "PayPal-Order konnte nicht angelegt werden");
+  }
+  return res.json();
+}
+
+export async function payOrgOnboarding(
+  orgId: number,
+  method: "invoice" | "paypal",
+  orderId?: string,
+): Promise<Organization> {
+  const res = await fetch(`/api/organizations/${orgId}/onboarding/pay`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ method, order_id: orderId ?? null }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail ?? "Zahlung konnte nicht erfasst werden");
+  }
+  return res.json();
 }
 
 // ── Kalender / Termine ────────────────────────────────────────────────────

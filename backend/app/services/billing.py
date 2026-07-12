@@ -17,7 +17,26 @@ from app import pricing
 from app.models.discount_code import DiscountCode
 from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
+from app.models.organization import Organization
 from app.models.user import User
+
+
+def is_org_case(mediation: Mediation) -> bool:
+    """Ob der Fall zu einem Firmenkunden gehört (Business-Track). Firmenfälle
+    werden über das aktive Firmen-Abo freigeschaltet, nicht über Parteizahlungen."""
+    return getattr(mediation, "organization_id", None) is not None
+
+
+def org_subscription_active(db: Session, mediation: Mediation) -> bool:
+    """True, wenn der Fall zu einem Firmenkunden mit aktivem Abo gehört."""
+    if not is_org_case(mediation):
+        return False
+    org = (
+        db.query(Organization)
+        .filter(Organization.id == mediation.organization_id)
+        .first()
+    )
+    return bool(org and org.is_active)
 
 
 # Rollen, die auch bei noch NICHT bezahltem Fall auf die Inhalte zugreifen
@@ -31,6 +50,7 @@ def ensure_unlocked(
     mediation: Mediation,
     participant: MediationParticipant,
     user: User | None = None,
+    db: Session | None = None,
 ) -> None:
     """Erzwingt die Paywall: wirft 402, wenn der Fall noch nicht bezahlt ist.
 
@@ -41,6 +61,8 @@ def ensure_unlocked(
     werden. Ausgenommen sind nur Mediator (fallbezogen) und globale Admins.
     """
     if mediation.is_paid:
+        return
+    if db is not None and org_subscription_active(db, mediation):
         return
     role = (participant.role or "").lower()
     if role in _UNLOCK_EXEMPT_ROLES:
@@ -79,7 +101,11 @@ def is_owner(participant: MediationParticipant) -> bool:
 
 def participant_owes(mediation: Mediation, participant: MediationParticipant) -> bool:
     """Ob diese konkrete Partei zahlungspflichtig ist: nur echte Parteien
-    (owner/other_party) und je nach Abrechnungsmodell (einmalig = nur Owner)."""
+    (owner/other_party) und je nach Abrechnungsmodell (einmalig = nur Owner).
+    Firmenfälle haben KEINE zahlungspflichtigen Parteien – sie laufen über das
+    Firmen-Abo."""
+    if is_org_case(mediation):
+        return False
     if not is_paying_party(participant):
         return False
     return pricing.participant_owes(mediation.mediation_type, is_owner=is_owner(participant))

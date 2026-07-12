@@ -48,7 +48,7 @@ def _require_paid_participant(mediation_id: int, user: User, db: Session) -> Med
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
-    billing.ensure_unlocked(mediation, participant, user)
+    billing.ensure_unlocked(mediation, participant, user, db)
     return participant
 
 
