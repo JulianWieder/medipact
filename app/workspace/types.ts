@@ -256,6 +256,11 @@ export interface Organization {
   name: string;
   plan: string;
   plan_label: string;
+  is_active?: boolean;
+  billing_email?: string | null;
+  onboarding_complete?: boolean;
+  // Abo-Modell: unternehmensweite Grundkonfiguration vorgenommen + akzeptiert.
+  base_config_accepted?: boolean;
   mediator_count: number;
   monthly_price_eur: number;
   created_at: string | null;
@@ -374,6 +379,10 @@ export interface UserRoleInfo {
   is_admin: boolean;
   /** Strenger als is_admin: nur echte Administratoren (role == "admin"). */
   is_superadmin?: boolean;
+  /** Firmen-Admin: eingeschränkter, auf das eigene Unternehmen begrenzter Zugriff. */
+  is_firm_admin?: boolean;
+  /** Zugeordnetes Unternehmen (organizations.id); null = kein Unternehmen. */
+  organization_id?: number | null;
   email: string;
   name: string;
 }

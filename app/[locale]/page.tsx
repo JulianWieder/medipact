@@ -7,6 +7,7 @@ import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
 import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
 import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
+import NewsletterSignup from "@/app/components/NewsletterSignup";
 import QuickCheck from "@/app/components/QuickCheck";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
@@ -148,6 +149,8 @@ export default async function MedipactLanding() {
         </section>
 
         <DidYouKnowSection />
+
+        <NewsletterSignup variant="section" source="landing" />
 
         <section
           id="cta"

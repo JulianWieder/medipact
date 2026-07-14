@@ -10,8 +10,10 @@ interface WorkspaceSidebarProps {
   active: WorkspaceSection;
   onSelect: (id: WorkspaceSection) => void;
   userEmail?: string;
-  /** Nur echte Administratoren sehen den Admin-Bereich. */
+  /** Nur echte (globale) Administratoren sehen den vollen Admin-Bereich. */
   isSuperAdmin?: boolean;
+  /** Firmen-Admin: eingeschränkte Navigation (eigenes Unternehmen). */
+  isFirmAdmin?: boolean;
 }
 
 const tooltipStyle = `
@@ -19,14 +21,23 @@ const tooltipStyle = `
   .ws-item:hover .ws-tooltip { opacity: 1; }
 `;
 
-// "admin" und "einstellungen" landen im unteren Bereich; "admin" nur für Admins.
-const mainNav = WORKSPACE_NAV.filter((i) => i.id !== "einstellungen" && i.id !== "admin");
+// "admin" und "einstellungen" landen im unteren Bereich; "admin" für globale
+// Admins UND Firmen-Admins. Firmen-Admins sehen den globalen Workflow-Designer
+// und die (globalen) Rechnungen nicht.
+const FIRM_ADMIN_HIDDEN = new Set(["workflows", "rechnungen"]);
 
-export function WorkspaceSidebar({ active, onSelect, userEmail, isSuperAdmin }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ active, onSelect, userEmail, isSuperAdmin, isFirmAdmin }: WorkspaceSidebarProps) {
   const [collapsed, setCollapsed] = useState(true);
 
+  const mainNav = WORKSPACE_NAV.filter(
+    (i) =>
+      i.id !== "einstellungen" &&
+      i.id !== "admin" &&
+      !(isFirmAdmin && FIRM_ADMIN_HIDDEN.has(i.id)),
+  );
+
   const bottomNav = WORKSPACE_NAV.filter(
-    (i) => i.id === "einstellungen" || (i.id === "admin" && isSuperAdmin),
+    (i) => i.id === "einstellungen" || (i.id === "admin" && (isSuperAdmin || isFirmAdmin)),
   );
 
   return (

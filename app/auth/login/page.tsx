@@ -66,7 +66,17 @@ function LoginForm() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      // Rollenbasiertes Routing: Firmen-Admin / Mediator / Admin -> Workspace,
+      // Privatpersonen (Partei) -> Dashboard.
+      let target = "/dashboard";
+      try {
+        const roleRes = await fetch("/api/auth/me/role", { cache: "no-store" });
+        if (roleRes.ok) {
+          const info = await roleRes.json();
+          if (["firm_admin", "mediator", "admin"].includes(info?.role)) target = "/workspace";
+        }
+      } catch {}
+      window.location.href = target;
     } catch {
       setError("Server nicht erreichbar");
     } finally {

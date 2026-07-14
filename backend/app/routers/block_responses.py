@@ -194,7 +194,7 @@ def _require_paid_participant(mediation_id: int, user: User, db: Session) -> Med
     (Mediator/Admin ausgenommen, siehe billing.ensure_unlocked)."""
     participant = _require_participant(mediation_id, user, db)
     mediation = _get_mediation(mediation_id, db)
-    billing.ensure_unlocked(mediation, participant, user)
+    billing.ensure_unlocked(mediation, participant, user, db)
     return participant
 
 

@@ -31,6 +31,7 @@ export default async function MediationPage({ params }: PageProps) {
       userRole={session?.user?.role ?? "party"}
       currentUserName={session?.user?.name ?? ""}
       initialIsPaid={result.data?.is_paid ?? false}
+      initialOrganizationId={(result.data as { organization_id?: number | null })?.organization_id ?? null}
     />
   );
 }

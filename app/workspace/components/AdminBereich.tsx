@@ -14,17 +14,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SystemUser } from "../types";
-import { fetchAllUsers, updateUserRole, deleteUser } from "../api";
+import { fetchAllUsers, updateUserRole, deleteUser, createOrgMember, fetchAssignableRoles } from "../api";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 
 const ROLE_OPTIONS: { id: string; label: string }[] = [
   { id: "party", label: "Partei" },
   { id: "mediator", label: "Mediator" },
+  { id: "firm_admin", label: "Firmen-Admin" },
   { id: "admin", label: "Administrator" },
 ];
 
 const ROLE_BADGE: Record<string, string> = {
   admin: "bg-violet-50 text-violet-700 border-violet-200",
+  firm_admin: "bg-indigo-50 text-indigo-700 border-indigo-200",
   mediator: "bg-accent-50 text-accent-700 border-accent-200",
   party: "bg-neutral-100 text-neutral-600 border-neutral-200",
 };
@@ -32,15 +34,39 @@ const ROLE_BADGE: Record<string, string> = {
 const ROLE_LABEL: Record<string, string> = {
   party: "Partei",
   mediator: "Mediator",
+  firm_admin: "Firmen-Admin",
   admin: "Administrator",
 };
 
 interface AdminBereichProps {
   /** E-Mail des eingeloggten Admins – markiert den eigenen Account. */
   currentUserEmail?: string;
+  /** Firmen-Admin: nur eigenes Unternehmen, Rollen party/mediator, Mitglieder anlegen. */
+  isFirmAdmin?: boolean;
 }
 
-export function BenutzerManager({ currentUserEmail }: AdminBereichProps) {
+export function BenutzerManager({ currentUserEmail, isFirmAdmin }: AdminBereichProps) {
+  // Rollen fürs Dropdown: dynamisch vom Backend (Single Source ALLOWED_ROLES),
+  // mit statischem Fallback falls der Endpunkt (noch) nicht erreichbar ist.
+  const [roleData, setRoleData] = useState<{ id: string; label: string }[]>([]);
+  const [roleLabels, setRoleLabels] = useState<Record<string, string>>({});
+  useEffect(() => {
+    fetchAssignableRoles()
+      .then((r) => {
+        setRoleData(r.assignable ?? []);
+        setRoleLabels(r.labels ?? {});
+      })
+      .catch(() => {});
+  }, []);
+  const fallbackOptions = isFirmAdmin
+    ? ROLE_OPTIONS.filter((r) => r.id === "party" || r.id === "mediator")
+    : ROLE_OPTIONS;
+  const roleOptions = roleData.length ? roleData : fallbackOptions;
+  const labelFor = (role: string) => roleLabels[role] ?? ROLE_LABEL[role] ?? role;
+  // Neues Mitglied anlegen (nur Firmen-Admin).
+  const [newMember, setNewMember] = useState({ name: "", email: "", role: "mediator" });
+  const [creating, setCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState("");
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -106,9 +132,82 @@ export function BenutzerManager({ currentUserEmail }: AdminBereichProps) {
     }
   }
 
+  async function addMember(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newMember.name.trim() || !newMember.email.trim()) return;
+    setCreating(true);
+    setCreateMsg("");
+    setError("");
+    try {
+      const created = await createOrgMember({
+        name: newMember.name.trim(),
+        email: newMember.email.trim(),
+        role: newMember.role,
+      });
+      setUsers((prev) => {
+        const without = prev.filter((u) => u.id !== created.id);
+        return [created as SystemUser, ...without];
+      });
+      setNewMember({ name: "", email: "", role: "mediator" });
+      setCreateMsg("Mitglied angelegt. Eine E-Mail zum Passwort-Setzen wurde versendet.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Mitglied konnte nicht angelegt werden.");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   return (
     <div className="p-6 max-w-5xl">
       <SectionHeader label="Administration" title="Benutzermanager" />
+
+      {isFirmAdmin && (
+        <div className="mb-5 rounded-xl border border-neutral-200 bg-white p-4">
+          <div className="mb-3 text-sm font-semibold text-neutral-800">
+            Mitglied anlegen (Mediator oder Mitarbeiter)
+          </div>
+          <form onSubmit={addMember} className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[9rem] flex-1">
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-neutral-400">Name</label>
+              <input
+                value={newMember.name}
+                onChange={(e) => setNewMember((m) => ({ ...m, name: e.target.value }))}
+                placeholder="Max Mustermann"
+                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
+              />
+            </div>
+            <div className="min-w-[11rem] flex-1">
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-neutral-400">E-Mail</label>
+              <input
+                type="email"
+                value={newMember.email}
+                onChange={(e) => setNewMember((m) => ({ ...m, email: e.target.value }))}
+                placeholder="person@firma.de"
+                className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-neutral-400">Rolle</label>
+              <select
+                value={newMember.role}
+                onChange={(e) => setNewMember((m) => ({ ...m, role: e.target.value }))}
+                className="rounded-lg border border-neutral-200 px-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
+              >
+                <option value="mediator">Mediator</option>
+                <option value="party">Mitarbeiter / Beteiligter</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={creating}
+              className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-600 disabled:opacity-50"
+            >
+              {creating ? "Legt an …" : "Anlegen"}
+            </button>
+          </form>
+          {createMsg && <div className="mt-2 text-xs text-accent-700">{createMsg}</div>}
+        </div>
+      )}
       <p className="mb-5 max-w-2xl text-sm text-neutral-500">
         Verwalte alle registrierten Nutzer: Rollen ändern (Partei / Mediator / Administrator)
         oder Accounts löschen. Nur Administratoren sehen diesen Bereich.
@@ -201,7 +300,7 @@ export function BenutzerManager({ currentUserEmail }: AdminBereichProps) {
                       ROLE_BADGE[user.role] ?? ROLE_BADGE.party,
                     )}
                   >
-                    {ROLE_LABEL[user.role] ?? user.role}
+                    {labelFor(user.role)}
                   </span>
 
                   {/* Rolle ändern */}
@@ -212,7 +311,7 @@ export function BenutzerManager({ currentUserEmail }: AdminBereichProps) {
                     className="shrink-0 rounded-lg border border-neutral-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent-400 disabled:opacity-40"
                     title={isSelf ? "Eigene Rolle kann hier nicht geändert werden" : "Rolle ändern"}
                   >
-                    {ROLE_OPTIONS.map((r) => (
+                    {roleOptions.map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.label}
                       </option>

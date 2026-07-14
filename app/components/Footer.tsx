@@ -4,6 +4,7 @@ import UnlocalizedLink from "next/link";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { resetCookieConsent } from "@/app/components/CookieConsent";
+import NewsletterSignup from "@/app/components/NewsletterSignup";
 
 interface FooterProps {
   brandName?: string;
@@ -49,9 +50,9 @@ export default function Footer({
 
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         {/* Top Section */}
-        <div className="grid gap-10 border-b border-white/10 pb-10 md:grid-cols-4 md:gap-8">
+        <div className="grid gap-10 border-b border-white/10 pb-10 md:grid-cols-2 md:gap-8 lg:grid-cols-6">
           {/* Brand */}
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-bold tracking-tight">{brandName}</h3>
             <p className="mt-3 text-neutral-400">{resolvedTagline}</p>
             <div className="mt-4 space-y-2 text-sm text-neutral-400">
@@ -145,6 +146,9 @@ export default function Footer({
               </li>
             </ul>
           </div>
+
+          {/* Newsletter */}
+          <NewsletterSignup variant="footer" source="footer" />
         </div>
 
         {/* Bottom Section */}
