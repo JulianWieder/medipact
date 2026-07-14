@@ -22,6 +22,7 @@ import { article as fuenfPhasenDerMediation } from "./5-phasen-der-mediation";
 import { article as wasIstMediation } from "./was-ist-mediation";
 import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
 import { article as mediationKosten } from "./mediation-kosten";
+import { article as gerichtOderMediation } from "./gericht-oder-mediation";
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 
@@ -33,6 +34,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   wasIstMediation,
   wasIstEinMediator,
   mediationKosten,
+  gerichtOderMediation,
   wirtschaftsmediation,
   mediationAmArbeitsplatz,
 ];
