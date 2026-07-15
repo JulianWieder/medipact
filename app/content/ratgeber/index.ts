@@ -24,6 +24,8 @@ import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
 import { article as mediationKosten } from "./mediation-kosten";
 import { article as gerichtOderMediation } from "./gericht-oder-mediation";
 import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg";
+import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
+import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 
@@ -37,6 +39,8 @@ export const ratgeberArticles: RatgeberArticle[] = [
   mediationKosten,
   gerichtOderMediation,
   scheidungOhneRosenkrieg,
+  ichWillMichTrennen,
+  trennungVonEinemNarzissten,
   wirtschaftsmediation,
   mediationAmArbeitsplatz,
 ];
