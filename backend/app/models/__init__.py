@@ -17,3 +17,4 @@ from app.models.ai_prompt import AiPrompt
 from app.models.invite_meet_recording import InviteMeetRecording
 from app.models.discount_code import DiscountCode
 from app.models.newsletter_subscriber import NewsletterSubscriber
+from app.models.mediation_chat_message import MediationChatMessage

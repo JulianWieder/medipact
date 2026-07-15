@@ -15,6 +15,7 @@ import {
   cn,
 } from "../ui";
 import { StatusDot, SegmentedControl, Skeleton, SlideOver } from "@/app/components/ui/premium";
+import MediationChat from "@/app/components/mediation/MediationChat";
 import {
   fetchParticipants,
   fetchAllNotes,
@@ -149,7 +150,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse" | "chat">("overview");
 
   // ── Mediations-Variante (Fall <-> Variante, jederzeit umstellbar) ──
   const [variants, setVariants] = useState<MediationVariantDto[]>([]);
@@ -881,6 +882,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     { id: "contract" as const, label: "Vertrag" },
     { id: "feedback" as const, label: "Feedback" },
     { id: "analyse" as const, label: "✦ Analyse" },
+    { id: "chat" as const, label: "Chat" },
   ];
 
   return (
@@ -2323,6 +2325,17 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ── Tab: Chat (Gruppenchat aller Parteien + Mediator) ── */}
+          {activeTab === "chat" && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Fall-Chat</p>
+              <p className="text-xs text-neutral-500">
+                Freier Austausch aller Beteiligten — auch zu Themen außerhalb der vorgegebenen Schritte. Du liest und schreibst als Mediator mit.
+              </p>
+              <MediationChat mediationId={fall.id} variant="panel" />
             </div>
           )}
 
