@@ -28,6 +28,7 @@ import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
 import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
+import { article as kuendigungOhneGericht } from "./kuendigung-ohne-gericht";
 
 export type { RatgeberArticle, RatgeberBlock, RatgeberFaq } from "./types";
 
@@ -43,6 +44,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   trennungVonEinemNarzissten,
   wirtschaftsmediation,
   mediationAmArbeitsplatz,
+  kuendigungOhneGericht,
 ];
 
 export const ratgeberBySlug: Record<string, RatgeberArticle> = Object.fromEntries(
