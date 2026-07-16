@@ -29,6 +29,7 @@ import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narz
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 import { article as kuendigungOhneGericht } from "./kuendigung-ohne-gericht";
+import { article as vermoegensauseinandersetzung } from "./vermoegensauseinandersetzung";
 
 export type { RatgeberArticle, RatgeberBlock, RatgeberFaq } from "./types";
 
@@ -42,6 +43,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   scheidungOhneRosenkrieg,
   ichWillMichTrennen,
   trennungVonEinemNarzissten,
+  vermoegensauseinandersetzung,
   wirtschaftsmediation,
   mediationAmArbeitsplatz,
   kuendigungOhneGericht,
