@@ -18,6 +18,7 @@
 // Veröffentlichung gegenlesen.
 
 import type { RatgeberArticle } from "./types";
+import { article as mediationAlsKonfliktloesung } from "./mediation-als-konfliktloesung";
 import { article as fuenfPhasenDerMediation } from "./5-phasen-der-mediation";
 import { article as wasIstMediation } from "./was-ist-mediation";
 import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
@@ -27,14 +28,17 @@ import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg"
 import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
 import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
+import { article as mediationImUnternehmen } from "./mediation-im-unternehmen";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 import { article as kuendigungOhneGericht } from "./kuendigung-ohne-gericht";
 import { article as vermoegensauseinandersetzung } from "./vermoegensauseinandersetzung";
+import { article as familienUndErbmediation } from "./familien-und-erbmediation";
 
 export type { RatgeberArticle, RatgeberBlock, RatgeberFaq } from "./types";
 
 /** Alle Artikel; Reihenfolge bestimmt die Sortierung innerhalb der Kategorien. */
 export const ratgeberArticles: RatgeberArticle[] = [
+  mediationAlsKonfliktloesung,
   fuenfPhasenDerMediation,
   wasIstMediation,
   wasIstEinMediator,
@@ -44,7 +48,9 @@ export const ratgeberArticles: RatgeberArticle[] = [
   ichWillMichTrennen,
   trennungVonEinemNarzissten,
   vermoegensauseinandersetzung,
+  familienUndErbmediation,
   wirtschaftsmediation,
+  mediationImUnternehmen,
   mediationAmArbeitsplatz,
   kuendigungOhneGericht,
 ];

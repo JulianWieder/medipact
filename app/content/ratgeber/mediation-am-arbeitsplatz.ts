@@ -80,6 +80,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Mediation im Unternehmen (Arbeitgeber-Sicht)", href: "/ratgeber/mediation-im-unternehmen" },
     { label: "Fallbeispiel: Konflikt im Team", href: "/cases/team-konflikt" },
     { label: "Wirtschaftsmediation im Überblick", href: "/ratgeber/wirtschaftsmediation" },
     { label: "Die Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },

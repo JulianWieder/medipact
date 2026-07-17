@@ -16,10 +16,9 @@ import heroPhoto from "../../fotos/medi_main.jpg";
 // for the lift-into-translations pattern used here and in HeroScrollPin).
 
 export const metadata: Metadata = {
-  title:
-    "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
+  title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
   description:
-    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. Medipact hilft bei Trennung, Nachbarschaftsstreit, Erbschaft und Team-Konflikten nach dem Harvard-Prinzip.",
+    "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
   alternates: {
     canonical: "https://medipact.de",
   },

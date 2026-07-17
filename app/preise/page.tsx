@@ -3,10 +3,9 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title:
-    "Preise – Mediation ab €249, Business-Pauschale für Unternehmen | medipact",
+  title: "Preise: Mediation ab 249 €, Business-Pauschale | medipact",
   description:
-    "Transparente Preise für Mediation bei Scheidung, Nachbarschaftsstreit, Erbe und Business-Konflikten. Drei Modelle plus Business-Pauschale für Unternehmen: €5.000/Monat mit bis zu 150 Mediationen. Alle Parteien zahlen anteilig.",
+    "Mediation ab 249 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Pauschale. Transparent, ohne versteckte Kosten. Jetzt Modelle vergleichen.",
   alternates: { canonical: "https://medipact.de/preise" },
 };
 

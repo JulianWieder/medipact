@@ -1,18 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { WorkspaceSection, MediationCase, ParticipantWithCase } from "./types";
+import type { WorkspaceSection, MediationCase, SystemUserWithCases } from "./types";
 import { WORKSPACE_NAV } from "./types";
 import { WorkspaceSidebar } from "./components/WorkspaceSidebar";
 import { WorkspaceDashboard } from "./components/WorkspaceDashboard";
 import { FaelleListe } from "./components/FaelleListe";
 import { FallDetail } from "./components/FallDetail";
-import { ParteienListe } from "./components/ParteienListe";
-import { ParteiDetail } from "./components/ParteiDetail";
+import { BenutzerListe, BenutzerDetail } from "./components/BenutzerBereich";
 import { Kalender } from "./components/Kalender";
 import { RechnungenListe } from "./components/RechnungenListe";
 import { WorkflowManager } from "./components/WorkflowManager";
-import { BenutzerManager } from "./components/AdminBereich";
 import { MandantenManager } from "./components/MandantenManager";
 import { FirmOnboardingWizard, FirmOnboardingChecklist } from "./components/FirmOnboarding";
 import { cn } from "./ui";
@@ -134,7 +132,9 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
   const [tab, setTab] = useState<Tab>("liste");
 
   const [selectedFall, setSelectedFall] = useState<MediationCase | null>(null);
-  const [selectedPartei, setSelectedPartei] = useState<ParticipantWithCase | null>(null);
+  const [selectedBenutzer, setSelectedBenutzer] = useState<SystemUserWithCases | null>(null);
+  // Hochzählen lädt die Benutzerliste neu (nach Rollenwechsel/Löschung/Anlage).
+  const [benutzerRefresh, setBenutzerRefresh] = useState(0);
 
   // Status-Filter für die Fallliste, z.B. per Klick auf eine Dashboard-KPI gesetzt.
   const [faelleFilter, setFaelleFilter] = useState<{ statuses: string[]; label: string } | null>(null);
@@ -198,7 +198,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
     setSection(id);
     setTab("liste");
     setSelectedFall(null);
-    setSelectedPartei(null);
+    setSelectedBenutzer(null);
     setKalenderDate(null);
     setFaelleFilter(null);
   }
@@ -245,24 +245,55 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
       );
     }
 
-    if (section === "parteien") {
-      if (!selectedPartei) {
+    if (section === "benutzer") {
+      if (!selectedBenutzer) {
         return (
           <div className="flex h-full items-center justify-center p-8">
             <div className="text-center">
               <div className="text-4xl mb-3">👥</div>
-              <p className="text-sm text-neutral-400">Keine Partei ausgewählt.</p>
+              <p className="text-sm text-neutral-400">Kein Benutzer ausgewählt.</p>
               <button
                 onClick={() => setTab("liste")}
                 className="mt-4 text-xs text-accent-600 hover:underline"
               >
-                → Zur Parteienliste
+                → Zur Benutzerliste
               </button>
             </div>
           </div>
         );
       }
-      return <ParteiDetail partei={selectedPartei} />;
+      return (
+        <BenutzerDetail
+          benutzer={selectedBenutzer}
+          canManage={isSuperAdmin || isFirmAdmin}
+          isFirmAdmin={isFirmAdmin}
+          currentUserEmail={userEmail}
+          onChanged={(u) => {
+            setSelectedBenutzer(u);
+            setBenutzerRefresh((n) => n + 1);
+          }}
+          onDeleted={() => {
+            setSelectedBenutzer(null);
+            setBenutzerRefresh((n) => n + 1);
+            setTab("liste");
+          }}
+          onOpenFall={(c) => {
+            setSelectedFall({
+              id: c.mediation_id,
+              mediation_id: c.mediation_id,
+              title: c.title,
+              mediation_type: c.mediation_type,
+              status: c.status,
+              phase: c.phase,
+              progress: 0,
+              description: null,
+              role: "mediator",
+            });
+            setSection("faelle");
+            setTab("einzelansicht");
+          }}
+        />
+      );
     }
 
     return (
@@ -289,13 +320,15 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         />
       );
     }
-    if (section === "parteien") {
+    if (section === "benutzer") {
       return (
-        <ParteienListe
-          isAdmin={isAdmin}
-          selectedId={selectedPartei?.id}
-          onSelect={(p) => {
-            setSelectedPartei(p);
+        <BenutzerListe
+          canManage={isSuperAdmin || isFirmAdmin}
+          isFirmAdmin={isFirmAdmin}
+          refreshKey={benutzerRefresh}
+          selectedId={selectedBenutzer?.id}
+          onSelect={(u) => {
+            setSelectedBenutzer(u);
             setTab("einzelansicht");
           }}
         />
@@ -406,8 +439,23 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         <div className="flex-1 overflow-auto">
           {isSuperAdmin || isFirmAdmin ? (
             <>
-              <BenutzerManager currentUserEmail={userEmail} isFirmAdmin={isFirmAdmin} />
-              {isSuperAdmin && <MandantenManager />}
+              {/* Benutzerverwaltung lebt jetzt im Bereich „Benutzer" (Sidebar) –
+                  Liste + Detail mit Admin-Aktionen. Hier bleiben nur globale
+                  Admin-Werkzeuge wie der MandantenManager. */}
+              {isSuperAdmin ? (
+                <MandantenManager />
+              ) : (
+                <div className="p-6 text-sm text-neutral-500">
+                  Die Benutzerverwaltung findest du jetzt im Bereich{" "}
+                  <button
+                    onClick={() => handleSelectSection("benutzer")}
+                    className="font-semibold text-accent-600 hover:underline"
+                  >
+                    Benutzer
+                  </button>
+                  .
+                </div>
+              )}
             </>
           ) : (
             <div className="flex h-full items-center justify-center p-8">
@@ -480,10 +528,10 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
               <span className="text-sm text-neutral-500 truncate max-w-xs">{selectedFall.title}</span>
             </>
           )}
-          {selectedPartei && section === "parteien" && (
+          {selectedBenutzer && section === "benutzer" && (
             <>
               <span className="text-neutral-300">·</span>
-              <span className="text-sm text-neutral-500">{selectedPartei.name}</span>
+              <span className="text-sm text-neutral-500">{selectedBenutzer.name}</span>
             </>
           )}
         </div>
@@ -494,7 +542,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           <div
             className={cn(
               "overflow-auto border-r border-neutral-200 bg-white",
-              tab === "einzelansicht" && (selectedFall || selectedPartei)
+              tab === "einzelansicht" && (selectedFall || selectedBenutzer)
                 ? "hidden xl:block xl:w-72 shrink-0"
                 : "flex-1",
             )}
@@ -506,7 +554,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           <div
             className={cn(
               "overflow-auto flex-1 bg-neutral-50",
-              tab === "liste" && !selectedFall && !selectedPartei ? "hidden xl:block" : "block",
+              tab === "liste" && !selectedFall && !selectedBenutzer ? "hidden xl:block" : "block",
             )}
           >
             <div className="p-5">{renderEinzelansicht()}</div>

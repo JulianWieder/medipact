@@ -9,7 +9,7 @@ import ratgeberHero from "@/fotos/medi_ratgeber.jpg";
 export const metadata: Metadata = {
   title: "Ratgeber Mediation: Ablauf, Kosten & Wissen | medipact",
   description:
-    "Der medipact-Ratgeber erklärt Mediation verständlich: Ablauf und Phasen, die Rolle des Mediators, Kosten und wann sich ein Verfahren lohnt.",
+    "Der medipact-Ratgeber erklärt Mediation verständlich: Ablauf und Phasen, Kosten, Wirtschaftsmediation und wann sich ein Verfahren lohnt.",
   alternates: { canonical: "https://medipact.de/ratgeber" },
 };
 

@@ -8,7 +8,7 @@ import mediModernPhoto from "@/fotos/medi_modern.jpg";
 export const metadata: Metadata = {
   title: "Fallbeispiele – So löst Mediation echte Konflikte | medipact",
   description:
-    "Echte Fallbeispiele aus Trennung, Erbschaft, Nachbarschaft und Unternehmen: Wie Mediation in wenigen Monaten zu fairen Lösungen führt – statt jahrelangem Streit.",
+    "Echte Fallbeispiele: Trennung, Erbschaft, Nachbarschaft und Unternehmen. Wie Mediation in Monaten faire Lösungen schafft – statt jahrelangem Streit.",
   alternates: { canonical: "https://medipact.de/cases" },
 };
 

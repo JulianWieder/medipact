@@ -7,7 +7,7 @@ import nachbarnPhoto from "@/fotos/med_nachbarn_d.jpg";
 export const metadata: Metadata = {
   title: "Nachbarschaftsstreit lösen ohne Gericht | medipact",
   description:
-    "Lärm, Grenzen, Parkplätze oder Garten – Nachbarschaftskonflikte belasten den Alltag. Medipact hilft, wieder normal nebeneinander zu leben.",
+    "Lärm, Grenzen, Parkplätze oder Garten – Nachbarschaftsstreit belastet den Alltag. Mediation hilft, wieder normal nebeneinander zu leben. Jetzt starten.",
   alternates: { canonical: "https://medipact.de/konflikte/nachbarschaft" },
 };
 

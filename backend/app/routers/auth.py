@@ -368,6 +368,94 @@ def get_all_users(
     ]
 
 
+@router.get("/users/overview")
+def get_users_overview(
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user),
+):
+    """Nutzer inkl. ihrer Fälle in EINER Antwort – für den Benutzer-Bereich im
+    Workspace. Ersetzt die frühere N+1-Ladelogik im Frontend (Teilnehmer pro
+    Fall einzeln laden).
+
+    Scoping wie /users/all bzw. /mediations/all: firm_admin und Firmen-
+    Mediatoren sehen nur Nutzer + Fälle des eigenen Unternehmens, globale
+    Admins und Pool-Mediatoren alles."""
+    from app.models.mediation import Mediation
+    from app.models.mediation_participant import MediationParticipant
+
+    current = db.query(User).filter(User.email == current_user_email).first()
+    if not current or current.role not in ("mediator", "admin", "firm_admin"):
+        raise HTTPException(status_code=403, detail="Nur fuer Mediatoren, Firmen-Admins und Admins")
+
+    user_query = db.query(User)
+    mediation_query = db.query(Mediation)
+    if tenancy.is_tenant_scoped(current):
+        if current.organization_id is None:
+            return []
+        user_query = user_query.filter(User.organization_id == current.organization_id)
+        mediation_query = mediation_query.filter(
+            Mediation.organization_id == current.organization_id
+        )
+
+    users = user_query.order_by(User.name).all()
+    mediations = {m.id: m for m in mediation_query.all()}
+
+    # Alle Teilnahmen der sichtbaren Fälle in einer Abfrage.
+    participants = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id.in_(mediations.keys()))
+        .all()
+        if mediations
+        else []
+    )
+
+    # Mediator je Fall (Teilnehmer mit Rolle owner/mediator) für die Anzeige
+    # „wer leitet den Fall". Nutzer-Namen für die Auflösung vorab laden.
+    user_by_id = {u.id: u for u in users}
+    missing_ids = {p.user_id for p in participants} - set(user_by_id)
+    if missing_ids:
+        for u in db.query(User).filter(User.id.in_(missing_ids)).all():
+            user_by_id[u.id] = u
+
+    mediator_name_by_case: dict[int, str | None] = {}
+    for p in participants:
+        if p.role in ("owner", "mediator"):
+            leader = user_by_id.get(p.user_id)
+            mediator_name_by_case.setdefault(p.mediation_id, leader.name if leader else None)
+
+    cases_by_user: dict[int, list[dict]] = {}
+    for p in participants:
+        m = mediations.get(p.mediation_id)
+        if not m:
+            continue
+        is_leader = p.role in ("owner", "mediator")
+        cases_by_user.setdefault(p.user_id, []).append(
+            {
+                "mediation_id": m.id,
+                "title": m.title,
+                "mediation_type": m.mediation_type,
+                "status": m.status,
+                "phase": m.phase,
+                "participant_role": p.role,
+                "invitation_status": "accepted",
+                "mediator_name": None if is_leader else mediator_name_by_case.get(m.id),
+            }
+        )
+
+    return [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "is_verified": u.is_verified,
+            "organization_id": u.organization_id,
+            "cases": cases_by_user.get(u.id, []),
+        }
+        for u in users
+    ]
+
+
 # ── Benutzermanager (nur echte Admins, role == "admin") ────────────────────
 #
 # Getrennt von der Mediator-Berechtigung: Mediatoren dürfen Fälle/Workflows
@@ -533,10 +621,10 @@ class OrgMemberCreateRequest(BaseModel):
     @field_validator("role")
     @classmethod
     def role_valid(cls, v: str) -> str:
-        if v not in FIRM_ADMIN_ASSIGNABLE_ROLES:
-            raise ValueError(
-                f"Ungültige Rolle. Erlaubt: {', '.join(FIRM_ADMIN_ASSIGNABLE_ROLES)}"
-            )
+        # Alle bekannten Rollen zulassen; die engere Firmen-Admin-Beschränkung
+        # (nur party/mediator) prüft der Handler rollenabhängig.
+        if v not in ALLOWED_ROLES:
+            raise ValueError(f"Ungültige Rolle. Erlaubt: {', '.join(ALLOWED_ROLES)}")
         return v
 
 
@@ -549,23 +637,30 @@ def create_org_member(
     manager = _require_user_manager(db, current_user_email)
 
     if tenancy.is_global_admin(manager):
+        # Globaler Admin: Unternehmen optional (None = Pool-Nutzer ohne Org),
+        # jede Rolle erlaubt.
         org_id = payload.organization_id
-        if org_id is None:
-            raise HTTPException(status_code=400, detail="organization_id erforderlich.")
     else:
+        if payload.role not in FIRM_ADMIN_ASSIGNABLE_ROLES:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Firmen-Admins können nur folgende Rollen vergeben: {', '.join(FIRM_ADMIN_ASSIGNABLE_ROLES)}.",
+            )
         org_id = manager.organization_id
         if org_id is None:
             raise HTTPException(status_code=400, detail="Dein Account ist keinem Unternehmen zugeordnet.")
 
-    org = db.query(Organization).filter(Organization.id == org_id).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Unternehmen nicht gefunden")
+    if org_id is not None:
+        org = db.query(Organization).filter(Organization.id == org_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Unternehmen nicht gefunden")
 
     existing = db.query(User).filter(User.email == str(payload.email)).first()
     if existing:
         if existing.organization_id not in (None, org_id) and not tenancy.is_global_admin(manager):
             raise HTTPException(status_code=409, detail="Nutzer gehört bereits zu einem anderen Unternehmen.")
-        existing.organization_id = org_id
+        if org_id is not None:
+            existing.organization_id = org_id
         if existing.role == "party":
             existing.role = payload.role
         db.commit()

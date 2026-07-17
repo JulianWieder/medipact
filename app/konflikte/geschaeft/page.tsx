@@ -6,9 +6,9 @@ import teamPhoto from "@/fotos/medi_buiness.jpg";
 import konfliktPhoto from "@/fotos/kon_formen.jpg";
 
 export const metadata: Metadata = {
-  title: "Business-Mediation – Team, Gesellschafter & B2B-Konflikte | medipact",
+  title: "Wirtschaftsmediation für Unternehmen – ab 399 € | medipact",
   description:
-    "Wirtschaftsmediation für Unternehmen: intern (Team, Führung, Gesellschafter, Nachfolge) und B2B (Lieferanten, IT-Großprojekte, M&A). Vertraulich und schneller als Gericht – ab €399 pro Fall oder als Business-Pauschale.",
+    "Gesellschafterstreit, Teamkonflikt oder B2B-Streit? Wirtschaftsmediation löst ihn in Wochen – vertraulich, ohne Gericht, ab 399 €. Jetzt anfragen.",
   alternates: { canonical: "https://medipact.de/konflikte/geschaeft" },
 };
 

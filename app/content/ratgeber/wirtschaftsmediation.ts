@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "wirtschaftsmediation",
   category: "Wirtschaftsmediation",
   title: "Wirtschaftsmediation: Konflikte im Unternehmen lösen",
-  metaTitle: "Wirtschaftsmediation: Konflikte im Unternehmen lösen | medipact",
+  metaTitle: "Wirtschaftsmediation: Ablauf, Kosten & Beispiele | medipact",
   description:
-    "Wirtschaftsmediation erklärt: Wann sich Mediation bei Gesellschafterstreit, Team-Konflikten und B2B-Streitigkeiten lohnt, wie sie abläuft und was sie kostet.",
+    "Wirtschaftsmediation erklärt: Wann sich Mediation bei Gesellschafterstreit, Teamkonflikten und B2B-Streit lohnt, wie sie abläuft und was sie kostet.",
   eyebrow: "Ratgeber · Wirtschaftsmediation",
   updated: "2026-07-11",
   readingMinutes: 7,
@@ -97,7 +97,8 @@ export const article: RatgeberArticle = {
   related: [
     { label: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/geschaeft" },
     { label: "Fallbeispiel: Gesellschafterstreit", href: "/cases/gesellschafter-streit" },
-    { label: "Mediation am Arbeitsplatz", href: "/ratgeber/mediation-am-arbeitsplatz" },
+    { label: "Mediation im Unternehmen & Teamkonflikte", href: "/ratgeber/mediation-im-unternehmen" },
+    { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
   ],
 };

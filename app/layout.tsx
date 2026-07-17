@@ -34,7 +34,7 @@ const organizationSchema = {
   url: "https://medipact.de",
   logo: "https://medipact.de/og-image.png",
   description:
-    "KI-gestützte Mediation für private Konflikte – bei Trennung, Nachbarschaftsstreit und Erbschaft.",
+    "KI-gestützte Mediation für private und geschäftliche Konflikte – bei Trennung, Erbschaft, Nachbarschaftsstreit und im Unternehmen.",
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer support",
@@ -59,17 +59,19 @@ const websiteSchema = {
 };
 
 export const metadata: Metadata = {
-  title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
+  title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
   description:
-    "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen. KI-basierte Mediation nach dem Harvard-Prinzip. Schneller, günstiger, menschlicher als klassische Mediation.",
+    "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
   keywords: [
     "Mediation",
     "KI-Mediation",
+    "Wirtschaftsmediation",
     "Konfliktlösung",
     "Harvard-Prinzip",
     "Trennung",
     "Erbschaft",
     "Nachbarschaftsstreit",
+    "Mediation Unternehmen",
   ],
   authors: [{ name: "medipact" }],
   creator: "medipact",
@@ -80,8 +82,9 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: "https://medipact.de",
     siteName: "medipact",
-    title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
-    description: "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen.",
+    title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+    description:
+      "Konflikte fair, vertraulich und ohne Gericht lösen – Online-Mediation mit Mediator und KI.",
     images: [
       {
         url: "https://medipact.de/og-image.png",
@@ -93,8 +96,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "medipact – Mediation online: Konflikte fair, vertraulich und ohne Gericht lösen",
-    description: "Mediation online – Konflikte fair, vertraulich und ohne Gericht lösen.",
+    title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+    description:
+      "Konflikte fair, vertraulich und ohne Gericht lösen – Online-Mediation mit Mediator und KI.",
     creator: "@medipact_de",
   },
 };

@@ -15,9 +15,9 @@ import step5Photo from "../../fotos/schritte/5.jpg";
 import step6Photo from "../../fotos/schritte/6.jpg";
 
 export const metadata: Metadata = {
-  title: "So funktioniert medipact – Mediation in 6 Schritten",
+  title: "Ablauf einer Mediation: 6 Schritte bei medipact",
   description:
-    "Wie medipact Konflikte löst: der 6-Schritte-Prozess, die Mediationsphasen im Detail, die Rollen von KI und Mediator sowie drei Modelle vom Online-Prozess bis zum Vollservice.",
+    "Vom ersten Schritt bis zur Vereinbarung: der 6-Schritte-Prozess, alle Mediationsphasen und die Rollen von KI und Mediator – transparent erklärt.",
   alternates: { canonical: "https://medipact.de/methode" },
 };
 

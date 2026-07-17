@@ -8,9 +8,9 @@ import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
 
 export const metadata: Metadata = {
-  title: "Konfliktarten – Trennung, Nachbarschaft, Erbschaft, Team | medipact",
+  title: "Konfliktarten: Trennung, Erbe, Nachbarn, Business | medipact",
   description:
-    "Für welchen Konflikt brauchen Sie Hilfe? Medipact unterstützt bei Trennung & Scheidung, Nachbarschaftsstreit, Erbschaftskonflikten sowie Team- und Organisationskonflikten. Jetzt kostenlos einschätzen.",
+    "Trennung, Nachbarschaftsstreit, Erbschaft oder Konflikt im Unternehmen? Finden Sie den passenden Mediationsweg für Ihren Fall – jetzt einschätzen lassen.",
   alternates: { canonical: "https://medipact.de/konflikte" },
 };
 

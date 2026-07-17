@@ -1,6 +1,6 @@
 // ── Workspace Types ───────────────────────────────────────────────────────
 
-export type WorkspaceSection = "dashboard" | "faelle" | "parteien" | "kalender" | "rechnungen" | "workflows" | "admin" | "einstellungen";
+export type WorkspaceSection = "dashboard" | "faelle" | "benutzer" | "kalender" | "rechnungen" | "workflows" | "admin" | "einstellungen";
 
 export interface WorkspaceNavItem {
   id: WorkspaceSection;
@@ -11,7 +11,7 @@ export interface WorkspaceNavItem {
 export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   { id: "dashboard", label: "Übersicht", icon: "⊞" },
   { id: "faelle", label: "Meine Fälle", icon: "⚖" },
-  { id: "parteien", label: "Parteien", icon: "👥" },
+  { id: "benutzer", label: "Benutzer", icon: "👥" },
   { id: "kalender", label: "Kalender", icon: "📅" },
   { id: "rechnungen", label: "Rechnungen", icon: "🧾" },
   { id: "workflows", label: "Workflow Manager", icon: "🧭" },
@@ -247,6 +247,24 @@ export interface SystemUser {
   is_verified: boolean;
   /** Mandanten-Zuordnung (organizations.id); null = kein Mandant. */
   organization_id?: number | null;
+}
+
+/** Fall-Referenz eines Nutzers aus GET /auth/users/overview. */
+export interface UserCaseRef {
+  mediation_id: number;
+  title: string;
+  mediation_type: string;
+  status: string;
+  phase: string | null;
+  participant_role: string;
+  invitation_status: string;
+  /** Wer den Fall leitet – null, wenn der Nutzer selbst Owner/Mediator ist. */
+  mediator_name: string | null;
+}
+
+/** Nutzer inkl. seiner Fälle – Datenbasis des Benutzer-Bereichs. */
+export interface SystemUserWithCases extends SystemUser {
+  cases: UserCaseRef[];
 }
 
 // ── Mandanten (Organizations) ──────────────────────────────────────────────

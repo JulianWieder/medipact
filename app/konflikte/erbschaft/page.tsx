@@ -6,9 +6,9 @@ import erbschaftFamilie from "@/fotos/medi_Erbe.jpg";
 import erbschaftTisch from "@/fotos/erbschaft-tisch.jpg";
 
 export const metadata: Metadata = {
-  title: "Erbschaftsstreit lösen – faire Einigung ohne Gericht | medipact",
+  title: "Erbschaftsstreit lösen: fair einigen ohne Gericht | medipact",
   description:
-    "Trauer, Erwartungen und Familiengeschichte treffen aufeinander. Medipact hilft, Erbschaftskonflikte strukturiert zu klären – bevor Anwalt und Gericht notwendig werden.",
+    "Streit ums Erbe belastet die Familie. Mediation klärt Erbschaftskonflikte strukturiert und fair – bevor Anwalt und Gericht nötig werden. Jetzt starten.",
   alternates: { canonical: "https://medipact.de/konflikte/erbschaft" },
 };
 

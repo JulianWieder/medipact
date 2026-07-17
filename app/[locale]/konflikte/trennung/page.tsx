@@ -6,7 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import trennungPhoto from "@/fotos/medi_trennung.jpg";
 
 export const metadata: Metadata = {
-  title: "Trennung & Scheidung ohne Eskalation – KI-Mediation | medipact",
+  title: "Mediation bei Trennung & Scheidung: fair einigen | medipact",
   description:
     "Unterhalt, Betreuung, Finanzen – Trennung bringt viele offene Fragen. Medipact hilft, faire Lösungen zu finden, ohne dass jede Nachricht zum Streit wird.",
   alternates: { canonical: "https://medipact.de/konflikte/trennung" },
