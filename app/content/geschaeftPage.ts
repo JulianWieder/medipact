@@ -10,12 +10,12 @@
 import { geschaeftFacts } from "@/app/components/ui/DidYouKnowSection";
 
 export const geschaeftPageContent = {
-  eyebrow: "Business-Mediation",
+  eyebrow: "Wirtschaftsmediation",
   title: "Wenn Konflikte das Unternehmen blockieren.",
   titleHighlight:
     "Im Team, unter Gesellschaftern – oder mit Geschäftspartnern.",
   intro:
-    "Ob innerbetrieblich oder über die Unternehmensgrenze hinaus (B2B): Konflikte kosten Arbeitsfähigkeit, Geld und Partnerschaften. Medipact klärt strukturiert – strikt vertraulich und deutlich schneller als ein Gerichtsverfahren.",
+    "Ob innerbetrieblich oder über die Unternehmensgrenze hinaus (B2B): Ungelöste Konflikte kosten Arbeitsfähigkeit, Geld und Partnerschaften. Eine professionelle Wirtschaftsmediation klärt strukturiert – strikt vertraulich und deutlich schneller als ein Gerichtsverfahren.",
 
   primaryCta: {
     label: "Business-Konflikt einschätzen",
@@ -58,11 +58,15 @@ export const geschaeftPageContent = {
     },
   ],
 
-  processTitle: "Wie medipact unterstützt",
+  processTitle: "Ablauf einer Wirtschaftsmediation im Betrieb",
   process: [
     {
       title: "Diagnose zuerst",
-      text: "Konfliktart (Sach-, Beziehungs-, Rollen- oder Strukturkonflikt) und Eskalationsstufe werden strukturiert erfasst – bevor irgendjemand über Lösungen spricht.",
+      text: "Konfliktart (Sach-, Beziehungs-, Rollen- oder Strukturkonflikt) und Eskalationsstufe nach Glasl werden strukturiert erfasst – bevor irgendjemand über Lösungen spricht.",
+    },
+    {
+      title: "Vertrauliche Fallaufnahme",
+      text: "Jede Partei schildert ihre Sicht zunächst getrennt und asynchron – ohne Terminfindungs-Marathon, neben dem Tagesgeschäft. Die Arbeit läuft währenddessen weiter.",
     },
     {
       title: "Der passende Ansatz",
@@ -114,15 +118,19 @@ export const geschaeftPageContent = {
     },
   ],
 
-  trustTitle: "Der Business-Vorteil",
+  trustTitle: "Diskretion, Tempo, Rechtssicherheit",
   trustPoints: [
     {
       title: "Strikt vertraulich",
-      text: "Anders als ein Gerichtsverfahren bleibt alles unter Verschluss – kein öffentliches Verfahren, kein Image-Schaden am Markt.",
+      text: "Anders als ein Gerichtsverfahren bleibt alles unter Verschluss – kein öffentliches Verfahren, kein Image-Schaden am Markt. Mediator:innen unterliegen der gesetzlichen Verschwiegenheitspflicht (§ 4 Mediationsgesetz).",
     },
     {
       title: "Deutlich schneller als Gericht",
       text: "Wochen statt Jahre: Das schont Ressourcen, und Projekte laufen weiter, statt blockiert zu werden.",
+    },
+    {
+      title: "Rechtssicher vereinbart",
+      text: "Die Abschlussvereinbarung ist ein bindender Vertrag und kann bei Bedarf notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden – Grundlage ist das Mediationsgesetz.",
     },
     {
       title: "Partnerschaft bleibt erhalten",
@@ -132,8 +140,18 @@ export const geschaeftPageContent = {
 
   didYouKnowFacts: geschaeftFacts,
 
-  faqTitle: "Häufige Fragen zur Business-Mediation",
+  faqTitle: "Häufige Fragen zur Wirtschaftsmediation",
   faqs: [
+    {
+      question: "Was kosten ungelöste Konflikte im Unternehmen?",
+      answer:
+        "Mehr als jede Mediation: Laut KPMG-Konfliktkostenstudie verbringen Mitarbeitende 10–15 % ihrer Arbeitszeit mit Konflikten, Führungskräfte je nach Eskalation 30–50 %. Dazu kommen Fluktuation, Krankheitstage, blockierte Projekte – und im Streitfall Anwalts- und Gerichtskosten über Jahre. Eine Wirtschaftsmediation bei medipact kostet ab €399 pro Fall und klärt in Tagen bis Wochen.",
+    },
+    {
+      question: "Ist eine Wirtschaftsmediation rechtssicher?",
+      answer:
+        "Ja. Das Verfahren ist im Mediationsgesetz geregelt, Mediator:innen unterliegen der Verschwiegenheitspflicht (§ 4 MediationsG). Die Abschlussvereinbarung ist ein bindender Vertrag und kann notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden.",
+    },
     {
       question: "Welchen Zeitaufwand müssen wir für das Verfahren einplanen?",
       answer:
