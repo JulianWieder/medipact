@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, field_validator
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -256,7 +257,13 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Sessio
     """
     auth_limiter.check(request)
 
-    user = db.query(User).filter(User.email == str(payload.email)).first()
+    # Case-insensitiv matchen — E-Mails werden bei der Registrierung wie
+    # eingetippt gespeichert (gleicher Fix wie bei /invites/me)
+    user = (
+        db.query(User)
+        .filter(func.lower(User.email) == str(payload.email).lower())
+        .first()
+    )
 
     # Wir antworten gleich, egal ob der Account existiert oder nicht (Sicherheit!)
     if not user:
@@ -275,8 +282,10 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Sessio
     # Reset-E-Mail senden (Fehler loggen, aber nicht abbrechen)
     try:
         send_password_reset_email(str(payload.email), user.name, token)
-    except Exception as exc:
-        print(f"[EMAIL ERROR] {exc}")
+    except Exception:
+        import traceback
+        print(f"[EMAIL ERROR] Passwort-Reset an {payload.email} fehlgeschlagen:")
+        traceback.print_exc()
 
     return ForgotPasswordResponse(
         message="Falls ein Account mit dieser E-Mail existiert, erhältst du einen Reset-Link.",
