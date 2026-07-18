@@ -45,8 +45,8 @@ const serviceSchema = {
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
-    price: "249",
-    description: "KI-Mediation ab €249",
+    price: "20",
+    description: "KI-Mediation ab €20",
   },
 };
 

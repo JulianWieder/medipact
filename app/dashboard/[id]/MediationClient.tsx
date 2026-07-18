@@ -27,6 +27,13 @@ type PartyStatus = {
   billing_address_complete?: boolean;
 };
 
+type AddonOffer = {
+  key: string;
+  label: string;
+  description: string;
+  price_eur: number;
+};
+
 type PayStatus = {
   mediation_type: string;
   package: string;
@@ -34,11 +41,15 @@ type PayStatus = {
   case_base_price_eur: number;
   is_paid: boolean;
   all_owing_paid: boolean;
+  // Buchbare Add-ons des Einstiegs-Tarifs (leer bei Premium-Typen).
+  addons_available?: AddonOffer[];
   you: {
     owes: boolean;
     base_due_eur: number;
     discount_code: string | null;
     discount_amount_eur: number;
+    addons?: { key: string; price_eur: number }[];
+    addons_total_eur?: number;
     amount_due_eur: number;
     paid: boolean;
     billing_address_complete?: boolean;
@@ -169,6 +180,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [paying, setPaying] = useState(false);
   const [payStatus, setPayStatus] = useState<PayStatus | null>(null);
+  const [addonBusy, setAddonBusy] = useState(false);
   const [discountInput, setDiscountInput] = useState("");
   const [discountBusy, setDiscountBusy] = useState(false);
   const [discountError, setDiscountError] = useState("");
@@ -513,6 +525,35 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       }
     } catch {
       setDiscountError("Server nicht erreichbar.");
+    }
+  }
+
+  // Add-on an-/abwählen (Einstiegs-Tarif): ersetzt die Auswahl serverseitig
+  // komplett und aktualisiert den Bezahl-Status (Betrag inkl. Add-ons).
+  async function toggleAddon(key: string) {
+    if (!payStatus || payStatus.you.paid || addonBusy) return;
+    const current = (payStatus.you.addons ?? []).map((a) => a.key);
+    const next = current.includes(key)
+      ? current.filter((k) => k !== key)
+      : [...current, key];
+    setAddonBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/addons`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keys: next }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(data?.detail ?? data?.error ?? "Add-ons konnten nicht gespeichert werden.");
+        return;
+      }
+      setPayStatus(data);
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setAddonBusy(false);
     }
   }
 
@@ -1141,6 +1182,52 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                       <p className="mt-2 text-xs font-semibold text-red-600">{discountError}</p>
                     )}
                   </div>
+
+                  {/* Add-ons (Einstiegs-Tarif: 20 € Basis + buchbare Zusatzleistungen) */}
+                  {(payStatus.addons_available?.length ?? 0) > 0 && (
+                    <div className="mx-auto mt-5 w-full max-w-sm text-left">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+                        Optionale Zusatzleistungen
+                      </p>
+                      <div className="space-y-2">
+                        {payStatus.addons_available!.map((addon) => {
+                          const selected = (payStatus.you.addons ?? []).some((a) => a.key === addon.key);
+                          return (
+                            <label
+                              key={addon.key}
+                              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+                                selected
+                                  ? "border-accent-500 bg-accent-50"
+                                  : "border-neutral-200 bg-white hover:border-neutral-300"
+                              } ${addonBusy ? "opacity-60" : ""}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                disabled={addonBusy}
+                                onChange={() => toggleAddon(addon.key)}
+                                className="mt-1 h-4 w-4 accent-accent-600"
+                              />
+                              <span className="flex-1">
+                                <span className="flex items-baseline justify-between gap-2">
+                                  <span className="text-sm font-semibold text-neutral-900">{addon.label}</span>
+                                  <span className="shrink-0 text-sm font-bold text-neutral-900">
+                                    +{addon.price_eur.toFixed(0)} €
+                                  </span>
+                                </span>
+                                <span className="mt-0.5 block text-xs text-neutral-500">{addon.description}</span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {(payStatus.you.addons_total_eur ?? 0) > 0 && (
+                        <p className="mt-2 text-xs font-semibold text-neutral-600">
+                          Zusatzleistungen: +{(payStatus.you.addons_total_eur ?? 0).toFixed(2)} €
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   <p className="mx-auto mt-4 max-w-sm text-xs text-neutral-500">
                     Der Betrag wird zunächst nur reserviert und erst nach erfolgreicher

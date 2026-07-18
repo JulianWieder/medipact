@@ -3,9 +3,9 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title: "Preise: Mediation ab 249 €, Business-Pauschale | medipact",
+  title: "Preise: Mediation ab 20 €, Business-Pauschale | medipact",
   description:
-    "Mediation ab 249 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Pauschale. Transparent, ohne versteckte Kosten. Jetzt Modelle vergleichen.",
+    "Einstieg ab 20 € pro Partei (Nachbarschaft, WG, Verbraucher), Wirtschaftsmediation ab 399 € oder Business-Pauschale. Transparent, ohne versteckte Kosten.",
   alternates: { canonical: "https://medipact.de/preise" },
 };
 
@@ -67,11 +67,41 @@ export default function Preise() {
                       Nachbarschafts-Streit
                     </span>
                     <span className="text-lg font-bold text-accent-600">
-                      €249
+                      €20
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Aufgeteilt auf alle Parteien
+                    ➜ Pro Partei – Einstiegstarif
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      WG- & Mitbewohner-Konflikt
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €20
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    ➜ Pro Partei – Einstiegstarif
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Verbraucher- & Handwerker-Streit
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €20
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    ➜ Pro Partei – Einstiegstarif
+                  </p>
+
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Optional zubuchbar: Live-Videositzung mit Mediator:in
+                    (+€79), geprüfte Abschlussvereinbarung (+€49),
+                    Express-Bearbeitung (+€29).
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -569,7 +599,7 @@ export default function Preise() {
               {[
                 {
                   q: "Wie wird die Aufteilung der Kosten berechnet?",
-                  a: "Alle Parteien zahlen anteilig. Bei einer Scheidung zahlt jede Person den gleichen Anteil. Bei einer Nachbarschafts-Mediation mit 2 Parteien zahlt jede Partei 50%. Vollständige Transparenz!",
+                  a: "Jede Partei zahlt ihren eigenen Anteil. Beim Einstiegstarif (Nachbarschaft, WG, Verbraucher/Handwerker) sind das nur 20 € pro Partei – optionale Zusatzleistungen wie eine Live-Videositzung oder eine geprüfte Abschlussvereinbarung können einzeln dazugebucht werden. Vollständige Transparenz!",
                 },
                 {
                   q: "Welches Modell passt zu meinem Fall?",

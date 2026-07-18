@@ -74,6 +74,8 @@ export default function Header() {
       children: [
         { label: t("konflikteTrennung"), href: "/konflikte/trennung" },
         { label: t("konflikteNachbarschaft"), href: "/konflikte/nachbarschaft" },
+        { label: t("konflikteWg"), href: "/konflikte/wg" },
+        { label: t("konflikteVerbraucher"), href: "/konflikte/verbraucher" },
         { label: t("konflikteErbschaft"), href: "/konflikte/erbschaft" },
         { label: t("konflikteGeschaeft"), href: "/konflikte/geschaeft" },
       ],

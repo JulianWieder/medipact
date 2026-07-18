@@ -7,6 +7,8 @@
     "konflikte": "Konflikte",
     "konflikteTrennung": "Scheidung & Trennung",
     "konflikteNachbarschaft": "Nachbarschaft",
+    "konflikteWg": "WG & Mitbewohner",
+    "konflikteVerbraucher": "Verbraucher & Handwerker",
     "konflikteErbschaft": "Erbe & Familie",
     "konflikteGeschaeft": "Team & Organisation",
     "methode": "So funktioniert es",
@@ -68,7 +70,7 @@
         "label": "typische Dauer"
       },
       {
-        "value": "ab €249",
+        "value": "ab €20",
         "label": "statt tausenden an Anwaltskosten"
       },
       {

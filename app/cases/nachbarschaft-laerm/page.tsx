@@ -36,7 +36,7 @@ export default function Page() {
         {
           question: "Was kostet eine Nachbarschaftsmediation?",
           answer:
-            "Bei medipact ab €249 pro Partei, meist in wenigen Wochen abgeschlossen – deutlich günstiger als eine Unterlassungsklage mit Anwalt und ungewissem Ausgang.",
+            "Bei medipact ab €20 pro Partei, meist in wenigen Wochen abgeschlossen – deutlich günstiger als eine Unterlassungsklage mit Anwalt und ungewissem Ausgang.",
         },
       ]}
     />

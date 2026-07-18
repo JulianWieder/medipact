@@ -36,7 +36,7 @@ export default function Page() {
         {
           question: "Was kostet ein Zaunstreit vor Gericht?",
           answer:
-            "Vermessung, Anwälte und Verfahren summieren sich schnell auf mehrere tausend Euro. Die Mediation kostet bei medipact ab €249 pro Partei – und beide Familien grüßen sich noch.",
+            "Vermessung, Anwälte und Verfahren summieren sich schnell auf mehrere tausend Euro. Die Mediation kostet bei medipact ab €20 pro Partei – und beide Familien grüßen sich noch.",
         },
       ]}
     />

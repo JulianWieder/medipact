@@ -200,6 +200,8 @@ def generate_invite_content(
         "trennung": "Trennung & Scheidung",
         "erbschaft": "Erbschaftsstreit",
         "nachbarschaft": "Nachbarschaftskonflikt",
+        "wg": "WG-Konflikt",
+        "verbraucher": "Verbraucherstreit",
     }
     type_label = type_labels.get(mediation_type, mediation_type or "Mediation")
 

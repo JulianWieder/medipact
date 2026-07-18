@@ -29,6 +29,8 @@ TYPE_LABELS = {
     "trennung": "Trennung & Scheidung",
     "erbschaft": "Erbschaftsstreit",
     "nachbarschaft": "Nachbarschaftskonflikt",
+    "wg": "WG-Konflikt",
+    "verbraucher": "Verbraucherstreit",
 }
 
 INVOICE_STATUS_LABELS = {

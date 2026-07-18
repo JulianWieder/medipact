@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type MediationType = "trennung" | "nachbarschaft" | "erbschaft";
+type MediationType = "trennung" | "nachbarschaft" | "erbschaft" | "geschaeft" | "wg" | "verbraucher";
 type Phase =
   | "einleitung"
   | "themensammlung"
@@ -41,6 +41,8 @@ type MediationVariant = {
 const MEDIATION_TYPES: { value: MediationType; label: string }[] = [
   { value: "trennung", label: "Trennung" },
   { value: "nachbarschaft", label: "Nachbarschaft" },
+  { value: "wg", label: "WG & Mitbewohner" },
+  { value: "verbraucher", label: "Verbraucher & Handwerker" },
   { value: "erbschaft", label: "Erbschaft" },
 ];
 

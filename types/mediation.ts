@@ -26,7 +26,7 @@ export interface MediationParticipant {
 export interface MediationCase {
   id: string;
   title: string;
-  type: "trennung" | "erbe" | "nachbarschaft";
+  type: "trennung" | "erbe" | "erbschaft" | "nachbarschaft" | "geschaeft" | "wg" | "verbraucher";
   status: MediationStatus;
   phase: MediationPhase;
   progress: number;

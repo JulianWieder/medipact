@@ -179,6 +179,8 @@ export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "trennung", label: "Trennung & Scheidung" },
   { id: "erbschaft", label: "Erbschaft" },
   { id: "nachbarschaft", label: "Nachbarschaft" },
+  { id: "wg", label: "WG & Mitbewohner" },
+  { id: "verbraucher", label: "Verbraucher & Handwerker" },
   { id: "geschaeft", label: "Geschäft & Organisation" },
 ];
 
@@ -461,6 +463,8 @@ export const TYPE_LABEL: Record<string, string> = {
   trennung: "Trennung & Scheidung",
   erbschaft: "Erbschaftsstreit",
   nachbarschaft: "Nachbarschaftskonflikt",
+  wg: "WG-Konflikt",
+  verbraucher: "Verbraucherstreit",
   geschaeft: "Geschäft & Organisation",
 };
 
@@ -468,6 +472,8 @@ export const TYPE_COLOR: Record<string, string> = {
   trennung: "bg-rose-50 text-rose-700 border-rose-200",
   erbschaft: "bg-amber-50 text-amber-700 border-amber-200",
   nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
+  wg: "bg-teal-50 text-teal-700 border-teal-200",
+  verbraucher: "bg-orange-50 text-orange-700 border-orange-200",
   geschaeft: "bg-violet-50 text-violet-700 border-violet-200",
 };
 

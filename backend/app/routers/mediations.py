@@ -656,11 +656,18 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
         "case_base_price_eur": pricing.base_price(mediation.mediation_type, mediation.package),
         "is_paid": bool(mediation.is_paid),
         "all_owing_paid": billing.all_owing_paid(db, mediation),
+        # Buchbare Add-ons des Einstiegs-Tarifs (leer bei Premium-Typen).
+        "addons_available": pricing.addons_for(mediation.mediation_type),
         "you": {
             "owes": billing.participant_owes(mediation, me),
             "base_due_eur": my_base,
             "discount_code": me.discount_code,
             "discount_amount_eur": round(me.discount_amount or 0.0, 2),
+            "addons": [
+                {"key": a.addon_key, "price_eur": round(float(a.price_eur or 0.0), 2)}
+                for a in billing.participant_addons(db, mediation, me)
+            ],
+            "addons_total_eur": billing.participant_addons_total(db, mediation, me),
             "amount_due_eur": my_final,
             "paid": bool(me.paid),
             # Fürs Onboarding: Zahlung ist erst möglich, wenn die
@@ -731,6 +738,28 @@ def remove_discount(
     me.discount_amount = 0.0
     db.commit()
     db.refresh(me)
+    return _payment_status_payload(db, mediation, me)
+
+
+class AddonsUpdateRequest(BaseModel):
+    keys: list[str] = []
+
+
+@router.put("/{mediation_id}/addons")
+def set_addons(
+    mediation_id: int,
+    payload: AddonsUpdateRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Setzt die Add-on-Auswahl der EIGENEN Partei (Einstiegs-Tarif). Ersetzt
+    die bisherige Auswahl komplett; nur vor der Zahlung möglich. Der Betrag
+    wird auf den eigenen Anteil aufgeschlagen (siehe services/billing.py)."""
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if not billing.participant_owes(mediation, me):
+        raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an – Add-ons sind nur für zahlende Parteien buchbar.")
+    billing.set_participant_addons(db, mediation, me, payload.keys)
     return _payment_status_payload(db, mediation, me)
 
 
@@ -1815,6 +1844,8 @@ def generate_title(
         "trennung": "Trennung & Scheidung",
         "erbschaft": "Erbschaftsstreit",
         "nachbarschaft": "Nachbarschaftskonflikt",
+        "wg": "WG-Konflikt",
+        "verbraucher": "Verbraucherstreit",
     }
     type_label = type_labels.get(payload.mediation_type, payload.mediation_type)
 
@@ -2601,6 +2632,8 @@ def analyse_mediation(
         "trennung": "Trennung & Scheidung",
         "erbschaft": "Erbschaftsstreit",
         "nachbarschaft": "Nachbarschaftskonflikt",
+        "wg": "WG-Konflikt",
+        "verbraucher": "Verbraucherstreit",
     }
     type_label = type_labels.get(mediation.mediation_type or "", mediation.mediation_type or "")
     phase_labels = {
@@ -3092,6 +3125,8 @@ TYPE_LABELS_ANALYSE = {
     "trennung": "Trennung & Scheidung",
     "erbschaft": "Erbschaftsstreit",
     "nachbarschaft": "Nachbarschaftskonflikt",
+    "wg": "WG-Konflikt",
+    "verbraucher": "Verbraucherstreit",
     "geschaeft": "Geschäftskonflikt",
 }
 

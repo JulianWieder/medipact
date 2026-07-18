@@ -26,7 +26,7 @@ export default function Page() {
         {
           question: "Wer trägt die Kosten bei einer Mediation?",
           answer:
-            "In der Regel teilen sich beide Parteien die Kosten anteilig – bei medipact ab €249 pro Partei. Im Fall von Maria & Thomas kostete die gesamte Mediation €499, ein Gerichtsverfahren hätte über €52.000 gekostet.",
+            "In der Regel teilen sich beide Parteien die Kosten anteilig – bei medipact ab €399 pro Partei. Im Fall von Maria & Thomas kostete die gesamte Mediation €798, ein Gerichtsverfahren hätte über €52.000 gekostet.",
         },
         {
           question: "Wie lange dauert eine Mediation bei Trennung?",

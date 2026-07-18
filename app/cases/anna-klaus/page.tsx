@@ -36,7 +36,7 @@ export default function Page() {
         {
           question: "Was kostet eine Erbschaftsmediation?",
           answer:
-            "Bei medipact ab €249 pro Partei. Anna & Klaus zahlten €800 und waren nach 3 Monaten fertig – ein Erbstreit vor Gericht hätte über €20.000 gekostet und Jahre gedauert.",
+            "Bei medipact ab €399 einmalig für den Fall. Anna & Klaus zahlten €399 und waren nach 3 Monaten fertig – ein Erbstreit vor Gericht hätte über €20.000 gekostet und Jahre gedauert.",
         },
       ]}
     />

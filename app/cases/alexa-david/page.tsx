@@ -36,7 +36,7 @@ export default function Page() {
         {
           question: "Was kostet eine Mediation bei Trennung mit Kindern?",
           answer:
-            "Bei medipact ab €249 pro Partei. Alexa & David zahlten zusammen €499 und waren nach 4 Monaten fertig – ein Gerichtsverfahren hätte rund €33.000 gekostet und 2 Jahre gedauert.",
+            "Bei medipact ab €399 pro Partei. Alexa & David zahlten zusammen €798 und waren nach 4 Monaten fertig – ein Gerichtsverfahren hätte rund €33.000 gekostet und 2 Jahre gedauert.",
         },
       ]}
     />

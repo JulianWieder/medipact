@@ -28,16 +28,24 @@ PACKAGE_LABELS = {
 
 # EUR-Grundpreis je (Konflikttyp, Paket). None = Kombination nicht angeboten.
 # TODO(Julian): fehlende Werte (None) füllen, falls die Kombination angeboten wird.
+#
+# Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/WG/Verbraucher = nied-
+# rigschwellig, 20 € pro Partei, Umsatz über buchbare Add-ons – siehe ADDONS).
+# Monetarisierung über Trennung/Erbschaft/Geschäft (Premium-Typen).
 PRICE_MATRIX: dict[str, dict[str, float | None]] = {
-    "nachbarschaft": {"online": 249.0, "hybrid": None, "vollservice": None},
+    "nachbarschaft": {"online": 20.0,  "hybrid": None,  "vollservice": None},
+    "wg":            {"online": 20.0,  "hybrid": None,  "vollservice": None},
+    "verbraucher":   {"online": 20.0,  "hybrid": None,  "vollservice": None},
     "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
-    "erbschaft":     {"online": 399.0, "hybrid": None, "vollservice": None},
-    "geschaeft":     {"online": 399.0, "hybrid": None, "vollservice": None},
+    "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "geschaeft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
 }
 
 # Abrechnungsmodell je Konflikttyp (laut /preise). Gilt paketübergreifend.
 BILLING_MODEL: dict[str, str] = {
-    "nachbarschaft": "split",
+    "nachbarschaft": "per_party",  # 20 € je Partei (früher 249 € split)
+    "wg": "per_party",
+    "verbraucher": "per_party",
     "trennung": "per_party",
     "erbschaft": "once",
     "geschaeft": "once",
@@ -110,6 +118,59 @@ def participant_due(
         return round(price / max(participant_count, 1), 2)
     # per_party (Default)
     return round(price, 2)
+
+
+# ── Buchbare Add-ons (Einstiegs-Typen) ──────────────────────────────────────
+#
+# Beim 20-€-Einstiegstarif (Nachbarschaft/WG/Verbraucher) ist der Basispreis
+# bewusst niedrig; Umsatz entsteht über optional zubuchbare Add-ons. Eine
+# Partei wählt ihre Add-ons VOR der Zahlung (PUT /mediations/{id}/addons);
+# der Betrag wird auf ihren Anteil aufgeschlagen (siehe services/billing.py).
+# Preise – wie alles hier – bewusst NUR an dieser Stelle gepflegt.
+# TODO(Julian): Preise/Formulierungen prüfen, ggf. weitere Add-ons ergänzen.
+
+ADDON_TYPES: set[str] = {"nachbarschaft", "wg", "verbraucher"}
+
+ADDONS: dict[str, dict] = {
+    "videositzung": {
+        "label": "Live-Videositzung mit Mediator:in",
+        "description": "60 Minuten moderierte Videositzung mit einer erfahrenen Mediator:in – zusätzlich zum Online-Prozess.",
+        "price_eur": 79.0,
+    },
+    "vereinbarung": {
+        "label": "Geprüfte Abschlussvereinbarung",
+        "description": "Eure Einigung wird als rechtssicher formulierte, unterschriftsreife Abschlussvereinbarung aufbereitet und geprüft.",
+        "price_eur": 49.0,
+    },
+    "express": {
+        "label": "Express-Bearbeitung",
+        "description": "Priorisierte Bearbeitung: Rückmeldungen und Freigaben innerhalb von 24 Stunden an Werktagen.",
+        "price_eur": 29.0,
+    },
+}
+
+
+def addons_available(mediation_type: str) -> bool:
+    return (mediation_type or "").lower() in ADDON_TYPES
+
+
+def addons_for(mediation_type: str) -> list[dict]:
+    """Buchbare Add-ons für einen Konflikttyp – für das Auswahl-UI im
+    Freischalt-Schritt. Leere Liste, wenn der Typ keine Add-ons anbietet."""
+    if not addons_available(mediation_type):
+        return []
+    return [
+        {"key": key, "label": cfg["label"], "description": cfg["description"], "price_eur": float(cfg["price_eur"])}
+        for key, cfg in ADDONS.items()
+    ]
+
+
+def addon_price(mediation_type: str, addon_key: str) -> float | None:
+    """Preis eines Add-ons (EUR) oder None, wenn es für den Typ nicht buchbar ist."""
+    if not addons_available(mediation_type):
+        return None
+    cfg = ADDONS.get((addon_key or "").strip().lower())
+    return float(cfg["price_eur"]) if cfg else None
 
 
 # ── Business-Abos (Firmenkunden) ─────────────────────────────────────────────

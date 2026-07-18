@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app import pricing
 from app.models.discount_code import DiscountCode
 from app.models.mediation import Mediation
+from app.models.mediation_addon import MediationAddon
 from app.models.mediation_participant import MediationParticipant
 from app.models.organization import Organization
 from app.models.user import User
@@ -121,11 +122,69 @@ def participant_base_due(db: Session, mediation: Mediation, participant: Mediati
     )
 
 
+def participant_addons(db: Session, mediation: Mediation, participant: MediationParticipant) -> list[MediationAddon]:
+    """Von dieser Partei gewählte Add-ons (Einstiegs-Tarif, siehe pricing.ADDONS)."""
+    return (
+        db.query(MediationAddon)
+        .filter(
+            MediationAddon.mediation_id == mediation.id,
+            MediationAddon.participant_id == participant.id,
+        )
+        .all()
+    )
+
+
+def participant_addons_total(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
+    """Summe der von dieser Partei gewählten Add-ons (EUR, Preis-Schnappschuss)."""
+    return round(sum(float(a.price_eur or 0.0) for a in participant_addons(db, mediation, participant)), 2)
+
+
+def set_participant_addons(
+    db: Session,
+    mediation: Mediation,
+    participant: MediationParticipant,
+    keys: list[str],
+) -> list[MediationAddon]:
+    """Ersetzt die Add-on-Auswahl dieser Partei durch ``keys`` (validiert gegen
+    den Katalog). Nur vor der Zahlung erlaubt – danach ist die Auswahl Teil des
+    bezahlten Betrags und damit fix."""
+    if participant.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt – Add-ons können nicht mehr geändert werden.")
+
+    normalized: list[str] = []
+    for key in keys:
+        k = (key or "").strip().lower()
+        if not k or k in normalized:
+            continue
+        price = pricing.addon_price(mediation.mediation_type, k)
+        if price is None:
+            raise HTTPException(status_code=400, detail=f"Add-on '{k}' ist für diesen Konflikttyp nicht buchbar.")
+        normalized.append(k)
+
+    db.query(MediationAddon).filter(
+        MediationAddon.mediation_id == mediation.id,
+        MediationAddon.participant_id == participant.id,
+    ).delete()
+    for k in normalized:
+        db.add(
+            MediationAddon(
+                mediation_id=mediation.id,
+                participant_id=participant.id,
+                addon_key=k,
+                price_eur=pricing.addon_price(mediation.mediation_type, k) or 0.0,
+            )
+        )
+    db.commit()
+    return participant_addons(db, mediation, participant)
+
+
 def participant_final_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
-    """Zu zahlender Betrag dieser Partei NACH Rabatt (>= 0)."""
+    """Zu zahlender Betrag dieser Partei: Basis nach Rabatt (>= 0) plus die von
+    ihr gewählten Add-ons (Rabattcodes gelten nur auf den Basispreis)."""
     base = participant_base_due(db, mediation, participant)
     discount = participant.discount_amount or 0.0
-    return round(max(base - discount, 0.0), 2)
+    addons = participant_addons_total(db, mediation, participant)
+    return round(max(base - discount, 0.0) + addons, 2)
 
 
 def owing_participants(db: Session, mediation: Mediation) -> list[MediationParticipant]:
