@@ -196,6 +196,34 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           if (currentUserName) {
             const me = data.find((p) => p.name === currentUserName);
             if (me) setMyRole(me.role);
+            // Eingeladene Partei VOR der Zahlung: erst die Aufklärung
+            // (Situation, was Mediation ist, Ablauf, Video) durchlaufen —
+            // sonst ist ihr erster Eindruck die Rechnung. Bestätigung wird
+            // als block_response (einladung/gegenseite_aufklaerung) geprüft.
+            if (me?.role === "other_party" && !initialIsPaid) {
+              try {
+                const r = await fetch(
+                  `/api/mediations/${mediationId}/block-responses?phase=einladung&step_key=gegenseite_aufklaerung`,
+                  { cache: "no-store" },
+                );
+                if (r.ok) {
+                  const rows: { block_id: string; value: unknown }[] = await r.json();
+                  const v = Array.isArray(rows)
+                    ? rows.find((x) => x.block_id === "ga_verstanden")?.value
+                    : undefined;
+                  const confirmed =
+                    typeof v === "object" && v !== null
+                      ? (v as { agreed?: boolean }).agreed === true
+                      : v === true;
+                  if (!confirmed) {
+                    router.replace(`/dashboard/${hashId(mediationId)}/intro`);
+                    return;
+                  }
+                }
+              } catch {
+                // Aufklärung nicht prüfbar → Checkliste normal anzeigen
+              }
+            }
             // Andere Partei erst NACH der Freischaltung direkt zur emotionalen
             // Einleitung weiterleiten – vorher braucht sie diese Seite, um ihre
             // Rechnungsdaten zu hinterlegen und den eigenen Anteil zu bezahlen.
