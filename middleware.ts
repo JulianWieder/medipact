@@ -28,13 +28,15 @@ export default auth((req) => {
   if (isAppRoute) {
     if (pathname.startsWith("/dashboard") && !isAuthenticated) {
       const loginUrl = new URL("/auth/login", req.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
+      // Query-String mitnehmen: Einladungslinks (?token=...) dürfen beim
+      // Login-Redirect nicht verloren gehen.
+      loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search);
       return NextResponse.redirect(loginUrl);
     }
 
     if (pathname.startsWith("/workspace") && !isAuthenticated) {
       const loginUrl = new URL("/auth/login", req.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
+      loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search);
       return NextResponse.redirect(loginUrl);
     }
 

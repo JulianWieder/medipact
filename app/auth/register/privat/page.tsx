@@ -1,10 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 // Privatpersonen-Registrierung (öffentlich, ohne Domain-Beschränkung).
-export default function RegisterPrivatePage() {
+function RegisterPrivateContent() {
+  // callbackUrl (z.B. Einladungslink) bis zum Login weiterreichen.
+  const searchParams = useSearchParams();
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "";
+  const callbackUrl =
+    rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "";
+  const loginHref = callbackUrl
+    ? `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/auth/login";
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -50,7 +61,7 @@ export default function RegisterPrivatePage() {
           <div className="mb-3 text-4xl">✉️</div>
           <h1 className="mb-2 text-xl font-bold text-neutral-900">Fast geschafft</h1>
           <p className="text-sm text-neutral-600">Bestätige deine Adresse <strong>{registeredEmail}</strong> über den Link in der E-Mail.</p>
-          <Link href="/auth/login" className="mt-6 inline-block text-sm text-accent-600 hover:underline">→ Zum Login</Link>
+          <Link href={loginHref} className="mt-6 inline-block text-sm text-accent-600 hover:underline">→ Zum Login</Link>
         </div>
       </div>
     );
@@ -86,11 +97,22 @@ export default function RegisterPrivatePage() {
           </button>
         </form>
         <p className="mt-5 text-center text-xs text-neutral-400">
-          <Link href="/auth/register" className="text-accent-600 hover:underline">← Zurück zur Auswahl</Link>
+          <Link
+            href={callbackUrl ? `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/auth/register"}
+            className="text-accent-600 hover:underline"
+          >← Zurück zur Auswahl</Link>
           <span className="mx-2">·</span>
-          <Link href="/auth/login" className="text-accent-600 hover:underline">Einloggen</Link>
+          <Link href={loginHref} className="text-accent-600 hover:underline">Einloggen</Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPrivatePage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPrivateContent />
+    </Suspense>
   );
 }

@@ -1,21 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 // Verzweigter Registrierungs-Einstieg: Privatperson vs. Unternehmen.
 // Interne Mitarbeiter (medipact/mandexis) registrieren separat über
 // /auth/register/intern (domain-beschränkt).
-export default function RegisterChoicePage() {
+function RegisterChoiceContent() {
+  // callbackUrl (z.B. Einladungslink) durch den gesamten Registrierungs-Flow
+  // weiterreichen, damit Eingeladene nach dem Login wieder bei ihrer
+  // Einladung landen.
+  const searchParams = useSearchParams();
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "";
+  const callbackUrl =
+    rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "";
+  const withCallback = (href: string) =>
+    callbackUrl ? `${href}?callbackUrl=${encodeURIComponent(callbackUrl)}` : href;
+
   const cards = [
     {
-      href: "/auth/register/privat",
+      href: withCallback("/auth/register/privat"),
       badge: "Privat",
       title: "Als Privatperson",
       text: "Für private Konflikte – z.B. Trennung, Erbschaft oder Nachbarschaft. Du startest eine eigene Mediation und lädst die Gegenseite ein.",
       icon: "🧑",
     },
     {
-      href: "/auth/register-company",
+      href: withCallback("/auth/register-company"),
       badge: "Abo-Modell",
       title: "Als Unternehmen (Abo)",
       text: "Für Firmen im Abo-Modell: einmal Grundkonfiguration festlegen, dann interne Fälle ohne Einzelzahlung – mit eigenen Mediatoren über euren Firmen-Zugang.",
@@ -59,9 +73,17 @@ export default function RegisterChoicePage() {
         <span className="mx-2">·</span>
         <span>
           Schon ein Konto?{" "}
-          <Link href="/auth/login" className="text-accent-600 hover:underline">Einloggen</Link>
+          <Link href={withCallback("/auth/login")} className="text-accent-600 hover:underline">Einloggen</Link>
         </span>
       </div>
     </div>
+  );
+}
+
+export default function RegisterChoicePage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterChoiceContent />
+    </Suspense>
   );
 }

@@ -66,10 +66,11 @@ function blocksFromLegacy(config: NewMediationConfig): FlowBlock[] {
       id: "legacy_intro",
       type: "textausgabe",
       config: {
-        title: "Schön, dass Sie da sind.",
+        title: "Nehmen Sie sich einen Moment.",
         text:
-          "Die nächsten Minuten gehören Ihrer Situation: ein Gespräch, keine " +
-          "Formular-Batterie. Alles, was Sie schreiben, bleibt vertraulich.",
+          "Die nächsten Minuten gehören Ihrer Situation. Es gibt keine " +
+          "richtigen oder falschen Antworten, und Sie bestimmen das Tempo. " +
+          "Alles, was Sie schreiben, bleibt vertraulich.",
       },
     },
   ];
@@ -444,7 +445,7 @@ export default function StartFlowClient({ config }: Props) {
         <div>
           {s.isIntro && (
             <p className="eyebrow sf-in mb-5">
-              ≈ 5 Minuten · vertraulich · in Ihrem Tempo
+              Vertraulich · in Ihrem Tempo · jede Frage darf übersprungen werden
             </p>
           )}
           {leadTitle && (
@@ -569,7 +570,7 @@ export default function StartFlowClient({ config }: Props) {
             disabled={saving}
             className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {saving ? "Wird gespeichert …" : "Vorhang auf – zum Fall"}
+            {saving ? "Wird gespeichert …" : "Weiter zu Ihrem Fall"}
           </button>
         </div>
       </div>

@@ -749,7 +749,9 @@ def get_my_invites(
         db.query(MediationInvite, Mediation)
         .join(Mediation, MediationInvite.mediation_id == Mediation.id)
         .filter(
-            MediationInvite.invited_email == user.email,
+            # Case-insensitiv: Eingeladene registrieren sich gelegentlich mit
+            # anderer Gross-/Kleinschreibung als in der Einladung hinterlegt.
+            func.lower(MediationInvite.invited_email) == user.email.lower(),
             MediationInvite.status == "pending",
         )
         .all()

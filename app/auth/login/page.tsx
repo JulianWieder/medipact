@@ -11,6 +11,13 @@ import { Card } from "@/app/components/ui/Card";
 function LoginForm() {
   const searchParams = useSearchParams();
   const justVerified = searchParams.get("verified") === "1";
+  // Ziel nach dem Login (z.B. /dashboard/invitations?token=... aus einem
+  // Einladungslink). Nur relative Pfade zulassen (kein Open Redirect).
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "";
+  const callbackUrl =
+    rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,6 +70,13 @@ function LoginForm() {
 
       if (result?.error) {
         setError("E-Mail oder Passwort falsch");
+        return;
+      }
+
+      // Explizites Ziel (z.B. Einladungslink) hat Vorrang vor dem
+      // rollenbasierten Routing.
+      if (callbackUrl) {
+        window.location.href = callbackUrl;
         return;
       }
 
@@ -189,7 +203,11 @@ function LoginForm() {
             <p className="text-neutral-600">
               Noch kein Konto?{" "}
               <Link
-                href="/auth/register"
+                href={
+                  callbackUrl
+                    ? `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                    : "/auth/register"
+                }
                 className="font-semibold text-accent-600 transition hover:text-accent-700"
               >
                 Hier registrieren
