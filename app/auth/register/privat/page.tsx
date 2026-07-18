@@ -16,7 +16,9 @@ function RegisterPrivateContent() {
   const loginHref = callbackUrl
     ? `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
     : "/auth/login";
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  // E-Mail-Vorbelegung aus Einladungs-Redirect (Login-Seite → Registrierung)
+  const prefillEmail = searchParams.get("email") ?? "";
+  const [form, setForm] = useState({ name: "", email: prefillEmail, password: "", confirmPassword: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);

@@ -832,6 +832,51 @@ def accept_invite_direct(
     }
 
 
+@router.get("/invites/{token}/lookup")
+def lookup_invite(
+    token: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Public: Prüft ein Einladungs-Token und sagt, ob zur eingeladenen
+    E-Mail bereits ein Konto existiert.
+
+    Wird von der Login-Seite genutzt, um neu Eingeladene ohne Konto direkt
+    zur Registrierung (mit vorausgefüllter E-Mail) zu routen statt sie auf
+    dem Login stranden zu lassen. Kein Auth nötig — das Token selbst ist
+    das Geheimnis (kam per E-Mail an genau diese Adresse).
+    """
+    invite_limiter.check(request)
+
+    invite = (
+        db.query(MediationInvite)
+        .filter(MediationInvite.token_hash == hash_token(token))
+        .first()
+    )
+    if not invite or invite.status != "pending" or not invite.invited_email:
+        raise HTTPException(status_code=404, detail="Einladung ungueltig")
+
+    expires_at = (
+        invite.expires_at.replace(tzinfo=None)
+        if invite.expires_at.tzinfo
+        else invite.expires_at
+    )
+    if expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+        raise HTTPException(status_code=404, detail="Einladung abgelaufen")
+
+    user_exists = (
+        db.query(User.id)
+        .filter(func.lower(User.email) == invite.invited_email.lower())
+        .first()
+        is not None
+    )
+
+    return {
+        "invited_email": invite.invited_email,
+        "user_exists": user_exists,
+    }
+
+
 @router.post("/invites/{token}/accept")
 def accept_invite(
     token: str,

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
@@ -24,6 +24,44 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Kommt jemand über einen Einladungslink hierher (callbackUrl mit
+  // ?token=...), prüfen wir, ob zur eingeladenen E-Mail schon ein Konto
+  // existiert. Nein → direkt zur Registrierung mit vorausgefüllter E-Mail
+  // (neu Eingeladene kennen ja noch kein Passwort). Ja → E-Mail vorausfüllen.
+  useEffect(() => {
+    if (!callbackUrl.startsWith("/dashboard/invitations")) return;
+    let inviteToken = "";
+    try {
+      inviteToken =
+        new URL(callbackUrl, window.location.origin).searchParams.get("token") ?? "";
+    } catch {}
+    if (!inviteToken) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/invites/lookup?token=${encodeURIComponent(inviteToken)}`,
+          { cache: "no-store" }
+        );
+        if (!res.ok || cancelled) return;
+        const info = await res.json();
+        if (cancelled || !info?.invited_email) return;
+        if (info.user_exists === false) {
+          window.location.replace(
+            `/auth/register/privat?callbackUrl=${encodeURIComponent(callbackUrl)}&email=${encodeURIComponent(info.invited_email)}`
+          );
+          return;
+        }
+        setEmail((current) => current || info.invited_email);
+      } catch {}
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
