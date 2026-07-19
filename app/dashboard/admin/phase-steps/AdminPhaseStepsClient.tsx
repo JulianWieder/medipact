@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type MediationType = "trennung" | "nachbarschaft" | "erbschaft" | "geschaeft" | "wg" | "verbraucher";
+type MediationType =
+  | "trennung"
+  | "nachbarschaft"
+  | "erbschaft"
+  | "wg"
+  | "verbraucher"
+  // ODR-Familie (Online Dispute Resolution, ehemals "geschaeft")
+  | "odr"
+  | "schlichtung"
+  | "ecommerce"
+  | "b2b";
 type Phase =
   | "einleitung"
   | "themensammlung"

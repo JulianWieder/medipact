@@ -57,7 +57,7 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Bei medipact gibt es feste Paketpreise statt offener Stundensätze – das macht die Kosten planbar. Für Unternehmen mit wiederkehrendem Bedarf gibt es Firmenpakete mit inkludierten Fällen. Verglichen mit den Folgekosten eines eskalierten Konflikts – Fluktuation, Krankenstand, Arbeitsgerichtsverfahren – ist Mediation fast immer die wirtschaftlichste Option.",
     },
-    { type: "cta", text: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/geschaeft" },
+    { type: "cta", text: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/odr" },
   ],
   faq: [
     {
@@ -89,6 +89,7 @@ export const article: RatgeberArticle = {
   related: [
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Wirtschaftsmediation", href: "/ratgeber/wirtschaftsmediation" },
+    { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },
     { label: "Mediation am Arbeitsplatz (Arbeitnehmer-Sicht)", href: "/ratgeber/mediation-am-arbeitsplatz" },
     { label: "Fallbeispiel: Konflikt im Team", href: "/cases/team-konflikt" },
   ],

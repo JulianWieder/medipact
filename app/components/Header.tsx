@@ -77,7 +77,7 @@ export default function Header() {
         { label: t("konflikteWg"), href: "/konflikte/wg" },
         { label: t("konflikteVerbraucher"), href: "/konflikte/verbraucher" },
         { label: t("konflikteErbschaft"), href: "/konflikte/erbschaft" },
-        { label: t("konflikteGeschaeft"), href: "/konflikte/geschaeft" },
+        { label: t("konflikteGeschaeft"), href: "/konflikte/odr" },
       ],
     },
     { label: t("methode"), href: "/methode" },

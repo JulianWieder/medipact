@@ -17,7 +17,7 @@ export default function Page() {
       {...caseStudies["gesellschafter-streit"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
-        { label: "Team & Organisation", href: "/konflikte/geschaeft" },
+        { label: "Team & Organisation", href: "/konflikte/odr" },
         { label: "Gesellschafterstreit" },
       ]}
       relatedCases={[

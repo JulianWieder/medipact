@@ -66,6 +66,8 @@ export const metadata: Metadata = {
     "Mediation",
     "KI-Mediation",
     "Wirtschaftsmediation",
+    "Online Dispute Resolution",
+    "ODR",
     "Konfliktlösung",
     "Harvard-Prinzip",
     "Trennung",

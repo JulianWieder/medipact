@@ -54,7 +54,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Geschäfts- und Arbeitskonflikte mit medipact lösen",
-      href: "/konflikte/geschaeft",
+      href: "/konflikte/odr",
     },
   ],
   faq: [

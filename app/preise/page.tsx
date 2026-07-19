@@ -478,10 +478,10 @@ export default function Preise() {
                   Business-Pauschale anfragen
                 </a>
                 <a
-                  href="/konflikte/geschaeft"
+                  href="/konflikte/odr"
                   className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
                 >
-                  Mehr zur Business-Mediation →
+                  Mehr zur Online Dispute Resolution (ODR) →
                 </a>
               </div>
             </div>

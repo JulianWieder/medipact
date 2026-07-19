@@ -1,4 +1,15 @@
-export type MediationType = 'trennung' | 'erbschaft' | 'nachbarschaft' | 'geschaeft' | 'wg' | 'verbraucher'
+// ODR-Familie (Online Dispute Resolution, ehemals 'geschaeft'):
+// odr | schlichtung | ecommerce | b2b
+export type MediationType =
+  | 'trennung'
+  | 'erbschaft'
+  | 'nachbarschaft'
+  | 'wg'
+  | 'verbraucher'
+  | 'odr'
+  | 'schlichtung'
+  | 'ecommerce'
+  | 'b2b'
 
 export interface FormField {
   id: string

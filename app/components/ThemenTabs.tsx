@@ -9,7 +9,7 @@ import { FeatureCard } from "@/app/components/ui/FeatureCard";
 import { trennungPageContent } from "@/app/content/trennungPage";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
-import { geschaeftPageContent } from "@/app/content/geschaeftPage";
+import { odrPageContent } from "@/app/content/odrPage";
 import { wgPageContent } from "@/app/content/wgPage";
 import { verbraucherPageContent } from "@/app/content/verbraucherPage";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
@@ -57,11 +57,11 @@ const themen: Thema[] = [
     content: erbschaftPageContent,
   },
   {
-    key: "geschaeft",
-    label: "Team & Organisation",
-    href: "/konflikte/geschaeft",
+    key: "odr",
+    label: "Geschäft & ODR",
+    href: "/konflikte/odr",
     image: geschaeftPhoto,
-    content: geschaeftPageContent,
+    content: odrPageContent,
   },
   {
     key: "wg",

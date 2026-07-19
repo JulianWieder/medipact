@@ -69,7 +69,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Mehr zu Geschäftskonflikten bei medipact",
-      href: "/konflikte/geschaeft",
+      href: "/konflikte/odr",
     },
   ],
   faq: [
@@ -95,8 +95,9 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
-    { label: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/geschaeft" },
+    { label: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/odr" },
     { label: "Fallbeispiel: Gesellschafterstreit", href: "/cases/gesellschafter-streit" },
+    { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },
     { label: "Mediation im Unternehmen & Teamkonflikte", href: "/ratgeber/mediation-im-unternehmen" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },

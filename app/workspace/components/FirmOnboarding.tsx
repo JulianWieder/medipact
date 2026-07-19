@@ -285,7 +285,7 @@ export function FirmOnboardingWizard({ onClose, onFinished }: { onClose: () => v
 
   useEffect(() => {
     if (step === 4) {
-      fetchVariants("geschaeft").then(setVariants).catch(() => {});
+      fetchVariants("odr").then(setVariants).catch(() => {});
       fetchMediators().then(setMediatorOptions).catch(() => {});
     }
   }, [step]);

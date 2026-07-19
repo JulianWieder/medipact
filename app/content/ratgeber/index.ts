@@ -27,6 +27,7 @@ import { article as gerichtOderMediation } from "./gericht-oder-mediation";
 import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg";
 import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
 import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
+import { article as onlineDisputeResolution } from "./online-dispute-resolution";
 import { article as wirtschaftsmediation } from "./wirtschaftsmediation";
 import { article as mediationImUnternehmen } from "./mediation-im-unternehmen";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
@@ -49,6 +50,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   trennungVonEinemNarzissten,
   vermoegensauseinandersetzung,
   familienUndErbmediation,
+  onlineDisputeResolution,
   wirtschaftsmediation,
   mediationImUnternehmen,
   mediationAmArbeitsplatz,

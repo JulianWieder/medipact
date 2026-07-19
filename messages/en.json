@@ -10,7 +10,7 @@
     "konflikteWg": "WG & Mitbewohner",
     "konflikteVerbraucher": "Verbraucher & Handwerker",
     "konflikteErbschaft": "Erbe & Familie",
-    "konflikteGeschaeft": "Team & Organisation",
+    "konflikteGeschaeft": "Business & ODR",
     "methode": "So funktioniert es",
     "beispiele": "Beispiele",
     "beispieleFallbeispiele": "Fallbeispiele",
@@ -106,8 +106,8 @@
           "text": "Erbstreitigkeiten belasten Familien oft länger als das Erbe selbst wert ist. Medipact hilft, eine Lösung zu finden, mit der alle weiterleben können."
         },
         "geschaeft": {
-          "title": "Team & Organisation",
-          "text": "Konflikte im Team, unter Gesellschaftern oder mit Geschäftspartnern (B2B): Medipact klärt strukturiert – vertraulich und schneller als ein Gerichtsverfahren."
+          "title": "Business & ODR",
+          "text": "Conflicts within teams, among shareholders, with partners or customers? Online dispute resolution (ODR) settles business disputes digitally, confidentially and faster than any court."
         }
       }
     },

@@ -1,13 +1,13 @@
 import { NewMediationConfig } from '../types'
 
-export const geschaeftConfig: NewMediationConfig = {
-  type: 'geschaeft',
-  title: 'Geschäft & Organisation',
+export const odrConfig: NewMediationConfig = {
+  type: 'odr',
+  title: 'ODR – Geschäft & Organisation',
   description:
-    'Konflikte in Teams, zwischen Abteilungen oder in Veränderungsprozessen strukturiert klären.',
-  mainHeading: 'Organisationskonflikte klären',
+    'Online Dispute Resolution: Konflikte in Teams, zwischen Abteilungen oder in Veränderungsprozessen strukturiert online klären.',
+  mainHeading: 'Organisationskonflikte online klären (ODR)',
   mainDescription:
-    'Konflikte in Organisationen sind selten reine Leistungsverweigerung. Diese Mediation hilft, die Dynamik zu verstehen, die Konfliktart und Eskalationsstufe zu bestimmen und einen tragfähigen Weg zu finden.',
+    'Konflikte in Organisationen sind selten reine Leistungsverweigerung. Dieses ODR-Verfahren hilft, die Dynamik zu verstehen, die Konfliktart und Eskalationsstufe zu bestimmen und einen tragfähigen Weg zu finden – vollständig digital.',
   topics: [
     'Beteiligte & Rollen',
     'Konfliktgegenstand',

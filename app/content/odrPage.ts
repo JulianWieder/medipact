@@ -1,24 +1,27 @@
-// app/content/geschaeftPage.ts
+// app/content/odrPage.ts (ehemals geschaeftPage.ts)
 //
-// Marketing-Content für den Mediationstyp "geschaeft" (Business-Mediation).
-// Brennpunkt: interne Mediation (Team/Führung/Gesellschafter/Nachfolge) UND
-// externe B2B-Mediation (Verträge/Lieferanten, IT-Großprojekte, M&A) plus die
-// vier methodischen Ansätze. Workflow-Hintergrund: docs/konzept_organisations-
-// konflikt.md und docs/faelle-phasen-inhalte.md. Preise: /preise (Einzelfall
-// €399, Business-Pauschale €5.000/Monat mit bis zu 150 Mediationen).
+// Marketing-Content für die ODR-Familie (Online Dispute Resolution, ehemals
+// Typ "geschaeft"/Wirtschaftsmediation). Brennpunkt: interne Klärung (Team/
+// Führung/Gesellschafter/Nachfolge), externe B2B-Streitbeilegung (Verträge/
+// Lieferanten, IT-Großprojekte, M&A) sowie die weiteren ODR-Verfahren
+// (Online-Schlichtung, E-Commerce/Plattform, B2B-Vertragsstreit) und die
+// digitalisierte Massen-ODR über das Firmen-Abo. Workflow-Hintergrund:
+// docs/konzept_organisationskonflikt.md und docs/faelle-phasen-inhalte.md.
+// Preise: /preise (Einzelfall €399, Business-Pauschale €5.000/Monat mit bis
+// zu 150 Verfahren).
 
 import { geschaeftFacts } from "@/app/components/ui/DidYouKnowSection";
 
-export const geschaeftPageContent = {
-  eyebrow: "Wirtschaftsmediation",
+export const odrPageContent = {
+  eyebrow: "Online Dispute Resolution (ODR)",
   title: "Wenn Konflikte das Unternehmen blockieren.",
   titleHighlight:
     "Im Team, unter Gesellschaftern – oder mit Geschäftspartnern.",
   intro:
-    "Ob innerbetrieblich oder über die Unternehmensgrenze hinaus (B2B): Ungelöste Konflikte kosten Arbeitsfähigkeit, Geld und Partnerschaften. Eine professionelle Wirtschaftsmediation klärt strukturiert – strikt vertraulich und deutlich schneller als ein Gerichtsverfahren.",
+    "Online Dispute Resolution (ODR) heißt: Konflikte werden vollständig digital beigelegt – strukturiert, strikt vertraulich und deutlich schneller als ein Gerichtsverfahren. Ob innerbetrieblich, B2B, im E-Commerce oder als Schlichtung mit konkretem Lösungsvorschlag: medipact bildet die passende Verfahrensart online ab.",
 
   primaryCta: {
-    label: "Business-Konflikt einschätzen",
+    label: "Konflikt einschätzen",
     href: "#cta",
   },
 
@@ -58,7 +61,7 @@ export const geschaeftPageContent = {
     },
   ],
 
-  processTitle: "Ablauf einer Wirtschaftsmediation im Betrieb",
+  processTitle: "Ablauf eines ODR-Verfahrens im Betrieb",
   process: [
     {
       title: "Diagnose zuerst",
@@ -78,42 +81,43 @@ export const geschaeftPageContent = {
     },
   ],
 
-  comparisonTitle: "Die methodischen Ansätze im Business",
+  comparisonTitle: "Die Verfahren der ODR-Familie",
   comparisonIntro:
-    "Je nach Dynamik nutzen Wirtschaftsmediatoren unterschiedliche Modelle – medipact wählt den Ansatz nach der Diagnose.",
+    "Nicht jeder Konflikt braucht dasselbe Verfahren. medipact bildet vier ODR-Verfahrensarten ab – die Diagnose zeigt, welches passt. Für sehr große Fallzahlen (Fluggastrechte, Mietpreisbremse, E-Commerce) gibt es die digitalisierte Massen-ODR im Firmen-Abo.",
   comparisonPlans: [
     {
-      title: "Harvard-Konzept (facilitativ)",
-      status: "Interessen statt Positionen",
+      title: "ODR-Mediation (Geschäft & Organisation)",
+      status: "Die Parteien entwickeln die Lösung selbst",
       features: [
-        "Der Standard, um sachliche Win-Win-Lösungen zu verhandeln",
-        "Fragt nach den Interessen hinter den Forderungen",
-        "Basis des geführten medipact-Prozesses",
+        "Team-, Führungs- und Gesellschafterkonflikte sowie B2B",
+        "Diagnose nach Konfliktart und Glasl-Eskalationsstufe",
+        "Methodisch facilitativ, evaluativ, transformativ oder Shuttle",
       ],
       featured: true,
     },
     {
-      title: "Evaluative Mediation",
-      status: "Rechtliche & sachliche Einschätzung",
+      title: "Online-Schlichtung",
+      status: "Neutraler Lösungsvorschlag (Schlichterspruch)",
       features: [
-        "Mediator:in (oft mit juristischem Hintergrund) gibt eine Richtung vor",
-        "Gut bei harten Vertragsstreitigkeiten und SLA-Fragen",
+        "Beide Seiten werden strukturiert angehört",
+        "KI-gestützter, von Mediator:innen geprüfter Lösungsvorschlag",
+        "Annehmen oder ablehnen – der Rechtsweg bleibt offen",
       ],
     },
     {
-      title: "Transformative Mediation",
-      status: "Beziehung & Kommunikation",
+      title: "E-Commerce & Plattform",
+      status: "B2C-Streit aus Online-Käufen",
       features: [
-        "Fokus auf der Dynamik zwischen den Beteiligten",
-        "Ideal, wenn das Team danach noch Jahre zusammenarbeiten muss",
+        "Nicht gelieferte Ware, Erstattungen, Konto-Sperrungen, Bewertungen",
+        "Schneller und günstiger als jeder Rechtsweg bei kleinen Streitwerten",
       ],
     },
     {
-      title: "Shuttle-Mediation",
-      status: "Getrennte Gespräche",
+      title: "B2B-Vertragsstreit",
+      status: "Unternehmen gegen Unternehmen",
       features: [
-        "Die Parteien sitzen in getrennten Räumen, die Mediator:in pendelt",
-        "Sinnvoll bei extrem eskalierten Fronten",
+        "Offene Rechnungen, Leistungsumfang, Verzug, Kündigung",
+        "Vertraulich – die Geschäftsbeziehung bleibt erhalten",
       ],
     },
   ],
@@ -140,8 +144,23 @@ export const geschaeftPageContent = {
 
   didYouKnowFacts: geschaeftFacts,
 
-  faqTitle: "Häufige Fragen zur Wirtschaftsmediation",
+  faqTitle: "Häufige Fragen zur Online Dispute Resolution (ODR)",
   faqs: [
+    {
+      question: "Was ist Online Dispute Resolution (ODR)?",
+      answer:
+        "ODR bezeichnet die Beilegung von Konflikten über digitale Plattformen – von der Online-Mediation über die Online-Schlichtung bis zur automatisierten Massen-Streitbeilegung. Bei medipact läuft das gesamte Verfahren digital: strukturierte Fallaufnahme, KI-gestützte Auswertung, geprüfte Vereinbarung. Ohne Terminfindungs-Marathon, ohne Gericht.",
+    },
+    {
+      question: "Mediation oder Schlichtung – was ist der Unterschied?",
+      answer:
+        "In der Mediation entwickeln die Parteien die Lösung selbst; die Mediator:in strukturiert nur den Prozess. In der Online-Schlichtung erarbeitet die neutrale Stelle nach Anhörung beider Seiten einen konkreten, begründeten Lösungsvorschlag (Schlichterspruch), den die Parteien annehmen oder ablehnen können. Schlichtung passt, wenn eine schnelle sachliche Entscheidung wichtiger ist als der gemeinsame Prozess.",
+    },
+    {
+      question: "Was ist digitalisierte Massen-ODR?",
+      answer:
+        "Bei sehr großen Fallzahlen – etwa Fluggastrechten, Mietpreisbremsen-Streitigkeiten oder E-Commerce-Konflikten – kommen ODR-Plattformen zum Einsatz, die viele gleichartige Fälle standardisiert und weitgehend automatisiert abwickeln. medipact bildet das über die Business-Pauschale ab: Firmenkunden legen ODR-Fälle im Abo an (bis zu 150 Verfahren pro Monat), jeder Fall läuft durch den geführten digitalen Prozess.",
+    },
     {
       question: "Was kosten ungelöste Konflikte im Unternehmen?",
       answer:

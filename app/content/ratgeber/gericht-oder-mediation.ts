@@ -126,6 +126,7 @@ export const article: RatgeberArticle = {
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
+    { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },
     { label: "So funktioniert medipact: Die Methode", href: "/methode" },
   ],
 };

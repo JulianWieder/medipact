@@ -69,6 +69,13 @@ const typeLabel: Record<string, string> = {
   trennung: "Trennung & Scheidung",
   erbschaft: "Erbschaftsstreit",
   nachbarschaft: "Nachbarschaftskonflikt",
+  wg: "WG-Konflikt",
+  verbraucher: "Verbraucherstreit",
+  odr: "ODR – Geschäft & Organisation",
+  schlichtung: "ODR – Online-Schlichtung",
+  ecommerce: "ODR – E-Commerce & Plattform",
+  b2b: "ODR – B2B-Vertragsstreit",
+  geschaeft: "ODR – Geschäft & Organisation",
 };
 
 export default function DashboardClient() {

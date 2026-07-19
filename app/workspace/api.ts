@@ -282,13 +282,16 @@ export async function createOrgMember(payload: {
   return res.json();
 }
 
-/** Legt einen Firmen-Fall an (Business-Track: mediation_type="geschaeft").
- * Das Backend stempelt automatisch die Org des Firmen-Admins + schaltet über
- * das Firmen-Abo frei. Der Ersteller wird als Beobachter (Manager) geführt. */
+/** Legt einen Firmen-Fall an (ODR-Track: Online Dispute Resolution, Default
+ * mediation_type="odr"; alternativ schlichtung/ecommerce/b2b – z. B. für
+ * digitalisierte Massen-ODR im Firmen-Abo). Das Backend stempelt automatisch
+ * die Org des Firmen-Admins + schaltet über das Firmen-Abo frei. Der Ersteller
+ * wird als Beobachter (Manager) geführt. */
 export async function createMediationCase(payload: {
   title: string;
   description?: string;
   priority?: string;
+  mediationType?: "odr" | "schlichtung" | "ecommerce" | "b2b";
 }): Promise<{ id: number; mediation_id: number }> {
   const res = await fetch("/api/mediations", {
     method: "POST",
@@ -297,7 +300,7 @@ export async function createMediationCase(payload: {
       title: payload.title,
       description: payload.description ?? null,
       priority: payload.priority ?? null,
-      mediation_type: "geschaeft",
+      mediation_type: payload.mediationType ?? "odr",
       role: "observer",
     }),
   });

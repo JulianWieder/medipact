@@ -6,7 +6,7 @@
 // über das Firmen-Abo bereits bezahlt. Beteiligte sehen zuerst die vom
 // Unternehmen akzeptierte GRUNDKONFIGURATION (read-only, aus
 // organisation/abo_grundkonfiguration + organizations.base_config), dann den
-// WFM-Schritt geschaeft/abo_start (visible_if abo=ja): Rahmen akzeptieren,
+// WFM-Schritt odr/abo_start (visible_if abo=ja): Rahmen akzeptieren,
 // eigene Sicht, Glasl-Kurzeinschätzung. Danach direkt weiter zur Einleitung.
 //
 // Antworten werden als block_responses gespeichert (Auswertung). Wurde der

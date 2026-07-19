@@ -461,7 +461,8 @@ def create_mediation(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Firmenkontext: Ersteller gehört zu einem Unternehmen -> Firmenfall.
-    # Firmenkunden legen ausschließlich Business-Mediationen ("geschaeft") an;
+    # Firmenkunden legen ausschließlich ODR-Verfahren (Online Dispute
+    # Resolution: odr/schlichtung/ecommerce/b2b, ehemals "geschaeft") an;
     # der Fall wird über das Firmen-Abo freigeschaltet (is_paid=True).
     org_id = user.organization_id
     # Abo-Gate: Im Abo-Modell muss ZUERST die unternehmensweite
@@ -480,10 +481,10 @@ def create_mediation(
                     "angelegt werden."
                 ),
             )
-    if org_id is not None and mediation.mediation_type != "geschaeft":
+    if org_id is not None and mediation.mediation_type not in pricing.ODR_TYPES:
         raise HTTPException(
             status_code=422,
-            detail="Firmenkunden können nur Business-Mediationen (Team & Organisation) anlegen.",
+            detail="Firmenkunden können nur ODR-Verfahren (Online Dispute Resolution) anlegen.",
         )
 
     db_mediation = Mediation(
@@ -497,7 +498,7 @@ def create_mediation(
         organization_id=org_id,
         is_paid=(org_id is not None),
         # Abo-Fälle bekommen das Flag abo=ja: dadurch greift der schlanke
-        # Abo-Start (phase_step_defaults geschaeft/abo_start, visible_if)
+        # Abo-Start (phase_step_defaults odr/abo_start, visible_if)
         # statt des B2C-Intakes mit Paketwahl.
         flags=({"abo": "ja"} if org_id is not None else None),
     )
@@ -3127,7 +3128,10 @@ TYPE_LABELS_ANALYSE = {
     "nachbarschaft": "Nachbarschaftskonflikt",
     "wg": "WG-Konflikt",
     "verbraucher": "Verbraucherstreit",
-    "geschaeft": "Geschäftskonflikt",
+    "odr": "Geschäftskonflikt (ODR)",
+    "schlichtung": "Online-Schlichtung (ODR)",
+    "ecommerce": "E-Commerce-/Plattform-Streit (ODR)",
+    "b2b": "B2B-Vertragsstreit (ODR)",
 }
 
 

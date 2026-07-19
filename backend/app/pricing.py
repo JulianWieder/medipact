@@ -31,15 +31,29 @@ PACKAGE_LABELS = {
 #
 # Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/WG/Verbraucher = nied-
 # rigschwellig, 20 € pro Partei, Umsatz über buchbare Add-ons – siehe ADDONS).
-# Monetarisierung über Trennung/Erbschaft/Geschäft (Premium-Typen).
+# Monetarisierung über Trennung/Erbschaft/ODR-Familie (Premium-Typen).
+#
+# ODR-Familie (Online Dispute Resolution, ehemals "geschaeft"/Wirtschafts-
+# mediation): "odr" (Wirtschafts-Mediation online), "schlichtung" (Online-
+# Schlichtung mit Schlichterspruch), "ecommerce" (E-Commerce/Plattform-Streit),
+# "b2b" (B2B-Vertragsstreit). Einzelfall = 399 € once; alternativ laufen die
+# Typen im Firmen-Abo (Organization → is_paid=True, Fälle inkl.) – insbesondere
+# für die digitalisierte Massen-ODR (Fluggastrechte, Mietpreisbremse, E-Commerce).
 PRICE_MATRIX: dict[str, dict[str, float | None]] = {
     "nachbarschaft": {"online": 20.0,  "hybrid": None,  "vollservice": None},
     "wg":            {"online": 20.0,  "hybrid": None,  "vollservice": None},
     "verbraucher":   {"online": 20.0,  "hybrid": None,  "vollservice": None},
     "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
     "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "geschaeft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "odr":           {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "schlichtung":   {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "ecommerce":     {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "b2b":           {"online": 399.0, "hybrid": None,  "vollservice": None},
 }
+
+# ODR-Verfahrensfamilie – Firmenkunden dürfen genau diese Typen anlegen
+# (Abo-Modell), B2C-Einzelfälle zahlen 399 € once.
+ODR_TYPES: set[str] = {"odr", "schlichtung", "ecommerce", "b2b"}
 
 # Abrechnungsmodell je Konflikttyp (laut /preise). Gilt paketübergreifend.
 BILLING_MODEL: dict[str, str] = {
@@ -48,7 +62,10 @@ BILLING_MODEL: dict[str, str] = {
     "verbraucher": "per_party",
     "trennung": "per_party",
     "erbschaft": "once",
-    "geschaeft": "once",
+    "odr": "once",
+    "schlichtung": "once",
+    "ecommerce": "once",
+    "b2b": "once",
 }
 
 # Fallback, falls ein unbekannter Typ/ein unbekanntes Paket auftaucht.

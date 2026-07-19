@@ -239,7 +239,7 @@ export default function CasesPage() {
       />
 
       <CaseSection
-        eyebrow="Team & Organisation"
+        eyebrow="Geschäft & ODR"
         title="Wenn Konflikte das Geschäft blockieren"
         text="Drei Beispiele aus Unternehmen: Gesellschafter-Patt, Teamkonflikt und festgefahrenes B2B-Projekt — gelöst in Wochen statt Jahren."
         cases={geschaeftCases}

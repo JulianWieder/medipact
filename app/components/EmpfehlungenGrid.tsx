@@ -12,7 +12,7 @@ const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
   { key: "trennung", href: "/konflikte/trennung", image: trennungPhoto },
   { key: "nachbarschaft", href: "/konflikte/nachbarschaft", image: nachbarnPhoto },
   { key: "erbschaft", href: "/konflikte/erbschaft", image: erbschaftPhoto },
-  { key: "geschaeft", href: "/konflikte/geschaeft", image: geschaeftPhoto },
+  { key: "geschaeft", href: "/konflikte/odr", image: geschaeftPhoto },
 ];
 
 /**

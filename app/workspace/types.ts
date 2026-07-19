@@ -181,7 +181,10 @@ export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "nachbarschaft", label: "Nachbarschaft" },
   { id: "wg", label: "WG & Mitbewohner" },
   { id: "verbraucher", label: "Verbraucher & Handwerker" },
-  { id: "geschaeft", label: "Geschäft & Organisation" },
+  { id: "odr", label: "ODR – Geschäft & Organisation" },
+  { id: "schlichtung", label: "ODR – Online-Schlichtung" },
+  { id: "ecommerce", label: "ODR – E-Commerce & Plattform" },
+  { id: "b2b", label: "ODR – B2B-Vertragsstreit" },
 ];
 
 export interface MediationDetail extends MediationCase {
@@ -465,7 +468,11 @@ export const TYPE_LABEL: Record<string, string> = {
   nachbarschaft: "Nachbarschaftskonflikt",
   wg: "WG-Konflikt",
   verbraucher: "Verbraucherstreit",
-  geschaeft: "Geschäft & Organisation",
+  odr: "ODR – Geschäft & Organisation",
+  schlichtung: "ODR – Online-Schlichtung",
+  ecommerce: "ODR – E-Commerce & Plattform",
+  b2b: "ODR – B2B-Vertragsstreit",
+  geschaeft: "ODR – Geschäft & Organisation", // Altbestand vor Migration
 };
 
 export const TYPE_COLOR: Record<string, string> = {
@@ -474,7 +481,11 @@ export const TYPE_COLOR: Record<string, string> = {
   nachbarschaft: "bg-sky-50 text-sky-700 border-sky-200",
   wg: "bg-teal-50 text-teal-700 border-teal-200",
   verbraucher: "bg-orange-50 text-orange-700 border-orange-200",
-  geschaeft: "bg-violet-50 text-violet-700 border-violet-200",
+  odr: "bg-violet-50 text-violet-700 border-violet-200",
+  schlichtung: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  ecommerce: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+  b2b: "bg-purple-50 text-purple-700 border-purple-200",
+  geschaeft: "bg-violet-50 text-violet-700 border-violet-200", // Altbestand
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {

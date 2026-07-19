@@ -15,7 +15,7 @@ export default function Page() {
       {...caseStudies["team-konflikt"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
-        { label: "Team & Organisation", href: "/konflikte/geschaeft" },
+        { label: "Team & Organisation", href: "/konflikte/odr" },
         { label: "Teamkonflikt" },
       ]}
       relatedCases={[

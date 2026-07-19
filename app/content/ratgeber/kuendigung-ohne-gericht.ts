@@ -70,7 +70,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Arbeits- und Trennungskonflikte mit medipact klären",
-      href: "/konflikte/geschaeft",
+      href: "/konflikte/odr",
     },
   ],
   faq: [

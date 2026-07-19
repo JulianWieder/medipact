@@ -189,7 +189,7 @@ export const geschaeftFacts: DidYouKnowFact[] = [
   },
   {
     eyebrow: "Schneller als der Rechtsweg",
-    text: "Erstinstanzliche Zivilverfahren vor den Landgerichten dauern im Schnitt deutlich über ein Jahr, mit Berufung oft mehrere Jahre. Eine Wirtschaftsmediation ist dagegen häufig in wenigen Wochen abgeschlossen – und die Geschäftsbeziehung läuft währenddessen weiter.",
+    text: "Erstinstanzliche Zivilverfahren vor den Landgerichten dauern im Schnitt deutlich über ein Jahr, mit Berufung oft mehrere Jahre. Ein ODR-Verfahren (Online Dispute Resolution) ist dagegen häufig in wenigen Wochen abgeschlossen – und die Geschäftsbeziehung läuft währenddessen weiter.",
   },
 ];
 

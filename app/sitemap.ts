@@ -88,7 +88,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/konflikte/geschaeft`,
+      url: `${BASE_URL}/konflikte/odr`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,

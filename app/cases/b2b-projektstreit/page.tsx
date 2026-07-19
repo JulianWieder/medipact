@@ -15,7 +15,7 @@ export default function Page() {
       {...caseStudies["b2b-projektstreit"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
-        { label: "Team & Organisation", href: "/konflikte/geschaeft" },
+        { label: "Team & Organisation", href: "/konflikte/odr" },
         { label: "B2B-Projektstreit" },
       ]}
       relatedCases={[

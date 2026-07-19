@@ -41,9 +41,9 @@ const conflictTypes = [
     href: "/konflikte/erbschaft",
   },
   {
-    title: "Business",
-    text: "Wenn Konflikte im Team, zwischen Abteilungen oder mit Führungskräften die Zusammenarbeit lähmen.",
-    href: "/konflikte/geschaeft",
+    title: "Business & ODR",
+    text: "Wenn Konflikte im Team, zwischen Abteilungen, mit Geschäftspartnern oder Kunden die Zusammenarbeit lähmen – Online Dispute Resolution klärt digital.",
+    href: "/konflikte/odr",
   },
 ];
 
@@ -379,10 +379,10 @@ export default function KonfliktePage() {
               </Link>
               . Im Unternehmen löst eine professionelle{" "}
               <Link
-                href="/konflikte/geschaeft"
+                href="/konflikte/odr"
                 className="font-semibold text-accent-300 underline-offset-4 hover:underline"
               >
-                Wirtschaftsmediation
+                Online Dispute Resolution (ODR)
               </Link>{" "}
               blockierte Teams, Gesellschafterstreits und Führungskonflikte –
               diskret, schnell und deutlich günstiger als ein Rechtsstreit.
