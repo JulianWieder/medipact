@@ -209,6 +209,52 @@ DEFAULT_PROMPTS: dict[str, dict] = {
             "WICHTIG: Antworte NUR mit dem JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."
         ),
     },
+    "logbuch_analyse": {
+        "label": "Logbuch: Nächste Schritte + psychologischer Tipp nach einem Eintrag (JSON)",
+        "placeholders": [
+            "type_label", "heute", "intake_text", "history_text",
+            "entry_type", "entry_text",
+        ],
+        "template": (
+            "Du begleitest eine Person, die einen laufenden Konflikt in einem privaten "
+            "Konflikt-Logbuch dokumentiert (Konfliktart: {type_label}). Es gibt KEINE "
+            "Gegenseite in diesem Werkzeug und noch keine Mediation – die Person hält nur "
+            "fest, was passiert, und wünscht sich danach eine kurze, hochwertige "
+            "Einordnung: Was wäre jetzt ein guter nächster Schritt?\n\n"
+            "Heutiges Datum: {heute}\n\n"
+            "GRUNDDATEN DES KONFLIKTS (einmalige Fallaufnahme):\n{intake_text}\n\n"
+            "BISHERIGE EINTRÄGE (Chronologie, gekürzt):\n{history_text}\n\n"
+            "NEUER EINTRAG (Art: {entry_type}):\n{entry_text}\n\n"
+            "Deine Aufgabe:\n"
+            "1. QUALITÄTS-PRÜFUNG: Gib nur dann eine Empfehlung, wenn der neue Eintrag "
+            "genug Substanz für eine WIRKLICH hilfreiche, konkrete Empfehlung enthält. "
+            "Ist er zu dünn, vage oder rein emotional ohne verwertbare Fakten, antworte "
+            "exakt mit {{\"skip\": true}} – lieber keine Empfehlung als eine banale.\n"
+            "2. NÄCHSTE SCHRITTE: 1–3 konkrete, praktische Schritte, die zur Lage passen "
+            "(z.B. Anwältin für Erstberatung kontaktieren, den Auszug schriftlich per "
+            "Brief/E-Mail festhalten, Fotos mit Datum sichern, Kontoauszüge kopieren, "
+            "eine Frist notieren, ein klärendes Gespräch vorschlagen). Priorisiere: der "
+            "wichtigste Schritt zuerst. Begründe jeden Schritt in einem Satz.\n"
+            "3. PSYCHOLOGISCHER TIPP: EIN kurzer, konkreter Tipp für den Umgang mit der "
+            "Belastung (z.B. Abgrenzung, Schlaf, nicht im Affekt antworten, soziale "
+            "Unterstützung) – warm, auf Augenhöhe, ohne Floskeln, ohne Diagnosen.\n\n"
+            "Regeln: Sprich die Person mit \"Sie\" an. KEINE Rechtsberatung – du darfst "
+            "empfehlen, rechtlichen Rat einzuholen, aber keine Rechtslage behaupten. "
+            "Nichts erfinden, was nicht in den Einträgen steht. Keine Wiederholung von "
+            "Schritten, die laut Chronologie bereits erledigt sind.\n\n"
+            "Antworte NUR mit einem JSON-Objekt in diesem Format (auf Deutsch):\n"
+            "{{\n"
+            "  \"einschaetzung\": \"1-2 Sätze: kurze, wertschätzende Einordnung des Eintrags\",\n"
+            "  \"naechste_schritte\": [\n"
+            "    {{\"titel\": \"Kurzer Imperativ, z.B. 'Auszug schriftlich festhalten'\", "
+            "\"warum\": \"Ein Satz Begründung\"}}\n"
+            "  ],\n"
+            "  \"tipp\": \"Der psychologische Tipp (2-3 Sätze)\"\n"
+            "}}\n"
+            "Oder – wenn der Eintrag zu wenig Substanz hat – exakt: {{\"skip\": true}}\n\n"
+            "WICHTIG: NUR das JSON-Objekt, ohne Erklärung, ohne Markdown-Code-Blöcke."
+        ),
+    },
 }
 
 

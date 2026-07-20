@@ -20,3 +20,4 @@ from app.models.discount_code import DiscountCode
 from app.models.newsletter_subscriber import NewsletterSubscriber
 from app.models.mediation_chat_message import MediationChatMessage
 from app.models.mediation_log_entry import MediationLogEntry
+from app.models.mediation_log_upload import MediationLogUpload

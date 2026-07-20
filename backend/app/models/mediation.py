@@ -25,6 +25,11 @@ class Mediation(Base):
     #                 Per POST /mediations/{id}/logbuch/convert in eine normale
     #                 Mediation umwandelbar (Einträge bleiben erhalten).
     mode = Column(String, nullable=False, default="mediation", server_default="mediation")
+    # Stufe des Konflikt-Logbuchs (nur relevant bei mode="logbuch"):
+    #   "free"    – 1 Datei-Upload/Woche + 1 KI-Interpretation/Woche.
+    #   "premium" – einmalig 14,95 € (pricing.LOGBUCH_PREMIUM_PRICE_EUR):
+    #               1 KI-Tipp pro TAG + unbegrenzte Datei-Uploads.
+    logbuch_plan = Column(String, nullable=False, default="free", server_default="free")
     description = Column(Text, nullable=True)
     priority = Column(Text, nullable=True)
     role = Column(String, nullable=True)

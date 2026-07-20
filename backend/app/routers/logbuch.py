@@ -10,19 +10,30 @@ keine Gegenseiten-Kommunikation: Einladungen sind für Logbuch-Fälle geblockt
 WorkflowManager (phase="logbuch", step_key="logbuch_eintrag") – editierbar im
 Designer, gespeichert wird {block_id: wert} in mediation_log_entries.content.
 """
-from datetime import datetime, timezone
+import json
+import os
+import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app import pricing
+from app.database import DB_PATH, get_db
 from app.models.mediation import Mediation
+from app.models.mediation_block_response import MediationBlockResponse
 from app.models.mediation_log_entry import MediationLogEntry
+from app.models.mediation_log_upload import MediationLogUpload
 from app.models.mediation_participant import MediationParticipant
+from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
+from app.paypal import PayPalError, capture_order, create_order
+from app.prompts import get_prompt
 from app.security import get_current_db_user
+from app.services.llm import ai_complete
 
 router = APIRouter(prefix="/mediations", tags=["logbuch"])
 
@@ -67,6 +78,8 @@ def _serialize(e: MediationLogEntry) -> dict:
         "title": e.title,
         "content": e.content or {},
         "author_participant_id": e.author_participant_id,
+        "ai_analysis": e.ai_analysis,
+        "ai_analysis_at": e.ai_analysis_at.isoformat() if e.ai_analysis_at else None,
         "created_at": e.created_at.isoformat() if e.created_at else None,
         "updated_at": e.updated_at.isoformat() if e.updated_at else None,
     }
@@ -228,3 +241,415 @@ def convert_to_mediation(
         "status": mediation.status,
         "mediation_type": mediation.mediation_type,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Logbuch-Ausbau: KI-Analyse (nächste Schritte + psychologischer Tipp),
+# Datei-Uploads und Premium-Stufe (einmalig 14,95 € – pricing.py).
+#
+# Kontingente (pricing.LOGBUCH_LIMITS):
+#   free:    1 KI-Interpretation/Woche, 1 Datei-Upload/Woche
+#   premium: 1 KI-Tipp/Tag, Uploads unbegrenzt
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Uploads liegen im selben Verzeichnis wie Block-Uploads, aber mit eigenem
+# "lb"-Token-Präfix und eigener (paywall-freier) Auslieferungsroute.
+_MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+_UPLOAD_DIR = DB_PATH.parent / "block_uploads"
+
+# Mindest-Substanz eines Eintrags, bevor überhaupt die KI gefragt wird –
+# spart Kosten und verhindert banale Empfehlungen bei Einwort-Einträgen.
+_MIN_ENTRY_CHARS = 80
+
+
+def _plan(m: Mediation) -> str:
+    return (m.logbuch_plan or "free").lower()
+
+
+def _period_start(period: str, now: datetime) -> datetime:
+    """Beginn des Kontingent-Zeitraums (UTC): Kalendertag oder -woche (ab Montag)."""
+    day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    if period == "day":
+        return day
+    return day - timedelta(days=day.weekday())  # week
+
+
+def _period_end(period: str, now: datetime) -> datetime:
+    start = _period_start(period, now)
+    return start + (timedelta(days=1) if period == "day" else timedelta(days=7))
+
+
+def _analyses_used(db: Session, mediation_id: int, since: datetime) -> int:
+    return (
+        db.query(MediationLogEntry)
+        .filter(
+            MediationLogEntry.mediation_id == mediation_id,
+            MediationLogEntry.ai_analysis_at.isnot(None),
+            MediationLogEntry.ai_analysis_at >= since,
+        )
+        .count()
+    )
+
+
+def _uploads_used(db: Session, mediation_id: int, since: datetime) -> int:
+    return (
+        db.query(MediationLogUpload)
+        .filter(
+            MediationLogUpload.mediation_id == mediation_id,
+            MediationLogUpload.created_at >= since,
+        )
+        .count()
+    )
+
+
+def _quota(db: Session, m: Mediation, kind: str) -> dict:
+    """Kontingent-Status für "analyses" oder "uploads" (used/limit/Restlaufzeit)."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    cfg = pricing.logbuch_limits(_plan(m))[kind]
+    limit, period = cfg["limit"], cfg["period"]
+    if limit is None:
+        return {"limit": None, "period": period, "used": 0, "remaining": None,
+                "next_available_at": None}
+    since = _period_start(period, now)
+    used = (
+        _analyses_used(db, m.id, since) if kind == "analyses"
+        else _uploads_used(db, m.id, since)
+    )
+    remaining = max(limit - used, 0)
+    return {
+        "limit": limit,
+        "period": period,
+        "used": used,
+        "remaining": remaining,
+        "next_available_at": (
+            None if remaining > 0 else _period_end(period, now).isoformat() + "Z"
+        ),
+    }
+
+
+@router.get("/{mediation_id}/logbuch/status")
+def logbuch_status(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Stufe + Kontingente – Grundlage für Quota-Anzeige und Premium-CTA."""
+    _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
+    return {
+        "plan": _plan(m),
+        "premium_price_eur": pricing.LOGBUCH_PREMIUM_PRICE_EUR,
+        "analyses": _quota(db, m, "analyses"),
+        "uploads": _quota(db, m, "uploads"),
+    }
+
+
+# ── KI-Analyse eines Eintrags ───────────────────────────────────────────────
+
+def _block_labels(db: Session, mediation_type: str, step_key: str) -> dict[str, str]:
+    """block_id -> Label (prompt/label) aus der WFM-Vorlage – für lesbare Prompts."""
+    row = (
+        db.query(PhaseStepDefault)
+        .filter(
+            PhaseStepDefault.mediation_type == mediation_type,
+            PhaseStepDefault.phase == "logbuch",
+            PhaseStepDefault.step_key == step_key,
+            PhaseStepDefault.variant_key.is_(None),
+        )
+        .first()
+    )
+    labels: dict[str, str] = {}
+    for b in (row.blocks or []) if row else []:
+        if isinstance(b, dict) and b.get("id"):
+            cfg = b.get("config") or {}
+            labels[b["id"]] = str(cfg.get("prompt") or cfg.get("label") or b["id"])
+    return labels
+
+
+def _content_as_text(content: dict, labels: dict[str, str]) -> str:
+    """Eintrags-/Intake-Werte als lesbaren Text ("Label: Wert" je Zeile)."""
+    lines: list[str] = []
+    for block_id, v in (content or {}).items():
+        if v is None or v == "":
+            continue
+        label = labels.get(block_id, block_id)
+        if isinstance(v, dict):  # datei_upload: {url, name}
+            name = v.get("name") or "Datei"
+            lines.append(f"{label}: [angehängte Datei: {name}]")
+        elif isinstance(v, list):
+            lines.append(f"{label}: {', '.join(str(x) for x in v)}")
+        else:
+            lines.append(f"{label}: {v}")
+    return "\n".join(lines) or "(keine Angaben)"
+
+
+def _entry_substance(entry: MediationLogEntry) -> int:
+    """Zeichenzahl der Freitext-Substanz eines Eintrags (Qualitäts-Vorprüfung)."""
+    total = len((entry.title or "").strip())
+    for v in (entry.content or {}).values():
+        if isinstance(v, str):
+            total += len(v.strip())
+    return total
+
+
+def _parse_ai_json(raw: str) -> Optional[dict]:
+    """JSON aus der KI-Antwort ziehen – tolerant gegenüber Code-Fences/Umtext."""
+    text = (raw or "").strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.lower().startswith("json"):
+            text = text[4:]
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end <= start:
+        return None
+    try:
+        data = json.loads(text[start : end + 1])
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+@router.post("/{mediation_id}/logbuch/entries/{entry_id}/analyze")
+def analyze_entry(
+    mediation_id: int,
+    entry_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Analysiert einen Eintrag: 1–3 konkrete nächste Schritte + psychologischer Tipp.
+
+    Verbraucht NUR dann Kontingent, wenn die KI tatsächlich eine Empfehlung
+    liefert (Qualitäts-Gate: dünne Einträge → "skipped", kostenlos). Bereits
+    analysierte Einträge geben ihr gespeichertes Ergebnis zurück."""
+    _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
+    entry = _get_own_entry(mediation_id, entry_id, db, current_user)
+
+    if entry.ai_analysis:
+        return {"status": "done", "analysis": entry.ai_analysis,
+                "analyses": _quota(db, m, "analyses")}
+
+    quota = _quota(db, m, "analyses")
+    if quota["remaining"] == 0:
+        return {
+            "status": "quota_exhausted",
+            "analyses": quota,
+            "plan": _plan(m),
+            "premium_price_eur": pricing.LOGBUCH_PREMIUM_PRICE_EUR,
+        }
+
+    # Qualitäts-Vorprüfung ohne KI-Kosten.
+    if _entry_substance(entry) < _MIN_ENTRY_CHARS:
+        return {
+            "status": "skipped",
+            "reason": (
+                "Für eine wirklich hilfreiche Empfehlung ist der Eintrag noch zu "
+                "knapp. Beschreiben Sie das Ereignis etwas ausführlicher – Ihr "
+                "Kontingent wird dadurch nicht verbraucht."
+            ),
+            "analyses": quota,
+        }
+
+    # Kontext: Intake + bisherige Chronologie (kompakt).
+    intake_labels = _block_labels(db, m.mediation_type, "logbuch_intake")
+    entry_labels = _block_labels(db, m.mediation_type, "logbuch_eintrag")
+
+    intake_rows = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation_id,
+            MediationBlockResponse.phase == "logbuch",
+            MediationBlockResponse.step_key == "logbuch_intake",
+        )
+        .all()
+    )
+    intake_text = _content_as_text(
+        {r.block_id: r.value for r in intake_rows}, intake_labels
+    )
+
+    others = (
+        db.query(MediationLogEntry)
+        .filter(
+            MediationLogEntry.mediation_id == mediation_id,
+            MediationLogEntry.id != entry.id,
+        )
+        .all()
+    )
+    others.sort(key=lambda e: (e.occurred_at or e.created_at or datetime.min))
+    history_parts = []
+    for e in others[-10:]:
+        when = (e.occurred_at or e.created_at)
+        datum = when.strftime("%d.%m.%Y") if when else "ohne Datum"
+        text = _content_as_text(e.content or {}, entry_labels)
+        if len(text) > 400:
+            text = text[:400] + " …"
+        steps = ""
+        if e.ai_analysis and isinstance(e.ai_analysis, dict):
+            titles = [
+                s.get("titel", "") for s in e.ai_analysis.get("naechste_schritte", [])
+                if isinstance(s, dict)
+            ]
+            if titles:
+                steps = f"\n(Bereits empfohlen: {', '.join(t for t in titles if t)})"
+        history_parts.append(f"– {datum} [{e.entry_type}]:\n{text}{steps}")
+    history_text = "\n\n".join(history_parts) or "(noch keine früheren Einträge)"
+
+    from app.routers.mediations import TYPE_LABELS_ANALYSE  # zirkelfrei zur Laufzeit
+
+    now = datetime.now(timezone.utc)
+    prompt = get_prompt(
+        "logbuch_analyse",
+        type_label=TYPE_LABELS_ANALYSE.get(m.mediation_type, m.mediation_type),
+        heute=now.strftime("%d.%m.%Y"),
+        intake_text=intake_text,
+        history_text=history_text,
+        entry_type=entry.entry_type,
+        entry_text=_content_as_text(entry.content or {}, entry_labels),
+    )
+    raw = ai_complete(prompt, max_tokens=700)
+    data = _parse_ai_json(raw)
+
+    if not data or data.get("skip") is True or not data.get("naechste_schritte"):
+        return {
+            "status": "skipped",
+            "reason": (
+                "Die KI hat diesmal bewusst keine Empfehlung gegeben – der Eintrag "
+                "bietet dafür (noch) zu wenig Anhaltspunkte. Ihr Kontingent wurde "
+                "nicht verbraucht."
+            ),
+            "analyses": _quota(db, m, "analyses"),
+        }
+
+    analysis = {
+        "einschaetzung": str(data.get("einschaetzung") or ""),
+        "naechste_schritte": [
+            {"titel": str(s.get("titel") or ""), "warum": str(s.get("warum") or "")}
+            for s in data.get("naechste_schritte", [])
+            if isinstance(s, dict) and s.get("titel")
+        ][:3],
+        "tipp": str(data.get("tipp") or ""),
+    }
+    entry.ai_analysis = analysis
+    entry.ai_analysis_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    db.refresh(entry)
+    return {"status": "done", "analysis": analysis, "analyses": _quota(db, m, "analyses")}
+
+
+# ── Datei-Upload (Foto vom halb leeren Schrank, Screenshots, Belege …) ──────
+
+@router.post("/{mediation_id}/logbuch/upload")
+async def logbuch_upload(
+    mediation_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Datei-Upload fürs Logbuch – OHNE Paywall, aber mit Stufen-Quote
+    (free: 1/Woche; premium: unbegrenzt)."""
+    _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
+
+    quota = _quota(db, m, "uploads")
+    if quota["remaining"] == 0:
+        raise HTTPException(
+            status_code=402,
+            detail=(
+                "Ihr kostenloses Kontingent (1 Datei pro Woche) ist aufgebraucht. "
+                "Mit Logbuch-Premium (einmalig "
+                f"{pricing.LOGBUCH_PREMIUM_PRICE_EUR:.2f} €) laden Sie beliebig "
+                "viele Dateien hoch."
+            ),
+        )
+
+    contents = await file.read()
+    if len(contents) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="Datei zu groß (max. 25 MB)")
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if not ext or len(ext) > 12 or "/" in ext or "\\" in ext:
+        ext = ""
+    token = f"lb{mediation_id}_{secrets.token_hex(16)}{ext}"
+    _UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    with open(_UPLOAD_DIR / token, "wb") as out:
+        out.write(contents)
+
+    db.add(
+        MediationLogUpload(
+            mediation_id=mediation_id,
+            token=token,
+            name=file.filename or token,
+            size_bytes=len(contents),
+        )
+    )
+    db.commit()
+    return {
+        "url": f"/api/mediations/{mediation_id}/logbuch/file?token={token}",
+        "name": file.filename or token,
+        "uploads": _quota(db, m, "uploads"),
+    }
+
+
+@router.get("/{mediation_id}/logbuch/file")
+def logbuch_file(
+    mediation_id: int,
+    token: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    if not token.startswith(f"lb{mediation_id}_") or "/" in token or "\\" in token or ".." in token:
+        raise HTTPException(status_code=400, detail="Ungültiger Token")
+    path = _UPLOAD_DIR / token
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Datei nicht gefunden")
+    return FileResponse(path)
+
+
+# ── Premium-Upgrade (einmalig 14,95 € pro Logbuch, via PayPal) ──────────────
+
+class PayPalCaptureRequest(BaseModel):
+    order_id: str
+
+
+@router.post("/{mediation_id}/logbuch/upgrade/paypal/create-order")
+async def logbuch_upgrade_create_order(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
+    if m.mode != "logbuch":
+        raise HTTPException(status_code=409, detail="Dieser Fall ist kein Logbuch.")
+    if _plan(m) == "premium":
+        raise HTTPException(status_code=400, detail="Dieses Logbuch ist bereits Premium.")
+    try:
+        order = await create_order(pricing.LOGBUCH_PREMIUM_PRICE_EUR, mediation_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return {"order_id": order["id"], "amount_eur": pricing.LOGBUCH_PREMIUM_PRICE_EUR}
+
+
+@router.post("/{mediation_id}/logbuch/upgrade/paypal/capture-order")
+async def logbuch_upgrade_capture_order(
+    mediation_id: int,
+    payload: PayPalCaptureRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
+    if _plan(m) == "premium":
+        return {"ok": True, "plan": "premium"}
+    try:
+        result = await capture_order(payload.order_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    if result.get("status") != "COMPLETED":
+        raise HTTPException(
+            status_code=402,
+            detail="Die Zahlung wurde von PayPal nicht als abgeschlossen gemeldet.",
+        )
+    m.logbuch_plan = "premium"
+    db.commit()
+    return {"ok": True, "plan": "premium"}

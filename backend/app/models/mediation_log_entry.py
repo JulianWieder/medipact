@@ -40,6 +40,12 @@ class MediationLogEntry(Base):
     title = Column(String, nullable=True)
     # Feldwerte gemäß WFM-Vorlage logbuch_eintrag: {block_id: wert}.
     content = Column(JSON, nullable=True)
+    # KI-Analyse dieses Eintrags (routers/logbuch.py analyze_entry):
+    # {"einschaetzung": str, "naechste_schritte": [{"titel","warum"}], "tipp": str}.
+    # ai_analysis_at zählt zugleich als Kontingent-Verbrauch (free: 1/Woche,
+    # premium: 1/Tag – Zahlen in app/pricing.py LOGBUCH_LIMITS).
+    ai_analysis = Column(JSON, nullable=True)
+    ai_analysis_at = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(

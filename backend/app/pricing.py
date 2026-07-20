@@ -190,6 +190,35 @@ def addon_price(mediation_type: str, addon_key: str) -> float | None:
     return float(cfg["price_eur"]) if cfg else None
 
 
+# ── Konflikt-Logbuch: Stufen + Kontingente ──────────────────────────────────
+#
+# Das Logbuch (mediations.mode="logbuch") ist grundsätzlich kostenlos; die
+# KI-Interpretation der Einträge und Datei-Uploads sind kontingentiert.
+# Premium wird EINMALIG pro Logbuch bezahlt (kein Abo) und schaltet das
+# Tages-Kontingent + unbegrenzte Uploads frei. Zahlen – wie alles hier –
+# bewusst NUR an dieser Stelle gepflegt.
+
+LOGBUCH_PREMIUM_PRICE_EUR = 14.95
+
+# je Stufe: analyses = KI-Interpretationen, uploads = Datei-Uploads.
+# period "week" = Kalenderwoche (Mo 00:00 UTC), "day" = Kalendertag (UTC).
+# limit None = unbegrenzt.
+LOGBUCH_LIMITS: dict[str, dict] = {
+    "free": {
+        "analyses": {"limit": 1, "period": "week"},
+        "uploads": {"limit": 1, "period": "week"},
+    },
+    "premium": {
+        "analyses": {"limit": 1, "period": "day"},
+        "uploads": {"limit": None, "period": "day"},
+    },
+}
+
+
+def logbuch_limits(plan: str) -> dict:
+    return LOGBUCH_LIMITS.get((plan or "free").lower(), LOGBUCH_LIMITS["free"])
+
+
 # ── Business-Abos (Firmenkunden) ─────────────────────────────────────────────
 #
 # Ein Firmenkunde (Organization) hat einen Abo-Plan; das Abo schaltet die
