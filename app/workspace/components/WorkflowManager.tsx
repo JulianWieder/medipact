@@ -34,6 +34,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import {
   PHASES,
+  DESIGNER_PHASES,
   MEDIATION_TYPES,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
@@ -1454,7 +1455,7 @@ export function WorkflowManager() {
   const setEditableSteps = activeVariant ? setVariantSteps : setBaseSteps;
   const chain = useMemo(() => [...lockedSteps, ...editableSteps], [lockedSteps, editableSteps]);
 
-  const activePhaseLabel = PHASES.find((p) => p.id === activePhase)?.label ?? activePhase;
+  const activePhaseLabel = DESIGNER_PHASES.find((p) => p.id === activePhase)?.label ?? activePhase;
   const typeLabel = MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
 
   // ── Schritt-Aktionen ──────────────────────────────────────────────────────
@@ -1837,7 +1838,7 @@ export function WorkflowManager() {
       <div className="flex gap-6">
         {/* Phasen-Liste */}
         <div className="flex w-56 shrink-0 flex-col gap-1">
-          {PHASES.map((phase, idx) => {
+          {DESIGNER_PHASES.map((phase, idx) => {
             const active = phase.id === activePhase;
             return (
               <button

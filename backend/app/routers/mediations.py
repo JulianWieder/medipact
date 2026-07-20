@@ -46,6 +46,9 @@ class MediationCreate(BaseModel):
     # Gewähltes Paket (online | hybrid | vollservice). Bestimmt zusammen mit
     # mediation_type den Preis (siehe app/pricing.py).
     package: Optional[str] = None
+    # Betriebsart: "mediation" (Default) oder "logbuch" (kostenloses
+    # Konflikt-Logbuch – siehe Mediation.mode / routers/logbuch.py).
+    mode: str = "mediation"
 
 
 class MediationUpdate(BaseModel):
@@ -460,6 +463,44 @@ def create_mediation(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # ── Kostenloses Konflikt-Logbuch (mode="logbuch") ────────────────────────
+    # Eigener, schlanker Pfad: immer privat (kein Firmen-Abo, kein Org-Scoping),
+    # keine Paywall (is_paid bleibt False, es wird nie eine Zahlung fällig),
+    # KEIN Standard-Mediator (das Logbuch ist ein privates Gedächtnisprotokoll).
+    # Gegenseiten-Einladungen sind für Logbuch-Fälle geblockt (invites-Router).
+    if (mediation.mode or "mediation").lower() == "logbuch":
+        db_mediation = Mediation(
+            title=mediation.title or "Mein Konflikt-Logbuch",
+            mediation_type=mediation.mediation_type,
+            mode="logbuch",
+            description=mediation.description,
+            priority=mediation.priority,
+            role=mediation.role,
+            status="draft",
+            package=pricing.normalize_package(mediation.package),
+            organization_id=None,
+            is_paid=False,
+        )
+        db.add(db_mediation)
+        db.commit()
+        db.refresh(db_mediation)
+        db.add(
+            MediationParticipant(
+                mediation_id=db_mediation.id,
+                user_id=user.id,
+                role=mediation.role or "owner",
+            )
+        )
+        db.commit()
+        return {
+            "mediation_id": db_mediation.id,
+            "id": db_mediation.id,
+            "title": db_mediation.title,
+            "mediation_type": db_mediation.mediation_type,
+            "mode": db_mediation.mode,
+            "status": db_mediation.status,
+        }
+
     # Firmenkontext: Ersteller gehört zu einem Unternehmen -> Firmenfall.
     # Firmenkunden legen ausschließlich ODR-Verfahren (Online Dispute
     # Resolution: odr/schlichtung/ecommerce/b2b, ehemals "geschaeft") an;
@@ -528,6 +569,7 @@ def create_mediation(
         "role": db_mediation.role,
         "status": db_mediation.status,
         "package": db_mediation.package,
+        "mode": db_mediation.mode,
     }
 
 
@@ -916,6 +958,7 @@ def get_my_mediations(
             "phase": mediation.phase,
             "mediation_type": mediation.mediation_type,
             "variant_key": mediation.variant_key,
+            "mode": mediation.mode,
             "is_my_turn": is_my_turn,
         })
 
@@ -1016,6 +1059,7 @@ def get_mediation(
         "phase": mediation.phase,
         "role": is_participant.role if is_participant else current_user.role,
         "is_paid": mediation.is_paid,
+        "mode": mediation.mode,
         "organization_id": mediation.organization_id,
         "mediator": _serialize_mediator(db, mediation.id),
     }
@@ -1244,9 +1288,11 @@ def get_phase_steps(
     im Frontend \u2013 die Konfiguration kommt jetzt vollst\u00e4ndig vom Backend.
     """
     # Die Onboarding-/Intake-Phase ("einladung") ist bewusst VOR der Zahlung
-    # zugänglich – sie führt zur Zahlung hin (Start-Flow). Alle anderen Phasen
-    # bleiben paywall-geschützt (siehe billing.ensure_unlocked).
-    if phase == "einladung":
+    # zugänglich – sie führt zur Zahlung hin (Start-Flow). Ebenso "logbuch":
+    # das kostenlose Konflikt-Logbuch (Intake + Eintrags-Vorlage) hat per
+    # Design keine Paywall. Alle anderen Phasen bleiben paywall-geschützt
+    # (siehe billing.ensure_unlocked).
+    if phase in ("einladung", "logbuch"):
         _require_participant(mediation_id, current_user, db)
     else:
         _require_paid_participant(mediation_id, current_user, db)

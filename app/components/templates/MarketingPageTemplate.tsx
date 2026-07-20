@@ -11,6 +11,7 @@ import {
   type DidYouKnowFact,
 } from "@/app/components/ui/DidYouKnowSection";
 import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
+import { LogbuchHinweis } from "@/app/components/ui/LogbuchHinweis";
 
 type PageImage = {
   src: StaticImageData;
@@ -429,6 +430,9 @@ export function MarketingPageTemplate({
             </div>
           </section>
         )}
+
+        {/* Kostenloses Konflikt-Logbuch: sanfter Einstieg vor dem harten CTA */}
+        <LogbuchHinweis />
 
         <section
           id="cta"

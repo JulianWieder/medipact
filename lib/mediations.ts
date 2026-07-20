@@ -12,6 +12,8 @@ export async function createMediation(payload: {
   description?: string;
   priority?: string;
   role?: string;
+  // "mediation" (Default) oder "logbuch" (kostenloses Konflikt-Logbuch)
+  mode?: string;
 }) {
   return backendFetch<{
     mediation_id: number;

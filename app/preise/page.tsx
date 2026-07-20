@@ -3,9 +3,9 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title: "Preise: Mediation ab 20 €, Business-Pauschale | medipact",
+  title: "Preise: Mediation ab 20 €, Business ab 1.000 € | medipact",
   description:
-    "Einstieg ab 20 € pro Partei (Nachbarschaft, WG, Verbraucher), Wirtschaftsmediation ab 399 € oder Business-Pauschale. Transparent, ohne versteckte Kosten.",
+    "Einstieg ab 20 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Tarife ab 1.000 €/Monat (10 Mediationen). Transparent, ohne versteckte Kosten.",
   alternates: { canonical: "https://medipact.de/preise" },
 };
 
@@ -35,8 +35,43 @@ export default function Preise() {
           </div>
         </ImagePinHero>
 
+        {/* STUFE 0: KOSTENLOSES KONFLIKT-LOGBUCH */}
+        <section className="section-base pt-14">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex flex-col items-start gap-5 rounded-2xl border-2 border-dashed border-accent-300 bg-accent-50/50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+              <div className="flex items-start gap-4">
+                <span className="hidden text-3xl font-black text-accent-600 sm:block">
+                  €0
+                </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-display text-xl font-medium text-neutral-900">
+                      Konflikt-Logbuch
+                    </h2>
+                    <span className="rounded-full bg-accent-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                      dauerhaft kostenlos
+                    </span>
+                  </div>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-neutral-600">
+                    Noch nicht bereit für eine Mediation? Dokumentieren Sie
+                    Ihren Streit erst einmal: Vorkommnisse, Gespräche, E-Mails,
+                    WhatsApp, Telefonate – vertraulich und jederzeit in eine
+                    Mediation umwandelbar.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/konflikt-logbuch"
+                className="shrink-0 rounded-xl border-2 border-accent-600 px-6 py-2.5 text-sm font-bold text-accent-700 transition hover:bg-accent-600 hover:text-white"
+              >
+                Kostenlos starten →
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* DREI MODELLE */}
-        <section className="section section-base">
+        <section className="section section-base pt-10">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* ONLINE-PROZESS */}
@@ -395,51 +430,105 @@ export default function Preise() {
           </div>
         </section>
 
-        {/* BUSINESS-PAUSCHALE */}
+        {/* BUSINESS-TARIFE */}
         <section className="section section-strong">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-300 mb-6">
-                  Für Unternehmen
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent-300 mb-6">
+                Für Unternehmen
+              </div>
+              <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
+                Business-Tarife.
+                <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
+                  Ein Preis, alle Business-Konflikte.
+                </span>
+              </h2>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-300">
+                Für HR-Abteilungen, große Organisationen und Verbände mit
+                laufendem Klärungsbedarf: eine feste Monatspauschale statt
+                Einzelabrechnung – intern (Team, Führung, Gesellschafter,
+                Nachfolge) und extern mit Geschäftspartnern (B2B).
+              </p>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                {[
+                  "Team- & Abteilungsmediation",
+                  "Führung & Betriebsrat",
+                  "Gesellschafter & Nachfolge",
+                  "Verträge & Lieferanten (B2B)",
+                  "IT- & Großprojekte (B2B)",
+                  "M&A & Post-Merger (B2B)",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-2.5 text-sm text-neutral-200"
+                  >
+                    <span className="mt-0.5 font-bold text-accent-400">✓</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+              {/* BUSINESS LIGHT */}
+              <div className="flex flex-col rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur">
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
+                  Business Light
                 </div>
-                <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl leading-[1.1]">
-                  Business-Pauschale.
-                  <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                    Ein Preis, alle Businees Konflikte.
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-5xl font-black tracking-tight text-white">
+                    €1.000
                   </span>
-                </h2>
-                <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-300">
-                  Für HR-Abteilungen, große Organisationen und Verbände mit
-                  laufendem Klärungsbedarf: eine feste Monatspauschale statt
-                  Einzelabrechnung – intern (Team, Führung, Gesellschafter,
-                  Nachfolge) und extern mit Geschäftspartnern (B2B).
-                </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {[
-                    "Team- & Abteilungsmediation",
-                    "Führung & Betriebsrat",
-                    "Gesellschafter & Nachfolge",
-                    "Verträge & Lieferanten (B2B)",
-                    "IT- & Großprojekte (B2B)",
-                    "M&A & Post-Merger (B2B)",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-2.5 text-sm text-neutral-200"
-                    >
-                      <span className="mt-0.5 font-bold text-accent-400">
-                        ✓
-                      </span>
-                      {item}
-                    </div>
-                  ))}
+                  <span className="text-base font-semibold text-neutral-400">
+                    / Monat
+                  </span>
                 </div>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+                  Bis zu{" "}
+                  <strong className="text-white">
+                    10 Mediationen pro Monat
+                  </strong>{" "}
+                  – rechnerisch €100 pro Fall statt €399 einzeln.
+                </p>
+                <div className="mt-6 flex-1 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Alle
+                    Business-Konfliktarten, intern & B2B
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Strikt
+                    vertraulich – kein Image-Schaden am Markt
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Geführter Online-Prozess für jeden Fall, Start jederzeit
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Ideal
+                    für Mittelstand & einzelne HR-Teams
+                  </p>
+                </div>
+                <a
+                  href="mailto:hallo@medipact.de?subject=Business%20Light%20anfragen"
+                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-accent-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-accent-500"
+                >
+                  Business Light anfragen
+                </a>
+                <a
+                  href="tel:+4915209942351"
+                  className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
+                >
+                  📞 Oder direkt anrufen: +49 1520 9942351
+                </a>
               </div>
 
-              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur sm:p-10">
+              {/* BUSINESS */}
+              <div className="relative flex flex-col rounded-[2rem] border-2 border-accent-500/60 bg-white/10 p-8 backdrop-blur">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                  Beliebt
+                </div>
                 <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
-                  Business-Pauschale
+                  Business
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
                   <span className="text-5xl font-black tracking-tight text-white">
@@ -452,38 +541,98 @@ export default function Preise() {
                 <p className="mt-3 text-sm leading-relaxed text-neutral-300">
                   Bis zu{" "}
                   <strong className="text-white">
-                    150 Mediationen pro Monat
+                    50 Mediationen pro Monat
                   </strong>{" "}
-                  – rechnerisch ab rund €33 pro Fall statt €399 einzeln.
+                  – rechnerisch €100 pro Fall, mit vollem Funktionsumfang.
                 </p>
-                <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
+                <div className="mt-6 flex-1 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
                   <p>
-                    <span className="font-bold text-accent-400">✓</span> Alle
-                    Business-Konfliktarten, intern & B2B
-                  </p>
-                  <p>
-                    <span className="font-bold text-accent-400">✓</span> Strikt
-                    vertraulich – kein Image-Schaden am Markt
+                    <span className="font-bold text-accent-400">✓</span> Alles
+                    aus Business Light
                   </p>
                   <p>
                     <span className="font-bold text-accent-400">✓</span>{" "}
                     Methodenwahl nach Diagnose: facilitativ, evaluativ,
                     transformativ, Shuttle
                   </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Digitalisierte Massen-ODR (z.B. E-Commerce,
+                    Kundenbeschwerden)
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Priorisierter Support für Ihr Unternehmen
+                  </p>
                 </div>
                 <a
-                  href="mailto:hallo@medipact.de?subject=Business-Pauschale%20anfragen"
+                  href="mailto:hallo@medipact.de?subject=Business-Tarif%20anfragen"
                   className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-accent-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-accent-500"
                 >
-                  Business-Pauschale anfragen
+                  Business anfragen
                 </a>
                 <a
-                  href="/konflikte/odr"
+                  href="tel:+4915209942351"
                   className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
                 >
-                  Mehr zur Online Dispute Resolution (ODR) →
+                  📞 Oder direkt anrufen: +49 1520 9942351
                 </a>
               </div>
+
+              {/* BUSINESS PREMIUM */}
+              <div className="flex flex-col rounded-[2rem] border border-accent-300/40 bg-gradient-to-br from-accent-500/15 to-white/5 p-8 backdrop-blur">
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
+                  Business Premium
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-4xl font-black tracking-tight text-white">
+                    Full Service
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+                  Individuelles Fallkontingent und persönliche Rundum-Betreuung
+                  – <strong className="text-white">Preis auf Anfrage</strong>.
+                </p>
+                <div className="mt-6 flex-1 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Alles
+                    aus Business
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Persönliche Mediator:innen inklusive – auch vor Ort
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span> Feste
+                    Ansprechperson & garantierte Reaktionszeiten
+                  </p>
+                  <p>
+                    <span className="font-bold text-accent-400">✓</span>{" "}
+                    Konflikt-Prävention: Workshops & Schulungen für Teams
+                  </p>
+                </div>
+                <a
+                  href="tel:+4915209942351"
+                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-accent-700 transition hover:bg-accent-50"
+                >
+                  📞 Bitte direkt anrufen: +49 1520 9942351
+                </a>
+                <a
+                  href="mailto:hallo@medipact.de?subject=Business%20Premium%20%E2%80%93%20R%C3%BCckruf%20erbeten"
+                  className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
+                >
+                  Oder Rückruf per E-Mail vereinbaren
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <a
+                href="/konflikte/odr"
+                className="inline-flex items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
+              >
+                Mehr zur Online Dispute Resolution (ODR) →
+              </a>
             </div>
           </div>
         </section>
@@ -614,8 +763,12 @@ export default function Preise() {
                   a: "Bei Bedarf buchen Sie gezielt einen Rechtsanwalt (ab €190/Std.) oder einen Psychologen bzw. Gutachter (ab €170/Std.) dazu. Im Vollservice ist eine anwaltliche Ersteinschätzung bereits enthalten. Sie zahlen nur, wenn Sie es tatsächlich nutzen – klar abgerechnet pro Stunde.",
                 },
                 {
-                  q: "Was ist die Business-Pauschale für Unternehmen?",
-                  a: "Unternehmen mit laufendem Klärungsbedarf zahlen €5.000 pro Monat und können damit bis zu 150 Mediationen monatlich durchführen – interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Pauschale kosten €399.",
+                  q: "Was kosten die Business-Tarife für Unternehmen?",
+                  a: "Es gibt drei Business-Tarife: Business Light für €1.000 pro Monat mit bis zu 10 Mediationen, Business für €5.000 pro Monat mit bis zu 50 Mediationen, und Business Premium als Full-Service-Paket mit persönlicher Betreuung und individuellem Kontingent – dafür rufen Sie uns am besten direkt an (+49 1520 9942351). Abgedeckt sind interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Tarif kosten €399.",
+                },
+                {
+                  q: "Gibt es ein kostenloses Angebot?",
+                  a: "Ja: das Konflikt-Logbuch. Sie dokumentieren Ihren Streit kostenlos – Vorkommnisse, Gespräche, E-Mails, WhatsApp, Telefonate – und wandeln das Logbuch erst dann in eine Mediation um, wenn Sie so weit sind. Erst ab diesem Schritt fallen die regulären Preise an.",
                 },
                 {
                   q: "Gibt es versteckte Kosten?",

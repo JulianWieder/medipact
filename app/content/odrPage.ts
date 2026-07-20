@@ -7,8 +7,9 @@
 // (Online-Schlichtung, E-Commerce/Plattform, B2B-Vertragsstreit) und die
 // digitalisierte Massen-ODR über das Firmen-Abo. Workflow-Hintergrund:
 // docs/konzept_organisationskonflikt.md und docs/faelle-phasen-inhalte.md.
-// Preise: /preise (Einzelfall €399, Business-Pauschale €5.000/Monat mit bis
-// zu 150 Verfahren).
+// Preise: /preise (Einzelfall €399; Business-Tarife: Light €1.000/Monat bis
+// 10 Mediationen, Business €5.000/Monat bis 50, Premium Full Service auf
+// Anfrage – Direktanruf).
 
 import { geschaeftFacts } from "@/app/components/ui/DidYouKnowSection";
 
@@ -159,7 +160,7 @@ export const odrPageContent = {
     {
       question: "Was ist digitalisierte Massen-ODR?",
       answer:
-        "Bei sehr großen Fallzahlen – etwa Fluggastrechten, Mietpreisbremsen-Streitigkeiten oder E-Commerce-Konflikten – kommen ODR-Plattformen zum Einsatz, die viele gleichartige Fälle standardisiert und weitgehend automatisiert abwickeln. medipact bildet das über die Business-Pauschale ab: Firmenkunden legen ODR-Fälle im Abo an (bis zu 150 Verfahren pro Monat), jeder Fall läuft durch den geführten digitalen Prozess.",
+        "Bei sehr großen Fallzahlen – etwa Fluggastrechten, Mietpreisbremsen-Streitigkeiten oder E-Commerce-Konflikten – kommen ODR-Plattformen zum Einsatz, die viele gleichartige Fälle standardisiert und weitgehend automatisiert abwickeln. medipact bildet das über die Business-Tarife ab: Firmenkunden legen ODR-Fälle im Abo an (je nach Tarif 10 bis 50 Verfahren pro Monat, größere Kontingente im Business Premium auf Anfrage), jeder Fall läuft durch den geführten digitalen Prozess.",
     },
     {
       question: "Was kosten ungelöste Konflikte im Unternehmen?",
@@ -184,7 +185,7 @@ export const odrPageContent = {
     {
       question: "Was kostet Business-Mediation bei medipact?",
       answer:
-        "Der einzelne Fall kostet €399 (einmalig, geführter Online-Prozess). Für Unternehmen mit laufendem Bedarf gibt es die Business-Pauschale: €5.000 pro Monat mit bis zu 150 Mediationen monatlich – ideal für HR, große Organisationen und Verbände. Details auf der Preisseite.",
+        "Der einzelne Fall kostet €399 (einmalig, geführter Online-Prozess). Für Unternehmen mit laufendem Bedarf gibt es drei Business-Tarife: Business Light (€1.000/Monat, bis zu 10 Mediationen), Business (€5.000/Monat, bis zu 50 Mediationen) und Business Premium als Full Service mit individuellem Kontingent – Preis auf Anfrage, am besten direkt anrufen. Details auf der Preisseite.",
     },
     {
       question: "Intern oder extern – was passt zu unserem Konflikt?",
@@ -205,7 +206,7 @@ export const odrPageContent = {
 
   finalCtaTitle: "Klärt den Konflikt, bevor er das Geschäft kostet.",
   finalCtaText:
-    "Beschreiben Sie kurz die Situation – wir zeigen, welcher Weg passt: interne Klärung, externe Mediation oder die Business-Pauschale für laufenden Bedarf.",
+    "Beschreiben Sie kurz die Situation – wir zeigen, welcher Weg passt: interne Klärung, externe Mediation oder ein Business-Tarif für laufenden Bedarf.",
   finalCta: {
     label: "Jetzt starten",
     href: "/kontakt",

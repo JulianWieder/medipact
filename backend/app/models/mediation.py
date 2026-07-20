@@ -16,6 +16,15 @@ class Mediation(Base):
     organization_id = Column(
         Integer, ForeignKey("organizations.id"), nullable=True, index=True
     )
+    # Betriebsart des Falls:
+    #   "mediation" – normales (zahlungspflichtiges) Mediationsverfahren.
+    #   "logbuch"   – kostenloses Konflikt-Logbuch: der/die Nutzer:in dokumentiert
+    #                 Vorkommnisse/Gedanken/Gespräche (mediation_log_entries),
+    #                 BEVOR eine Mediation gestartet wird. Keine Paywall, keine
+    #                 Gegenseiten-Kommunikation (Invites geblockt), kein Mediator.
+    #                 Per POST /mediations/{id}/logbuch/convert in eine normale
+    #                 Mediation umwandelbar (Einträge bleiben erhalten).
+    mode = Column(String, nullable=False, default="mediation", server_default="mediation")
     description = Column(Text, nullable=True)
     priority = Column(Text, nullable=True)
     role = Column(String, nullable=True)

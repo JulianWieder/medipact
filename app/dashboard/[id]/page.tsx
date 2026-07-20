@@ -25,6 +25,11 @@ export default async function MediationPage({ params }: PageProps) {
     redirect("/dashboard");
   }
 
+  // Konflikt-Logbücher haben eine eigene, kostenlose Ansicht.
+  if ((result.data as { mode?: string })?.mode === "logbuch") {
+    redirect(`/dashboard/logbuch/${id}`);
+  }
+
   return (
     <MediationClient
       mediationId={numericId.toString()}

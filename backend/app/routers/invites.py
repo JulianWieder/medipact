@@ -656,6 +656,19 @@ def create_invite(
     mediation=Depends(require_mediation_access),
 ):
     invite_limiter.check(request)
+
+    # Konflikt-Logbücher (mode="logbuch") sind bewusst privat: KEINE
+    # Gegenseiten-Kommunikation. Erst in eine Mediation umwandeln
+    # (POST /mediations/{id}/logbuch/convert), dann einladen.
+    if getattr(mediation, "mode", "mediation") == "logbuch":
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Ein Konflikt-Logbuch hat keine Gegenseite. Wandeln Sie das "
+                "Logbuch zuerst in eine Mediation um, um jemanden einzuladen."
+            ),
+        )
+
     token = create_invite_token()
 
     if effective_video_mode(db, mediation.mediation_type) == "required" and not payload.video_token:

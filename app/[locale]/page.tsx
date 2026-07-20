@@ -9,6 +9,7 @@ import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
 import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import QuickCheck from "@/app/components/QuickCheck";
+import LogbuchSection from "@/app/components/LogbuchSection";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 
@@ -116,6 +117,8 @@ export default async function MedipactLanding() {
         <EmpfehlungenGrid />
 
         <QuickCheck />
+
+        <LogbuchSection />
 
         <section
           id="process"

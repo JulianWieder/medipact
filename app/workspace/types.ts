@@ -426,6 +426,17 @@ export const PHASES: { id: string; label: string; short: string }[] = [
   { id: "abschluss", label: "Abschluss", short: "6" },
 ];
 
+/** Phasen im WorkflowManager-Designer: die Teilnehmer-Phasen (PHASES) plus
+ *  "logbuch" – das kostenlose Konflikt-Logbuch (Streit dokumentieren, bevor
+ *  eine Mediation gestartet wird). Enthält die Schritte logbuch_intake
+ *  (geführtes Anlegen) und logbuch_eintrag (VORLAGE: die Blöcke sind die
+ *  Felder des Eintrag-Formulars). Bewusst NICHT in PHASES, damit das Logbuch
+ *  nirgends als Verfahrens-Phase (Stepper/Fortschritt) auftaucht. */
+export const DESIGNER_PHASES: { id: string; label: string; short: string }[] = [
+  { id: "logbuch", label: "Logbuch (kostenlos)", short: "L" },
+  ...PHASES,
+];
+
 // ── Workflow Manager: Schritte pro Phase ────────────────────────────────────
 //
 // Vorlage für die einzelnen Schritte innerhalb einer Mediationsphase.

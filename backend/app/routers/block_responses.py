@@ -240,8 +240,9 @@ def list_block_responses(
     liefert dieser Endpunkt für Parteien nur die EIGENEN Antworten zurück.
     """
     # Onboarding-Phase ("einladung") ist vor der Zahlung nutzbar (Start-Flow);
-    # alle anderen Phasen bleiben paywall-geschützt.
-    if phase == "einladung":
+    # "logbuch" (kostenloses Konflikt-Logbuch) ist per Design kostenlos.
+    # Alle anderen Phasen bleiben paywall-geschützt.
+    if phase in ("einladung", "logbuch"):
         own = _require_participant(mediation_id, current_user, db)
     else:
         own = _require_paid_participant(mediation_id, current_user, db)
@@ -266,8 +267,9 @@ def upsert_block_response(
     current_user: User = Depends(get_current_db_user),
 ):
     """Legt den Beitrag des aktuellen Autors zu einem Block an oder aktualisiert ihn."""
-    # Antworten der Onboarding-Phase (Start-Intake) sind vor der Zahlung erlaubt.
-    if payload.phase == "einladung":
+    # Antworten der Onboarding-Phase (Start-Intake) sind vor der Zahlung
+    # erlaubt; ebenso die Logbuch-Phase (kostenloses Konflikt-Logbuch).
+    if payload.phase in ("einladung", "logbuch"):
         own = _require_participant(mediation_id, current_user, db)
     else:
         own = _require_paid_participant(mediation_id, current_user, db)

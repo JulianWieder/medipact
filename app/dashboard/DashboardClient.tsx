@@ -26,6 +26,8 @@ interface Mediation {
   description?: string;
   role?: string;
   is_my_turn?: boolean;
+  // "mediation" (Default) oder "logbuch" (kostenloses Konflikt-Logbuch)
+  mode?: string;
 }
 
 interface PendingInvite {
@@ -80,6 +82,9 @@ const typeLabel: Record<string, string> = {
 
 export default function DashboardClient() {
   const [data, setData] = useState<Mediation[]>([]);
+  // Kostenlose Konflikt-Logbücher (mode="logbuch") – eigene Sektion, zählen
+  // nicht in die Verfahrens-Statistiken hinein.
+  const [logbooks, setLogbooks] = useState<Mediation[]>([]);
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
@@ -117,6 +122,7 @@ export default function DashboardClient() {
               description?: string;
               role?: string;
               is_my_turn?: boolean;
+              mode?: string;
             }) => ({
               id: item.mediation_id ?? item.id,
               title: item.title ?? "Neue Mediation",
@@ -127,9 +133,11 @@ export default function DashboardClient() {
               description: item.description,
               role: item.role,
               is_my_turn: item.is_my_turn ?? false,
+              mode: item.mode ?? "mediation",
             }),
           );
-          setData(mapped);
+          setData(mapped.filter((m: Mediation) => m.mode !== "logbuch"));
+          setLogbooks(mapped.filter((m: Mediation) => m.mode === "logbuch"));
         }
 
         if (invitesRes.ok) {
@@ -331,10 +339,22 @@ export default function DashboardClient() {
         subtitle="Übersicht Ihrer laufenden und abgeschlossenen Konflikte."
         stats={stats}
         action={
-          <PillButton href="/dashboard/mediation/new" tone="light">
-            Neue Mediation
-            <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
-          </PillButton>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Sekundär-CTA: kostenloses Konflikt-Logbuch (Outline auf dunklem Hero) */}
+            <a
+              href="/dashboard/logbuch/new"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-white hover:bg-white/10"
+            >
+              Streit dokumentieren
+              <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-300">
+                kostenlos
+              </span>
+            </a>
+            <PillButton href="/dashboard/mediation/new" tone="light">
+              Neue Mediation
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+            </PillButton>
+          </div>
         }
       />
 
@@ -451,6 +471,59 @@ export default function DashboardClient() {
           </div>
         )}
 
+        {/* ── Konflikt-Logbücher (kostenlos) ─────────────────────────── */}
+        {logbooks.length > 0 && (
+          <div className="mb-14">
+            <div className="mb-1 flex items-center gap-3">
+              <h2 className="font-display text-xl font-medium text-neutral-900">
+                Deine Konflikt-Logbücher
+              </h2>
+              <span className="rounded-full border border-accent-200 bg-accent-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-700">
+                kostenlos
+              </span>
+            </div>
+            <p className="mb-6 text-sm font-light text-neutral-500">
+              Dokumentierte Streitigkeiten – noch keine Mediation. Halte
+              Vorkommnisse, Gespräche und Nachrichten fest; umwandeln kannst du
+              jederzeit.
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+              {logbooks.map((log, i) => (
+                <a
+                  key={`logbuch-${log.id}`}
+                  href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
+                  className={cn(
+                    "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_20px] sm:gap-6",
+                    i > 0 && "border-t border-neutral-100",
+                  )}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-neutral-900">
+                      {log.title || "Konflikt-Logbuch"}
+                    </span>
+                    <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
+                      {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
+                    </span>
+                  </span>
+                  <span className="hidden sm:block">
+                    <StatusDot label="Logbuch" tone="sky" />
+                  </span>
+                  <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                    ›
+                  </span>
+                </a>
+              ))}
+            </div>
+            <a
+              href="/dashboard/logbuch/new"
+              className="mt-3 inline-block text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
+            >
+              Weiteren Streit dokumentieren →
+            </a>
+            <div className="mt-10 hairline" />
+          </div>
+        )}
+
         {/* ── Meine Mediationen ─────────────────────────────────────── */}
         {data.length > 0 && (
           <div className="mb-6">
@@ -471,9 +544,17 @@ export default function DashboardClient() {
                 Sie haben noch keine Mediationen gestartet.
               </p>
 
-              <PillButton href="/dashboard/mediation/new" className="mt-6">
-                Neue Mediation starten →
-              </PillButton>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <PillButton href="/dashboard/mediation/new">
+                  Neue Mediation starten →
+                </PillButton>
+                <a
+                  href="/dashboard/logbuch/new"
+                  className="text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
+                >
+                  Oder erst einmal nur dokumentieren – kostenloses Logbuch →
+                </a>
+              </div>
             </div>
           ) : visibleData.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">

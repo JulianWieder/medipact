@@ -24,7 +24,7 @@ const serviceSchema = {
   serviceType:
     "Online Dispute Resolution (Wirtschaftsmediation, Online-Schlichtung, E-Commerce- und B2B-Streitbeilegung)",
   description:
-    "KI-gestützte Online Dispute Resolution: innerbetriebliche Klärung (Team- und Abteilungsmediation, Führungsmediation, Gesellschafter, Unternehmensnachfolge), B2B-Vertragsstreit, E-Commerce- und Plattform-Konflikte sowie Online-Schlichtung mit Schlichterspruch. Digitalisierte Massen-ODR für große Fallzahlen (z. B. Fluggastrechte, Mietpreisbremse, E-Commerce) über die Business-Pauschale.",
+    "KI-gestützte Online Dispute Resolution: innerbetriebliche Klärung (Team- und Abteilungsmediation, Führungsmediation, Gesellschafter, Unternehmensnachfolge), B2B-Vertragsstreit, E-Commerce- und Plattform-Konflikte sowie Online-Schlichtung mit Schlichterspruch. Digitalisierte Massen-ODR für große Fallzahlen (z. B. Fluggastrechte, Mietpreisbremse, E-Commerce) über die Business-Tarife.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

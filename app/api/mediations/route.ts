@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
       description: body.description,
       priority: body.priority,
       role: body.role,
+      mode: body.mode,
     });
 
     if (!result.ok) {
