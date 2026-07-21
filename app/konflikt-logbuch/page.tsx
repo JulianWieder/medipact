@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { JsonLd } from "@/app/components/JsonLd";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
+import { Card } from "@/app/components/ui/Card";
 import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
@@ -14,7 +15,7 @@ import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
 export const metadata: Metadata = {
   title: "Konflikt-Logbuch: Streit kostenlos dokumentieren | medipact",
   description:
-    "Vorkommnisse, Gespräche, E-Mails & private Journal-Gedanken im Streit festhalten: Das kostenlose Konflikt-Logbuch mit Journal. Jederzeit in Mediation umwandelbar.",
+    "Streit kostenlos dokumentieren: Vorkommnisse, Gespräche & Nachrichten im Konflikt-Logbuch festhalten – Basis fürs klärende Gespräch, für Mediation oder Gericht.",
   alternates: { canonical: "https://medipact.de/konflikt-logbuch" },
 };
 
@@ -63,6 +64,14 @@ const FAQ = [
   {
     q: "Warum sollte ich einen Streit dokumentieren?",
     a: "Erinnerungen verblassen und werden im Streit unbewusst verzerrt. Eine zeitnahe Dokumentation (Gedächtnisprotokoll) schafft Klarheit über Muster und Häufigkeit, entlastet emotional – und ist eine wertvolle Grundlage, falls es später zu Mediation, Schlichtung oder einem Rechtsstreit kommt.",
+  },
+  {
+    q: "Kann ich einen Konflikt mit dem Logbuch auch ohne Mediation lösen?",
+    a: "Ja, häufig sogar. Sobald Sie Ihre eigene Chronologie überblicken, können Sie das Thema ruhig, konkret und ohne Vorwürfe ansprechen. Viele Konflikte entschärfen sich von selbst, sobald aus diffusem Ärger belegbare Punkte werden. Das Logbuch verpflichtet zu nichts – eine Mediation starten Sie nur, wenn das Gespräch allein nicht reicht.",
+  },
+  {
+    q: "Hilft mir das Logbuch bei einem Rechtsstreit vor Gericht?",
+    a: "Ja. Vor Gericht zählt nicht, was passiert ist, sondern was Sie belegen können. Ein zeitnah geführtes Logbuch mit Datum, Uhrzeit, Wortlaut und angehängten Belegen (E-Mails, Fotos, Nachrichten) ist eine belastbare Grundlage – für das Gespräch mit Ihrem Anwalt und als Beweis-Dokumentation im Verfahren. Für manche Auseinandersetzungen, etwa ein Lärmprotokoll, ist eine solche Dokumentation praktisch unverzichtbar.",
   },
   {
     q: "Ist das Logbuch auch als Lärmprotokoll geeignet?",
@@ -145,8 +154,10 @@ export default function KonfliktLogbuchPage() {
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
                 Noch keine Mediation – aber ein Konflikt, der Sie beschäftigt?
                 Dokumentieren Sie kostenlos, was passiert: Vorkommnisse,
-                Gespräche, E-Mails, WhatsApp, Telefonate. Vertraulich, sortiert,
-                jederzeit in eine Mediation umwandelbar.
+                Gespräche, E-Mails, WhatsApp, Telefonate. Vertraulich, sortiert –
+                und die Basis, um Ihren Konflikt so effizient und
+                aggressionsarm wie möglich zu lösen: im klärenden Gespräch, per
+                Mediation oder notfalls vor Gericht.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
@@ -278,22 +289,67 @@ export default function KonfliktLogbuchPage() {
           </div>
         </section>
 
+        {/* WOHIN FÜHRT DAS LOGBUCH — Philosophie + drei Wege */}
+        <section className="section section-strong">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <div className="eyebrow mb-4 justify-center text-accent-300">
+                Wohin es führt
+              </div>
+              <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
+                So effizient und aggressionsarm wie möglich.
+              </h2>
+              <p className="mt-5 text-lg leading-8 text-neutral-300">
+                Dafür steht medipact: einen Konflikt mit so wenig Reibung und
+                Eskalation wie möglich beenden. Das Logbuch ist der erste Schritt –
+                und hält Ihnen danach jeden Weg offen. Vom ruhigen Gespräch bis
+                zum Gericht wird jeder davon einfacher, wenn Sie dokumentiert
+                haben.
+              </p>
+            </div>
+            <div className="mt-14 grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  icon: "🕊️",
+                  title: "Ganz ohne Verfahren",
+                  text: "Oft reicht schon Klarheit. Wer seine Chronologie kennt, spricht das Problem ruhig und konkret an – statt vager Vorwürfe. Viele Konflikte lösen sich so, bevor sie eskalieren. Der aggressionsärmste Weg – und mit Logbuch der wahrscheinlichste.",
+                },
+                {
+                  icon: "🤝",
+                  title: "Mit Mediation",
+                  text: "Reicht das Gespräch nicht, wandeln Sie das Logbuch mit einem Klick in eine Mediation um. Strukturiert, fair und ohne Gericht – Ihre Dokumentation ist der saubere Startpunkt der Fallaufnahme.",
+                },
+                {
+                  icon: "⚖️",
+                  title: "Wenn es doch vor Gericht geht",
+                  text: "Kommt es zum Rechtsstreit, zählt nicht, was passiert ist, sondern was Sie belegen können. Ein lückenloses Logbuch mit Datum, Wortlaut und Beleg-Uploads ist dann Ihre Beweis-Dokumentation – und oft unverzichtbar.",
+                },
+              ].map((o) => (
+                <div
+                  key={o.title}
+                  className="rounded-[2rem] border border-neutral-700 bg-neutral-800/50 p-8"
+                >
+                  <span className="text-2xl">{o.icon}</span>
+                  <h3 className="mt-4 mb-2 text-xl font-bold text-white">
+                    {o.title}
+                  </h3>
+                  <p className="text-sm leading-6 text-neutral-300">{o.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="section section-muted border-t border-neutral-200">
           <div className="mx-auto max-w-4xl px-6 lg:px-8">
             <h2 className="heading-2 mb-12 text-center">Häufige Fragen</h2>
             <div className="space-y-4">
               {FAQ.map((item) => (
-                <details
-                  key={item.q}
-                  className="group rounded-lg border border-neutral-200 bg-white p-6 transition hover:shadow-md"
-                >
-                  <summary className="flex cursor-pointer items-center justify-between font-bold text-neutral-900">
-                    {item.q}
-                    <span className="transition group-open:rotate-180">▼</span>
-                  </summary>
-                  <p className="mt-4 text-neutral-700">{item.a}</p>
-                </details>
+                <Card key={item.q}>
+                  <h3 className="heading-3">{item.q}</h3>
+                  <p className="mt-4 leading-7 text-neutral-700">{item.a}</p>
+                </Card>
               ))}
             </div>
             <div className="mt-10 flex flex-wrap justify-center gap-4 text-sm">
