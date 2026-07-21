@@ -14,7 +14,7 @@ import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
 export const metadata: Metadata = {
   title: "Konflikt-Logbuch: Streit kostenlos dokumentieren | medipact",
   description:
-    "Vorkommnisse, Gespräche, E-Mails & WhatsApp im Streit festhalten: Das kostenlose Konflikt-Logbuch – Ihr Streit-Tagebuch. Jederzeit in Mediation umwandelbar.",
+    "Vorkommnisse, Gespräche, E-Mails & private Journal-Gedanken im Streit festhalten: Das kostenlose Konflikt-Logbuch mit Journal. Jederzeit in Mediation umwandelbar.",
   alternates: { canonical: "https://medipact.de/konflikt-logbuch" },
 };
 
@@ -46,8 +46,8 @@ const ENTRY_TYPES = [
   },
   {
     icon: "💭",
-    title: "Gedanken",
-    text: "Wie geht es Ihnen damit? Auch Ihre Sicht und Belastung gehören dazu – sie zeigen die Entwicklung des Konflikts.",
+    title: "Gedanken & Journal",
+    text: "Wie geht es Ihnen damit? Tiefe, persönliche Gedanken markieren Sie als Journal-Eintrag – die sieht niemals jemand außer Ihnen, auch nicht in einer späteren Mediation.",
   },
 ];
 
@@ -70,7 +70,15 @@ const FAQ = [
   },
   {
     q: "Sieht die Gegenseite, was ich schreibe?",
-    a: "Nein. Das Konflikt-Logbuch ist privat: Es gibt keine Gegenseite, keine Einladungen und keine Freigaben. Erst wenn Sie das Logbuch in eine Mediation umwandeln und die andere Partei einladen, beginnt das gemeinsame Verfahren – Ihre Logbuch-Einträge bleiben dabei Ihre eigenen.",
+    a: "Nein. Das Konflikt-Logbuch ist privat: Es gibt keine Gegenseite, keine Einladungen und keine Freigaben. Auch nach einer Umwandlung in eine Mediation sehen Mediator und Gegenseite nur Einträge, die Sie ausdrücklich in die Mediation teilen – alles andere bleibt Ihres.",
+  },
+  {
+    q: "Kann ich auch geheime Gedanken festhalten (Journal)?",
+    a: "Ja. Jeder Eintrag lässt sich als „Journal (privat)“ markieren. Solche Einträge sind streng vertraulich und werden niemals geteilt – weder mit einem Mediator noch mit der Gegenseite, auch nicht nach einer Umwandlung in eine Mediation. So können Sie Gefühle, Zweifel und Ihre ungefilterte Sicht sicher festhalten.",
+  },
+  {
+    q: "Kann ich das Logbuch neben einer laufenden Mediation weiterführen?",
+    a: "Ja. Das Logbuch läuft als „Logbuch & Journal“ neben Ihrem Fall weiter. Einzelne Einträge können Sie gezielt in die Mediation teilen, damit Mediator und Gegenseite sie sehen – und jederzeit wieder zurückziehen. Journal-Einträge bleiben immer privat.",
   },
   {
     q: "Kann ich aus dem Logbuch später eine Mediation starten?",
@@ -241,13 +249,13 @@ export default function KonfliktLogbuchPage() {
                 },
                 {
                   n: "2",
-                  title: "Fortlaufend dokumentieren",
-                  text: "Jedes Vorkommnis als eigener Eintrag: Datum, was passiert ist, Wortlaut aus E-Mail oder WhatsApp, Beteiligte, Ihre Gedanken. Ihre Chronologie wächst automatisch mit.",
+                  title: "Dokumentieren – und Journal führen",
+                  text: "Jedes Vorkommnis als eigener Eintrag: Datum, was passiert ist, Wortlaut aus E-Mail oder WhatsApp, Beteiligte. Tiefe persönliche Gedanken markieren Sie als Journal (privat) – die liest garantiert niemand außer Ihnen. Ideal auch langfristig, wenn Sie unsicher sind, ob der Konflikt eskaliert.",
                 },
                 {
                   n: "3",
                   title: "Bei Bedarf: Mediation starten",
-                  text: "Wenn Sie den Konflikt lösen möchten, wandeln Sie das Logbuch mit einem Klick in eine Mediation um – die Dokumentation bleibt erhalten. Erst ab hier fallen Kosten an.",
+                  text: "Wenn Sie den Konflikt lösen möchten, wandeln Sie das Logbuch mit einem Klick in eine Mediation um – die Dokumentation bleibt erhalten und läuft als Logbuch & Journal neben dem Fall weiter. Geteilt wird nur, was Sie ausdrücklich freigeben. Erst ab hier fallen Kosten an.",
                 },
               ].map((s) => (
                 <li key={s.n} className="flex gap-5 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
@@ -262,8 +270,10 @@ export default function KonfliktLogbuchPage() {
               ))}
             </ol>
             <p className="mt-8 text-center text-sm text-neutral-500">
-              Vertraulich: Die Gegenseite sieht Ihr Logbuch nicht – es gibt
-              keine Einladungen und keine Freigaben.
+              Vertraulich: Die Gegenseite sieht Ihr Logbuch nicht. Und
+              Journal-Einträge bleiben immer privat – selbst in einer
+              späteren Mediation teilen Sie nur, was Sie ausdrücklich
+              freigeben.
             </p>
           </div>
         </section>
@@ -289,6 +299,12 @@ export default function KonfliktLogbuchPage() {
             <div className="mt-10 flex flex-wrap justify-center gap-4 text-sm">
               <Link href="/ratgeber/konflikt-dokumentieren" className="font-semibold text-accent-600 hover:text-accent-700">
                 Ratgeber: Konflikt richtig dokumentieren →
+              </Link>
+              <Link href="/ratgeber/konflikt-journal" className="font-semibold text-accent-600 hover:text-accent-700">
+                Ratgeber: Konflikt-Journal führen →
+              </Link>
+              <Link href="/ratgeber/schwelender-konflikt" className="font-semibold text-accent-600 hover:text-accent-700">
+                Ratgeber: Schwelenden Konflikt beobachten →
               </Link>
               <Link href="/konflikte" className="font-semibold text-accent-600 hover:text-accent-700">
                 Alle Konfliktarten →

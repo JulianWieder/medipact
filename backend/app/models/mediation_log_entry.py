@@ -40,6 +40,14 @@ class MediationLogEntry(Base):
     title = Column(String, nullable=True)
     # Feldwerte gemäß WFM-Vorlage logbuch_eintrag: {block_id: wert}.
     content = Column(JSON, nullable=True)
+    # Journal-Funktion – Sichtbarkeit des Eintrags (Filter in routers/logbuch.py):
+    #   "private"  – Journal: tiefe/geheime Gedanken, sieht NUR die Autor:in,
+    #                auch nach Umwandlung niemals Mediator oder Gegenseite.
+    #   "personal" – Dokumentation (Default): nur die Autor:in, kann später
+    #                aber in die Mediation geteilt werden.
+    #   "shared"   – in die Mediation gepusht: sichtbar für alle Teilnehmer
+    #                des Falls (Mediator + Gegenseite).
+    visibility = Column(String, nullable=False, default="personal", server_default="personal")
     # KI-Analyse dieses Eintrags (routers/logbuch.py analyze_entry):
     # {"einschaetzung": str, "naechste_schritte": [{"titel","warum"}], "tipp": str}.
     # ai_analysis_at zählt zugleich als Kontingent-Verbrauch (free: 1/Woche,

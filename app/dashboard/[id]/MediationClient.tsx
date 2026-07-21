@@ -739,6 +739,15 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               <div className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-600">
                 Verfahrens-ID: {mediationId}
               </div>
+              {/* Journal-Ausbau: das Logbuch läuft neben der Mediation weiter –
+                  private Dokumentation + Journal, einzelne Einträge teilbar. */}
+              <button
+                type="button"
+                onClick={() => router.push(`/dashboard/logbuch/${hashId(mediationId)}`)}
+                className="btn btn-ghost text-sm"
+              >
+                📓 Logbuch &amp; Journal
+              </button>
               {(userRole === "mediator" || userRole === "admin") && (
                 <button
                   type="button"

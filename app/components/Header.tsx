@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { isMigratedLocalePath } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
-import logo from "@/fotos/Medipact Logo für Mediation Online.png";
+import logo from "@/fotos/medi logo.png";
 
 /**
  * Most marketing routes (e.g. /methode, /cases, /about) are NOT migrated

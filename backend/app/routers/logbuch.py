@@ -39,6 +39,23 @@ router = APIRouter(prefix="/mediations", tags=["logbuch"])
 
 ENTRY_TYPES = {"vorkommnis", "gedanke", "gespraech", "email", "whatsapp", "telefonat"}
 
+# Journal-Ausbau: Sichtbarkeit je Eintrag.
+#   private  – Journal: sieht NUR die Autor:in (nie Mediator/Gegenseite).
+#   personal – Dokumentation (Default): nur die Autor:in.
+#   shared   – in die Mediation gepusht: alle Teilnehmer des Falls.
+VISIBILITIES = {"private", "personal", "shared"}
+
+
+def _visible_to(entry: MediationLogEntry, participant: MediationParticipant) -> bool:
+    """Darf dieser Teilnehmer den Eintrag sehen?
+
+    Autor:in sieht immer alles Eigene; Einträge ohne Autor (Altbestand) gelten
+    als Einträge der Eigentümer:in und bleiben nicht-Autoren verborgen, außer
+    sie sind explizit geteilt."""
+    if (entry.visibility or "personal") == "shared":
+        return True
+    return entry.author_participant_id == participant.id
+
 
 def _require_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
     p = (
@@ -78,6 +95,7 @@ def _serialize(e: MediationLogEntry) -> dict:
         "title": e.title,
         "content": e.content or {},
         "author_participant_id": e.author_participant_id,
+        "visibility": e.visibility or "personal",
         "ai_analysis": e.ai_analysis,
         "ai_analysis_at": e.ai_analysis_at.isoformat() if e.ai_analysis_at else None,
         "created_at": e.created_at.isoformat() if e.created_at else None,
@@ -90,6 +108,7 @@ class LogEntryCreate(BaseModel):
     occurred_at: Optional[str] = None  # ISO-Datum/Zeit des Ereignisses
     title: Optional[str] = None
     content: Optional[dict[str, Any]] = None  # {block_id: wert} gemäß WFM-Vorlage
+    visibility: str = "personal"  # private | personal | shared
 
 
 class LogEntryUpdate(BaseModel):
@@ -97,6 +116,14 @@ class LogEntryUpdate(BaseModel):
     occurred_at: Optional[str] = None
     title: Optional[str] = None
     content: Optional[dict[str, Any]] = None
+    visibility: Optional[str] = None
+
+
+def _check_visibility(value: str) -> str:
+    v = (value or "personal").strip().lower()
+    if v not in VISIBILITIES:
+        raise HTTPException(status_code=422, detail="Unbekannte Sichtbarkeit.")
+    return v
 
 
 @router.get("/{mediation_id}/logbuch/entries")
@@ -108,20 +135,27 @@ def list_entries(
     """Alle Logbuch-Einträge des Falls, neueste Ereignisse zuerst.
 
     Kein Paywall-Check: das Logbuch ist ein kostenloses Angebot. Zugriff nur
-    für Teilnehmer (praktisch: die Eigentümer:in – Logbuch-Fälle haben keine
-    Gegenseite)."""
-    _require_participant(mediation_id, current_user, db)
+    für Teilnehmer. Sichtbarkeitsfilter (Journal-Ausbau): Nicht-Autoren –
+    also Mediator/Gegenseite nach Umwandlung oder im verknüpften Fall – sehen
+    ausschließlich Einträge mit visibility="shared"."""
+    participant = _require_participant(mediation_id, current_user, db)
     rows = (
         db.query(MediationLogEntry)
         .filter(MediationLogEntry.mediation_id == mediation_id)
         .all()
     )
+    rows = [e for e in rows if _visible_to(e, participant)]
+    # is_own steuert im Frontend Bearbeiten/Löschen/Teilen (Backend erzwingt
+    # das zusätzlich in _get_own_entry).
     # Sortierung: Ereignisdatum absteigend, Einträge ohne Datum nach created_at.
     rows.sort(
         key=lambda e: (e.occurred_at or e.created_at or datetime.min),
         reverse=True,
     )
-    return [_serialize(e) for e in rows]
+    return [
+        {**_serialize(e), "is_own": e.author_participant_id == participant.id}
+        for e in rows
+    ]
 
 
 @router.post("/{mediation_id}/logbuch/entries")
@@ -145,6 +179,7 @@ def create_entry(
         occurred_at=_parse_occurred_at(payload.occurred_at),
         title=(payload.title or "").strip() or None,
         content=payload.content or {},
+        visibility=_check_visibility(payload.visibility),
     )
     db.add(entry)
     db.commit()
@@ -155,7 +190,7 @@ def create_entry(
 def _get_own_entry(
     mediation_id: int, entry_id: int, db: Session, user: User
 ) -> MediationLogEntry:
-    _require_participant(mediation_id, user, db)
+    participant = _require_participant(mediation_id, user, db)
     entry = (
         db.query(MediationLogEntry)
         .filter(
@@ -166,6 +201,10 @@ def _get_own_entry(
     )
     if not entry:
         raise HTTPException(status_code=404, detail="Eintrag nicht gefunden")
+    # Journal-Schutz: bearbeiten/löschen/analysieren darf nur die Autor:in;
+    # fremde Einträge sind selbst dann tabu, wenn sie geteilt (shared) sind.
+    if entry.author_participant_id != participant.id:
+        raise HTTPException(status_code=403, detail="Nur eigene Einträge.")
     return entry
 
 
@@ -189,6 +228,8 @@ def update_entry(
         entry.title = payload.title.strip() or None
     if payload.content is not None:
         entry.content = payload.content
+    if payload.visibility is not None:
+        entry.visibility = _check_visibility(payload.visibility)
     db.commit()
     db.refresh(entry)
     return _serialize(entry)
@@ -421,7 +462,7 @@ def analyze_entry(
     Verbraucht NUR dann Kontingent, wenn die KI tatsächlich eine Empfehlung
     liefert (Qualitäts-Gate: dünne Einträge → "skipped", kostenlos). Bereits
     analysierte Einträge geben ihr gespeichertes Ergebnis zurück."""
-    _require_participant(mediation_id, current_user, db)
+    participant = _require_participant(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     entry = _get_own_entry(mediation_id, entry_id, db, current_user)
 
@@ -475,6 +516,8 @@ def analyze_entry(
         )
         .all()
     )
+    # Kontext nur aus Einträgen, die diese Teilnehmer:in sehen darf (Journal!).
+    others = [e for e in others if _visible_to(e, participant)]
     others.sort(key=lambda e: (e.occurred_at or e.created_at or datetime.min))
     history_parts = []
     for e in others[-10:]:

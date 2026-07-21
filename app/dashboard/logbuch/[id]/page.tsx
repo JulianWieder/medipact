@@ -28,16 +28,18 @@ export default async function LogbuchPage({ params }: PageProps) {
     title?: string;
   } | null;
 
-  // Umgewandelte Logbücher führen zur normalen Fall-Seite.
-  if (data?.mode && data.mode !== "logbuch") {
-    redirect(`/dashboard/${id}`);
-  }
+  // Journal-Ausbau: auch neben einer laufenden Mediation nutzbar – das
+  // Logbuch läuft als "Logbuch & Journal" zum Fall weiter (kein Redirect mehr).
+  // Einträge können dort einzeln in die Mediation geteilt werden.
+  const mode = data?.mode ?? "logbuch";
 
   return (
     <LogbuchClient
       mediationId={numericId.toString()}
       initialTitle={data?.title ?? "Mein Konflikt-Logbuch"}
       mediationType={data?.mediation_type ?? "nachbarschaft"}
+      mode={mode}
+      caseHref={mode !== "logbuch" ? `/dashboard/${id}` : undefined}
     />
   );
 }

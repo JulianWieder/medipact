@@ -20,6 +20,9 @@
 import type { RatgeberArticle } from "./types";
 import { article as mediationAlsKonfliktloesung } from "./mediation-als-konfliktloesung";
 import { article as konfliktDokumentieren } from "./konflikt-dokumentieren";
+import { article as konfliktJournal } from "./konflikt-journal";
+import { article as akuterKonfliktWasTun } from "./akuter-konflikt-was-tun";
+import { article as schwelenderKonflikt } from "./schwelender-konflikt";
 import { article as fuenfPhasenDerMediation } from "./5-phasen-der-mediation";
 import { article as wasIstMediation } from "./was-ist-mediation";
 import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
@@ -42,6 +45,9 @@ export type { RatgeberArticle, RatgeberBlock, RatgeberFaq } from "./types";
 export const ratgeberArticles: RatgeberArticle[] = [
   mediationAlsKonfliktloesung,
   konfliktDokumentieren,
+  konfliktJournal,
+  akuterKonfliktWasTun,
+  schwelenderKonflikt,
   fuenfPhasenDerMediation,
   wasIstMediation,
   wasIstEinMediator,

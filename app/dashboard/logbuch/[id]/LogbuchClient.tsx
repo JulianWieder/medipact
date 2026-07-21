@@ -27,6 +27,10 @@ interface Props {
   mediationId: string;
   initialTitle: string;
   mediationType: string;
+  /** "logbuch" (eigenständig) oder "mediation" (Logbuch & Journal neben dem Fall). */
+  mode?: string;
+  /** Link zurück zum Fall, wenn das Logbuch an eine Mediation geknüpft ist. */
+  caseHref?: string;
 }
 
 interface FlowBlock {
@@ -55,6 +59,8 @@ interface LogEntry {
   ai_analysis: AiAnalysis | null;
   ai_analysis_at: string | null;
   created_at: string | null;
+  visibility?: string;
+  is_own?: boolean;
 }
 
 interface Quota {
@@ -80,6 +86,32 @@ const ENTRY_TYPES: { key: string; label: string; icon: string }[] = [
   { key: "whatsapp", label: "WhatsApp", icon: "💬" },
   { key: "telefonat", label: "Telefonat", icon: "📞" },
 ];
+
+// Journal-Ausbau: Sichtbarkeit je Eintrag (Backend: mediation_log_entries.visibility)
+const VISIBILITIES: { key: string; label: string; icon: string; hint: string }[] = [
+  {
+    key: "personal",
+    label: "Dokumentation",
+    icon: "📓",
+    hint: "Nur für Sie – lässt sich später in die Mediation teilen.",
+  },
+  {
+    key: "private",
+    label: "Journal (privat)",
+    icon: "🔒",
+    hint: "Streng vertraulich: sieht niemals Mediator oder Gegenseite – auch nach einer Umwandlung nicht.",
+  },
+  {
+    key: "shared",
+    label: "In Mediation geteilt",
+    icon: "🤝",
+    hint: "Sichtbar für alle Beteiligten des Falls (Mediator + Gegenseite).",
+  },
+];
+
+function visMeta(key: string | undefined) {
+  return VISIBILITIES.find((v) => v.key === (key ?? "personal")) ?? VISIBILITIES[0];
+}
 
 const INPUT_TYPES = new Set([
   "frage", "texteingabe", "auswahl", "skala", "datum", "betrag", "datei_upload",
@@ -347,7 +379,15 @@ function AnalysisCard({ analysis }: { analysis: AiAnalysis }) {
   );
 }
 
-export default function LogbuchClient({ mediationId, initialTitle }: Props) {
+export default function LogbuchClient({
+  mediationId,
+  initialTitle,
+  mode = "logbuch",
+  caseHref,
+}: Props) {
+  // Verknüpfter Modus: das Logbuch läuft NEBEN einer Mediation weiter –
+  // Einträge können einzeln in den Fall gepusht werden (visibility=shared).
+  const isLinked = mode !== "logbuch";
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNew = searchParams.get("neu") === "1";
@@ -365,6 +405,8 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
 
   // Composer (neuer/bearbeiteter Eintrag)
   const [entryType, setEntryType] = useState("vorkommnis");
+  const [entryVisibility, setEntryVisibility] = useState("personal");
+  const [viewFilter, setViewFilter] = useState("alle");
   const [entryValues, setEntryValues] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [entrySaving, setEntrySaving] = useState(false);
@@ -594,6 +636,7 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
       entry_type: entryType,
       occurred_at: typeof occurred === "string" && occurred ? occurred : null,
       content: entryValues,
+      visibility: entryVisibility,
     };
     try {
       const url = editingId
@@ -618,6 +661,7 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
       setEntryValues({});
       setEditingId(null);
       setEntryType("vorkommnis");
+      setEntryVisibility("personal");
       // Automatische KI-Analyse direkt nach dem Speichern eines NEUEN Eintrags.
       if (wasNew && body?.id) {
         void analyzeEntry(body.id, status?.plan === "premium");
@@ -627,7 +671,7 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
     } finally {
       setEntrySaving(false);
     }
-  }, [dateBlockId, editingId, entryType, entryValues, mediationId, analyzeEntry, status]);
+  }, [dateBlockId, editingId, entryType, entryValues, entryVisibility, mediationId, analyzeEntry, status]);
 
   const deleteEntry = useCallback(
     async (id: number) => {
@@ -640,9 +684,38 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
     [mediationId],
   );
 
+  // Eintrag in die Mediation pushen / wieder zurückziehen (nur eigene).
+  const changeVisibility = useCallback(
+    async (entry: LogEntry, visibility: string) => {
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/mediations/${mediationId}/logbuch/entries/${entry.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ visibility }),
+          },
+        );
+        const body = await res.json().catch(() => null);
+        if (!res.ok) {
+          setError(body?.detail ?? body?.error ?? `Fehler (${res.status})`);
+          return;
+        }
+        setEntries((prev) =>
+          prev.map((e) => (e.id === entry.id ? { ...e, ...body } : e)),
+        );
+      } catch {
+        setError("Server nicht erreichbar.");
+      }
+    },
+    [mediationId],
+  );
+
   const startEdit = useCallback((entry: LogEntry) => {
     setEditingId(entry.id);
     setEntryType(entry.entry_type);
+    setEntryVisibility(entry.visibility ?? "personal");
     setEntryValues(entry.content ?? {});
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -776,14 +849,22 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
     return `${first} · ${second}`;
   }, [status, isPremium]);
 
+  const filteredEntries = useMemo(
+    () =>
+      viewFilter === "alle"
+        ? entries
+        : entries.filter((e) => (e.visibility ?? "personal") === viewFilter),
+    [entries, viewFilter],
+  );
+
   return (
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-4xl px-6 py-12 lg:px-8">
         {/* Kopf */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <Link href="/dashboard" className="btn btn-ghost mb-4 -ml-3">
-              ← Dashboard
+            <Link href={caseHref ?? "/dashboard"} className="btn btn-ghost mb-4 -ml-3">
+              ← {isLinked ? "Zum Fall" : "Dashboard"}
             </Link>
             <div className="flex items-center gap-3">
               <span
@@ -793,24 +874,33 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
                     : "border-accent-200 bg-accent-50 text-accent-700"
                 }`}
               >
-                {isPremium ? "Konflikt-Logbuch · Premium" : "Konflikt-Logbuch · kostenlos"}
+                {isLinked
+                  ? "Logbuch & Journal zum Fall"
+                  : isPremium
+                    ? "Konflikt-Logbuch · Premium"
+                    : "Konflikt-Logbuch · kostenlos"}
               </span>
             </div>
             <h1 className="heading-1 mt-3 text-neutral-900">{initialTitle}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-500">
               Halten Sie fest, was passiert – Vorkommnisse, Gespräche, E-Mails,
               WhatsApp, Telefonate, Gedanken, Fotos. Nach jedem Eintrag schlägt
-              Ihnen die KI gute nächste Schritte vor. Vertraulich; die Gegenseite
-              sieht nichts davon.
+              Ihnen die KI gute nächste Schritte vor. Standardmäßig sieht das
+              niemand außer Ihnen – und Journal-Einträge (🔒) bleiben in jedem
+              Fall privat, selbst in einer späteren Mediation.
+              {isLinked &&
+                " Einzelne Einträge können Sie gezielt in die Mediation teilen."}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setConfirmConvert(true)}
-            className="btn btn-primary"
-          >
-            In Mediation umwandeln →
-          </button>
+          {!isLinked && (
+            <button
+              type="button"
+              onClick={() => setConfirmConvert(true)}
+              className="btn btn-primary"
+            >
+              In Mediation umwandeln →
+            </button>
+          )}
         </div>
 
         {error && (
@@ -948,6 +1038,35 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
                 ))}
               </div>
 
+              {/* Sichtbarkeit (Journal-Ausbau) */}
+              <div className="mt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  Wer darf das sehen?
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {VISIBILITIES.filter((v) => isLinked || v.key !== "shared").map(
+                    (v) => (
+                      <button
+                        key={v.key}
+                        type="button"
+                        onClick={() => setEntryVisibility(v.key)}
+                        title={v.hint}
+                        className={`rounded-full border px-4 py-2 text-sm transition ${
+                          entryVisibility === v.key
+                            ? "border-accent-500 bg-white font-semibold text-accent-700 ring-2 ring-accent-200"
+                            : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
+                        }`}
+                      >
+                        {v.icon} {v.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+                <p className="mt-1.5 text-xs leading-5 text-neutral-400">
+                  {visMeta(entryVisibility).hint}
+                </p>
+              </div>
+
               <div className="mt-6 space-y-5">
                 {entryInputs.map((b) => (
                   <BlockField
@@ -1003,14 +1122,41 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
                 )}
               </h2>
 
+              {entries.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {[{ key: "alle", label: "Alle", icon: "" }, ...VISIBILITIES].map(
+                    (v) => (
+                      <button
+                        key={v.key}
+                        type="button"
+                        onClick={() => setViewFilter(v.key)}
+                        className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                          viewFilter === v.key
+                            ? "border-accent-500 bg-accent-50 text-accent-700"
+                            : "border-neutral-300 bg-white text-neutral-500 hover:border-neutral-400"
+                        }`}
+                      >
+                        {v.icon ? `${v.icon} ` : ""}{v.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
+
               {entries.length === 0 ? (
                 <p className="mt-4 rounded-2xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-500">
                   Noch keine Einträge. Halten Sie oben das erste Vorkommnis fest.
                 </p>
+              ) : filteredEntries.length === 0 ? (
+                <p className="mt-4 rounded-2xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-500">
+                  Keine Einträge in dieser Ansicht.
+                </p>
               ) : (
                 <ol className="mt-5 space-y-4">
-                  {entries.map((entry) => {
+                  {filteredEntries.map((entry) => {
                     const meta = typeMeta(entry.entry_type);
+                    const vis = visMeta(entry.visibility);
+                    const own = entry.is_own !== false;
                     const fields = Object.entries(entry.content ?? {}).filter(
                       ([, v]) => v !== undefined && v !== null && v !== "",
                     );
@@ -1027,23 +1173,55 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
                             <span className="text-sm text-neutral-500">
                               {formatDate(entry.occurred_at ?? entry.created_at)}
                             </span>
-                          </div>
-                          <div className="flex gap-2 text-xs">
-                            <button
-                              type="button"
-                              onClick={() => startEdit(entry)}
-                              className="font-semibold text-neutral-400 transition hover:text-accent-600"
+                            <span
+                              title={vis.hint}
+                              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                (entry.visibility ?? "personal") === "private"
+                                  ? "bg-neutral-900 text-white"
+                                  : (entry.visibility ?? "personal") === "shared"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-neutral-100 text-neutral-500"
+                              }`}
                             >
-                              Bearbeiten
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteEntry(entry.id)}
-                              className="font-semibold text-neutral-400 transition hover:text-red-500"
-                            >
-                              Löschen
-                            </button>
+                              {vis.icon} {vis.label}
+                            </span>
                           </div>
+                          {own && (
+                            <div className="flex gap-2 text-xs">
+                              {isLinked && (entry.visibility ?? "personal") === "personal" && (
+                                <button
+                                  type="button"
+                                  onClick={() => changeVisibility(entry, "shared")}
+                                  className="font-semibold text-emerald-600 transition hover:text-emerald-700"
+                                >
+                                  🤝 In Mediation teilen
+                                </button>
+                              )}
+                              {isLinked && (entry.visibility ?? "personal") === "shared" && (
+                                <button
+                                  type="button"
+                                  onClick={() => changeVisibility(entry, "personal")}
+                                  className="font-semibold text-neutral-400 transition hover:text-neutral-600"
+                                >
+                                  Nicht mehr teilen
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => startEdit(entry)}
+                                className="font-semibold text-neutral-400 transition hover:text-accent-600"
+                              >
+                                Bearbeiten
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteEntry(entry.id)}
+                                className="font-semibold text-neutral-400 transition hover:text-red-500"
+                              >
+                                Löschen
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <dl className="mt-3 space-y-2.5">
                           {fields.map(([blockId, v]) => {
@@ -1150,7 +1328,8 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
               </section>
             )}
 
-            {/* ── Upsell Mediation ── */}
+            {/* ── Upsell Mediation (nur eigenständiges Logbuch) ── */}
+            {!isLinked && (
             <section className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white sm:p-8">
               <h2 className="font-display text-xl font-medium">
                 Bereit, den Konflikt wirklich zu lösen?
@@ -1169,6 +1348,7 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
                 In Mediation umwandeln →
               </button>
             </section>
+            )}
           </>
         )}
       </div>
@@ -1221,8 +1401,10 @@ export default function LogbuchClient({ mediationId, initialTitle }: Props) {
             <p className="mt-3 text-sm leading-6 text-neutral-600">
               Ihr Fall durchläuft danach den normalen Start (Fallaufnahme,
               Paketwahl, Einladung der Gegenseite). Alle Logbuch-Einträge
-              bleiben erhalten. Kosten entstehen erst mit der Freischaltung der
-              Mediation.
+              bleiben erhalten – und bleiben privat: Mediator oder Gegenseite
+              sehen nur Einträge, die Sie später ausdrücklich in die Mediation
+              teilen. Journal-Einträge (🔒) bleiben immer nur für Sie sichtbar.
+              Kosten entstehen erst mit der Freischaltung der Mediation.
             </p>
             <div className="mt-6 flex gap-3">
               <button

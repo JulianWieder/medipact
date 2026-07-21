@@ -381,6 +381,31 @@ export default function MethodePage() {
               </div>
             ))}
           </div>
+
+          {/* Schritt 0: Konflikt-Logbuch & Journal (kostenlos, vor der Mediation) */}
+          <div className="mt-8 rounded-[2rem] border border-accent-200 bg-accent-50/60 p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-700">
+                  Schritt 0 – noch vor der Mediation
+                </div>
+                <h3 className="mt-2 text-xl font-bold text-neutral-900">
+                  Erst dokumentieren: Konflikt-Logbuch &amp; Journal
+                </h3>
+                <p className="mt-2 max-w-2xl leading-relaxed text-neutral-600">
+                  Nicht sicher, ob der Konflikt eskaliert? Halten Sie kostenlos
+                  fest, was passiert – Vorkommnisse, Gespräche, E-Mails – und
+                  führen Sie parallel ein privates Journal für Ihre Gedanken,
+                  das garantiert niemand außer Ihnen liest. Eskaliert es doch,
+                  wird das Logbuch mit einem Klick zur Mediation; geteilt wird
+                  nur, was Sie ausdrücklich freigeben.
+                </p>
+              </div>
+              <Link href="/konflikt-logbuch" className="btn btn-primary shrink-0">
+                Kostenloses Logbuch starten
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

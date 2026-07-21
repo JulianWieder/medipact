@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "medipact Logbuch",
+    "slug": "medipact-logbuch",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "medipact",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "backgroundColor": "#fafaf9",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "de.medipact.logbuch"
+    },
+    "android": {
+      "package": "de.medipact.logbuch",
+      "edgeToEdgeEnabled": true
+    },
+    "extra": {
+      "apiUrl": "https://medipact.de/backend"
+    }
+  }
+}
