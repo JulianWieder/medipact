@@ -13,8 +13,8 @@ export const article: RatgeberArticle = {
   description:
     "Ein Konflikt-Journal hilft, Gefühle zu sortieren und klarer zu entscheiden. So führen Sie es richtig – privat, ehrlich und getrennt von der Faktendokumentation.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-07-21",
-  readingMinutes: 7,
+  updated: "2026-07-22",
+  readingMinutes: 9,
   intro:
     "In einem Konflikt gibt es zwei Ebenen: das, was passiert – und das, was es mit Ihnen macht. Für die Fakten gibt es das Streit-Tagebuch. Für alles andere gibt es das Konflikt-Journal: einen streng privaten Ort für Wut, Zweifel, Ängste und die Gedanken, die Sie (noch) niemandem zeigen wollen. Dieser Ratgeber erklärt, warum genau diese Trennung so wirksam ist und wie Sie ein Journal führen, das Ihnen wirklich hilft.",
   blocks: [
@@ -56,6 +56,42 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Viele Konflikte sind lange in der Schwebe: noch kein offener Krieg, aber auch kein Frieden. Genau hier ist die Kombination aus Journal und Dokumentation am stärksten. Die Dokumentation sammelt nüchtern, was passiert – falls Sie später doch handeln müssen. Das Journal beantwortet parallel die wichtigere Frage: Wie sehr belastet mich das wirklich? Wenn die Einträge über Wochen häufiger, länger und dunkler werden, ist das ein klares Signal, aktiv zu werden – etwa mit einem klärenden Gespräch oder einer Mediation.",
     },
+    { type: "heading", text: "Drei Momente einer Trennung – und der passende Eintrag" },
+    {
+      type: "paragraph",
+      text: "Eine Trennung verläuft selten an einem einzigen Tag. Sie zieht sich über Wochen und Monate – und jede Phase braucht einen anderen Eintrag. Drei Beispiele zeigen, wie Journal und Dokumentation zusammenspielen.",
+    },
+    {
+      type: "paragraph",
+      text: "Phase 1 – Sie sind sich unsicher, was eigentlich los ist. Noch ist nichts entschieden, aber die Stimmung kippt. Hier gehört ins Journal, wie es Ihnen wirklich geht: „Seit Wochen reden wir nur noch über Organisatorisches. Ich fühle mich einsam, obwohl er im selben Raum sitzt.“ Solche Einträge helfen, das diffuse Gefühl zu fassen – und sind oft der erste Schritt, es auch auszusprechen. Vielleicht erzählen Sie Ihrem Partner davon, vielleicht suchen Sie das Gespräch.",
+    },
+    {
+      type: "paragraph",
+      text: "Phase 2 – die Trennung wird akut. Jetzt zählen Fakten. In die Dokumentation gehört nüchtern, was passiert: „14.03., Partner kam erst um 2:00 Uhr nach Hause. 21.03., erst um 4:00 Uhr. 02.04., er ist ausgezogen.“ Gerade das Auszugsdatum ist wichtig: In Deutschland markiert die Trennung den Beginn des Trennungsjahrs – wer wann ausgezogen ist (oder wann „Trennung von Tisch und Bett“ innerhalb der Wohnung begann), kann für eine spätere Scheidung entscheidend sein. Diese Zeilen schreiben Sie sachlich, damit sie später Bestand haben.",
+    },
+    {
+      type: "callout",
+      text: "Genau das ist der clevere Kern des Logbuchs: Dieselbe App hält die emotionale Verarbeitung und die rechtlich relevanten Fakten fest – sauber getrennt, aber an einem Ort. Das Journal trägt Sie durch die Trennung, die Dokumentation trägt Sie danach.",
+    },
+    {
+      type: "paragraph",
+      text: "Phase 3 – der Abschied. Irgendwann kommt der Moment des Loslassens. Dann darf ein Journal-Eintrag ganz weich werden: „Ich lasse dich los. Weil ich spüre, dass mein Herz wieder frei atmen will. Weil ich nicht länger auf etwas warten will, das nicht mehr zurückkommt. Ich danke dir für die gemeinsamen Jahre – und lasse den Rest gehen.“ Solche Einträge sind kein Beweismittel, sondern ein Ritual: Sie schließen ein Kapitel, das die nüchternen Fakten allein nie schließen könnten.",
+    },
+    { type: "heading", text: "Schreibübungen, wenn Sie nicht weiterwissen" },
+    {
+      type: "paragraph",
+      text: "Manchmal ist das Blatt leer, obwohl der Kopf voll ist. Für diese Momente helfen kleine Impulse – Fragen, die den Stift wieder in Bewegung bringen:",
+    },
+    {
+      type: "list",
+      items: [
+        "„Die schlimmsten Urlaube“: Erinnern Sie sich an gemeinsame Reisen, die schiefgingen. Was genau hat gestört – und sagt das etwas über ein Muster, das sich bis heute zieht?",
+        "„Der Brief, den ich nie abschicke“: Schreiben Sie der anderen Person alles, was Sie nie laut sagen würden. Danach bleibt der Brief im Journal – oder Sie zerreißen ihn.",
+        "„Zwei Spalten“: Links, was ich vermisse. Rechts, was ich nicht vermisse. Oft ist die rechte Spalte länger, als man denkt.",
+        "„In einem Jahr“: Schreiben Sie aus der Zukunft zurück. Wie soll sich Ihr Leben in zwölf Monaten anfühlen – und welcher erste Schritt führt dorthin?",
+        "„Der beste Moment von heute“: Auch in schweren Phasen ein Satz. Das hält den Blick offen für das, was trägt.",
+      ],
+    },
     { type: "heading", text: "Privatsphäre: die Grundbedingung" },
     {
       type: "paragraph",
@@ -82,6 +118,11 @@ export const article: RatgeberArticle = {
       question: "Kann jemand meine Journal-Einträge im medipact Logbuch lesen?",
       answer:
         "Nein. Einträge mit der Sichtbarkeit „Journal (privat)“ sieht ausschließlich die Person, die sie geschrieben hat – auch nach einer Umwandlung des Logbuchs in eine Mediation weder Mediator noch Gegenseite.",
+    },
+    {
+      question: "Warum ist das Auszugsdatum in der Dokumentation so wichtig?",
+      answer:
+        "Weil in Deutschland mit der Trennung das Trennungsjahr beginnt – die Voraussetzung für eine Scheidung. Wer wann ausgezogen ist oder ab wann getrennt in der Wohnung lebte, kann rechtlich entscheidend sein. Halten Sie es sachlich und mit Datum fest. Das ersetzt keine Rechtsberatung.",
     },
     {
       question: "Wie oft sollte ich in mein Konflikt-Journal schreiben?",
