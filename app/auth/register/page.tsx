@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Icon from "@/app/components/ui/Icon";
 
 // Verzweigter Registrierungs-Einstieg: Privatperson vs. Unternehmen.
 // Interne Mitarbeiter (medipact/mandexis) registrieren separat über
@@ -53,7 +54,7 @@ function RegisterChoiceContent() {
             className="group flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition hover:border-accent-300 hover:shadow-md"
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-3xl">{c.icon}</span>
+              <span><Icon name={c.icon} size={30} /></span>
               <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
                 {c.badge}
               </span>

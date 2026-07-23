@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 
 /**
  * Startseiten-Sektion: Kostenloses Konflikt-Logbuch.
@@ -58,7 +59,7 @@ export default function LogbuchSection() {
                 { icon: "📌", label: "Vorkommnis", text: "Laute Musik bis 1:30 Uhr, drittes Mal diese Woche." },
               ].map((e) => (
                 <li key={e.text} className="flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50/60 p-3">
-                  <span>{e.icon}</span>
+                  <span><Icon name={e.icon} size={18} /></span>
                   <span>
                     <span className="block text-xs font-bold text-neutral-800">{e.label}</span>
                     <span className="block text-xs leading-5 text-neutral-500">{e.text}</span>

@@ -50,6 +50,7 @@ import {
   type BlockTypeDef,
 } from "../blockTypes";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
+import Icon from "@/app/components/ui/Icon";
 import AiPromptsEditor from "./AiPromptsEditor";
 import {
   fetchVariants,
@@ -112,7 +113,7 @@ function BlockBadges({ blocks }: { blocks: StepBlockDto[] }) {
             className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-semibold ${def.badge}`}
             title={def.label}
           >
-            <span aria-hidden>{def.icon}</span>
+            <Icon name={def.icon} color="currentColor" size={12} />
             {def.short}
           </span>
         );
@@ -1244,7 +1245,7 @@ function StepDesignerPanel({
                     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition hover:brightness-95 ${def.badge}`}
                     title={def.hint}
                   >
-                    <span aria-hidden>{def.icon}</span>
+                    <Icon name={def.icon} color="currentColor" size={13} />
                     {def.label}
                     <span className="text-neutral-400">＋</span>
                   </button>
@@ -1273,7 +1274,7 @@ function StepDesignerPanel({
                         def?.badge ?? "border-neutral-200 bg-neutral-50 text-neutral-500"
                       }`}
                     >
-                      <span aria-hidden>{def?.icon ?? "▪"}</span>
+                      <Icon name={def?.icon ?? "▪"} color="currentColor" size={13} />
                       {def?.label ?? b.type}
                     </span>
                     <div className="flex items-center gap-1">

@@ -10,6 +10,7 @@
 
 import { encodeId } from "@/lib/ids";
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -117,7 +118,7 @@ export default function LogbuchNewClient() {
               disabled={creating !== null}
               className="rounded-2xl border border-neutral-200 bg-white p-6 text-left transition hover:border-accent-400 hover:shadow-lg disabled:opacity-50"
             >
-              <span className="text-2xl">{t.icon}</span>
+              <span><Icon name={t.icon} size={26} /></span>
               <h2 className="heading-3 mt-3 mb-1 text-neutral-900">{t.title}</h2>
               <p className="text-sm text-neutral-600">{t.description}</p>
               {creating === t.type && (

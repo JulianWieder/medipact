@@ -1,6 +1,7 @@
 "use client";
 
 import { hashId } from "@/lib/ids";
+import Icon from "@/app/components/ui/Icon";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -1209,7 +1210,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               { icon: "📄", label: "Mediationsvertrag" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2 text-sm text-blue-800">
-                <span>{item.icon}</span>
+                <span><Icon name={item.icon} color="currentColor" size={17} /></span>
                 <span>{item.label}</span>
               </div>
             ))}

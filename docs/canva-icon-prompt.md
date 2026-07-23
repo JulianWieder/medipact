@@ -171,3 +171,185 @@ gleiche Motive im obigen Stil neu erzeugen.
 
 > Tipp: Erst 2–3 Icons testen, Look absegnen, dann das ganze Set generieren –
 > spart Magic-Media-Credits.
+
+---
+
+# ERWEITERTE PROMPT-BIBLIOTHEK
+
+## 7. Fünf Stilrichtungen (eine wählen, dann konsequent bleiben)
+
+Jede Richtung ist ein austauschbarer Stil-Baustein. Nimm **einen** und hänge
+das Motiv aus Abschnitt 4 an. So bekommst du je nach Geschmack einen anderen
+Gesamtlook – aber immer in der medipact-Palette.
+
+**A · Heraldic Line (Standard, empfohlen für UI)**
+```
+minimalist line icon inspired by a refined heraldic crest, MOTIF,
+thin even 2px stroke, petrol-teal #336E7C lines with subtle champagne-gold
+#C9B27A accents, flat, geometric, calm law-firm look, transparent background
+```
+
+**B · Duotone Flat (kräftiger, gut für Marketing-Kacheln)**
+```
+modern duotone flat icon, MOTIF, two-tone petrol-teal #336E7C and lighter
+teal #4A8A98 fills with a fine champagne-gold #C9B27A rim, no outline noise,
+rounded corners, clean vector, transparent background
+```
+
+**C · Embossed Crest Badge (3D, ganz nah am Logo)**
+```
+premium embossed emblem, MOTIF centered inside a heraldic shield, matte
+petrol-teal #336E7C relief with a polished champagne-gold #C9B27A beveled
+border, soft studio lighting, subtle depth, dark navy #0B1922 backdrop,
+luxury law-firm branding, 3D render, high detail
+```
+
+**D · Gold-on-Navy Premium (edel, dunkler Modus / Siegel)**
+```
+elegant thin-line icon, MOTIF, champagne-gold #C9B27A hairline on a deep
+navy #0B1922 background, luxurious minimal, engraved feel, generous padding,
+crisp vector, symmetrical
+```
+
+**E · Soft Rounded (freundlicher, für Onboarding/Empty States)**
+```
+friendly soft rounded icon, MOTIF, smooth petrol-teal #336E7C shapes,
+gentle champagne-gold #C9B27A highlight, plenty of negative space, warm and
+approachable yet professional, flat, transparent background
+```
+
+---
+
+## 8. Negativ-Prompt (überall anhängen, wo Canva es erlaubt)
+
+```
+no text, no letters, no watermark, no photorealism, no drop shadow clutter,
+no gradients banding, no busy background, no clipping at edges, no extra
+objects, no inconsistent stroke weight, not skewed, not tilted
+```
+
+---
+
+## 9. Voll ausformulierte Beispiel-Prompts (Copy-&-Paste)
+
+**Waage / „Meine Fälle" (Heraldic Line):**
+```
+minimalist line icon inspired by a refined heraldic crest, a perfectly
+balanced set of scales of justice, thin even 2px stroke, petrol-teal #336E7C
+lines with subtle champagne-gold #C9B27A accents on the beam, flat, geometric,
+symmetrical, centered, consistent padding, calm law-firm look, vector,
+transparent background — no text, no photorealism, no drop shadow
+```
+
+**Taube / „Lösung" (Duotone Flat):**
+```
+modern duotone flat icon, a stylized dove in flight carrying an olive branch,
+two-tone petrol-teal #336E7C and lighter teal #4A8A98, fine champagne-gold
+#C9B27A wing accent, rounded, clean vector, centered, transparent background
+— no text, no realism, no shadow
+```
+
+**Handschlag / „Einigung" (Embossed Crest Badge):**
+```
+premium embossed emblem, two hands in a firm handshake centered inside a
+heraldic shield, matte petrol-teal #336E7C relief with a polished
+champagne-gold #C9B27A beveled border, soft studio light, subtle depth,
+dark navy #0B1922 backdrop, luxury branding, 3D render — no text
+```
+
+**Schild / „Administration" (Gold-on-Navy Premium):**
+```
+elegant thin-line icon, a heraldic shield with a subtle inner divide,
+champagne-gold #C9B27A hairline on deep navy #0B1922, engraved feel,
+symmetrical, generous padding, crisp vector — no text, no shadow
+```
+
+---
+
+## 10. Mehr Design-Assets (über Icons hinaus)
+
+### Logo-Varianten
+```
+horizontal logo lockup for "medipact", the existing petrol-teal heraldic
+shield with gold border on the left, clean modern serif wordmark in petrol
+#336E7C to the right, balanced spacing, on transparent background,
+professional law brand
+```
+```
+simplified monochrome favicon of the medipact shield monogram, single-color
+petrol-teal #336E7C, bold and legible at 32px, flat, transparent background
+```
+
+### Social-/OG-Bild (1200 × 630)
+```
+elegant social share banner for a mediation platform, deep navy #0B1922
+background with faint heraldic line pattern, centered petrol-teal shield with
+gold border, calm premium law-firm mood, empty space on the right for a
+headline, high contrast, no text
+```
+
+### Hero-Hintergrund / Muster
+```
+subtle seamless background pattern of thin champagne-gold #C9B27A heraldic
+line motifs and fine geometric linework on deep navy #0B1922, very low
+contrast, elegant, non-distracting, tileable
+```
+
+### Sektions-Illustrationen für Konfliktarten
+```
+minimalist editorial illustration in petrol-teal #336E7C and champagne-gold
+#C9B27A line style on transparent background, SCENE, calm and respectful tone,
+consistent stroke, no faces in detail, professional mediation brand
+```
+SCENE-Beispiele: `two neighbors talking over a garden fence` (Nachbarschaft),
+`two business partners at a table with documents` (Wirtschaft),
+`a family sitting together` (Familie), `an online video call between two
+parties` (ODR).
+
+### Empty States (leere Listen / „noch nichts hier")
+```
+friendly minimalist spot illustration, an open empty folder with a small gold
+star, petrol-teal #336E7C soft rounded shapes with champagne-gold #C9B27A
+accent, lots of negative space, encouraging calm mood, transparent background
+— no text
+```
+
+### Vertrauens-Siegel / Badges
+```
+circular trust seal badge, a heraldic shield with a check mark in the center,
+champagne-gold #C9B27A ring and laurel accents on petrol-teal #336E7C, premium
+certified look, flat vector, transparent background — no text
+```
+
+### Avatar-Platzhalter
+```
+neutral user avatar placeholder, simple person silhouette in petrol-teal
+#336E7C inside a soft rounded square with a thin champagne-gold #C9B27A border,
+flat, minimal, transparent background
+```
+
+### E-Mail-Header (600 px breit)
+```
+slim email header banner, deep navy #0B1922 with the medipact shield centered,
+thin champagne-gold #C9B27A divider line beneath, minimalist, premium,
+plenty of quiet space, no text
+```
+
+---
+
+## 11. Canva-Tipps für bessere & konsistentere Ergebnisse
+
+- **Brand Kit anlegen** (Canva Pro): Farben `#336E7C`, `#0B1922`, `#C9B27A`,
+  `#4A8A98` speichern → schnelleres Umfärben & einheitliche Serie.
+- **Immer 4 Varianten** generieren lassen und die konsistenteste nehmen; Stil-
+  Baustein Wort für Wort gleich lassen, nur das Motiv tauschen.
+- **Eine Stilrichtung festlegen** (Abschnitt 7) und für ALLE Assets behalten –
+  Mischen wirkt schnell unruhig.
+- **Quadratisch generieren** (1:1) für Icons, **16:9** für Hero/OG,
+  **9:16** für Story/Mobile.
+- **Nachschärfen:** Magic-Media-Ergebnis auf ein Blatt ziehen → „Hintergrund
+  entfernen" → als PNG (transparent) oder SVG exportieren.
+- **Batch-Download:** alle Motive je auf eine eigene Seite, dann „Alle Seiten"
+  als ZIP herunterladen = ein Download für das ganze Set.
+- **Konsistenz-Check:** die fertigen Icons nebeneinander auf ein Blatt legen –
+  passen Strichstärke, Größe und Farbe? Ausreißer neu generieren.

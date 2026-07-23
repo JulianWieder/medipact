@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { WORKSPACE_NAV, WorkspaceSection } from "../types";
 import { cn } from "../ui";
+import Icon from "@/app/components/ui/Icon";
 import logo from "@/fotos/medi logo.png";
 
 interface WorkspaceSidebarProps {
@@ -92,7 +93,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail, isSuperAdmin, is
                 {active === item.id && !collapsed && (
                   <div className="absolute left-0 w-1 h-5 bg-accent-500 rounded-r-full" />
                 )}
-                <span className="text-lg leading-none shrink-0">{item.icon}</span>
+                <span className="leading-none shrink-0"><Icon name={item.icon} color="currentColor" size={20} /></span>
                 {!collapsed && (
                   <span
                     className={cn(
@@ -131,7 +132,7 @@ export function WorkspaceSidebar({ active, onSelect, userEmail, isSuperAdmin, is
                     : "text-neutral-400 hover:bg-neutral-50 hover:text-neutral-700",
                 )}
               >
-                <span className="text-lg leading-none shrink-0">{item.icon}</span>
+                <span className="leading-none shrink-0"><Icon name={item.icon} color="currentColor" size={20} /></span>
                 {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
               </button>
 

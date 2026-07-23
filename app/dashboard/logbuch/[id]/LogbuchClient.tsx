@@ -20,6 +20,7 @@
 // Upsells: "In Mediation umwandeln" (POST /logbuch/convert) + Premium-Modal.
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -1167,7 +1168,7 @@ export default function LogbuchClient({
                       >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-lg">{meta.icon}</span>
+                            <span><Icon name={meta.icon} size={19} /></span>
                             <span className="text-sm font-bold text-neutral-900">{meta.label}</span>
                             <span className="text-sm text-neutral-400">·</span>
                             <span className="text-sm text-neutral-500">

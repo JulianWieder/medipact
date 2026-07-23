@@ -5,6 +5,7 @@ import { JsonLd } from "@/app/components/JsonLd";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { Card } from "@/app/components/ui/Card";
 import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
+import Icon from "@/app/components/ui/Icon";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
@@ -233,7 +234,7 @@ export default function KonfliktLogbuchPage() {
             <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {ENTRY_TYPES.map((e) => (
                 <div key={e.title} className="rounded-2xl border border-neutral-200 bg-white p-6">
-                  <span className="text-2xl">{e.icon}</span>
+                  <span><Icon name={e.icon} size={26} /></span>
                   <h3 className="mt-3 mb-1.5 font-display text-lg font-medium text-neutral-900">
                     {e.title}
                   </h3>
@@ -329,7 +330,7 @@ export default function KonfliktLogbuchPage() {
                   key={o.title}
                   className="rounded-[2rem] border border-neutral-700 bg-neutral-800/50 p-8"
                 >
-                  <span className="text-2xl">{o.icon}</span>
+                  <span><Icon name={o.icon} size={26} color="#C9B27A" /></span>
                   <h3 className="mt-4 mb-2 text-xl font-bold text-white">
                     {o.title}
                   </h3>
