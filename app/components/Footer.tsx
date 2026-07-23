@@ -175,6 +175,16 @@ export default function Footer({
             </a>
           </div>
         </div>
+
+        {/* Brand banner */}
+        <div className="mt-10 flex justify-center border-t border-white/10 pt-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/og-image.png"
+            alt="medipact – Mediation online"
+            className="h-auto w-full max-w-2xl rounded-2xl"
+          />
+        </div>
       </div>
     </footer>
   );
