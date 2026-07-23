@@ -2,13 +2,14 @@
 
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
-import type { StaticImageData } from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
 import {
   ScrollPinFrame,
   useScrollPin,
 } from "@/app/components/ui/ScrollPinSection";
 import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
+import crest from "@/fotos/medi logo.png";
 
 export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,6 +25,8 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
   const textY = useTransform(scrollYProgress, [0, 0.4], [0, -20]);
   const ctaOpacity = useTransform(scrollYProgress, [0.1, 0.5], [1, 0]);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  const crestY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const crestOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0]);
 
   return (
     <ScrollPinFrame
@@ -96,10 +99,30 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
             </motion.div>
           </div>
 
-          {/* Platzhalter-Spalte (rechts) - lässt dem Wirbel Raum */}
-          <div className="hidden lg:col-span-4 lg:block">
-            {/* Raum für visuelle Effekte im Hintergrund */}
-          </div>
+          {/* Wappen-Spalte (rechts) - großes medipact-Wappen */}
+          <motion.div
+            style={{ opacity: crestOpacity, y: crestY }}
+            className="hidden lg:col-span-4 lg:flex lg:justify-center"
+          >
+            <motion.div
+              className="relative"
+              animate={{ y: [0, -14, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            >
+              {/* weicher Schein hinter dem Wappen */}
+              <div
+                aria-hidden
+                className="absolute inset-0 -z-10 scale-125 rounded-full bg-accent-500/20 blur-3xl"
+              />
+              <Image
+                src={crest}
+                alt="medipact – Wappen"
+                priority
+                sizes="(min-width: 1024px) 22rem, 0px"
+                className="h-auto w-[16rem] xl:w-[22rem] drop-shadow-2xl"
+              />
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </ScrollPinFrame>

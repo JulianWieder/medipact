@@ -14,8 +14,6 @@
 // name={x.icon} />`. Unbekannte Zeichen werden unverändert als Text
 // ausgegeben, es bricht also nie etwas.
 
-import React from "react";
-
 const P: Record<string, string> = {
   grid: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
   scale: '<path d="M12 4v15"/><path d="M8.5 20h7"/><path d="M4.5 8h15"/><circle cx="12" cy="3.6" r="1.1" fill="currentColor" stroke="none"/><path d="M5 8l-2.2 4.6"/><path d="M5 8l2.2 4.6"/><path d="M2.4 12.6a2.7 2.2 0 0 0 5.2 0z"/><path d="M19 8l-2.2 4.6"/><path d="M19 8l2.2 4.6"/><path d="M16.4 12.6a2.7 2.2 0 0 0 5.2 0z"/>',
