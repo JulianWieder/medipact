@@ -6,7 +6,7 @@ import { FounderSection } from "@/app/components/FounderSection";
 import aboutPhoto from "@/fotos/medi_about.jpg";
 
 export const metadata: Metadata = {
-  title: "Über medipact – KI-Mediation mit klarem Ergebnisfokus",
+  title: "Über medipact – strukturierte Mediation mit klarem Ergebnisfokus",
   description:
     "Medipact steht für strukturierte Mediation bei privaten Konflikten. Wir helfen Menschen, festgefahrene Situationen zu klären – vertraulich und lösungsorientiert.",
   alternates: { canonical: "https://medipact.de/about" },

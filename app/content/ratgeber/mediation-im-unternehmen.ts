@@ -50,7 +50,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Online-Mediation: niedrige Hürde, klare Struktur" },
     {
       type: "paragraph",
-      text: "Gerade im Unternehmenskontext hat Online-Mediation praktische Vorteile: keine Terminblöcke von mehreren Stunden, keine Anreise, kein Konferenzraum, in dem alle gesehen werden. Mit medipact bringen die Beteiligten ihre Sichtweisen zeitversetzt und in Ruhe ein, der Mediator strukturiert das Verfahren, und KI-gestützte Zusammenfassungen halten alle auf demselben Stand. Das senkt die Hemmschwelle – gerade für Beteiligte, die im direkten Gespräch untergehen würden.",
+      text: "Gerade im Unternehmenskontext hat Online-Mediation praktische Vorteile: keine Terminblöcke von mehreren Stunden, keine Anreise, kein Konferenzraum, in dem alle gesehen werden. Mit medipact bringen die Beteiligten ihre Sichtweisen zeitversetzt und in Ruhe ein, der Mediator strukturiert das Verfahren, und übersichtliche Zusammenfassungen halten alle auf demselben Stand. Das senkt die Hemmschwelle – gerade für Beteiligte, die im direkten Gespräch untergehen würden.",
     },
     { type: "heading", text: "Was kostet Mediation im Unternehmen?" },
     {

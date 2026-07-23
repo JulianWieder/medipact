@@ -101,7 +101,7 @@ export const odrPageContent = {
       status: "Neutraler Lösungsvorschlag (Schlichterspruch)",
       features: [
         "Beide Seiten werden strukturiert angehört",
-        "KI-gestützter, von Mediator:innen geprüfter Lösungsvorschlag",
+        "Von erfahrenen Mediator:innen geprüfter, strukturiert erarbeiteter Lösungsvorschlag",
         "Annehmen oder ablehnen – der Rechtsweg bleibt offen",
       ],
     },
@@ -150,7 +150,7 @@ export const odrPageContent = {
     {
       question: "Was ist Online Dispute Resolution (ODR)?",
       answer:
-        "ODR bezeichnet die Beilegung von Konflikten über digitale Plattformen – von der Online-Mediation über die Online-Schlichtung bis zur automatisierten Massen-Streitbeilegung. Bei medipact läuft das gesamte Verfahren digital: strukturierte Fallaufnahme, KI-gestützte Auswertung, geprüfte Vereinbarung. Ohne Terminfindungs-Marathon, ohne Gericht.",
+        "ODR bezeichnet die Beilegung von Konflikten über digitale Plattformen – von der Online-Mediation über die Online-Schlichtung bis zur automatisierten Massen-Streitbeilegung. Bei medipact läuft das gesamte Verfahren digital: strukturierte Fallaufnahme, systematische Auswertung, geprüfte Vereinbarung. Ohne Terminfindungs-Marathon, ohne Gericht.",
     },
     {
       question: "Mediation oder Schlichtung – was ist der Unterschied?",

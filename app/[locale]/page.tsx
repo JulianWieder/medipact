@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "KI-Mediation",
+  name: "Online-Mediation",
   provider: {
     "@type": "Organization",
     name: "medipact",
@@ -36,7 +36,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation",
   description:
-    "KI-gestützte Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten. Nach dem Harvard-Prinzip.",
+    "Strukturierte Online-Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten. Von erfahrenen Mediatoren begleitet, nach dem Harvard-Prinzip.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -47,7 +47,7 @@ const serviceSchema = {
     "@type": "Offer",
     priceCurrency: "EUR",
     price: "20",
-    description: "KI-Mediation ab €20",
+    description: "Online-Mediation ab €20",
   },
 };
 

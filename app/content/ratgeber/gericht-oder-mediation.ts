@@ -72,7 +72,7 @@ export const article: RatgeberArticle = {
     {
       type: "list",
       items: [
-        "Mensch plus KI: Ein erfahrener Mediator begleitet dein Verfahren; die KI strukturiert Eingaben, fasst Phasen zusammen und bereitet Optionen vor. Die Entscheidungen trefft ihr.",
+        "Der Mensch im Mittelpunkt: Ein erfahrener Mediator begleitet dein Verfahren; ein strukturierter, digitaler Prozess ordnet Eingaben, fasst Phasen zusammen und bereitet Optionen vor. Die Entscheidungen trefft ihr.",
         "Bewährte Methoden: medipact arbeitet mit anerkannten Mediationsansätzen wie dem Harvard-Konzept oder der Shuttle-Mediation – passend zum Konflikt, nicht nach Schema F.",
         "In deinem Tempo: Du antwortest, wann du klar denken kannst – abends, am Wochenende, nach dem ersten Ärger. Nicht dann, wenn ein Termin es diktiert.",
         "Transparenter Preis: Du kennst die Kosten, bevor du startest. Keine offene Stundenuhr, kein Streitwert-Risiko.",

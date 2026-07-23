@@ -53,7 +53,7 @@ export const article: RatgeberArticle = {
       type: "list",
       items: [
         "Schreiben statt eskalieren: Du antwortest, wenn du ruhig bist - nicht um 23 Uhr im Affekt. Was du schreibst, kannst du überdenken, bevor es die andere Seite liest. Allein das entschärft mehr, als man glaubt.",
-        "KI, die Kommunikation verbessert: Sie strukturiert eure Eingaben, fasst Phasen zusammen und übersetzt Schärfe in Klarheit - aus Vorwürfen werden verhandelbare Themen. Ein erfahrener Mediator begleitet das Verfahren und behält die Balance im Blick.",
+        "Ein Prozess, der Kommunikation verbessert: Er strukturiert eure Eingaben, fasst Phasen zusammen und übersetzt Schärfe in Klarheit - aus Vorwürfen werden verhandelbare Themen. Ein erfahrener Mediator begleitet das Verfahren und behält die Balance im Blick.",
         "Neutraler Einstieg: medipact lädt deinen Ex-Partner oder deine Ex-Partnerin ein - wertschätzend und neutral. Der erste Schritt ist keine Kampfansage, sondern ein Angebot.",
         "Struktur statt Chaos: Das Verfahren führt euch durch die fünf Phasen der Mediation - von den Themen über die Interessen bis zu einer gemeinsamen Lösung. Ihr springt nicht von Streit zu Streit, ihr arbeitet euch Punkt für Punkt vor.",
         "Ein Ergebnis, das euch gehört: Am Ende steht eine gemeinsam erarbeitete Abschlussvereinbarung - Betreuung, Wohnung, Hausrat, Finanzen. Keine Entscheidung, die euch ein Dritter überstülpt, sondern eine Lösung, die beide unterschreiben, weil sie für beide funktioniert.",

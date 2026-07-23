@@ -22,7 +22,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei WG- und Mitbewohner-Konflikten",
   description:
-    "KI-gestützte Online-Mediation bei WG-Konflikten – Putzplan, Kosten, Lärm, Gäste oder Auszug – niedrigschwellig ab 20 € pro Person.",
+    "Strukturierte Online-Mediation bei WG-Konflikten – Putzplan, Kosten, Lärm, Gäste oder Auszug – niedrigschwellig ab 20 € pro Person.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

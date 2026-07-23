@@ -68,7 +68,7 @@ export const article: RatgeberArticle = {
         "Zeit statt Druck: Auf jede Eingabe kannst du in deinem Tempo reagieren. Die klassische Zermürbungstaktik - dich so lange bearbeiten, bis du nachgibst - läuft ins Leere.",
         "Alles ist dokumentiert: Jede Aussage, jede Zusage, jeder Zwischenstand ist festgehalten. „Das habe ich nie gesagt“ funktioniert nicht mehr - der Verlauf ist für beide Seiten und den Mediator sichtbar.",
         "Struktur statt Nebenschauplätze: Die fünf Phasen der Mediation zwingen zur Sache. Wer vom Thema Kinderbetreuung auf deine angeblichen Verfehlungen umlenken will, wird vom Verfahren selbst zurückgeholt - Punkt für Punkt, Thema für Thema.",
-        "Die KI übersetzt Schärfe in Sache: Eingaben werden strukturiert und auf die verhandelbaren Kerne reduziert. Rhetorik, Dramatisierung und Schuldzuweisungen verlieren ihre Wirkung, wenn am Ende nüchtern dasteht, worum es eigentlich geht.",
+        "Der strukturierte Prozess übersetzt Schärfe in Sache: Eingaben werden geordnet und auf die verhandelbaren Kerne reduziert. Rhetorik, Dramatisierung und Schuldzuweisungen verlieren ihre Wirkung, wenn am Ende nüchtern dasteht, worum es eigentlich geht.",
         "Ein Mediator, der die Balance hält: Ein erfahrener, neutraler Mediator begleitet das Verfahren und achtet auf das Machtgefälle. Charme wirkt auf ein strukturiertes Verfahren deutlich weniger als auf ein Publikum.",
         "Ein Ergebnis mit Verbindlichkeit: Am Ende steht eine schriftliche Abschlussvereinbarung - die Grundlage, auf der sich spätere „so war das nicht gemeint“-Manöver sauber kontern lassen.",
       ],

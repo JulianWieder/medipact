@@ -57,7 +57,7 @@ export default function AgbPage() {
 
           <Section num="2" title="Leistungsbeschreibung">
             <p>
-              medipact bietet eine KI-gestützte Online-Mediationsplattform an,
+              medipact bietet eine digital gestützte Online-Mediationsplattform an,
               die Nutzer bei der strukturierten außergerichtlichen Beilegung
               privater Konflikte unterstützt – insbesondere bei Trennungen,
               Scheidungen, Nachbarschaftsstreitigkeiten und Erbkonflikten.

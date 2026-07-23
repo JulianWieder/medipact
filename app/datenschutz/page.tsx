@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung – medipact",
-  description: "Datenschutzerklärung der medipact Plattform für KI-gestützte Mediation.",
+  description: "Datenschutzerklärung der medipact Plattform für strukturierte Online-Mediation.",
   robots: "noindex",
 };
 

@@ -21,7 +21,7 @@ const values = [
     icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
   },
   {
-    title: "KI als Werkzeug, du als Kern",
+    title: "Technik als Werkzeug, du als Kern",
     text: "Unsere Plattform automatisiert Struktur und Ablauf. Du bringst das ein, was Technologie nicht kann: Einfühlungsvermögen, Urteilsvermögen, Vertrauen.",
     icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
   },
@@ -29,9 +29,9 @@ const values = [
 
 const responsibilities = [
   "Begleitung von Mediationsverfahren auf der Plattform – du übernimmst Fälle, die menschliche Begleitung erfordern oder bei denen Parteien das wünschen",
-  "Qualitätssicherung KI-geführter Verfahren: du prüfst kritische Phasen, gibst Feedback und erkennst, wann ein Fall eskalationsgefährdet ist",
+  "Qualitätssicherung digital geführter Verfahren: du prüfst kritische Phasen, gibst Feedback und erkennst, wann ein Fall eskalationsgefährdet ist",
   "Entwicklung und Pflege von Gesprächsleitfäden und Modulen, die in die Plattform einfließen",
-  "Enge Zusammenarbeit mit dem Produktteam, um die KI-gestützten Prozesse fachlich fundiert weiterzuentwickeln",
+  "Enge Zusammenarbeit mit dem Produktteam, um die digital gestützten Prozesse fachlich fundiert weiterzuentwickeln",
   "Bei Bedarf: telefonische oder videobasierte Kurzberatung für Nutzer in schwierigen Phasen",
 ];
 
@@ -39,7 +39,7 @@ const requirements = [
   { must: true, text: "Abgeschlossene Mediationsausbildung mit anerkanntem Zertifikat (z. B. BMWA, BM, BAFM oder vergleichbar)" },
   { must: true, text: "Praktische Erfahrung in mindestens einem der Bereiche: Familienmediation, Nachbarschaftsmediation oder Erbschaftskonflikte" },
   { must: true, text: "Sehr gute schriftliche Ausdrucksweise auf Deutsch – ein Großteil der Kommunikation läuft asynchron und textbasiert" },
-  { must: false, text: "Erfahrung mit digitalen Tools und grundlegende Offenheit gegenüber KI-gestützten Workflows" },
+  { must: false, text: "Erfahrung mit digitalen Tools und grundlegende Offenheit gegenüber digital gestützten Workflows" },
   { must: false, text: "Interesse daran, Mediationsprozesse zu dokumentieren und strukturiert weiterzugeben" },
   { must: false, text: "Erfahrungen in der juristischen Beratung oder im Coaching sind ein Plus, aber kein Muss" },
 ];
@@ -71,7 +71,7 @@ export default function KarrierePage() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-              Medipact verbindet strukturierte Mediation mit KI-gestützten
+              Medipact verbindet strukturierte Mediation mit modernen digitalen
               Prozessen. Wir suchen Menschen, die beides schätzen: gute
               Technologie und den menschlichen Kern, der dahinter bleiben muss.
             </p>
@@ -196,8 +196,9 @@ export default function KarrierePage() {
                   <p className="text-sm leading-7 text-neutral-600">
                     Als Mediator bei medipact begleitest du Verfahren, bei denen
                     menschliche Kompetenz den Unterschied macht. Du arbeitest
-                    eng mit unserem Produktteam zusammen, gibst der KI fachliches
-                    Fundament und übernimmst eigenständig Fälle – auf Wunsch
+                    eng mit unserem Produktteam zusammen, gibst unseren digitalen
+                    Prozessen fachliches Fundament und übernimmst eigenständig
+                    Fälle – auf Wunsch
                     vollständig remote.
                   </p>
                   <p className="mt-4 text-sm leading-7 text-neutral-600">

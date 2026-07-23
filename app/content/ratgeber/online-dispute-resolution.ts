@@ -30,7 +30,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "1. Online-Mediation: Die Parteien finden die Lösung selbst" },
     {
       type: "paragraph",
-      text: "Die Online-Mediation überträgt das klassische Mediationsverfahren ins Digitale. Eine allparteiliche Mediator:in strukturiert den Prozess, die Lösung erarbeiten die Parteien selbst – nach den bewährten Phasen von der Themensammlung über die Interessenklärung bis zur Abschlussvereinbarung. Der digitale Rahmen hat dabei handfeste Vorteile: Die Fallaufnahme läuft asynchron (kein Terminfindungs-Marathon), jede Seite kann in Ruhe formulieren statt im Affekt zu reagieren, und alle Zwischenstände sind dokumentiert. Bei medipact unterstützt zusätzlich KI: Sie strukturiert Eingaben, macht Interessen sichtbar und schlägt Optionen vor – die Verantwortung bleibt bei Menschen.",
+      text: "Die Online-Mediation überträgt das klassische Mediationsverfahren ins Digitale. Eine allparteiliche Mediator:in strukturiert den Prozess, die Lösung erarbeiten die Parteien selbst – nach den bewährten Phasen von der Themensammlung über die Interessenklärung bis zur Abschlussvereinbarung. Der digitale Rahmen hat dabei handfeste Vorteile: Die Fallaufnahme läuft asynchron (kein Terminfindungs-Marathon), jede Seite kann in Ruhe formulieren statt im Affekt zu reagieren, und alle Zwischenstände sind dokumentiert. Bei medipact unterstützt zusätzlich ein strukturierter, digitaler Prozess: Er ordnet Eingaben, macht Interessen sichtbar und bereitet Optionen vor – die Verantwortung bleibt bei Menschen.",
     },
     { type: "heading", text: "2. Online-Schlichtung: Ein neutraler Lösungsvorschlag" },
     {
@@ -59,7 +59,7 @@ export const article: RatgeberArticle = {
     {
       type: "list",
       items: [
-        "Fall anlegen: Eine Partei beschreibt den Konflikt strukturiert online – Beteiligte, Streitgegenstand, Belege. Die KI hilft, aus einer kurzen Beschreibung eine saubere Fallaufnahme zu machen.",
+        "Fall anlegen: Eine Partei beschreibt den Konflikt strukturiert online – Beteiligte, Streitgegenstand, Belege. Ein digitaler Assistent hilft, aus einer kurzen Beschreibung eine saubere Fallaufnahme zu machen.",
         "Gegenseite einladen: Die andere Partei wird digital eingeladen und durchläuft eine eigene, vertrauliche Fallaufnahme – zeitversetzt und im eigenen Tempo.",
         "Verfahren wählen: Je nach Konflikt läuft der Fall als Online-Mediation (die Parteien erarbeiten die Lösung) oder Online-Schlichtung (die neutrale Stelle macht einen geprüften Lösungsvorschlag).",
         "Klärung und Verhandlung: Der geführte Prozess strukturiert Themen, Interessen und Optionen; eine erfahrene Mediator:in begleitet und prüft die entscheidenden Schritte.",

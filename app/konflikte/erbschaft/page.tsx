@@ -23,7 +23,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei Erbschaftskonflikten",
   description:
-    "KI-gestützte Mediation bei Erbstreitigkeiten – Erbengemeinschaften, Pflichtteil, Testament oder geerbte Unternehmen – als strukturierte Alternative zum Gerichtsverfahren.",
+    "Strukturierte Online-Mediation bei Erbstreitigkeiten – Erbengemeinschaften, Pflichtteil, Testament oder geerbte Unternehmen – als strukturierte Alternative zum Gerichtsverfahren.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

@@ -22,7 +22,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei Verbraucher- und Handwerkerstreitigkeiten",
   description:
-    "KI-gestützte Online-Mediation bei Streit um Rechnungen, Mängel oder Handwerkerleistungen – außergerichtlich, ab 20 € pro Partei.",
+    "Strukturierte Online-Mediation bei Streit um Rechnungen, Mängel oder Handwerkerleistungen – außergerichtlich, ab 20 € pro Partei.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

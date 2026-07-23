@@ -92,7 +92,7 @@ export const article: RatgeberArticle = {
         "Schriftlich und in eurem Tempo: Du antwortest, wenn du klar denken kannst - nicht im aufgeladenen Gespräch am Küchentisch.",
         "Interessen statt Positionen: Es geht nicht nur um die Hälfte der Differenz, sondern darum, was jeder wirklich braucht - Liquidität, Sicherheit, das Zuhause der Kinder.",
         "Ein neutraler Mediator führt: Er hält die Balance, wenn einer besser verhandelt oder die Finanzen besser kennt als der andere.",
-        "Die KI strukturiert: Eingaben werden zusammengefasst, Optionen vorbereitet - und alles bleibt dokumentiert.",
+        "Der Prozess strukturiert: Eingaben werden zusammengefasst, Optionen vorbereitet - und alles bleibt dokumentiert.",
         "Planbare Kosten: ein transparenter Preis statt einer Streitwert-Spirale, bei der jeder Euro Vermögen die Rechnung erhöht.",
         "Am Ende steht eine Vereinbarung, die beide tragen - die Grundlage für die notarielle oder gerichtliche Umsetzung.",
       ],

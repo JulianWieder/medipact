@@ -76,7 +76,7 @@ export const article: RatgeberArticle = {
       items: [
         "Du musst den ersten Schritt nicht allein gehen: medipact lädt deinen Partner oder deine Partnerin neutral und wertschätzend zur Mediation ein. Aus dem gefürchteten Paukenschlag wird ein Angebot, die Dinge fair und gemeinsam zu regeln.",
         "Schreiben statt konfrontieren: Ihr müsst euch nicht sofort gegenübersitzen. Ihr arbeitet online, jeder von seinem Ort aus, jeder in seinem Tempo - gerade am Anfang, wenn die Emotionen am größten sind, entschärft das enorm.",
-        "Worte finden, wenn dir die Worte fehlen: Die KI hilft, Gedanken zu strukturieren und Verletzung in Klarheit zu übersetzen - aus Vorwürfen und Schuldgefühlen werden benennbare Themen und Bedürfnisse. Ein erfahrener Mediator begleitet das Verfahren und achtet darauf, dass beide gehört werden.",
+        "Worte finden, wenn dir die Worte fehlen: Ein strukturierter Prozess hilft, Gedanken zu ordnen und Verletzung in Klarheit zu übersetzen - aus Vorwürfen und Schuldgefühlen werden benennbare Themen und Bedürfnisse. Ein erfahrener Mediator begleitet das Verfahren und achtet darauf, dass beide gehört werden.",
         "Struktur gegen die Überforderung: Kinder, Wohnung, Finanzen, Hausrat - die fünf Phasen der Mediation führen euch Punkt für Punkt durch alles, was geregelt werden muss. Du musst nicht alles auf einmal lösen.",
         "Ein Ergebnis, hinter dem beide stehen: Am Ende steht eine gemeinsam erarbeitete Abschlussvereinbarung statt eines Urteils - eine Lösung, die beide unterschreiben, weil sie für beide funktioniert.",
         "Planbare Kosten: Du kennst den Preis, bevor du startest. Keine Kostenspirale, die zur zusätzlichen Angst wird.",

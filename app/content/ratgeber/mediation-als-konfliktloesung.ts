@@ -80,7 +80,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Online-Mediation mit medipact" },
     {
       type: "paragraph",
-      text: "medipact führt Sie strukturiert durch alle fünf Phasen – online, zeitlich flexibel und mit einem erfahrenen Mediator an Ihrer Seite. Jede Partei bringt ihre Sichtweise in Ruhe ein, KI-gestützte Zusammenfassungen machen den Stand für alle transparent, und am Ende steht eine schriftliche Vereinbarung.",
+      text: "medipact führt Sie strukturiert durch alle fünf Phasen – online, zeitlich flexibel und mit einem erfahrenen Mediator an Ihrer Seite. Jede Partei bringt ihre Sichtweise in Ruhe ein, strukturierte Zusammenfassungen machen den Stand für alle transparent, und am Ende steht eine schriftliche Vereinbarung.",
     },
   ],
   faq: [

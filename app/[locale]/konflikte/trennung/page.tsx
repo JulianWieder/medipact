@@ -23,7 +23,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei Trennung und Scheidung",
   description:
-    "KI-gestützte Mediation bei Trennung und Scheidung – Unterhalt, Betreuung, Vermögensaufteilung – als strukturierte Alternative zum anwaltlichen Streit.",
+    "Strukturierte Online-Mediation bei Trennung und Scheidung – Unterhalt, Betreuung, Vermögensaufteilung – als strukturierte Alternative zum anwaltlichen Streit.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

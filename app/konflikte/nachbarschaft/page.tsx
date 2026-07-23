@@ -22,7 +22,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei Nachbarschaftskonflikten",
   description:
-    "KI-gestützte Mediation bei Nachbarschaftsstreit – Lärm, Grenzen, Hecken, Parkplätze oder Hausordnung – als strukturierte Alternative zu Schiedsstelle und Gericht.",
+    "Strukturierte Online-Mediation bei Nachbarschaftsstreit – Lärm, Grenzen, Hecken, Parkplätze oder Hausordnung – als strukturierte Alternative zu Schiedsstelle und Gericht.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
