@@ -3,9 +3,9 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 
 export const metadata: Metadata = {
-  title: "Preise: Mediation ab 20 €, Business ab 1.000 € | medipact",
+  title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
   description:
-    "Einstieg ab 20 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Tarife ab 1.000 €/Monat (10 Mediationen). Transparent, ohne versteckte Kosten.",
+    "Einstieg ab 49 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Tarife ab 1.000 €/Monat (10 Mediationen). Transparent, ohne versteckte Kosten.",
   alternates: { canonical: "https://medipact.de/preise" },
 };
 
@@ -102,19 +102,7 @@ export default function Preise() {
                       Nachbarschafts-Streit
                     </span>
                     <span className="text-lg font-bold text-accent-600">
-                      €20
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Pro Partei – Einstiegstarif
-                  </p>
-
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="font-medium text-neutral-900">
-                      WG- & Mitbewohner-Konflikt
-                    </span>
-                    <span className="text-lg font-bold text-accent-600">
-                      €20
+                      €49
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
@@ -126,7 +114,7 @@ export default function Preise() {
                       Verbraucher- & Handwerker-Streit
                     </span>
                     <span className="text-lg font-bold text-accent-600">
-                      €20
+                      €49
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
@@ -748,7 +736,7 @@ export default function Preise() {
               {[
                 {
                   q: "Wie wird die Aufteilung der Kosten berechnet?",
-                  a: "Jede Partei zahlt ihren eigenen Anteil. Beim Einstiegstarif (Nachbarschaft, WG, Verbraucher/Handwerker) sind das nur 20 € pro Partei – optionale Zusatzleistungen wie eine Live-Videositzung oder eine geprüfte Abschlussvereinbarung können einzeln dazugebucht werden. Vollständige Transparenz!",
+                  a: "Jede Partei zahlt ihren eigenen Anteil. Beim Einstiegstarif (Nachbarschaft, Verbraucher/Handwerker) sind das nur 49 € pro Partei – optionale Zusatzleistungen wie eine Live-Videositzung oder eine geprüfte Abschlussvereinbarung können einzeln dazugebucht werden. Vollständige Transparenz!",
                 },
                 {
                   q: "Welches Modell passt zu meinem Fall?",

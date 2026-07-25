@@ -171,7 +171,7 @@ const variants = [
   {
     badge: "Online-Prozess",
     title: "Schnell & günstig",
-    price: "ab €20",
+    price: "ab €49",
     priceNote: "je nach Konfliktart, fair aufgeteilt",
     text: "Der geführte Prozess bringt Sie Schritt für Schritt zur Lösung – rund um die Uhr, ganz in Ihrem Tempo.",
     facts: ["Geführter Prozess, 24/7 verfügbar", "Dauer: meist 1–2 Wochen", "Ideal für klare bis mittelschwere Fälle"],
@@ -281,8 +281,8 @@ const serviceSchema = {
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
-    price: "20",
-    description: "KI-Mediation ab €20",
+    price: "49",
+    description: "KI-Mediation ab €49",
   },
 };
 

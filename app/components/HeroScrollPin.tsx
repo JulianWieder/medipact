@@ -58,8 +58,13 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
                 </span>
               </h1>
 
+              {/* Keyword-Subline: trägt "Online-Mediation" für SEO direkt unter der H1 */}
+              <p className="mt-4 text-lg font-semibold leading-snug text-neutral-100 sm:text-2xl max-w-xl">
+                {t("subline")}
+              </p>
+
               {/* Kontrast erhöht: text-neutral-400 -> text-neutral-200 */}
-              <p className="mt-6 text-base leading-8 text-neutral-200 sm:text-lg max-w-xl">
+              <p className="mt-5 text-base leading-8 text-neutral-200 sm:text-lg max-w-xl">
                 {t("intro")}
               </p>
             </motion.div>

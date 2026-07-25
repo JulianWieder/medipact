@@ -1192,7 +1192,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                     )}
                   </div>
 
-                  {/* Add-ons (Einstiegs-Tarif: 20 € Basis + buchbare Zusatzleistungen) */}
+                  {/* Add-ons (Einstiegs-Tarif: 49 € Basis + buchbare Zusatzleistungen) */}
                   {(payStatus.addons_available?.length ?? 0) > 0 && (
                     <div className="mx-auto mt-5 w-full max-w-sm text-left">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">

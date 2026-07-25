@@ -9,7 +9,7 @@ import Icon from "@/app/components/ui/Icon";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
-// Einstieg in den Trichter (0 € dokumentieren → 20 €/399 € Mediation).
+// Einstieg in den Trichter (0 € dokumentieren → 49 €/399 € Mediation).
 // Keywords: Konflikt dokumentieren, Streit-Tagebuch, Konflikttagebuch,
 // Lärmprotokoll, Gedächtnisprotokoll, Vorfälle festhalten.
 
@@ -60,7 +60,7 @@ const FAQ = [
   },
   {
     q: "Was kostet das Konflikt-Logbuch?",
-    a: "Nichts. Das Konflikt-Logbuch ist dauerhaft kostenlos – Sie brauchen nur ein medipact-Konto. Kosten entstehen erst, wenn Sie sich später entscheiden, aus dem Logbuch eine Mediation zu starten (ab 20 € pro Partei).",
+    a: "Nichts. Das Konflikt-Logbuch ist dauerhaft kostenlos – Sie brauchen nur ein medipact-Konto. Kosten entstehen erst, wenn Sie sich später entscheiden, aus dem Logbuch eine Mediation zu starten (ab 49 € pro Partei).",
   },
   {
     q: "Warum sollte ich einen Streit dokumentieren?",
@@ -257,7 +257,7 @@ export default function KonfliktLogbuchPage() {
                 {
                   n: "1",
                   title: "Kostenloses Konto erstellen",
-                  text: "Registrieren, Konfliktart wählen (Nachbarschaft, WG, Verbraucher, Trennung, Erbschaft oder Geschäft) und den Streit mit wenigen geführten Fragen anlegen.",
+                  text: "Registrieren, Konfliktart wählen (Nachbarschaft, Verbraucher, Trennung, Erbschaft oder Geschäft) und den Streit mit wenigen geführten Fragen anlegen.",
                 },
                 {
                   n: "2",

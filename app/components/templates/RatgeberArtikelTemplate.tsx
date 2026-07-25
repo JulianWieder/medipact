@@ -19,11 +19,24 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
     headline: article.title,
     description: article.description,
     inLanguage: "de",
-    datePublished: article.updated,
+    // `datePublished` nur, wenn das Erscheinungsdatum wirklich bekannt ist —
+    // und dann steht es auch sichtbar im Artikel (siehe unten). `dateModified`
+    // spiegelt exakt das sichtbare "Aktualisiert am ...".
+    ...(article.published && { datePublished: article.published }),
     dateModified: article.updated,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     author: { "@type": "Organization", name: "medipact", url: BASE_URL },
-    publisher: { "@type": "Organization", name: "medipact", url: BASE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: "medipact",
+      url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/logo.png`,
+        width: 512,
+        height: 512,
+      },
+    },
     about: { "@type": "Thing", name: "Mediation" },
   };
 
@@ -40,11 +53,15 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
         }
       : null;
 
-  const updatedLabel = new Date(article.updated).toLocaleDateString("de-DE", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("de-DE", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+  const updatedLabel = formatDate(article.updated);
+  const publishedLabel = article.published ? formatDate(article.published) : null;
 
   return (
     <>
@@ -77,6 +94,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
               </p>
 
               <p className="mt-6 text-sm text-neutral-400">
+                {publishedLabel && <>Veröffentlicht am {publishedLabel} · </>}
                 Aktualisiert am {updatedLabel} · ca. {article.readingMinutes} Min. Lesezeit
               </p>
             </div>

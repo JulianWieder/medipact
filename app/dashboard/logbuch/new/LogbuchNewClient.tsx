@@ -19,7 +19,6 @@ const TYPES: { type: string; title: string; hint: string; icon: string; business
   { type: "trennung", title: "Trennung & Familie", hint: "Partnerschaft, Trennung, Umgang", icon: "💔" },
   { type: "erbschaft", title: "Erbschaft", hint: "Erbengemeinschaft, Nachlass, Immobilie", icon: "📜" },
   { type: "nachbarschaft", title: "Nachbarschaft", hint: "Lärm, Grenze, Garten, Parken", icon: "🏡" },
-  { type: "wg", title: "WG & Mitbewohner", hint: "Putzplan, Kosten, Lautstärke, Auszug", icon: "🛋️" },
   { type: "verbraucher", title: "Verbraucher & Handwerker", hint: "Mängel, Rechnungen, Leistungen", icon: "🧾" },
   { type: "odr", title: "Geschäft & Arbeit", hint: "Team, Gesellschafter, Kunden, B2B", icon: "🏢", business: true },
 ];

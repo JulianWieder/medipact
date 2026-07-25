@@ -31,7 +31,7 @@ export default function Page() {
         {
           question: "Lohnt sich ein Anwalt bei einem Parkstreit unter Nachbarn?",
           answer:
-            "Selten – die Kosten stehen meist außer Verhältnis, und man bleibt danach trotzdem Nachbarn. Eine Mediation ab €20 pro Partei löst den Konflikt, statt ihn zu gewinnen.",
+            "Selten – die Kosten stehen meist außer Verhältnis, und man bleibt danach trotzdem Nachbarn. Eine Mediation ab €49 pro Partei löst den Konflikt, statt ihn zu gewinnen.",
         },
         {
           question: "Wie schnell wirkt eine Nachbarschaftsmediation?",

@@ -26,11 +26,6 @@ const conflictTypes = [
     href: "/konflikte/nachbarschaft",
   },
   {
-    title: "WG & Mitbewohner",
-    text: "Wenn Putzplan, Kosten, Lärm oder Gäste das Zusammenwohnen zur Belastung machen.",
-    href: "/konflikte/wg",
-  },
-  {
     title: "Verbraucher & Handwerker",
     text: "Wenn strittige Rechnungen, Mängel oder nicht erbrachte Leistungen zum Streit führen.",
     href: "/konflikte/verbraucher",

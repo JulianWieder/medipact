@@ -216,6 +216,16 @@ export default function DashboardClient() {
     const hasSubmitted = data.some(
       (m) => (m.status === "active" && !m.is_my_turn) || m.status === "completed",
     );
+    // Konkreter Fall, auf den die offenen Schritte verweisen. Ohne diesen Link
+    // war die Checkliste bei "Verfahren gestartet" eine Sackgasse: der Start
+    // passiert erst nach Rechnungsdaten + Zahlung auf der Fall-Seite, das
+    // Dashboard bot dafür aber keinen Weg an.
+    const toStart = data.find((m) => m.status === "pending" || m.status === "draft");
+    const toAnswer = data.find((m) => m.is_my_turn);
+    const caseHref = (m?: Mediation) => (m ? `/dashboard/${encodeId(Number(m.id))}` : undefined);
+    const startHref = caseHref(toStart);
+    const answerHref = caseHref(toAnswer);
+
     const steps = [
       { label: "Konto erstellt", done: true, action: undefined as { label: string; href: string } | undefined },
       {
@@ -223,9 +233,30 @@ export default function DashboardClient() {
         done: hasCase,
         action: !hasCase ? { label: "Neue Mediation starten", href: "/dashboard/mediation/new" } : undefined,
       },
-      { label: "Verfahren gestartet", done: hasStarted, action: undefined },
-      { label: "Erste Eingabe gemacht", done: hasSubmitted, action: undefined },
-    ];
+      {
+        label: "Verfahren gestartet",
+        done: hasStarted,
+        action:
+          !hasStarted && startHref
+            ? { label: "Fall einrichten und freischalten", href: startHref }
+            : undefined,
+        hint:
+          !hasStarted && startHref
+            ? "Dazu im Fall die Beteiligten und Rechnungsdaten hinterlegen und freischalten."
+            : undefined,
+      },
+      {
+        label: "Erste Eingabe gemacht",
+        done: hasSubmitted,
+        action:
+          !hasSubmitted && answerHref ? { label: "Eingabe machen", href: answerHref } : undefined,
+      },
+    ] as {
+      label: string;
+      done: boolean;
+      action?: { label: string; href: string };
+      hint?: string;
+    }[];
     return { steps, doneCount: steps.filter((s) => s.done).length };
   }, [data]);
   const showOnboarding = onboarding.doneCount < onboarding.steps.length;
@@ -455,32 +486,39 @@ export default function DashboardClient() {
             />
             <ul className="mt-6 space-y-3">
               {onboarding.steps.map((step) => (
-                <li key={step.label} className="flex items-center gap-3">
+                <li key={step.label} className="flex items-start gap-3">
                   {step.done ? (
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[10px] font-bold text-white">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[10px] font-bold text-white">
                       ✓
                     </span>
                   ) : (
-                    <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-neutral-300" />
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full border border-dashed border-neutral-300" />
                   )}
-                  <span
-                    className={cn(
-                      "text-sm",
-                      step.done
-                        ? "font-light text-neutral-400 line-through decoration-neutral-300"
-                        : "font-medium text-neutral-800",
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span
+                        className={cn(
+                          "text-sm",
+                          step.done
+                            ? "font-light text-neutral-400 line-through decoration-neutral-300"
+                            : "font-medium text-neutral-800",
+                        )}
+                      >
+                        {step.label}
+                      </span>
+                      {!step.done && step.action && (
+                        <a
+                          href={step.action.href}
+                          className="ml-auto text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
+                        >
+                          {step.action.label} →
+                        </a>
+                      )}
+                    </div>
+                    {!step.done && step.hint && (
+                      <p className="mt-1 text-xs font-light text-neutral-500">{step.hint}</p>
                     )}
-                  >
-                    {step.label}
-                  </span>
-                  {!step.done && step.action && (
-                    <a
-                      href={step.action.href}
-                      className="ml-auto text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
-                    >
-                      {step.action.label} →
-                    </a>
-                  )}
+                  </div>
                 </li>
               ))}
             </ul>

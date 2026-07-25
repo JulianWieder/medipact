@@ -194,6 +194,12 @@ export function CaseStudyTemplate({
       "@type": "Organization",
       name: "medipact",
       url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/logo.png`,
+        width: 512,
+        height: 512,
+      },
     },
     about: {
       "@type": "Thing",

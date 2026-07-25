@@ -49,8 +49,8 @@ const serviceSchema = {
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
-    price: "20",
-    description: "Online-Mediation ab €20",
+    price: "49",
+    description: "Online-Mediation ab €49",
   },
 };
 

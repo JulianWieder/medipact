@@ -28,8 +28,19 @@ export type RatgeberArticle = {
   /** Meta-Description + Intro-Absatz. */
   description: string;
   eyebrow: string;
-  /** ISO-Datum letzte inhaltliche Aktualisierung. */
+  /** ISO-Datum letzte inhaltliche Aktualisierung. Sichtbar als
+   *  "Aktualisiert am ..." und als `dateModified` im Article-JSON-LD. */
   updated: string;
+  /**
+   * ISO-Datum der Erstveröffentlichung — optional.
+   *
+   * Nur setzen, wenn das Datum wirklich bekannt ist: Es wird als
+   * `datePublished` ins Article-JSON-LD geschrieben UND sichtbar im Artikel
+   * ausgegeben. Fehlt es, entfällt beides. Vorher wurde `updated` doppelt
+   * verwendet — jeder Artikel behauptete also, am Tag der letzten Änderung
+   * erschienen zu sein, obwohl sichtbar nur "Aktualisiert am" stand.
+   */
+  published?: string;
   readingMinutes: number;
   /** Lead-Absatz oben im Artikel. */
   intro: string;

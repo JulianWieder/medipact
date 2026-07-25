@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backend";
 
 // PUT /api/mediations/[id]/addons – Add-on-Auswahl der eigenen Partei setzen
-// (Einstiegs-Tarif Nachbarschaft/WG/Verbraucher; ersetzt die bisherige Auswahl).
+// (Einstiegs-Tarif Nachbarschaft/Verbraucher; ersetzt die bisherige Auswahl).
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

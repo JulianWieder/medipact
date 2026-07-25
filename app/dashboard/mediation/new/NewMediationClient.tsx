@@ -4,7 +4,7 @@
 //
 // Zweistufig statt 9 flacher Karten (Nutzer-Feedback: ODR-Auswahl zu viel):
 //   1. Privat oder Geschäftlich?
-//   2a. Privat: die 5 privaten Konfliktarten.
+//   2a. Privat: die 4 privaten Konfliktarten.
 //   2b. Geschäftlich: EIN unspezifischer Einstieg (type "odr" = allgemeines
 //       Verfahren) im Fokus; die 3 Spezialverfahren (schlichtung/ecommerce/
 //       b2b) nur optional aufklappbar. Granularer wird es ohnehin in der
@@ -19,7 +19,9 @@ import { mediationRegistry } from "@/lib/mediation-types/registry";
 
 type Category = "privat" | "business";
 
-const PRIVATE_TYPES = ["trennung", "erbschaft", "nachbarschaft", "wg", "verbraucher"] as const;
+// "wg" ist seit 25.07.2026 nicht mehr neu anlegbar (Bestandsfälle laufen
+// weiter, siehe backend/app/pricing.py).
+const PRIVATE_TYPES = ["trennung", "erbschaft", "nachbarschaft", "verbraucher"] as const;
 
 // Spezialverfahren ohne "ODR –"-Jargon; der allgemeine Einstieg ist "odr".
 const BUSINESS_SPECIAL: { type: string; title: string; description: string }[] = [
@@ -144,7 +146,7 @@ export default function NewMediationClient() {
             >
               <h2 className="heading-3 mb-2">Privater Konflikt</h2>
               <p className="text-sm leading-6 text-neutral-600">
-                Trennung &amp; Familie, Erbschaft, Nachbarschaft, WG, Streit mit
+                Trennung &amp; Familie, Erbschaft, Nachbarschaft, Streit mit
                 Händlern oder Handwerkern.
               </p>
               <span className="mt-4 inline-block text-sm font-semibold text-accent-600">

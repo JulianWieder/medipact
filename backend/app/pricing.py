@@ -29,9 +29,15 @@ PACKAGE_LABELS = {
 # EUR-Grundpreis je (Konflikttyp, Paket). None = Kombination nicht angeboten.
 # TODO(Julian): fehlende Werte (None) füllen, falls die Kombination angeboten wird.
 #
-# Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/WG/Verbraucher = nied-
-# rigschwellig, 20 € pro Partei, Umsatz über buchbare Add-ons – siehe ADDONS).
+# Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/Verbraucher = nied-
+# rigschwellig, 49 € pro Partei, Umsatz über buchbare Add-ons – siehe ADDONS).
 # Monetarisierung über Trennung/Erbschaft/ODR-Familie (Premium-Typen).
+#
+# "wg" wird seit 25.07.2026 NICHT mehr angeboten: kein Eintrag in der Typ-
+# Auswahl, keine Landingpage, kein Marketing (/konflikte/wg leitet auf
+# /konflikte weiter). Die Zeile unten bleibt NUR für Bestandsfälle stehen –
+# ohne sie würden bereits angelegte WG-Mediationen auf FALLBACK_PRICE (499 €)
+# springen. Nicht entfernen, solange WG-Fälle in der DB liegen können.
 #
 # ODR-Familie (Online Dispute Resolution, ehemals "geschaeft"/Wirtschafts-
 # mediation): "odr" (Wirtschafts-Mediation online), "schlichtung" (Online-
@@ -40,9 +46,10 @@ PACKAGE_LABELS = {
 # Typen im Firmen-Abo (Organization → is_paid=True, Fälle inkl.) – insbesondere
 # für die digitalisierte Massen-ODR (Fluggastrechte, Mietpreisbremse, E-Commerce).
 PRICE_MATRIX: dict[str, dict[str, float | None]] = {
-    "nachbarschaft": {"online": 20.0,  "hybrid": None,  "vollservice": None},
-    "wg":            {"online": 20.0,  "hybrid": None,  "vollservice": None},
-    "verbraucher":   {"online": 20.0,  "hybrid": None,  "vollservice": None},
+    "nachbarschaft": {"online": 49.0,  "hybrid": None,  "vollservice": None},
+    "verbraucher":   {"online": 49.0,  "hybrid": None,  "vollservice": None},
+    # Legacy, nicht mehr buchbar – siehe Kommentar oben.
+    "wg":            {"online": 49.0,  "hybrid": None,  "vollservice": None},
     "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
     "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
     "odr":           {"online": 399.0, "hybrid": None,  "vollservice": None},
@@ -57,9 +64,9 @@ ODR_TYPES: set[str] = {"odr", "schlichtung", "ecommerce", "b2b"}
 
 # Abrechnungsmodell je Konflikttyp (laut /preise). Gilt paketübergreifend.
 BILLING_MODEL: dict[str, str] = {
-    "nachbarschaft": "per_party",  # 20 € je Partei (früher 249 € split)
-    "wg": "per_party",
+    "nachbarschaft": "per_party",  # 49 € je Partei (früher 20 €, davor 249 € split)
     "verbraucher": "per_party",
+    "wg": "per_party",  # legacy
     "trennung": "per_party",
     "erbschaft": "once",
     "odr": "once",
@@ -139,14 +146,17 @@ def participant_due(
 
 # ── Buchbare Add-ons (Einstiegs-Typen) ──────────────────────────────────────
 #
-# Beim 20-€-Einstiegstarif (Nachbarschaft/WG/Verbraucher) ist der Basispreis
+# Beim 49-€-Einstiegstarif (Nachbarschaft/Verbraucher) ist der Basispreis
 # bewusst niedrig; Umsatz entsteht über optional zubuchbare Add-ons. Eine
 # Partei wählt ihre Add-ons VOR der Zahlung (PUT /mediations/{id}/addons);
 # der Betrag wird auf ihren Anteil aufgeschlagen (siehe services/billing.py).
 # Preise – wie alles hier – bewusst NUR an dieser Stelle gepflegt.
 # TODO(Julian): Preise/Formulierungen prüfen, ggf. weitere Add-ons ergänzen.
+#
+# "wg" bleibt gelistet, damit Bestandsfälle ihre gebuchten Add-ons behalten;
+# neu anlegbar ist der Typ nicht mehr.
 
-ADDON_TYPES: set[str] = {"nachbarschaft", "wg", "verbraucher"}
+ADDON_TYPES: set[str] = {"nachbarschaft", "verbraucher", "wg"}
 
 ADDONS: dict[str, dict] = {
     "videositzung": {

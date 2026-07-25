@@ -7,7 +7,7 @@ import verbraucherPhoto from "@/fotos/kosten.jpg";
 export const metadata: Metadata = {
   title: "Handwerker- & Verbraucherstreit lösen | medipact",
   description:
-    "Strittige Rechnung, Mängel oder Leistung nicht erbracht? Online-Mediation ab 20 € pro Partei – schneller und günstiger als Gericht. Jetzt klären.",
+    "Strittige Rechnung, Mängel oder Leistung nicht erbracht? Online-Mediation ab 49 € pro Partei – schneller und günstiger als Gericht. Jetzt klären.",
   alternates: { canonical: "https://medipact.de/konflikte/verbraucher" },
 };
 
@@ -22,7 +22,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation bei Verbraucher- und Handwerkerstreitigkeiten",
   description:
-    "Strukturierte Online-Mediation bei Streit um Rechnungen, Mängel oder Handwerkerleistungen – außergerichtlich, ab 20 € pro Partei.",
+    "Strukturierte Online-Mediation bei Streit um Rechnungen, Mängel oder Handwerkerleistungen – außergerichtlich, ab 49 € pro Partei.",
   areaServed: {
     "@type": "Country",
     name: "Germany",

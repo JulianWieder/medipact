@@ -10,13 +10,11 @@ import { trennungPageContent } from "@/app/content/trennungPage";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
 import { odrPageContent } from "@/app/content/odrPage";
-import { wgPageContent } from "@/app/content/wgPage";
 import { verbraucherPageContent } from "@/app/content/verbraucherPage";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
 import geschaeftPhoto from "../../fotos/medi_buiness.jpg";
-import wgPhoto from "../../fotos/medi_modern.jpg";
 import verbraucherPhoto from "../../fotos/kosten.jpg";
 
 type ThemaContent = {
@@ -62,13 +60,6 @@ const themen: Thema[] = [
     href: "/konflikte/odr",
     image: geschaeftPhoto,
     content: odrPageContent,
-  },
-  {
-    key: "wg",
-    label: "WG",
-    href: "/konflikte/wg",
-    image: wgPhoto,
-    content: wgPageContent,
   },
   {
     key: "verbraucher",

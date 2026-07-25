@@ -33,7 +33,7 @@ const atomicFaq = [
   },
   {
     q: "Was kostet der erste Schritt?",
-    a: "Nichts. Account und das Anlegen Ihres Falls sind kostenlos und unverbindlich – die eigentliche Mediation beginnt beim Einstiegstarif ab 20 € pro Partei.",
+    a: "Nichts. Account und das Anlegen Ihres Falls sind kostenlos und unverbindlich – die eigentliche Mediation beginnt beim Einstiegstarif ab 49 € pro Partei.",
   },
   {
     q: "Ist das Ergebnis rechtlich bindend?",

@@ -7,6 +7,7 @@ import { ConditionalHeader, ConditionalFooter } from "@/app/components/Condition
 import { JsonLd } from "@/app/components/JsonLd";
 import Analytics from "@/app/components/Analytics";
 import CookieConsent from "@/app/components/CookieConsent";
+import { socialProfiles } from "@/app/content/social";
 
 // Self-hosted via next/font statt Google-Fonts-<link>: kein render-blockendes
 // externes Stylesheet mehr, kein Layout-Shift (size-adjust-Fallback), Fonts
@@ -30,9 +31,13 @@ const playfair = Playfair_Display({
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://medipact.de/#organization",
   name: "medipact",
   url: "https://medipact.de",
-  logo: "https://medipact.de/og-image.png",
+  // /logo.png (512x512, quadratisch) statt /og-image.png: Letzteres ist ein
+  // 1200x630-Marketing-Banner. Google erwartet unter `logo` ein echtes,
+  // erkennbares Logo — der Banner wird sonst verworfen.
+  logo: "https://medipact.de/logo.png",
   description:
     "KI-gestützte Mediation für private und geschäftliche Konflikte – bei Trennung, Erbschaft, Nachbarschaftsstreit und im Unternehmen.",
   contactPoint: {
@@ -40,25 +45,27 @@ const organizationSchema = {
     contactType: "customer support",
     availableLanguage: "German",
   },
-  sameAs: ["https://twitter.com/medipact_de"],
+  // Nur echte, im Footer verlinkte Profile — siehe app/content/social.ts.
+  ...(socialProfiles.length > 0 && {
+    sameAs: socialProfiles.map((p) => p.url),
+  }),
 };
 
+// Kein `potentialAction`/SearchAction mehr: Das zeigte auf
+// /cases?q={search_term_string}, aber /cases wertet gar keine searchParams
+// aus — eine Falschbehauptung im Markup. Die Sitelinks-Searchbox, für die das
+// gedacht war, hat Google ohnehin abgekündigt.
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "medipact",
   url: "https://medipact.de",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: "https://medipact.de/cases?q={search_term_string}",
-    },
-    "query-input": "required name=search_term_string",
-  },
+  inLanguage: "de",
+  publisher: { "@id": "https://medipact.de/#organization" },
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://medipact.de"),
   title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
   description:
     "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
@@ -82,7 +89,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "de_DE",
-    url: "https://medipact.de",
+    // Bewusst KEIN `url` hier: Unterseiten, die openGraph nicht überschreiben,
+    // erben diesen Wert und meldeten dadurch alle og:url = Startseite
+    // (z. B. /konflikte -> https://medipact.de). Lieber kein og:url als ein
+    // falsches; die Kanonisierung läuft ohnehin über `alternates.canonical`.
+    // Seiten, die ein eigenes og:url wollen, setzen es relativ (metadataBase
+    // löst es auf), z. B. openGraph: { url: "/konflikte" }.
     siteName: "medipact",
     title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
     description:

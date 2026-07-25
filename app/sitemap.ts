@@ -70,12 +70,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/konflikte/wg`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
       url: `${BASE_URL}/konflikte/verbraucher`,
       lastModified,
       changeFrequency: "monthly",
