@@ -49,16 +49,84 @@
   },
   "home": {
     "hero": {
-      "badge": "Für Trennung, Nachbarschaft, Erbe und Team-Konflikte",
+      "badge": "Digitale Mediation für Trennung, Nachbarschaft, Wohnen und Wirtschaft",
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
-      "titleLine1": "Mediation online –",
-      "titleLine2": "Konflikte fair, vertraulich und ohne Gericht lösen.",
-      "intro": "Wenn Worte nicht mehr weiterhelfen, hilft Struktur. Medipact begleitet Sie bei Scheidung, Nachbarschaftsstreit oder Erbe sowie in Business Konflikten – Schritt für Schritt zu einer Lösung, mit der beide Seiten leben können.",
+      "titleLine1": "Jeder Konflikt",
+      "titleLine2": "hat einen Ausgang.",
+      "intro": "Online-Mediation, die Sie nicht allein lässt: ein klarer Weg in fünf Phasen, erfahrene Mediatorinnen und Mediatoren an Ihrer Seite – vertraulich, bezahlbar, ohne Gericht.",
       "ctaPrimary": "Kostenlosen Account erstellen",
       "ctaSecondary": "So funktioniert es",
       "badgeVertraulich": "Vertraulich",
       "badgeBezahlbar": "Bezahlbar",
-      "badgeLoesungsorientiert": "Lösungsorientiert"
+      "badgeLoesungsorientiert": "Lösungsorientiert",
+      "scrollCue": "Scrollen und entdecken"
+    },
+    "kampagnen": {
+      "eyebrow": "Aktuell bei medipact",
+      "title": "Ein Weg für jeden Konflikt.",
+      "cards": [
+        {
+          "tag": "Logbuch",
+          "title": "Dokumentieren, bevor es eskaliert.",
+          "text": "Das kostenlose Konflikt-Logbuch: Vorfälle festhalten, Muster erkennen – der ruhige erste Schritt.",
+          "href": "/konflikt-logbuch",
+          "cta": "Logbuch starten"
+        },
+        {
+          "tag": "Trennung",
+          "title": "Fair auseinandergehen, ohne Rosenkrieg.",
+          "text": "Sorgerecht, Wohnung, Finanzen – geregelt in Wochen statt Jahren vor Gericht.",
+          "href": "/konflikte/trennung",
+          "cta": "Mehr erfahren"
+        },
+        {
+          "tag": "Nachbarschaft",
+          "title": "Wieder grüßen können.",
+          "text": "Lärm, Zaun, Parken – Lösungen, mit denen man Tür an Tür weiterleben kann. Ab 20 € pro Partei.",
+          "href": "/konflikte/nachbarschaft",
+          "cta": "Mehr erfahren"
+        },
+        {
+          "tag": "Erbe",
+          "title": "Das Erbe regeln, die Familie behalten.",
+          "text": "Erbstreitigkeiten lösen, bevor sie Geschwister zu Gegnern machen.",
+          "href": "/konflikte/erbschaft",
+          "cta": "Mehr erfahren"
+        },
+        {
+          "tag": "Wirtschaft",
+          "title": "Konflikte lösen, bevor sie das Geschäft kosten.",
+          "text": "Gesellschafterstreit, Teamkonflikte, B2B – Wirtschaftsmediation für Unternehmen.",
+          "href": "/konflikte/geschaeft",
+          "cta": "Mehr erfahren"
+        },
+        {
+          "tag": "ODR",
+          "title": "Streitbeilegung im Volumen.",
+          "text": "Viele Kundenkonflikte, ein System: Online Dispute Resolution über das Firmen-Abo.",
+          "href": "/konflikte/odr",
+          "cta": "Mehr erfahren"
+        }
+      ]
+    },
+    "zweiWelten": {
+      "eyebrow": "Für wen ist medipact?",
+      "title": "Zwei Welten. Ein Prinzip.",
+      "intro": "Ob am Küchentisch oder im Konferenzraum: Konflikte folgen denselben Mustern – und lassen sich mit derselben Methode lösen.",
+      "privat": {
+        "kicker": "Privat",
+        "title": "Konflikte, die zu Hause wohnen.",
+        "text": "Trennung, Erbe, Nachbarschaft, WG oder Ärger als Verbraucher – strukturiert gelöst, ab 20 € pro Partei.",
+        "ctaLabel": "Für Privatpersonen",
+        "ctaHref": "/konflikte"
+      },
+      "business": {
+        "kicker": "Unternehmen",
+        "title": "Konflikte, die Geld kosten.",
+        "text": "Gesellschafterstreit, Teamkonflikte, B2B-Streitigkeiten und Massen-ODR – mit Firmen-Abo bis zum Full Service.",
+        "ctaLabel": "Für Unternehmen",
+        "ctaHref": "/konflikte/geschaeft"
+      }
     },
     "stats": [
       {
@@ -136,7 +204,20 @@
     "ctaText": "Starten Sie ruhig, vertraulich und unverbindlich. Der erste Schritt ist nicht die Einigung – sondern wieder Klarheit.",
     "ctaButton": "Kostenlosen Account erstellen",
     "ctaSecondaryLabel": "Preise & Pakete ansehen",
-    "ctaDisclaimer": "Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar"
+    "ctaDisclaimer": "Keine Kreditkarte erforderlich · Kostenloser Einstieg · Jederzeit kündbar",
+    "outcomes": {
+      "eyebrow": "Ergebnisse",
+      "title": "So klingt ein Ausgang.",
+      "intro": "Stimmen aus unseren Fallbeispielen – von der Trennung bis zum Gesellschafterstreit.",
+      "disclaimer": "Anonymisierte, exemplarische Fallbeispiele auf Basis typischer Mediationsverläufe.",
+      "link": "Alle Fallbeispiele ansehen"
+    },
+    "mission": {
+      "eyebrow": "Unsere Überzeugung",
+      "statement": "Die meisten Konflikte brauchen kein Gericht.",
+      "text": "Sie brauchen ein Gespräch, das funktioniert. medipact gibt Streit eine Struktur: klare Phasen, faire Regeln, menschliche Begleitung – damit beide Seiten wieder entscheiden können, statt zu kämpfen.",
+      "link": "Mehr über medipact"
+    }
   },
   "newsletter": {
     "eyebrow": "Newsletter",

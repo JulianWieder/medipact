@@ -88,6 +88,16 @@ const ENTRY_TYPES: { key: string; label: string; icon: string }[] = [
   { key: "telefonat", label: "Telefonat", icon: "📞" },
 ];
 
+// Business/ODR: sachliche Falldokumentation statt persönlichem Journal.
+// Gleiche entry_type-Keys (Datenmodell unverändert), nur nüchternere Labels.
+const BUSINESS_TYPES = new Set(["odr", "schlichtung", "ecommerce", "b2b", "geschaeft"]);
+const BUSINESS_ENTRY_LABELS: Record<string, string> = {
+  vorkommnis: "Vorgang",
+  gedanke: "Interne Notiz",
+  gespraech: "Besprechung",
+  whatsapp: "Nachricht",
+};
+
 // Journal-Ausbau: Sichtbarkeit je Eintrag (Backend: mediation_log_entries.visibility)
 const VISIBILITIES: { key: string; label: string; icon: string; hint: string }[] = [
   {
@@ -98,7 +108,7 @@ const VISIBILITIES: { key: string; label: string; icon: string; hint: string }[]
   },
   {
     key: "private",
-    label: "Journal (privat)",
+    label: "Sensibel",
     icon: "🔒",
     hint: "Streng vertraulich: sieht niemals Mediator oder Gegenseite – auch nach einer Umwandlung nicht.",
   },
@@ -335,7 +345,9 @@ function BlockField({
 }
 
 // ── KI-Analyse-Karte unter einem Eintrag ────────────────────────────────────
-function AnalysisCard({ analysis }: { analysis: AiAnalysis }) {
+// showTip=false (Business): nur sachliche Einschätzung + nächste Schritte,
+// keine psychologische "Für Sie persönlich"-Karte.
+function AnalysisCard({ analysis, showTip = true }: { analysis: AiAnalysis; showTip?: boolean }) {
   return (
     <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 sm:p-5">
       <p className="text-xs font-bold uppercase tracking-wide text-violet-600">
@@ -364,7 +376,7 @@ function AnalysisCard({ analysis }: { analysis: AiAnalysis }) {
           </ol>
         </div>
       )}
-      {analysis.tipp && (
+      {showTip && analysis.tipp && (
         <div className="mt-3 rounded-xl bg-white/70 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
             💚 Für Sie persönlich
@@ -383,12 +395,16 @@ function AnalysisCard({ analysis }: { analysis: AiAnalysis }) {
 export default function LogbuchClient({
   mediationId,
   initialTitle,
+  mediationType,
   mode = "logbuch",
   caseHref,
 }: Props) {
   // Verknüpfter Modus: das Logbuch läuft NEBEN einer Mediation weiter –
   // Einträge können einzeln in den Fall gepusht werden (visibility=shared).
   const isLinked = mode !== "logbuch";
+  // Business/ODR: Falldokumentation statt Journal – kein Sensibel-Schalter,
+  // kein psychologischer KI-Tipp, sachliche Labels.
+  const isBusiness = BUSINESS_TYPES.has(mediationType);
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNew = searchParams.get("neu") === "1";
@@ -396,7 +412,10 @@ export default function LogbuchClient({
   const [intakeBlocks, setIntakeBlocks] = useState<FlowBlock[]>([]);
   const [entryBlocks, setEntryBlocks] = useState<FlowBlock[]>([]);
   const [intakeValues, setIntakeValues] = useState<Record<string, unknown>>({});
-  const [intakeOpen, setIntakeOpen] = useState(isNew);
+  // Intake ist jetzt sekundär: standardmäßig eingeklappt, unter dem Composer.
+  const [intakeOpen, setIntakeOpen] = useState(false);
+  // Composer zusammengeklappt, bis man aktiv einen Eintrag festhalten will.
+  const [composerOpen, setComposerOpen] = useState(isNew);
   const [intakeSaving, setIntakeSaving] = useState(false);
   const [intakeSaved, setIntakeSaved] = useState(false);
 
@@ -458,7 +477,10 @@ export default function LogbuchClient({
           if (Object.keys(map).length > 0) setIntakeSaved(true);
         }
         if (entriesRes.ok) {
-          setEntries(await entriesRes.json());
+          const loaded: LogEntry[] = await entriesRes.json();
+          setEntries(loaded);
+          // Leeres Logbuch: Composer direkt offen, damit man sofort loslegt.
+          if (loaded.length === 0) setComposerOpen(true);
         }
         if (statusRes.ok) {
           setStatus(await statusRes.json());
@@ -663,6 +685,7 @@ export default function LogbuchClient({
       setEditingId(null);
       setEntryType("vorkommnis");
       setEntryVisibility("personal");
+      setComposerOpen(false);
       // Automatische KI-Analyse direkt nach dem Speichern eines NEUEN Eintrags.
       if (wasNew && body?.id) {
         void analyzeEntry(body.id, status?.plan === "premium");
@@ -718,6 +741,7 @@ export default function LogbuchClient({
     setEntryType(entry.entry_type);
     setEntryVisibility(entry.visibility ?? "personal");
     setEntryValues(entry.content ?? {});
+    setComposerOpen(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -820,8 +844,12 @@ export default function LogbuchClient({
     }
   }, [premiumOpen, isPremium, mediationId, refreshStatus]);
 
-  const typeMeta = (key: string) =>
-    ENTRY_TYPES.find((t) => t.key === key) ?? ENTRY_TYPES[0];
+  const typeMeta = (key: string) => {
+    const base = ENTRY_TYPES.find((t) => t.key === key) ?? ENTRY_TYPES[0];
+    return isBusiness && BUSINESS_ENTRY_LABELS[base.key]
+      ? { ...base, label: BUSINESS_ENTRY_LABELS[base.key] }
+      : base;
+  };
 
   const blockLabel = (blockId: string): string => {
     const b = entryInputs.find((x) => x.id === blockId);
@@ -876,19 +904,37 @@ export default function LogbuchClient({
                 }`}
               >
                 {isLinked
-                  ? "Logbuch & Journal zum Fall"
-                  : isPremium
-                    ? "Konflikt-Logbuch · Premium"
-                    : "Konflikt-Logbuch · kostenlos"}
+                  ? isBusiness
+                    ? "Falldokumentation zum Fall"
+                    : "Logbuch & Journal zum Fall"
+                  : isBusiness
+                    ? isPremium
+                      ? "Falldokumentation · Premium"
+                      : "Falldokumentation · kostenlos"
+                    : isPremium
+                      ? "Konflikt-Logbuch · Premium"
+                      : "Konflikt-Logbuch · kostenlos"}
               </span>
             </div>
             <h1 className="heading-1 mt-3 text-neutral-900">{initialTitle}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-500">
-              Halten Sie fest, was passiert – Vorkommnisse, Gespräche, E-Mails,
-              WhatsApp, Telefonate, Gedanken, Fotos. Nach jedem Eintrag schlägt
-              Ihnen die KI gute nächste Schritte vor. Standardmäßig sieht das
-              niemand außer Ihnen – und Journal-Einträge (🔒) bleiben in jedem
-              Fall privat, selbst in einer späteren Mediation.
+              {isBusiness ? (
+                <>
+                  Dokumentieren Sie den Vorgang lückenlos – Vorgänge,
+                  Besprechungen, E-Mails, Nachrichten, Telefonate, Belege. Nach
+                  jedem Eintrag schlägt die KI sachliche nächste Schritte vor.
+                  Standardmäßig sieht Ihre Dokumentation niemand außer Ihnen.
+                </>
+              ) : (
+                <>
+                  Halten Sie fest, was passiert – Vorkommnisse, Gespräche,
+                  E-Mails, WhatsApp, Telefonate, Gedanken, Fotos. Nach jedem
+                  Eintrag schlägt Ihnen die KI gute nächste Schritte vor.
+                  Standardmäßig sieht das niemand außer Ihnen – und sensible
+                  Einträge (🔒) bleiben in jedem Fall privat, selbst in einer
+                  späteren Mediation.
+                </>
+              )}
               {isLinked &&
                 " Einzelne Einträge können Sie gezielt in die Mediation teilen."}
             </p>
@@ -914,23 +960,203 @@ export default function LogbuchClient({
           <p className="mt-12 text-neutral-400">Ihr Logbuch wird geladen …</p>
         ) : (
           <>
-            {/* ── Grunddaten (logbuch_intake) ── */}
-            <section className="mt-10 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="heading-3 text-neutral-900">Ihr Streit im Überblick</h2>
-                {intakeSaved && !intakeOpen && (
-                  <button
-                    type="button"
-                    onClick={() => setIntakeOpen(true)}
-                    className="text-sm font-semibold text-accent-600 hover:text-accent-700"
-                  >
-                    Bearbeiten
-                  </button>
-                )}
-              </div>
+            {/* ── Neuer Eintrag (Vorlage: logbuch_eintrag) ── */}
+            <section className="mt-8">
+              {!composerOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-accent-300 bg-accent-50/40 px-6 py-5 text-left transition hover:border-accent-400 hover:bg-accent-50"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500 text-lg font-bold text-white">
+                    +
+                  </span>
+                  <span>
+                    <span className="block text-sm font-bold text-neutral-900">
+                      Neuen Eintrag festhalten
+                    </span>
+                    <span className="mt-0.5 block text-xs text-neutral-500">
+                      Was ist passiert? Vorkommnis, Gespräch, Nachricht, Gedanke …
+                    </span>
+                  </span>
+                </button>
+              ) : (
+                <div className="rounded-2xl border-2 border-accent-200 bg-accent-50/40 p-6 sm:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="heading-3 text-neutral-900">
+                        {editingId ? "Eintrag bearbeiten" : "Was ist passiert?"}
+                      </h2>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        Dokumentieren Sie zeitnah – so bleibt Ihre Chronologie
+                        belastbar. Nach dem Speichern prüft die KI, was jetzt ein
+                        guter nächster Schritt wäre.
+                      </p>
+                    </div>
+                    {!editingId && entries.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setComposerOpen(false);
+                          setEntryValues({});
+                          setEntryType("vorkommnis");
+                          setEntryVisibility("personal");
+                        }}
+                        className="shrink-0 text-sm font-semibold text-neutral-400 transition hover:text-neutral-600"
+                      >
+                        Schließen
+                      </button>
+                    )}
+                  </div>
 
-              {intakeOpen ? (
-                <div className="mt-5 space-y-5">
+                  {quotaLine && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                          isPremium
+                            ? "bg-violet-100 text-violet-700"
+                            : "bg-white text-neutral-500 ring-1 ring-neutral-200"
+                        }`}
+                      >
+                        ✨ {quotaLine}
+                      </span>
+                      {!isPremium && (
+                        <button
+                          type="button"
+                          onClick={() => setPremiumOpen(true)}
+                          className="rounded-full bg-violet-600 px-3 py-1 text-xs font-bold text-white transition hover:bg-violet-700"
+                        >
+                          Premium: 1 Tipp pro Tag – einmalig {premiumPrice}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Eintragsart */}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {ENTRY_TYPES.map((t) => (
+                      <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setEntryType(t.key)}
+                        className={`rounded-full border px-4 py-2 text-sm transition ${
+                          entryType === t.key
+                            ? "border-accent-500 bg-white font-semibold text-accent-700 ring-2 ring-accent-200"
+                            : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
+                        }`}
+                      >
+                        {t.icon} {typeMeta(t.key).label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 space-y-5">
+                    {entryInputs.map((b) => (
+                      <BlockField
+                        key={b.id}
+                        block={b}
+                        value={entryValues[b.id]}
+                        onChange={(v) => setEntryValues((s) => ({ ...s, [b.id]: v }))}
+                        uploading={uploadingBlocks[b.id] === true}
+                        onUploadFile={
+                          b.type === "datei_upload" ? (f) => uploadFile(b, f) : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  {/* Sensibel-Schalter (ersetzt die Sichtbarkeits-Vorwahl).
+                      Ohne Haken bleibt der Eintrag privat ("personal") und kann
+                      später gezielt in die Mediation geteilt werden. Mit Haken
+                      wird er "private" = niemals teilbar. Ein bereits geteilter
+                      ("shared") Eintrag bleibt beim Bearbeiten geteilt.
+                      Business: kein Journal → Schalter entfällt komplett. */}
+                  {!isBusiness && (
+                  <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-neutral-200 bg-white/70 p-3.5">
+                    <input
+                      type="checkbox"
+                      checked={entryVisibility === "private"}
+                      onChange={(e) =>
+                        setEntryVisibility(
+                          e.target.checked
+                            ? "private"
+                            : entryVisibility === "private"
+                              ? "personal"
+                              : entryVisibility,
+                        )
+                      }
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-neutral-900"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-neutral-800">
+                        🔒 Sensibel – nur für mich
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-5 text-neutral-500">
+                        Bleibt streng vertraulich: niemals sichtbar für Mediator
+                        oder Gegenseite – auch nach einer Umwandlung in eine
+                        Mediation nicht. Ohne Haken bleibt der Eintrag privat,
+                        lässt sich aber später gezielt in die Mediation teilen.
+                      </span>
+                    </span>
+                  </label>
+                  )}
+
+                  <div className="mt-6 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={saveEntry}
+                      disabled={entrySaving}
+                      className="btn btn-primary disabled:opacity-50"
+                    >
+                      {entrySaving
+                        ? "Wird gespeichert …"
+                        : editingId
+                          ? "Änderungen speichern"
+                          : "Eintrag speichern"}
+                    </button>
+                    {editingId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(null);
+                          setEntryValues({});
+                          setEntryType("vorkommnis");
+                          setEntryVisibility("personal");
+                        }}
+                        className="btn btn-ghost"
+                      >
+                        Abbrechen
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* ── Streit im Überblick (sekundär, einklappbar) ── */}
+            <section className="mt-8 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+              <button
+                type="button"
+                onClick={() => setIntakeOpen((o) => !o)}
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-neutral-50"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Icon name="📓" size={18} />
+                  <span className="text-sm font-semibold text-neutral-800">
+                    Ihr Streit im Überblick
+                  </span>
+                  {intakeSaved && (
+                    <span className="text-xs font-medium text-emerald-600">
+                      ✓ hinterlegt
+                    </span>
+                  )}
+                </span>
+                <span className="text-xs text-neutral-400">
+                  {intakeOpen ? "Zuklappen ▲" : "Aufklappen ▼"}
+                </span>
+              </button>
+              {intakeOpen && (
+                <div className="space-y-5 border-t border-neutral-100 px-5 pb-6 pt-5">
                   {intakeIntro && (
                     <p className="whitespace-pre-wrap text-sm leading-7 text-neutral-600">
                       {cfgStr(intakeIntro.config, "text")}
@@ -953,163 +1179,7 @@ export default function LogbuchClient({
                     {intakeSaving ? "Wird gespeichert …" : "Grunddaten speichern"}
                   </button>
                 </div>
-              ) : intakeSaved ? (
-                <dl className="mt-4 space-y-3">
-                  {intakeInputs
-                    .filter((b) => {
-                      const v = intakeValues[b.id];
-                      return v !== undefined && v !== null && v !== "";
-                    })
-                    .map((b) => (
-                      <div key={b.id}>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                          {cfgStr(b.config, "prompt") || cfgStr(b.config, "label")}
-                        </dt>
-                        <dd className="mt-0.5 whitespace-pre-wrap text-sm leading-6 text-neutral-700">
-                          {Array.isArray(intakeValues[b.id])
-                            ? (intakeValues[b.id] as string[]).join(", ")
-                            : String(intakeValues[b.id])}
-                        </dd>
-                      </div>
-                    ))}
-                </dl>
-              ) : (
-                <p className="mt-3 text-sm text-neutral-500">
-                  Noch keine Grunddaten hinterlegt.{" "}
-                  <button
-                    type="button"
-                    onClick={() => setIntakeOpen(true)}
-                    className="font-semibold text-accent-600 hover:text-accent-700"
-                  >
-                    Jetzt ausfüllen →
-                  </button>
-                </p>
               )}
-            </section>
-
-            {/* ── Neuer Eintrag (Vorlage: logbuch_eintrag) ── */}
-            <section className="mt-8 rounded-2xl border-2 border-accent-200 bg-accent-50/40 p-6 sm:p-8">
-              <h2 className="heading-3 text-neutral-900">
-                {editingId ? "Eintrag bearbeiten" : "Was ist passiert?"}
-              </h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Dokumentieren Sie zeitnah – so bleibt Ihre Chronologie belastbar.
-                Nach dem Speichern prüft die KI, was jetzt ein guter nächster
-                Schritt wäre.
-              </p>
-
-              {quotaLine && (
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                      isPremium
-                        ? "bg-violet-100 text-violet-700"
-                        : "bg-white text-neutral-500 ring-1 ring-neutral-200"
-                    }`}
-                  >
-                    ✨ {quotaLine}
-                  </span>
-                  {!isPremium && (
-                    <button
-                      type="button"
-                      onClick={() => setPremiumOpen(true)}
-                      className="rounded-full bg-violet-600 px-3 py-1 text-xs font-bold text-white transition hover:bg-violet-700"
-                    >
-                      Premium: 1 Tipp pro Tag – einmalig {premiumPrice}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Eintragsart */}
-              <div className="mt-5 flex flex-wrap gap-2">
-                {ENTRY_TYPES.map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => setEntryType(t.key)}
-                    className={`rounded-full border px-4 py-2 text-sm transition ${
-                      entryType === t.key
-                        ? "border-accent-500 bg-white font-semibold text-accent-700 ring-2 ring-accent-200"
-                        : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
-                    }`}
-                  >
-                    {t.icon} {t.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Sichtbarkeit (Journal-Ausbau) */}
-              <div className="mt-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                  Wer darf das sehen?
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {VISIBILITIES.filter((v) => isLinked || v.key !== "shared").map(
-                    (v) => (
-                      <button
-                        key={v.key}
-                        type="button"
-                        onClick={() => setEntryVisibility(v.key)}
-                        title={v.hint}
-                        className={`rounded-full border px-4 py-2 text-sm transition ${
-                          entryVisibility === v.key
-                            ? "border-accent-500 bg-white font-semibold text-accent-700 ring-2 ring-accent-200"
-                            : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
-                        }`}
-                      >
-                        {v.icon} {v.label}
-                      </button>
-                    ),
-                  )}
-                </div>
-                <p className="mt-1.5 text-xs leading-5 text-neutral-400">
-                  {visMeta(entryVisibility).hint}
-                </p>
-              </div>
-
-              <div className="mt-6 space-y-5">
-                {entryInputs.map((b) => (
-                  <BlockField
-                    key={b.id}
-                    block={b}
-                    value={entryValues[b.id]}
-                    onChange={(v) => setEntryValues((s) => ({ ...s, [b.id]: v }))}
-                    uploading={uploadingBlocks[b.id] === true}
-                    onUploadFile={
-                      b.type === "datei_upload" ? (f) => uploadFile(b, f) : undefined
-                    }
-                  />
-                ))}
-              </div>
-
-              <div className="mt-6 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={saveEntry}
-                  disabled={entrySaving}
-                  className="btn btn-primary disabled:opacity-50"
-                >
-                  {entrySaving
-                    ? "Wird gespeichert …"
-                    : editingId
-                      ? "Änderungen speichern"
-                      : "Eintrag speichern"}
-                </button>
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingId(null);
-                      setEntryValues({});
-                      setEntryType("vorkommnis");
-                    }}
-                    className="btn btn-ghost"
-                  >
-                    Abbrechen
-                  </button>
-                )}
-              </div>
             </section>
 
             {/* ── Chronologie ── */}
@@ -1125,7 +1195,16 @@ export default function LogbuchClient({
 
               {entries.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {[{ key: "alle", label: "Alle", icon: "" }, ...VISIBILITIES].map(
+                  {[
+                    { key: "alle", label: "Alle", icon: "" },
+                    ...VISIBILITIES.filter(
+                      (v) =>
+                        // Business: kein Journal-Filter; "geteilt" nur im
+                        // verknüpften Modus sinnvoll.
+                        (!isBusiness || v.key !== "private") &&
+                        (isLinked || v.key !== "shared"),
+                    ),
+                  ].map(
                     (v) => (
                       <button
                         key={v.key}
@@ -1269,7 +1348,7 @@ export default function LogbuchClient({
 
                         {/* KI-Analyse */}
                         {entry.ai_analysis ? (
-                          <AnalysisCard analysis={entry.ai_analysis} />
+                          <AnalysisCard analysis={entry.ai_analysis} showTip={!isBusiness} />
                         ) : analyzingId === entry.id ? (
                           <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 text-sm text-violet-700">
                             ✨ Die KI prüft, was jetzt ein guter nächster Schritt wäre …
@@ -1404,7 +1483,9 @@ export default function LogbuchClient({
               Paketwahl, Einladung der Gegenseite). Alle Logbuch-Einträge
               bleiben erhalten – und bleiben privat: Mediator oder Gegenseite
               sehen nur Einträge, die Sie später ausdrücklich in die Mediation
-              teilen. Journal-Einträge (🔒) bleiben immer nur für Sie sichtbar.
+              teilen.
+              {!isBusiness &&
+                " Sensible Einträge (🔒) bleiben immer nur für Sie sichtbar."}{" "}
               Kosten entstehen erst mit der Freischaltung der Mediation.
             </p>
             <div className="mt-6 flex gap-3">

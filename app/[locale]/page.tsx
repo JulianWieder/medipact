@@ -10,6 +10,9 @@ import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import QuickCheck from "@/app/components/QuickCheck";
 import LogbuchSection from "@/app/components/LogbuchSection";
+import KampagnenKarussell from "@/app/components/KampagnenKarussell";
+import ZweiWelten from "@/app/components/ZweiWelten";
+import OutcomeWand from "@/app/components/OutcomeWand";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 
@@ -83,6 +86,8 @@ export default async function MedipactLanding() {
           </div>
         </section>
 
+        <KampagnenKarussell />
+
         <ErsteHilfeBox />
 
         <section className="border-y border-neutral-100 bg-neutral-50 py-5">
@@ -111,6 +116,8 @@ export default async function MedipactLanding() {
             </div>
           </div>
         </section>
+
+        <ZweiWelten />
 
         <ThemenTabs />
 
@@ -141,12 +148,23 @@ export default async function MedipactLanding() {
           </div>
         </section>
 
+        <OutcomeWand />
+
+        {/* Mission-Sektion (Palantir-Stil: Haltung statt Feature) */}
         <section className="section section-accent border-y border-accent-100 text-center">
-          <div className="mx-auto max-w-2xl px-6 lg:px-8">
-            <p className="text-base text-neutral-700">
-              {t("trustText")}{" "}
-              <ArrowLink href="/about">{t("trustLink")}</ArrowLink>
+          <div className="mx-auto max-w-3xl px-6 lg:px-8">
+            <div className="eyebrow mb-4 justify-center">
+              {t("mission.eyebrow")}
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl leading-[1.15]">
+              {t("mission.statement")}
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-700">
+              {t("mission.text")}
             </p>
+            <ArrowLink href="/about" className="mt-8 text-base">
+              {t("mission.link")}
+            </ArrowLink>
           </div>
         </section>
 
