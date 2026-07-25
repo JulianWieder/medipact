@@ -64,14 +64,9 @@
     "kampagnen": {
       "eyebrow": "Aktuell bei medipact",
       "title": "Ein Weg für jeden Konflikt.",
+      "startCta": "Mediation starten",
+      "learnCta": "Mehr erfahren",
       "cards": [
-        {
-          "tag": "Logbuch",
-          "title": "Dokumentieren, bevor es eskaliert.",
-          "text": "Das kostenlose Konflikt-Logbuch: Vorfälle festhalten, Muster erkennen – der ruhige erste Schritt.",
-          "href": "/konflikt-logbuch",
-          "cta": "Logbuch starten"
-        },
         {
           "tag": "Trennung",
           "title": "Fair auseinandergehen, ohne Rosenkrieg.",

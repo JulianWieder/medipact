@@ -105,6 +105,7 @@ export function PremiumHero({
   subtitle,
   action,
   stats,
+  children,
   variant = "card",
 }: {
   eyebrow: string;
@@ -112,6 +113,8 @@ export function PremiumHero({
   subtitle?: string;
   action?: React.ReactNode;
   stats?: StatItem[];
+  /** Eigener Inhalt im unteren Hero-Bereich (statt der Stat-Kacheln). */
+  children?: React.ReactNode;
   variant?: "card" | "bleed";
 }) {
   return (
@@ -158,7 +161,16 @@ export function PremiumHero({
           {action && <div className="shrink-0">{action}</div>}
         </div>
 
-        {stats && stats.length > 0 && (
+        {children ? (
+          <div
+            className={cn(
+              "border-t border-white/10 pt-8",
+              variant === "bleed" ? "mt-12" : "mt-8",
+            )}
+          >
+            {children}
+          </div>
+        ) : stats && stats.length > 0 ? (
           <div
             className={cn(
               "grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-10",
@@ -169,7 +181,7 @@ export function PremiumHero({
               <StatTile key={item.label} {...item} />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

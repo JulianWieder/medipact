@@ -182,9 +182,7 @@ export default function DashboardClient() {
     }
   }
 
-  // Filter-Prädikate für die Stat-Kacheln im Hero – ein Klick filtert die
-  // Mediationsliste darunter, ein erneuter Klick auf dieselbe Kachel hebt
-  // den Filter wieder auf (Toggle-Verhalten, analog zum Workspace-Dashboard).
+  // Filter-Prädikate für die Filterleiste über der Liste (einzige Filterstelle).
   const filterPredicates: Record<string, (m: Mediation) => boolean> = {
     my_turn: (m) => !!m.is_my_turn,
     waiting: (m) => m.status === "active" && !m.is_my_turn,
@@ -192,48 +190,16 @@ export default function DashboardClient() {
     completed: (m) => m.status === "completed",
   };
 
-  function toggleFilter(key: string, label: string) {
-    setFilter((prev) => (prev?.key === key ? null : { key, label }));
-  }
-
-  const stats = useMemo(
-    () => [
-      {
-        label: "Deine Eingabe",
-        value: data.filter((m) => m.is_my_turn).length,
-        sub: "wartet auf dich",
-        highlight: data.some((m) => m.is_my_turn),
-        active: filter?.key === "my_turn",
-        onClick: () => toggleFilter("my_turn", "Deine Eingabe"),
-        // Mini-Sparkline: Fortschritt der Fälle, die auf dich warten
-        trend: data.filter((m) => m.is_my_turn).map((m) => m.progress ?? 0),
-      },
-      {
-        label: "Warte auf Gegenpartei",
-        value: data.filter((m) => m.status === "active" && !m.is_my_turn).length,
-        sub: "Ball liegt bei der anderen Seite",
-        active: filter?.key === "waiting",
-        onClick: () => toggleFilter("waiting", "Warte auf Gegenpartei"),
-        trend: data
-          .filter((m) => m.status === "active" && !m.is_my_turn)
-          .map((m) => m.progress ?? 0),
-      },
-      {
-        label: "Ausstehend",
-        value: data.filter((m) => m.status === "pending" || m.status === "draft").length,
-        sub: "noch nicht gestartet",
-        active: filter?.key === "pending",
-        onClick: () => toggleFilter("pending", "Ausstehend"),
-      },
-      {
-        label: "Abgeschlossen",
-        value: data.filter((m) => m.status === "completed").length,
-        sub: "beendete Verfahren",
-        active: filter?.key === "completed",
-        onClick: () => toggleFilter("completed", "Abgeschlossen"),
-      },
-    ],
-    [data, filter],
+  // Aktions-Fokus (Option C): die Fälle, die konkret auf mich warten, +
+  // eine schlanke Zahlen-Zeile statt vier großer Kennzahl-Kacheln.
+  const waiting = useMemo(() => data.filter((m) => m.is_my_turn), [data]);
+  const counts = useMemo(
+    () => ({
+      active: data.filter((m) => m.status === "active").length,
+      pending: data.filter((m) => m.status === "pending" || m.status === "draft").length,
+      completed: data.filter((m) => m.status === "completed").length,
+    }),
+    [data],
   );
 
   const visibleData = useMemo(() => {
@@ -337,7 +303,6 @@ export default function DashboardClient() {
         eyebrow="Dashboard"
         title="Meine Mediationen"
         subtitle="Übersicht Ihrer laufenden und abgeschlossenen Konflikte."
-        stats={stats}
         action={
           /* Mediation im Fokus: ein Primär-CTA, das Logbuch nur als dezenter
              Textlink darunter (Sektion + Empty-State verlinken es zusätzlich). */
@@ -354,7 +319,60 @@ export default function DashboardClient() {
             </a>
           </div>
         }
-      />
+      >
+        {/* Aktions-Fokus statt Kennzahl-Kacheln – nur wenn es Fälle gibt. */}
+        {data.length > 0 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-300">
+                Das wartet auf dich{waiting.length > 0 ? ` · ${waiting.length}` : ""}
+              </p>
+              {waiting.length > 0 ? (
+                <div className="mt-4 space-y-2.5">
+                  {waiting.map((m) => (
+                    <div
+                      key={`waiting-${m.id}`}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent-300/30 bg-accent-300/10 px-4 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">
+                          {m.title || m.conflict_type || "Neue Mediation"}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs font-light text-neutral-300">
+                          {phaseLabel(m.phase)}
+                        </p>
+                      </div>
+                      <a
+                        href={`/dashboard/${encodeId(Number(m.id))}`}
+                        className="shrink-0 whitespace-nowrap rounded-full bg-accent-300 px-4 py-1.5 text-xs font-bold text-neutral-900 transition-colors hover:bg-white"
+                      >
+                        Eingabe machen →
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 max-w-xl text-sm font-light text-neutral-300">
+                  Nichts wartet gerade auf dich – der Ball liegt bei der
+                  Gegenseite oder alles ist erledigt.
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-1 border-t border-white/10 pt-5 text-sm">
+              <span className="font-light text-neutral-300">
+                <span className="font-semibold tabular-nums text-white">{counts.active}</span> laufend
+              </span>
+              <span className="font-light text-neutral-300">
+                <span className="font-semibold tabular-nums text-white">{counts.pending}</span> ausstehend
+              </span>
+              <span className="font-light text-neutral-300">
+                <span className="font-semibold tabular-nums text-white">{counts.completed}</span> abgeschlossen
+              </span>
+            </div>
+          </div>
+        )}
+      </PremiumHero>
 
       <section className="container py-16 lg:py-20">
         {/* ── Eingehende Mediationsanfragen ─────────────────────────── */}
@@ -580,15 +598,15 @@ export default function DashboardClient() {
             <div className="hairline mb-10" />
             <div className="mb-1 flex items-center gap-3">
               <h2 className="font-display text-lg font-medium text-neutral-900">
-                Deine Konflikt-Logbücher
+                {logbooks.length === 1 ? "Dein Konflikt-Logbuch" : "Deine Konflikt-Logbücher"}
               </h2>
               <span className="rounded-full border border-accent-200 bg-accent-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-700">
                 kostenlos
               </span>
             </div>
             <p className="mb-5 text-sm font-light text-neutral-500">
-              Dokumentierte Streitigkeiten – noch keine Mediation. Umwandeln
-              kannst du jederzeit.
+              Dokumentierter Streit – noch keine Mediation. Umwandeln kannst du
+              jederzeit.
             </p>
             <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
               {logbooks.map((log, i) => (
@@ -596,20 +614,17 @@ export default function DashboardClient() {
                   key={`logbuch-${log.id}`}
                   href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
                   className={cn(
-                    "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_20px] sm:gap-6",
+                    "group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50",
                     i > 0 && "border-t border-neutral-100",
                   )}
                 >
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-neutral-900">
                       {log.title || "Konflikt-Logbuch"}
                     </span>
                     <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
                       {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
                     </span>
-                  </span>
-                  <span className="hidden sm:block">
-                    <StatusDot label="Logbuch" tone="sky" />
                   </span>
                   <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
                     ›

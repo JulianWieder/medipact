@@ -18,6 +18,8 @@ type KampagnenCard = {
 export default function KampagnenKarussell() {
   const t = useTranslations("home.kampagnen");
   const cards = t.raw("cards") as KampagnenCard[];
+  const startCta = t("startCta");
+  const learnCta = t("learnCta");
   const scroller = useRef<HTMLDivElement>(null);
 
   const scrollBy = (dir: 1 | -1) => {
@@ -59,13 +61,12 @@ export default function KampagnenKarussell() {
 
       <div
         ref={scroller}
-        className="mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-4 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mx-auto mt-10 flex max-w-7xl snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-4 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {cards.map((card, i) => (
-          <a
+          <div
             key={card.tag}
             data-card
-            href={card.href}
             className="group relative flex w-[85%] max-w-sm flex-none snap-start flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg sm:w-[45%] lg:w-[30%]"
           >
             <div>
@@ -84,10 +85,21 @@ export default function KampagnenKarussell() {
                 {card.text}
               </p>
             </div>
-            <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 transition group-hover:gap-2.5">
-              {card.cta} →
-            </span>
-          </a>
+            <div className="mt-6 flex flex-col gap-3">
+              <a
+                href={`/auth/register?anlass=${card.href.split("/").pop()}`}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500 active:scale-[0.98]"
+              >
+                {startCta} →
+              </a>
+              <a
+                href={card.href}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 transition hover:gap-2.5"
+              >
+                {learnCta} →
+              </a>
+            </div>
+          </div>
         ))}
       </div>
     </section>
