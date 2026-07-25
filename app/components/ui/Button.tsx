@@ -27,15 +27,19 @@ type ButtonProps = LinkButtonProps | NativeButtonProps;
 // unterschiedlichen Werten dupliziert zu werden — vorher 0.96 bei primary,
 // 0.98 bei secondary, ohne erkennbaren Grund), damit sich alle
 // Button-Varianten beim Klicken gleich anfühlen.
+// relative + overflow-hidden + btn-shine tragen den Lichtreflex-Sweep
+// (.btn-shine in globals.css). hover:-translate-y-0.5 hebt den Button beim
+// Hovern leicht an — dieselbe „premium"-Geste wie bei .app-surface (-3px).
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 active:scale-[0.96] disabled:opacity-50 disabled:pointer-events-none";
+  "relative overflow-hidden btn-shine inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] disabled:opacity-50 disabled:pointer-events-none motion-reduce:hover:translate-y-0 motion-reduce:transition-none";
 
 const variants = {
   primary:
-    "bg-accent-500 text-white hover:bg-accent-600 hover:shadow-[0_10px_25px_-5px_rgba(20,184,166,0.4)] active:shadow-inner",
+    "bg-gradient-to-br from-accent-400 to-accent-600 text-white shadow-[0_4px_14px_-4px_rgba(13,148,136,0.5)] hover:from-accent-500 hover:to-accent-700 hover:shadow-[0_14px_30px_-6px_rgba(13,148,136,0.55)] active:shadow-inner",
   secondary:
-    "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm",
-  ghost: "text-neutral-600 hover:text-accent-600 hover:bg-accent-50/30",
+    "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm hover:shadow-md",
+  ghost:
+    "text-neutral-600 hover:text-accent-600 hover:bg-accent-50/40",
 };
 
 const sizes = {

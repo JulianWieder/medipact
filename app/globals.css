@@ -355,6 +355,44 @@
       transparent
     );
   }
+
+  /* Shine-Sweep für CTAs: ein Lichtreflex wandert beim Hover über den
+     Button. overflow-hidden + relative kommen aus baseStyles im Button. */
+  .btn-shine::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.35) 50%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.65s cubic-bezier(0.25, 0.1, 0.25, 1);
+    pointer-events: none;
+  }
+  .btn-shine:hover::before {
+    transform: translateX(130%);
+  }
+
+  /* Icon-Micro-Motion: Elemente mit .btn-icon rutschen beim Hover leicht. */
+  .btn-shine:hover .btn-icon {
+    transform: translateX(3px);
+  }
+  .btn-icon {
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-shine::before {
+      transition: none;
+      display: none;
+    }
+    .btn-shine:hover .btn-icon {
+      transform: none;
+    }
+  }
 }
 /* ------------------------------------------------------------
    Stripe-Style Gradient-Blobs (BackgroundGradientAnimation.tsx)
