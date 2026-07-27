@@ -439,7 +439,11 @@ export default function LogbuchClient({
   // Premium-Upgrade
   const [premiumOpen, setPremiumOpen] = useState(false);
   const paypalContainerRef = useRef<HTMLDivElement>(null);
-  const paypalRenderedRef = useRef(false);
+  // Gemounteter DOM-Knoten statt "schon gerendert"-Flag: das Premium-Modal
+  // mountet den Container bei jedem Öffnen neu – mit einem booleschen Flag
+  // bräche der Effect ab und der Bezahl-Button bliebe unsichtbar.
+  const paypalMountedNodeRef = useRef<HTMLElement | null>(null);
+  const [paypalRetry, setPaypalRetry] = useState(0);
 
   const [converting, setConverting] = useState(false);
   const [confirmConvert, setConfirmConvert] = useState(false);
@@ -766,14 +770,27 @@ export default function LogbuchClient({
     }
   }, [mediationId, router]);
 
+  // Nach einer fehlgeschlagenen Zahlung ist die genehmigte Order verbraucht –
+  // die Buttons müssen neu aufgebaut werden, sonst hängt der Nutzer fest.
+  function resetPaypalButtons() {
+    paypalMountedNodeRef.current = null;
+    if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
+    setPaypalRetry((n) => n + 1);
+  }
+
   // ── PayPal-Buttons im Premium-Modal ──
   useEffect(() => {
     if (!premiumOpen || isPremium) {
       if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
-      paypalRenderedRef.current = false;
+      paypalMountedNodeRef.current = null;
       return;
     }
-    if (paypalRenderedRef.current) return;
+    if (
+      paypalMountedNodeRef.current &&
+      paypalMountedNodeRef.current === paypalContainerRef.current
+    ) {
+      return;
+    }
 
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     if (!clientId) {
@@ -782,8 +799,11 @@ export default function LogbuchClient({
     }
 
     function renderButtons() {
-      if (!window.paypal || !paypalContainerRef.current || paypalRenderedRef.current) return;
-      paypalRenderedRef.current = true;
+      const container = paypalContainerRef.current;
+      if (!window.paypal || !container) return;
+      if (paypalMountedNodeRef.current === container) return;
+      paypalMountedNodeRef.current = container;
+      container.innerHTML = "";
       window.paypal
         .Buttons({
           style: { layout: "vertical", color: "gold", label: "paypal" },
@@ -815,19 +835,26 @@ export default function LogbuchClient({
                 setError(
                   `Zahlung fehlgeschlagen: ${body?.detail ?? body?.error ?? "Unbekannter Fehler"}`,
                 );
+                resetPaypalButtons();
                 return;
               }
               setPremiumOpen(false);
               await refreshStatus();
             } catch {
               setError("Server nicht erreichbar.");
+              resetPaypalButtons();
             }
           },
           onError: () => {
             setError("PayPal hat einen Fehler gemeldet. Bitte versuchen Sie es erneut.");
+            resetPaypalButtons();
           },
         })
-        .render(paypalContainerRef.current);
+        .render(container)
+        .catch(() => {
+          paypalMountedNodeRef.current = null;
+          setError("Der PayPal-Button konnte nicht geladen werden. Bitte Seite neu laden.");
+        });
     }
 
     const existing = document.getElementById("paypal-sdk") as HTMLScriptElement | null;
@@ -840,9 +867,13 @@ export default function LogbuchClient({
       script.id = "paypal-sdk";
       script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
       script.addEventListener("load", renderButtons);
+      script.addEventListener("error", () =>
+        setError("Das PayPal-SDK konnte nicht geladen werden (Netzwerk oder Adblocker?)."),
+      );
       document.body.appendChild(script);
     }
-  }, [premiumOpen, isPremium, mediationId, refreshStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [premiumOpen, isPremium, mediationId, refreshStatus, paypalRetry]);
 
   const typeMeta = (key: string) => {
     const base = ENTRY_TYPES.find((t) => t.key === key) ?? ENTRY_TYPES[0];

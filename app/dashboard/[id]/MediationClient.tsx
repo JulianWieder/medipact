@@ -10,7 +10,9 @@ declare global {
   interface Window {
     paypal?: {
       Buttons: (options: Record<string, unknown>) => {
-        render: (container: HTMLElement) => void;
+        // render() liefert ein Promise – schlägt es fehl (SDK-Fehler, Container
+        // nicht im DOM), muss der Button neu gerendert werden können.
+        render: (container: HTMLElement) => Promise<void>;
       };
     };
   }
@@ -21,7 +23,11 @@ type PartyStatus = {
   role: string;
   name: string | null;
   owes: boolean;
+  // paid = Betrag wurde tatsächlich eingezogen.
   paid: boolean;
+  // authorized = zugesagt, Betrag ist bei PayPal reserviert, aber noch nicht
+  // abgebucht. Eingezogen wird erst, wenn alle Parteien zugesagt haben.
+  authorized?: boolean;
   amount_due_eur: number;
   is_you: boolean;
   billing_address_complete?: boolean;
@@ -52,9 +58,12 @@ type PayStatus = {
     addons_total_eur?: number;
     amount_due_eur: number;
     paid: boolean;
+    authorized?: boolean;
     billing_address_complete?: boolean;
   };
   participants: PartyStatus[];
+  // Hinweis vom Backend, z.B. wenn eine Reservierung der Gegenseite abgelaufen ist.
+  warning?: string;
 };
 
 type Props = {
@@ -195,7 +204,15 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [billingBusy, setBillingBusy] = useState(false);
   const [billingError, setBillingError] = useState("");
   const paypalContainerRef = useRef<HTMLDivElement>(null);
-  const paypalRenderedRef = useRef(false);
+  // Merkt sich den DOM-Knoten, in den die PayPal-Buttons tatsächlich gerendert
+  // wurden. Ein bloßes boolean ("schon gerendert") reicht nicht: mountet React
+  // den Container neu (Re-Render nach Rabatt/Add-on/Fehler), zeigt der Ref auf
+  // einen neuen, LEEREN div – der Effect würde aber wegen "schon gerendert"
+  // abbrechen und der Bezahl-Button bliebe für immer unsichtbar.
+  const paypalMountedNodeRef = useRef<HTMLElement | null>(null);
+  // Hochzählen erzwingt einen neuen Render-Versuch (z.B. nach fehlgeschlagener
+  // Zahlung), damit der Nutzer es direkt noch einmal probieren kann.
+  const [paypalRetry, setPaypalRetry] = useState(0);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -568,6 +585,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
         return;
       }
       setPayStatus(data);
+      if (data.warning) setError(data.warning);
       if (data.is_paid) setIsPaid(true);
     } catch {
       setError("Server nicht erreichbar.");
@@ -580,15 +598,29 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   // Partei beim Start) – ohne Adresse bleibt der Bezahl-Schritt gesperrt.
   const needsBillingBeforePay = !!payStatus && payStatus.you.owes && !billingSaved;
 
+  // Eigener Betrag ist zugesagt und bei PayPal reserviert, aber noch nicht
+  // abgebucht – wir warten auf die Gegenseite.
+  const iAmAuthorized = !!payStatus && !!payStatus.you.authorized && !payStatus.you.paid;
+
   // Zeigt PayPal nur, wenn die aktuelle Partei einen offenen Betrag (> 0 €)
-  // hat UND ihre Rechnungsdaten hinterlegt sind.
+  // hat, noch nicht reserviert hat UND ihre Rechnungsdaten hinterlegt sind.
   const showPaypal =
     !!payStatus &&
     payStatus.you.owes &&
     !payStatus.you.paid &&
+    !iAmAuthorized &&
     payStatus.you.amount_due_eur > 0 &&
     !isPaid &&
     billingSaved;
+
+  // Setzt die PayPal-Buttons zurück, sodass sie neu gerendert werden. Nötig
+  // nach einer fehlgeschlagenen Zahlung: die alte Button-Instanz gehört zu
+  // einer bereits genehmigten Order und ist damit verbraucht.
+  function resetPaypalButtons() {
+    paypalMountedNodeRef.current = null;
+    if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
+    setPaypalRetry((n) => n + 1);
+  }
 
   // PayPal-Button für den EIGENEN Anteil rendern
   useEffect(() => {
@@ -596,10 +628,17 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     if (!showPaypal) {
       // Kein offener Betrag (bezahlt oder per Rabatt 0 €) -> evtl. Button entfernen.
       if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
-      paypalRenderedRef.current = false;
+      paypalMountedNodeRef.current = null;
       return;
     }
-    if (paypalRenderedRef.current) return;
+    // Nur abbrechen, wenn GENAU in den aktuell gemounteten Container gerendert
+    // wurde – nach einem Remount ist der Knoten ein anderer und wir rendern neu.
+    if (
+      paypalMountedNodeRef.current &&
+      paypalMountedNodeRef.current === paypalContainerRef.current
+    ) {
+      return;
+    }
 
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     if (!clientId) {
@@ -608,8 +647,11 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
 
     function renderButtons() {
-      if (!window.paypal || !paypalContainerRef.current || paypalRenderedRef.current) return;
-      paypalRenderedRef.current = true;
+      const container = paypalContainerRef.current;
+      if (!window.paypal || !container) return;
+      if (paypalMountedNodeRef.current === container) return;
+      paypalMountedNodeRef.current = container;
+      container.innerHTML = "";
       window.paypal
         .Buttons({
           style: { layout: "vertical", color: "gold", label: "paypal" },
@@ -637,21 +679,38 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               if (!res.ok) {
                 const raw = body?.detail ?? body?.error;
                 setError(`Zahlung fehlgeschlagen: ${raw ?? "Unbekannter Fehler"}`);
+                // Die genehmigte Order ist verbraucht – Buttons neu aufbauen,
+                // sonst steht der Nutzer vor einem leeren Bezahl-Bereich.
+                resetPaypalButtons();
                 return;
               }
               setPayStatus(body);
+              // z.B. abgelaufene Reservierung der Gegenseite – kein Fehler,
+              // aber der Fall startet erst nach deren Nachzahlung.
+              if (body.warning) setError(body.warning);
               if (body.is_paid) setIsPaid(true);
             } catch {
               setError("Server nicht erreichbar.");
+              resetPaypalButtons();
             } finally {
               setPaying(false);
             }
           },
           onError: () => {
             setError("PayPal hat einen Fehler gemeldet. Bitte versuche es erneut.");
+            resetPaypalButtons();
+          },
+          onCancel: () => {
+            // Nutzer hat das PayPal-Fenster geschlossen – Buttons bleiben nutzbar.
+            setPaying(false);
           },
         })
-        .render(paypalContainerRef.current);
+        .render(container)
+        .catch(() => {
+          // Render fehlgeschlagen -> Sperre lösen, damit ein neuer Versuch greift.
+          paypalMountedNodeRef.current = null;
+          setError("Der PayPal-Button konnte nicht geladen werden. Bitte Seite neu laden.");
+        });
     }
 
     const existing = document.getElementById("paypal-sdk") as HTMLScriptElement | null;
@@ -664,10 +723,22 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       script.id = "paypal-sdk";
       script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
       script.addEventListener("load", renderButtons);
+      script.addEventListener("error", () => {
+        setError(
+          "Das PayPal-SDK konnte nicht geladen werden (Netzwerk oder Adblocker?). Bitte Seite neu laden.",
+        );
+      });
       document.body.appendChild(script);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediationId, hasOtherParty, isPaid, showPaypal, payStatus?.you.amount_due_eur]);
+  }, [
+    mediationId,
+    hasOtherParty,
+    isPaid,
+    showPaypal,
+    payStatus?.you.amount_due_eur,
+    paypalRetry,
+  ]);
 
   async function startMediation() {
     setAdvancing(true);
@@ -1117,6 +1188,19 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 </div>
               )}
 
+              {iAmAuthorized && !isPaid && (
+                <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50 p-5">
+                  <p className="text-lg font-bold text-accent-700">
+                    Dein Betrag ist reserviert ✓
+                  </p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {payStatus!.you.amount_due_eur.toFixed(2)} € sind bei PayPal vorgemerkt,
+                    aber noch nicht abgebucht. Der Einzug erfolgt erst, wenn auch die andere
+                    Seite zugestimmt hat und die Mediation startet.
+                  </p>
+                </div>
+              )}
+
               {payStatus && !payStatus.you.paid && !payStatus.you.owes && !isPaid && (
                 <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
                   <p className="text-base font-semibold text-neutral-800">Für dich fällt kein Betrag an.</p>
@@ -1135,7 +1219,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 </div>
               )}
 
-              {payStatus && !payStatus.you.paid && payStatus.you.owes && !isPaid && !needsBillingBeforePay && (
+              {payStatus && !payStatus.you.paid && !iAmAuthorized && payStatus.you.owes && !isPaid && !needsBillingBeforePay && (
                 <>
                   <p className="mt-6 mb-2 text-xs font-semibold uppercase tracking-widest text-accent-600">
                     Dein Anteil
@@ -1239,8 +1323,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                   )}
 
                   <p className="mx-auto mt-4 max-w-sm text-xs text-neutral-500">
-                    Der Betrag wird zunächst nur reserviert und erst nach erfolgreicher
-                    Freischaltung tatsächlich abgebucht.
+                    Der Betrag wird zunächst nur reserviert und erst abgebucht, wenn auch
+                    die andere Seite zugestimmt hat und die Mediation startet. Kommt sie
+                    nicht zustande, wird die Reservierung wieder freigegeben.
                   </p>
 
                   <div className="mx-auto mt-6 w-full max-w-sm">
@@ -1281,6 +1366,12 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                             <span className="text-neutral-400">kein Betrag</span>
                           ) : p.paid ? (
                             <span className="text-accent-700">bezahlt ✓</span>
+                          ) : p.authorized ? (
+                            // Zugesagt, Betrag reserviert – abgebucht wird erst,
+                            // wenn alle Parteien zugesagt haben.
+                            <span className="text-accent-700">
+                              reserviert · {p.amount_due_eur.toFixed(2)} €
+                            </span>
                           ) : (
                             <span className="text-neutral-500">offen · {p.amount_due_eur.toFixed(2)} €</span>
                           )}

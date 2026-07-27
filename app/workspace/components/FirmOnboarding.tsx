@@ -52,23 +52,40 @@ Zwischen der medipact GmbH (Anbieter) und dem registrierten Unternehmen (Kunde).
 Mit der Unterschrift bestätigt der/die Firmen-Admin die Vertretungsbefugnis
 und die Annahme dieser Vereinbarung.`;
 
-function getPaypal(): { Buttons: (o: unknown) => { render: (el: HTMLElement) => void } } | undefined {
-  return (window as unknown as { paypal?: { Buttons: (o: unknown) => { render: (el: HTMLElement) => void } } }).paypal;
+type PayPalSDK = { Buttons: (o: unknown) => { render: (el: HTMLElement) => Promise<void> } };
+
+function getPaypal(): PayPalSDK | undefined {
+  return (window as unknown as { paypal?: PayPalSDK }).paypal;
 }
 
 // PayPal-Bezahlbutton für die Onboarding-Zahlung. Nichts, wenn kein Client-Id gesetzt.
 function OrgPaypalButton({ orgId, onPaid }: { orgId: number; onPaid: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  const rendered = useRef(false);
+  // Gemounteter DOM-Knoten statt "schon gerendert"-Flag: nach einem Remount
+  // zeigt ref.current auf einen neuen, leeren div – mit einem booleschen Flag
+  // würde der Effect abbrechen und der Button bliebe dauerhaft unsichtbar.
+  const mountedNode = useRef<HTMLElement | null>(null);
+  const [retry, setRetry] = useState(0);
   const [error, setError] = useState("");
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
+  // Nach einer fehlgeschlagenen Zahlung ist die genehmigte Order verbraucht –
+  // die Buttons müssen neu aufgebaut werden, sonst hängt der Nutzer fest.
+  function resetButtons() {
+    mountedNode.current = null;
+    if (ref.current) ref.current.innerHTML = "";
+    setRetry((n) => n + 1);
+  }
 
   useEffect(() => {
     if (!clientId) return;
     function render() {
       const paypal = getPaypal();
-      if (!paypal || !ref.current || rendered.current) return;
-      rendered.current = true;
+      const container = ref.current;
+      if (!paypal || !container) return;
+      if (mountedNode.current === container) return;
+      mountedNode.current = container;
+      container.innerHTML = "";
       paypal
         .Buttons({
           style: { layout: "horizontal", color: "gold", label: "pay", height: 38 },
@@ -83,11 +100,19 @@ function OrgPaypalButton({ orgId, onPaid }: { orgId: number; onPaid: () => void 
               onPaid();
             } catch {
               setError("Zahlung konnte nicht abgeschlossen werden.");
+              resetButtons();
             }
           },
-          onError: () => setError("PayPal hat einen Fehler gemeldet."),
+          onError: () => {
+            setError("PayPal hat einen Fehler gemeldet.");
+            resetButtons();
+          },
         })
-        .render(ref.current);
+        .render(container)
+        .catch(() => {
+          mountedNode.current = null;
+          setError("Der PayPal-Button konnte nicht geladen werden. Bitte Seite neu laden.");
+        });
     }
     const existing = document.getElementById("paypal-sdk") as HTMLScriptElement | null;
     if (getPaypal()) render();
@@ -97,10 +122,13 @@ function OrgPaypalButton({ orgId, onPaid }: { orgId: number; onPaid: () => void 
       sc.id = "paypal-sdk";
       sc.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
       sc.addEventListener("load", render);
+      sc.addEventListener("error", () =>
+        setError("Das PayPal-SDK konnte nicht geladen werden (Netzwerk oder Adblocker?)."),
+      );
       document.body.appendChild(sc);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId]);
+  }, [orgId, retry]);
 
   if (!clientId) return null;
   return (

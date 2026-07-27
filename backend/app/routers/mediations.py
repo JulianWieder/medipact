@@ -21,7 +21,12 @@ from app.models.mediation_block_response import MediationBlockResponse
 from app.models.phase_step_default import PhaseStepDefault
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
-from app.paypal import PayPalError, capture_order, create_order
+from app.paypal import (
+    AuthorizationExpiredError,
+    PayPalError,
+    authorize_order,
+    create_order,
+)
 from app.prompts import get_prompt
 from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
@@ -687,6 +692,9 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             "name": (u.name if u else None),
             "owes": owes,
             "paid": bool(p.paid),
+            # Zugesagt, aber noch nicht eingezogen: der Betrag ist bei PayPal
+            # nur reserviert (siehe services/billing.py).
+            "authorized": bool(p.authorized) and not bool(p.paid),
             "amount_due_eur": billing.participant_final_due(db, mediation, p) if owes else 0.0,
             "is_you": p.id == me.id,
             "billing_address_complete": _has_billing_address(p),
@@ -713,12 +721,28 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             "addons_total_eur": billing.participant_addons_total(db, mediation, me),
             "amount_due_eur": my_final,
             "paid": bool(me.paid),
+            "authorized": bool(me.authorized) and not bool(me.paid),
             # Fürs Onboarding: Zahlung ist erst möglich, wenn die
             # Rechnungsadresse hinterlegt ist (Rechnung pro Partei beim Start).
             "billing_address_complete": _has_billing_address(me),
         },
         "participants": parties,
     }
+
+
+def _require_amount_still_changeable(participant: MediationParticipant) -> None:
+    """Blockt Änderungen am eigenen Betrag (Rabatt/Add-ons) nach der Zusage.
+
+    Nicht nur nach dem Einzug: schon die PayPal-Reservierung lautet auf einen
+    festen Betrag und lässt sich nachträglich nicht verändern.
+    """
+    if participant.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    if participant.authorized:
+        raise HTTPException(
+            status_code=400,
+            detail="Dein Betrag ist bereits reserviert und kann nicht mehr geändert werden.",
+        )
 
 
 def _get_mediation_or_404(db: Session, mediation_id: int) -> Mediation:
@@ -753,8 +777,9 @@ def apply_discount(
     das geschieht erst bei erfolgreicher Zahlung)."""
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
-    if me.paid:
-        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    # Auch nach der Reservierung ist der Betrag fix - er steht bereits als
+    # Autorisierung bei PayPal und lässt sich nicht nachträglich senken.
+    _require_amount_still_changeable(me)
 
     base_due = billing.participant_base_due(db, mediation, me)
     discount, code = billing.validate_discount(db, payload.code, mediation, base_due)
@@ -775,8 +800,7 @@ def remove_discount(
     """Entfernt einen zuvor angewendeten (noch nicht bezahlten) Rabattcode."""
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
-    if me.paid:
-        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    _require_amount_still_changeable(me)
     me.discount_code = None
     me.discount_amount = 0.0
     db.commit()
@@ -810,17 +834,43 @@ class PayPalCaptureRequest(BaseModel):
     order_id: str
 
 
+def _parse_paypal_time(value: str | None) -> datetime | None:
+    """Wandelt einen PayPal-Zeitstempel ("2026-07-30T12:00:00Z") in datetime.
+
+    Gibt None zurück, wenn PayPal nichts oder etwas Unerwartetes liefert - das
+    Ablaufdatum ist nur informativ, der Einzug scheitert im Zweifel ohnehin mit
+    AuthorizationExpiredError.
+    """
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
 @router.post("/{mediation_id}/pay/paypal/create-order")
 async def create_paypal_order(
     mediation_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Erstellt eine PayPal-Order über den EIGENEN Anteil dieser Partei (nach Rabatt)."""
+    """Erstellt eine PayPal-Order über den EIGENEN Anteil dieser Partei (nach Rabatt).
+
+    intent="AUTHORIZE": Der Betrag wird beim Bestätigen nur RESERVIERT. Der
+    Einzug erfolgt erst, wenn alle zahlungspflichtigen Parteien zugesagt haben
+    (siehe services/billing.py settle_and_unlock) - sonst läge das Geld der
+    ersten Partei bei uns, während der Fall nie startet.
+    """
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
     if me.paid:
         raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    if me.authorized:
+        raise HTTPException(
+            status_code=400,
+            detail="Dein Betrag ist bereits reserviert. Er wird eingezogen, sobald die Gegenseite zugestimmt hat.",
+        )
 
     if not billing.participant_owes(mediation, me):
         raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an.")
@@ -841,7 +891,7 @@ async def create_paypal_order(
         )
 
     try:
-        order = await create_order(amount, mediation_id)
+        order = await create_order(amount, mediation_id, intent="AUTHORIZE")
     except PayPalError as e:
         raise HTTPException(status_code=502, detail=str(e))
 
@@ -855,34 +905,58 @@ async def capture_paypal_order(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
-    """Erfasst die genehmigte PayPal-Order für den EIGENEN Anteil.
+    """Reserviert den EIGENEN Anteil auf der genehmigten PayPal-Order.
 
-    Erst wenn PayPal "COMPLETED" meldet, gilt der Anteil als bezahlt. Der Fall
-    wird freigeschaltet, sobald ALLE zahlungspflichtigen Parteien bezahlt haben.
+    Hier fließt noch KEIN Geld: der Betrag wird beim Zahler nur blockiert.
+    Sobald alle zahlungspflichtigen Parteien reserviert haben, zieht
+    ``settle_and_unlock`` sämtliche Reservierungen ein und schaltet den Fall
+    frei. Der Endpunktname bleibt aus Kompatibilität "capture-order".
     """
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
 
     try:
-        result = await capture_order(payload.order_id)
+        auth = await authorize_order(payload.order_id)
+    except AuthorizationExpiredError as e:
+        raise HTTPException(status_code=402, detail=str(e))
     except PayPalError as e:
         raise HTTPException(status_code=502, detail=str(e))
 
-    if result.get("status") != "COMPLETED":
+    if auth.get("status") not in ("CREATED", "PENDING", "CAPTURED"):
         raise HTTPException(
             status_code=402,
-            detail="Die Zahlung wurde von PayPal nicht als abgeschlossen gemeldet.",
+            detail="PayPal hat den Betrag nicht reserviert. Bitte erneut versuchen.",
         )
 
+    expires_at = _parse_paypal_time(auth.get("expires_at"))
     amount = billing.participant_final_due(db, mediation, me)
-    billing.mark_participant_paid(db, me, amount=amount, order_id=payload.order_id)
-    billing.check_and_unlock(db, mediation)
+    billing.mark_participant_authorized(
+        db,
+        me,
+        amount=amount,
+        order_id=payload.order_id,
+        authorization_id=auth["authorization_id"],
+        expires_at=expires_at,
+    )
+
+    # Zieht ein, sobald ALLE zugesagt haben - sonst passiert hier nichts.
+    result = await billing.settle_and_unlock(db, mediation)
     db.refresh(mediation)
-    return {"ok": True, **_payment_status_payload(db, mediation, me)}
+    db.refresh(me)
+
+    payload_out = {"ok": True, **_payment_status_payload(db, mediation, me)}
+    if result["expired"]:
+        payload_out["warning"] = (
+            "Eine Reservierung der Gegenseite ist abgelaufen. Der Fall startet, "
+            "sobald sie erneut bezahlt hat."
+        )
+    return payload_out
 
 
 @router.post("/{mediation_id}/pay/free")
-def redeem_free(
+async def redeem_free(
     mediation_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
@@ -911,9 +985,19 @@ def redeem_free(
         )
 
     billing.mark_participant_paid(db, me, amount=0.0)
-    billing.check_and_unlock(db, mediation)
+    # Diese Partei kann die letzte fehlende Zusage gewesen sein - dann müssen
+    # jetzt die Reservierungen der anderen Parteien eingezogen werden.
+    result = await billing.settle_and_unlock(db, mediation)
     db.refresh(mediation)
-    return {"ok": True, **_payment_status_payload(db, mediation, me)}
+    db.refresh(me)
+
+    payload_out = {"ok": True, **_payment_status_payload(db, mediation, me)}
+    if result["expired"]:
+        payload_out["warning"] = (
+            "Eine Reservierung der Gegenseite ist abgelaufen. Der Fall startet, "
+            "sobald sie erneut bezahlt hat."
+        )
+    return payload_out
 
 
 @router.get("/me")

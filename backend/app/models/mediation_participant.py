@@ -20,6 +20,22 @@ class MediationParticipant(Base):
     paid = Column(Boolean, nullable=False, default=False, server_default="0")
     paid_at = Column(DateTime, nullable=True)
     paypal_order_id = Column(String, nullable=True)
+
+    # ── Reservieren, dann einziehen ───────────────────────────────────────
+    # Der Fall startet erst, wenn ALLE zahlungspflichtigen Parteien zugesagt
+    # haben. Damit das Geld der ersten Partei nicht monatelang bei uns liegt,
+    # während die Gegenseite zögert, wird beim Bezahlen zunächst nur
+    # RESERVIERT (PayPal-Autorisierung, siehe app/paypal.py):
+    #   authorized = True  -> Betrag ist beim Zahler blockiert, noch nicht geflossen
+    #   paid       = True  -> Betrag wurde tatsächlich eingezogen
+    # `paid` bleibt damit die maßgebliche Größe für Rechnungen und Umsatz;
+    # `authorized` steuert nur, wann eingezogen werden darf.
+    authorized = Column(Boolean, nullable=False, default=False, server_default="0")
+    authorized_at = Column(DateTime, nullable=True)
+    paypal_authorization_id = Column(String, nullable=True)
+    # Ende der PayPal-Honor-Period (~3 Tage). Danach kann der Einzug scheitern
+    # und die Partei muss erneut bezahlen (AuthorizationExpiredError).
+    authorization_expires_at = Column(DateTime, nullable=True)
     # Angewendeter Rabattcode (Groß-/Kleinschreibung wie eingegeben) + Rabattbetrag in EUR.
     discount_code = Column(String, nullable=True)
     discount_amount = Column(Float, nullable=False, default=0.0, server_default="0")

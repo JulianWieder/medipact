@@ -4,9 +4,24 @@ Kapselt die Preis-/Freischalt-Logik, damit der Router schlank bleibt:
   • Jede zahlungspflichtige Partei zahlt ihren eigenen Anteil (siehe app/pricing.py).
   • Der Fall wird erst freigeschaltet (mediation.is_paid = True), wenn ALLE
     zahlungspflichtigen Parteien bezahlt haben.
+
+ZWEI STUFEN: reservieren -> einziehen
+─────────────────────────────────────
+Weil der Fall erst mit der letzten Zusage startet, würde eine sofortige
+Abbuchung bedeuten, dass das Geld der ersten Partei bei uns liegt, obwohl die
+Mediation vielleicht nie zustande kommt. Deshalb:
+
+  participant.authorized = True  ->  Betrag ist bei PayPal RESERVIERT
+  participant.paid       = True  ->  Betrag wurde tatsächlich EINGEZOGEN
+
+``settle_and_unlock()`` zieht alle Reservierungen ein, sobald die letzte Partei
+zugesagt hat, und schaltet den Fall frei. Scheitert der Einzug (Reservierung
+abgelaufen), wird die betroffene Partei zurückgesetzt und muss erneut zahlen -
+der Fall bleibt so lange zu.
 """
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
@@ -20,6 +35,14 @@ from app.models.mediation_addon import MediationAddon
 from app.models.mediation_participant import MediationParticipant
 from app.models.organization import Organization
 from app.models.user import User
+from app.paypal import (
+    AuthorizationExpiredError,
+    PayPalError,
+    capture_authorization,
+    void_authorization,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def is_org_case(mediation: Mediation) -> bool:
@@ -150,6 +173,9 @@ def set_participant_addons(
     bezahlten Betrags und damit fix."""
     if participant.paid:
         raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt – Add-ons können nicht mehr geändert werden.")
+    # Auch die Reservierung lautet schon auf einen festen Betrag.
+    if participant.authorized:
+        raise HTTPException(status_code=400, detail="Dein Betrag ist bereits reserviert – Add-ons können nicht mehr geändert werden.")
 
     normalized: list[str] = []
     for key in keys:
@@ -198,18 +224,49 @@ def owing_participants(db: Session, mediation: Mediation) -> list[MediationParti
 
 
 def all_owing_paid(db: Session, mediation: Mediation) -> bool:
+    """Ob alle zahlungspflichtigen Parteien tatsächlich EINGEZOGEN wurden."""
     owing = owing_participants(db, mediation)
     if not owing:
         return False
     return all(bool(p.paid) for p in owing)
 
 
+def all_owing_authorized(db: Session, mediation: Mediation) -> bool:
+    """Ob alle zahlungspflichtigen Parteien zugesagt haben (reserviert ODER bezahlt).
+
+    Das ist die Bedingung, ab der eingezogen werden darf - nicht die Bedingung
+    für die Freischaltung selbst (die folgt nach erfolgreichem Einzug).
+    """
+    owing = owing_participants(db, mediation)
+    if not owing:
+        return False
+    return all(bool(p.paid) or bool(p.authorized) for p in owing)
+
+
 def check_and_unlock(db: Session, mediation: Mediation) -> bool:
-    """Setzt is_paid=True, sobald alle zahlungspflichtigen Parteien bezahlt haben."""
+    """Setzt is_paid=True, sobald alle zahlungspflichtigen Parteien bezahlt haben.
+
+    Achtung: prüft nur den Ist-Zustand und zieht selbst NICHTS ein. Für den
+    Ablauf "letzte Zusage -> alle Reservierungen einziehen -> freischalten"
+    ist ``settle_and_unlock()`` zuständig.
+    """
     if all_owing_paid(db, mediation) and not mediation.is_paid:
         mediation.is_paid = True
         db.commit()
     return bool(mediation.is_paid)
+
+
+def _redeem_discount_code(db: Session, participant: MediationParticipant) -> None:
+    """Zählt den Rabattcode der Partei als eingelöst (used_count += 1)."""
+    if not participant.discount_code:
+        return
+    code = (
+        db.query(DiscountCode)
+        .filter(func.lower(DiscountCode.code) == participant.discount_code.lower())
+        .first()
+    )
+    if code:
+        code.used_count = (code.used_count or 0) + 1
 
 
 def mark_participant_paid(
@@ -219,21 +276,129 @@ def mark_participant_paid(
     amount: float,
     order_id: str | None = None,
 ) -> None:
+    """Markiert den Anteil als tatsächlich eingezogen (Geld ist geflossen).
+
+    Wird für 0-€-Freischaltungen direkt genutzt; bei PayPal-Zahlungen erst
+    nach erfolgreichem Einzug der Reservierung (settle_and_unlock).
+    """
     participant.paid = True
     participant.paid_at = datetime.now(timezone.utc)
+    participant.authorized = True
     participant.amount_due = round(amount, 2)
     if order_id:
         participant.paypal_order_id = order_id
     # Rabattcode jetzt tatsächlich einlösen (used_count erhöhen).
-    if participant.discount_code:
-        code = (
-            db.query(DiscountCode)
-            .filter(func.lower(DiscountCode.code) == participant.discount_code.lower())
-            .first()
-        )
-        if code:
-            code.used_count = (code.used_count or 0) + 1
+    _redeem_discount_code(db, participant)
     db.commit()
+
+
+def mark_participant_authorized(
+    db: Session,
+    participant: MediationParticipant,
+    *,
+    amount: float,
+    order_id: str,
+    authorization_id: str,
+    expires_at: datetime | None = None,
+) -> None:
+    """Merkt sich die Reservierung dieser Partei - es ist noch KEIN Geld geflossen.
+
+    Der Rabattcode wird hier bewusst noch NICHT eingelöst: das passiert erst
+    beim tatsächlichen Einzug, damit ein Code nicht verbraucht ist, wenn der
+    Fall am Ende nie zustande kommt.
+    """
+    participant.authorized = True
+    participant.authorized_at = datetime.now(timezone.utc)
+    participant.paypal_order_id = order_id
+    participant.paypal_authorization_id = authorization_id
+    participant.authorization_expires_at = expires_at
+    participant.amount_due = round(amount, 2)
+    db.commit()
+
+
+def clear_participant_authorization(db: Session, participant: MediationParticipant) -> None:
+    """Setzt eine (abgelaufene/fehlgeschlagene) Reservierung zurück.
+
+    Die Partei erscheint danach wieder als "offen" und kann erneut bezahlen.
+    """
+    participant.authorized = False
+    participant.authorized_at = None
+    participant.paypal_authorization_id = None
+    participant.authorization_expires_at = None
+    db.commit()
+
+
+async def settle_and_unlock(db: Session, mediation: Mediation) -> dict:
+    """Zieht alle Reservierungen ein, sobald ALLE Parteien zugesagt haben.
+
+    Vorher passiert bewusst nichts: solange eine Partei fehlt, bleibt das Geld
+    der anderen nur reserviert und kann jederzeit wieder freigegeben werden.
+
+    Rückgabe: ``{"is_paid": bool, "expired": [participant_id, ...]}``.
+    ``expired`` listet Parteien, deren Reservierung abgelaufen war - sie wurden
+    zurückgesetzt und müssen erneut bezahlen; der Fall bleibt dann zu.
+    """
+    if mediation.is_paid:
+        return {"is_paid": True, "expired": []}
+    if not all_owing_authorized(db, mediation):
+        return {"is_paid": False, "expired": []}
+
+    expired: list[int] = []
+    for p in owing_participants(db, mediation):
+        if p.paid:
+            continue  # bereits eingezogen (z.B. 0-€-Freischaltung)
+        if not p.paypal_authorization_id:
+            # Als zugesagt markiert, aber ohne Reservierung - inkonsistent.
+            # Zurücksetzen statt stillschweigend freischalten.
+            logger.error(
+                "Teilnehmer %s ist authorized ohne authorization_id (Mediation %s)",
+                p.id, mediation.id,
+            )
+            clear_participant_authorization(db, p)
+            expired.append(p.id)
+            continue
+        try:
+            await capture_authorization(p.paypal_authorization_id, p.amount_due)
+        except AuthorizationExpiredError:
+            logger.warning(
+                "Reservierung von Teilnehmer %s (Mediation %s) abgelaufen",
+                p.id, mediation.id,
+            )
+            clear_participant_authorization(db, p)
+            expired.append(p.id)
+            continue
+        mark_participant_paid(db, p, amount=float(p.amount_due or 0.0))
+
+    if expired:
+        # Mindestens eine Partei muss neu zahlen -> Fall bleibt zu. Die bereits
+        # eingezogenen Beträge bleiben stehen; sie werden fällig, sobald die
+        # Nachzahlung da ist.
+        return {"is_paid": False, "expired": expired}
+
+    return {"is_paid": check_and_unlock(db, mediation), "expired": []}
+
+
+async def release_authorizations(db: Session, mediation: Mediation) -> int:
+    """Gibt alle offenen Reservierungen eines Falls wieder frei (Storno).
+
+    Für den Abbruch eines Falls, bevor alle gezahlt haben: bereits reservierte
+    Beträge sollen beim Zahler nicht unnötig blockiert bleiben. Gibt die Anzahl
+    freigegebener Reservierungen zurück.
+    """
+    released = 0
+    for p in owing_participants(db, mediation):
+        if p.paid or not p.paypal_authorization_id:
+            continue
+        try:
+            await void_authorization(p.paypal_authorization_id)
+        except PayPalError:
+            logger.exception(
+                "Storno der Reservierung von Teilnehmer %s fehlgeschlagen", p.id
+            )
+            continue
+        clear_participant_authorization(db, p)
+        released += 1
+    return released
 
 
 # ── Rabattcodes ────────────────────────────────────────────────────────────
