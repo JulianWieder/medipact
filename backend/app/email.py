@@ -257,6 +257,137 @@ def send_password_reset_email(to_email: str, to_name: str, token: str) -> None:
             server.sendmail(settings.SMTP_USER or settings.EMAIL_FROM, to_email, msg.as_string())
 
 
+def _send(msg: MIMEMultipart, to_email: str, dev_note: str) -> None:
+    """Gemeinsamer SMTP-Versand. Ohne SMTP_HOST wird nur geloggt (Dev-Modus)."""
+    if not settings.SMTP_HOST:
+        print(f"[DEV] {dev_note} -> {to_email}")
+        return
+
+    context = ssl.create_default_context()
+    sender = settings.SMTP_USER or settings.EMAIL_FROM
+    if settings.SMTP_USE_SSL:
+        with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context) as server:
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(sender, to_email, msg.as_string())
+    else:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            if settings.SMTP_USE_TLS:
+                server.starttls(context=context)
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(sender, to_email, msg.as_string())
+
+
+def _simple_email(
+    to_email: str, subject: str, heading: str, paragraphs: list[str], cta: tuple[str, str] | None
+) -> MIMEMultipart:
+    """Baut eine schlichte medipact-Mail im Layout der übrigen Benachrichtigungen."""
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = settings.EMAIL_FROM
+    msg["To"] = to_email
+
+    text = "\n\n".join(paragraphs)
+    if cta:
+        text += f"\n\n{cta[0]}: {cta[1]}"
+    text += "\n\nViele Grüße\nDas medipact-Team\n"
+
+    body_html = "".join(
+        f'<p style="margin:0 0 12px;font-size:15px;color:#475569;line-height:1.6;">{p}</p>'
+        for p in paragraphs
+    )
+    cta_html = (
+        f'<a href="{cta[1]}" style="display:inline-block;margin-top:16px;background:#059669;'
+        f'color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;'
+        f'border-radius:12px;">{cta[0]}</a>'
+        if cta
+        else ""
+    )
+
+    html = f"""\
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+        <tr><td style="background:#059669;padding:32px 40px;">
+          <span style="font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;">medipact</span>
+        </td></tr>
+        <tr><td style="padding:40px 40px 32px;">
+          <h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;line-height:1.3;">{heading}</h1>
+          {body_html}
+          {cta_html}
+        </td></tr>
+        <tr><td style="background:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
+            © 2026 medipact · <a href="https://medipact.de" style="color:#059669;text-decoration:none;">medipact.de</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>
+"""
+    msg.attach(MIMEText(text, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+    return msg
+
+
+def send_authorization_expiring_email(
+    to_email: str, to_name: str, mediation_id: int, mediation_title: str, hours_left: int
+) -> None:
+    """Erinnert die Gegenseite, dass eine Reservierung der anderen Partei bald verfällt.
+
+    Angeschrieben wird die Partei, die NOCH NICHT zugestimmt hat - sie hält den
+    Fall auf, und die Reservierung der anderen Seite läuft ab (siehe
+    scripts/check_authorizations.py).
+    """
+    url = f"{settings.APP_BASE_URL}/dashboard/{mediation_id}"
+    msg = _simple_email(
+        to_email,
+        f"Nur noch {hours_left} Stunden: „{mediation_title}“ wartet auf dich",
+        "Die Gegenseite wartet auf deine Zustimmung",
+        [
+            f"Hallo {to_name},",
+            f"für den Fall <strong>{mediation_title}</strong> hat die andere Seite ihren Anteil "
+            f"bereits reserviert. Solange du nicht zustimmst, kann die Mediation nicht starten.",
+            f"Die Reservierung der Gegenseite verfällt in etwa <strong>{hours_left} Stunden</strong>. "
+            f"Danach muss sie erneut bezahlen – das verzögert euren Fall unnötig.",
+        ],
+        ("Jetzt zustimmen", url),
+    )
+    _send(msg, to_email, f"Ablauf-Erinnerung ({hours_left}h) für Fall {mediation_id}")
+
+
+def send_authorization_expired_email(
+    to_email: str, to_name: str, mediation_id: int, mediation_title: str
+) -> None:
+    """Informiert die zahlende Partei, dass ihre Reservierung verfallen ist.
+
+    Es wurde KEIN Geld abgebucht - sie muss lediglich erneut zahlen, sobald die
+    Gegenseite so weit ist.
+    """
+    url = f"{settings.APP_BASE_URL}/dashboard/{mediation_id}"
+    msg = _simple_email(
+        to_email,
+        f"Deine Zahlungsreservierung für „{mediation_title}“ ist abgelaufen",
+        "Reservierung abgelaufen – es wurde nichts abgebucht",
+        [
+            f"Hallo {to_name},",
+            f"deine Zahlungsreservierung für <strong>{mediation_title}</strong> ist abgelaufen, "
+            f"weil die Gegenseite nicht rechtzeitig zugestimmt hat.",
+            "<strong>Es wurde kein Geld abgebucht.</strong> Der vorgemerkte Betrag ist bei "
+            "deinem Zahlungsmittel wieder frei.",
+            "Sobald die andere Seite bereit ist, kannst du die Freischaltung erneut vornehmen.",
+        ],
+        ("Zum Fall", url),
+    )
+    _send(msg, to_email, f"Ablauf-Info für Fall {mediation_id}")
+
+
 def _build_invoice_email(
     to_email: str, to_name: str, invoice_number: str, mediation_title: str
 ) -> MIMEMultipart:

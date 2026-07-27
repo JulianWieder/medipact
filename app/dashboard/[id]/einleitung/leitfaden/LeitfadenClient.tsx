@@ -82,7 +82,10 @@ export default function LeitfadenClient({ mediationId }: Props) {
       const res = await fetch(`/api/mediations/${mediationId}/update`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "active", phase: "einleitung" }),
+        // Start führt in die EINLADUNGS-Phase: dort steht der Bezahl-Schritt
+        // (Blocktyp "fall_freischaltung"), und nur diese Phase ist vor der
+        // Zahlung erreichbar. Ein Sprung nach "einleitung" liefe in die Paywall.
+        body: JSON.stringify({ status: "active", phase: "einladung" }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);

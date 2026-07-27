@@ -87,6 +87,14 @@ class Settings(BaseSettings):
         default="sandbox",
         validation_alias=AliasChoices("PAYPAL_ENV", "PAYPAL_MODE"),
     )
+    # Webhook-ID aus dem PayPal-Developer-Dashboard (Apps & Credentials ->
+    # App -> Webhooks). Wird gebraucht, um eingehende Webhook-Aufrufe als echt
+    # zu verifizieren (siehe app/paypal.py verify_webhook_signature).
+    # LEER = Webhooks werden abgelehnt, damit niemand Zahlungen faken kann.
+    PAYPAL_WEBHOOK_ID: str = ""
+    # Kulanzfenster in Stunden, ab dem vor Ablauf einer Zahlungsreservierung
+    # erinnert wird (scripts/check_authorizations.py).
+    PAYPAL_AUTH_REMINDER_HOURS: int = 24
     # Preis pro Teilnehmer in EUR (einmalig, beim Freischalten der Mediation)
     PRICE_PER_PARTICIPANT_EUR: float = 499.0
 

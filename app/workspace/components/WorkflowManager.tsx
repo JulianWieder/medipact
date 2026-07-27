@@ -770,6 +770,31 @@ function BlockConfigEditor({
           />
         </>
       );
+    case "fall_freischaltung":
+      return (
+        <>
+          <FieldLabel>Überschrift</FieldLabel>
+          <input
+            value={cfgStr(c, "title")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="z.B. Mediation freischalten"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Erklärtext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "description")}
+            onChange={(e) => onChange({ description: e.target.value })}
+            rows={3}
+            placeholder="Was die Parteien hier tun und wann abgebucht wird."
+            className={INPUT_CLASS}
+          />
+          <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+            Betrag, Rabattcodes und Add-ons kommen automatisch aus der Preis-Matrix des
+            Falls – hier gibt es dafür bewusst keine Felder. Dieser Block gehört in die
+            <strong> Einladungs-Phase</strong>: nur dort ist er erreichbar, bevor bezahlt wurde.
+          </p>
+        </>
+      );
     case "bezahlung":
       return (
         <>
@@ -1056,6 +1081,20 @@ function PreviewBlock({ block }: { block: StepBlockDto }) {
       return (
         <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-3 text-sm text-blue-700">
           ⏸ {text("text") || "Wartet, bis beide Parteien bestätigt haben."}
+        </div>
+      );
+    case "fall_freischaltung":
+      return (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50/70 p-3">
+          <p className="text-sm font-semibold text-amber-800">
+            💳 {text("title") || "Mediation freischalten"}
+          </p>
+          {text("description") && (
+            <p className="mt-0.5 text-xs text-amber-700">{text("description")}</p>
+          )}
+          <p className="mt-2 text-[11px] text-amber-700">
+            Rechnungsdaten + eigener Anteil + PayPal · Betrag kommt aus der Preis-Matrix
+          </p>
         </div>
       );
     case "bezahlung":

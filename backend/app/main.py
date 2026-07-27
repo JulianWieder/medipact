@@ -18,6 +18,7 @@ from app.routers import (
     mediations,
     newsletter,
     organizations,
+    paypal_webhooks,
     phase_step_defaults,
     step_content,
 )
@@ -50,6 +51,9 @@ app.include_router(ai_prompts.router)
 app.include_router(discounts.router)
 app.include_router(organizations.router)
 app.include_router(newsletter.router)
+# PayPal-Webhooks: fängt Zahlungen auf, bei denen der Browser abgebrochen ist.
+# Öffentlich erreichbar, aber signaturgeprüft (siehe routers/paypal_webhooks.py).
+app.include_router(paypal_webhooks.router)
 
 # Dev-Test-Endpunkte (Gemini/Claude/PayPal). Über ENABLE_DEV_TEST steuerbar –
 # funktioniert auch auf dem Live-Server (nur per localhost:8000 erreichbar, da

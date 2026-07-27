@@ -227,6 +227,57 @@ async def capture_authorization(authorization_id: str, amount_eur: float | None 
     return resp.json()
 
 
+async def verify_webhook_signature(headers: dict, event_body: str) -> bool:
+    """Prüft bei PayPal, ob ein eingehender Webhook echt ist.
+
+    Ohne diese Prüfung könnte jeder einen Request an unseren Webhook schicken
+    und damit Zahlungen als erfolgreich melden. Ist PAYPAL_WEBHOOK_ID nicht
+    gesetzt, gilt der Webhook als NICHT verifiziert (fail closed).
+
+    ``event_body`` muss der exakte Roh-Body des Requests sein - schon ein
+    unterschiedlich formatiertes JSON lässt die Signaturprüfung scheitern.
+    """
+    if not settings.PAYPAL_WEBHOOK_ID:
+        return False
+
+    def _h(name: str) -> str:
+        # Header sind case-insensitiv; PayPal schickt sie in Großschreibung.
+        return headers.get(name) or headers.get(name.lower()) or ""
+
+    required = [
+        "PAYPAL-AUTH-ALGO",
+        "PAYPAL-CERT-URL",
+        "PAYPAL-TRANSMISSION-ID",
+        "PAYPAL-TRANSMISSION-SIG",
+        "PAYPAL-TRANSMISSION-TIME",
+    ]
+    if not all(_h(k) for k in required):
+        return False
+
+    token = await _get_access_token()
+    # webhook_event muss als JSON-Objekt (nicht als String) mitgeschickt werden.
+    import json
+
+    payload = {
+        "auth_algo": _h("PAYPAL-AUTH-ALGO"),
+        "cert_url": _h("PAYPAL-CERT-URL"),
+        "transmission_id": _h("PAYPAL-TRANSMISSION-ID"),
+        "transmission_sig": _h("PAYPAL-TRANSMISSION-SIG"),
+        "transmission_time": _h("PAYPAL-TRANSMISSION-TIME"),
+        "webhook_id": settings.PAYPAL_WEBHOOK_ID,
+        "webhook_event": json.loads(event_body),
+    }
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        resp = await client.post(
+            f"{_api_base()}/v1/notifications/verify-webhook-signature",
+            json=payload,
+            headers=_json_headers(token),
+        )
+    if resp.status_code != 200:
+        return False
+    return resp.json().get("verification_status") == "SUCCESS"
+
+
 async def void_authorization(authorization_id: str) -> None:
     """Hebt eine Reservierung auf (Storno) - der Betrag wird beim Zahler wieder frei.
 

@@ -253,6 +253,21 @@ def check_and_unlock(db: Session, mediation: Mediation) -> bool:
     if all_owing_paid(db, mediation) and not mediation.is_paid:
         mediation.is_paid = True
         db.commit()
+        # Genau hier entstehen die Rechnungen - nicht mehr beim Start des Falls.
+        # Seit die Zahlung ein Schritt im Workflow ist, kann ein Fall bereits
+        # unbezahlt starten; erst der vollständige Zahlungseingang ist der
+        # richtige Auslöser (siehe services/invoicing.py).
+        try:
+            from app.services import invoicing
+
+            invoicing.ensure_invoices(db, mediation)
+        except Exception:
+            # Eine fehlgeschlagene Rechnung darf die Freischaltung nie blockieren -
+            # das Geld ist eingezogen, der Fall muss laufen. Nacherzeugung ist
+            # idempotent und passiert beim nächsten Aufruf.
+            logger.exception(
+                "Rechnungserstellung für Fall %s fehlgeschlagen", mediation.id
+            )
     return bool(mediation.is_paid)
 
 
@@ -325,6 +340,9 @@ def clear_participant_authorization(db: Session, participant: MediationParticipa
     participant.authorized_at = None
     participant.paypal_authorization_id = None
     participant.authorization_expires_at = None
+    # Erinnerungs-Merker mit zurücksetzen: eine spätere neue Reservierung soll
+    # wieder erinnern dürfen.
+    participant.authorization_reminder_sent_at = None
     db.commit()
 
 

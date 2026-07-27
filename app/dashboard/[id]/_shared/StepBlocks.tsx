@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StepBlockDto } from "@/app/workspace/types";
+import FallFreischaltungBlock from "./FallFreischaltungBlock";
 import {
   fetchBlockResponses,
   saveBlockResponse,
@@ -538,6 +539,18 @@ export default function StepBlocks({
           <div key={block.id} className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 text-sm text-blue-700">
             ⏸ {cfgStr(c, "text") || "Es geht weiter, sobald beide Parteien bestätigt haben."}
           </div>
+        );
+      case "fall_freischaltung":
+        // Der eigentliche Bezahl-Schritt des Falls (Rechnungsdaten + eigener
+        // Anteil + PayPal). Eigene Komponente, weil er deutlich mehr Zustand
+        // hält als die übrigen Blöcke.
+        return (
+          <FallFreischaltungBlock
+            key={block.id}
+            mediationId={mediationId}
+            title={cfgStr(c, "title")}
+            description={cfgStr(c, "description")}
+          />
         );
       case "bezahlung": {
         const price = cfgNum(c, "price", 0);

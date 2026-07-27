@@ -14,6 +14,7 @@ from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.security import get_current_db_user
+from app.services import invoicing
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
@@ -54,11 +55,13 @@ class InvoiceUpdate(BaseModel):
 
 
 def _next_invoice_number(db: Session) -> str:
-    """Erzeugt 'RE-{Jahr}-{laufende Nummer}', z.B. 'RE-2026-0042'."""
-    year = datetime.now(timezone.utc).year
-    prefix = f"RE-{year}-"
-    count = db.query(Invoice).filter(Invoice.invoice_number.like(f"{prefix}%")).count()
-    return f"{prefix}{count + 1:04d}"
+    """Erzeugt 'RE-{Jahr}-{laufende Nummer}', z.B. 'RE-2026-0042'.
+
+    Dünner Wrapper - die Nummernvergabe liegt in services/invoicing.py, damit
+    die automatische Rechnungserstellung bei Zahlungseingang dieselbe Logik
+    nutzt und keine zweite Nummernreihe entsteht.
+    """
+    return invoicing.next_invoice_number(db)
 
 
 def _get_participant_or_404(db: Session, mediation_id: int, participant_id: int) -> MediationParticipant:

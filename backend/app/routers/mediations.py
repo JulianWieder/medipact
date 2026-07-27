@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -8,7 +9,6 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models.invoice import Invoice
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
 from app.models.mediation_note import MediationNote
@@ -26,16 +26,18 @@ from app.paypal import (
     PayPalError,
     authorize_order,
     create_order,
+    void_authorization,
 )
 from app.prompts import get_prompt
-from app.routers.invoices import _next_invoice_number
 from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
 from app import pricing
-from app.services import billing
+from app.services import billing, invoicing
 from app.services import tenancy
 from app.models.organization import Organization
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/mediations", tags=["mediations"])
 mediations = []
@@ -355,60 +357,10 @@ def _mediation_price_eur(db: Session, mediation_id: int) -> float:
     return round(sum(billing.participant_base_due(db, mediation, p) for p in billing.owing_participants(db, mediation)), 2)
 
 
-def _ensure_start_invoices(db: Session, mediation: Mediation) -> None:
-    """
-    Legt automatisch Rechnungen an, wenn ein Fall gestartet wird (siehe
-    update_mediation unten) - eine EIGENE Rechnung für JEDE zahlungspflichtige
-    Partei (anteilige Zahlung = keine Sammel-Rechnung, siehe models/invoice.py).
-    Die Rechnungsadresse jeder Partei ist an dieser Stelle bereits Pflicht,
-    weil sie vor der Zahlung hinterlegt werden muss (create_paypal_order/
-    redeem_free) und der Start erst nach vollständiger Zahlung möglich ist.
-
-    Idempotent: existiert für (mediation, participant) bereits eine
-    Rechnung (z.B. durch einen erneuten PATCH-Aufruf), wird keine zweite
-    angelegt.
-
-    Die Rechnungen gehen NICHT automatisch per E-Mail raus - sie stehen
-    zunächst nur als PDF zum Ansehen/Ausdrucken bereit (GET /invoices/{id}/pdf).
-    Erst ein Mediator/Admin kann sie nach Prüfung explizit per E-Mail freigeben
-    (POST /invoices/{id}/send-email, siehe routers/invoices.py).
-
-    Steuersatz wird bewusst auf 0.0 als Platzhalter gesetzt (auf Wunsch von
-    Julian, da die USt-ID/Kleinunternehmer-Status noch nicht final geklärt
-    ist) - der Mediator/Admin muss den tatsächlichen Satz vor Freigabe im
-    Rechnungsformular prüfen und ggf. anpassen.
-    """
-    for participant in billing.owing_participants(db, mediation):
-        existing = (
-            db.query(Invoice)
-            .filter(
-                Invoice.mediation_id == mediation.id,
-                Invoice.participant_id == participant.id,
-            )
-            .first()
-        )
-        if existing:
-            continue
-
-        payer = db.query(User).filter(User.id == participant.user_id).first()
-        invoice = Invoice(
-            invoice_number=_next_invoice_number(db),
-            mediation_id=mediation.id,
-            participant_id=participant.id,
-            payer_name=(payer.name if payer else None),
-            payer_email=(payer.email if payer else None),
-            billing_street=participant.billing_street,
-            billing_postal_code=participant.billing_postal_code,
-            billing_city=participant.billing_city,
-            amount=billing.participant_final_due(db, mediation, participant),
-            tax_rate=0.0,
-            currency="EUR",
-            status="paid",
-            issued_at=datetime.now(timezone.utc),
-            paid_at=datetime.now(timezone.utc),
-        )
-        db.add(invoice)
-        db.commit()
+# Hinweis: Die frühere _ensure_start_invoices() ist entfallen. Rechnungen
+# entstehen nicht mehr beim Start des Falls, sondern beim vollständigen
+# Zahlungseingang - siehe services/invoicing.py (aufgerufen aus
+# services/billing.check_and_unlock).
 
 
 MEDIATOR_ROLE = "mediator"
@@ -578,8 +530,14 @@ def create_mediation(
     }
 
 
+# Status, die einen Fall endgültig beenden. Beim Übergang dorthin werden noch
+# offene Zahlungsreservierungen freigegeben - das Geld der Parteien, die schon
+# zugesagt haben, soll nicht weiter bei PayPal blockiert bleiben.
+TERMINAL_STATUSES = {"cancelled", "canceled", "abgebrochen", "archived", "archiviert"}
+
+
 @router.patch("/{mediation_id}")
-def update_mediation(
+async def update_mediation(
     mediation_id: int,
     payload: MediationUpdate,
     db: Session = Depends(get_db),
@@ -612,31 +570,23 @@ def update_mediation(
     # Phase 1 darf erst starten, wenn bezahlt wurde. Diese Prüfung greift
     # serverseitig, damit ein direkter API-Call (z.B. via Link) die Paywall
     # nicht umgehen kann.
-    if update_data.get("status") == "active" and not mediation.is_paid:
-        raise HTTPException(
-            status_code=402,
-            detail="Zahlung erforderlich, bevor die Mediation gestartet werden kann.",
-        )
+    # Der Start ist NICHT mehr zahlungspflichtig. Die Zahlung ist inzwischen ein
+    # Schritt INNERHALB des Workflows (Blocktyp "fall_freischaltung" in der
+    # Einladungs-Phase) - ein Fall startet also bewusst unbezahlt und landet
+    # genau in dieser Phase.
+    #
+    # Die Paywall bleibt davon unberührt: services/billing.ensure_unlocked
+    # blockiert weiterhin ALLE Inhalte außerhalb von "einladung"/"logbuch", bis
+    # jede zahlungspflichtige Partei bezahlt hat. Der Weg in spätere Phasen ist
+    # damit nach wie vor geschützt.
+    new_status = (update_data.get("status") or "").lower()
+    ending_now = new_status in TERMINAL_STATUSES and (mediation.status or "").lower() != new_status
 
-    # "Fall wird gestartet" = Übergang nach status "active". Genau in diesem
-    # Moment wird automatisch für JEDE zahlungspflichtige Partei eine Rechnung
-    # angelegt (siehe _ensure_start_invoices) - dafür muss jede dieser Parteien
-    # ihre Rechnungsadresse hinterlegt haben. Normalerweise ist das durch die
-    # Adress-Pflicht vor der Zahlung bereits sichergestellt; diese Prüfung ist
-    # der serverseitige Fallback für Altfälle/direkte API-Calls.
     starting_now = update_data.get("status") == "active" and mediation.status != "active"
-    if starting_now:
-        missing = [
-            p for p in billing.owing_participants(db, mediation) if not _has_billing_address(p)
-        ]
-        if missing:
-            raise HTTPException(
-                status_code=422,
-                detail=(
-                    "Es fehlen noch Rechnungsadressen (Straße, PLZ, Ort). "
-                    "Jede zahlende Partei muss ihre Rechnungsdaten hinterlegen, bevor die Mediation startet."
-                ),
-            )
+    if starting_now and not update_data.get("phase"):
+        # Ohne ausdrücklich gesetzte Phase startet ein Fall in der
+        # Einladungs-Phase - dort steht der Bezahl-Schritt.
+        update_data["phase"] = "einladung"
 
     for key, value in update_data.items():
         setattr(mediation, key, value)
@@ -644,8 +594,32 @@ def update_mediation(
     db.commit()
     db.refresh(mediation)
 
-    if starting_now:
-        _ensure_start_invoices(db, mediation)
+    # Rechnungen entstehen NICHT mehr beim Start, sondern beim vollständigen
+    # Zahlungseingang (services/billing.check_and_unlock -> invoicing).
+    # Für Altfälle, die vor dem Umbau bereits bezahlt gestartet sind, holen wir
+    # sie hier nach - der Aufruf ist idempotent.
+    if starting_now and mediation.is_paid:
+        try:
+            invoicing.ensure_invoices(db, mediation)
+        except Exception:
+            logger.exception(
+                "Nachträgliche Rechnungserstellung für Fall %s fehlgeschlagen", mediation.id
+            )
+
+    if ending_now:
+        # Fall wird beendet, bevor alle bezahlt haben -> reservierte Beträge
+        # freigeben, statt sie beim Zahler blockiert zu lassen.
+        try:
+            released = await billing.release_authorizations(db, mediation)
+            if released:
+                logger.info(
+                    "Fall %s beendet: %s Reservierung(en) freigegeben",
+                    mediation.id, released,
+                )
+        except Exception:  # Storno darf das Beenden des Falls nie blockieren
+            logger.exception(
+                "Freigabe der Reservierungen für Fall %s fehlgeschlagen", mediation.id
+            )
 
     return mediation
 
@@ -895,6 +869,13 @@ async def create_paypal_order(
     except PayPalError as e:
         raise HTTPException(status_code=502, detail=str(e))
 
+    # Order-ID sofort merken (noch VOR der Bestätigung durch den Nutzer). Nur so
+    # lässt sich ein Webhook später dieser Partei zuordnen, wenn der Browser
+    # zwischen PayPal-Bestätigung und unserem Autorisierungs-Aufruf abbricht
+    # (siehe routers/paypal_webhooks.py).
+    me.paypal_order_id = order["id"]
+    db.commit()
+
     return {"order_id": order["id"], "amount_eur": amount}
 
 
@@ -953,6 +934,37 @@ async def capture_paypal_order(
             "sobald sie erneut bezahlt hat."
         )
     return payload_out
+
+
+@router.post("/{mediation_id}/pay/release")
+async def release_own_authorization(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Gibt die EIGENE Zahlungsreservierung wieder frei (Rückzieher vor dem Start).
+
+    Nur solange nichts eingezogen wurde - nach dem Einzug wäre das eine
+    Erstattung und kein Storno mehr.
+    """
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if me.paid:
+        raise HTTPException(
+            status_code=400,
+            detail="Dein Anteil wurde bereits eingezogen – bitte wende dich für eine Erstattung an den Support.",
+        )
+    if not me.authorized or not me.paypal_authorization_id:
+        raise HTTPException(status_code=400, detail="Es liegt keine Reservierung vor.")
+
+    try:
+        await void_authorization(me.paypal_authorization_id)
+    except PayPalError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    billing.clear_participant_authorization(db, me)
+    db.refresh(me)
+    return {"ok": True, **_payment_status_payload(db, mediation, me)}
 
 
 @router.post("/{mediation_id}/pay/free")

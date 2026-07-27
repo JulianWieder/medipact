@@ -6,80 +6,11 @@ import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
 
-type PayPalSdk = {
-  Buttons: (options: Record<string, unknown>) => {
-    // render() liefert ein Promise – schlägt es fehl (SDK-Fehler, Container
-    // nicht im DOM), muss der Button neu gerendert werden können.
-    render: (container: HTMLElement) => Promise<void>;
-  };
-};
-
-declare global {
-  interface Window {
-    // Standard-SDK (intent=capture): sofortige Abbuchung, genutzt von den
-    // Ein-Zahler-Flows (Logbuch-Premium, Bonus-Blöcke, Firmen-Onboarding).
-    paypal?: PayPalSdk;
-    // Eigene SDK-Instanz mit intent=authorize für die Fall-Freischaltung.
-    // MUSS getrennt geladen werden: das SDK erwartet, dass der Intent im
-    // Script-URL zum Intent der serverseitig erzeugten Order passt – sonst
-    // öffnet sich das PayPal-Fenster und schließt sofort wieder. Über
-    // data-namespace landet es in window.paypalAuthorize statt window.paypal
-    // und überschreibt das Standard-SDK nicht.
-    paypalAuthorize?: PayPalSdk;
-  }
-}
-
-// Script-Tag-ID und Namespace der AUTHORIZE-Variante des PayPal-SDK.
-const PAYPAL_AUTHORIZE_SCRIPT_ID = "paypal-sdk-authorize";
-const PAYPAL_AUTHORIZE_NAMESPACE = "paypalAuthorize";
-
-type PartyStatus = {
-  participant_id: number;
-  role: string;
-  name: string | null;
-  owes: boolean;
-  // paid = Betrag wurde tatsächlich eingezogen.
-  paid: boolean;
-  // authorized = zugesagt, Betrag ist bei PayPal reserviert, aber noch nicht
-  // abgebucht. Eingezogen wird erst, wenn alle Parteien zugesagt haben.
-  authorized?: boolean;
-  amount_due_eur: number;
-  is_you: boolean;
-  billing_address_complete?: boolean;
-};
-
-type AddonOffer = {
-  key: string;
-  label: string;
-  description: string;
-  price_eur: number;
-};
-
-type PayStatus = {
-  mediation_type: string;
-  package: string;
-  billing_model: string;
-  case_base_price_eur: number;
-  is_paid: boolean;
-  all_owing_paid: boolean;
-  // Buchbare Add-ons des Einstiegs-Tarifs (leer bei Premium-Typen).
-  addons_available?: AddonOffer[];
-  you: {
-    owes: boolean;
-    base_due_eur: number;
-    discount_code: string | null;
-    discount_amount_eur: number;
-    addons?: { key: string; price_eur: number }[];
-    addons_total_eur?: number;
-    amount_due_eur: number;
-    paid: boolean;
-    authorized?: boolean;
-    billing_address_complete?: boolean;
-  };
-  participants: PartyStatus[];
-  // Hinweis vom Backend, z.B. wenn eine Reservierung der Gegenseite abgelaufen ist.
-  warning?: string;
-};
+// Bezahl-Typen und das PayPal-SDK sind hier bewusst NICHT mehr definiert:
+// die Zahlung ist seit dem Umbau ein Schritt innerhalb der Mediation
+// (_shared/FallFreischaltungBlock.tsx, Blocktyp "fall_freischaltung").
+// Dieses Onboarding kennt vom Bezahlvorgang nur noch das Ja/Nein aus
+// mediations.is_paid.
 
 type Props = {
   mediationId: string;
@@ -201,33 +132,10 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   const [videoMode, setVideoMode] = useState<"optional" | "required" | "off">("optional");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myRole, setMyRole] = useState("");
+  // Zahlungsstatus wird hier nur noch ANGEZEIGT (Hinweis im Start-Schritt) –
+  // Rechnungsdaten, Rabattcodes, Add-ons und PayPal liegen seit dem Umbau im
+  // Bezahl-Block der Einladungs-Phase (_shared/FallFreischaltungBlock.tsx).
   const [isPaid, setIsPaid] = useState(initialIsPaid);
-  const [paying, setPaying] = useState(false);
-  const [payStatus, setPayStatus] = useState<PayStatus | null>(null);
-  const [addonBusy, setAddonBusy] = useState(false);
-  const [discountInput, setDiscountInput] = useState("");
-  const [discountBusy, setDiscountBusy] = useState(false);
-  const [discountError, setDiscountError] = useState("");
-  // Rechnungsdaten (pro Fall, für den eingeloggten Teilnehmer). Pflicht für
-  // jede zahlende Partei, bevor sie ihren Anteil bezahlt – beim Start wird
-  // daraus automatisch die Rechnung erstellt.
-  const [billingStreet, setBillingStreet] = useState("");
-  const [billingPostalCode, setBillingPostalCode] = useState("");
-  const [billingCity, setBillingCity] = useState("");
-  const [billingSaved, setBillingSaved] = useState(false);
-  const [billingEditing, setBillingEditing] = useState(false);
-  const [billingBusy, setBillingBusy] = useState(false);
-  const [billingError, setBillingError] = useState("");
-  const paypalContainerRef = useRef<HTMLDivElement>(null);
-  // Merkt sich den DOM-Knoten, in den die PayPal-Buttons tatsächlich gerendert
-  // wurden. Ein bloßes boolean ("schon gerendert") reicht nicht: mountet React
-  // den Container neu (Re-Render nach Rabatt/Add-on/Fehler), zeigt der Ref auf
-  // einen neuen, LEEREN div – der Effect würde aber wegen "schon gerendert"
-  // abbrechen und der Bezahl-Button bliebe für immer unsichtbar.
-  const paypalMountedNodeRef = useRef<HTMLElement | null>(null);
-  // Hochzählen erzwingt einen neuen Render-Versuch (z.B. nach fehlgeschlagener
-  // Zahlung), damit der Nutzer es direkt noch einmal probieren kann.
-  const [paypalRetry, setPaypalRetry] = useState(0);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -467,302 +375,23 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
   }
 
-  async function saveBillingAddress() {
-    const street = billingStreet.trim();
-    const postal = billingPostalCode.trim();
-    const city = billingCity.trim();
-    if (!street || !postal || !city) {
-      setBillingError("Bitte fülle Straße, PLZ und Ort aus.");
-      return;
-    }
-    setBillingBusy(true);
-    setBillingError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/billing-address`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          billing_street: street,
-          billing_postal_code: postal,
-          billing_city: city,
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setBillingError(data?.detail ?? data?.error ?? "Rechnungsdaten konnten nicht gespeichert werden.");
-        return;
-      }
-      setBillingSaved(true);
-      setBillingEditing(false);
-      // Bezahl-Status neu laden, damit billing_address_complete aktuell ist.
-      if (hasOtherParty && !isPaid) loadPayStatus();
-    } catch {
-      setBillingError("Server nicht erreichbar.");
-    } finally {
-      setBillingBusy(false);
-    }
-  }
-
-  async function loadPayStatus() {
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/price`, { cache: "no-store" });
-      if (res.ok) {
-        const data: PayStatus = await res.json();
-        setPayStatus(data);
-        if (data.is_paid) setIsPaid(true);
-      }
-    } catch {
-      // still ignorieren
-    }
-  }
-
-  // Bezahl-Status laden, sobald die Gegenseite verbunden ist und noch nicht freigeschaltet wurde
+  // Nur noch die Ja/Nein-Info, ob der Fall vollständig bezahlt ist – für den
+  // Hinweis im Start-Schritt. Alles Weitere (Betrag, Rabatt, Add-ons, PayPal)
+  // steckt im Bezahl-Block der Einladungs-Phase.
   useEffect(() => {
     if (!hasOtherParty || isPaid) return;
-    loadPayStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    (async () => {
+      try {
+        const res = await fetch(`/api/mediations/${mediationId}/price`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { is_paid?: boolean };
+        if (data.is_paid) setIsPaid(true);
+      } catch {
+        // still ignorieren
+      }
+    })();
   }, [mediationId, hasOtherParty, isPaid]);
 
-  async function applyDiscount() {
-    if (!discountInput.trim()) return;
-    setDiscountBusy(true);
-    setDiscountError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/discount`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: discountInput.trim() }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setDiscountError(data?.detail ?? data?.error ?? "Rabattcode ungültig.");
-        return;
-      }
-      setPayStatus(data);
-    } catch {
-      setDiscountError("Server nicht erreichbar.");
-    } finally {
-      setDiscountBusy(false);
-    }
-  }
-
-  async function removeDiscount() {
-    setDiscountError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/discount`, { method: "DELETE" });
-      const data = await res.json().catch(() => null);
-      if (res.ok) {
-        setPayStatus(data);
-        setDiscountInput("");
-      }
-    } catch {
-      setDiscountError("Server nicht erreichbar.");
-    }
-  }
-
-  // Add-on an-/abwählen (Einstiegs-Tarif): ersetzt die Auswahl serverseitig
-  // komplett und aktualisiert den Bezahl-Status (Betrag inkl. Add-ons).
-  async function toggleAddon(key: string) {
-    if (!payStatus || payStatus.you.paid || addonBusy) return;
-    const current = (payStatus.you.addons ?? []).map((a) => a.key);
-    const next = current.includes(key)
-      ? current.filter((k) => k !== key)
-      : [...current, key];
-    setAddonBusy(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/addons`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keys: next }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError(data?.detail ?? data?.error ?? "Add-ons konnten nicht gespeichert werden.");
-        return;
-      }
-      setPayStatus(data);
-    } catch {
-      setError("Server nicht erreichbar.");
-    } finally {
-      setAddonBusy(false);
-    }
-  }
-
-  async function redeemFree() {
-    setPaying(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/pay/free`, { method: "POST" });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError(data?.detail ?? data?.error ?? "Freischaltung fehlgeschlagen.");
-        return;
-      }
-      setPayStatus(data);
-      if (data.warning) setError(data.warning);
-      if (data.is_paid) setIsPaid(true);
-    } catch {
-      setError("Server nicht erreichbar.");
-    } finally {
-      setPaying(false);
-    }
-  }
-
-  // Rechnungsdaten sind Voraussetzung für die eigene Zahlung (Rechnung pro
-  // Partei beim Start) – ohne Adresse bleibt der Bezahl-Schritt gesperrt.
-  const needsBillingBeforePay = !!payStatus && payStatus.you.owes && !billingSaved;
-
-  // Eigener Betrag ist zugesagt und bei PayPal reserviert, aber noch nicht
-  // abgebucht – wir warten auf die Gegenseite.
-  const iAmAuthorized = !!payStatus && !!payStatus.you.authorized && !payStatus.you.paid;
-
-  // Zeigt PayPal nur, wenn die aktuelle Partei einen offenen Betrag (> 0 €)
-  // hat, noch nicht reserviert hat UND ihre Rechnungsdaten hinterlegt sind.
-  const showPaypal =
-    !!payStatus &&
-    payStatus.you.owes &&
-    !payStatus.you.paid &&
-    !iAmAuthorized &&
-    payStatus.you.amount_due_eur > 0 &&
-    !isPaid &&
-    billingSaved;
-
-  // Setzt die PayPal-Buttons zurück, sodass sie neu gerendert werden. Nötig
-  // nach einer fehlgeschlagenen Zahlung: die alte Button-Instanz gehört zu
-  // einer bereits genehmigten Order und ist damit verbraucht.
-  function resetPaypalButtons() {
-    paypalMountedNodeRef.current = null;
-    if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
-    setPaypalRetry((n) => n + 1);
-  }
-
-  // PayPal-Button für den EIGENEN Anteil rendern
-  useEffect(() => {
-    if (!hasOtherParty || isPaid) return;
-    if (!showPaypal) {
-      // Kein offener Betrag (bezahlt oder per Rabatt 0 €) -> evtl. Button entfernen.
-      if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
-      paypalMountedNodeRef.current = null;
-      return;
-    }
-    // Nur abbrechen, wenn GENAU in den aktuell gemounteten Container gerendert
-    // wurde – nach einem Remount ist der Knoten ein anderer und wir rendern neu.
-    if (
-      paypalMountedNodeRef.current &&
-      paypalMountedNodeRef.current === paypalContainerRef.current
-    ) {
-      return;
-    }
-
-    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-    if (!clientId) {
-      setError("PayPal ist noch nicht konfiguriert (NEXT_PUBLIC_PAYPAL_CLIENT_ID fehlt).");
-      return;
-    }
-
-    function renderButtons() {
-      const container = paypalContainerRef.current;
-      const sdk = window[PAYPAL_AUTHORIZE_NAMESPACE];
-      if (!sdk || !container) return;
-      if (paypalMountedNodeRef.current === container) return;
-      paypalMountedNodeRef.current = container;
-      container.innerHTML = "";
-      sdk
-        .Buttons({
-          style: { layout: "vertical", color: "gold", label: "paypal" },
-          createOrder: async () => {
-            setError("");
-            const res = await fetch(`/api/mediations/${mediationId}/pay/paypal/create-order`, {
-              method: "POST",
-            });
-            const data = await res.json().catch(() => null);
-            if (!res.ok) {
-              throw new Error(data?.detail ?? "Order konnte nicht erstellt werden");
-            }
-            return data.order_id;
-          },
-          onApprove: async (data: { orderID: string }) => {
-            setPaying(true);
-            setError("");
-            try {
-              const res = await fetch(`/api/mediations/${mediationId}/pay/paypal/capture-order`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ order_id: data.orderID }),
-              });
-              const body = await res.json().catch(() => null);
-              if (!res.ok) {
-                const raw = body?.detail ?? body?.error;
-                setError(`Zahlung fehlgeschlagen: ${raw ?? "Unbekannter Fehler"}`);
-                // Die genehmigte Order ist verbraucht – Buttons neu aufbauen,
-                // sonst steht der Nutzer vor einem leeren Bezahl-Bereich.
-                resetPaypalButtons();
-                return;
-              }
-              setPayStatus(body);
-              // z.B. abgelaufene Reservierung der Gegenseite – kein Fehler,
-              // aber der Fall startet erst nach deren Nachzahlung.
-              if (body.warning) setError(body.warning);
-              if (body.is_paid) setIsPaid(true);
-            } catch {
-              setError("Server nicht erreichbar.");
-              resetPaypalButtons();
-            } finally {
-              setPaying(false);
-            }
-          },
-          onError: () => {
-            setError("PayPal hat einen Fehler gemeldet. Bitte versuche es erneut.");
-            resetPaypalButtons();
-          },
-          onCancel: () => {
-            // Nutzer hat das PayPal-Fenster geschlossen – Buttons bleiben nutzbar.
-            setPaying(false);
-          },
-        })
-        .render(container)
-        .catch(() => {
-          // Render fehlgeschlagen -> Sperre lösen, damit ein neuer Versuch greift.
-          paypalMountedNodeRef.current = null;
-          setError("Der PayPal-Button konnte nicht geladen werden. Bitte Seite neu laden.");
-        });
-    }
-
-    const existing = document.getElementById(
-      PAYPAL_AUTHORIZE_SCRIPT_ID,
-    ) as HTMLScriptElement | null;
-    if (window[PAYPAL_AUTHORIZE_NAMESPACE]) {
-      renderButtons();
-    } else if (existing) {
-      existing.addEventListener("load", renderButtons);
-    } else {
-      const script = document.createElement("script");
-      script.id = PAYPAL_AUTHORIZE_SCRIPT_ID;
-      // intent=authorize MUSS zum Intent der serverseitig erzeugten Order
-      // passen (siehe backend/app/paypal.py create_order). Fehlt es, öffnet
-      // sich das PayPal-Fenster und schließt sofort wieder.
-      script.src =
-        `https://www.paypal.com/sdk/js?client-id=${clientId}` +
-        `&currency=EUR&intent=authorize`;
-      script.setAttribute("data-namespace", PAYPAL_AUTHORIZE_NAMESPACE);
-      script.addEventListener("load", renderButtons);
-      script.addEventListener("error", () => {
-        setError(
-          "Das PayPal-SDK konnte nicht geladen werden (Netzwerk oder Adblocker?). Bitte Seite neu laden.",
-        );
-      });
-      document.body.appendChild(script);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    mediationId,
-    hasOtherParty,
-    isPaid,
-    showPaypal,
-    payStatus?.you.amount_due_eur,
-    paypalRetry,
-  ]);
 
   async function startMediation() {
     setAdvancing(true);
@@ -771,7 +400,11 @@ export default function MediationClient({ mediationId, userRole, currentUserName
       const res = await fetch(`/api/mediations/${mediationId}/update`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "active", phase: "einleitung" }),
+        // Start führt in die EINLADUNGS-Phase, nicht direkt nach "einleitung":
+        // dort steht der Bezahl-Schritt (Blocktyp "fall_freischaltung"), und
+        // nur diese Phase ist vor der Zahlung überhaupt erreichbar. Ein Sprung
+        // nach "einleitung" liefe sofort in die Paywall.
+        body: JSON.stringify({ status: "active", phase: "einladung" }),
       });
       if (!res.ok) {
         const errorBody = await res.json().catch(() => null);
@@ -798,17 +431,16 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   }
 
   // ── Schritt-Status fürs Onboarding ─────────────────────────────────────────
-  const isMediatorHere = myRole === "mediator" || userRole === "mediator" || userRole === "admin";
+  //
+  // Das Onboarding ist seit dem Umbau zahlungsunabhängig: Rechnungsdaten und
+  // Zahlung sind kein Checklisten-Schritt mehr, sondern der erste Schritt
+  // INNERHALB der Mediation (Blocktyp "fall_freischaltung" in der
+  // Einladungs-Phase, gepflegt im WorkflowManager). Hier bleiben nur noch:
+  //   1. Beteiligte verbinden
+  //   2. Mediation starten  – darf jede Partei, nicht nur der Initiator
   const step1Done = hasOtherParty;
-  // Rechnungsdaten: erledigt, wenn gespeichert – oder gar nicht nötig
-  // (Mediator bzw. Partei ohne eigenen Anteil).
-  const billingNotNeeded = isMediatorHere || (!!payStatus && !payStatus.you.owes);
-  const step2Done = billingSaved || billingNotNeeded;
-  const step3Done = isPaid;
   const step1State: StepState = step1Done ? "done" : "active";
-  const step2State: StepState = step2Done ? "done" : step1Done ? "active" : "locked";
-  const step3State: StepState = step3Done ? "done" : step1Done && step2Done ? "active" : "locked";
-  const step4State: StepState = step3Done ? "active" : "locked";
+  const step2State: StepState = step1Done ? "active" : "locked";
 
   const mediator = participants.find((p) => p.role === "mediator");
   const parties = participants.filter((p) => p.role !== "mediator");
@@ -826,8 +458,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               <p className="eyebrow mb-3">Mediation vorbereiten</p>
               <h1 className="heading-2 text-neutral-900">Dein Start in die Mediation</h1>
               <p className="mt-4 max-w-2xl text-neutral-600">
-                Vier Schritte bis zum Start: Beteiligte verbinden, Rechnungsdaten
-                hinterlegen, Verfahren freischalten – dann kann die Mediation beginnen.
+                Zwei Schritte bis zum Start: Beteiligte verbinden, dann die Mediation
+                starten. Die Freischaltung ist der erste Schritt im Verfahren selbst –
+                dort hinterlegt jede Partei ihre Rechnungsdaten und ihren Anteil.
               </p>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
@@ -1077,348 +710,19 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             )}
           </StepCard>
 
-          {/* Schritt 2: Rechnungsdaten */}
+
+          {/* Schritt 2: Mediation starten */}
           <StepCard
             index={2}
-            title="Rechnungsdaten hinterlegen"
-            state={step2State}
-            badge={step2Done ? (billingSaved ? "Gespeichert" : "Nicht erforderlich") : "Offen"}
-          >
-            {billingNotNeeded && !billingSaved ? (
-              <p className="text-sm text-neutral-600">
-                Für dich fällt kein Betrag an – Rechnungsdaten sind nicht erforderlich.
-              </p>
-            ) : billingSaved && !billingEditing ? (
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-neutral-600">Deine Rechnung geht an:</p>
-                  <p className="mt-1 font-semibold text-neutral-900">
-                    {billingStreet}, {billingPostalCode} {billingCity}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setBillingEditing(true)}
-                  className="btn btn-ghost text-sm"
-                >
-                  Ändern
-                </button>
-              </div>
-            ) : (
-              <div className="max-w-xl">
-                <p className="text-sm text-neutral-600">
-                  Beim Start der Mediation wird für jede zahlende Partei automatisch eine
-                  Rechnung über den eigenen Anteil erstellt. Dafür brauchen wir deine
-                  Rechnungsadresse.
-                </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-[2fr_1fr_2fr]">
-                  <div className="sm:col-span-3">
-                    <label htmlFor="billing-street" className="text-sm font-semibold text-neutral-900">
-                      Straße und Hausnummer
-                    </label>
-                    <input
-                      id="billing-street"
-                      value={billingStreet}
-                      onChange={(e) => setBillingStreet(e.target.value)}
-                      placeholder="Musterstraße 12"
-                      className={`mt-2 ${inputClass}`}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="billing-postal" className="text-sm font-semibold text-neutral-900">
-                      PLZ
-                    </label>
-                    <input
-                      id="billing-postal"
-                      value={billingPostalCode}
-                      onChange={(e) => setBillingPostalCode(e.target.value)}
-                      placeholder="10115"
-                      className={`mt-2 ${inputClass}`}
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label htmlFor="billing-city" className="text-sm font-semibold text-neutral-900">
-                      Ort
-                    </label>
-                    <input
-                      id="billing-city"
-                      value={billingCity}
-                      onChange={(e) => setBillingCity(e.target.value)}
-                      placeholder="Berlin"
-                      className={`mt-2 ${inputClass}`}
-                    />
-                  </div>
-                </div>
-                {billingError && (
-                  <p className="mt-3 text-xs font-semibold text-red-600">{billingError}</p>
-                )}
-                <div className="mt-4 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={saveBillingAddress}
-                    disabled={billingBusy || !billingStreet.trim() || !billingPostalCode.trim() || !billingCity.trim()}
-                    className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {billingBusy ? "Wird gespeichert…" : "Rechnungsdaten speichern"}
-                  </button>
-                  {billingEditing && (
-                    <button type="button" onClick={() => setBillingEditing(false)} className="btn btn-ghost text-sm">
-                      Abbrechen
-                    </button>
-                  )}
-                </div>
-                <p className="mt-3 text-xs text-neutral-400">
-                  Die Rechnung steht nach dem Start als PDF in deinem Fall bereit und wird
-                  nicht automatisch per E-Mail verschickt.
-                </p>
-              </div>
-            )}
-          </StepCard>
-
-          {/* Schritt 3: Freischalten (Zahlung pro Partei) */}
-          <StepCard
-            index={3}
-            title="Mediation freischalten"
-            state={step3State}
-            badge={step3Done ? "Freigeschaltet" : payStatus?.you.paid ? "Dein Anteil bezahlt" : "Offen"}
-          >
-            <div className="text-center">
-              <p className="mx-auto max-w-xl text-sm text-neutral-600">
-                Jede Partei bezahlt ihren eigenen Anteil. Die Mediation startet, sobald
-                alle zahlungspflichtigen Parteien bezahlt haben.
-              </p>
-
-              {!payStatus && (
-                <p className="mt-6 text-sm text-neutral-400">Preis wird geladen…</p>
-              )}
-
-              {payStatus && payStatus.you.paid && !isPaid && (
-                <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50 p-5">
-                  <p className="text-lg font-bold text-accent-700">Dein Anteil ist bezahlt ✓</p>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    {payStatus.all_owing_paid
-                      ? "Alle Parteien haben bezahlt – die Mediation kann starten."
-                      : "Warten auf die Zahlung der anderen Seite …"}
-                  </p>
-                </div>
-              )}
-
-              {isPaid && (
-                <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50 p-5">
-                  <p className="text-lg font-bold text-accent-700">Zahlung erhalten ✓</p>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    Alle Parteien haben bezahlt – weiter zu Schritt 4.
-                  </p>
-                </div>
-              )}
-
-              {iAmAuthorized && !isPaid && (
-                <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50 p-5">
-                  <p className="text-lg font-bold text-accent-700">
-                    Dein Betrag ist reserviert ✓
-                  </p>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    {payStatus!.you.amount_due_eur.toFixed(2)} € sind bei PayPal vorgemerkt,
-                    aber noch nicht abgebucht. Der Einzug erfolgt erst, wenn auch die andere
-                    Seite zugestimmt hat und die Mediation startet.
-                  </p>
-                </div>
-              )}
-
-              {payStatus && !payStatus.you.paid && !payStatus.you.owes && !isPaid && (
-                <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
-                  <p className="text-base font-semibold text-neutral-800">Für dich fällt kein Betrag an.</p>
-                  <p className="mt-1 text-sm text-neutral-600">
-                    Bei diesem Fall zahlt die andere Seite. Sobald das erledigt ist, geht es weiter.
-                  </p>
-                </div>
-              )}
-
-              {needsBillingBeforePay && !payStatus?.you.paid && !isPaid && (
-                <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                  <p className="text-sm font-semibold text-amber-800">
-                    Bitte hinterlege zuerst deine Rechnungsdaten (Schritt 2), dann kannst du
-                    hier bezahlen.
-                  </p>
-                </div>
-              )}
-
-              {payStatus && !payStatus.you.paid && !iAmAuthorized && payStatus.you.owes && !isPaid && !needsBillingBeforePay && (
-                <>
-                  <p className="mt-6 mb-2 text-xs font-semibold uppercase tracking-widest text-accent-600">
-                    Dein Anteil
-                  </p>
-                  <div className="flex items-baseline justify-center gap-1">
-                    {payStatus.you.discount_amount_eur > 0 && (
-                      <span className="mr-2 text-2xl font-semibold text-neutral-400 line-through">
-                        {payStatus.you.base_due_eur.toFixed(2)}
-                      </span>
-                    )}
-                    <span className="text-5xl font-extrabold tracking-tight text-neutral-900">
-                      {payStatus.you.amount_due_eur.toFixed(2)}
-                    </span>
-                    <span className="text-2xl font-bold text-neutral-900">€</span>
-                  </div>
-                  <p className="mt-1 text-sm text-neutral-400">inkl. MwSt.</p>
-                  {payStatus.you.discount_amount_eur > 0 && (
-                    <p className="mt-1 text-sm font-semibold text-accent-700">
-                      Rabatt „{payStatus.you.discount_code}“: −{payStatus.you.discount_amount_eur.toFixed(2)} €
-                    </p>
-                  )}
-
-                  {/* Rabattcode */}
-                  <div className="mx-auto mt-5 w-full max-w-sm text-left">
-                    {payStatus.you.discount_code ? (
-                      <button
-                        type="button"
-                        onClick={removeDiscount}
-                        className="text-xs font-semibold text-neutral-500 underline"
-                      >
-                        Rabattcode entfernen
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={discountInput}
-                          onChange={(e) => setDiscountInput(e.target.value)}
-                          placeholder="Rabattcode"
-                          className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-accent-500 focus:ring-4 focus:ring-accent-100"
-                        />
-                        <button
-                          type="button"
-                          onClick={applyDiscount}
-                          disabled={discountBusy || !discountInput.trim()}
-                          className="btn btn-secondary shrink-0 px-4 py-2 text-sm disabled:opacity-60"
-                        >
-                          {discountBusy ? "…" : "Anwenden"}
-                        </button>
-                      </div>
-                    )}
-                    {discountError && (
-                      <p className="mt-2 text-xs font-semibold text-red-600">{discountError}</p>
-                    )}
-                  </div>
-
-                  {/* Add-ons (Einstiegs-Tarif: 49 € Basis + buchbare Zusatzleistungen) */}
-                  {(payStatus.addons_available?.length ?? 0) > 0 && (
-                    <div className="mx-auto mt-5 w-full max-w-sm text-left">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-                        Optionale Zusatzleistungen
-                      </p>
-                      <div className="space-y-2">
-                        {payStatus.addons_available!.map((addon) => {
-                          const selected = (payStatus.you.addons ?? []).some((a) => a.key === addon.key);
-                          return (
-                            <label
-                              key={addon.key}
-                              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
-                                selected
-                                  ? "border-accent-500 bg-accent-50"
-                                  : "border-neutral-200 bg-white hover:border-neutral-300"
-                              } ${addonBusy ? "opacity-60" : ""}`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selected}
-                                disabled={addonBusy}
-                                onChange={() => toggleAddon(addon.key)}
-                                className="mt-1 h-4 w-4 accent-accent-600"
-                              />
-                              <span className="flex-1">
-                                <span className="flex items-baseline justify-between gap-2">
-                                  <span className="text-sm font-semibold text-neutral-900">{addon.label}</span>
-                                  <span className="shrink-0 text-sm font-bold text-neutral-900">
-                                    +{addon.price_eur.toFixed(0)} €
-                                  </span>
-                                </span>
-                                <span className="mt-0.5 block text-xs text-neutral-500">{addon.description}</span>
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                      {(payStatus.you.addons_total_eur ?? 0) > 0 && (
-                        <p className="mt-2 text-xs font-semibold text-neutral-600">
-                          Zusatzleistungen: +{(payStatus.you.addons_total_eur ?? 0).toFixed(2)} €
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  <p className="mx-auto mt-4 max-w-sm text-xs text-neutral-500">
-                    Der Betrag wird zunächst nur reserviert und erst abgebucht, wenn auch
-                    die andere Seite zugestimmt hat und die Mediation startet. Kommt sie
-                    nicht zustande, wird die Reservierung wieder freigegeben.
-                  </p>
-
-                  <div className="mx-auto mt-6 w-full max-w-sm">
-                    {payStatus.you.amount_due_eur > 0 ? (
-                      <div ref={paypalContainerRef} />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={redeemFree}
-                        disabled={paying}
-                        className="btn btn-primary w-full disabled:opacity-60"
-                      >
-                        {paying ? "Wird freigeschaltet…" : "Kostenlos freischalten"}
-                      </button>
-                    )}
-                    {paying && payStatus.you.amount_due_eur > 0 && (
-                      <p className="mt-2 text-sm font-semibold text-neutral-500">Zahlung wird verarbeitet…</p>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Status aller Parteien */}
-              {payStatus && payStatus.participants.length > 0 && !isPaid && (
-                <div className="mx-auto mt-8 w-full max-w-sm text-left">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-                    Status
-                  </p>
-                  <ul className="space-y-1">
-                    {payStatus.participants.map((p) => (
-                      <li key={p.participant_id} className="flex items-center justify-between text-sm">
-                        <span className="text-neutral-700">
-                          {p.name ?? p.role}
-                          {p.is_you && <span className="text-neutral-400"> (du)</span>}
-                        </span>
-                        <span className="font-semibold">
-                          {!p.owes ? (
-                            <span className="text-neutral-400">kein Betrag</span>
-                          ) : p.paid ? (
-                            <span className="text-accent-700">bezahlt ✓</span>
-                          ) : p.authorized ? (
-                            // Zugesagt, Betrag reserviert – abgebucht wird erst,
-                            // wenn alle Parteien zugesagt haben.
-                            <span className="text-accent-700">
-                              reserviert · {p.amount_due_eur.toFixed(2)} €
-                            </span>
-                          ) : (
-                            <span className="text-neutral-500">offen · {p.amount_due_eur.toFixed(2)} €</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </StepCard>
-
-          {/* Schritt 4: Mediation starten */}
-          <StepCard
-            index={4}
             title="Mediation starten"
-            state={step4State}
-            badge={step4State === "active" ? "Bereit" : undefined}
+            state={step2State}
+            badge={step2State === "active" ? "Bereit" : undefined}
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-xl text-sm text-neutral-600">
-                Alle Beteiligten sind verbunden und die Zahlung ist erledigt. Mit dem Start
-                werden die Rechnungen erstellt und ihr beginnt mit der ersten Phase.
+                Sobald die Beteiligten verbunden sind, kann es losgehen. Der erste Schritt
+                der Mediation ist die Freischaltung – dort hinterlegt jede Partei ihre
+                Rechnungsdaten und ihren Anteil. Starten kann jede Partei.
               </p>
               <button
                 type="button"

@@ -441,7 +441,23 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     hint: "Hinweis, dass es erst weitergeht, wenn beide Parteien bestätigt haben.",
   },
 
-  // ── Bezahlung (kostenpflichtige Bonus-Leistungen, z.B. Gutachter) ────────
+  // ── Bezahlung ────────────────────────────────────────────────────────────
+  {
+    type: "fall_freischaltung",
+    label: "Fall freischalten (Anteil bezahlen)",
+    short: "Freischaltung €",
+    icon: "💳",
+    group: "Bezahlung",
+    badge: "bg-amber-100 text-amber-700 border-amber-300",
+    defaultConfig: {
+      title: "Mediation freischalten",
+      description:
+        "Jede Partei trägt ihren eigenen Anteil. Der Betrag wird zunächst nur reserviert und erst abgebucht, wenn alle zugestimmt haben.",
+    },
+    capturesResponse: false,
+    hint:
+      "Der eigentliche Bezahl-Schritt des Falls: Rechnungsdaten + Anteil der jeweiligen Partei (PayPal). Gehört in die Einladungs-Phase – nur dort ist er vor der Zahlung erreichbar.",
+  },
   {
     type: "bezahlung",
     label: "Bonus-Leistung (kostenpflichtig)",

@@ -36,6 +36,11 @@ class MediationParticipant(Base):
     # Ende der PayPal-Honor-Period (~3 Tage). Danach kann der Einzug scheitern
     # und die Partei muss erneut bezahlen (AuthorizationExpiredError).
     authorization_expires_at = Column(DateTime, nullable=True)
+    # Merker, dass wegen dieser Reservierung bereits eine Ablauf-Erinnerung
+    # rausging (scripts/check_authorizations.py läuft stündlich - ohne Merker
+    # ginge die Mail jede Stunde erneut raus). Wird mit der Reservierung
+    # zurückgesetzt.
+    authorization_reminder_sent_at = Column(DateTime, nullable=True)
     # Angewendeter Rabattcode (Groß-/Kleinschreibung wie eingegeben) + Rabattbetrag in EUR.
     discount_code = Column(String, nullable=True)
     discount_amount = Column(Float, nullable=False, default=0.0, server_default="0")
