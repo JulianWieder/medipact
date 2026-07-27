@@ -238,11 +238,11 @@ export default function DashboardClient() {
         done: hasStarted,
         action:
           !hasStarted && startHref
-            ? { label: "Fall einrichten und freischalten", href: startHref }
+            ? { label: "Fall einrichten und starten", href: startHref }
             : undefined,
         hint:
           !hasStarted && startHref
-            ? "Dazu im Fall die Beteiligten und Rechnungsdaten hinterlegen und freischalten."
+            ? "Dazu im Fall die Beteiligten verbinden und die Mediation starten. Rechnungsdaten und Zahlung folgen als erster Schritt im Verfahren."
             : undefined,
       },
       {

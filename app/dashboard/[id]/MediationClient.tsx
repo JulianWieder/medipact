@@ -1,7 +1,7 @@
 "use client";
 
 import { hashId } from "@/lib/ids";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
@@ -459,8 +459,8 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               <h1 className="heading-2 text-neutral-900">Dein Start in die Mediation</h1>
               <p className="mt-4 max-w-2xl text-neutral-600">
                 Zwei Schritte bis zum Start: Beteiligte verbinden, dann die Mediation
-                starten. Die Freischaltung ist der erste Schritt im Verfahren selbst –
-                dort hinterlegt jede Partei ihre Rechnungsdaten und ihren Anteil.
+                starten. Bezahlt wird erst im Verfahren selbst – dort hinterlegt im
+                ersten Schritt jede Partei ihre Rechnungsdaten und ihren Anteil.
               </p>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
@@ -720,9 +720,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-xl text-sm text-neutral-600">
-                Sobald die Beteiligten verbunden sind, kann es losgehen. Der erste Schritt
-                der Mediation ist die Freischaltung – dort hinterlegt jede Partei ihre
-                Rechnungsdaten und ihren Anteil. Starten kann jede Partei.
+                Sobald die Beteiligten verbunden sind, kann es losgehen – starten kann
+                jede Partei. Hier fällt noch nichts an: Rechnungsdaten und Zahlung
+                kommen als erster Schritt innerhalb des Verfahrens.
               </p>
               <button
                 type="button"
@@ -758,15 +758,18 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               <div>
                 <p className="font-semibold text-neutral-900">Jede Partei zahlt ihren Anteil</p>
                 <p className="mt-1 text-sm text-neutral-600">
-                  Die Kosten werden fair geteilt. Der Betrag wird erst abgebucht, wenn das
-                  Verfahren tatsächlich freigeschaltet ist.
+                  Die Kosten werden fair geteilt und im Verfahren selbst beglichen – im
+                  Schritt „Verfahren freischalten". Der Betrag wird zunächst nur
+                  reserviert und erst abgebucht, wenn der Fall tatsächlich freigeschaltet
+                  ist.
                 </p>
               </div>
               <div>
                 <p className="font-semibold text-neutral-900">Deine Rechnung</p>
                 <p className="mt-1 text-sm text-neutral-600">
-                  Beim Start wird automatisch eine Rechnung über deinen Anteil erstellt –
-                  mit den Rechnungsdaten aus Schritt 2. Sie steht als PDF bereit.
+                  Sobald deine Zahlung eingegangen ist, wird automatisch eine Rechnung
+                  über deinen Anteil erstellt – mit den Rechnungsdaten, die du im
+                  Freischaltungs-Schritt hinterlegst. Sie steht als PDF bereit.
                 </p>
               </div>
               <div>
