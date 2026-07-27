@@ -8,6 +8,15 @@ export type RatgeberBlock =
   | { type: "paragraph"; text: string }
   | { type: "list"; items: string[] }
   | { type: "callout"; text: string }
+  /**
+   * Vergleichstabelle (z. B. Mediation vs. Gerichtsverfahren).
+   *
+   * `caption` ist Pflicht: Sie wird für Screenreader ausgegeben und gibt
+   * Suchmaschinen den Kontext der Tabelle. Die erste Spalte jeder Zeile wird
+   * als Zeilenkopf (<th scope="row">) gerendert – dort gehört das Merkmal
+   * hin, nicht der Wert. Alle Zeilen brauchen so viele Zellen wie `headers`.
+   */
+  | { type: "table"; caption: string; headers: string[]; rows: string[][] }
   | { type: "cta"; text: string; href: string };
 
 export type RatgeberFaq = {

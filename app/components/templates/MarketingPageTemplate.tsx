@@ -33,6 +33,21 @@ type Faq = {
   answer: string;
 };
 
+type DeepDive = {
+  eyebrow?: string;
+  /** Sichtbare H2 – hier gehört die exakte Ziel-Suchphrase hinein. */
+  title: string;
+  intro?: string;
+  /** Unterabschnitte als H3-Karten. */
+  items: Feature[];
+  /** Optionale Signal-Liste ("typische Anlässe"). */
+  bulletsTitle?: string;
+  bullets?: string[];
+  /** Abschließender Absatz mit interner Verlinkung. */
+  note?: string;
+  links?: BreadcrumbItem[];
+};
+
 type ComparisonPlan = {
   title: string;
   status: string;
@@ -58,6 +73,15 @@ type MarketingPageTemplateProps = {
   featuresTitle: string;
   featuresIntro?: string;
   features: Feature[];
+  /**
+   * Optionaler Vertiefungs-Abschnitt direkt unter den Leistungen.
+   *
+   * Zweck ist SEO: Er gibt einer Seite einen eigenen H2/H3-Block zu genau
+   * einem Suchbegriff (z. B. "Mediation bei Geschäftspartnern"), ohne dass
+   * dafür eine neue URL nötig wäre, die der bestehenden Seite Ranking-Kraft
+   * abziehen würde. Weglassen = Abschnitt entfällt komplett.
+   */
+  deepDive?: DeepDive;
   processTitle?: string;
   process: Step[];
   comparisonTitle?: string;
@@ -119,6 +143,7 @@ export function MarketingPageTemplate({
   featuresTitle,
   featuresIntro,
   features,
+  deepDive,
   processTitle = "So funktioniert es",
   process,
   comparisonTitle,
@@ -254,6 +279,64 @@ export function MarketingPageTemplate({
             </div>
           </div>
         </section>
+
+        {deepDive && (
+          <section className="section section-base">
+            <div className="container">
+              <SectionLead
+                eyebrow={deepDive.eyebrow ?? "Im Detail"}
+                title={deepDive.title}
+                text={deepDive.intro}
+              />
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {deepDive.items.map((item) => (
+                  <Card key={item.title}>
+                    <h3 className="heading-3">{item.title}</h3>
+                    <p className="mt-4 leading-7 text-neutral-700">{item.text}</p>
+                  </Card>
+                ))}
+              </div>
+
+              {deepDive.bullets && deepDive.bullets.length > 0 && (
+                <div className="mt-12 grid gap-8 rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
+                  <h3 className="heading-3 text-neutral-900">
+                    {deepDive.bulletsTitle ?? "Typische Anlässe"}
+                  </h3>
+
+                  <ul className="space-y-4 text-neutral-700">
+                    {deepDive.bullets.map((bullet) => (
+                      <li key={bullet} className="flex gap-3 leading-7">
+                        <span className="mt-1 text-accent-700">✓</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {deepDive.note && (
+                <div className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white">
+                  <p className="leading-7 text-neutral-300">{deepDive.note}</p>
+
+                  {deepDive.links && deepDive.links.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-4">
+                      {deepDive.links.map((link) => (
+                        <NextLink
+                          key={link.href}
+                          href={link.href ?? "#"}
+                          className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition hover:border-accent-300 hover:text-accent-300"
+                        >
+                          {link.label} →
+                        </NextLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <section className="section section-base">
           <div className="container max-w-5xl">

@@ -83,6 +83,8 @@ export const article: RatgeberArticle = {
   ],
   related: [
     { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
+    { label: "Scheidung mit Mediator: Kosten im Detail", href: "/ratgeber/scheidung-mediator-kosten" },
+    { label: "Wirtschaftsmediation: Kosten im Unternehmen", href: "/ratgeber/wirtschaftsmediation" },
     { label: "Die Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
     { label: "Preise ansehen", href: "/preise" },
   ],

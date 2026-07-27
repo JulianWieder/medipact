@@ -79,6 +79,40 @@ export const trennungPageContent = {
 
   didYouKnowFacts: trennungFacts,
 
+  faqTitle: "Häufige Fragen zur Trennungs- und Scheidungsmediation",
+  faqs: [
+    {
+      question: "Was kostet eine Mediation bei Trennung und Scheidung?",
+      answer:
+        "Bei medipact kostet die Trennungsmediation pauschal 399 € pro Partei im reinen Online-Verfahren, 499 € in der Hybrid-Variante mit Video-Terminen und 899 € im Vollservice. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird. Details im Kostenüberblick.",
+    },
+    {
+      question: "Ersetzt die Mediation Anwalt und Gericht?",
+      answer:
+        "Nein. Geschieden wird in Deutschland ausschließlich durch das Familiengericht, und dafür ist anwaltliche Vertretung erforderlich. Die Mediation klärt die Folgen – Unterhalt, Betreuung, Vermögen, Wohnung – und hält sie in einer Vereinbarung fest, die notariell beurkundet werden kann. Das Gerichtsverfahren wird dadurch deutlich kürzer und günstiger, entfällt aber nicht.",
+    },
+    {
+      question: "Ist die Vereinbarung rechtlich bindend?",
+      answer:
+        "Die Abschlussvereinbarung ist ein bindender Vertrag. Für bestimmte Regelungen – etwa zum Versorgungsausgleich, zu Immobilien oder zum nachehelichen Unterhalt – ist zusätzlich eine notarielle Beurkundung erforderlich, damit sie wirksam ist. Lassen Sie die Vereinbarung vor der Unterschrift anwaltlich prüfen.",
+    },
+    {
+      question: "Funktioniert Mediation, wenn wir kaum noch miteinander reden können?",
+      answer:
+        "Genau dafür ist das Online-Verfahren gemacht. Jede Seite bearbeitet die strukturierte Fallaufnahme zunächst getrennt und schriftlich – Sie müssen sich nicht gegenübersitzen, solange das noch nicht geht. Wer aufschreibt statt im Affekt zu antworten, formuliert überlegter. Erst danach wird zusammengeführt.",
+    },
+    {
+      question: "Wie gut sind die Erfolgsaussichten?",
+      answer:
+        "Erhebungen von Mediationsverbänden berichten für Familien- und Scheidungsmediation regelmäßig Einigungsquoten um die 80 Prozent. Entscheidend ist die Freiwilligkeit: Wer sich auf eine Mediation einlässt, sucht bereits eine Lösung statt eines Urteils. Selbst entwickelte Regelungen werden zudem seltener nachverhandelt als gerichtlich verfügte.",
+    },
+    {
+      question: "Wann ist Mediation bei einer Trennung nicht der richtige Weg?",
+      answer:
+        "Wenn Gewalt, Drohung oder Stalking Teil der Beziehungsgeschichte sind, wenn eine Seite Angst hat, offen zu sprechen, oder wenn der begründete Verdacht besteht, dass Vermögen verschwiegen wird. In diesen Fällen braucht es einen geschützten rechtlichen Rahmen, keinen gemeinsamen Verhandlungstisch.",
+    },
+  ],
+
   finalCtaTitle: "Klär die wichtigsten Fragen, bevor es eskaliert.",
   finalCtaText:
     "Beschreibe kurz deine Situation und erhalte eine erste Einschätzung, wie du vorgehen kannst.",

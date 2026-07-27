@@ -31,10 +31,25 @@ const serviceSchema = {
   url: "https://medipact.de/konflikte/verbraucher",
 };
 
+
+// Die FAQs werden auf der Seite sichtbar gerendert - hier zusätzlich als
+// FAQPage-JSON-LD, damit sie für Rich Results und "Nutzer fragen auch"
+// in Frage kommen. Quelle ist dieselbe Liste, kein Duplikat.
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: verbraucherPageContent.faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: { "@type": "Answer", text: faq.answer },
+  })),
+};
+
 export default function VerbraucherPage() {
   return (
     <>
       <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingPageTemplate
         {...verbraucherPageContent}
         heroImage={{

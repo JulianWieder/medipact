@@ -141,6 +141,51 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
                   </div>
                 );
               }
+              if (block.type === "table") {
+                return (
+                  <div
+                    key={i}
+                    className="mt-8 overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm"
+                  >
+                    <table className="w-full min-w-[560px] text-left text-sm">
+                      <caption className="sr-only">{block.caption}</caption>
+                      <thead>
+                        <tr className="border-b border-neutral-200 bg-neutral-50 text-neutral-900">
+                          {block.headers.map((h) => (
+                            <th key={h} scope="col" className="px-5 py-4 font-semibold">
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {block.rows.map((row, r) => (
+                          <tr
+                            key={r}
+                            className="border-b border-neutral-100 last:border-0"
+                          >
+                            {row.map((cell, c) =>
+                              c === 0 ? (
+                                <th
+                                  key={c}
+                                  scope="row"
+                                  className="px-5 py-4 font-semibold text-neutral-900"
+                                >
+                                  {cell}
+                                </th>
+                              ) : (
+                                <td key={c} className="px-5 py-4 leading-6 text-neutral-600">
+                                  {cell}
+                                </td>
+                              ),
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
               // cta
               return (
                 <div key={i} className="mt-8">

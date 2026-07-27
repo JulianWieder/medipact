@@ -142,6 +142,7 @@ export const article: RatgeberArticle = {
   related: [
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
+    { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
   ],

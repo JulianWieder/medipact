@@ -72,6 +72,40 @@ export const nachbarschaftPageContent = {
 
   didYouKnowFacts: nachbarschaftFacts,
 
+  faqTitle: "Häufige Fragen zur Nachbarschaftsmediation",
+  faqs: [
+    {
+      question: "Was kostet eine Nachbarschaftsmediation?",
+      answer:
+        "Bei medipact kostet die Nachbarschaftsmediation 49 € pro Partei – eine einmalige Pauschale für den kompletten geführten Online-Prozess, keine Stundenabrechnung. Frei tätige Mediatorinnen und Mediatoren rechnen meist stündlich ab; die Kosten werden dann in der Regel zwischen den Nachbarn geteilt. Ein Rechtsstreit über Lärm oder eine Grenzbebauung liegt regelmäßig um ein Vielfaches darüber.",
+    },
+    {
+      question: "Wer zahlt die Mediation bei einem Nachbarschaftsstreit?",
+      answer:
+        "Üblich ist die hälftige Teilung – das hält das Verfahren neutral, weil keine Seite über die Rechnung Einfluss nehmen kann. Bei medipact zahlt jede Partei ihren eigenen Anteil von 49 € direkt und bekommt eine eigene Rechnung. Manche Rechtsschutzversicherungen beteiligen sich zusätzlich an Mediationskosten oder vermitteln selbst Mediatoren – ein Blick in die Police lohnt sich vor dem Start.",
+    },
+    {
+      question: "Ist das Ergebnis einer Nachbarschaftsmediation rechtlich bindend?",
+      answer:
+        "Ja. Die Abschlussvereinbarung ist ein Vertrag zwischen den Beteiligten und damit bindend. Bei Bedarf kann sie notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden. Für die meisten Nachbarschaftsthemen – Ruhezeiten, Heckenhöhe, Parkregelung, Nutzung gemeinsamer Flächen – genügt die schriftliche Vereinbarung, weil beide Seiten sie selbst entwickelt haben.",
+    },
+    {
+      question: "Muss ich vor Gericht erst zur Schlichtungsstelle?",
+      answer:
+        "In mehreren Bundesländern ist bei bestimmten Nachbarschaftsstreitigkeiten ein außergerichtlicher Einigungsversuch Voraussetzung für eine Klage – die Regelungen unterscheiden sich je nach Land und Streitgegenstand. Unabhängig davon gilt: Wer vorher ernsthaft eine Einigung versucht hat, steht besser da. Klären Sie die genauen Anforderungen im Zweifel mit einer Anwältin oder bei Ihrem Amtsgericht.",
+    },
+    {
+      question: "Was, wenn mein Nachbar nicht mitmachen will?",
+      answer:
+        "Mediation ist freiwillig – ohne die Gegenseite geht es nicht. Erfahrungsgemäß hilft ein sachlicher, schriftlicher Vorschlag ohne Vorwürfe mehr als ein Gespräch über den Zaun: Er nimmt den Druck, sofort reagieren zu müssen. Lehnt der Nachbar ab, haben Sie den Einigungsversuch dokumentiert und können den formalen Weg gehen.",
+    },
+    {
+      question: "Wie lange dauert eine Nachbarschaftsmediation?",
+      answer:
+        "Weil der Prozess online und asynchron läuft, entfällt die Terminfindung. Beide Seiten bearbeiten die strukturierte Fallaufnahme im eigenen Tempo, meist abends oder am Wochenende. Typische Nachbarschaftsthemen sind dadurch häufig innerhalb weniger Tage bis Wochen geklärt – ein Zivilverfahren über dieselbe Frage dauert oft Monate bis Jahre.",
+    },
+  ],
+
   finalCtaTitle: "Nachbarschaft klären, bevor es dauerhaft belastet.",
   finalCtaText:
     "Beschreiben Sie kurz Ihre Situation und finden Sie heraus, wie ein sinnvoller nächster Schritt aussehen kann.",

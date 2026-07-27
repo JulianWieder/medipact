@@ -32,10 +32,25 @@ const serviceSchema = {
   url: "https://medipact.de/konflikte/erbschaft",
 };
 
+
+// Die FAQs werden auf der Seite sichtbar gerendert - hier zusätzlich als
+// FAQPage-JSON-LD, damit sie für Rich Results und "Nutzer fragen auch"
+// in Frage kommen. Quelle ist dieselbe Liste, kein Duplikat.
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: erbschaftPageContent.faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: { "@type": "Answer", text: faq.answer },
+  })),
+};
+
 export default function ErbschaftPage() {
   return (
     <>
       <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingPageTemplate
         {...erbschaftPageContent}
         heroImage={{
@@ -51,6 +66,8 @@ export default function ErbschaftPage() {
           { label: "Erbschaft" },
         ]}
         relatedCases={[
+          { label: "Ratgeber: Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
+          { label: "Ratgeber: Pflichtteil verhandeln", href: "/ratgeber/pflichtteil-mediation" },
           { label: "Geschwister-Streit ums Haus", href: "/cases/anna-klaus" },
           { label: "Testament-Konflikt", href: "/cases/marie-sophie" },
           { label: "Unternehmen erben", href: "/cases/familie-weber" },

@@ -16,10 +16,13 @@ import { geschaeftFacts } from "@/app/components/ui/DidYouKnowSection";
 export const odrPageContent = {
   eyebrow: "Online Dispute Resolution (ODR)",
   title: "Wenn Konflikte das Unternehmen blockieren.",
+  // Die exakte Zielphrase "Mediation bei Geschäftspartnern" steht bewusst in
+  // der H1 (Highlight-Zeile): Sie rankt bereits auf Seite 2 und soll auf
+  // Seite 1 gezogen werden – siehe auch deepDive weiter unten.
   titleHighlight:
-    "Im Team, unter Gesellschaftern – oder mit Geschäftspartnern.",
+    "Mediation bei Geschäftspartnern, Gesellschaftern und im Team.",
   intro:
-    "Online Dispute Resolution (ODR) heißt: Konflikte werden vollständig digital beigelegt – strukturiert, strikt vertraulich und deutlich schneller als ein Gerichtsverfahren. Ob innerbetrieblich, B2B, im E-Commerce oder als Schlichtung mit konkretem Lösungsvorschlag: medipact bildet die passende Verfahrensart online ab.",
+    "Online Dispute Resolution (ODR) heißt: Konflikte werden vollständig digital beigelegt – strukturiert, strikt vertraulich und deutlich schneller als ein Gerichtsverfahren. Ob Streit unter Geschäftspartnern, innerbetrieblich, im E-Commerce oder als Schlichtung mit konkretem Lösungsvorschlag: medipact bildet die passende Verfahrensart online ab.",
 
   primaryCta: {
     label: "Konflikt einschätzen",
@@ -61,6 +64,60 @@ export const odrPageContent = {
       text: "Wenn zwei Firmen fusionieren und Unternehmenskulturen oder Führungsteams aufeinanderprallen, entscheidet die Integration über den Deal-Erfolg.",
     },
   ],
+
+  // ── SEO-Vertiefung: "Mediation bei Geschäftspartnern" ────────────────────
+  // Eigener H2/H3-Block zur Ziel-Suchphrase. Bewusst KEINE eigene URL: Die
+  // ODR-Seite hat die Ranking-Kraft, eine zweite Seite würde sie nur
+  // kannibalisieren.
+  deepDive: {
+    eyebrow: "Geschäftspartner & Gesellschafter",
+    title: "Mediation bei Geschäftspartnern: Streit klären, Partnerschaft retten",
+    intro:
+      "Ein Konflikt unter Geschäftspartnern ist selten nur ein Rechtsproblem. Es geht um Geld und Anteile – aber genauso um Vertrauen, Anerkennung und die Frage, wer künftig entscheidet. Genau deshalb scheitern Verhandlungen zwischen Partnern, obwohl beide Seiten rechnen können. Mediation bei Geschäftspartnern trennt diese Ebenen: Sie klärt zuerst, worum es wirklich geht, und verhandelt dann die Zahlen.",
+    items: [
+      {
+        title: "Gesellschafterstreit & Patt-Situationen",
+        text: "Zwei Gesellschafter mit je 50 % blockieren sich gegenseitig, Beschlüsse kommen nicht zustande, das operative Geschäft leidet. Die Mediation trennt Rollen (Gesellschafter, Geschäftsführer, Kollege) und macht Entscheidungswege wieder handlungsfähig – bevor eine Auflösungsklage die Firma zerlegt.",
+      },
+      {
+        title: "Ausstieg & Anteilsbewertung",
+        text: "Ein Partner will raus, der andere weiter – und die Bewertung der Anteile liegt weit auseinander. Statt zweier gegenläufiger Gutachten wird eine gemeinsame Bewertungsgrundlage vereinbart und daraus ein Ausstiegsszenario mit Zahlungsplan entwickelt.",
+      },
+      {
+        title: "Ungleiche Beiträge & Vergütung",
+        text: "„Ich arbeite 60 Stunden, du 20 – wir teilen aber 50:50.“ Der Klassiker unter Gründungspartnern. Die Mediation macht Erwartungen und tatsächliche Beiträge explizit und übersetzt sie in eine neue Vergütungs- und Verantwortungsregel.",
+      },
+      {
+        title: "Strategie & Richtungsstreit",
+        text: "Wachstum gegen Konsolidierung, neuer Markt gegen Kerngeschäft: Wertekonflikte lassen sich nicht wegverhandeln. Vereinbart werden deshalb Entscheidungsregeln, Budgetgrenzen und Überprüfungspunkte statt einer Sieger-Position.",
+      },
+      {
+        title: "B2B-Vertragspartner & Lieferanten",
+        text: "Verzug, Mängel, strittige SLA-Auslegung oder offene Rechnungen zwischen zwei Unternehmen. Ein Prozess läuft weiter, während er geklärt wird – anders als bei einer Kündigung, die beide Seiten Jahre und Anwaltskosten kostet.",
+      },
+      {
+        title: "Familienunternehmen & Nachfolge",
+        text: "Wenn Geschäftspartner zugleich Familie sind, überlagern alte Familienthemen jede Sachfrage. Die Mediation adressiert beide Systeme getrennt – Gesellschaftsvertrag hier, Familienverhältnis dort – und hält sie im Ergebnis wieder vereinbar.",
+      },
+    ],
+    bulletsTitle:
+      "Wann Mediation zwischen Geschäftspartnern der bessere erste Schritt ist",
+    bullets: [
+      "Entscheidungen werden vertagt oder blockiert – das Tagesgeschäft leidet spürbar.",
+      "Jede Seite hat bereits anwaltlich prüfen lassen, aber niemand will wirklich klagen.",
+      "Die Geschäftsbeziehung soll bestehen bleiben – oder zumindest sauber enden.",
+      "Ein öffentliches Verfahren würde Kunden, Banken oder Investoren verunsichern.",
+      "Es geht um Anteile, Ausstieg oder Bewertung und gleichzeitig um verletztes Vertrauen.",
+      "Beide Seiten sind grundsätzlich gesprächsbereit, kommen allein aber nicht weiter.",
+    ],
+    note:
+      "Der Ablauf ist derselbe wie bei jedem ODR-Verfahren: strukturierte, getrennte Fallaufnahme, Diagnose der Konfliktart und Eskalationsstufe, dann die passende Methode – facilitativ nach Harvard, evaluativ bei harten Vertrags- und Bewertungsfragen oder Shuttle-Mediation, wenn ein gemeinsamer Termin (noch) nicht möglich ist. Ergebnis ist eine verbindliche Vereinbarung, die notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden kann. Einzelfall ab €399.",
+    links: [
+      { label: "Fallbeispiel: Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
+      { label: "Fallbeispiel: B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
+      { label: "Ratgeber: Wirtschaftsmediation", href: "/ratgeber/wirtschaftsmediation" },
+    ],
+  },
 
   processTitle: "Ablauf eines ODR-Verfahrens im Betrieb",
   process: [
@@ -147,6 +204,21 @@ export const odrPageContent = {
 
   faqTitle: "Häufige Fragen zur Online Dispute Resolution (ODR)",
   faqs: [
+    {
+      question: "Wie läuft eine Mediation bei Geschäftspartnern ab?",
+      answer:
+        "Eine Mediation bei Geschäftspartnern läuft in vier Schritten: getrennte, vertrauliche Fallaufnahme beider Seiten, Diagnose von Konfliktart und Eskalationsstufe, moderierte Klärung mit der passenden Methode – und zum Schluss eine schriftliche, verbindliche Vereinbarung. Bei medipact läuft das vollständig online und asynchron, meist in Tagen bis wenigen Wochen statt in Monaten. Der Einzelfall kostet €399.",
+    },
+    {
+      question: "Was kostet eine Mediation zwischen Geschäftspartnern?",
+      answer:
+        "Bei medipact kostet der Einzelfall €399 als Pauschale für den geführten Online-Prozess – unabhängig davon, ob es um einen Gesellschafterstreit, einen Ausstieg oder einen B2B-Vertragskonflikt geht. Unternehmen mit laufendem Bedarf nutzen die Business-Tarife ab €1.000 pro Monat. Zum Vergleich: Ein Gesellschafterprozess erreicht über mehrere Instanzen schnell einen fünfstelligen Betrag.",
+    },
+    {
+      question: "Lohnt sich Mediation bei einem Gesellschafterstreit?",
+      answer:
+        "Meistens ja – vor allem, wenn beide Seiten am Unternehmen hängen. Ein Gesellschafterprozess ist öffentlich, dauert Jahre und blockiert währenddessen Beschlüsse, Finanzierungen und oft das operative Geschäft. Die Mediation ist vertraulich, klärt Rollen und Entscheidungswege und lässt beide Optionen offen: Weitermachen mit neuen Regeln oder ein geordneter Ausstieg mit vereinbarter Bewertung.",
+    },
     {
       question: "Was ist Online Dispute Resolution (ODR)?",
       answer:

@@ -31,10 +31,25 @@ const serviceSchema = {
   url: "https://medipact.de/konflikte/nachbarschaft",
 };
 
+
+// Die FAQs werden auf der Seite sichtbar gerendert - hier zusätzlich als
+// FAQPage-JSON-LD, damit sie für Rich Results und "Nutzer fragen auch"
+// in Frage kommen. Quelle ist dieselbe Liste, kein Duplikat.
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: nachbarschaftPageContent.faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: { "@type": "Answer", text: faq.answer },
+  })),
+};
+
 export default function NachbarschaftPage() {
   return (
     <>
       <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingPageTemplate
       {...nachbarschaftPageContent}
       heroImage={{
@@ -46,6 +61,8 @@ export default function NachbarschaftPage() {
         { label: "Nachbarschaft" },
       ]}
       relatedCases={[
+        { label: "Ratgeber: Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-mediation" },
+        { label: "Ratgeber: Streit in der Eigentümergemeinschaft", href: "/ratgeber/weg-streit-mediation" },
         { label: "Lärm bei Nacht", href: "/cases/nachbarschaft-laerm" },
         { label: "Zaun auf der Grenze", href: "/cases/nachbarschaft-zaun" },
         { label: "Parkplatz blockiert", href: "/cases/nachbarschaft-parken" },

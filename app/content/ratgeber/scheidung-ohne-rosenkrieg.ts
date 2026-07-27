@@ -105,6 +105,8 @@ export const article: RatgeberArticle = {
   related: [
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
+    { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
+    { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
   ],

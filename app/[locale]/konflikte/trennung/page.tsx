@@ -38,12 +38,27 @@ export default async function TrennungPage({
   params: Promise<{ locale: AppLocale }>;
 }) {
   const { locale } = await params;
+  const content = getTrennungPageContent(locale);
+
+  // FAQs sind locale-abhängig, deshalb wird das FAQPage-JSON-LD hier im
+  // Body gebaut und nicht als Modul-Konstante. Quelle ist dieselbe Liste,
+  // die das Template sichtbar rendert.
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: content.faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
 
   return (
     <>
       <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingPageTemplate
-        {...getTrennungPageContent(locale)}
+        {...content}
         heroImage={{
           src: trennungPhoto,
           alt: "Paar im Gespräch über eine Trennung",
@@ -53,6 +68,8 @@ export default async function TrennungPage({
           { label: "Trennung & Scheidung" },
         ]}
         relatedCases={[
+          { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
+          { label: "Ratgeber: Sorgerecht und Umgang regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
           { label: "Trennung mit 2 Kindern", href: "/cases/maria-thomas" },
           { label: "Hohes Vermögen, komplexe Aufteilung", href: "/cases/peter-sarah" },
           { label: "Nach 38 Jahren Ehe", href: "/cases/rolf-helga" },

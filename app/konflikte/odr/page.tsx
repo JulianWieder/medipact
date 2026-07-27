@@ -5,10 +5,13 @@ import { JsonLd } from "@/app/components/JsonLd";
 import teamPhoto from "@/fotos/medi_buiness.jpg";
 import konfliktPhoto from "@/fotos/kon_formen.jpg";
 
+// Title/Description tragen die Ziel-Suchphrase "Mediation bei Geschäfts-
+// partnern" (rankte auf Seite 2) vorn, ODR bleibt als Marken-/Kategoriebegriff
+// dahinter. Title ≤60, Description ≤155 Zeichen mit CTA – wie auf allen Seiten.
 export const metadata: Metadata = {
-  title: "Online Dispute Resolution (ODR) – ab 399 € | medipact",
+  title: "Mediation bei Geschäftspartnern & ODR – ab 399 € | medipact",
   description:
-    "Gesellschafterstreit, B2B-Konflikt oder E-Commerce-Streit? ODR löst ihn digital in Wochen – Mediation oder Schlichtung, ohne Gericht. Jetzt starten.",
+    "Streit unter Geschäftspartnern, Gesellschaftern oder im Team? Online-Mediation statt Gericht: vertraulich, in Wochen, ab 399 €. Jetzt Konflikt einschätzen.",
   alternates: { canonical: "https://medipact.de/konflikte/odr" },
 };
 
@@ -33,10 +36,24 @@ const serviceSchema = {
   url: "https://medipact.de/konflikte/odr",
 };
 
+// Die FAQs werden auf der Seite sichtbar gerendert – hier zusätzlich als
+// FAQPage-JSON-LD, damit sie für Rich Results und "Nutzer fragen auch"
+// überhaupt in Frage kommen. Quelle ist dieselbe Liste, kein Duplikat.
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: odrPageContent.faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: { "@type": "Answer", text: faq.answer },
+  })),
+};
+
 export default function OdrPage() {
   return (
     <>
       <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
       <MarketingPageTemplate
         {...odrPageContent}
         heroImage={{

@@ -72,6 +72,40 @@ export const erbschaftPageContent = {
 
   didYouKnowFacts: erbschaftFacts,
 
+  faqTitle: "Häufige Fragen zur Erbschaftsmediation",
+  faqs: [
+    {
+      question: "Was kostet eine Mediation im Erbstreit?",
+      answer:
+        "Bei medipact kostet die Erbschaftsmediation pauschal 399 € für den gesamten Fall – anders als bei anderen Konfliktarten zahlt nur die Partei, die den Fall anlegt; für die übrigen Erben entstehen keine Kosten. Zum Vergleich: Anwalts- und Gerichtskosten in einer Erbauseinandersetzung richten sich nach dem Nachlasswert und erreichen bei Immobilien schnell einen fünfstelligen Betrag.",
+    },
+    {
+      question: "Wie läuft eine Mediation ab, wenn die Erben nicht mehr miteinander sprechen?",
+      answer:
+        "Genau dafür ist das Online-Verfahren gemacht. Jede Seite schildert ihre Sicht zunächst getrennt und schriftlich – niemand muss dem anderen gegenübersitzen, solange das nicht geht. Erst wenn die Positionen und die dahinterliegenden Interessen erfasst sind, wird zusammengeführt. Bei stark eskalierten Fällen bleibt das Verfahren als Shuttle-Mediation durchgehend getrennt.",
+    },
+    {
+      question: "Kann Mediation eine Erbengemeinschaft auflösen?",
+      answer:
+        "Die Mediation erarbeitet die Auseinandersetzungsvereinbarung, mit der sich die Erbengemeinschaft auflösen lässt – wer welchen Gegenstand übernimmt, wie eine Immobilie behandelt wird, welche Ausgleichszahlungen fließen. Die Umsetzung selbst erfordert je nach Vermögen zusätzliche Schritte, etwa eine notarielle Beurkundung bei Grundstücken. Die Alternative wäre eine Teilungsversteigerung, bei der regelmäßig alle verlieren.",
+    },
+    {
+      question: "Eignet sich Mediation auch beim Pflichtteil?",
+      answer:
+        "Ja, und gerade dort ist sie oft der bessere Weg. Beim Pflichtteil geht es formal um einen Geldanspruch, tatsächlich meistens um Anerkennung und um die Frage, warum jemand enterbt wurde. Ein Prozess klärt nur den Betrag – und macht den Riss endgültig. In der Mediation lassen sich Auskunft, Bewertung und Zahlungsmodalitäten gemeinsam regeln, oft mit Ratenzahlung statt Zwangsverkauf.",
+    },
+    {
+      question: "Ist das Ergebnis rechtlich bindend?",
+      answer:
+        "Die Abschlussvereinbarung ist ein bindender Vertrag zwischen den Erben. Sobald Grundstücke betroffen sind oder eine Erbengemeinschaft formal auseinandergesetzt wird, ist zusätzlich eine notarielle Beurkundung erforderlich. Lassen Sie die Vereinbarung vor der Unterschrift anwaltlich prüfen – das ist überschaubar teuer und verhindert spätere Streitigkeiten.",
+    },
+    {
+      question: "Was, wenn die Fristen für den Pflichtteil laufen?",
+      answer:
+        "Fristen laufen unabhängig von einer Mediation weiter. Wenn eine Verjährung droht, klären Sie das vorab anwaltlich – nötigenfalls wird der Anspruch fristwahrend geltend gemacht und parallel mediiert. Die Mediation ersetzt keine Rechtsberatung; sie klärt, wie die Beteiligten miteinander umgehen wollen, nicht, welche Ansprüche formal bestehen.",
+    },
+  ],
+
   finalCtaTitle: "Erbe klären, bevor Familie zerbricht.",
   finalCtaText:
     "Beschreiben Sie kurz den Konflikt und finden Sie heraus, welcher nächste Schritt sinnvoll ist.",

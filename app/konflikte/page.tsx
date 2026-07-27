@@ -8,9 +8,9 @@ import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
 
 export const metadata: Metadata = {
-  title: "Konfliktarten: Trennung, Erbe, Nachbarn, Business | medipact",
+  title: "Konfliktarten: die 6 Arten im Überblick | medipact",
   description:
-    "Trennung, Nachbarschaftsstreit, Erbschaft oder Konflikt im Unternehmen? Finden Sie den passenden Mediationsweg für Ihren Fall – jetzt einschätzen lassen.",
+    "Die 6 Konfliktarten: Sach-, Interessen-, Beziehungs-, Werte-, Rollen- und Machtkonflikt – mit Beispiel, Lösungsweg und Eskalationsstufen. Jetzt einordnen.",
   alternates: { canonical: "https://medipact.de/konflikte" },
 };
 
@@ -87,6 +87,30 @@ const konfliktarten = [
   },
 ];
 
+// Zweite Achse neben der Konfliktart: Wie weit ist der Konflikt eskaliert?
+// Modell der neun Eskalationsstufen nach Friedrich Glasl, gruppiert in die
+// drei bekannten Zonen. Dieselbe Logik nutzt die Fall-Diagnose im Produkt.
+const eskalationsZonen = [
+  {
+    zone: "Win-Win",
+    stufen: "Stufe 1–3",
+    text: "Verhärtung, Debatte, Taten statt Worte. Die Beteiligten sind noch lösungsorientiert, auch wenn es unangenehm wird. Eine Lösung, mit der beide Seiten gut leben können, ist realistisch.",
+    weg: "Klärendes Gespräch, Moderation – oder eine Mediation, die schnell zum Ergebnis führt.",
+  },
+  {
+    zone: "Win-Lose",
+    stufen: "Stufe 4–6",
+    text: "Koalitionen, Gesichtsverlust, Drohstrategien. Es geht nicht mehr um die Sache, sondern ums Gewinnen. Ohne Dritte von außen dreht sich die Spirale weiter.",
+    weg: "Externe, allparteiliche Mediation – häufig zunächst getrennt (Shuttle-Verfahren).",
+  },
+  {
+    zone: "Lose-Lose",
+    stufen: "Stufe 7–9",
+    text: "Begrenzte Vernichtung, Zersplitterung, gemeinsam in den Abgrund. Der eigene Schaden wird in Kauf genommen, wenn er nur die Gegenseite härter trifft.",
+    weg: "Hier stößt Mediation an ihre Grenzen: Es braucht Machtentscheidungen, rechtliche Schritte oder Schutz.",
+  },
+];
+
 const konfliktartenFaq = [
   {
     q: "Welche Arten von Konflikten gibt es?",
@@ -99,6 +123,18 @@ const konfliktartenFaq = [
   {
     q: "Wie löst man die verschiedenen Konfliktarten?",
     a: "Jede Konfliktart braucht einen anderen Hebel: Sachkonflikte eine gemeinsame Faktenbasis, Interessenkonflikte eine Verhandlung über die dahinterliegenden Bedürfnisse, Beziehungskonflikte strukturierte Kommunikation. Mediation kombiniert diese Ansätze in einem geordneten Verfahren mit neutraler Begleitung.",
+  },
+  {
+    q: "Wie erkenne ich, welche Konfliktart vorliegt?",
+    a: "Achten Sie darauf, woran das Gespräch scheitert. Streiten Sie über Zahlen und Fakten, ist es ein Sachkonflikt. Geht es darum, wer wie viel bekommt, ein Interessenkonflikt. Wird es persönlich, steckt ein Beziehungskonflikt dahinter. Werden alle Vorschläge der Gegenseite abgelehnt – auch gute – ist es meist ein Machtkonflikt. In der Praxis mischen sich mehrere Arten; entscheidend ist, welche das Gespräch blockiert.",
+  },
+  {
+    q: "Welche Konfliktarten gibt es in Familie und Partnerschaft?",
+    a: "Privat dominieren Beziehungskonflikte (Verletzungen, Misstrauen), Wertekonflikte (unterschiedliche Vorstellungen von Erziehung, Geld oder Lebensführung) und Interessenkonflikte bei Trennung und Erbe – etwa um Unterhalt, Betreuungszeiten oder die Aufteilung des Nachlasses. Rollenkonflikte kommen dazu, wenn Familie und Geschäft zusammenfallen, zum Beispiel im Familienunternehmen.",
+  },
+  {
+    q: "Was sind die neun Eskalationsstufen nach Glasl?",
+    a: "Friedrich Glasl beschreibt neun Stufen in drei Zonen: Win-Win (Stufe 1–3: Verhärtung, Debatte, Taten statt Worte), Win-Lose (Stufe 4–6: Koalitionen, Gesichtsverlust, Drohstrategien) und Lose-Lose (Stufe 7–9: begrenzte Vernichtung, Zersplitterung, gemeinsam in den Abgrund). Die Stufe entscheidet über den passenden Weg: Bis Stufe 3 genügt oft Moderation, ab Stufe 4 braucht es externe Mediation, ab Stufe 7 rechtliche Schritte oder Schutz.",
   },
 ];
 
@@ -135,15 +171,19 @@ export default function KonfliktePage() {
           <Breadcrumbs items={[{ label: "Konfliktarten" }]} variant="dark" />
           <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
+          {/* H1 trägt die Ziel-Suchphrase "Konfliktarten" wörtlich – sie ist
+              der stärkste Impressionen-Lieferant der Seite. */}
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-            Konflikte haben viele Formen.{" "}
+            Konfliktarten erkennen.{" "}
             <span className="text-accent-300">Mediation schafft Klarheit.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-            Ob Trennung, Erbschaft oder Nachbarschaft: Viele Konflikte
-            eskalieren nicht wegen des eigentlichen Themas, sondern weil
-            Kommunikation, Erwartungen und Emotionen durcheinandergeraten.
+            Ob Trennung, Erbschaft, Nachbarschaft oder Streit im Unternehmen:
+            Viele Konflikte eskalieren nicht wegen des eigentlichen Themas,
+            sondern weil Kommunikation, Erwartungen und Emotionen
+            durcheinandergeraten. Wer die Konfliktart kennt, findet den
+            passenden Lösungsweg.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/kontakt" className="btn btn-primary">
@@ -335,7 +375,49 @@ export default function KonfliktePage() {
             </table>
           </div>
 
-          <div className="mt-12 grid gap-6">
+          <div className="mt-16 max-w-3xl">
+            <p className="eyebrow mb-4">Zweite Achse</p>
+
+            <h2 className="heading-2 text-neutral-900">
+              Konfliktarten und Eskalationsstufen: Wie weit ist es schon?
+            </h2>
+
+            <p className="mt-5 text-lg leading-8 text-neutral-600">
+              Die Konfliktart sagt, worum es geht. Die Eskalationsstufe sagt,
+              was jetzt noch möglich ist. Das bekannteste Modell dafür stammt
+              von Friedrich Glasl und unterscheidet neun Stufen in drei Zonen –
+              genau diese Einordnung nimmt auch die medipact-Diagnose vor,
+              bevor über Lösungen gesprochen wird.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {eskalationsZonen.map((z) => (
+              <div key={z.zone} className="card">
+                <div className="mb-3 text-sm font-semibold text-accent-700">
+                  {z.stufen}
+                </div>
+                <h3 className="heading-3 text-neutral-900">{z.zone}</h3>
+                <p className="mt-4 leading-7 text-neutral-600">{z.text}</p>
+                <p className="mt-4 border-t border-neutral-100 pt-4 text-sm leading-6 text-neutral-500">
+                  <span className="font-semibold text-neutral-700">
+                    Passender Weg:
+                  </span>{" "}
+                  {z.weg}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-16 max-w-3xl">
+            <p className="eyebrow mb-4">Häufige Fragen</p>
+
+            <h2 className="heading-2 text-neutral-900">
+              Fragen zu den Konfliktarten
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-6">
             {konfliktartenFaq.map((f) => (
               <div key={f.q} className="card">
                 <h3 className="heading-3 text-neutral-900">{f.q}</h3>
@@ -372,7 +454,14 @@ export default function KonfliktePage() {
               >
                 Nachbarschaftskonflikten
               </Link>
-              . Im Unternehmen löst eine professionelle{" "}
+              {" "}– was eine{" "}
+              <Link
+                href="/ratgeber/scheidung-mediator-kosten"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Scheidung mit Mediator kostet
+              </Link>
+              , steht im Kostenüberblick. Im Unternehmen löst eine professionelle{" "}
               <Link
                 href="/konflikte/odr"
                 className="font-semibold text-accent-300 underline-offset-4 hover:underline"

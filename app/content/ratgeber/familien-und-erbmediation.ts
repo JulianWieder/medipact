@@ -87,6 +87,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
+    { label: "Pflichtteil: einigen statt klagen", href: "/ratgeber/pflichtteil-mediation" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Erbkonflikte lösen mit medipact", href: "/konflikte/erbschaft" },
     { label: "Fallbeispiel: Das Firmenerbe der Familie Weber", href: "/cases/familie-weber" },
