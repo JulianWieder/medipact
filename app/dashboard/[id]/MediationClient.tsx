@@ -6,17 +6,32 @@ import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
 
+type PayPalSdk = {
+  Buttons: (options: Record<string, unknown>) => {
+    // render() liefert ein Promise – schlägt es fehl (SDK-Fehler, Container
+    // nicht im DOM), muss der Button neu gerendert werden können.
+    render: (container: HTMLElement) => Promise<void>;
+  };
+};
+
 declare global {
   interface Window {
-    paypal?: {
-      Buttons: (options: Record<string, unknown>) => {
-        // render() liefert ein Promise – schlägt es fehl (SDK-Fehler, Container
-        // nicht im DOM), muss der Button neu gerendert werden können.
-        render: (container: HTMLElement) => Promise<void>;
-      };
-    };
+    // Standard-SDK (intent=capture): sofortige Abbuchung, genutzt von den
+    // Ein-Zahler-Flows (Logbuch-Premium, Bonus-Blöcke, Firmen-Onboarding).
+    paypal?: PayPalSdk;
+    // Eigene SDK-Instanz mit intent=authorize für die Fall-Freischaltung.
+    // MUSS getrennt geladen werden: das SDK erwartet, dass der Intent im
+    // Script-URL zum Intent der serverseitig erzeugten Order passt – sonst
+    // öffnet sich das PayPal-Fenster und schließt sofort wieder. Über
+    // data-namespace landet es in window.paypalAuthorize statt window.paypal
+    // und überschreibt das Standard-SDK nicht.
+    paypalAuthorize?: PayPalSdk;
   }
 }
+
+// Script-Tag-ID und Namespace der AUTHORIZE-Variante des PayPal-SDK.
+const PAYPAL_AUTHORIZE_SCRIPT_ID = "paypal-sdk-authorize";
+const PAYPAL_AUTHORIZE_NAMESPACE = "paypalAuthorize";
 
 type PartyStatus = {
   participant_id: number;
@@ -648,11 +663,12 @@ export default function MediationClient({ mediationId, userRole, currentUserName
 
     function renderButtons() {
       const container = paypalContainerRef.current;
-      if (!window.paypal || !container) return;
+      const sdk = window[PAYPAL_AUTHORIZE_NAMESPACE];
+      if (!sdk || !container) return;
       if (paypalMountedNodeRef.current === container) return;
       paypalMountedNodeRef.current = container;
       container.innerHTML = "";
-      window.paypal
+      sdk
         .Buttons({
           style: { layout: "vertical", color: "gold", label: "paypal" },
           createOrder: async () => {
@@ -713,15 +729,23 @@ export default function MediationClient({ mediationId, userRole, currentUserName
         });
     }
 
-    const existing = document.getElementById("paypal-sdk") as HTMLScriptElement | null;
-    if (window.paypal) {
+    const existing = document.getElementById(
+      PAYPAL_AUTHORIZE_SCRIPT_ID,
+    ) as HTMLScriptElement | null;
+    if (window[PAYPAL_AUTHORIZE_NAMESPACE]) {
       renderButtons();
     } else if (existing) {
       existing.addEventListener("load", renderButtons);
     } else {
       const script = document.createElement("script");
-      script.id = "paypal-sdk";
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
+      script.id = PAYPAL_AUTHORIZE_SCRIPT_ID;
+      // intent=authorize MUSS zum Intent der serverseitig erzeugten Order
+      // passen (siehe backend/app/paypal.py create_order). Fehlt es, öffnet
+      // sich das PayPal-Fenster und schließt sofort wieder.
+      script.src =
+        `https://www.paypal.com/sdk/js?client-id=${clientId}` +
+        `&currency=EUR&intent=authorize`;
+      script.setAttribute("data-namespace", PAYPAL_AUTHORIZE_NAMESPACE);
       script.addEventListener("load", renderButtons);
       script.addEventListener("error", () => {
         setError(
