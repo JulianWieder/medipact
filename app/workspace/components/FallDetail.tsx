@@ -459,6 +459,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     result_source_phase: string | null;
   };
   const [phaseSteps, setPhaseSteps] = useState<Record<string, PhaseStepDef[]>>({});
+  const [phaseStepsError, setPhaseStepsError] = useState("");
   // Alle Zustands-Maps sind mit `${phase}:${step.key}` verschlüsselt.
   const [stepStatuses, setStepStatuses] = useState<Record<string, StepStatusResult>>({});
   const [loadingSteps, setLoadingSteps] = useState(false);
@@ -539,12 +540,24 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   // Schrittlisten ALLER Phasen aus dem zusammengeführten phase-steps-Endpoint
   // (= WorkflowManager-Konfiguration für diesen Fall, inkl. Variante).
   const loadAllPhaseSteps = useCallback(async (): Promise<Record<string, PhaseStepDef[]>> => {
+    // Fehler pro Phase sammeln: ein 402/403 sah früher aus wie "keine Schritte
+    // konfiguriert" und ließ die Variantenzuordnung kaputt wirken.
+    const failures: string[] = [];
     const entries = await Promise.all(
       PHASES.map(async (p): Promise<[string, PhaseStepDef[]]> => {
         const res = await fetch(`/api/mediations/${fall.id}/phase-steps?phase=${p.id}`, {
           cache: "no-store",
         });
-        if (!res.ok) return [p.id, []];
+        if (!res.ok) {
+          failures.push(
+            res.status === 402
+              ? `${p.label}: Fall noch nicht bezahlt (402)`
+              : res.status === 403
+                ? `${p.label}: kein Zugriff auf diesen Fall (403)`
+                : `${p.label}: Fehler ${res.status}`,
+          );
+          return [p.id, []];
+        }
         const data = await res.json().catch(() => null);
         const raw = (data?.steps ?? []) as Array<Record<string, unknown>>;
         const defs: PhaseStepDef[] = raw.map((s) => ({
@@ -566,6 +579,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     );
     const map = Object.fromEntries(entries) as Record<string, PhaseStepDef[]>;
     setPhaseSteps(map);
+    setPhaseStepsError(failures.length ? failures.join(" · ") : "");
     return map;
   }, [fall.id]);
 
@@ -1333,7 +1347,14 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                   ))}
                 </div>
               ) : (phaseSteps[stepsPhase] ?? []).length === 0 ? (
-                <EmptyState icon="🧭" text="Keine Schritte für diese Phase definiert – im Workflow Manager pflegbar." />
+                phaseStepsError ? (
+                  <EmptyState
+                    icon="⚠️"
+                    text={`Schritte konnten nicht geladen werden – ${phaseStepsError}`}
+                  />
+                ) : (
+                  <EmptyState icon="🧭" text="Keine Schritte für diese Phase definiert – im Workflow Manager pflegbar." />
+                )
               ) : (
                 <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl border border-neutral-200">
                   {(phaseSteps[stepsPhase] ?? []).map((step) => {

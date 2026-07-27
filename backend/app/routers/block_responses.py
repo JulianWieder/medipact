@@ -28,7 +28,7 @@ from app.models.phase_step_default import PhaseStepDefault
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_db_user
-from app.services import billing
+from app.services import access, billing
 from app.services.llm import ai_complete
 
 router = APIRouter(prefix="/mediations", tags=["block_responses"])
@@ -242,10 +242,12 @@ def list_block_responses(
     # Onboarding-Phase ("einladung") ist vor der Zahlung nutzbar (Start-Flow);
     # "logbuch" (kostenloses Konflikt-Logbuch) ist per Design kostenlos.
     # Alle anderen Phasen bleiben paywall-geschützt.
+    # own ist None bei betreuendem Mediator/Admin ohne eigenen Teilnehmer-
+    # Eintrag – der sieht (wie ein Fall-Mediator) alle Beiträge.
     if phase in ("einladung", "logbuch"):
-        own = _require_participant(mediation_id, current_user, db)
+        own = access.require_participant_or_staff(mediation_id, current_user, db)
     else:
-        own = _require_paid_participant(mediation_id, current_user, db)
+        own = access.require_read_access(mediation_id, current_user, db)
     query = db.query(MediationBlockResponse).filter(
         MediationBlockResponse.mediation_id == mediation_id
     )
@@ -253,7 +255,7 @@ def list_block_responses(
         query = query.filter(MediationBlockResponse.phase == phase)
     if step_key:
         query = query.filter(MediationBlockResponse.step_key == step_key)
-    if own.role not in _MEDIATOR_ROLES:
+    if own is not None and own.role not in _MEDIATOR_ROLES:
         query = query.filter(MediationBlockResponse.author_key == str(own.id))
     rows = query.order_by(MediationBlockResponse.step_key, MediationBlockResponse.block_id).all()
     return [_serialize(r) for r in rows]

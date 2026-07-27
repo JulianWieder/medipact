@@ -32,7 +32,7 @@ from app.prompts import get_prompt
 from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
 from app import pricing
-from app.services import billing, invoicing
+from app.services import access, billing, invoicing
 from app.services import tenancy
 from app.models.organization import Organization
 
@@ -98,6 +98,14 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     if not p:
         raise HTTPException(status_code=403, detail="Not allowed")
     return p
+
+
+# Zugriff für Teilnehmer ODER betreuenden Mediator/Firmen-Admin/Admin – die
+# gemeinsame Implementierung liegt in services/access.py, weil custom_steps.py
+# und step_content.py dieselbe Regel brauchen.
+_require_participant_or_staff = access.require_participant_or_staff
+_require_read_access = access.require_read_access
+_staff_can_view = access.staff_can_view
 
 
 def _require_paid_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
@@ -189,7 +197,7 @@ def list_workflow_rules(
     Fall vorhandenen Teilnehmer-Rollen (damit das Dashboard die passenden
     Auswahlmöglichkeiten anzeigen kann) und die Standardrollen.
     """
-    _require_participant(mediation_id, current_user, db)
+    _require_participant_or_staff(mediation_id, current_user, db)
 
     rules = (
         db.query(MediationStepRule)
@@ -227,8 +235,9 @@ def upsert_workflow_rule(
     current_user: User = Depends(get_current_db_user),
 ):
     """Legt eine Abweichung vom Standard-Workflow für diesen Fall fest (oder ändert sie)."""
-    participant = _require_participant(mediation_id, current_user, db)
-    if participant.role not in _WORKFLOW_ADMIN_ROLES:
+    # participant ist None bei betreuendem Mediator/Admin ohne Teilnehmer-Eintrag.
+    participant = _require_participant_or_staff(mediation_id, current_user, db)
+    if participant is not None and participant.role not in _WORKFLOW_ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Nur der Mediator kann den Workflow anpassen")
 
     rule = _get_step_rule(db, mediation_id, payload.phase, payload.step)
@@ -266,8 +275,8 @@ def delete_workflow_rule(
     current_user: User = Depends(get_current_db_user),
 ):
     """Entfernt einen Override – der Schritt fällt zurück auf das Standardverhalten."""
-    participant = _require_participant(mediation_id, current_user, db)
-    if participant.role not in _WORKFLOW_ADMIN_ROLES:
+    participant = _require_participant_or_staff(mediation_id, current_user, db)
+    if participant is not None and participant.role not in _WORKFLOW_ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Nur der Mediator kann den Workflow anpassen")
 
     rule = _get_step_rule(db, mediation_id, phase, step)
@@ -1177,7 +1186,10 @@ def get_mediation_participants(
     )
     if not is_participant:
         mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
-        if not tenancy.can_view_mediation(current_user, mediation):
+        # _staff_can_view statt tenancy.can_view_mediation: letzteres sperrt
+        # Pool-Mediatoren (Rolle "mediator" ohne organization_id) aus, obwohl
+        # /mediations/all ihnen genau diese Fälle anzeigt.
+        if not _staff_can_view(current_user, mediation):
             raise HTTPException(status_code=403, detail="Not allowed")
 
     confirmed = (
@@ -1300,7 +1312,7 @@ def get_step_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_paid_participant(mediation_id, current_user, db)
+    _require_read_access(mediation_id, current_user, db)
 
     participants = (
         db.query(MediationParticipant, User)
@@ -1388,10 +1400,12 @@ def get_phase_steps(
     # das kostenlose Konflikt-Logbuch (Intake + Eintrags-Vorlage) hat per
     # Design keine Paywall. Alle anderen Phasen bleiben paywall-geschützt
     # (siehe billing.ensure_unlocked).
+    # Mediator/Admin dürfen die Konfiguration jedes Falls lesen, auch ohne
+    # eigenen Teilnehmer-Eintrag (der Workspace listet Fälle über /all).
     if phase in ("einladung", "logbuch"):
-        _require_participant(mediation_id, current_user, db)
+        _require_participant_or_staff(mediation_id, current_user, db)
     else:
-        _require_paid_participant(mediation_id, current_user, db)
+        _require_read_access(mediation_id, current_user, db)
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:
@@ -1656,8 +1670,10 @@ def summarize_results(
     """
     import json as _json
 
-    participant = _require_paid_participant(mediation_id, current_user, db)
-    if participant.role not in ("mediator", "owner", "admin"):
+    # participant ist None bei globalem Mediator/Admin ohne Teilnehmer-Eintrag
+    # (Workspace-Betreuung) – der ist hier ausdrücklich zugelassen.
+    participant = _require_read_access(mediation_id, current_user, db)
+    if participant is not None and participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
     q = (
@@ -2130,7 +2146,7 @@ def get_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_paid_participant(mediation_id, current_user, db)
+    _require_read_access(mediation_id, current_user, db)
 
     # Prüfen ob aktueller User Mediator/Admin in dieser Mediation ist
     caller_participant = (
@@ -2508,7 +2524,7 @@ def get_appointment_slots(
     ist erst gesetzt, wenn der Mediator final bestätigt hat – nur dann ist
     der Termin verbindlich.
     """
-    _require_paid_participant(mediation_id, current_user, db)
+    _require_read_access(mediation_id, current_user, db)
 
     slots = db.query(MediationAppointmentSlot).filter(
         MediationAppointmentSlot.mediation_id == mediation_id
@@ -2689,8 +2705,9 @@ def get_feedback(
     """Gibt alle Feedback-Einträge eines Falls zurück (chronologisch), inkl. Teilnehmername/-rolle."""
     import json as _json
 
-    # Sicherstellen, dass der aktuelle Nutzer Teil dieses Falls ist (und bezahlt hat).
-    _require_paid_participant(mediation_id, current_user, db)
+    # Sicherstellen, dass der aktuelle Nutzer Teil dieses Falls ist (und bezahlt hat)
+    # – oder ein betreuender Mediator/Admin ohne eigenen Teilnehmer-Eintrag.
+    _require_read_access(mediation_id, current_user, db)
 
     rows = (
         db.query(MediationFeedback, MediationParticipant, User)
@@ -2731,8 +2748,10 @@ def analyse_mediation(
     import json as _json
 
     # Nur Mediator/Owner/Admin darf analysieren
-    participant = _require_paid_participant(mediation_id, current_user, db)
-    if participant.role not in ("mediator", "owner", "admin"):
+    # participant ist None bei globalem Mediator/Admin ohne Teilnehmer-Eintrag
+    # (Workspace-Betreuung) – der ist hier ausdrücklich zugelassen.
+    participant = _require_read_access(mediation_id, current_user, db)
+    if participant is not None and participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
@@ -3376,8 +3395,10 @@ def analyse_phase(
     die KI gesendet wurde (Transparenz). Das Ergebnis wird als
     MediationBlockResponse (author='ai') gespeichert und kann über
     GET /analysen jederzeit wieder geladen werden."""
-    participant = _require_paid_participant(mediation_id, current_user, db)
-    if participant.role not in ("mediator", "owner", "admin"):
+    # participant ist None bei globalem Mediator/Admin ohne Teilnehmer-Eintrag
+    # (Workspace-Betreuung) – der ist hier ausdrücklich zugelassen.
+    participant = _require_read_access(mediation_id, current_user, db)
+    if participant is not None and participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
     if payload.phase not in PHASE_LABELS_ANALYSE:
@@ -3439,8 +3460,10 @@ def analyse_swot(
     und speichert das Ergebnis dauerhaft."""
     import json as _json
 
-    participant = _require_paid_participant(mediation_id, current_user, db)
-    if participant.role not in ("mediator", "owner", "admin"):
+    # participant ist None bei globalem Mediator/Admin ohne Teilnehmer-Eintrag
+    # (Workspace-Betreuung) – der ist hier ausdrücklich zugelassen.
+    participant = _require_read_access(mediation_id, current_user, db)
+    if participant is not None and participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
@@ -3514,8 +3537,10 @@ def get_saved_analyses(
 ):
     """Lädt alle gespeicherten Fall-Analysen (Phasen-Zusammenfassungen + SWOT),
     inkl. des jeweils an die KI gesendeten Prompts."""
-    participant = _require_paid_participant(mediation_id, current_user, db)
-    if participant.role not in ("mediator", "owner", "admin"):
+    # participant ist None, wenn ein globaler Mediator/Admin den Fall betreut,
+    # ohne selbst Teilnehmer zu sein – der darf die Analysen immer sehen.
+    participant = _require_read_access(mediation_id, current_user, db)
+    if participant is not None and participant.role not in ("mediator", "owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren")
 
     rows = (

@@ -9,11 +9,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.mediation import Mediation
 from app.models.mediation_custom_step import MediationCustomStep
-from app.models.mediation_participant import MediationParticipant
 from app.security import get_current_db_user
-from app.services import billing
+from app.services import access
 from app.models.user import User
 
 router = APIRouter(tags=["custom_steps"])
@@ -28,29 +26,8 @@ class CustomStepCreate(BaseModel):
     description: str = ""
 
 
-def _require_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
-    p = (
-        db.query(MediationParticipant)
-        .filter(
-            MediationParticipant.mediation_id == mediation_id,
-            MediationParticipant.user_id == user.id,
-        )
-        .first()
-    )
-    if not p:
-        raise HTTPException(status_code=403, detail="Kein Zugriff auf diese Mediation")
-    return p
-
-
-def _require_paid_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
-    """Wie `_require_participant`, erzwingt aber zusätzlich die Paywall
-    (Mediator/Admin ausgenommen, siehe billing.ensure_unlocked)."""
-    participant = _require_participant(mediation_id, user, db)
-    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
-    if not mediation:
-        raise HTTPException(status_code=404, detail="Mediation nicht gefunden")
-    billing.ensure_unlocked(mediation, participant, user, db)
-    return participant
+# Zugriffsregeln: siehe services/access.py (Teilnehmer ODER betreuender
+# Mediator/Admin, Paywall nur für echte Teilnehmer).
 
 
 @router.get("/mediations/{mediation_id}/custom-steps")
@@ -61,7 +38,8 @@ def list_custom_steps(
     user: User = Depends(get_current_db_user),
 ):
     """Alle custom Steps einer Phase zurückgeben (für alle Teilnehmer)."""
-    _require_paid_participant(mediation_id, user, db)
+    # Auch für betreuende Mediatoren/Admins ohne eigenen Teilnehmer-Eintrag.
+    access.require_read_access(mediation_id, user, db)
 
     steps = (
         db.query(MediationCustomStep)
@@ -92,9 +70,10 @@ def create_custom_step(
     user: User = Depends(get_current_db_user),
 ):
     """Einen neuen custom Step anlegen – nur Mediator/Owner."""
-    participant = _require_paid_participant(mediation_id, user, db)
+    # participant ist None bei betreuendem Mediator/Admin ohne Teilnehmer-Eintrag.
+    participant = access.require_read_access(mediation_id, user, db)
 
-    if participant.role not in _ALLOWED_ROLES:
+    if participant is not None and participant.role not in _ALLOWED_ROLES:
         raise HTTPException(status_code=403, detail="Nur der Mediator kann Steps hinzufügen")
 
     # Eindeutigen Step-Key generieren
@@ -138,9 +117,10 @@ def delete_custom_step(
     user: User = Depends(get_current_db_user),
 ):
     """Einen custom Step löschen – nur Mediator/Owner."""
-    participant = _require_paid_participant(mediation_id, user, db)
+    # participant ist None bei betreuendem Mediator/Admin ohne Teilnehmer-Eintrag.
+    participant = access.require_read_access(mediation_id, user, db)
 
-    if participant.role not in _ALLOWED_ROLES:
+    if participant is not None and participant.role not in _ALLOWED_ROLES:
         raise HTTPException(status_code=403, detail="Nur der Mediator kann Steps entfernen")
 
     step = (
