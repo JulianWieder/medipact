@@ -199,30 +199,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     loadParticipants();
   }, [mediationId, currentUserName, router, initialIsPaid, initialOrganizationId]);
 
-  // Rechnungsdaten des eingeloggten Teilnehmers laden.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/mediations/${mediationId}/billing-address`, { cache: "no-store" });
-        if (res.ok && !cancelled) {
-          const data = await res.json().catch(() => null);
-          const street = data?.billing_street ?? "";
-          const postal = data?.billing_postal_code ?? "";
-          const city = data?.billing_city ?? "";
-          setBillingStreet(street);
-          setBillingPostalCode(postal);
-          setBillingCity(city);
-          setBillingSaved(Boolean(street && postal && city));
-        }
-      } catch {
-        // still ignorieren
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [mediationId]);
+  // Rechnungsdaten werden hier nicht mehr geladen: seit dem PayPal-Umbau
+  // hinterlegt jede Partei sie im Schritt "Verfahren freischalten" innerhalb
+  // des Verfahrens, nicht mehr im Onboarding.
 
   // Video-Modus der Einladung aus der "einladung"-Phasenkonfiguration laden.
   useEffect(() => {
