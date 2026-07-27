@@ -78,7 +78,15 @@ async def capture_order(order_id: str) -> dict:
     async with httpx.AsyncClient(timeout=15.0) as client:
         resp = await client.post(
             f"{_api_base()}/v2/checkout/orders/{order_id}/capture",
-            headers={"Authorization": f"Bearer {token}"},
+            # Der Capture-Aufruf hat KEINEN Body. Ohne json=/content setzt httpx
+            # aber auch keinen Content-Type – PayPal antwortet dann mit
+            # UNSUPPORTED_MEDIA_TYPE. Deshalb Header explizit setzen und einen
+            # leeren JSON-Body mitschicken.
+            json={},
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
         )
     if resp.status_code not in (200, 201):
         raise PayPalError(f"PayPal-Capture fehlgeschlagen: {resp.text}")
