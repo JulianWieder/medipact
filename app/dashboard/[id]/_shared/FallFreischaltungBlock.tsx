@@ -9,8 +9,11 @@
 // Einladungs-Phase bezahlt wird.
 //
 // WICHTIG – Reihenfolge im Block:
-//   1. Rechnungsdaten (Pflicht, bevor bezahlt werden kann: beim Zahlungseingang
-//      wird daraus automatisch die Rechnung erzeugt)
+//   1. Rechnungsdaten – werden normalerweise schon im Onboarding hinterlegt
+//      (Schritt 2 in MediationClient.tsx) und hier nur noch angezeigt, mit
+//      „Ändern". Fehlen sie (z. B. Partei über einen Direktlink im Verfahren),
+//      erscheint hier das Formular; ohne sie ist keine Zahlung möglich, weil
+//      beim Zahlungseingang automatisch die Rechnung erzeugt wird.
 //   2. Betrag inkl. Rabattcode und Add-ons
 //   3. PayPal – reserviert nur, abgebucht wird erst, wenn ALLE zugesagt haben
 //      (siehe backend/app/paypal.py und services/billing.py)
@@ -145,8 +148,11 @@ export default function FallFreischaltungBlock({
     setAddressBusy(true);
     setAddressError("");
     try {
+      // PATCH, nicht PUT: die Next-Route exportiert nur GET/PATCH – ein PUT
+      // endete in einem 405 ohne JSON-Body und damit in der nichtssagenden
+      // Meldung „Rechnungsdaten konnten nicht gespeichert werden".
       const res = await fetch(`/api/mediations/${mediationId}/billing-address`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           billing_street: street,
@@ -156,7 +162,15 @@ export default function FallFreischaltungBlock({
       });
       const d = await res.json().catch(() => null);
       if (!res.ok) {
-        setAddressError(d?.detail ?? "Rechnungsdaten konnten nicht gespeichert werden.");
+        const raw = d?.detail ?? d?.error;
+        const detail = Array.isArray(raw)
+          ? raw.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join(", ")
+          : raw;
+        setAddressError(
+          detail
+            ? `Rechnungsdaten konnten nicht gespeichert werden: ${detail}`
+            : `Rechnungsdaten konnten nicht gespeichert werden (Fehler ${res.status}).`,
+        );
         return;
       }
       setAddressSaved(true);
@@ -407,7 +421,7 @@ export default function FallFreischaltungBlock({
         </div>
       ) : (
         <>
-          {/* 1 – Rechnungsdaten */}
+          {/* 1 – Rechnungsdaten (aus dem Onboarding, hier nur änderbar) */}
           <div className="mt-5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">
               Rechnungsdaten
@@ -559,7 +573,8 @@ export default function FallFreischaltungBlock({
           <div className="mx-auto mt-6 w-full max-w-sm">
             {!addressSaved ? (
               <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
-                Bitte zuerst die Rechnungsdaten oben speichern.
+                Für die Rechnung fehlen noch deine Rechnungsdaten – bitte oben ergänzen
+                und speichern.
               </p>
             ) : you.amount_due_eur > 0 ? (
               <>

@@ -242,7 +242,7 @@ export default function DashboardClient() {
             : undefined,
         hint:
           !hasStarted && startHref
-            ? "Dazu im Fall die Beteiligten verbinden und die Mediation starten. Rechnungsdaten und Zahlung folgen als erster Schritt im Verfahren."
+            ? "Dazu im Fall die Beteiligten verbinden, die Rechnungsdaten hinterlegen und die Mediation starten. Bezahlt wird erst als erster Schritt im Verfahren."
             : undefined,
       },
       {
