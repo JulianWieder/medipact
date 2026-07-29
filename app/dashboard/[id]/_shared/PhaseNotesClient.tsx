@@ -648,6 +648,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   // hinzugefügte custom Steps, bereits zusammengeführt und um geskippte
   // Schritte bereinigt). phaseData.ts liefert weiterhin Label/Guide/Stepper.
   const [stepDetails, setStepDetails] = useState<StepDetail[]>([]);
+  // Warum ist die Phase leer? Ein 402/403 vom phase-steps-Endpoint sah bisher
+  // exakt aus wie "keine Schritte konfiguriert" – die Seite wirkte dadurch wie
+  // ein alter, fest verdrahteter Stub. Jetzt sagen wir den Grund.
+  const [stepsError, setStepsError] = useState<"paywall" | "forbidden" | "error" | "">("");
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -703,6 +707,15 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         const parts: Participant[] = await partRes.json();
         setParticipants(parts);
 
+        if (phaseStepsRes.ok) {
+          setStepsError("");
+        } else if (phaseStepsRes.status === 402) {
+          setStepsError("paywall");
+        } else if (phaseStepsRes.status === 403) {
+          setStepsError("forbidden");
+        } else {
+          setStepsError("error");
+        }
         const phaseStepsFromAPI: PhaseStepFromAPI[] = phaseStepsRes.ok
           ? (await phaseStepsRes.json()).steps ?? []
           : [];
@@ -894,7 +907,9 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         return;
       }
       if (phase.nextPhase) {
-        router.push(`/dashboard/${mediationId}/${phase.nextPhase}`);
+        // hashId: die Dashboard-Routen laufen über die gehashte ID, nicht über
+        // die numerische (sonst landet man auf einer 404/Redirect-Schleife).
+        router.push(`/dashboard/${hashId(mediationId)}/${phase.nextPhase}`);
       } else {
         router.push("/dashboard");
       }
@@ -1000,6 +1015,40 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Warum ist hier nichts? Fehler sichtbar machen statt leerer Phase. */}
+          {stepsError && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <p className="text-sm font-semibold text-amber-900">
+                {stepsError === "paywall"
+                  ? "Diese Phase ist noch nicht freigeschaltet"
+                  : stepsError === "forbidden"
+                    ? "Kein Zugriff auf diese Phase"
+                    : "Die Schritte konnten nicht geladen werden"}
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                {stepsError === "paywall" ? (
+                  <>
+                    Der Fall ist noch nicht bezahlt. Die Inhalte werden sichtbar, sobald die
+                    Freischaltung abgeschlossen ist – das passiert im Onboarding des Falls.
+                  </>
+                ) : stepsError === "forbidden" ? (
+                  <>Dein Konto ist diesem Fall nicht zugeordnet. Bitte wende dich an deinen Mediator.</>
+                ) : (
+                  <>Bitte lade die Seite neu. Bleibt es dabei, melde dich bei deinem Mediator.</>
+                )}
+              </p>
+              {stepsError === "paywall" && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/dashboard/${hashId(mediationId)}/start`)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700"
+                >
+                  Zum Onboarding
+                </button>
               )}
             </div>
           )}
