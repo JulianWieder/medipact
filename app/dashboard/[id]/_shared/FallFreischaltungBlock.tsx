@@ -240,16 +240,22 @@ export default function FallFreischaltungBlock({
   }
 
   // Statuswechsel -> einmalig onPaid melden (nicht bei jedem Re-Render).
+  //
+  // ACHTUNG – hier zählt AUSSCHLIESSLICH status.is_paid: die Paywall im Backend
+  // (services/billing.ensure_unlocked) öffnet erst, wenn ALLE zahlungspflichtigen
+  // Parteien eingezogen sind. Der eigene Status (paid/authorized/kein Betrag)
+  // schaltet gar nichts frei. Meldete der Block schon dabei „bezahlt", lud die
+  // Phase neu, bekam wieder 402, mountete den Block neu -> onPaid erneut ->
+  // Endlosschleife, die als Flackern der Seite sichtbar war.
   const paidNotified = useRef(false);
-  const unlockedForMe =
-    !!status && (status.is_paid || status.you.paid || !!status.you.authorized || !status.you.owes);
+  const caseUnlocked = !!status && status.is_paid;
   useEffect(() => {
-    if (unlockedForMe && !paidNotified.current) {
+    if (caseUnlocked && !paidNotified.current) {
       paidNotified.current = true;
       onPaid?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unlockedForMe]);
+  }, [caseUnlocked]);
 
   const iAmAuthorized = !!status && !!status.you.authorized && !status.you.paid;
   const showPaypal =

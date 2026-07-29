@@ -77,7 +77,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/konflikte/trennung`,
-      lastModified,
+      // Eigenes Datum: H1, Title, Description und Intro wurden am 29.07.
+      // auf "Scheidungsmediation" umgestellt. Mit dem gemeinsamen
+      // lastModified oben (21.07.) würde die Sitemap Google melden, die
+      // Seite sei seit vor der Änderung unverändert.
+      lastModified: new Date("2026-07-29"),
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -201,9 +205,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Ratgeber-Artikel automatisch aus dem Content generieren —
   // neue Artikel in app/content/ratgeber/ landen ohne Zutun in der Sitemap.
+  // Artikel tragen ihr echtes Datum aus dem `updated`-Feld. Vorher bekamen
+  // alle den festen Stand oben — die am 27.07. veröffentlichten Artikel
+  // meldeten damit ein lastmod von 2026-07-21, also ÄLTER als ihre eigene
+  // Veröffentlichung. Genau das Signal, mit dem Google entscheidet, was neu
+  // gecrawlt wird, zeigte für die neuesten Seiten in die falsche Richtung.
   const ratgeberRoutes: MetadataRoute.Sitemap = ratgeberArticles.map((a) => ({
     url: `${BASE_URL}/ratgeber/${a.slug}`,
-    lastModified,
+    lastModified: new Date(a.updated),
     changeFrequency: "monthly",
     priority: 0.7,
   }));

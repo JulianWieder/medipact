@@ -681,6 +681,11 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const [advancing, setAdvancing] = useState(false);
   // Erhöht sich nach erfolgreicher Zahlung und lädt die Phase neu.
   const [reloadKey, setReloadKey] = useState(0);
+  // Nachladen nach der Zahlung passiert STILL, ohne den Voll-Spinner: sonst
+  // unmountet der ganze Seiteninhalt (inkl. Freischaltungs-Block), und der Block
+  // meldet beim Neu-Mount erneut onPaid -> Flackern. Nur der erste Aufbau bzw.
+  // ein Phasenwechsel zeigt den Spinner.
+  const silentReload = useRef(false);
 
   // Der Bezahl-Schritt bei gesperrter Phase kommt NICHT aus dem Code, sondern
   // aus dem Workflow Manager: der Schritt der Einladungs-Phase, der einen Block
@@ -727,7 +732,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   // ── Daten laden ──────────────────────────────────────────────────────────────
   useEffect(() => {
     async function load() {
-      setLoading(true);
+      if (!silentReload.current) setLoading(true);
       try {
         const [partRes, phaseStepsRes] = await Promise.all([
           fetch(`/api/mediations/${mediationId}/participants`),
@@ -816,6 +821,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         setStepView(newView);
         setInputText(Object.fromEntries(allDetails.map((s) => [s.key, ""])));
       } finally {
+        silentReload.current = false;
         setLoading(false);
       }
     }
@@ -1037,7 +1043,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 phase="einladung"
                 stepKey={paywallStep.key}
                 blocks={paywallStep.blocks ?? []}
-                onPaid={() => setReloadKey((n) => n + 1)}
+                onPaid={() => {
+                  silentReload.current = true;
+                  setReloadKey((n) => n + 1);
+                }}
               />
             </div>
           )}
