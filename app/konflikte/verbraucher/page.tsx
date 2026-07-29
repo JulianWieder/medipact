@@ -3,13 +3,14 @@ import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageT
 import { verbraucherPageContent } from "@/app/content/verbraucherPage";
 import { JsonLd } from "@/app/components/JsonLd";
 import verbraucherPhoto from "@/fotos/kosten.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Handwerker- & Verbraucherstreit lösen | medipact",
   description:
     "Strittige Rechnung, Mängel oder Leistung nicht erbracht? Online-Mediation ab 49 € pro Partei – schneller und günstiger als Gericht. Jetzt klären.",
-  alternates: { canonical: "https://medipact.de/konflikte/verbraucher" },
-};
+  path: "/konflikte/verbraucher",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

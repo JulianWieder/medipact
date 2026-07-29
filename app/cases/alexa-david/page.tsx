@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Patchwork-Trennung: Alexa & David | medipact",
   description:
     "Trennung mit 2 Kindern, neuem Partner und Stiefkind: Wie Alexa & David mit Mediation in 4 Monaten klare Rollen für alle fanden – für €499 statt €33.000 Verfahrenskosten.",
-  alternates: { canonical: "https://medipact.de/cases/alexa-david" },
-};
+  path: "/cases/alexa-david",
+  type: "article",
+});
 
 export default function Page() {
   return (

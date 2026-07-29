@@ -4,13 +4,14 @@ import { erbschaftPageContent } from "@/app/content/erbschaftPage";
 import { JsonLd } from "@/app/components/JsonLd";
 import erbschaftFamilie from "@/fotos/medi_Erbe.jpg";
 import erbschaftTisch from "@/fotos/erbschaft-tisch.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Erbschaftsstreit lösen: fair einigen ohne Gericht | medipact",
   description:
     "Streit ums Erbe belastet die Familie. Mediation klärt Erbschaftskonflikte strukturiert und fair – bevor Anwalt und Gericht nötig werden. Jetzt starten.",
-  alternates: { canonical: "https://medipact.de/konflikte/erbschaft" },
-};
+  path: "/konflikte/erbschaft",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

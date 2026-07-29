@@ -10,11 +10,15 @@ import { trennungFacts } from "@/app/components/ui/DidYouKnowSection";
 export const trennungPageContent = {
   eyebrow: "Trennung & Unterhalt",
 
-  title: "Wenn die Beziehung endet, beginnen die offenen Fragen.",
-  titleHighlight: "Finde eine faire Lösung ohne Eskalation.",
+  // Parallel zu trennungPage.de.ts gehalten (siehe Kommentar dort). Die
+  // EN-Variante wird bewusst nicht indexiert, die Struktur muss aber
+  // identisch bleiben, damit MarketingPageTemplate unverändert bleibt.
+  title: "Scheidungsmediation online.",
+  titleHighlight:
+    "Wenn die Beziehung endet, beginnen die offenen Fragen. Klärt sie fair – statt vor Gericht.",
 
   intro:
-    "Trennung bedeutet nicht nur emotionale Belastung, sondern auch konkrete Entscheidungen: Unterhalt, Betreuung, Finanzen. Oft wird es genau dann schwierig, wenn beide Seiten unterschiedliche Vorstellungen haben.",
+    "Trennung und Scheidung bedeuten nicht nur emotionale Belastung, sondern auch konkrete Entscheidungen: Unterhalt, Betreuung, Finanzen. Genau dafür ist Scheidungsmediation da – ein strukturiertes Verfahren, das beide Seiten zu einer tragfähigen Regelung führt, auch wenn die Vorstellungen weit auseinanderliegen.",
 
   primaryCta: {
     label: "Konflikt einschätzen",

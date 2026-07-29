@@ -171,11 +171,16 @@ export default function StepBlocks({
   phase,
   stepKey,
   blocks,
+  onPaid,
 }: {
   mediationId: string;
   phase: string;
   stepKey: string;
   blocks: StepBlockDto[];
+  /** Optional: wird vom Block "fall_freischaltung" gemeldet, sobald der eigene
+   *  Anteil reserviert/bezahlt ist. PhaseNotesClient lädt darauf die gesperrte
+   *  Phase neu, ohne dass die Seite neu geladen werden muss. */
+  onPaid?: () => void;
 }) {
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [purchased, setPurchased] = useState<Set<string>>(new Set());
@@ -550,6 +555,7 @@ export default function StepBlocks({
             mediationId={mediationId}
             title={cfgStr(c, "title")}
             description={cfgStr(c, "description")}
+            onPaid={onPaid}
           />
         );
       case "bezahlung": {

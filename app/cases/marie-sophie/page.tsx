@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Testament-Konflikt: Marie & Sophie | medipact",
   description:
     "Ungleiches Testament, verletzte Gefühle: Wie Marie & Sophie per Mediation in 3 Monaten eine faire Lösung fanden, die Pflegeleistung anerkennt – für €800 statt €28.000 Prozesskosten.",
-  alternates: { canonical: "https://medipact.de/cases/marie-sophie" },
-};
+  path: "/cases/marie-sophie",
+  type: "article",
+});
 
 export default function Page() {
   return (

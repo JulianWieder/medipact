@@ -15,18 +15,17 @@ import ZweiWelten from "@/app/components/ZweiWelten";
 import OutcomeWand from "@/app/components/OutcomeWand";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
+import { pageMetadata } from "@/lib/seo";
 
 // Body copy lives in messages/*.json under "home" (see migration-notes.md
 // for the lift-into-translations pattern used here and in HeroScrollPin).
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
   description:
     "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
-  alternates: {
-    canonical: "https://medipact.de",
-  },
-};
+  path: "",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

@@ -77,10 +77,15 @@ export default function FallFreischaltungBlock({
   mediationId,
   title,
   description,
+  onPaid,
 }: {
   mediationId: string;
   title: string;
   description: string;
+  /** Wird aufgerufen, sobald der eigene Anteil bezahlt/reserviert ist bzw. der
+   *  Fall komplett freigeschaltet wurde. Genutzt von PhaseNotesClient, um die
+   *  gesperrte Phase ohne Seiten-Reload nachzuladen. */
+  onPaid?: () => void;
 }) {
   const [status, setStatus] = useState<PayStatus | null>(null);
   const [error, setError] = useState("");
@@ -233,6 +238,18 @@ export default function FallFreischaltungBlock({
     if (paypalRef.current) paypalRef.current.innerHTML = "";
     setRetry((n) => n + 1);
   }
+
+  // Statuswechsel -> einmalig onPaid melden (nicht bei jedem Re-Render).
+  const paidNotified = useRef(false);
+  const unlockedForMe =
+    !!status && (status.is_paid || status.you.paid || !!status.you.authorized || !status.you.owes);
+  useEffect(() => {
+    if (unlockedForMe && !paidNotified.current) {
+      paidNotified.current = true;
+      onPaid?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unlockedForMe]);
 
   const iAmAuthorized = !!status && !!status.you.authorized && !status.you.paid;
   const showPaypal =

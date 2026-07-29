@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Scheidung nach 38 Jahren: Rolf & Helga | medipact",
   description:
     "Späte Scheidung mit Pension und ungleicher Rente: Wie Rolf & Helga per Mediation Altersvorsorge und Haus in 6 Monaten fair regelten – für €800 statt €26.500 Verfahrenskosten.",
-  alternates: { canonical: "https://medipact.de/cases/rolf-helga" },
-};
+  path: "/cases/rolf-helga",
+  type: "article",
+});
 
 export default function Page() {
   return (

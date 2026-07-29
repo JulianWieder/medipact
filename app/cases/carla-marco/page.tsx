@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Trennung mit Firma: Carla & Marco | medipact",
   description:
     "Trennung mit gemeinsamer GmbH: Wie Carla & Marco per Mediation Abfindung und Firmenfortbestand in 6 Monaten regelten – €200k Abfindung, Jobs gesichert, €600 statt €37.000 Kosten.",
-  alternates: { canonical: "https://medipact.de/cases/carla-marco" },
-};
+  path: "/cases/carla-marco",
+  type: "article",
+});
 
 export default function Page() {
   return (

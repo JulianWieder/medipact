@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Gesellschafterstreit: 50/50-Patt gelöst | medipact",
   description:
     "Zwei Gründer, je 50% der Anteile, komplette Blockade: Wie eine Softwareagentur mit 18 Mitarbeitern das Gesellschafter-Patt in 3 Monaten per Mediation gelöst hat – statt jahrelangem Rechtsstreit.",
-  alternates: {
-    canonical: "https://medipact.de/cases/gesellschafter-streit",
-  },
-};
+  path: "/cases/gesellschafter-streit",
+  type: "article",
+});
 
 export default function Page() {
   return (

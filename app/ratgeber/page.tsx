@@ -5,13 +5,15 @@ import { JsonLd } from "@/app/components/JsonLd";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { ratgeberArticles, ratgeberCategories } from "@/app/content/ratgeberArtikel";
 import ratgeberHero from "@/fotos/medi_ratgeber.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Ratgeber Mediation: Ablauf, Kosten & Wissen | medipact",
   description:
     "Der medipact-Ratgeber erklärt Mediation verständlich: Ablauf und Phasen, Kosten, Wirtschaftsmediation und wann sich ein Verfahren lohnt.",
-  alternates: { canonical: "https://medipact.de/ratgeber" },
-};
+  path: "/ratgeber",
+  type: "article",
+});
 
 const BASE_URL = "https://medipact.de";
 

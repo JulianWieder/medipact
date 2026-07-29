@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Scheidung mit Vermögen: Peter & Sarah | medipact",
   description:
     "Scheidung nach 20 Jahren mit Haus, Ersparnissen und Rentenpunkten: Wie Peter & Sarah per Mediation €1,1 Mio. fair aufteilten und €20.000 Steuern sparten – für €1.500 statt €45.000.",
-  alternates: { canonical: "https://medipact.de/cases/peter-sarah" },
-};
+  path: "/cases/peter-sarah",
+  type: "article",
+});
 
 export default function Page() {
   return (

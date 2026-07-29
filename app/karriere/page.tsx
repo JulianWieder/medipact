@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import karrierePhoto from "@/fotos/medi_karriere.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Karriere bei medipact – Mitgestalten statt verwalten",
   description:
     "Werde Teil von medipact. Wir suchen zertifizierte Mediatoren, die Menschen in schwierigen Lebenssituationen strukturiert begleiten wollen.",
-  alternates: { canonical: "https://medipact.de/karriere" },
-};
+  path: "/karriere",
+});
 
 const values = [
   {

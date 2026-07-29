@@ -6,13 +6,14 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Konfliktarten: die 6 Arten im Überblick | medipact",
   description:
     "Die 6 Konfliktarten: Sach-, Interessen-, Beziehungs-, Werte-, Rollen- und Machtkonflikt – mit Beispiel, Lösungsweg und Eskalationsstufen. Jetzt einordnen.",
-  alternates: { canonical: "https://medipact.de/konflikte" },
-};
+  path: "/konflikte",
+});
 
 const conflictTypes = [
   {

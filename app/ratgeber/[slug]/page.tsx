@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RatgeberArtikelTemplate } from "@/app/components/templates/RatgeberArtikelTemplate";
 import { ratgeberArticles, ratgeberBySlug } from "@/app/content/ratgeberArtikel";
+import { pageMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
   return ratgeberArticles.map((a) => ({ slug: a.slug }));
@@ -15,11 +16,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = ratgeberBySlug[slug];
   if (!article) return {};
-  return {
+  return pageMetadata({
     title: article.metaTitle,
     description: article.description,
-    alternates: { canonical: `https://medipact.de/ratgeber/${article.slug}` },
-  };
+    path: `/ratgeber/${article.slug}`,
+    type: "article",
+  });
 }
 
 export default async function RatgeberArtikelPage({

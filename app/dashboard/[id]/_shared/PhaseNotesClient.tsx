@@ -679,7 +679,15 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [advancing, setAdvancing] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
+  // Erhöht sich nach erfolgreicher Zahlung und lädt die Phase neu.
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Der Bezahl-Schritt bei gesperrter Phase kommt NICHT aus dem Code, sondern
+  // aus dem Workflow Manager: der Schritt der Einladungs-Phase, der einen Block
+  // vom Typ "fall_freischaltung" enthält. Titel, Beschreibung und alle weiteren
+  // Blöcke daneben (Hinweise, Texte …) pflegt der Mediator dort.
+  const [paywallStep, setPaywallStep] = useState<PhaseStepFromAPI | null>(null);
+  const [paywallStepMissing, setPaywallStepMissing] = useState(false);
 
   // ── Custom Steps ──────────────────────────────────────────────────────────────
   const [showAddStep, setShowAddStep] = useState(false);
@@ -693,6 +701,28 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const currentStep = allStepDetails[activeStepIndex];
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
+
+  // Bezahl-Schritt aus dem Workflow holen: der Schritt der Einladungs-Phase, der
+  // einen Block vom Typ "fall_freischaltung" enthält. Findet sich keiner, hat der
+  // Mediator im Workflow Manager keinen Bezahl-Schritt hinterlegt – dann wird
+  // hier bewusst NICHTS hartkodiert, sondern der Hinweis dazu angezeigt.
+  const loadPaywallStep = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}/phase-steps?phase=einladung`);
+      if (!res.ok) {
+        setPaywallStepMissing(true);
+        return;
+      }
+      const steps: PhaseStepFromAPI[] = (await res.json()).steps ?? [];
+      const step = steps.find((s) =>
+        (s.blocks ?? []).some((b) => b.type === "fall_freischaltung"),
+      );
+      setPaywallStep(step ?? null);
+      setPaywallStepMissing(!step);
+    } catch {
+      setPaywallStepMissing(true);
+    }
+  }, [mediationId]);
 
   // ── Daten laden ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -711,6 +741,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           setStepsError("");
         } else if (phaseStepsRes.status === 402) {
           setStepsError("paywall");
+          // Phase gesperrt → den im Workflow Manager konfigurierten Bezahl-
+          // Schritt nachladen. Die Einladungs-Phase ist bewusst NICHT von der
+          // Paywall geschützt, deshalb ist sie hier abrufbar.
+          void loadPaywallStep();
         } else if (phaseStepsRes.status === 403) {
           setStepsError("forbidden");
         } else {
@@ -786,7 +820,9 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
       }
     }
     load();
-  }, [mediationId, phaseKey]); // eslint-disable-line react-hooks/exhaustive-deps
+    // reloadKey: nach erfolgreicher Zahlung im Freischaltungs-Block erneut laden,
+    // damit die eben freigeschalteten Schritte ohne Reload erscheinen.
+  }, [mediationId, phaseKey, reloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Polling wenn "waiting" ────────────────────────────────────────────────────
   const pollStatus = useCallback(async (stepKey: string) => {
@@ -983,73 +1019,54 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
           <p className="eyebrow mb-1">Phase {currentIndex + 1} von {PHASES.length}</p>
           <h1 className="heading-2 text-neutral-900">{phase.label}</h1>
 
-          {/* Mediator-Leitfaden */}
-          {phase.guide.length > 0 && (
-            <div className="mt-4">
-              <button type="button" onClick={() => setShowGuide((v) => !v)} className="flex items-center gap-2 rounded-xl border border-accent-200 bg-accent-50 px-4 py-2.5 text-sm font-semibold text-accent-700 transition hover:bg-accent-100">
-                <svg className={`h-4 w-4 transition-transform ${showGuide ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-                {showGuide ? "Leitfaden ausblenden" : "Mediator-Leitfaden anzeigen"}
-              </button>
-              {showGuide && (
-                <div className="mt-4 space-y-4 rounded-2xl border border-accent-100 bg-accent-50/40 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-accent-600">Leitfaden · {phase.shortLabel}</p>
-                  {phase.guide.map((section, i) => (
-                    <div key={i} className={`rounded-xl border p-4 ${section.highlight ? "border-accent-300 bg-accent-50" : "border-neutral-200 bg-white"}`}>
-                      <h3 className="mb-2 text-sm font-bold text-neutral-800">{section.title}</h3>
-                      {section.type === "list" ? (
-                        <ul className="space-y-1">
-                          {(section.content as string[]).map((item, j) => (
-                            <li key={j} className="flex items-start gap-2 text-sm text-neutral-600">
-                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-neutral-600">{section.content as string}</p>
-                      )}
-                      {section.example && <p className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs italic text-neutral-500">{section.example}</p>}
-                      {section.note && <p className="mt-3 text-xs font-medium text-amber-700">{section.note}</p>}
-                    </div>
-                  ))}
-                </div>
+          {/* Gesperrte Phase: bezahlt wird DIREKT hier statt im Onboarding – aber
+              der Schritt kommt aus dem Workflow Manager (Schritt der Einladungs-
+              Phase mit Block "fall_freischaltung"), nicht aus dem Code. Titel,
+              Beschreibung und begleitende Blöcke pflegt der Mediator dort.
+              Nach erfolgreicher Zahlung lädt onPaid die Phase neu. */}
+          {stepsError === "paywall" && paywallStep && (
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
+                {paywallStep.title}
+              </p>
+              {paywallStep.description && (
+                <p className="mb-3 mt-1 text-sm text-neutral-600">{paywallStep.description}</p>
               )}
+              <StepBlocks
+                mediationId={mediationId}
+                phase="einladung"
+                stepKey={paywallStep.key}
+                blocks={paywallStep.blocks ?? []}
+                onPaid={() => setReloadKey((n) => n + 1)}
+              />
             </div>
           )}
 
-          {/* Warum ist hier nichts? Fehler sichtbar machen statt leerer Phase. */}
-          {stepsError && (
+          {stepsError === "paywall" && paywallStepMissing && (
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
               <p className="text-sm font-semibold text-amber-900">
-                {stepsError === "paywall"
-                  ? "Diese Phase ist noch nicht freigeschaltet"
-                  : stepsError === "forbidden"
-                    ? "Kein Zugriff auf diese Phase"
-                    : "Die Schritte konnten nicht geladen werden"}
+                Diese Phase ist noch nicht freigeschaltet
               </p>
               <p className="mt-1 text-sm text-amber-800">
-                {stepsError === "paywall" ? (
-                  <>
-                    Der Fall ist noch nicht bezahlt. Die Inhalte werden sichtbar, sobald die
-                    Freischaltung abgeschlossen ist – das passiert im Onboarding des Falls.
-                  </>
-                ) : stepsError === "forbidden" ? (
-                  <>Dein Konto ist diesem Fall nicht zugeordnet. Bitte wende dich an deinen Mediator.</>
-                ) : (
-                  <>Bitte lade die Seite neu. Bleibt es dabei, melde dich bei deinem Mediator.</>
-                )}
+                Für diesen Fall ist im Workflow kein Freischaltungs-Schritt hinterlegt. Dein
+                Mediator kann ihn im Workflow Manager ergänzen (Einladungs-Phase, Block
+                „Fall freischalten").
               </p>
-              {stepsError === "paywall" && (
-                <button
-                  type="button"
-                  onClick={() => router.push(`/dashboard/${hashId(mediationId)}/start`)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700"
-                >
-                  Zum Onboarding
-                </button>
-              )}
+            </div>
+          )}
+
+          {stepsError && stepsError !== "paywall" && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <p className="text-sm font-semibold text-amber-900">
+                {stepsError === "forbidden"
+                  ? "Kein Zugriff auf diese Phase"
+                  : "Die Schritte konnten nicht geladen werden"}
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                {stepsError === "forbidden"
+                  ? "Dein Konto ist diesem Fall nicht zugeordnet. Bitte wende dich an deinen Mediator."
+                  : "Bitte lade die Seite neu. Bleibt es dabei, melde dich bei deinem Mediator."}
+              </p>
             </div>
           )}
 

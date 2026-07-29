@@ -4,16 +4,17 @@ import { odrPageContent } from "@/app/content/odrPage";
 import { JsonLd } from "@/app/components/JsonLd";
 import teamPhoto from "@/fotos/medi_buiness.jpg";
 import konfliktPhoto from "@/fotos/kon_formen.jpg";
+import { pageMetadata } from "@/lib/seo";
 
 // Title/Description tragen die Ziel-Suchphrase "Mediation bei Geschäfts-
 // partnern" (rankte auf Seite 2) vorn, ODR bleibt als Marken-/Kategoriebegriff
 // dahinter. Title ≤60, Description ≤155 Zeichen mit CTA – wie auf allen Seiten.
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Mediation bei Geschäftspartnern & ODR – ab 399 € | medipact",
   description:
     "Streit unter Geschäftspartnern, Gesellschaftern oder im Team? Online-Mediation statt Gericht: vertraulich, in Wochen, ab 399 €. Jetzt Konflikt einschätzen.",
-  alternates: { canonical: "https://medipact.de/konflikte/odr" },
-};
+  path: "/konflikte/odr",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

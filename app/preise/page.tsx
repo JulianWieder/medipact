@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
   description:
     "Einstieg ab 49 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Tarife ab 1.000 €/Monat (10 Mediationen). Transparent, ohne versteckte Kosten.",
-  alternates: { canonical: "https://medipact.de/preise" },
-};
+  path: "/preise",
+});
 
 export default function Preise() {
   return (

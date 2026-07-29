@@ -13,13 +13,14 @@ import step3Photo from "../../fotos/schritte/3.jpg";
 import step4Photo from "../../fotos/schritte/4.jpg";
 import step5Photo from "../../fotos/schritte/5.jpg";
 import step6Photo from "../../fotos/schritte/6.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Ablauf einer Mediation: 6 Schritte bei medipact",
   description:
     "Vom ersten Schritt bis zur Vereinbarung: der 6-Schritte-Prozess, alle Mediationsphasen und die Rollen von KI und Mediator – transparent erklärt.",
-  alternates: { canonical: "https://medipact.de/methode" },
-};
+  path: "/methode",
+});
 
 const differentiators = [
   {

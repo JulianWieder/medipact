@@ -498,7 +498,11 @@ export function MarketingPageTemplate({
         {relatedCases && relatedCases.length > 0 && (
           <section className="section section-base border-t border-neutral-100">
             <div className="container max-w-4xl">
-              <SectionLead eyebrow="Weiterlesen" title="Passende Fallbeispiele" center />
+              {/* Bewusst neutral: In relatedCases stehen längst nicht nur
+                  Fallbeispiele, sondern auch Ratgeber-Artikel und die
+                  Preisseite. "Passende Fallbeispiele" war dafür schon vorher
+                  zu eng. */}
+              <SectionLead eyebrow="Weiterlesen" title="Passend zum Thema" center />
               <div className="flex flex-wrap justify-center gap-4">
                 {relatedCases.map((item) => (
                   <NextLink

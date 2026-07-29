@@ -3,13 +3,14 @@ import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageT
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { JsonLd } from "@/app/components/JsonLd";
 import nachbarnPhoto from "@/fotos/med_nachbarn_d.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Nachbarschaftsstreit lösen ohne Gericht | medipact",
   description:
     "Lärm, Grenzen, Parkplätze oder Garten – Nachbarschaftsstreit belastet den Alltag. Mediation hilft, wieder normal nebeneinander zu leben. Jetzt starten.",
-  alternates: { canonical: "https://medipact.de/konflikte/nachbarschaft" },
-};
+  path: "/konflikte/nachbarschaft",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

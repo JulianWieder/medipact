@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { Card } from "@/app/components/ui/Card";
 import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
 import Icon from "@/app/components/ui/Icon";
+import { pageMetadata } from "@/lib/seo";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
@@ -13,12 +14,12 @@ import Icon from "@/app/components/ui/Icon";
 // Keywords: Konflikt dokumentieren, Streit-Tagebuch, Konflikttagebuch,
 // Lärmprotokoll, Gedächtnisprotokoll, Vorfälle festhalten.
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Konflikt-Logbuch: Streit kostenlos dokumentieren | medipact",
   description:
     "Streit kostenlos dokumentieren: Vorkommnisse, Gespräche & Nachrichten im Konflikt-Logbuch festhalten – Basis fürs klärende Gespräch, für Mediation oder Gericht.",
-  alternates: { canonical: "https://medipact.de/konflikt-logbuch" },
-};
+  path: "/konflikt-logbuch",
+});
 
 const ENTRY_TYPES = [
   {

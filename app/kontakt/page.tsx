@@ -3,13 +3,14 @@ import Link from "next/link";
 import SituationCheck from "@/app/components/SituationCheck";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Situation einordnen lassen – Kontakt | medipact",
   description:
     "Lassen Sie Ihre Situation in 5 kurzen Fragen einordnen: Ist Mediation geeignet, unklar – oder eher nicht der richtige Weg? Inklusive Hilfsangeboten für akute Fälle.",
-  alternates: { canonical: "https://medipact.de/kontakt" },
-};
+  path: "/kontakt",
+});
 
 export default function KontaktPage() {
   return (

@@ -4,13 +4,17 @@ import { getTrennungPageContent } from "@/app/content/trennungPage.loader";
 import { JsonLd } from "@/app/components/JsonLd";
 import type { AppLocale } from "@/i18n/routing";
 import trennungPhoto from "@/fotos/medi_trennung.jpg";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Mediation bei Trennung & Scheidung: fair einigen | medipact",
+export const metadata: Metadata = pageMetadata({
+  // Keyword-Ziel ist das Kompositum "Scheidungsmediation" — vorher stand hier
+  // "Trennung & Scheidung", also zwei getrennte Wörter. Die URL bleibt
+  // bewusst /konflikte/trennung (kein Umzug, siehe Entscheidung vom 27.07.).
+  title: "Scheidungsmediation online: fair einigen | medipact",
   description:
-    "Unterhalt, Betreuung, Finanzen – Trennung bringt viele offene Fragen. Medipact hilft, faire Lösungen zu finden, ohne dass jede Nachricht zum Streit wird.",
-  alternates: { canonical: "https://medipact.de/konflikte/trennung" },
-};
+    "Scheidungsmediation online ab 399 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
+  path: "/konflikte/trennung",
+});
 
 const serviceSchema = {
   "@context": "https://schema.org",

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel B2B-Streit: ERP-Projekt gerettet statt verklagt | medipact",
   description:
     "14 Monate Verzug, €400.000 strittige Nachträge: Wie ein Maschinenbauer und sein IT-Dienstleister das festgefahrene ERP-Projekt in 10 Wochen per Wirtschaftsmediation gerettet haben – statt 3–5 Jahre zu prozessieren.",
-  alternates: { canonical: "https://medipact.de/cases/b2b-projektstreit" },
-};
+  path: "/cases/b2b-projektstreit",
+  type: "article",
+});
 
 export default function Page() {
   return (

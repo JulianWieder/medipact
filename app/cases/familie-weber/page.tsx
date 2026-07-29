@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CaseStudyTemplate } from "@/app/components/templates/CaseStudyTemplate";
 import { caseStudies } from "@/app/content/caseStudies";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Firmenerbe: Familie Weber | medipact",
   description:
     "Drei Kinder erben einen Metallbau-Betrieb mit 20 Mitarbeitern: Wie die Familie Weber per Mediation in 4 Monaten den Betrieb rettete – für €1.200 statt €38.000 Verfahrenskosten.",
-  alternates: { canonical: "https://medipact.de/cases/familie-weber" },
-};
+  path: "/cases/familie-weber",
+  type: "article",
+});
 
 export default function Page() {
   return (
