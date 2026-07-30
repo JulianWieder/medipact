@@ -315,6 +315,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
     { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },

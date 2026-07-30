@@ -20,6 +20,7 @@ from app.routers import (
     organizations,
     paypal_webhooks,
     phase_step_defaults,
+    pricing,
     step_content,
 )
 
@@ -51,6 +52,9 @@ app.include_router(ai_prompts.router)
 app.include_router(discounts.router)
 app.include_router(organizations.router)
 app.include_router(newsletter.router)
+# Öffentliche Preisauskunft für Marketing-Seiten (Kostenrechner) – lesend,
+# ohne Auth, siehe routers/pricing.py.
+app.include_router(pricing.router)
 # PayPal-Webhooks: fängt Zahlungen auf, bei denen der Browser abgebrochen ist.
 # Öffentlich erreichbar, aber signaturgeprüft (siehe routers/paypal_webhooks.py).
 app.include_router(paypal_webhooks.router)

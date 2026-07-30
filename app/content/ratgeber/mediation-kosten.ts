@@ -82,6 +82,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
     { label: "Scheidung mit Mediator: Kosten im Detail", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Wirtschaftsmediation: Kosten im Unternehmen", href: "/ratgeber/wirtschaftsmediation" },

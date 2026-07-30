@@ -175,6 +175,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Erbschaft & Familie: Mediation im Überblick", href: "/konflikte/erbschaft" },
     { label: "Pflichtteil: streiten oder verhandeln?", href: "/ratgeber/pflichtteil-mediation" },
     { label: "Familien- und Erbmediation", href: "/ratgeber/familien-und-erbmediation" },

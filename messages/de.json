@@ -111,14 +111,14 @@
       "privat": {
         "kicker": "Privat",
         "title": "Konflikte, die zu Hause wohnen.",
-        "text": "Trennung, Erbe, Nachbarschaft oder Ärger als Verbraucher – strukturiert gelöst, ab 49 € pro Partei.",
+        "text": "Trennung, Erbe, Nachbarschaft: Der Streit sitzt jeden Abend mit am Tisch und zermürbt die Beziehung, die danach noch tragen muss. Struktur statt Eskalation – ab 49 € pro Partei.",
         "ctaLabel": "Für Privatpersonen",
         "ctaHref": "/konflikte"
       },
       "business": {
         "kicker": "Unternehmen",
-        "title": "Konflikte, die Geld kosten.",
-        "text": "Gesellschafterstreit, Teamkonflikte, B2B-Streitigkeiten und Massen-ODR – mit Firmen-Abo bis zum Full Service.",
+        "title": "Konflikte, die jeden Tag Geld kosten.",
+        "text": "Gesellschafterstreit, Teamkonflikte, B2B: Der Streit blockiert Entscheidungen, bindet Führungszeit und beschädigt die Geschäftsbeziehung, die danach noch tragen muss. Ein Gerichtsverfahren dauert Jahre – unser Weg fünf Phasen.",
         "ctaLabel": "Für Unternehmen",
         "ctaHref": "/konflikte/geschaeft"
       }

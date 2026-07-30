@@ -71,6 +71,24 @@ export default function Preise() {
           </div>
         </section>
 
+        {/* VERGLEICH ZUM GERICHTSWEG */}
+        <section className="section-base pt-6">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <p className="text-sm text-neutral-600">
+              Zum Vergleich: Was dieselbe Sache vor Gericht kosten würde,
+              rechnet Ihnen der{" "}
+              <a
+                href="/kostenrechner"
+                className="font-semibold text-accent-700 underline"
+              >
+                Prozesskosten-Rechner
+              </a>{" "}
+              nach den gesetzlichen Gebührentabellen aus – inklusive der Frage,
+              was passiert, wenn Ihr Anwalt nach Stunden abrechnet.
+            </p>
+          </div>
+        </section>
+
         {/* DREI MODELLE */}
         <section className="section section-base pt-10">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">

@@ -213,6 +213,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Nachbarschaft: Mediation im Überblick", href: "/konflikte/nachbarschaft" },
     { label: "Streit in der Eigentümergemeinschaft (WEG)", href: "/ratgeber/weg-streit-mediation" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
