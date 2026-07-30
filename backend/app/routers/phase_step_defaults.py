@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.phase_step_default import PhaseStepDefault
+from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
 from app.models.user import User
 from app.security import get_current_db_user
 from app.services.llm import ai_complete
@@ -62,10 +62,25 @@ def _normalize_blocks(blocks: Optional[list]) -> Optional[list]:
     return normalized
 
 
+def _sort_key(step: PhaseStepDefault) -> tuple:
+    """Sortierung einer gemischten Liste aus typspezifischen und globalen
+    Schritten: nach position; bei gleicher position steht der typspezifische
+    Schritt vorn, danach der globale. Muss identisch zu der Sortierung in
+    mediations.get_phase_steps sein (Designer zeigt sonst eine andere
+    Reihenfolge als die Teilnehmer sehen)."""
+    return (
+        step.position,
+        1 if step.mediation_type == SHARED_MEDIATION_TYPE else 0,
+        step.id,
+    )
+
+
 def _serialize(step: PhaseStepDefault) -> dict:
     return {
         "id": step.id,
         "mediation_type": step.mediation_type,
+        # true = wiederverwendbarer Schritt, der in allen Mediationstypen gilt.
+        "shared": step.mediation_type == SHARED_MEDIATION_TYPE,
         "phase": step.phase,
         "step_key": step.step_key,
         "variant_key": step.variant_key,
@@ -143,6 +158,7 @@ def list_phase_step_defaults(
     mediation_type: str,
     phase: str,
     variant_key: Optional[str] = None,
+    include_shared: bool = False,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
@@ -154,6 +170,13 @@ def list_phase_step_defaults(
     zusätzlichen/abweichenden Schritte dieser Variante geliefert – diese
     ergänzen im späteren Fall-Kontext die Standard-Schritte, ersetzen sie hier
     aber nicht in der Anzeige (getrennte Listen im Designer).
+
+    mediation_type="*" (SHARED_MEDIATION_TYPE) liefert die wiederverwendbaren
+    Schritte, die in ALLEN Mediationstypen gelten (Tab "Alle Typen").
+
+    include_shared=true mischt diese globalen Schritte zusätzlich in die Liste
+    eines konkreten Typs – so sieht der Designer dieselbe Reihenfolge, die die
+    Teilnehmer später sehen. Erkennbar am Feld "shared" im Ergebnis.
     """
     _require_admin(user)
     query = db.query(PhaseStepDefault).filter(
@@ -164,7 +187,23 @@ def list_phase_step_defaults(
         query = query.filter(PhaseStepDefault.variant_key == variant_key)
     else:
         query = query.filter(PhaseStepDefault.variant_key.is_(None))
-    steps = query.order_by(PhaseStepDefault.position, PhaseStepDefault.id).all()
+    steps = query.all()
+
+    # Globale Schritte nur zur Basis-Liste eines echten Typs dazumischen –
+    # nicht zur Varianten-Liste (dort stünden sie doppelt) und nicht zur
+    # Liste der globalen Schritte selbst.
+    if include_shared and not variant_key and mediation_type != SHARED_MEDIATION_TYPE:
+        steps += (
+            db.query(PhaseStepDefault)
+            .filter(
+                PhaseStepDefault.mediation_type == SHARED_MEDIATION_TYPE,
+                PhaseStepDefault.phase == phase,
+                PhaseStepDefault.variant_key.is_(None),
+            )
+            .all()
+        )
+
+    steps.sort(key=_sort_key)
     return [_serialize(s) for s in steps]
 
 
@@ -175,6 +214,14 @@ def create_phase_step_default(
     user: User = Depends(get_current_db_user),
 ):
     _require_admin(user)
+
+    # Ein globaler Schritt gilt typübergreifend – Varianten gehören dagegen zu
+    # genau einem Mediationstyp. Die Kombination ist bedeutungslos.
+    if payload.mediation_type == SHARED_MEDIATION_TYPE and payload.variant_key:
+        raise HTTPException(
+            status_code=400,
+            detail="Ein globaler Schritt (Alle Typen) kann keiner Variante zugeordnet werden",
+        )
 
     existing = (
         db.query(PhaseStepDefault)
@@ -190,6 +237,34 @@ def create_phase_step_default(
         raise HTTPException(
             status_code=409,
             detail="Step-Key existiert bereits für diesen Mediationstyp/Phase/Variante",
+        )
+
+    # Innerhalb eines Falls muss step_key eindeutig bleiben (daran hängen
+    # MediationStepContent, MediationStepRule und die Notizen). Ein globaler
+    # Schritt trifft in JEDEM Typ auf dessen Schritte – deshalb typübergreifend
+    # gegen Kollisionen prüfen.
+    collision_scope = None
+    if payload.mediation_type == SHARED_MEDIATION_TYPE:
+        collision_scope = PhaseStepDefault.mediation_type != SHARED_MEDIATION_TYPE
+    else:
+        collision_scope = PhaseStepDefault.mediation_type == SHARED_MEDIATION_TYPE
+    clash = (
+        db.query(PhaseStepDefault)
+        .filter(
+            collision_scope,
+            PhaseStepDefault.phase == payload.phase,
+            PhaseStepDefault.step_key == payload.step_key,
+        )
+        .first()
+    )
+    if clash:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Step-Key kollidiert mit einem globalen Schritt (Alle Typen)"
+                if payload.mediation_type != SHARED_MEDIATION_TYPE
+                else f"Step-Key wird bereits im Mediationstyp „{clash.mediation_type}“ verwendet"
+            ),
         )
 
     count = (
@@ -365,9 +440,18 @@ def generate_blocks(
 
     phase_hint = _PHASE_HINT.get(payload.phase, "")
     extra = f"\nZusätzliche Anweisung des Mediators: {payload.instruction}" if payload.instruction else ""
+    # Globale Schritte laufen in jedem Konflikttyp – der Text darf also weder
+    # Trennung noch Nachbarschaft noch B2B voraussetzen.
+    type_hint = (
+        "ALLE Mediationsarten (Trennung, Erbschaft, Nachbarschaft, Verbraucher, "
+        "B2B …) – formuliere bewusst typneutral, ohne Annahmen über die Art des "
+        "Konflikts oder das Verhältnis der Parteien"
+        if payload.mediation_type == SHARED_MEDIATION_TYPE
+        else payload.mediation_type
+    )
     prompt = (
         "Du gestaltest die Seite eines Schritts in einer Online-Mediation. "
-        f"Mediationstyp: {payload.mediation_type}. Phase: {payload.phase} ({phase_hint}). "
+        f"Mediationstyp: {type_hint}. Phase: {payload.phase} ({phase_hint}). "
         f"Titel des Schritts: {payload.title or '(ohne Titel)'}.{extra}\n\n"
         "Erzeuge eine sinnvolle, in sich schlüssige Abfolge von 3 bis 6 Blöcken für "
         "diese Seite. Beginne in der Regel mit einer kurzen Textausgabe (Anleitung), "

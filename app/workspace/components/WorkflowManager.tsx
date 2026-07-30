@@ -36,6 +36,7 @@ import {
   PHASES,
   DESIGNER_PHASES,
   MEDIATION_TYPES,
+  SHARED_MEDIATION_TYPE,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
   type StepBlockDto,
@@ -127,7 +128,11 @@ type StepNodeData = {
   label: string;
   stepKey: string;
   blocks: StepBlockDto[];
+  /** Basis-Schritt, während eine Variante bearbeitet wird: nur Anzeige. */
   locked: boolean;
+  /** Globaler Schritt („Alle Typen"): Inhalt nur im Tab „Alle Typen" editierbar,
+   *  Position darf aber von hier aus verschoben werden (sie gilt global). */
+  shared: boolean;
   isEditing: boolean;
   editingLabel: string;
   isDesigning: boolean;
@@ -158,6 +163,50 @@ function StepNode({ data }: NodeProps) {
           {step.stepKey} · Basis
         </p>
         <BlockBadges blocks={step.blocks} />
+      </div>
+    );
+  }
+
+  // Globaler Schritt in der Ansicht eines konkreten Mediationstyps: sichtbar an
+  // seiner echten Position, Inhalt aber nur im Tab „Alle Typen" änderbar.
+  if (step.shared) {
+    return (
+      <div
+        className="rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/60 px-3 py-2.5"
+        style={{ width: NODE_WIDTH }}
+        title={
+          "Globaler Schritt — Inhalt im Tab „Alle Typen“ bearbeiten. " +
+          "Die Position hier gilt für alle Mediationsarten."
+        }
+      >
+        <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-amber-300" />
+        <Handle type="source" position={Position.Right} className="!h-2 !w-2 !bg-amber-300" />
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-800">
+            Alle Typen
+          </span>
+        </div>
+        <p className="mt-1 truncate text-sm font-medium text-amber-900">{step.label}</p>
+        <p className="mt-0.5 truncate font-mono text-[10px] text-amber-400">{step.stepKey}</p>
+        <BlockBadges blocks={step.blocks} />
+        <div className="mt-2 flex items-center gap-1">
+          <button
+            onClick={() => step.onMove(-1)}
+            disabled={!step.canMoveLeft}
+            className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
+            title="Nach links (gilt für alle Mediationsarten)"
+          >
+            ←
+          </button>
+          <button
+            onClick={() => step.onMove(1)}
+            disabled={!step.canMoveRight}
+            className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
+            title="Nach rechts (gilt für alle Mediationsarten)"
+          >
+            →
+          </button>
+        </div>
       </div>
     );
   }
@@ -1455,8 +1504,17 @@ export function WorkflowManager() {
   // Welcher Schritt ist gerade im Seiten-Designer offen.
   const [designStepId, setDesignStepId] = useState<number | null>(null);
 
+  // Tab „Alle Typen": hier werden die wiederverwendbaren Schritte gepflegt, die
+  // in jeder Mediationsart laufen. Varianten gibt es dort nicht (sie gehören zu
+  // genau einem Typ).
+  const isShared = mediationType === SHARED_MEDIATION_TYPE;
+
   useEffect(() => {
     setActiveVariant(null);
+    if (mediationType === SHARED_MEDIATION_TYPE) {
+      setVariants([]);
+      return;
+    }
     fetchVariants(mediationType)
       .then((list) => setVariants(list.filter((v) => v.enabled)))
       .catch(() => setVariants([]));
@@ -1468,7 +1526,9 @@ export function WorkflowManager() {
     setError("");
     setDesignStepId(null);
     const loads: Promise<PhaseStepDefaultDto[]>[] = [
-      fetchPhaseStepDefaults(mediationType, activePhase),
+      // In einer Typ-Ansicht kommen die globalen Schritte mit in die Basis-
+      // Liste (an ihrer echten Position), im Tab „Alle Typen" nicht.
+      fetchPhaseStepDefaults(mediationType, activePhase, null, !isShared),
     ];
     if (activeVariant) {
       loads.push(fetchPhaseStepDefaults(mediationType, activePhase, activeVariant));
@@ -1488,15 +1548,19 @@ export function WorkflowManager() {
     return () => {
       cancelled = true;
     };
-  }, [mediationType, activePhase, activeVariant]);
+  }, [mediationType, activePhase, activeVariant, isShared]);
 
+  // baseSteps enthält in einer Typ-Ansicht auch die globalen Schritte (Feld
+  // `shared`) – sie sind Teil der Reihenfolge, aber inhaltlich gesperrt.
   const editableSteps = activeVariant ? variantSteps : baseSteps;
   const lockedSteps = activeVariant ? baseSteps : [];
   const setEditableSteps = activeVariant ? setVariantSteps : setBaseSteps;
   const chain = useMemo(() => [...lockedSteps, ...editableSteps], [lockedSteps, editableSteps]);
 
   const activePhaseLabel = DESIGNER_PHASES.find((p) => p.id === activePhase)?.label ?? activePhase;
-  const typeLabel = MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
+  const typeLabel = isShared
+    ? "Alle Typen"
+    : MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
 
   // ── Schritt-Aktionen ──────────────────────────────────────────────────────
   async function addStep() {
@@ -1512,10 +1576,19 @@ export function WorkflowManager() {
         title: label,
         variant_key: activeVariant,
       });
-      setEditableSteps((prev) => [...prev, created]);
+      // Das Backend vergibt die position anhand der Schritte DIESES Scopes –
+      // in einer Typ-Ansicht mit eingemischten globalen Schritten muss die
+      // Reihenfolge danach einmal normalisiert werden.
+      setEditableSteps((prev) => {
+        const next = [...prev, created];
+        persistOrder(next);
+        return next;
+      });
       setNewLabel("");
     } catch {
-      setError("Schritt konnte nicht angelegt werden.");
+      setError(
+        "Schritt konnte nicht angelegt werden — evtl. ist der Step-Key bereits als globaler Schritt vergeben.",
+      );
     }
   }
 
@@ -1548,6 +1621,9 @@ export function WorkflowManager() {
     }
   }
 
+  // Schreibt die Reihenfolge als fortlaufende Positionen zurück – auch für
+  // eingemischte globale Schritte. Deren Position gilt bewusst in ALLEN
+  // Mediationsarten (ein Datensatz), das Verschieben hier wirkt also überall.
   const persistOrder = useCallback((list: PhaseStepDefaultDto[]) => {
     reorderPhaseStepDefaults(list.map((s, idx) => ({ id: s.id, position: idx }))).catch(() =>
       setError("Reihenfolge konnte nicht gespeichert werden."),
@@ -1743,6 +1819,9 @@ export function WorkflowManager() {
     () =>
       chain.map((step, idx) => {
         const locked = idx < lockedSteps.length;
+        // Globaler Schritt: verschiebbar, aber nicht umbenennbar/löschbar und
+        // ohne Designer (Inhalt gehört in den Tab „Alle Typen").
+        const shared = !locked && !!step.shared;
         return {
           id: String(step.id),
           type: "step",
@@ -1753,6 +1832,7 @@ export function WorkflowManager() {
             stepKey: step.step_key,
             blocks: stepBlocks(step),
             locked,
+            shared,
             isEditing: editingId === step.id,
             editingLabel,
             isDesigning: designStepId === step.id,
@@ -1787,7 +1867,12 @@ export function WorkflowManager() {
     ? variants.find((v) => v.key === activeVariant)?.label ?? activeVariant
     : null;
 
-  const designStep = designStepId !== null ? editableSteps.find((s) => s.id === designStepId) ?? null : null;
+  // Globale Schritte werden nur im Tab „Alle Typen" gestaltet – dort sind sie
+  // reguläre editierbare Schritte (shared-Flag ist dann nicht gesetzt).
+  const designStep =
+    designStepId !== null
+      ? editableSteps.find((s) => s.id === designStepId && !(!isShared && s.shared)) ?? null
+      : null;
 
   return (
     <div className="p-6 max-w-6xl">
@@ -1797,6 +1882,8 @@ export function WorkflowManager() {
         gestaltest du als geordnete Liste von <span className="font-semibold">Blöcken</span>
         {" "}(Textausgabe, Texteingabe, Video, Frage, Videokonferenz, KI-Prompt …) mit
         Live-Vorschau — klick dazu bei einem Schritt auf <span className="font-semibold">„Gestalten"</span>.
+        Schritte, die in <span className="font-semibold">jeder</span> Mediationsart gebraucht werden,
+        legst du einmal unter <span className="font-semibold">„Alle Typen"</span> an.
       </p>
 
       <DesignChat phaseLabel={activePhaseLabel} onSubmit={createStepFromAi} />
@@ -1826,10 +1913,32 @@ export function WorkflowManager() {
             {t.label}
           </button>
         ))}
+        <span className="mx-1 h-5 w-px bg-neutral-200" />
+        <button
+          onClick={() => setMediationType(SHARED_MEDIATION_TYPE)}
+          className={cn(
+            "rounded-full px-4 py-1.5 text-sm font-medium transition",
+            isShared
+              ? "bg-amber-500 text-white"
+              : "bg-amber-50 text-amber-700 hover:bg-amber-100",
+          )}
+          title="Schritte, die in jeder Mediationsart laufen — einmal pflegen, überall aktiv"
+        >
+          ★ Alle Typen
+        </button>
       </div>
 
-      {/* Scope: Basis / Varianten */}
-      <div className="mb-6 flex flex-wrap items-center gap-2">
+      {isShared && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-xs text-amber-800">
+          Diese Schritte laufen in <span className="font-semibold">jeder</span> Mediationsart mit
+          (z.B. ein Persönlichkeitstest). Sie werden nur hier bearbeitet, erscheinen in den
+          Typ-Ansichten aber an ihrer echten Position — dort kann die Reihenfolge angepasst werden.
+          Formuliere die Inhalte typneutral, sie gelten für Trennung genauso wie für B2B.
+        </div>
+      )}
+
+      {/* Scope: Basis / Varianten (Varianten gehören zu genau einem Typ) */}
+      <div className={cn("mb-6 flex-wrap items-center gap-2", isShared ? "hidden" : "flex")}>
         <button
           onClick={() => setActiveVariant(null)}
           className={cn(
@@ -1915,7 +2024,11 @@ export function WorkflowManager() {
           <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
             <h4 className="text-sm font-semibold text-neutral-800">
               {typeLabel}
-              {activeVariantLabel ? ` · Variante „${activeVariantLabel}"` : " · Basis"}
+              {activeVariantLabel
+                ? ` · Variante „${activeVariantLabel}"`
+                : isShared
+                  ? ""
+                  : " · Basis"}
               {" · "}
               {activePhaseLabel}
             </h4>
@@ -1927,6 +2040,13 @@ export function WorkflowManager() {
           <p className="border-b border-neutral-100 bg-neutral-50/60 px-5 py-2 text-[11px] text-neutral-400">
             Titel anklicken zum Umbenennen · <span className="font-semibold">„Gestalten"</span> öffnet den
             Seiten-Designer für diesen Schritt (Blöcke + Live-Vorschau).
+            {!isShared && (
+              <>
+                {" "}
+                <span className="text-amber-600">Gelbe Karten</span> sind globale Schritte aus
+                „Alle Typen" — hier nur verschiebbar (die Position gilt dann überall).
+              </>
+            )}
           </p>
 
           {!loadingSteps && chain.length === 0 ? (
@@ -1936,7 +2056,9 @@ export function WorkflowManager() {
                 text={
                   activeVariant
                     ? "Diese Variante hat noch keine Zusatz-Schritte für diese Phase."
-                    : "Noch keine Schritte für diese Phase definiert."
+                    : isShared
+                      ? "Noch kein typübergreifender Schritt in dieser Phase."
+                      : "Noch keine Schritte für diese Phase definiert."
                 }
               />
             </div>
@@ -1982,7 +2104,9 @@ export function WorkflowManager() {
               placeholder={
                 activeVariant
                   ? `Neuer Zusatz-Schritt für „${activeVariantLabel}" …`
-                  : "Neuer Basis-Schritt …"
+                  : isShared
+                    ? "Neuer Schritt für alle Mediationsarten …"
+                    : "Neuer Basis-Schritt …"
               }
               className="flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400"
             />

@@ -84,6 +84,8 @@ export interface MediationVariantDto {
 export interface PhaseStepDefaultDto {
   id: number;
   mediation_type: string;
+  /** true = globaler Schritt (mediation_type "*"), gilt in allen Mediationsarten. */
+  shared?: boolean;
   phase: string;
   step_key: string;
   /** null = Standard-Schritt des Basistyps; sonst key der Variante. */
@@ -174,6 +176,15 @@ export const CONTENT_TYPES: ContentTypeDef[] = [
 export const CONTENT_TYPE_BY_ID: Record<string, ContentTypeDef> = Object.fromEntries(
   CONTENT_TYPES.map((t) => [t.id, t]),
 );
+
+/**
+ * Pseudo-Mediationsart für WIEDERVERWENDBARE Schritte: ein Schritt mit
+ * mediation_type "*" gilt in JEDEM Mediationstyp. Gepflegt wird er im
+ * WorkflowManager im eigenen Tab „Alle Typen"; in den einzelnen Typ-Tabs
+ * erscheint er als gesperrte Karte an seiner tatsächlichen Position.
+ * Backend-Gegenstück: SHARED_MEDIATION_TYPE in models/phase_step_default.py.
+ */
+export const SHARED_MEDIATION_TYPE = "*";
 
 export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "trennung", label: "Trennung & Scheidung" },

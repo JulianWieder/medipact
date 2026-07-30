@@ -28,7 +28,7 @@ from app.models.mediation_block_response import MediationBlockResponse
 from app.models.mediation_log_entry import MediationLogEntry
 from app.models.mediation_log_upload import MediationLogUpload
 from app.models.mediation_participant import MediationParticipant
-from app.models.phase_step_default import PhaseStepDefault
+from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.prompts import get_prompt
@@ -392,7 +392,9 @@ def _block_labels(db: Session, mediation_type: str, step_key: str) -> dict[str, 
     row = (
         db.query(PhaseStepDefault)
         .filter(
-            PhaseStepDefault.mediation_type == mediation_type,
+            # inkl. globaler Schritte ("Alle Typen"): step_key ist phasenweit
+            # eindeutig, deshalb reicht der IN-Filter ohne Vorrangregel.
+            PhaseStepDefault.mediation_type.in_([mediation_type, SHARED_MEDIATION_TYPE]),
             PhaseStepDefault.phase == "logbuch",
             PhaseStepDefault.step_key == step_key,
             PhaseStepDefault.variant_key.is_(None),

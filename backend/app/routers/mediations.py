@@ -18,7 +18,7 @@ from app.models.mediation_step_rule import MediationStepRule
 from app.models.mediation_custom_step import MediationCustomStep
 from app.models.mediation_step_content import MediationStepContent
 from app.models.mediation_block_response import MediationBlockResponse
-from app.models.phase_step_default import PhaseStepDefault
+from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
 from app.paypal import (
@@ -1423,21 +1423,31 @@ def get_phase_steps(
     defaults = (
         db.query(PhaseStepDefault)
         .filter(
-            PhaseStepDefault.mediation_type == mediation.mediation_type,
+            # Typspezifische Schritte + wiederverwendbare Schritte, die in
+            # ALLEN Mediationstypen gelten (SHARED_MEDIATION_TYPE, gepflegt im
+            # Workflow-Manager-Tab "Alle Typen").
+            PhaseStepDefault.mediation_type.in_(
+                [mediation.mediation_type, SHARED_MEDIATION_TYPE]
+            ),
             PhaseStepDefault.phase == phase,
             PhaseStepDefault.enabled.is_(True),
             variant_filter,
         )
-        # Basis-Schritte zuerst (in ihrer Reihenfolge), danach die Zusatz-
-        # Schritte der Variante (in ihrer eigenen Reihenfolge). Positionen
-        # werden pro Scope (variant_key) unabhängig ab 0 vergeben, daher
-        # nicht über beide Scopes hinweg mischen.
-        .order_by(
-            PhaseStepDefault.variant_key.isnot(None),
-            PhaseStepDefault.position,
-            PhaseStepDefault.id,
-        )
         .all()
+    )
+    # Basis-Schritte zuerst (typspezifische und globale nach position gemischt,
+    # bei Gleichstand der typspezifische zuerst), danach die Zusatz-Schritte der
+    # Variante in ihrer eigenen Reihenfolge. Positionen werden pro Scope
+    # (variant_key) unabhängig ab 0 vergeben, daher nicht über die Varianten-
+    # Grenze hinweg mischen. Sortierung identisch zu _sort_key in
+    # routers/phase_step_defaults.py – der Designer zeigt dieselbe Reihenfolge.
+    defaults.sort(
+        key=lambda d: (
+            1 if d.variant_key else 0,
+            d.position,
+            1 if d.mediation_type == SHARED_MEDIATION_TYPE else 0,
+            d.id,
+        )
     )
     custom_steps = (
         db.query(MediationCustomStep)
@@ -1511,6 +1521,8 @@ def get_phase_steps(
                 ),
                 "individual": is_individual,
                 "custom": False,
+                # true = stammt aus dem typübergreifenden Workflow ("Alle Typen")
+                "shared": d.mediation_type == SHARED_MEDIATION_TYPE,
             }
         )
     for c in custom_steps:
@@ -1536,6 +1548,7 @@ def get_phase_steps(
                 "feedback_occasion": sc.feedback_occasion if sc else None,
                 "individual": True,
                 "custom": True,
+                "shared": False,
             }
         )
 

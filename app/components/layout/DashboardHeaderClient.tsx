@@ -53,7 +53,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 border-b border-neutral-200/70 bg-white/80 backdrop-blur-md">
-      <div className="container flex h-[73px] items-center justify-between gap-6">
+      <div className="container flex h-[73px] min-w-0 items-center justify-between gap-6">
 
         {/* Logo */}
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2.5">
@@ -71,7 +71,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
         </Link>
 
         {/* Navigation */}
-        <nav className="hidden flex-1 items-center gap-1 md:flex">
+        <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-hidden md:flex">
           {nav.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -98,7 +98,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
         </nav>
 
         {/* Right: bell + user */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
 
           {/* Notification bell */}
           <Link

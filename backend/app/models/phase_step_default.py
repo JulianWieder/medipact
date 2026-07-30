@@ -4,6 +4,15 @@ from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text, U
 
 from app.database import Base
 
+# Pseudo-Mediationstyp für WIEDERVERWENDBARE (globale) Schritte: ein Datensatz
+# mit mediation_type == "*" gilt in JEDEM Mediationstyp. Er wird im Workflow
+# Manager im eigenen Tab "Alle Typen" gepflegt und in der Fall-Auflösung
+# (get_phase_steps) zu den typspezifischen Schritten dazugemischt – sortiert
+# nach `position`, bei Gleichstand hinter dem typspezifischen Schritt.
+# Ein globaler Schritt hat NIE eine variant_key (Varianten gehören zu genau
+# einem Mediationstyp).
+SHARED_MEDIATION_TYPE = "*"
+
 
 class PhaseStepDefault(Base):
     """
@@ -36,6 +45,8 @@ class PhaseStepDefault(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
+    # Mediationstyp (trennung, erbschaft, …) ODER SHARED_MEDIATION_TYPE ("*")
+    # für einen wiederverwendbaren Schritt, der in allen Typen gilt.
     mediation_type = Column(String, nullable=False, index=True)
     phase = Column(String, nullable=False, index=True)
     step_key = Column(String, nullable=False)

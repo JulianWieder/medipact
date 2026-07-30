@@ -23,7 +23,7 @@ from app.models.mediation_invite import MediationInvite
 from app.models.invite_meet_recording import InviteMeetRecording
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
-from app.models.phase_step_default import PhaseStepDefault
+from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
 from app.prompts import get_prompt
 from app.rate_limit import invite_limiter
 from app.security import get_current_db_user, require_mediation_access
@@ -614,7 +614,9 @@ def effective_video_mode(db: Session, mediation_type: str) -> str:
     steps = (
         db.query(PhaseStepDefault)
         .filter(
-            PhaseStepDefault.mediation_type == mediation_type,
+            # globale Schritte ("Alle Typen") zählen mit – ein dort gepflegter
+            # Video-Schritt gilt auch für diese Mediationsart.
+            PhaseStepDefault.mediation_type.in_([mediation_type, SHARED_MEDIATION_TYPE]),
             PhaseStepDefault.phase == "einladung",
             PhaseStepDefault.variant_key.is_(None),
             PhaseStepDefault.enabled.is_(True),

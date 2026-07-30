@@ -24,7 +24,7 @@ from app.models.mediation_block_purchase import MediationBlockPurchase
 from app.models.mediation_block_response import MediationBlockResponse
 from app.models.mediation_note import MediationNote
 from app.models.mediation_participant import MediationParticipant
-from app.models.phase_step_default import PhaseStepDefault
+from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
 from app.models.user import User
 from app.paypal import PayPalError, capture_order, create_order
 from app.security import get_current_db_user
@@ -54,7 +54,11 @@ def _find_block(db: Session, mediation: Mediation, block_id: str):
     steps = (
         db.query(PhaseStepDefault)
         .filter(
-            PhaseStepDefault.mediation_type == mediation.mediation_type,
+            # inkl. der globalen Schritte ("Alle Typen") – deren Blöcke müssen
+            # genauso beantwortbar sein wie die typspezifischen.
+            PhaseStepDefault.mediation_type.in_(
+                [mediation.mediation_type, SHARED_MEDIATION_TYPE]
+            ),
             PhaseStepDefault.enabled.is_(True),
             variant_filter,
         )

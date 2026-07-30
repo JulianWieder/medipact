@@ -599,11 +599,15 @@ export async function fetchPhaseStepDefaults(
   mediationType: string,
   phase: string,
   variantKey?: string | null,
+  includeShared = false,
 ): Promise<PhaseStepDefaultDto[]> {
   // Ohne variantKey liefert das Backend nur Basis-Schritte (variant_key IS
   // NULL); mit variantKey ausschließlich die Zusatz-Schritte der Variante.
+  // includeShared mischt zusätzlich die globalen Schritte (mediation_type "*")
+  // in die Basis-Liste – erkennbar am Feld `shared`.
   let url = `/api/admin/phase-step-defaults?mediation_type=${encodeURIComponent(mediationType)}&phase=${encodeURIComponent(phase)}`;
   if (variantKey) url += `&variant_key=${encodeURIComponent(variantKey)}`;
+  if (includeShared) url += "&include_shared=true";
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("Schritte konnten nicht geladen werden");
   return res.json();
