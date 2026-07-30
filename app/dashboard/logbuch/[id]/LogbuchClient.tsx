@@ -23,6 +23,9 @@ import Link from "next/link";
 import Icon from "@/app/components/ui/Icon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Reveal } from "@/app/components/ui/motion";
+import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
+import { cardLift, cn } from "@/app/components/ui/premium";
 
 interface Props {
   mediationId: string;
@@ -1263,6 +1266,9 @@ export default function LogbuchClient({
                   Keine Einträge in dieser Ansicht.
                 </p>
               ) : (
+                /* Ansichts-Filter wechselt per Crossfade (wie die ThemenTabs
+                   auf der Landing) statt hart umzuspringen. */
+                <CrossfadePanel activeKey={viewFilter}>
                 <ol className="mt-5 space-y-4">
                   {filteredEntries.map((entry) => {
                     const meta = typeMeta(entry.entry_type);
@@ -1272,9 +1278,15 @@ export default function LogbuchClient({
                       ([, v]) => v !== undefined && v !== null && v !== "",
                     );
                     return (
+                      /* Kein Reveal je Eintrag: zwischen <ol> und <li> darf
+                         kein <div> stehen. Die Liste als Ganzes crossfadet
+                         beim Filterwechsel, das reicht. */
                       <li
                         key={entry.id}
-                        className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6"
+                        className={cn(
+                          "rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 hover:border-accent-200",
+                          cardLift,
+                        )}
                       >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-2.5">
@@ -1414,12 +1426,13 @@ export default function LogbuchClient({
                     );
                   })}
                 </ol>
+                </CrossfadePanel>
               )}
             </section>
 
             {/* ── Premium-Upsell (nur free) ── */}
             {!isPremium && (
-              <section className="mt-10 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 sm:p-8">
+              <Reveal className="mt-10 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 sm:p-8">
                 <h2 className="font-display text-xl font-medium text-neutral-900">
                   Mehr Unterstützung mit Logbuch-Premium
                 </h2>
@@ -1436,12 +1449,12 @@ export default function LogbuchClient({
                 >
                   Premium freischalten – einmalig {premiumPrice}
                 </button>
-              </section>
+              </Reveal>
             )}
 
             {/* ── Upsell Mediation (nur eigenständiges Logbuch) ── */}
             {!isLinked && (
-            <section className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white sm:p-8">
+            <Reveal className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white sm:p-8">
               <h2 className="font-display text-xl font-medium">
                 Bereit, den Konflikt wirklich zu lösen?
               </h2>
@@ -1458,7 +1471,7 @@ export default function LogbuchClient({
               >
                 In Mediation umwandeln →
               </button>
-            </section>
+            </Reveal>
             )}
           </>
         )}

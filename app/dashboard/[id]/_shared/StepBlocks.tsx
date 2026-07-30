@@ -37,6 +37,19 @@ function getPaypal(): PayPalSDK | undefined {
   return (window as unknown as { paypal?: PayPalSDK }).paypal;
 }
 
+// Klartext-Namen der Blöcke, die für Teilnehmer unsichtbar sind – nur für den
+// Vorschau-Modus im Workflow Manager.
+const BLOCK_LABELS: Record<string, string> = {
+  ki_prompt: "KI-Prompt",
+  ki_zusammenfassung: "KI-Zusammenfassung",
+  ki_reframing: "KI-Reframing",
+  ki_interessen: "KI-Interessen",
+  ki_optionen: "KI-Optionen",
+  ki_gemeinsamkeiten: "KI-Gemeinsamkeiten",
+  individuell: "Individueller Inhalt (pro Fall)",
+  ergebnis: "Ergebnis-Anzeige (nach Freigabe)",
+};
+
 function cfgStr(config: Record<string, unknown>, key: string): string {
   const v = config?.[key];
   return typeof v === "string" ? v : "";
@@ -172,6 +185,7 @@ export default function StepBlocks({
   stepKey,
   blocks,
   onPaid,
+  preview = false,
 }: {
   mediationId: string;
   phase: string;
@@ -181,6 +195,16 @@ export default function StepBlocks({
    *  Anteil reserviert/bezahlt ist. PhaseNotesClient lädt darauf die gesperrte
    *  Phase neu, ohne dass die Seite neu geladen werden muss. */
   onPaid?: () => void;
+  /**
+   * Vorschau-Modus für den Seiten-Designer im Workflow Manager: rendert exakt
+   * dieselbe Seite wie für die Teilnehmer, aber ohne jeden Server-Kontakt –
+   * nichts wird geladen, nichts gespeichert, nichts hochgeladen, keine Zahlung
+   * ausgelöst. Eingaben bleiben rein lokal, damit man den Schritt durchklicken
+   * kann. Dadurch gibt es nur EINEN Renderer für Teilnehmeransicht und
+   * Vorschau – sie können nicht mehr auseinanderlaufen.
+   * mediationId wird in diesem Modus nicht verwendet (Aufrufer übergibt "").
+   */
+  preview?: boolean;
 }) {
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [purchased, setPurchased] = useState<Set<string>>(new Set());
@@ -189,12 +213,14 @@ export default function StepBlocks({
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const loadPurchases = useCallback(() => {
+    if (preview) return;
     fetchBonusPurchases(Number(mediationId))
       .then((rows) => setPurchased(new Set(rows.filter((r) => r.paid).map((r) => r.block_id))))
       .catch(() => {});
-  }, [mediationId]);
+  }, [mediationId, preview]);
 
   useEffect(() => {
+    if (preview) return;
     let cancelled = false;
     fetchBlockResponses(Number(mediationId), { phase, stepKey })
       .then((rows) => {
@@ -207,7 +233,7 @@ export default function StepBlocks({
     return () => {
       cancelled = true;
     };
-  }, [mediationId, phase, stepKey]);
+  }, [mediationId, phase, stepKey, preview]);
 
   useEffect(() => {
     loadPurchases();
@@ -215,6 +241,8 @@ export default function StepBlocks({
 
   const persist = useCallback(
     (block: StepBlockDto, value: unknown, immediate = false) => {
+      // Vorschau: Eingaben bleiben im lokalen State, es geht nichts zum Server.
+      if (preview) return;
       const key = block.id;
       const doSave = () => {
         saveBlockResponse(Number(mediationId), {
@@ -235,7 +263,7 @@ export default function StepBlocks({
       if (immediate) doSave();
       else timers.current[key] = setTimeout(doSave, 600);
     },
-    [mediationId, phase, stepKey],
+    [mediationId, phase, stepKey, preview],
   );
 
   const setVal = useCallback(
@@ -247,6 +275,11 @@ export default function StepBlocks({
   );
 
   async function handleUpload(block: StepBlockDto, file: File) {
+    // Vorschau: Datei nur benennen, nicht hochladen.
+    if (preview) {
+      setVal(block, { name: file.name });
+      return;
+    }
     setUploading((u) => ({ ...u, [block.id]: true }));
     try {
       const res = await uploadBlockFile(Number(mediationId), file);
@@ -261,6 +294,8 @@ export default function StepBlocks({
   if (!Array.isArray(blocks) || blocks.length === 0) return null;
 
   return (
+    // Einzug wie im Fall (unter der Schritt-Nummer) – die Vorschau im Designer
+    // bildet die Teilnehmerseite 1:1 ab, also auch hier identisch.
     <div className="mb-6 ml-11 max-w-2xl space-y-4">
       {blocks.map((block) => renderBlock(block))}
     </div>
@@ -549,6 +584,26 @@ export default function StepBlocks({
         // Der eigentliche Bezahl-Schritt des Falls (Rechnungsdaten + eigener
         // Anteil + PayPal). Eigene Komponente, weil er deutlich mehr Zustand
         // hält als die übrigen Blöcke.
+        // In der Vorschau statisch: der Block würde sonst Preise des Falls
+        // laden und PayPal-Buttons rendern.
+        if (preview) {
+          return (
+            <div key={block.id} className="rounded-2xl border border-amber-300 bg-amber-50/70 p-4">
+              <p className="text-sm font-semibold text-amber-900">
+                💳 {cfgStr(c, "title") || "Mediation freischalten"}
+              </p>
+              {cfgStr(c, "description") && (
+                <p className="mt-0.5 whitespace-pre-wrap text-sm text-amber-800">
+                  {cfgStr(c, "description")}
+                </p>
+              )}
+              <p className="mt-3 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-xs text-amber-700">
+                Hier stehen im Fall die Rechnungsdaten, der eigene Anteil aus der Preis-Matrix
+                und der PayPal-Button.
+              </p>
+            </div>
+          );
+        }
         return (
           <FallFreischaltungBlock
             key={block.id}
@@ -574,7 +629,13 @@ export default function StepBlocks({
             ) : (
               <div className="mt-3">
                 <p className="mb-2 text-sm font-semibold text-amber-900">{price.toFixed(2)} {currency}</p>
-                <BonusPayButton mediationId={mediationId} blockId={block.id} onPaid={loadPurchases} />
+                {preview ? (
+                  <p className="rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-xs text-amber-700">
+                    Hier erscheint der PayPal-Button.
+                  </p>
+                ) : (
+                  <BonusPayButton mediationId={mediationId} blockId={block.id} onPaid={loadPurchases} />
+                )}
               </div>
             )}
           </div>
@@ -596,6 +657,19 @@ export default function StepBlocks({
       case "ergebnis":
         // Für Teilnehmer nicht direkt sichtbar (KI/individuell/Ergebnis laufen
         // über eigene Wege bzw. im Hintergrund).
+        // In der Vorschau als ausgegrauter Hinweis, sonst wundert sich der
+        // Mediator, warum sein Block "verschwindet".
+        if (preview) {
+          const label = BLOCK_LABELS[block.type] ?? block.type;
+          return (
+            <div
+              key={block.id}
+              className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-xs text-neutral-400"
+            >
+              {label} — läuft im Hintergrund, für die Teilnehmer nicht sichtbar.
+            </div>
+          );
+        }
         return null;
       default:
         return null;

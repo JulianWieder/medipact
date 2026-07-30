@@ -53,6 +53,8 @@ import {
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import Icon from "@/app/components/ui/Icon";
 import AiPromptsEditor from "./AiPromptsEditor";
+// Der echte Teilnehmer-Renderer – im Designer als Live-Vorschau (preview).
+import StepBlocks from "@/app/dashboard/[id]/_shared/StepBlocks";
 import {
   fetchVariants,
   createVariant,
@@ -189,22 +191,39 @@ function StepNode({ data }: NodeProps) {
         <p className="mt-1 truncate text-sm font-medium text-amber-900">{step.label}</p>
         <p className="mt-0.5 truncate font-mono text-[10px] text-amber-400">{step.stepKey}</p>
         <BlockBadges blocks={step.blocks} />
-        <div className="mt-2 flex items-center gap-1">
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => step.onMove(-1)}
+              disabled={!step.canMoveLeft}
+              className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
+              title="Nach links (gilt für alle Mediationsarten)"
+            >
+              ←
+            </button>
+            <button
+              onClick={() => step.onMove(1)}
+              disabled={!step.canMoveRight}
+              className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
+              title="Nach rechts (gilt für alle Mediationsarten)"
+            >
+              →
+            </button>
+          </div>
+          {/* Gestalten geht auch von hier aus – der Designer warnt, dass die
+              Änderung in allen Mediationsarten wirkt. Umbenennen/Löschen
+              bleibt dem Tab „Alle Typen" vorbehalten. */}
           <button
-            onClick={() => step.onMove(-1)}
-            disabled={!step.canMoveLeft}
-            className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
-            title="Nach links (gilt für alle Mediationsarten)"
+            onClick={step.onOpenDesigner}
+            className={cn(
+              "rounded px-2 py-1 text-[11px] font-semibold transition",
+              step.isDesigning
+                ? "bg-amber-500 text-white"
+                : "bg-amber-100 text-amber-800 hover:bg-amber-200",
+            )}
+            title="Seite dieses Schritts gestalten (wirkt in allen Mediationsarten)"
           >
-            ←
-          </button>
-          <button
-            onClick={() => step.onMove(1)}
-            disabled={!step.canMoveRight}
-            className="rounded p-1 text-amber-500 hover:bg-amber-100 hover:text-amber-800 disabled:opacity-20"
-            title="Nach rechts (gilt für alle Mediationsarten)"
-          >
-            →
+            Gestalten
           </button>
         </div>
       </div>
@@ -935,266 +954,131 @@ function BlockConfigEditor({
   }
 }
 
-// ── Live-Vorschau der Teilnehmer-Seite (nicht interaktiv) ────────────────────
-function PreviewBlock({ block }: { block: StepBlockDto }) {
-  const c = block.config ?? {};
-  const def = BLOCK_TYPE_BY_ID[block.type];
-  const text = (k: string) => cfgStr(c, k);
-  switch (block.type) {
-    case "textausgabe":
-      return (
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
-          {text("text") || <span className="text-neutral-300">Textausgabe …</span>}
-        </p>
-      );
-    case "video":
-      return (
-        <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-neutral-900 text-sm text-white/80">
-          ▶ {text("url") ? "Video" : "Video-URL fehlt"}
-        </div>
-      );
-    case "texteingabe":
-      return (
-        <div>
-          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
-          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">
-            {text("placeholder") || "Texteingabe …"}
-          </div>
-        </div>
-      );
-    case "frage":
-      return (
-        <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-violet-600">Frage</p>
-          <p className="text-sm text-neutral-800">{text("prompt") || <span className="text-neutral-300">Frage …</span>}</p>
-        </div>
-      );
-    case "datum":
-      return (
-        <div>
-          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
-          <div className="w-44 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">tt.mm.jjjj</div>
-          {text("help") && <p className="mt-1 text-[11px] text-neutral-400">{text("help")}</p>}
-        </div>
-      );
-    case "video_aufnahme":
-      return (
-        <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-orange-600">⏺ Video aufnehmen</p>
-          <p className="text-sm text-neutral-700">{text("prompt") || "Videobotschaft aufnehmen"}</p>
-        </div>
-      );
-    case "videokonferenz":
-      return (
-        <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-sky-600">Videokonferenz</p>
-          <span className="inline-block rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white">🎥 Videoraum beitreten</span>
-        </div>
-      );
-    case "termin":
-      return (
-        <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-3 text-sm text-teal-700">📅 Terminvereinbarung</div>
-      );
-    case "feedback":
-      return (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-3 text-sm text-amber-700">★ Feedback-Fragebogen</div>
-      );
-    case "vertrag":
-      return (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3 text-sm text-indigo-700">§ Vertrag / Dokument</div>
-      );
-    case "ergebnis":
-      return (
-        <div className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-3 text-sm text-cyan-700">◆ Ergebnis-Anzeige (nach Freigabe)</div>
-      );
-    case "auswahl": {
-      const opts = cfgArr(c, "options");
-      return (
-        <div>
-          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
-          <div className="space-y-1">
-            {(opts.length ? opts : ["Option 1", "Option 2"]).map((o, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-neutral-600">
-                <span className={c.multi ? "h-3.5 w-3.5 rounded border border-neutral-300" : "h-3.5 w-3.5 rounded-full border border-neutral-300"} />
-                {o}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    case "skala": {
-      const min = cfgNum(c, "min", 1);
-      const max = cfgNum(c, "max", 10);
-      return (
-        <div>
-          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
-          <div className="flex items-center justify-between text-[11px] text-neutral-400">
-            <span>{text("minLabel") || min}</span>
-            <span>{text("maxLabel") || max}</span>
-          </div>
-          <input type="range" min={min} max={max} disabled className="w-full" />
-        </div>
-      );
-    }
-    case "ranking": {
-      const opts = cfgArr(c, "options");
-      return (
-        <div>
-          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
-          <div className="space-y-1">
-            {(opts.length ? opts : ["Punkt A", "Punkt B"]).map((o, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-sm text-neutral-600">
-                <span className="text-neutral-300">≡</span>
-                {o}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    case "liste":
-      return (
-        <div>
-          {text("prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("prompt")}</p>}
-          <div className="rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-sm text-neutral-400">
-            + {text("placeholder") || "Eintrag hinzufügen"}
-          </div>
-        </div>
-      );
-    case "betrag":
-      return (
-        <div>
-          {text("label") && <p className="mb-1 text-sm font-medium text-neutral-700">{text("label")}</p>}
-          <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-400">
-            <span>{text("currency") || "€"}</span>0,00
-          </div>
-        </div>
-      );
-    case "vertrauliche_notiz":
-      return (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">🔒 Nur für den Mediator</p>
-          <p className="text-sm text-neutral-700">{text("prompt") || "Vertrauliche Notiz …"}</p>
-        </div>
-      );
-    case "datei_upload":
-      return (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-3">
-          <p className="mb-1 text-sm text-neutral-700">{text("prompt") || "Datei hochladen"}</p>
-          <span className="inline-block rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-sm text-indigo-600">📎 Datei auswählen</span>
-        </div>
-      );
-    case "bild":
-      return text("url") ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={text("url")} alt={text("caption")} className="max-h-48 rounded-xl border border-neutral-200" />
-      ) : (
-        <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-neutral-300 text-sm text-neutral-400">🖼 Bild-URL fehlt</div>
-      );
-    case "zustimmung":
-      return (
-        <label className="flex items-start gap-2 text-sm text-neutral-700">
-          <span className="mt-0.5 h-4 w-4 rounded border border-neutral-300" />
-          {text("text") || "Ich stimme zu."}
-        </label>
-      );
-    case "unterschrift":
-      return (
-        <div className="rounded-2xl border border-neutral-200 p-3">
-          <p className="mb-2 text-sm text-neutral-600">{text("statement") || "Ich bestätige die Angaben."}</p>
-          <div className="rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-sm text-neutral-400">✍ Name eingeben …</div>
-        </div>
-      );
-    case "hinweis": {
-      const variant = cfgStr(c, "variant") || "info";
-      const styles: Record<string, string> = {
-        info: "border-blue-200 bg-blue-50 text-blue-800",
-        warnung: "border-amber-200 bg-amber-50 text-amber-800",
-        erfolg: "border-emerald-200 bg-emerald-50 text-emerald-800",
-      };
-      return (
-        <div className={`rounded-2xl border p-3 text-sm ${styles[variant] ?? styles.info}`}>
-          {text("text") || "Hinweistext …"}
-        </div>
-      );
-    }
-    case "akkordeon":
-      return (
-        <details className="rounded-2xl border border-neutral-200 bg-white p-3">
-          <summary className="cursor-pointer text-sm font-medium text-neutral-700">{text("title") || "Mehr erfahren"}</summary>
-          <p className="mt-2 text-sm text-neutral-600">{text("text")}</p>
-        </details>
-      );
-    case "gate":
-      return (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-3 text-sm text-blue-700">
-          ⏸ {text("text") || "Wartet, bis beide Parteien bestätigt haben."}
-        </div>
-      );
-    case "fall_freischaltung":
-      return (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50/70 p-3">
-          <p className="text-sm font-semibold text-amber-800">
-            💳 {text("title") || "Mediation freischalten"}
-          </p>
-          {text("description") && (
-            <p className="mt-0.5 text-xs text-amber-700">{text("description")}</p>
-          )}
-          <p className="mt-2 text-[11px] text-amber-700">
-            Rechnungsdaten + eigener Anteil + PayPal · Betrag kommt aus der Preis-Matrix
-          </p>
-        </div>
-      );
-    case "bezahlung":
-      return (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50/70 p-3">
-          <p className="text-sm font-semibold text-amber-800">💳 {text("title") || "Bonus-Leistung"}</p>
-          {text("description") && <p className="mt-0.5 text-xs text-amber-700">{text("description")}</p>}
-          <span className="mt-2 inline-block rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white">
-            Kostenpflichtig freischalten · {cfgNum(c, "price", 0).toFixed(2)} {text("currency") || "EUR"}
-          </span>
-        </div>
-      );
-    case "ki_prompt":
-    case "ki_zusammenfassung":
-    case "ki_reframing":
-    case "ki_interessen":
-    case "ki_optionen":
-    case "ki_gemeinsamkeiten":
-      return (
-        <div className="rounded-2xl border border-dashed border-fuchsia-300 bg-fuchsia-50/50 p-3 text-[11px] text-fuchsia-700">
-          ✨ {def?.label ?? "KI-Block"} — läuft im Hintergrund, für Teilnehmer nicht sichtbar.
-        </div>
-      );
-    case "individuell":
-      return (
-        <div className="rounded-2xl border border-dashed border-pink-300 bg-pink-50/50 p-3 text-[11px] text-pink-700">
-          ✦ Individueller Block — Inhalt pro Fall.
-        </div>
-      );
-    default:
-      return def ? (
-        <div className="rounded-xl border border-neutral-200 p-3 text-sm text-neutral-500">{def.label}</div>
-      ) : null;
-  }
+// ── Live-Vorschau: die ECHTE Teilnehmer-Seite ───────────────────────────────
+//
+// Gerendert wird StepBlocks – exakt die Komponente, die die Partei später im
+// Dashboard sieht – im Vorschau-Modus (kein Laden, kein Speichern, keine
+// Zahlung). Es gibt daher keinen zweiten Renderer mehr, der auseinanderlaufen
+// könnte: neue Blocktypen erscheinen hier automatisch so, wie sie im Fall
+// aussehen. Drumherum liegt dieselbe Seiten-Hülle wie in PhaseNotesClient
+// (app-surface, Phasen-Zeile, Schritt-Nummer, Titel, Beschreibung).
+interface StepPreviewProps {
+  title: string;
+  description: string;
+  blocks: StepBlockDto[];
+  phaseId: string;
+  phaseLabel: string;
+  /** 1-basiert, wie in der Teilnehmer-Ansicht ("Phase 2 von 6"). */
+  phaseIndex: number;
+  phaseTotal: number;
+  stepNumber: number;
+  stepKey: string;
 }
 
-function StepPreview({ title, blocks }: { title: string; blocks: StepBlockDto[] }) {
+function ParticipantStepPreview({
+  title,
+  description,
+  blocks,
+  phaseId,
+  phaseLabel,
+  phaseIndex,
+  phaseTotal,
+  stepNumber,
+  stepKey,
+}: StepPreviewProps) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Vorschau (Teilnehmer)</p>
-      <h5 className="mb-3 text-base font-semibold text-neutral-800">{title}</h5>
-      {blocks.length === 0 ? (
-        <p className="text-sm text-neutral-400">Noch keine Blöcke — links eine Methode hinzufügen.</p>
-      ) : (
-        <div className="space-y-3">
-          {blocks.map((b) => (
-            <PreviewBlock key={b.id} block={b} />
-          ))}
+    <div className="rounded-2xl bg-neutral-50 p-4">
+      <div className="app-surface p-6">
+        <p className="eyebrow mb-1">
+          Phase {phaseIndex} von {phaseTotal}
+        </p>
+        <h1 className="heading-2 text-neutral-900">{phaseLabel}</h1>
+
+        <div className="mt-6">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
+              {stepNumber}
+            </div>
+            <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
+          </div>
+          {description && (
+            <p className="mb-6 ml-11 max-w-2xl text-sm text-neutral-600">{description}</p>
+          )}
+          {blocks.length === 0 ? (
+            <p className="ml-11 text-sm text-neutral-400">
+              Noch keine Blöcke — links eine Methode hinzufügen.
+            </p>
+          ) : (
+            <StepBlocks
+              // Kein Fall-Kontext: preview unterbindet jeden Server-Aufruf.
+              mediationId=""
+              phase={phaseId}
+              stepKey={stepKey}
+              blocks={blocks}
+              preview
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepPreview(props: StepPreviewProps) {
+  const [full, setFull] = useState(false);
+
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFull(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [full]);
+
+  return (
+    <>
+      <div className="rounded-2xl border border-neutral-200 bg-white p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+            Vorschau — so sieht die Partei den Schritt
+          </p>
+          <button
+            onClick={() => setFull(true)}
+            className="rounded-lg border border-neutral-200 px-2 py-1 text-[11px] font-semibold text-neutral-500 transition hover:bg-neutral-50"
+            title="Vorschau in voller Breite öffnen"
+          >
+            ⛶ In groß
+          </button>
+        </div>
+        <ParticipantStepPreview {...props} />
+      </div>
+
+      {full && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-neutral-900/50 p-6"
+          onClick={() => setFull(false)}
+        >
+          <div
+            className="w-full max-w-4xl rounded-3xl bg-white p-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between px-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                Vorschau in voller Breite
+              </p>
+              <button
+                onClick={() => setFull(false)}
+                className="rounded-lg border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-500 hover:bg-neutral-50"
+              >
+                Schließen (Esc)
+              </button>
+            </div>
+            <ParticipantStepPreview {...props} />
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -1258,8 +1142,20 @@ function StepDesignerPanel({
   onChangeVisibleIf,
   onAiFill,
   onClose,
+  shared = false,
+  phaseLabel,
+  phaseIndex,
+  phaseTotal,
+  stepNumber,
 }: {
   step: PhaseStepDefaultDto;
+  /** true = globaler Schritt, geöffnet aus der Ansicht eines konkreten Typs. */
+  shared?: boolean;
+  /** Für die Vorschau-Hülle: Phasen-Zeile und Schritt-Nummer wie im Dashboard. */
+  phaseLabel: string;
+  phaseIndex: number;
+  phaseTotal: number;
+  stepNumber: number;
   onAddBlock: (type: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, dir: -1 | 1) => void;
@@ -1311,6 +1207,14 @@ function StepDesignerPanel({
         </div>
       </div>
       {aiError && <p className="mb-3 text-xs font-semibold text-red-600">{aiError}</p>}
+
+      {shared && (
+        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs text-amber-900">
+          <span className="font-semibold">Globaler Schritt.</span> Was du hier änderst, gilt sofort in{" "}
+          <span className="font-semibold">allen</span> Mediationsarten — nicht nur in dieser.
+          Formuliere die Inhalte entsprechend typneutral.
+        </div>
+      )}
 
       <VisibleIfEditor cond={step.visible_if} onChange={onChangeVisibleIf} />
 
@@ -1401,7 +1305,17 @@ function StepDesignerPanel({
 
         {/* Live-Vorschau */}
         <div className="lg:sticky lg:top-4 lg:self-start">
-          <StepPreview title={step.title} blocks={blocks} />
+          <StepPreview
+            title={step.title}
+            description={step.description}
+            blocks={blocks}
+            phaseId={step.phase}
+            phaseLabel={phaseLabel}
+            phaseIndex={phaseIndex}
+            phaseTotal={phaseTotal}
+            stepNumber={stepNumber}
+            stepKey={step.step_key}
+          />
         </div>
       </div>
 
@@ -1703,9 +1617,11 @@ export function WorkflowManager() {
   // KI-Vorbefüllung: erzeugt eine Blockliste für den Schritt und ersetzt die
   // aktuellen Blöcke (der Mediator kann danach frei nachjustieren).
   const aiFillBlocks = useCallback(
-    async (id: number, title: string) => {
+    async (id: number, title: string, shared = false) => {
       const { blocks } = await generateStepBlocks({
-        mediation_type: mediationType,
+        // Bei einem globalen Schritt formuliert die KI typneutral, auch wenn
+        // man ihn gerade aus der Ansicht eines konkreten Typs heraus öffnet.
+        mediation_type: shared ? SHARED_MEDIATION_TYPE : mediationType,
         phase: activePhase,
         title,
       });
@@ -1819,9 +1735,11 @@ export function WorkflowManager() {
     () =>
       chain.map((step, idx) => {
         const locked = idx < lockedSteps.length;
-        // Globaler Schritt: verschiebbar, aber nicht umbenennbar/löschbar und
-        // ohne Designer (Inhalt gehört in den Tab „Alle Typen").
-        const shared = !locked && !!step.shared;
+        // Gelbe „Fremd"-Darstellung NUR in der Ansicht eines konkreten Typs.
+        // Im Tab „Alle Typen" (isShared) ist derselbe Schritt der reguläre,
+        // voll editierbare Schritt – das Backend liefert dort ebenfalls
+        // shared=true, das allein darf die Karte also nicht sperren.
+        const shared = !locked && !isShared && !!step.shared;
         return {
           id: String(step.id),
           type: "step",
@@ -1848,7 +1766,7 @@ export function WorkflowManager() {
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chain, lockedSteps.length, editingId, editingLabel, designStepId, moveStep, openDesigner],
+    [chain, lockedSteps.length, isShared, editingId, editingLabel, designStepId, moveStep, openDesigner],
   );
 
   const edges: Edge[] = useMemo(
@@ -1867,12 +1785,10 @@ export function WorkflowManager() {
     ? variants.find((v) => v.key === activeVariant)?.label ?? activeVariant
     : null;
 
-  // Globale Schritte werden nur im Tab „Alle Typen" gestaltet – dort sind sie
-  // reguläre editierbare Schritte (shared-Flag ist dann nicht gesetzt).
+  // Globale Schritte lassen sich aus jeder Typ-Ansicht gestalten (der Designer
+  // weist darauf hin, dass die Änderung überall wirkt).
   const designStep =
-    designStepId !== null
-      ? editableSteps.find((s) => s.id === designStepId && !(!isShared && s.shared)) ?? null
-      : null;
+    designStepId !== null ? editableSteps.find((s) => s.id === designStepId) ?? null : null;
 
   return (
     <div className="p-6 max-w-6xl">
@@ -2044,7 +1960,8 @@ export function WorkflowManager() {
               <>
                 {" "}
                 <span className="text-amber-600">Gelbe Karten</span> sind globale Schritte aus
-                „Alle Typen" — hier nur verschiebbar (die Position gilt dann überall).
+                „Alle Typen" — auch von hier aus gestaltbar und verschiebbar, die Änderung
+                gilt dann in allen Mediationsarten. Umbenennen/Löschen nur im Tab „Alle Typen".
               </>
             )}
           </p>
@@ -2089,8 +2006,15 @@ export function WorkflowManager() {
               onRemoveBlock={(bid) => removeBlock(designStep.id, bid)}
               onMoveBlock={(bid, dir) => moveBlock(designStep.id, bid, dir)}
               onChangeBlockConfig={(bid, patch) => changeBlockConfig(designStep.id, bid, patch)}
+              shared={!isShared && !!designStep.shared}
+              phaseLabel={activePhaseLabel}
+              phaseIndex={PHASES.findIndex((p) => p.id === activePhase) + 1}
+              phaseTotal={PHASES.length}
+              stepNumber={chain.findIndex((s) => s.id === designStep.id) + 1}
               onChangeVisibleIf={(cond) => changeVisibleIf(designStep.id, cond)}
-              onAiFill={() => aiFillBlocks(designStep.id, designStep.title)}
+              onAiFill={() =>
+                aiFillBlocks(designStep.id, designStep.title, !!designStep.shared)
+              }
               onClose={() => setDesignStepId(null)}
             />
           )}

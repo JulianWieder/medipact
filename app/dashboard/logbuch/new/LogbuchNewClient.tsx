@@ -10,6 +10,7 @@
 // WorkflowManager-Blöcke im Logbuch selbst.
 
 import { encodeId } from "@/lib/ids";
+import { Reveal } from "@/app/components/ui/motion";
 import Link from "next/link";
 import Icon from "@/app/components/ui/Icon";
 import { useRouter } from "next/navigation";
@@ -78,7 +79,7 @@ export default function LogbuchNewClient() {
           jederzeit in eine Mediation umwandelbar.
         </p>
 
-        <div className="mt-10 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
+        <Reveal className="mt-10 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
           <p className="text-sm font-semibold text-neutral-800">
             Wohin gehört Ihr Konflikt am ehesten?
           </p>
@@ -129,7 +130,7 @@ export default function LogbuchNewClient() {
               Bitte zuerst einen Bereich wählen.
             </p>
           )}
-        </div>
+        </Reveal>
 
         {error && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

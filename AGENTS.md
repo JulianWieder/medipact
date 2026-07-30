@@ -65,6 +65,40 @@ When adding a similar effect to another page, build a small page-specific
 component on top of these primitives (don't fork their internals) so
 the underlying animation behavior stays consistent across the site.
 
+### Dieselbe Sprache im eingeloggten Bereich (Dashboard/Logbuch/Fall)
+
+Das Produkt soll sich wie die Landing anfühlen, ohne deren Marketing-Tempo
+zu übernehmen. Dafür gibt es abgeschwächte Gegenstücke — keine eigenen
+Effekte, sondern gedrosselte Varianten derselben Primitives:
+
+- **`Reveal` + `stagger()`** (`app/components/ui/motion.tsx`) — Arbeits-
+  Variante von `FadeIn`: 8px statt 24px Versatz, 0.45s statt 0.9s, und sie
+  respektiert `prefers-reduced-motion` (rendert dann einen schlichten
+  `div`). `stagger(i)` staffelt Listen und deckelt bei 6 Schritten.
+- **`CrossfadePanel`** (aus `TabSwitcher.tsx`) — auch im Produkt für
+  Filterwechsel: Dashboard-`SegmentedControl` und der Ansichts-Filter der
+  Logbuch-Chronologie crossfaden statt hart umzuschalten.
+- **`cardSurface` / `cardLift` / `cardHover` / `rowHover` / `Kicker`**
+  (`app/components/ui/premium.tsx`) — die Hover- und Kicker-Sprache aus
+  `ZweiWelten`/`OutcomeWand`/`FeatureCard` als geteilte Klassen-Konstanten.
+  `cardLift` ist bewusst OHNE Randfarbe, damit Aufrufer mit eigener
+  Randfarbe (amber, violet) nicht mit einer zweiten `hover:border-*`-Klasse
+  kollidieren — welche gewinnt, entscheidet die Stylesheet-Reihenfolge,
+  nicht die Reihenfolge im `cn()`-Aufruf. Dieselbe Falle gilt für zwei
+  `hover:bg-*` auf einem Element (siehe „Deine Eingabe"-Zeilen im
+  Dashboard: entweder-oder statt beide).
+
+Zwei Regeln beim Einsatz:
+
+1. **Bewegung außen, Hover innen.** `Reveal` nie mit einem
+   `hover:-translate-y-*` auf demselben Element kombinieren —
+   framer-motion schreibt `transform` inline und der Inline-Style schlägt
+   die Klasse. Karte als Kind von `Reveal` rendern.
+2. **Nur Lese-/Übersichtsflächen bewegen sich.** Formular-Panels
+   (`PhaseNotesClient`, `StepBlocks`) bleiben bewusst statisch: ein
+   Arbeitsbereich wird täglich benutzt, dort wird ein Fade nach dem
+   dritten Mal als Verzögerung wahrgenommen, nicht als Politur.
+
 ## Konflikt-Typen auf den Marketing-Seiten
 
 There are FOUR conflict types (matching the backend `mediation_type`s):

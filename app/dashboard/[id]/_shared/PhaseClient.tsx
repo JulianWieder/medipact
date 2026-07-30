@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { hashId } from "@/lib/ids";
+import { Reveal, stagger } from "@/app/components/ui/motion";
+import { cardHover, cn } from "@/app/components/ui/premium";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey } from "./phaseData";
 
 type Props = {
@@ -135,15 +137,22 @@ export default function PhaseClient({ mediationId, phaseKey }: Props) {
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {phase.steps.map((step, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
-              >
-                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
-                  {i + 1}
+              /* Bewegung außen (Reveal), Hover innen: framer-motion schreibt
+                 `transform` inline und würde `hover:-translate-y-*` auf
+                 demselben Element aushebeln. */
+              <Reveal key={i} delay={stagger(i)}>
+                <div
+                  className={cn(
+                    "h-full rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm",
+                    cardHover,
+                  )}
+                >
+                  <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
+                    {i + 1}
+                  </div>
+                  <p className="font-semibold text-neutral-900">{step}</p>
                 </div>
-                <p className="font-semibold text-neutral-900">{step}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
 

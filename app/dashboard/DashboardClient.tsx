@@ -12,8 +12,12 @@ import {
   SegmentedControl,
   Skeleton,
   SlideOver,
+  cardLift,
+  rowHover,
   cn,
 } from "@/app/components/ui/premium";
+import { Reveal, stagger } from "@/app/components/ui/motion";
+import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { PHASES } from "@/app/workspace/types";
 
 interface Mediation {
@@ -408,7 +412,7 @@ export default function DashboardClient() {
       <section className="container py-16 lg:py-20">
         {/* ── Eingehende Mediationsanfragen ─────────────────────────── */}
         {invites.length > 0 && (
-          <div className="mb-14">
+          <Reveal className="mb-14">
             <div className="mb-1 flex items-center gap-3">
               <h2 className="font-display text-xl font-medium text-neutral-900">
                 Eingehende Mediationsanfragen
@@ -423,10 +427,17 @@ export default function DashboardClient() {
             </p>
 
             <div className="space-y-3">
-              {invites.map((invite) => (
+              {invites.map((invite, i) => (
+                /* Reveal bleibt ein reiner Wrapper: framer-motion schreibt
+                   `transform` inline, das würde ein `hover:-translate-y-*`
+                   auf demselben Element aushebeln. Bewegung außen,
+                   Hover innen. */
+                <Reveal key={invite.invite_id} delay={stagger(i)}>
                 <div
-                  key={invite.invite_id}
-                  className="flex flex-col gap-4 rounded-2xl border border-amber-200/70 bg-amber-50/30 p-6 transition-shadow duration-300 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] sm:flex-row sm:items-center sm:justify-between"
+                  className={cn(
+                    "flex flex-col gap-4 rounded-2xl border border-amber-200/70 bg-amber-50/30 p-6 hover:border-amber-300 sm:flex-row sm:items-center sm:justify-between",
+                    cardLift,
+                  )}
                 >
                   <div>
                     <div className="mb-1.5 flex items-center gap-2">
@@ -455,6 +466,7 @@ export default function DashboardClient() {
                       : "Einladung annehmen"}
                   </PillButton>
                 </div>
+                </Reveal>
               ))}
             </div>
 
@@ -465,12 +477,12 @@ export default function DashboardClient() {
             )}
 
             <div className="mt-10 hairline" />
-          </div>
+          </Reveal>
         )}
 
         {/* ── Erste Schritte (Onboarding-Checkliste, Stripe-Stil) ────── */}
         {showOnboarding && (
-          <div className="mb-14 rounded-2xl border border-neutral-200 bg-white p-6 lg:p-8">
+          <Reveal className="mb-14 rounded-2xl border border-neutral-200 bg-white p-6 lg:p-8">
             <div className="mb-1 flex items-center justify-between gap-4">
               <h2 className="font-display text-xl font-medium text-neutral-900">Erste Schritte</h2>
               <span className="text-sm font-medium tabular-nums text-neutral-500">
@@ -522,12 +534,12 @@ export default function DashboardClient() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         )}
 
         {/* ── Meine Mediationen ─────────────────────────────────────── */}
         {data.length > 0 && (
-          <div className="mb-6">
+          <Reveal className="mb-6">
             <SegmentedControl
               segments={segments}
               activeKey={filter?.key ?? null}
@@ -535,10 +547,13 @@ export default function DashboardClient() {
                 setFilter(key ? { key, label: segmentLabels[key] ?? key } : null)
               }
             />
-          </div>
+          </Reveal>
         )}
 
-        <div>
+        {/* Filterwechsel als Crossfade statt hartem Umschalten – dieselbe
+            Mechanik wie die ThemenTabs auf der Landing. `activeKey` ist der
+            Filter, damit AnimatePresence beim Wechsel neu mountet. */}
+        <CrossfadePanel activeKey={filter?.key ?? "__all__"}>
           {data.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
               <p className="text-lg font-light text-neutral-500">
@@ -584,9 +599,14 @@ export default function DashboardClient() {
                     type="button"
                     onClick={() => setSelected(mediation)}
                     className={cn(
-                      "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50 sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
+                      "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
                       i > 0 && "border-t border-neutral-100",
-                      mediation.is_my_turn && "bg-amber-50/40 hover:bg-amber-50/70",
+                      /* Entweder-oder: zwei `hover:bg-*`-Klassen auf einem
+                         Element entscheidet die Stylesheet-Reihenfolge, nicht
+                         die Reihenfolge hier. */
+                      mediation.is_my_turn
+                        ? "bg-amber-50/40 transition-colors duration-200 hover:bg-amber-50/70"
+                        : rowHover,
                     )}
                   >
                     <span className="min-w-0">
@@ -627,12 +647,12 @@ export default function DashboardClient() {
               })}
             </div>
           )}
-        </div>
+        </CrossfadePanel>
 
         {/* ── Konflikt-Logbücher (kostenlos) – bewusst UNTER den Mediationen:
              die Verfahren bleiben im Fokus, das Logbuch ist Ergänzung. ── */}
         {logbooks.length > 0 && (
-          <div className="mt-14">
+          <Reveal className="mt-14">
             <div className="hairline mb-10" />
             <div className="mb-1 flex items-center gap-3">
               <h2 className="font-display text-lg font-medium text-neutral-900">
@@ -652,7 +672,8 @@ export default function DashboardClient() {
                   key={`logbuch-${log.id}`}
                   href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
                   className={cn(
-                    "group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors duration-150 hover:bg-neutral-50",
+                    "group flex w-full items-center gap-4 px-5 py-4 text-left",
+                    rowHover,
                     i > 0 && "border-t border-neutral-100",
                   )}
                 >
@@ -676,7 +697,7 @@ export default function DashboardClient() {
             >
               Weiteren Streit dokumentieren →
             </a>
-          </div>
+          </Reveal>
         )}
       </section>
     </main>

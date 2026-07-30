@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
+import { Reveal, stagger } from "@/app/components/ui/motion";
 
 // Bezahl-Typen und das PayPal-SDK sind hier bewusst NICHT mehr definiert:
 // die Zahlung ist seit dem Umbau ein Schritt innerhalb der Mediation
@@ -63,12 +64,17 @@ function StepCard({
   children?: ReactNode;
 }) {
   return (
+    /* Reveal außen, Karten-Styling innen – framer-motion setzt `transform`
+       inline und würde CSS-Hover-Transforms auf demselben Element schlagen.
+       Gestaffelt über den Schritt-Index, damit die drei Karten nacheinander
+       hereinkommen statt gleichzeitig. */
+    <Reveal delay={stagger(index - 1)}>
     <div
-      className={`rounded-3xl border bg-white transition ${
+      className={`rounded-3xl border bg-white transition-all duration-300 ${
         state === "active"
           ? "border-accent-300 shadow-lg shadow-accent-100/60"
           : state === "done"
-            ? "border-accent-200"
+            ? "border-accent-200 hover:border-accent-300 hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18)]"
             : "border-neutral-200 opacity-60"
       }`}
     >
@@ -111,6 +117,7 @@ function StepCard({
         <div className="border-t border-neutral-100 p-6 pt-5">{children}</div>
       )}
     </div>
+    </Reveal>
   );
 }
 

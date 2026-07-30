@@ -300,6 +300,61 @@ export function OutlinePill({
   );
 }
 
+// ── Karten-Hover (geteilte Klassen) ───────────────────────────────────────
+// Die Hover-Sprache der Landing (ZweiWelten/OutcomeWand/FeatureCard):
+// Rand färbt sich in den Accent, Karte hebt minimal ab, weicher Schatten.
+// Hier als Klassen-Konstanten, damit Dashboard, Logbuch und Fall-Detail
+// dieselbe Quelle benutzen statt die Strings je Call-Site zu wiederholen –
+// und damit eine spätere Änderung an EINER Stelle passiert.
+//
+// `cardSurface`  – Grundfläche (Rand + Weiß + Radius), ohne Hover.
+// `cardLift`     – Bewegung + Schatten, OHNE Randfarbe (damit Aufrufer mit
+//                  eigener Randfarbe – z.B. amber – nicht mit einer zweiten
+//                  `hover:border-*`-Klasse kollidieren; welche gewinnt,
+//                  entscheidet sonst die Reihenfolge im Stylesheet, nicht
+//                  die Reihenfolge im String).
+// `cardHover`    – Standard-Hover: `cardLift` + Accent-Rand.
+// `rowHover`     – ruhigere Variante für dichte Listenzeilen: kein Lift,
+//                  nur ein Hauch Accent auf der Fläche.
+
+export const cardSurface = "rounded-2xl border border-neutral-200 bg-white";
+
+export const cardLift =
+  "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18)]";
+
+export const cardHover = cardLift + " hover:border-accent-300";
+
+export const rowHover = "transition-colors duration-200 hover:bg-accent-50/40";
+
+// ── Kicker ────────────────────────────────────────────────────────────────
+// Die Landing-Kicker-Typo (uppercase, weit gesperrt, Accent) aus
+// ZweiWelten/OutcomeWand – ohne die Strich-Dekoration der globalen
+// `.eyebrow`-Klasse, damit sie auch in dichten Sektionsköpfen funktioniert.
+
+export function Kicker({
+  children,
+  tone = "accent",
+  className,
+}: {
+  children: React.ReactNode;
+  tone?: "accent" | "light" | "muted";
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "block text-[11px] font-bold uppercase tracking-[0.18em]",
+        tone === "light" && "text-accent-300",
+        tone === "accent" && "text-accent-700",
+        tone === "muted" && "text-neutral-400",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 // ── PremiumCard ───────────────────────────────────────────────────────────
 // Hairline-Karte mit dezentem Hover-Lift, für klickbare Listeneinträge
 // (Fallkarten, Einladungen, etc.) in Dashboard & Workspace.
@@ -316,8 +371,10 @@ export function PremiumCard({
   emphasis?: "neutral" | "amber";
 }) {
   const classes = cn(
-    "group block rounded-2xl border bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18)] lg:p-8",
-    emphasis === "amber" ? "border-amber-200 hover:border-amber-300" : "border-neutral-200 hover:border-neutral-300",
+    "group block rounded-2xl border bg-white p-6 lg:p-8",
+    emphasis === "amber"
+      ? cn(cardLift, "border-amber-200 hover:border-amber-300")
+      : cn(cardHover, "border-neutral-200"),
     className,
   );
 
