@@ -18,7 +18,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Ablauf einer Mediation: 6 Schritte bei medipact",
   description:
-    "Vom ersten Schritt bis zur Vereinbarung: der 6-Schritte-Prozess, alle Mediationsphasen und die Rollen von KI und Mediator – transparent erklärt.",
+    "Vom ersten Schritt bis zur Vereinbarung: der 6-Schritte-Prozess, alle Mediationsphasen, vier Methoden und die Rollen von KI und Mediator.",
   path: "/methode",
 });
 
@@ -168,12 +168,19 @@ const mediatorTasks = [
   },
 ];
 
+// Die Pakete spiegeln backend/app/pricing.py (PRICE_MATRIX). Wichtig und
+// vorher falsch dargestellt: Hybrid und Vollservice sind dort NUR für
+// "trennung" hinterlegt – bei nachbarschaft, verbraucher, erbschaft und der
+// gesamten ODR-Familie steht überall None. Die Seite hat sie bis 31.07.2026
+// als allgemein buchbar gezeigt. `availability` macht das jetzt sichtbar;
+// beim Ergänzen neuer Preise in pricing.py hier nachziehen.
 const variants = [
   {
     badge: "Online-Prozess",
     title: "Schnell & günstig",
     price: "ab €49",
-    priceNote: "je nach Konfliktart, fair aufgeteilt",
+    priceNote: "Nachbarschaft und Verbraucher je Partei; Trennung, Erbe und Geschäft ab €399",
+    availability: "Für alle Konfliktarten",
     text: "Der geführte Prozess bringt Sie Schritt für Schritt zur Lösung – rund um die Uhr, ganz in Ihrem Tempo.",
     facts: ["Geführter Prozess, 24/7 verfügbar", "Dauer: meist 1–2 Wochen", "Ideal für klare bis mittelschwere Fälle"],
     highlight: false,
@@ -181,8 +188,9 @@ const variants = [
   {
     badge: "Hybrid",
     title: "Persönlich & unterstützt",
-    price: "ab €499 / Partei",
+    price: "€499 / Partei",
     priceNote: "2 Std. persönliche Mediation inklusive",
+    availability: "Nur bei Trennung & Scheidung",
     text: "Der Prozess bereitet alles vor – ein zertifizierter Mediator begleitet Sie persönlich durch die entscheidenden Gespräche.",
     facts: ["Profi-Mediator persönlich dabei", "Dauer: 2–8 Wochen", "Spezialisten bei Bedarf zubuchbar"],
     highlight: true,
@@ -190,11 +198,64 @@ const variants = [
   {
     badge: "Vollservice",
     title: "Komplett & begleitet",
-    price: "ab €899 / Partei",
+    price: "€899 / Partei",
     priceNote: "5 Std. Mediator + anwaltliche Ersteinschätzung inklusive",
+    availability: "Nur bei Trennung & Scheidung",
     text: "Für sehr komplexe Fälle – mit Vermögen, Firma, Kindern oder hohem Konfliktniveau. Eine feste Ansprechperson von Anfang bis Ende.",
-    facts: ["Feste Ansprechperson, durchgehend", "Dauer: 4–12 Wochen", "Höchste Erfolgsquote bei Eskalation"],
+    facts: ["Feste Ansprechperson, durchgehend", "Dauer: 4–12 Wochen", "Für stark eskalierte Verfahren"],
     highlight: false,
+  },
+];
+
+// Die vier Methoden entsprechen den Varianten aus Migration q9r0s1t2u3v4
+// (methode_harvard / _shuttle / _transformativ / _evaluativ). Sie sind
+// additiv zum Basis-Workflow: Der Mediator ordnet einem Fall eine Methode zu,
+// dann kommen deren Schritte zu den Standardschritten der Phase dazu.
+const methodVariants = [
+  {
+    name: "Harvard-Methode",
+    claim: "Sachbezogen zum Ja",
+    text: "Hart in der Sache, weich zu den Menschen: Interessen statt Positionen, ein durchdachter Plan B, eine Optionen-Werkstatt und objektive Kriterien – bis beide Seiten guten Gewissens zustimmen können.",
+    fit: "Der Standardweg für die meisten Fälle",
+  },
+  {
+    name: "Shuttle-Mediation",
+    claim: "Getrennte Gespräche",
+    text: "Die Parteien treffen sich zunächst gar nicht. Der Mediator pendelt vertraulich zwischen beiden Seiten und bringt nur das hinüber, was helfen soll.",
+    fit: "Bei starker Eskalation, Machtgefälle oder hartem Verhandlungspoker",
+  },
+  {
+    name: "Transformative Mediation",
+    claim: "Beziehung zuerst",
+    text: "Erst die Menschen, dann die Sache: Anerkennung, Perspektivwechsel und ein gemeinsames Zukunftsbild stehen vor der Einigung über Zahlen.",
+    fit: "Wenn Sie danach weiter zusammenarbeiten oder Familie bleiben",
+  },
+  {
+    name: "Evaluative Mediation",
+    claim: "Realitätscheck",
+    text: "Der ehrliche Blick auf Zahlen und Risiken: Was kostet der Streit wirklich, wie stehen die Chancen vor Gericht, wo liegt die Einigungszone? Jede Option bekommt ein Preisschild.",
+    fit: "Wenn eine Seite ihre Erfolgsaussichten deutlich überschätzt",
+  },
+];
+
+// ODR = Online Dispute Resolution. Die vier Typen aus pricing.py (ODR_TYPES).
+// Einzelfall 399 € "once", alternativ im Firmen-Abo (Organization).
+const odrTypes = [
+  {
+    title: "Wirtschaftsmediation",
+    text: "Gesellschafter, Geschäftspartner, Lieferanten: Konflikte, bei denen die Geschäftsbeziehung überleben soll.",
+  },
+  {
+    title: "Online-Schlichtung",
+    text: "Mit Schlichterspruch am Ende – für Fälle, in denen eine Empfehlung von außen den Ausschlag geben muss.",
+  },
+  {
+    title: "E-Commerce & Plattform",
+    text: "Streit zwischen Händler und Kunde oder zwischen Plattform und Anbieter, in hoher Stückzahl abwickelbar.",
+  },
+  {
+    title: "B2B-Vertragsstreit",
+    text: "Leistungsstörungen, Abnahme, Gewährleistung – geklärt, bevor die Kündigung im Raum steht.",
   },
 ];
 
@@ -228,7 +289,19 @@ const exampleCases = [
 const faqs = [
   {
     q: "Für welche Konflikte ist Medipact geeignet?",
-    a: "Vor allem für private Konflikte, bei denen beide Seiten grundsätzlich eine Lösung suchen: Trennung, Scheidung, Nachbarschaftsstreit, Erbe oder familiäre Auseinandersetzungen.",
+    a: "Für private wie geschäftliche Konflikte, bei denen beide Seiten grundsätzlich eine Lösung suchen: Trennung und Scheidung, Nachbarschaftsstreit, Erbe und familiäre Auseinandersetzungen, Verbraucher- und Handwerkerstreit sowie Geschäftskonflikte zwischen Unternehmen (Online Dispute Resolution).",
+  },
+  {
+    q: "Kann ich Hybrid oder Vollservice für jeden Konflikt buchen?",
+    a: "Nein. Die persönlich begleiteten Pakete bieten wir derzeit nur bei Trennung und Scheidung an. Alle übrigen Konfliktarten laufen über den Online-Prozess – Nachbarschaft und Verbraucher ab 49 Euro je Partei, Erbe und Geschäftskonflikte pauschal 399 Euro pro Fall.",
+  },
+  {
+    q: "Nach welcher Methode wird mediiert?",
+    a: "Standard ist das Harvard-Prinzip: Interessen statt Positionen. Je nach Fall kommen drei weitere Methoden infrage – Shuttle-Mediation bei starker Eskalation, transformative Mediation, wenn die Beziehung bestehen bleibt, und evaluative Mediation, wenn eine Seite ihre Chancen vor Gericht überschätzt. Der Mediator wählt die Methode aus.",
+  },
+  {
+    q: "Was kostet ein Gerichtsverfahren im Vergleich?",
+    a: "Das hängt allein vom Streitwert ab, nicht vom Aufwand. Unser Prozesskosten-Rechner wendet die gesetzlichen Tabellen an und stellt das Kostenrisiko den Mediationskosten gegenüber – kostenlos, ohne Anmeldung und mit Fundstelle zu jeder Position.",
   },
   {
     q: "Ersetzt Medipact einen Anwalt oder ein Gericht?",
@@ -272,7 +345,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation",
   description:
-    "KI-gestützte Mediation für private Konflikte bei Trennung, Scheidung, Nachbarschaftsstreit und Erbschaft. Nach dem Harvard-Prinzip.",
+    "KI-gestützte Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft, Verbraucherstreit und Geschäftskonflikten (ODR). Nach dem Harvard-Prinzip, ergänzt um Shuttle-, transformative und evaluative Mediation.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -305,11 +378,17 @@ export default function MethodePage() {
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
             Medipact ersetzt das kreisende Gespräch durch einen klaren,
             geführten Prozess – nach dem Harvard-Prinzip, fair für alle
-            Seiten.
+            Seiten. Für private wie geschäftliche Konflikte.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/auth/register" className="btn btn-primary">
               Mediation starten
+            </Link>
+            <Link
+              href="/kostenrechner"
+              className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+            >
+              Kostenrechner
             </Link>
             <Link
               href="/preise"
@@ -544,7 +623,9 @@ export default function MethodePage() {
             <h2 className="heading-2">So viel Begleitung, wie Ihr Fall braucht</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-700">
               Derselbe geführte Prozess – wahlweise komplett online, mit
-              persönlicher Mediation oder rundum begleitet.
+              persönlicher Mediation oder rundum begleitet. Die persönlich
+              begleiteten Pakete bieten wir derzeit nur bei Trennung und
+              Scheidung an.
             </p>
           </div>
 
@@ -575,6 +656,13 @@ export default function MethodePage() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-neutral-500">{v.priceNote}</p>
+
+                {/* Verfügbarkeit gehört direkt an den Preis: Hybrid und
+                    Vollservice gibt es nur bei Trennung & Scheidung. */}
+                <p className="mt-3 inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+                  {v.availability}
+                </p>
+
                 <p className="mt-4 text-sm leading-relaxed text-neutral-600">
                   {v.text}
                 </p>
@@ -590,10 +678,107 @@ export default function MethodePage() {
             ))}
           </div>
 
-          <div className="mt-10 text-center">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <ArrowLink href="/preise">
               Alle Preise und Leistungen im Detail
             </ArrowLink>
+            <ArrowLink href="/kostenrechner">
+              Was würde derselbe Streit vor Gericht kosten?
+            </ArrowLink>
+          </div>
+        </div>
+      </section>
+
+      {/* METHODEN-VARIANTEN */}
+      <section id="methoden" className="section section-base">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-16 max-w-2xl">
+            <div className="eyebrow mb-4">Vier Methoden</div>
+            <h2 className="heading-2">Nicht jeder Konflikt braucht denselben Weg</h2>
+            <p className="mt-4 text-lg text-neutral-700">
+              Das Harvard-Prinzip ist unser Standard, aber nicht immer das
+              richtige Werkzeug. Wer sich nicht in einem Raum aushält, braucht
+              getrennte Gespräche. Wer die eigenen Chancen vor Gericht
+              überschätzt, braucht Zahlen. Der Mediator wählt die Methode zum
+              Fall – der Ablauf bleibt derselbe, die Schritte darin ändern sich.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {methodVariants.map((m) => (
+              <div
+                key={m.name}
+                className="rounded-[2rem] border border-neutral-200 bg-white p-8"
+              >
+                <div className="inline-flex items-center rounded border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-semibold uppercase text-accent-700">
+                  {m.claim}
+                </div>
+                <h3 className="mt-5 text-xl font-bold text-neutral-900">
+                  {m.name}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+                  {m.text}
+                </p>
+                <p className="mt-5 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
+                  <span className="font-semibold text-neutral-900">Passt: </span>
+                  {m.fit}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* GESCHÄFTSKONFLIKTE / ODR */}
+      <section id="geschaeft" className="section section-muted border-y border-neutral-200">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-16 max-w-2xl">
+            <div className="eyebrow mb-4">Auch für Unternehmen</div>
+            <h2 className="heading-2">Geschäftskonflikte online beilegen</h2>
+            <p className="mt-4 text-lg text-neutral-700">
+              Derselbe Prozess funktioniert zwischen Unternehmen – dort
+              allerdings unter dem Namen Online Dispute Resolution. Der
+              Unterschied ist weniger die Methode als das Tempo: Ein blockierter
+              Auftrag oder ein Gesellschafter-Patt kostet jeden Tag Geld, den er
+              ungelöst bleibt.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {odrTypes.map((o) => (
+              <div
+                key={o.title}
+                className="rounded-[2rem] border border-neutral-200 bg-white p-7"
+              >
+                <h3 className="text-lg font-bold text-neutral-900">{o.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+                  {o.text}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-[2rem] bg-neutral-900 p-8 sm:p-10">
+            <h3 className="text-xl font-bold text-white">
+              Für Unternehmen mit vielen Fällen
+            </h3>
+            <p className="mt-3 max-w-3xl leading-7 text-neutral-300">
+              Ein Einzelfall kostet pauschal 399 € und wird von der Seite
+              bezahlt, die ihn anlegt. Wer regelmäßig Streitfälle abzuwickeln
+              hat – Fluggastrechte, Mietforderungen, E-Commerce-Reklamationen –
+              nutzt stattdessen ein Firmen-Abo, in dem die Fälle enthalten sind.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-4">
+              <Link href="/konflikte/odr" className="btn btn-primary">
+                Geschäftskonflikte im Detail
+              </Link>
+              <Link
+                href="/kontakt"
+                className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:border-accent-300 hover:text-accent-300"
+              >
+                Firmen-Abo anfragen
+              </Link>
+            </div>
           </div>
         </div>
       </section>
