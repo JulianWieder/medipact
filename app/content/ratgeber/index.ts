@@ -31,6 +31,7 @@ import { article as gerichtOderMediation } from "./gericht-oder-mediation";
 import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg";
 import { article as scheidungMediatorKosten } from "./scheidung-mediator-kosten";
 import { article as sorgerechtUndUmgangsrecht } from "./sorgerecht-und-umgangsrecht";
+import { article as sorgerechtVerlorenWasTun } from "./sorgerecht-verloren-was-tun";
 import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
 import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
 import { article as onlineDisputeResolution } from "./online-dispute-resolution";
@@ -80,6 +81,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   scheidungOhneRosenkrieg,
   scheidungMediatorKosten,
   sorgerechtUndUmgangsrecht,
+  sorgerechtVerlorenWasTun,
   ichWillMichTrennen,
   trennungVonEinemNarzissten,
   vermoegensauseinandersetzung,
