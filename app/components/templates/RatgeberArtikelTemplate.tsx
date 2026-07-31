@@ -253,7 +253,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
               vertraulich und im eigenen Tempo.
             </p>
             <Link href="/auth/register" className="btn btn-primary mt-8">
-              Kostenlosen Account erstellen
+              Mediation starten
             </Link>
           </div>
         </section>

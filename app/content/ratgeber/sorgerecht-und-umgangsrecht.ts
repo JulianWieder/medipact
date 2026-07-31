@@ -18,10 +18,10 @@
 import type { RatgeberArticle } from "./types";
 
 export const article: RatgeberArticle = {
-  slug: "sorgerecht-umgang-mediation",
+  slug: "sorgerecht-und-umgangsrecht",
   category: "Trennung & Scheidung",
-  title: "Sorgerecht und Umgang ohne Gericht regeln",
-  metaTitle: "Sorgerecht & Umgang: Einigung statt Gericht | medipact",
+  title: "Sorgerecht und Umgang: Wer bekommt was – und wie ihr euch einigt",
+  metaTitle: "Sorgerecht und Umgang: Wer bekommt was? | medipact",
   description:
     "Betreuung, Umgang, Wechselmodell: Wie Eltern nach der Trennung eine tragfähige Regelung finden – ohne Gutachten und Gericht. Ablauf, Kosten, Grenzen.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
@@ -178,6 +178,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },

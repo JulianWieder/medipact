@@ -1,7 +1,7 @@
 // Ziel-Suchbegriffe: "weg streit mediation", "streit eigentümergemeinschaft",
 // "konflikt mit verwalter weg", "beschlussanfechtung vermeiden".
 //
-// Longtail zum Pillar nachbarschaftsstreit-mediation. Eigene URL, weil die
+// Longtail zum Pillar nachbarschaftsstreit-was-tun. Eigene URL, weil die
 // Suchintention klar abgegrenzt ist (Wohnungseigentum, Verwalter, Beschlüsse)
 // und das Publikum ein anderes ist – oft Beirat oder Verwaltung, nicht der
 // einzelne genervte Nachbar.
@@ -21,7 +21,7 @@ export const article: RatgeberArticle = {
   slug: "weg-streit-mediation",
   category: "Nachbarschaft",
   title: "Streit in der Eigentümergemeinschaft lösen",
-  metaTitle: "WEG-Streit: Mediation statt Beschlussanfechtung | medipact",
+  metaTitle: "WEG-Streit: Was tun bei Beschluss & Verwalter? | medipact",
   description:
     "Konflikt in der Eigentümergemeinschaft: Beschlüsse, Kosten, Verwalter, Sondernutzung. Wie Mediation Anfechtungsklagen vermeidet – Ablauf, Kosten, Grenzen.",
   eyebrow: "Ratgeber · Nachbarschaft",
@@ -168,7 +168,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
-    { label: "Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-mediation" },
+    { label: "Der Nachbar ist zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
+    { label: "Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-was-tun" },
     { label: "Nachbarschaft: Mediation im Überblick", href: "/konflikte/nachbarschaft" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Preise & Business-Tarife", href: "/preise" },

@@ -66,9 +66,12 @@ export default function ErbschaftPage() {
           { label: "Konfliktarten", href: "/konflikte" },
           { label: "Erbschaft" },
         ]}
+        kostenrechnerArt="erbschaft"
         relatedCases={[
+          { label: "Ratgeber: Geschwister streiten ums Erbe", href: "/ratgeber/geschwister-streiten-ums-erbe" },
+          { label: "Ratgeber: Erbengemeinschaft blockiert", href: "/ratgeber/erbengemeinschaft-blockade" },
           { label: "Ratgeber: Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
-          { label: "Ratgeber: Pflichtteil verhandeln", href: "/ratgeber/pflichtteil-mediation" },
+          { label: "Ratgeber: Pflichtteil verhandeln", href: "/ratgeber/pflichtteil-einfordern" },
           { label: "Geschwister-Streit ums Haus", href: "/cases/anna-klaus" },
           { label: "Testament-Konflikt", href: "/cases/marie-sophie" },
           { label: "Unternehmen erben", href: "/cases/familie-weber" },

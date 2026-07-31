@@ -3,7 +3,11 @@ import Link from "next/link";
 import { JsonLd } from "@/app/components/JsonLd";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { pageMetadata, SITE_URL } from "@/lib/seo";
-import { KOSTENRECHT_STAND } from "@/lib/kostenrecht";
+import {
+  KONFLIKTARTEN,
+  KOSTENRECHT_STAND,
+  type Konfliktart,
+} from "@/lib/kostenrecht";
 import { ladePreisOverlay } from "@/lib/pricing-matrix";
 import KostenrechnerClient from "./KostenrechnerClient";
 
@@ -85,11 +89,33 @@ const faqSchema = {
   })),
 };
 
-export default async function Kostenrechner() {
+/**
+ * ?art= belegt die Konfliktart vor. Gesetzt wird der Parameter von den
+ * Konfliktarten-Seiten (KostenrechnerHinweis) – ein unbekannter oder
+ * fehlender Wert fällt still auf die Voreinstellung zurück, damit sich über
+ * die URL keine kaputten Zustände erzeugen lassen.
+ *
+ * Kein Einfluss auf Indexierung: pageMetadata setzt das Canonical fest auf
+ * /kostenrechner, die Parameter-Varianten kanonisieren also auf die
+ * Hauptseite und verwässern sie nicht.
+ */
+function artParsen(wert?: string | string[]): Konfliktart | undefined {
+  const eins = Array.isArray(wert) ? wert[0] : wert;
+  return KONFLIKTARTEN.some((k) => k.key === eins)
+    ? (eins as Konfliktart)
+    : undefined;
+}
+
+export default async function Kostenrechner({
+  searchParams,
+}: {
+  searchParams: Promise<{ art?: string | string[] }>;
+}) {
   // Preise kommen aus backend/app/pricing.py (GET /pricing/matrix). Ist das
   // Backend nicht erreichbar, bleibt es bei den Fallback-Werten aus
   // lib/kostenrecht.ts – siehe lib/pricing-matrix.ts.
   const preise = await ladePreisOverlay();
+  const start = artParsen((await searchParams).art);
 
   return (
     <>
@@ -118,7 +144,7 @@ export default async function Kostenrechner() {
               {KOSTENRECHT_STAND}.
             </p>
 
-            <KostenrechnerClient className="mt-10" preise={preise} />
+            <KostenrechnerClient className="mt-10" preise={preise} start={start} />
           </div>
         </section>
 

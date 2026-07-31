@@ -61,8 +61,11 @@ export default function NachbarschaftPage() {
         { label: "Konfliktarten", href: "/konflikte" },
         { label: "Nachbarschaft" },
       ]}
+      kostenrechnerArt="nachbarschaft"
       relatedCases={[
-        { label: "Ratgeber: Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-mediation" },
+        { label: "Ratgeber: Nachbar zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
+        { label: "Ratgeber: Wie hoch darf die Hecke sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
+        { label: "Ratgeber: Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-was-tun" },
         { label: "Ratgeber: Streit in der Eigentümergemeinschaft", href: "/ratgeber/weg-streit-mediation" },
         { label: "Lärm bei Nacht", href: "/cases/nachbarschaft-laerm" },
         { label: "Zaun auf der Grenze", href: "/cases/nachbarschaft-zaun" },

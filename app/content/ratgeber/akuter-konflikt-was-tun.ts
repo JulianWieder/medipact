@@ -8,9 +8,9 @@ export const article: RatgeberArticle = {
   slug: "akuter-konflikt-was-tun",
   category: "Mediation",
   title: "Akuter Konflikt: Was Sie jetzt tun sollten – und was nicht",
-  metaTitle: "Akuter Konflikt: Was tun, wenn der Streit eskaliert? | medipact",
+  metaTitle: "Akuter Konflikt: Was tun, wenn es eskaliert? | medipact",
   description:
-    "Der Streit eskaliert gerade? Diese Sofortmaßnahmen helfen: Ruhe bewahren, nichts Unumkehrbares tun, sofort dokumentieren – und die nächsten Schritte klug wählen.",
+    "Der Streit eskaliert gerade? Ruhe bewahren, nichts Unumkehrbares tun, sofort dokumentieren – und die nächsten Schritte klug wählen.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-21",
   readingMinutes: 8,

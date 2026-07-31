@@ -69,6 +69,7 @@ export default function OdrPage() {
           { label: "Konfliktarten", href: "/konflikte" },
           { label: "Online Dispute Resolution (ODR)" },
         ]}
+        kostenrechnerArt="b2b"
         relatedCases={[
           { label: "Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
           { label: "Teamkonflikt im Mittelstand", href: "/cases/team-konflikt" },

@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "mediation-am-arbeitsplatz",
   category: "Wirtschaftsmediation",
   title: "Mediation am Arbeitsplatz: Konflikte im Team klären",
-  metaTitle: "Mediation am Arbeitsplatz: Konflikte im Team klären | medipact",
+  metaTitle: "Mediation am Arbeitsplatz: Teamkonflikte lösen | medipact",
   description:
-    "Mediation bei Konflikten am Arbeitsplatz: Wann sie sinnvoll ist, wie sie zwischen Mitarbeitenden oder mit der Führungskraft abläuft und was Arbeitgeber beachten sollten.",
+    "Konflikte am Arbeitsplatz: Wann Mediation sinnvoll ist, wie sie zwischen Mitarbeitenden oder mit der Führungskraft abläuft und was Arbeitgeber beachten.",
   eyebrow: "Ratgeber · Wirtschaftsmediation",
   updated: "2026-07-11",
   readingMinutes: 6,

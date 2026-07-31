@@ -61,6 +61,7 @@ export default function VerbraucherPage() {
           { label: "Konfliktarten", href: "/konflikte" },
           { label: "Verbraucher & Handwerker" },
         ]}
+        kostenrechnerArt="verbraucher"
         relatedCases={[
           { label: "B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
           { label: "Gesellschafter-Streit", href: "/cases/gesellschafter-streit" },

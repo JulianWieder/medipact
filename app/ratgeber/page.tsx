@@ -97,7 +97,7 @@ export default function RatgeberUebersichtPage() {
               online mit medipact.
             </p>
             <Link href="/auth/register" className="btn btn-primary mt-8">
-              Kostenlosen Account erstellen
+              Mediation starten
             </Link>
           </div>
         </section>

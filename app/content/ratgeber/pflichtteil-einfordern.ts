@@ -16,10 +16,10 @@
 import type { RatgeberArticle } from "./types";
 
 export const article: RatgeberArticle = {
-  slug: "pflichtteil-mediation",
+  slug: "pflichtteil-einfordern",
   category: "Familie & Erbe",
   title: "Pflichtteil: einfordern, ohne die Familie zu verlieren",
-  metaTitle: "Pflichtteil & Mediation: einigen statt klagen | medipact",
+  metaTitle: "Pflichtteil einfordern: Wie viel steht mir zu? | medipact",
   description:
     "Pflichtteil geltend machen, ohne dass die Familie zerbricht: warum Mediation hier oft besser wirkt als eine Klage – Ablauf, Auszahlung, Kosten und Grenzen.",
   eyebrow: "Ratgeber · Familie & Erbe",
@@ -166,9 +166,10 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Geschwister streiten ums Erbe – was tun?", href: "/ratgeber/geschwister-streiten-ums-erbe" },
     { label: "Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
     { label: "Erbschaft & Familie: Mediation im Überblick", href: "/konflikte/erbschaft" },
-    { label: "Familien- und Erbmediation", href: "/ratgeber/familien-und-erbmediation" },
+    { label: "Familien- und Erbmediation", href: "/ratgeber/streit-ums-erbe-in-der-familie" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
   ],
 };

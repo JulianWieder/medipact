@@ -315,9 +315,10 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
-    { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
+    { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Vermögensauseinandersetzung bei Trennung", href: "/ratgeber/vermoegensauseinandersetzung" },
     { label: "Was kostet eine Mediation? (allgemein)", href: "/ratgeber/mediation-kosten" },

@@ -16,10 +16,10 @@
 import type { RatgeberArticle } from "./types";
 
 export const article: RatgeberArticle = {
-  slug: "nachbarschaftsstreit-mediation",
+  slug: "nachbarschaftsstreit-was-tun",
   category: "Nachbarschaft",
-  title: "Nachbarschaftsstreit schlichten: Mediation statt Gericht",
-  metaTitle: "Nachbarschaftsstreit: Mediation, Kosten & Ablauf | medipact",
+  title: "Nachbarschaftsstreit schlichten: Was tun bei Lärm, Hecke und Grenze?",
+  metaTitle: "Nachbarschaftsstreit: Was tun bei Lärm & Hecke? | medipact",
   description:
     "Lärm, Hecke, Grenze, Parkplatz: Nachbarschaftsstreit außergerichtlich lösen – Kosten, wer zahlt, Rechtsschutz und ein Muster-Anschreiben zum Anpassen.",
   eyebrow: "Ratgeber · Nachbarschaft",
@@ -213,6 +213,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Der Nachbar ist zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
+    { label: "Wie hoch darf die Hecke des Nachbarn sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Nachbarschaft: Mediation im Überblick", href: "/konflikte/nachbarschaft" },
     { label: "Streit in der Eigentümergemeinschaft (WEG)", href: "/ratgeber/weg-streit-mediation" },

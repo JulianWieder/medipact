@@ -71,9 +71,13 @@ export default async function TrennungPage({
           { label: "Konfliktarten", href: "/konflikte" },
           { label: "Trennung & Scheidung" },
         ]}
+        kostenrechnerArt="trennung"
         relatedCases={[
+          { label: "Ratgeber: Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
+          { label: "Ratgeber: Muss ich das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },
+          { label: "Ratgeber: Wer muss aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
           { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
-          { label: "Ratgeber: Sorgerecht und Umgang regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
+          { label: "Ratgeber: Sorgerecht und Umgang regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
           { label: "Trennung mit 2 Kindern", href: "/cases/maria-thomas" },
           { label: "Hohes Vermögen, komplexe Aufteilung", href: "/cases/peter-sarah" },
           { label: "Nach 38 Jahren Ehe", href: "/cases/rolf-helga" },

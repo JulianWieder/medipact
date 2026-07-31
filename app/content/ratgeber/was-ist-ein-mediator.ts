@@ -4,7 +4,7 @@ export const article: RatgeberArticle = {
   slug: "was-ist-ein-mediator",
   category: "Mediation",
   title: "Was ist ein Mediator? Aufgaben, Rolle und Ausbildung",
-  metaTitle: "Was ist ein Mediator? Aufgaben, Rolle & Ausbildung | medipact",
+  metaTitle: "Was ist ein Mediator? Aufgaben und Rolle | medipact",
   description:
     "Was macht ein Mediator? Rolle, Aufgaben und Grenzen im Konflikt, der Unterschied zum Richter oder Anwalt und woran Sie einen guten Mediator erkennen.",
   eyebrow: "Ratgeber · Mediation",

@@ -309,7 +309,7 @@ export default function MethodePage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/auth/register" className="btn btn-primary">
-              Kostenlosen Account erstellen
+              Mediation starten
             </Link>
             <Link
               href="/preise"
@@ -682,7 +682,7 @@ export default function MethodePage() {
             Starten Sie ruhig, vertraulich und unverbindlich.
           </p>
           <Link href="/auth/register" className="btn btn-primary mt-8">
-            Kostenlosen Account erstellen
+            Mediation starten
           </Link>
         </div>
       </section>

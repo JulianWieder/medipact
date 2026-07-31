@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "gericht-oder-mediation",
   category: "Mediation",
   title: "„Wir sehen uns vor Gericht“ – warum dieser Satz teuer wird und was wirklich hilft",
-  metaTitle: "Gericht oder Mediation? Warum Prozesse oft schiefgehen | medipact",
+  metaTitle: "Gericht oder Mediation? Was wirklich hilft | medipact",
   description:
-    "Recht haben heißt nicht Recht bekommen: Was vor Gericht schiefgehen kann – Kosten, Dauer, Prozessrisiko – und warum Online-Mediation mit medipact oft der klügere Weg ist.",
+    "Recht haben heißt nicht Recht bekommen: Was vor Gericht schiefgehen kann – Kosten, Dauer, Prozessrisiko – und wann sich der Weg daran vorbei lohnt.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-14",
   readingMinutes: 8,
@@ -123,6 +123,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },

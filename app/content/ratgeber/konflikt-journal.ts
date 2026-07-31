@@ -9,9 +9,9 @@ export const article: RatgeberArticle = {
   slug: "konflikt-journal",
   category: "Mediation",
   title: "Konflikt-Journal: Warum Aufschreiben hilft, wenn es kracht",
-  metaTitle: "Konflikt-Journal führen: Gedanken & Gefühle sortieren | medipact",
+  metaTitle: "Konflikt-Journal: Warum Aufschreiben hilft | medipact",
   description:
-    "Ein Konflikt-Journal hilft, Gefühle zu sortieren und klarer zu entscheiden. So führen Sie es richtig – privat, ehrlich und getrennt von der Faktendokumentation.",
+    "Ein Konflikt-Journal hilft, Gefühle zu sortieren und klarer zu entscheiden. So führen Sie es richtig – privat und getrennt von der Faktendokumentation.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-22",
   readingMinutes: 9,

@@ -12,6 +12,8 @@ import {
 } from "@/app/components/ui/DidYouKnowSection";
 import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
 import { LogbuchHinweis } from "@/app/components/ui/LogbuchHinweis";
+import { KostenrechnerHinweis } from "@/app/components/ui/KostenrechnerHinweis";
+import type { Konfliktart } from "@/lib/kostenrecht";
 
 type PageImage = {
   src: StaticImageData;
@@ -103,6 +105,15 @@ type MarketingPageTemplateProps = {
   /** Optional links to related case studies, rendered above the final CTA
    * so crawlers and users always have a next click instead of a dead end. */
   relatedCases?: BreadcrumbItem[];
+  /**
+   * Konfliktart für den Prozesskostenrechner-Teaser vor dem Schluss-CTA.
+   * Weglassen = kein Teaser (z. B. auf Seiten ohne eigene Konfliktart).
+   *
+   * Der Rechner lag vorher praktisch abseits: verlinkt nur aus fünf
+   * Ratgeber-Artikeln und /preise, aber nicht aus den Landingpages, die
+   * die meiste Kraft haben und auf denen der Preis-Einwand entsteht.
+   */
+  kostenrechnerArt?: Konfliktart;
   finalCtaTitle: string;
   finalCtaText: string;
   finalCta: {
@@ -157,6 +168,7 @@ export function MarketingPageTemplate({
   didYouKnowFacts,
   breadcrumbs,
   relatedCases,
+  kostenrechnerArt,
   finalCtaTitle,
   finalCtaText,
   finalCta,
@@ -518,6 +530,11 @@ export function MarketingPageTemplate({
           </section>
         )}
 
+        {/* Erst die Kostenfrage beantworten, dann der sanfte Einstieg:
+            Wer die Gerichtszahl gesehen hat, liest das Logbuch-Angebot
+            anders — und beide stehen vor dem harten CTA. */}
+        {kostenrechnerArt && <KostenrechnerHinweis art={kostenrechnerArt} />}
+
         {/* Kostenloses Konflikt-Logbuch: sanfter Einstieg vor dem harten CTA */}
         <LogbuchHinweis />
 
@@ -534,10 +551,23 @@ export function MarketingPageTemplate({
               {finalCtaText}
             </p>
 
-            <div className="mt-10 flex justify-center">
-              <Button href={finalCta.href} size="lg">
-                {finalCta.label}
+            {/* „Mediation starten" ist bewusst der PRIMÄRE Weg und steht
+                links. Vorher endeten alle fünf Konflikt-Landingpages
+                ausschließlich auf /kontakt — wer sofort loslegen wollte,
+                musste erst ein Kontaktformular ausfüllen und auf Antwort
+                warten. Der bisherige CTA bleibt als zweite Option für alle,
+                die vorher noch eine Frage haben. */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button href="/auth/register" size="lg">
+                Mediation starten
               </Button>
+
+              <NextLink
+                href={finalCta.href}
+                className="rounded-full border border-white/25 px-8 py-4 text-base font-semibold text-white transition hover:border-accent-300 hover:text-accent-300"
+              >
+                {finalCta.label}
+              </NextLink>
             </div>
           </div>
         </section>

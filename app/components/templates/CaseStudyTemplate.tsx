@@ -496,10 +496,20 @@ export function CaseStudyTemplate({
               {ctaText}
             </p>
 
-            <div className="mt-10 flex justify-center">
-              <Button href={ctaHref} size="lg">
-                {ctaLabel}
+            {/* Ein Fallbeispiel zu Ende gelesen zu haben, ist der Moment mit
+                der höchsten Kaufabsicht auf der ganzen Seite — vorher führte
+                von hier trotzdem kein direkter Weg in die Anmeldung. */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button href="/auth/register" size="lg">
+                Mediation starten
               </Button>
+
+              <Link
+                href={ctaHref}
+                className="rounded-full border border-white/25 px-8 py-4 text-base font-semibold text-white transition hover:border-accent-300 hover:text-accent-300"
+              >
+                {ctaLabel}
+              </Link>
             </div>
           </div>
         </section>

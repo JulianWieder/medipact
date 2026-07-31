@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "5-phasen-der-mediation",
   category: "Mediation",
   title: "Die Phasen der Mediation – das 7-Phasen-Modell erklärt",
-  metaTitle: "Die Phasen der Mediation: das 7-Phasen-Modell erklärt | medipact",
+  metaTitle: "Phasen der Mediation: der Ablauf erklärt | medipact",
   description:
-    "Die Phasen der Mediation im Überblick – oft als 5 Phasen zusammengefasst, hier als ausführliches 7-Phasen-Modell: von der Vorbereitung über die Interessenklärung bis zur Umsetzung.",
+    "Die Phasen der Mediation im Überblick – oft als 5 Phasen zusammengefasst, hier als 7-Phasen-Modell: von der Vorbereitung bis zur Umsetzung.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-04",
   readingMinutes: 8,

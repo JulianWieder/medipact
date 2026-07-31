@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "kuendigung-ohne-gericht",
   category: "Wirtschaftsmediation",
   title: "Kündigung: Eine Achterbahnfahrt – und wie es ohne Gericht weitergeht",
-  metaTitle: "Kündigung ohne Gericht klären: Mediation statt Arbeitsgericht | medipact",
+  metaTitle: "Kündigung erhalten: Was kann ich jetzt tun? | medipact",
   description:
-    "Eine Kündigung ist ein emotionaler Ausnahmezustand – für Beschäftigte und oft auch für die Personalabteilung. Wie Mediation den Weg zum Arbeitsgericht ersetzen kann und beide Seiten fair auseinander- oder wieder zusammenkommen.",
+    "Gekündigt worden? Welche Fristen laufen, was Sie sofort tun sollten und wie sich ein Arbeitsgerichtsverfahren vermeiden lässt.",
   eyebrow: "Ratgeber · Wirtschaftsmediation",
   updated: "2026-07-15",
   readingMinutes: 7,

@@ -10,7 +10,7 @@ export const article: RatgeberArticle = {
   title: "Schwelender Konflikt: Beobachten, bevor es eskaliert",
   metaTitle: "Schwelender Konflikt: Beobachten statt abwarten | medipact",
   description:
-    "Noch kein offener Streit, aber es knirscht: Wie Sie einen schwelenden Konflikt über Monate klug beobachten, Eskalationssignale erkennen und rechtzeitig handeln.",
+    "Noch kein offener Streit, aber es knirscht: Wie Sie einen schwelenden Konflikt beobachten, Eskalationssignale erkennen und rechtzeitig handeln.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-21",
   readingMinutes: 8,

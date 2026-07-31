@@ -591,9 +591,20 @@ export default function KonfliktePage() {
             Einschätzung der Situation.
           </p>
 
-          <Link href="/kontakt" className="btn btn-primary mt-8">
-            Konflikt einschätzen
-          </Link>
+          {/* Die Übersichtsseite endete bisher nur auf /kontakt. Wer bereits
+              weiß, worum es geht, soll direkt starten können. */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link href="/auth/register" className="btn btn-primary">
+              Mediation starten
+            </Link>
+
+            <Link
+              href="/kontakt"
+              className="rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:border-accent-300 hover:text-accent-300"
+            >
+              Konflikt einschätzen
+            </Link>
+          </div>
         </div>
       </section>
     </>

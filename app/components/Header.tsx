@@ -89,6 +89,7 @@ export default function Header() {
       ],
     },
     { label: t("ratgeber"), href: "/ratgeber" },
+    { label: t("kostenrechner"), href: "/kostenrechner" },
   ];
 
   return (

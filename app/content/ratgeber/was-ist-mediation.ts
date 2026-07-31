@@ -6,7 +6,7 @@ export const article: RatgeberArticle = {
   title: "Was ist Mediation? Definition, Ablauf und Vorteile",
   metaTitle: "Was ist Mediation? Definition, Ablauf & Vorteile | medipact",
   description:
-    "Mediation einfach erklärt: Was Mediation bedeutet, wie ein Mediationsverfahren abläuft, wann es sich eignet und welche Vorteile es gegenüber dem Gericht hat.",
+    "Mediation einfach erklärt: Was sie bedeutet, wie ein Verfahren abläuft, wann es sich eignet und welche Vorteile es gegenüber dem Gericht hat.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-04",
   readingMinutes: 6,

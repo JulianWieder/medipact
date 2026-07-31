@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "vermoegensauseinandersetzung",
   category: "Trennung & Scheidung",
   title: "Vermögensauseinandersetzung bei Trennung und Scheidung: Wem gehört was - und wie ihr fair teilt, ohne euch zu ruinieren",
-  metaTitle: "Vermögensauseinandersetzung bei Scheidung: fair aufteilen | medipact",
+  metaTitle: "Vermögen aufteilen bei Scheidung: Wem gehört was? | medipact",
   description:
-    "Haus, Konto, Rente, Schulden: Was bei Trennung und Scheidung wirklich aufgeteilt wird, wie der Zugewinnausgleich rechnet - und warum die einvernehmliche Lösung per Mediation meist fairer und günstiger ist als der Weg über Anwälte und Gericht.",
+    "Haus, Konto, Rente, Schulden: Was bei Trennung und Scheidung wirklich aufgeteilt wird, wie der Zugewinnausgleich rechnet und was fair heißt.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-07-17",
   readingMinutes: 9,
@@ -140,6 +140,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
+    { label: "Muss ich bei der Scheidung das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },

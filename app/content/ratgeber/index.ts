@@ -30,7 +30,7 @@ import { article as mediationKosten } from "./mediation-kosten";
 import { article as gerichtOderMediation } from "./gericht-oder-mediation";
 import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg";
 import { article as scheidungMediatorKosten } from "./scheidung-mediator-kosten";
-import { article as sorgerechtUmgangMediation } from "./sorgerecht-umgang-mediation";
+import { article as sorgerechtUndUmgangsrecht } from "./sorgerecht-und-umgangsrecht";
 import { article as ichWillMichTrennen } from "./ich-will-mich-trennen";
 import { article as trennungVonEinemNarzissten } from "./trennung-von-einem-narzissten";
 import { article as onlineDisputeResolution } from "./online-dispute-resolution";
@@ -39,11 +39,22 @@ import { article as mediationImUnternehmen } from "./mediation-im-unternehmen";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 import { article as kuendigungOhneGericht } from "./kuendigung-ohne-gericht";
 import { article as vermoegensauseinandersetzung } from "./vermoegensauseinandersetzung";
-import { article as familienUndErbmediation } from "./familien-und-erbmediation";
+import { article as streitUmsErbeInDerFamilie } from "./streit-ums-erbe-in-der-familie";
 import { article as erbstreitLoesenOhneGericht } from "./erbstreit-loesen-ohne-gericht";
-import { article as pflichtteilMediation } from "./pflichtteil-mediation";
-import { article as nachbarschaftsstreitMediation } from "./nachbarschaftsstreit-mediation";
+import { article as pflichtteilEinfordern } from "./pflichtteil-einfordern";
+import { article as nachbarschaftsstreitWasTun } from "./nachbarschaftsstreit-was-tun";
 import { article as wegStreitMediation } from "./weg-streit-mediation";
+// Suchsprache-Artikel (31.07.2026): Titel = die Frage, die Betroffene
+// eingeben. "Mediation" kommt darin bewusst nicht vor – wer so sucht, kennt
+// das Wort nicht. Hintergrund in docs/ratgeber-suchsprache.md.
+import { article as wasStehtMirBeiDerScheidungZu } from "./was-steht-mir-bei-der-scheidung-zu";
+import { article as hausBeiScheidung } from "./haus-bei-scheidung";
+import { article as werMussAusDerWohnung } from "./wer-muss-aus-der-wohnung";
+import { article as trennungsjahrNachweisen } from "./trennungsjahr-nachweisen";
+import { article as geschwisterStreitenUmsErbe } from "./geschwister-streiten-ums-erbe";
+import { article as erbengemeinschaftBlockade } from "./erbengemeinschaft-blockade";
+import { article as nachbarLaermWasTun } from "./nachbar-laerm-was-tun";
+import { article as heckeNachbarHoehe } from "./hecke-nachbar-hoehe";
 
 export type { RatgeberArticle, RatgeberBlock, RatgeberFaq } from "./types";
 
@@ -59,16 +70,27 @@ export const ratgeberArticles: RatgeberArticle[] = [
   wasIstEinMediator,
   mediationKosten,
   gerichtOderMediation,
+  // Die Suchsprache-Artikel stehen bewusst VORNE in ihrer Kategorie: Sie
+  // sind der Einstieg für Betroffene, die den Begriff "Mediation" noch gar
+  // nicht kennen. Die Verfahrens-Artikel folgen dahinter.
+  wasStehtMirBeiDerScheidungZu,
+  hausBeiScheidung,
+  werMussAusDerWohnung,
+  trennungsjahrNachweisen,
   scheidungOhneRosenkrieg,
   scheidungMediatorKosten,
-  sorgerechtUmgangMediation,
+  sorgerechtUndUmgangsrecht,
   ichWillMichTrennen,
   trennungVonEinemNarzissten,
   vermoegensauseinandersetzung,
-  familienUndErbmediation,
+  geschwisterStreitenUmsErbe,
+  erbengemeinschaftBlockade,
+  streitUmsErbeInDerFamilie,
   erbstreitLoesenOhneGericht,
-  pflichtteilMediation,
-  nachbarschaftsstreitMediation,
+  pflichtteilEinfordern,
+  nachbarLaermWasTun,
+  heckeNachbarHoehe,
+  nachbarschaftsstreitWasTun,
   wegStreitMediation,
   onlineDisputeResolution,
   wirtschaftsmediation,

@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "mediation-kosten",
   category: "Mediation",
   title: "Was kostet eine Mediation? Kosten und Preise im Überblick",
-  metaTitle: "Was kostet eine Mediation? Kosten & Preise im Überblick | medipact",
+  metaTitle: "Was kostet eine Mediation? Preise im Überblick | medipact",
   description:
-    "Was eine Mediation kostet: Stundensätze, typische Gesamtkosten, wer zahlt und wie sich Mediation preislich zum Gericht verhält – plus günstige Online-Alternative.",
+    "Was eine Mediation kostet: Stundensätze, typische Gesamtkosten, wer zahlt und wie sich Mediation preislich zum Gericht verhält.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-04",
   readingMinutes: 6,

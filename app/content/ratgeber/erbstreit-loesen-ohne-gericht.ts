@@ -2,7 +2,7 @@
 // streit lösen", "erbauseinandersetzung ohne gericht".
 //
 // Pillar des Erb-Clusters. Vertiefung zum Pflichtteil steht bewusst in einem
-// eigenen Artikel (pflichtteil-mediation), damit beide Suchintentionen eine
+// eigenen Artikel (pflichtteil-einfordern), damit beide Suchintentionen eine
 // eigene URL bekommen und sich nicht kannibalisieren.
 //
 // Preise aus backend/app/pricing.py: erbschaft = 399 € "once", d.h. nur die
@@ -175,10 +175,12 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Geschwister streiten ums Erbe – was tun?", href: "/ratgeber/geschwister-streiten-ums-erbe" },
+    { label: "Erbengemeinschaft: Einer blockiert", href: "/ratgeber/erbengemeinschaft-blockade" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Erbschaft & Familie: Mediation im Überblick", href: "/konflikte/erbschaft" },
-    { label: "Pflichtteil: streiten oder verhandeln?", href: "/ratgeber/pflichtteil-mediation" },
-    { label: "Familien- und Erbmediation", href: "/ratgeber/familien-und-erbmediation" },
+    { label: "Pflichtteil: streiten oder verhandeln?", href: "/ratgeber/pflichtteil-einfordern" },
+    { label: "Familien- und Erbmediation", href: "/ratgeber/streit-ums-erbe-in-der-familie" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
   ],

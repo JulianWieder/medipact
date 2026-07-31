@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "ich-will-mich-trennen",
   category: "Trennung & Scheidung",
   title: "„Ich will mich trennen.“ Warum dieser Satz so schwer ist - und wie du ihn aussprichst, ohne alles zu zerstören",
-  metaTitle: "„Ich will mich trennen“ aussprechen: Warum es so schwer fällt | medipact",
+  metaTitle: "Ich will mich trennen: Wie sage ich es? | medipact",
   description:
-    "Du funktionierst seit Jahren - für alle anderen. Warum es so schwer ist, eine Trennung auszusprechen, was das Schweigen dich wirklich kostet und wie Mediation mit medipact dir den ersten Schritt leichter macht.",
+    "Warum es so schwer ist, eine Trennung auszusprechen, was das Schweigen dich wirklich kostet und wie dir der erste Schritt leichter fällt.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-07-15",
   readingMinutes: 8,
@@ -125,11 +125,13 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
+    { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
-    { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-umgang-mediation" },
+    { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
   ],
 };

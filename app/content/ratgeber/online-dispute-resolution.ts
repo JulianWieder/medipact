@@ -4,7 +4,7 @@ export const article: RatgeberArticle = {
   slug: "online-dispute-resolution",
   category: "Wirtschaftsmediation",
   title: "Online Dispute Resolution (ODR): Streit digital beilegen",
-  metaTitle: "Online Dispute Resolution (ODR): Verfahren & Ablauf | medipact",
+  metaTitle: "Online Dispute Resolution: Streit digital lösen | medipact",
   description:
     "Was ist Online Dispute Resolution? ODR-Verfahren erklärt: Online-Mediation, Online-Schlichtung und Massen-ODR – Ablauf, Vorteile, Grenzen und Kosten.",
   eyebrow: "Ratgeber · Online Dispute Resolution",

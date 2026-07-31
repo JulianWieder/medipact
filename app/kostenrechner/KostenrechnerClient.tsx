@@ -10,6 +10,7 @@ import {
   euro,
   euroGlatt,
   gerichtsSzenario,
+  konfliktart,
   konfliktartAus,
   medipactPreis,
   mitPreisen,
@@ -43,6 +44,12 @@ type Props = {
    * lib/kostenrecht.ts.
    */
   preise?: PreisOverlay;
+  /**
+   * Vorbelegte Konfliktart, gesetzt über ?art= (siehe page.tsx). Damit
+   * landen Besucher von /konflikte/erbschaft direkt auf dem Erbstreit statt
+   * auf der Nachbarschafts-Voreinstellung und müssen nicht erst umschalten.
+   */
+  start?: Konfliktart;
 };
 
 const zahl = (v: string, fallback: number) => {
@@ -50,9 +57,11 @@ const zahl = (v: string, fallback: number) => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-export default function KostenrechnerClient({ className, preise }: Props) {
-  const [art, setArt] = useState<Konfliktart>("nachbarschaft");
-  const [streitwert, setStreitwert] = useState(5000);
+export default function KostenrechnerClient({ className, preise, start }: Props) {
+  const [art, setArt] = useState<Konfliktart>(start ?? "nachbarschaft");
+  const [streitwert, setStreitwert] = useState(
+    konfliktart(start ?? "nachbarschaft").streitwertDefault,
+  );
   const [monatsnetto, setMonatsnetto] = useState(4500);
   const [anrechte, setAnrechte] = useState(2);
   const [gegenseiteAnwalt, setGegenseiteAnwalt] = useState(true);

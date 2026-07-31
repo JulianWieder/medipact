@@ -1,10 +1,10 @@
 import type { RatgeberArticle } from "./types";
 
 export const article: RatgeberArticle = {
-  slug: "familien-und-erbmediation",
+  slug: "streit-ums-erbe-in-der-familie",
   category: "Familie & Erbe",
-  title: "Familien- und Erbmediation: Konflikte lösen, Familie erhalten",
-  metaTitle: "Familien- & Erbmediation: Ablauf & Kosten | medipact",
+  title: "Wenn die Familie ums Erbe streitet: Konflikte lösen, Familie erhalten",
+  metaTitle: "Streit ums Erbe in der Familie: Was tun? | medipact",
   description:
     "Erbstreit oder Familienkonflikt? Wie Familien- und Erbmediation Lösungen schafft, ohne die Familie zu zerbrechen. Ablauf & Kosten – jetzt lesen.",
   eyebrow: "Ratgeber · Familie & Erbe",
@@ -87,8 +87,10 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Geschwister streiten ums Erbe – was tun?", href: "/ratgeber/geschwister-streiten-ums-erbe" },
+    { label: "Erbengemeinschaft: Einer blockiert", href: "/ratgeber/erbengemeinschaft-blockade" },
     { label: "Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
-    { label: "Pflichtteil: einigen statt klagen", href: "/ratgeber/pflichtteil-mediation" },
+    { label: "Pflichtteil: einigen statt klagen", href: "/ratgeber/pflichtteil-einfordern" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Erbkonflikte lösen mit medipact", href: "/konflikte/erbschaft" },
     { label: "Fallbeispiel: Das Firmenerbe der Familie Weber", href: "/cases/familie-weber" },

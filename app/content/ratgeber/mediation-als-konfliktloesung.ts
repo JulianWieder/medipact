@@ -62,7 +62,7 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Nirgendwo sind Konflikte so emotional wie in der Familie – und nirgendwo richtet ein Gerichtsverfahren so viel dauerhaften Schaden an. Ob Erbengemeinschaft, Generationenkonflikt oder Streit um Pflege und Nachfolge: Familienmediation löst den Konflikt, ohne die Familie zu zerbrechen.",
     },
-    { type: "cta", text: "Zum Ratgeber: Familien- und Erbmediation", href: "/ratgeber/familien-und-erbmediation" },
+    { type: "cta", text: "Zum Ratgeber: Familien- und Erbmediation", href: "/ratgeber/streit-ums-erbe-in-der-familie" },
     { type: "heading", text: "Weitere Einsatzfelder" },
     {
       type: "list",

@@ -4,9 +4,9 @@ export const article: RatgeberArticle = {
   slug: "trennung-von-einem-narzissten",
   category: "Trennung & Scheidung",
   title: "Trennung von einem Narzissten: Warum jedes Gespräch zum Kampf wird - und wie du verhandelst, ohne dich zu verlieren",
-  metaTitle: "Trennung von einem Narzissten: Verhandeln ohne Machtspiele | medipact",
+  metaTitle: "Trennung von einem Narzissten: Was jetzt hilft | medipact",
   description:
-    "Verhandeln mit einem narzisstischen Ex-Partner ist emotional aufreibend: Manipulation, Provokation, Schuldumkehr. Wie du dich auf Gespräche und Gerichtstermine vorbereitest - und warum die schriftliche, strukturierte Mediation mit medipact seine stärksten Waffen entschärft.",
+    "Manipulation, Provokation, Schuldumkehr: Wie du dich auf Gespräche mit einem narzisstischen Ex-Partner vorbereitest, ohne dich selbst zu verlieren.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-07-15",
   readingMinutes: 9,

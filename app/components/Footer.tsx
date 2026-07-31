@@ -83,6 +83,11 @@ export default function Footer({
                   {t("productCases")}
                 </Link>
               </li>
+              <li>
+                <Link href="/kostenrechner" className="transition hover:text-white">
+                  {t("productCalculator")}
+                </Link>
+              </li>
             </ul>
           </div>
 
