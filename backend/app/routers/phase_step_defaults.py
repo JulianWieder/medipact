@@ -12,7 +12,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
+from app.models.phase_step_default import (
+    GATE_MODES,
+    SHARED_MEDIATION_TYPE,
+    PhaseStepDefault,
+)
 from app.models.user import User
 from app.security import get_current_db_user
 from app.services.llm import ai_complete
@@ -62,6 +66,16 @@ def _normalize_blocks(blocks: Optional[list]) -> Optional[list]:
     return normalized
 
 
+def _clean_gate_mode(value: Optional[str]) -> Optional[str]:
+    """Fortschritts-Sperre normalisieren. "self" ist der Standard und wird als
+    NULL gespeichert, damit Bestandsdaten und explizite Standardwahl in der DB
+    dasselbe bedeuten. Unbekannte Werte fallen still auf den Standard zurück –
+    ein Tippfehler im Designer darf keinen Schritt unerreichbar machen."""
+    if value in (None, "", "self"):
+        return None
+    return value if value in GATE_MODES else None
+
+
 def _sort_key(step: PhaseStepDefault) -> tuple:
     """Sortierung einer gemischten Liste aus typspezifischen und globalen
     Schritten: nach position; bei gleicher position steht der typspezifische
@@ -98,6 +112,9 @@ def _serialize(step: PhaseStepDefault) -> dict:
         "result_source_phase": step.result_source_phase,
         "feedback_occasion": step.feedback_occasion,
         "required_roles": step.required_roles.split(",") if step.required_roles else None,
+        # NULL wird als "self" ausgeliefert, damit der Designer nie einen
+        # leeren Zustand anzeigen muss (Bestandsdaten = Standardverhalten).
+        "gate_mode": step.gate_mode or "self",
         "position": step.position,
         "enabled": step.enabled,
     }
@@ -123,6 +140,7 @@ class PhaseStepDefaultCreate(BaseModel):
     result_source_phase: Optional[str] = None
     feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
+    gate_mode: Optional[str] = None
     enabled: bool = True
 
 
@@ -141,6 +159,7 @@ class PhaseStepDefaultUpdate(BaseModel):
     result_source_phase: Optional[str] = None
     feedback_occasion: Optional[str] = None
     required_roles: Optional[list[str]] = None
+    gate_mode: Optional[str] = None
     enabled: Optional[bool] = None
 
 
@@ -296,6 +315,7 @@ def create_phase_step_default(
         result_source_phase=payload.result_source_phase,
         feedback_occasion=payload.feedback_occasion,
         required_roles=",".join(payload.required_roles) if payload.required_roles else None,
+        gate_mode=_clean_gate_mode(payload.gate_mode),
         position=count,
         enabled=payload.enabled,
     )
@@ -325,6 +345,8 @@ def update_phase_step_default(
     if "content_types" in update_data:
         types = update_data.pop("content_types")
         step.content_types = ",".join(types) if types else None
+    if "gate_mode" in update_data:
+        step.gate_mode = _clean_gate_mode(update_data.pop("gate_mode"))
     if "blocks" in update_data:
         step.blocks = _normalize_blocks(update_data.pop("blocks"))
     for key, value in update_data.items():

@@ -18,7 +18,11 @@ from app.models.mediation_step_rule import MediationStepRule
 from app.models.mediation_custom_step import MediationCustomStep
 from app.models.mediation_step_content import MediationStepContent
 from app.models.mediation_block_response import MediationBlockResponse
-from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
+from app.models.phase_step_default import (
+    DEFAULT_GATE_MODE,
+    SHARED_MEDIATION_TYPE,
+    PhaseStepDefault,
+)
 from app.models.mediation_variant import MediationVariant
 from app.models.user import User
 from app.paypal import (
@@ -1497,6 +1501,195 @@ def _is_visible(cond, flags) -> bool:
     return True
 
 
+# ── Fortschritts-Sperre innerhalb einer Phase ────────────────────────────────
+#
+# Der Schritt-Navigator war früher frei anklickbar: man konnte Schritt 5 öffnen
+# und abgeben, ohne Schritt 1 abgeschlossen zu haben. Jetzt gibt jeder Schritt
+# den nächsten erst frei, wenn seine Sperre erfüllt ist
+# (PhaseStepDefault.gate_mode, im Workflow Manager pro Schritt einstellbar):
+#
+#   "self" (Standard) – die eigene Abgabe genügt
+#   "all"             – alle laut required_roles nötigen Parteien müssen abgeben
+#   "none"            – sperrt nie (optionaler Schritt)
+#
+# Die Prüfung steht bewusst NICHT nur im Frontend: die UI-Sperre wäre sonst per
+# Direkt-API umgehbar (dieselbe Lehre wie bei der Paywall-Durchsetzung).
+#
+# Rollen, die die Reihenfolge überspringen dürfen. "owner" ist hier bewusst NICHT
+# dabei (anders als in _WORKFLOW_ADMIN_ROLES): der Antragsteller ist eine
+# Konfliktpartei und durchläuft dieselbe Reihenfolge wie die Gegenseite.
+_STEP_GATE_BYPASS_ROLES = {"mediator", "admin"}
+
+
+def _phase_step_defaults_for(db: Session, mediation: Mediation, phase: str):
+    """Die für diesen Fall geltenden Default-Schritte einer Phase, sortiert.
+
+    Standard-Schritte (variant_key IS NULL) gelten immer; Schritte einer
+    Variante kommen nur dazu, wenn dieser Fall ihr zugeordnet ist
+    (mediations.variant_key). Varianten sind additiv, siehe MediationVariant.
+
+    Basis-Schritte zuerst (typspezifische und globale nach position gemischt,
+    bei Gleichstand der typspezifische zuerst), danach die Zusatz-Schritte der
+    Variante in ihrer eigenen Reihenfolge. Positionen werden pro Scope
+    (variant_key) unabhängig ab 0 vergeben, daher nicht über die Varianten-
+    Grenze hinweg mischen. Sortierung identisch zu _sort_key in
+    routers/phase_step_defaults.py – der Designer zeigt sonst eine andere
+    Reihenfolge, als die Teilnehmer sehen.
+    """
+    variant_filter = PhaseStepDefault.variant_key.is_(None)
+    if mediation.variant_key:
+        variant_filter = or_(
+            variant_filter,
+            PhaseStepDefault.variant_key == mediation.variant_key,
+        )
+    defaults = (
+        db.query(PhaseStepDefault)
+        .filter(
+            # Typspezifische Schritte + wiederverwendbare Schritte, die in
+            # ALLEN Mediationstypen gelten (SHARED_MEDIATION_TYPE, gepflegt im
+            # Workflow-Manager-Tab "Alle Typen").
+            PhaseStepDefault.mediation_type.in_(
+                [mediation.mediation_type, SHARED_MEDIATION_TYPE]
+            ),
+            PhaseStepDefault.phase == phase,
+            PhaseStepDefault.enabled.is_(True),
+            variant_filter,
+        )
+        .all()
+    )
+    defaults.sort(
+        key=lambda d: (
+            1 if d.variant_key else 0,
+            d.position,
+            1 if d.mediation_type == SHARED_MEDIATION_TYPE else 0,
+            d.id,
+        )
+    )
+    return defaults
+
+
+def _ordered_step_gates(
+    db: Session, mediation: Mediation, phase: str
+) -> list[tuple[str, str]]:
+    """[(step_key, gate_mode)] in genau der Reihenfolge, die der Teilnehmer sieht.
+
+    Enthält dieselben Filter wie get_phase_steps (skip-Regel, visible_if), damit
+    ein übersprungener oder ausgeblendeter Schritt niemanden blockiert. Vom
+    Mediator ergänzte Fall-Schritte (MediationCustomStep) haben keine eigene
+    Konfiguration und laufen auf dem Standard "self".
+    """
+    rules = {
+        r.step: r
+        for r in db.query(MediationStepRule)
+        .filter(
+            MediationStepRule.mediation_id == mediation.id,
+            MediationStepRule.phase == phase,
+        )
+        .all()
+    }
+    order: list[tuple[str, str]] = []
+    for d in _phase_step_defaults_for(db, mediation, phase):
+        rule = rules.get(d.step_key)
+        if rule and rule.skip:
+            continue
+        if not _is_visible(d.visible_if, mediation.flags):
+            continue
+        order.append((d.step_key, d.gate_mode or DEFAULT_GATE_MODE))
+    for c in (
+        db.query(MediationCustomStep)
+        .filter(
+            MediationCustomStep.mediation_id == mediation.id,
+            MediationCustomStep.phase == phase,
+        )
+        .order_by(MediationCustomStep.position, MediationCustomStep.id)
+        .all()
+    ):
+        rule = rules.get(c.step_key)
+        if rule and rule.skip:
+            continue
+        order.append((c.step_key, DEFAULT_GATE_MODE))
+    return order
+
+
+def _step_all_submitted(db: Session, mediation_id: int, phase: str, step: str) -> bool:
+    """Haben alle für diesen Schritt nötigen Rollen abgegeben? (Wie
+    /step-status.all_submitted, nur ohne Serialisierung.)"""
+    participants = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id == mediation_id)
+        .all()
+    )
+    required_roles, skip = _resolve_step_requirement(
+        db, mediation_id, phase, step, {p.role for p in participants}
+    )
+    if skip:
+        return True
+    submitted_ids = {
+        n.participant_id
+        for n in db.query(MediationNote)
+        .filter(
+            MediationNote.mediation_id == mediation_id,
+            MediationNote.phase == phase,
+            MediationNote.step == step,
+            MediationNote.submitted.is_(True),
+        )
+        .all()
+    }
+    required = [p for p in participants if p.role in required_roles]
+    return len(required) > 0 and all(p.id in submitted_ids for p in required)
+
+
+def _assert_step_reachable(
+    db: Session,
+    mediation: Mediation,
+    participant: MediationParticipant,
+    phase: str,
+    step: str,
+) -> None:
+    """Wirft 409, wenn ein vorheriger Schritt derselben Phase noch sperrt.
+
+    Kennt die Reihenfolge den Schritt nicht (Alt-Daten, Einleitungs-Phase mit
+    ihrer eigenen Schrittführung, Pseudo-Phasen), wird bewusst nicht blockiert –
+    eine Sperre, die niemand auflösen kann, wäre schlimmer als keine Sperre.
+    """
+    if participant.role in _STEP_GATE_BYPASS_ROLES:
+        return
+    order = _ordered_step_gates(db, mediation, phase)
+    keys = [k for k, _ in order]
+    if step not in keys:
+        return
+    blocking = [(k, g) for k, g in order[: keys.index(step)] if g != "none"]
+    if not blocking:
+        return
+
+    own_submitted = {
+        n.step
+        for n in db.query(MediationNote)
+        .filter(
+            MediationNote.mediation_id == mediation.id,
+            MediationNote.participant_id == participant.id,
+            MediationNote.phase == phase,
+            MediationNote.step.in_([k for k, _ in blocking]),
+            MediationNote.submitted.is_(True),
+        )
+        .all()
+    }
+    for key, gate in blocking:
+        if key not in own_submitted:
+            raise HTTPException(
+                status_code=409,
+                detail="Bitte schließe zuerst den vorherigen Schritt ab.",
+            )
+        if gate == "all" and not _step_all_submitted(db, mediation.id, phase, key):
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "Dieser Schritt wird erst frei, wenn alle Beteiligten den "
+                    "vorherigen Schritt abgeschlossen haben."
+                ),
+            )
+
+
 @router.get("/{mediation_id}/phase-steps")
 def get_phase_steps(
     mediation_id: int,
@@ -1534,44 +1727,10 @@ def get_phase_steps(
     if not mediation:
         raise HTTPException(status_code=404, detail="Mediation not found")
 
-    # Standard-Schritte (variant_key IS NULL) gelten immer; Schritte einer
-    # Variante kommen nur dazu, wenn dieser Fall ihr zugeordnet ist
-    # (mediations.variant_key). Varianten sind additiv, siehe MediationVariant.
-    variant_filter = PhaseStepDefault.variant_key.is_(None)
-    if mediation.variant_key:
-        variant_filter = or_(
-            variant_filter,
-            PhaseStepDefault.variant_key == mediation.variant_key,
-        )
-    defaults = (
-        db.query(PhaseStepDefault)
-        .filter(
-            # Typspezifische Schritte + wiederverwendbare Schritte, die in
-            # ALLEN Mediationstypen gelten (SHARED_MEDIATION_TYPE, gepflegt im
-            # Workflow-Manager-Tab "Alle Typen").
-            PhaseStepDefault.mediation_type.in_(
-                [mediation.mediation_type, SHARED_MEDIATION_TYPE]
-            ),
-            PhaseStepDefault.phase == phase,
-            PhaseStepDefault.enabled.is_(True),
-            variant_filter,
-        )
-        .all()
-    )
-    # Basis-Schritte zuerst (typspezifische und globale nach position gemischt,
-    # bei Gleichstand der typspezifische zuerst), danach die Zusatz-Schritte der
-    # Variante in ihrer eigenen Reihenfolge. Positionen werden pro Scope
-    # (variant_key) unabhängig ab 0 vergeben, daher nicht über die Varianten-
-    # Grenze hinweg mischen. Sortierung identisch zu _sort_key in
-    # routers/phase_step_defaults.py – der Designer zeigt dieselbe Reihenfolge.
-    defaults.sort(
-        key=lambda d: (
-            1 if d.variant_key else 0,
-            d.position,
-            1 if d.mediation_type == SHARED_MEDIATION_TYPE else 0,
-            d.id,
-        )
-    )
+    # Auflösung + Sortierung teilen sich mit der Fortschritts-Sperre denselben
+    # Helper – Reihenfolge in der Anzeige und Reihenfolge der Sperre dürfen nie
+    # auseinanderlaufen.
+    defaults = _phase_step_defaults_for(db, mediation, phase)
     custom_steps = (
         db.query(MediationCustomStep)
         .filter(
@@ -1643,6 +1802,9 @@ def get_phase_steps(
                     sc.feedback_occasion if sc and sc.feedback_occasion is not None else d.feedback_occasion
                 ),
                 "individual": is_individual,
+                # Fortschritts-Sperre: wann gibt dieser Schritt den nächsten
+                # frei? Siehe _ordered_step_gates.
+                "gate_mode": d.gate_mode or DEFAULT_GATE_MODE,
                 "custom": False,
                 # true = stammt aus dem typübergreifenden Workflow ("Alle Typen")
                 "shared": d.mediation_type == SHARED_MEDIATION_TYPE,
@@ -1670,6 +1832,7 @@ def get_phase_steps(
                 "result_released": bool(sc and sc.released),
                 "feedback_occasion": sc.feedback_occasion if sc else None,
                 "individual": True,
+                "gate_mode": DEFAULT_GATE_MODE,
                 "custom": True,
                 "shared": False,
             }
@@ -1868,6 +2031,13 @@ def save_note(
 
     if str(own_participant.id) != payload.participant_id:
         raise HTTPException(status_code=403, detail="Du kannst nur deine eigene Notiz speichern")
+
+    # Reihenfolge erzwingen: ein Schritt ist erst abgebbar, wenn die vorherigen
+    # Schritte derselben Phase ihre Sperre freigegeben haben. Ohne diese Prüfung
+    # ließe sich der gesperrte Schritt-Navigator per Direkt-API umgehen.
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if mediation:
+        _assert_step_reachable(db, mediation, own_participant, payload.phase, payload.step)
 
     existing = (
         db.query(MediationNote)

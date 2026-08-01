@@ -37,6 +37,8 @@ import {
   DESIGNER_PHASES,
   MEDIATION_TYPES,
   SHARED_MEDIATION_TYPE,
+  GATE_MODE_OPTIONS,
+  type GateMode,
   type MediationVariantDto,
   type PhaseStepDefaultDto,
   type StepBlockDto,
@@ -1083,6 +1085,45 @@ function StepPreview(props: StepPreviewProps) {
 }
 
 // Editor für die Sichtbarkeitsbedingung eines Schritts (Eskalation/Segmentierung).
+// Fortschritts-Sperre: wann gibt dieser Schritt den nächsten frei? Ohne sie
+// war der Schritt-Navigator der Teilnehmer frei anklickbar – man konnte Schritt
+// 5 öffnen, ohne Schritt 1 abgeschlossen zu haben.
+function GateModeEditor({
+  value,
+  onChange,
+}: {
+  value: GateMode | null | undefined;
+  onChange: (mode: GateMode) => void;
+}) {
+  const active: GateMode = value ?? "self";
+  const hint = GATE_MODE_OPTIONS.find((o) => o.value === active)?.hint ?? "";
+  return (
+    <div className="mb-4 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-semibold text-neutral-500">
+          <Icon name="lock" size={12} color="currentColor" /> Nächster Schritt öffnet
+        </span>
+        {GATE_MODE_OPTIONS.map((o) => (
+          <button
+            key={o.value}
+            onClick={() => onChange(o.value)}
+            title={o.hint}
+            className={cn(
+              "rounded-full border px-2.5 py-1 font-semibold transition",
+              active === o.value
+                ? "border-accent-500 bg-accent-50 text-accent-700"
+                : "border-neutral-200 text-neutral-500 hover:bg-neutral-50",
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1.5 leading-snug text-neutral-400">{hint}</p>
+    </div>
+  );
+}
+
 function VisibleIfEditor({
   cond,
   onChange,
@@ -1140,6 +1181,7 @@ function StepDesignerPanel({
   onMoveBlock,
   onChangeBlockConfig,
   onChangeVisibleIf,
+  onChangeGateMode,
   onAiFill,
   onClose,
   shared = false,
@@ -1161,6 +1203,7 @@ function StepDesignerPanel({
   onMoveBlock: (blockId: string, dir: -1 | 1) => void;
   onChangeBlockConfig: (blockId: string, patch: Record<string, unknown>) => void;
   onChangeVisibleIf: (cond: VisibleIf | null) => void;
+  onChangeGateMode: (mode: GateMode) => void;
   onAiFill: () => Promise<void>;
   onClose: () => void;
 }) {
@@ -1215,6 +1258,8 @@ function StepDesignerPanel({
           Formuliere die Inhalte entsprechend typneutral.
         </div>
       )}
+
+      <GateModeEditor value={step.gate_mode} onChange={onChangeGateMode} />
 
       <VisibleIfEditor cond={step.visible_if} onChange={onChangeVisibleIf} />
 
@@ -1643,6 +1688,19 @@ export function WorkflowManager() {
     [setEditableSteps],
   );
 
+  // Fortschritts-Sperre eines Schritts setzen (gibt den nächsten Schritt frei).
+  const changeGateMode = useCallback(
+    (id: number, mode: GateMode) => {
+      setEditableSteps((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, gate_mode: mode } : s)),
+      );
+      updatePhaseStepDefault(id, { gate_mode: mode }).catch(() =>
+        setError("Sperre konnte nicht gespeichert werden."),
+      );
+    },
+    [setEditableSteps],
+  );
+
   // KI-Design-Assistent: erzeugt aus einer freien Instruktion einen komplett
   // neuen Schritt (Titel + Blöcke) in der aktiven Phase und öffnet ihn.
   const createStepFromAi = useCallback(
@@ -2012,6 +2070,7 @@ export function WorkflowManager() {
               phaseTotal={PHASES.length}
               stepNumber={chain.findIndex((s) => s.id === designStep.id) + 1}
               onChangeVisibleIf={(cond) => changeVisibleIf(designStep.id, cond)}
+              onChangeGateMode={(mode) => changeGateMode(designStep.id, mode)}
               onAiFill={() =>
                 aiFillBlocks(designStep.id, designStep.title, !!designStep.shared)
               }

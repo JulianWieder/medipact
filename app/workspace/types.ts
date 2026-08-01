@@ -117,9 +117,37 @@ export interface PhaseStepDefaultDto {
   /** Fragebogen-Anlass — nur relevant wenn "feedback" in content_types. */
   feedback_occasion: "after_videocall" | "before_contract" | null;
   required_roles: string[] | null;
+  /**
+   * Fortschritts-Sperre: wann gibt dieser Schritt den nächsten frei?
+   * "self" (Standard) = die eigene Abgabe genügt, "all" = alle nötigen
+   * Parteien müssen abgegeben haben, "none" = sperrt nie (optionaler Schritt).
+   * Das Backend liefert nie null (NULL wird als "self" serialisiert).
+   */
+  gate_mode: GateMode;
   position: number;
   enabled: boolean;
 }
+
+/** Siehe PhaseStepDefaultDto.gate_mode. */
+export type GateMode = "self" | "all" | "none";
+
+export const GATE_MODE_OPTIONS: { value: GateMode; label: string; hint: string }[] = [
+  {
+    value: "self",
+    label: "Eigene Abgabe genügt",
+    hint: "Wer den Schritt abgeschlossen hat, arbeitet weiter – auch wenn die andere Seite noch tippt.",
+  },
+  {
+    value: "all",
+    label: "Auf alle warten",
+    hint: "Der nächste Schritt öffnet erst, wenn alle nötigen Parteien diesen Schritt abgeschlossen haben.",
+  },
+  {
+    value: "none",
+    label: "Nicht sperren",
+    hint: "Optionaler Schritt: er hält niemanden auf, auch wenn er offen bleibt.",
+  },
+];
 
 // ── Fallbezogener Inhalt "individueller" Schritte ─────────────────────────
 //

@@ -13,6 +13,11 @@ from app.database import Base
 # einem Mediationstyp).
 SHARED_MEDIATION_TYPE = "*"
 
+# Gültige Werte für PhaseStepDefault.gate_mode (Fortschritts-Sperre, siehe dort).
+# "self" ist der Standard und wird als NULL gespeichert.
+GATE_MODES = ("self", "all", "none")
+DEFAULT_GATE_MODE = "self"
+
 
 class PhaseStepDefault(Base):
     """
@@ -109,6 +114,17 @@ class PhaseStepDefault(Base):
     # Komma-separierte Rollenliste, z.B. "owner,other_party". NULL = Standard
     # (owner, initiator, other_party) – analog zu MediationStepRule.required_roles.
     required_roles = Column(String, nullable=True)
+    # ── Fortschritts-Sperre: wann gibt dieser Schritt den nächsten frei? ──────
+    # Ohne Sperre konnten Teilnehmer beliebig im Schritt-Navigator vorspringen,
+    # ohne einen Schritt abzuschließen. Gültige Werte (NULL = "self"):
+    #   "self" – Standard: sobald ICH abgegeben habe, darf ich weiterarbeiten,
+    #            auch während die andere Seite noch tippt.
+    #   "all"  – gemeinsamer Takt: erst wenn ALLE laut required_roles nötigen
+    #            Parteien abgegeben haben (z.B. vor einem gemeinsamen Termin).
+    #   "none" – sperrt nie; optionaler Schritt, der übersprungen werden darf.
+    # Unabhängig davon geht die PHASE erst weiter, wenn jeder Schritt von allen
+    # nötigen Parteien abgeschlossen ist (siehe PhaseNotesClient).
+    gate_mode = Column(String, nullable=True)
     position = Column(Integer, nullable=False, default=0)
     enabled = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))

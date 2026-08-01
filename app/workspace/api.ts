@@ -650,6 +650,7 @@ export async function updatePhaseStepDefault(
       | "contract_template"
       | "result_source_phase"
       | "feedback_occasion"
+      | "gate_mode"
     >
   >,
 ): Promise<PhaseStepDefaultDto> {

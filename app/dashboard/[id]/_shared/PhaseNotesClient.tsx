@@ -76,8 +76,21 @@ type PhaseStepFromAPI = {
   feedback_occasion?: "after_videocall" | "before_contract" | null;
   // Ergebnis-Schritte: true, sobald der Mediator den Inhalt freigegeben hat.
   result_released?: boolean | null;
+  // Fortschritts-Sperre aus dem Workflow Manager: wann gibt dieser Schritt den
+  // nächsten frei? "self" = eigene Abgabe genügt (Standard), "all" = alle
+  // nötigen Parteien müssen abgegeben haben, "none" = sperrt nie.
+  gate_mode?: GateMode | null;
   custom: boolean;
 };
+
+type GateMode = "self" | "all" | "none";
+
+// Rollen, für die die Reihenfolge nicht gilt: Mediator und Admin müssen den
+// Fall vorbereiten und prüfen können. "owner" ist bewusst NICHT dabei – der
+// Antragsteller ist eine Konfliktpartei. Muss zu _STEP_GATE_BYPASS_ROLES in
+// backend/app/routers/mediations.py passen, sonst sperrt die UI etwas, das das
+// Backend erlaubt (oder umgekehrt).
+const GATE_BYPASS_ROLES = ["mediator", "admin"];
 
 function toStepDetailFromAPI(s: PhaseStepFromAPI): StepDetail {
   return {
@@ -704,9 +717,40 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const allStepDetails = stepDetails;
-  const currentStep = allStepDetails[activeStepIndex];
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
   const currentParticipant = participants.find((p) => p.name === currentUserName);
+
+  // ── Fortschritts-Sperre ───────────────────────────────────────────────────
+  // Vorher war jeder Schritt jederzeit anklickbar; man konnte Schritt 5 öffnen,
+  // ohne Schritt 1 abgeschlossen zu haben. Jetzt gibt jeder Schritt den nächsten
+  // erst frei, wenn seine im Workflow Manager gesetzte Sperre erfüllt ist. Die
+  // gleiche Prüfung läuft im Backend (POST /notes -> 409); die UI-Sperre allein
+  // wäre per Direkt-API umgehbar.
+  const gatePassed = (stepKey: string) => {
+    const gate: GateMode = stepMeta[stepKey]?.gate_mode ?? "self";
+    if (gate === "none") return true;
+    const v = stepView[stepKey] ?? "input";
+    // "waiting" heißt: ich habe abgegeben, die andere Seite noch nicht.
+    return gate === "all" ? v === "reflection" : v === "waiting" || v === "reflection";
+  };
+  // Der erste Schritt, dessen Sperre noch zu ist, ist der letzte erreichbare.
+  const unlockedUntil = (() => {
+    for (let i = 0; i < allStepDetails.length; i++) {
+      if (!gatePassed(allStepDetails[i].key)) return i;
+    }
+    return allStepDetails.length - 1;
+  })();
+  const bypassesGate = currentParticipant
+    ? GATE_BYPASS_ROLES.includes(currentParticipant.role)
+    : false;
+  const isStepLocked = (idx: number) => !bypassesGate && idx > unlockedUntil;
+  // Angezeigt wird immer ein erreichbarer Schritt – auch wenn activeStepIndex
+  // von außen weiter vorn steht (neu eingefügter Schritt, Schritt-Löschung).
+  const stepIndex =
+    bypassesGate || activeStepIndex <= unlockedUntil
+      ? activeStepIndex
+      : Math.max(0, unlockedUntil);
+  const currentStep = allStepDetails[stepIndex];
 
   // Bezahl-Schritt aus dem Workflow holen: der Schritt der Einladungs-Phase, der
   // einen Block vom Typ "fall_freischaltung" enthält. Findet sich keiner, hat der
@@ -821,6 +865,11 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
         setStepStatus(newStatus);
         setStepView(newView);
         setInputText(Object.fromEntries(allDetails.map((s) => [s.key, ""])));
+        // Beim Öffnen dort landen, wo die Arbeit weitergeht – seit die Schritte
+        // der Reihe nach gesperrt sind, wäre ein Start auf Schritt 1 nur ein
+        // Umweg über bereits erledigte Schritte.
+        const firstOpen = allDetails.findIndex((s) => newView[s.key] !== "reflection");
+        setActiveStepIndex(firstOpen === -1 ? Math.max(0, allDetails.length - 1) : firstOpen);
       } finally {
         silentReload.current = false;
         setLoading(false);
@@ -976,7 +1025,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
   const view = currentStep ? (stepView[currentStep.key] ?? "input") : "input";
   const myItems = currentParticipant ? (items[currentStep?.key ?? ""]?.[currentParticipant.id] ?? []) : [];
-  const isLastStep = activeStepIndex === allStepDetails.length - 1;
+  const isLastStep = stepIndex === allStepDetails.length - 1;
   const allStepsReflected = allStepDetails.every((s) => stepView[s.key] === "reflection");
 
   // Ergebnis-Schritt (read-only): freigegebener Text + „gesehen"-Bestätigung.
@@ -1085,19 +1134,28 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
             <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-1">
               {allStepDetails.map((step, idx) => {
                 const sv = stepView[step.key] ?? "input";
-                const isActive = idx === activeStepIndex;
+                const isActive = idx === stepIndex;
                 const isDone = sv === "reflection";
                 const isCustom = step.key.startsWith("custom_");
+                const isLocked = isStepLocked(idx);
                 return (
                   <div key={step.key} className="relative flex shrink-0">
                     <button
                       type="button"
-                      onClick={() => setActiveStepIndex(idx)}
+                      onClick={() => { if (!isLocked) setActiveStepIndex(idx); }}
+                      disabled={isLocked}
+                      title={
+                        isLocked
+                          ? `Erst nach „${allStepDetails[unlockedUntil]?.title ?? "dem vorherigen Schritt"}"`
+                          : undefined
+                      }
                       className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                         isActive
                           ? "bg-accent-600 text-white shadow-sm"
                           : isDone
                           ? "bg-accent-100 text-accent-700"
+                          : isLocked
+                          ? "cursor-not-allowed bg-neutral-50 text-neutral-400"
                           : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                       } ${isCustom ? "pr-7" : ""}`}
                     >
@@ -1105,6 +1163,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
+                      ) : isLocked ? (
+                        <span className="flex h-5 w-5 items-center justify-center">
+                          <Icon name="lock" size={13} color="currentColor" />
+                        </span>
                       ) : (
                         <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-white/20" : "bg-neutral-200 text-neutral-500"}`}>{idx + 1}</span>
                       )}
@@ -1148,6 +1210,15 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 </button>
               )}
             </div>{/* end flex step-nav */}
+
+            {/* Warum sind Schritte grau? Ohne diesen Satz wirkt die Sperre wie
+                ein Fehler statt wie eine Regel. */}
+            {allStepDetails.length > 1 && unlockedUntil < allStepDetails.length - 1 && !bypassesGate && (
+              <p className="-mt-3 mb-5 text-xs text-neutral-400">
+                <Icon name="lock" size={12} color="currentColor" /> Die weiteren Schritte öffnen sich,
+                sobald dieser abgeschlossen ist.
+              </p>
+            )}
 
             {/* Modal: neuen Schritt hinzufügen */}
             {showAddStep && (
@@ -1271,7 +1342,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
               <div>
                 <div className="mb-2 flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-sm font-bold text-accent-700">
-                    {activeStepIndex + 1}
+                    {stepIndex + 1}
                   </div>
                   <h2 className="text-lg font-bold text-neutral-900">{currentStep.title}</h2>
                 </div>
@@ -1316,7 +1387,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     <div className="flex justify-end">
                       {myResultDone ? (
                         !isLastStep ? (
-                          <button type="button" onClick={() => setActiveStepIndex((i) => i + 1)} className="btn btn-primary">
+                          <button type="button" onClick={() => setActiveStepIndex(stepIndex + 1)} className="btn btn-primary">
                             Weiter
                           </button>
                         ) : (
@@ -1414,7 +1485,23 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
                 {/* Warte-Ansicht */}
                 {!isResultStep && view === "waiting" && stepStatus[currentStep.key] && (
-                  <WaitingView status={stepStatus[currentStep.key]} />
+                  <>
+                    <WaitingView status={stepStatus[currentStep.key]} />
+                    {/* Sperre „self": die eigene Abgabe genügt – weiterarbeiten,
+                        während die andere Seite noch tippt. Bei „all" bleibt der
+                        nächste Schritt zu und dieser Button erscheint nicht. */}
+                    {!isLastStep && gatePassed(currentStep.key) && (
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setActiveStepIndex(stepIndex + 1)}
+                          className="btn btn-primary"
+                        >
+                          Weiter →
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Reflexions-Ansicht */}
@@ -1429,7 +1516,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     isLastStep={isLastStep}
                     onNext={() => {
                       if (!isLastStep) {
-                        setActiveStepIndex((i) => i + 1);
+                        setActiveStepIndex(stepIndex + 1);
                       }
                     }}
                   />
