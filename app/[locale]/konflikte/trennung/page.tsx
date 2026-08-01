@@ -78,9 +78,9 @@ export default async function TrennungPage({
           { label: "Ratgeber: Wer muss aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
           { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
           { label: "Ratgeber: Sorgerecht und Umgang regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
-          { label: "Trennung mit 2 Kindern", href: "/cases/maria-thomas" },
-          { label: "Hohes Vermögen, komplexe Aufteilung", href: "/cases/peter-sarah" },
-          { label: "Nach 38 Jahren Ehe", href: "/cases/rolf-helga" },
+          { label: "Trennung mit 2 Kindern", href: "/cases/trennung-mit-kindern" },
+          { label: "Hohes Vermögen, komplexe Aufteilung", href: "/cases/trennung-vermoegen-aufteilen" },
+          { label: "Nach 38 Jahren Ehe", href: "/cases/trennung-nach-langer-ehe" },
         ]}
       />
     </>

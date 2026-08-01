@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Firmenerbe: Familie Weber | medipact",
   description:
     "Drei Kinder erben einen Metallbau-Betrieb mit 20 Mitarbeitern: Wie die Familie Weber per Mediation in 4 Monaten den Betrieb rettete – für €1.200 statt €38.000 Verfahrenskosten.",
-  path: "/cases/familie-weber",
+  path: "/cases/unternehmen-geerbt",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["familie-weber"]}
+      {...caseStudies["unternehmen-geerbt"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Erbschaft", href: "/konflikte/erbschaft" },
         { label: "Familie Weber" },
       ]}
       relatedCases={[
-        { label: "Anna & Klaus", href: "/cases/anna-klaus" },
-        { label: "Marie & Sophie", href: "/cases/marie-sophie" },
+        { label: "Anna & Klaus", href: "/cases/erbstreit-haus-geschwister" },
+        { label: "Marie & Sophie", href: "/cases/streit-ums-testament" },
       ]}
       faq={[
         {

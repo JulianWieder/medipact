@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Trennung mit Kindern: Maria & Thomas | medipact",
   description:
     "Trennung nach 12 Jahren Ehe, 2 Kinder: Wie Maria & Thomas mit Mediation in 5 Monaten Sorgerecht, Unterhalt und Haus fair geregelt haben – für €499 statt €52.000 Gerichtskosten.",
-  path: "/cases/maria-thomas",
+  path: "/cases/trennung-mit-kindern",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["maria-thomas"]}
+      {...caseStudies["trennung-mit-kindern"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
         { label: "Maria & Thomas" },
       ]}
       relatedCases={[
-        { label: "Alexa & David", href: "/cases/alexa-david" },
-        { label: "Peter & Sarah", href: "/cases/peter-sarah" },
+        { label: "Alexa & David", href: "/cases/trennung-patchwork-familie" },
+        { label: "Peter & Sarah", href: "/cases/trennung-vermoegen-aufteilen" },
       ]}
       faq={[
         {

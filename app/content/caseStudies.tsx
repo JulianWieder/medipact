@@ -74,8 +74,8 @@ export type CaseStudyData = {
 };
 
 export const caseStudies: Record<string, CaseStudyData> = {
-  "maria-thomas": {
-    slug: "maria-thomas",
+  "trennung-mit-kindern": {
+    slug: "trennung-mit-kindern",
     eyebrow: "Fallbeispiel",
     title: "Maria & Thomas",
     titleHighlight: "Trennung mit 2 Kindern",
@@ -282,8 +282,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "alexa-david": {
-    slug: "alexa-david",
+  "trennung-patchwork-familie": {
+    slug: "trennung-patchwork-familie",
     eyebrow: "Fallbeispiel",
     title: "Alexa & David",
     titleHighlight: "Mit neuem Partner & Stiefkind",
@@ -443,8 +443,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "peter-sarah": {
-    slug: "peter-sarah",
+  "trennung-vermoegen-aufteilen": {
+    slug: "trennung-vermoegen-aufteilen",
     eyebrow: "Fallbeispiel",
     title: "Peter & Sarah",
     titleHighlight: "Hohes Vermögen, komplexe Aufteilung",
@@ -606,8 +606,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "rolf-helga": {
-    slug: "rolf-helga",
+  "trennung-nach-langer-ehe": {
+    slug: "trennung-nach-langer-ehe",
     eyebrow: "Fallbeispiel",
     title: "Rolf & Helga",
     titleHighlight: "Nach 38 Jahren Ehe",
@@ -769,8 +769,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "carla-marco": {
-    slug: "carla-marco",
+  "trennung-gemeinsame-firma": {
+    slug: "trennung-gemeinsame-firma",
     eyebrow: "Fallbeispiel",
     title: "Carla & Marco",
     titleHighlight: "Mit Unternehmen",
@@ -925,8 +925,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "jens-katarina": {
-    slug: "jens-katarina",
+  "internationale-trennung": {
+    slug: "internationale-trennung",
     eyebrow: "Fallbeispiel",
     title: "Jens & Katarina",
     titleHighlight: "Internationale Trennung",
@@ -1094,8 +1094,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "anna-klaus": {
-    slug: "anna-klaus",
+  "erbstreit-haus-geschwister": {
+    slug: "erbstreit-haus-geschwister",
     eyebrow: "Erbschafts-Fallbeispiel",
     title: "Anna & Klaus",
     titleHighlight: "Geschwister-Streit um das Haus",
@@ -1245,8 +1245,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "marie-sophie": {
-    slug: "marie-sophie",
+  "streit-ums-testament": {
+    slug: "streit-ums-testament",
     eyebrow: "Erbschafts-Fallbeispiel",
     title: "Marie & Sophie",
     titleHighlight: "Testament-Konflikt",
@@ -1395,8 +1395,8 @@ export const caseStudies: Record<string, CaseStudyData> = {
     ctaLabel: "Mediation starten",
   },
 
-  "familie-weber": {
-    slug: "familie-weber",
+  "unternehmen-geerbt": {
+    slug: "unternehmen-geerbt",
     eyebrow: "Erbschafts-Fallbeispiel",
     title: "Familie Weber",
     titleHighlight: "Unternehmen erben – Betrieb retten oder verkaufen?",

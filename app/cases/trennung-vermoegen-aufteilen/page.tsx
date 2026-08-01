@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Scheidung mit Vermögen: Peter & Sarah | medipact",
   description:
     "Scheidung nach 20 Jahren mit Haus, Ersparnissen und Rentenpunkten: Wie Peter & Sarah per Mediation €1,1 Mio. fair aufteilten und €20.000 Steuern sparten – für €1.500 statt €45.000.",
-  path: "/cases/peter-sarah",
+  path: "/cases/trennung-vermoegen-aufteilen",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["peter-sarah"]}
+      {...caseStudies["trennung-vermoegen-aufteilen"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
         { label: "Peter & Sarah" },
       ]}
       relatedCases={[
-        { label: "Rolf & Helga", href: "/cases/rolf-helga" },
-        { label: "Jens & Katarina", href: "/cases/jens-katarina" },
+        { label: "Rolf & Helga", href: "/cases/trennung-nach-langer-ehe" },
+        { label: "Jens & Katarina", href: "/cases/internationale-trennung" },
       ]}
       faq={[
         {

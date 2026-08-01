@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Erbstreit ums Haus: Anna & Klaus | medipact",
   description:
     "Zwei Geschwister, ein geerbtes Haus: Wie Anna & Klaus per Mediation in 3 Monaten eine faire Lösung fanden – Anna behält das Haus, Klaus erhält €150.000, für €800 statt €20.000.",
-  path: "/cases/anna-klaus",
+  path: "/cases/erbstreit-haus-geschwister",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["anna-klaus"]}
+      {...caseStudies["erbstreit-haus-geschwister"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Erbschaft", href: "/konflikte/erbschaft" },
         { label: "Anna & Klaus" },
       ]}
       relatedCases={[
-        { label: "Marie & Sophie", href: "/cases/marie-sophie" },
-        { label: "Familie Weber", href: "/cases/familie-weber" },
+        { label: "Marie & Sophie", href: "/cases/streit-ums-testament" },
+        { label: "Familie Weber", href: "/cases/unternehmen-geerbt" },
       ]}
       faq={[
         {

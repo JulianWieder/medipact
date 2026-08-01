@@ -93,7 +93,7 @@ export const article: RatgeberArticle = {
     { label: "Pflichtteil: einigen statt klagen", href: "/ratgeber/pflichtteil-einfordern" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Erbkonflikte lösen mit medipact", href: "/konflikte/erbschaft" },
-    { label: "Fallbeispiel: Das Firmenerbe der Familie Weber", href: "/cases/familie-weber" },
+    { label: "Fallbeispiel: Das Firmenerbe der Familie Weber", href: "/cases/unternehmen-geerbt" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
   ],
 };

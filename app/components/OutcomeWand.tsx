@@ -7,14 +7,14 @@ import { caseStudies } from "@/app/content/caseStudies";
 // echten Kundenzitate, bis welche vorliegen (dann hier ersetzen).
 
 const WALL: { slug: string; label: string }[] = [
-  { slug: "maria-thomas", label: "Trennung mit Kindern" },
+  { slug: "trennung-mit-kindern", label: "Trennung mit Kindern" },
   { slug: "nachbarschaft-laerm", label: "Nachbarschaft · Lärm" },
   { slug: "gesellschafter-streit", label: "Gesellschafterstreit" },
-  { slug: "anna-klaus", label: "Erbschaft" },
-  { slug: "peter-sarah", label: "Trennung · Vermögen" },
+  { slug: "erbstreit-haus-geschwister", label: "Erbschaft" },
+  { slug: "trennung-vermoegen-aufteilen", label: "Trennung · Vermögen" },
   { slug: "team-konflikt", label: "Teamkonflikt" },
   { slug: "nachbarschaft-zaun", label: "Nachbarschaft · Grundstück" },
-  { slug: "familie-weber", label: "Erbschaft · Familie" },
+  { slug: "unternehmen-geerbt", label: "Erbschaft · Familie" },
   { slug: "b2b-projektstreit", label: "B2B-Projektstreit" },
 ];
 

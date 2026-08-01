@@ -23,42 +23,42 @@ type CaseCard = {
 
 const trennungCases: CaseCard[] = [
   {
-    slug: "maria-thomas",
+    slug: "trennung-mit-kindern",
     title: "Maria & Thomas",
     titleHighlight: "Trennung mit 2 Kindern",
     intro:
       "Verheiratet 12 Jahre, 2 Kinder. Mit Mediation: Lösung in 5 Monaten statt 3 Jahre Gericht.",
   },
   {
-    slug: "alexa-david",
+    slug: "trennung-patchwork-familie",
     title: "Alexa & David",
     titleHighlight: "Mit neuem Partner & Stiefkind",
     intro:
       "Neue Partnerschaft, neue Fragen: Wer macht was? Lösung in 4 Monaten ohne Gericht.",
   },
   {
-    slug: "peter-sarah",
+    slug: "trennung-vermoegen-aufteilen",
     title: "Peter & Sarah",
     titleHighlight: "Hohes Vermögen, komplexe Aufteilung",
     intro:
       "Haus, Ersparnisse, Rentenpunkte. Gericht kostet €45k+ — Mediation: €1.500, schneller, transparenter.",
   },
   {
-    slug: "rolf-helga",
+    slug: "trennung-nach-langer-ehe",
     title: "Rolf & Helga",
     titleHighlight: "Nach 38 Jahren Ehe",
     intro:
       "Beamten-Pension trifft geringe Rentenansprüche. Klarheit in 6 Monaten statt 2+ Jahre Verfahren.",
   },
   {
-    slug: "carla-marco",
+    slug: "trennung-gemeinsame-firma",
     title: "Carla & Marco",
     titleHighlight: "Mit Unternehmen",
     intro:
       "Gemeinsame GmbH, einer will raus. Lösung: Abfindung plus Fortbestand der Firma.",
   },
   {
-    slug: "jens-katarina",
+    slug: "internationale-trennung",
     title: "Jens & Katarina",
     titleHighlight: "Internationale Trennung",
     intro:
@@ -68,21 +68,21 @@ const trennungCases: CaseCard[] = [
 
 const erbschaftCases: CaseCard[] = [
   {
-    slug: "anna-klaus",
+    slug: "erbstreit-haus-geschwister",
     title: "Anna & Klaus",
     titleHighlight: "Geschwister-Streit um das Haus",
     intro:
       "Ein Haus, zwei Geschwister, zwei Vorstellungen. Fair gelöst in 3 Monaten statt Jahren Streit.",
   },
   {
-    slug: "marie-sophie",
+    slug: "streit-ums-testament",
     title: "Marie & Sophie",
     titleHighlight: "Testament-Konflikt",
     intro:
       "Ungleiche Erbteile, das Gefühl von Ungerechtigkeit. Mediation führt zu einer fairen, verständlichen Lösung.",
   },
   {
-    slug: "familie-weber",
+    slug: "unternehmen-geerbt",
     title: "Familie Weber",
     titleHighlight: "Unternehmen erben – retten oder verkaufen?",
     intro:

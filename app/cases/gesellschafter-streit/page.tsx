@@ -23,7 +23,7 @@ export default function Page() {
       relatedCases={[
         { label: "Teamkonflikt im Mittelstand", href: "/cases/team-konflikt" },
         { label: "ERP-Projektstreit", href: "/cases/b2b-projektstreit" },
-        { label: "Carla & Marco: Trennung mit GmbH", href: "/cases/carla-marco" },
+        { label: "Carla & Marco: Trennung mit GmbH", href: "/cases/trennung-gemeinsame-firma" },
       ]}
       faq={[
         {

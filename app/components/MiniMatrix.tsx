@@ -21,12 +21,12 @@ const rows: MatrixRow[] = [
       "Es gibt Unklarheiten oder erste Spannungen, aber ein Gespräch scheint noch möglich.",
     cells: [
       {
-        href: "/cases/alexa-david",
+        href: "/cases/trennung-patchwork-familie",
         title: "Neue Partner, offene Rollen",
         text: "Die Trennung steht fest — aber wer macht was, und wie funktioniert die Patchwork-Familie für alle?",
       },
       {
-        href: "/cases/anna-klaus",
+        href: "/cases/erbstreit-haus-geschwister",
         title: "Wer übernimmt das Elternhaus?",
         text: "Zwei Geschwister, ein geerbtes Haus, zwei völlig unterschiedliche Vorstellungen — noch ist nichts eskaliert.",
       },
@@ -43,12 +43,12 @@ const rows: MatrixRow[] = [
       "Man redet zwar noch, aber oft aneinander vorbei. Positionen werden fester.",
     cells: [
       {
-        href: "/cases/peter-sarah",
+        href: "/cases/trennung-vermoegen-aufteilen",
         title: "Streit ums Vermögen",
         text: "Haus, Ersparnisse, Rentenpunkte: Finanzielle Fragen blockieren eine faire Lösung nach 20 Jahren Ehe.",
       },
       {
-        href: "/cases/familie-weber",
+        href: "/cases/unternehmen-geerbt",
         title: "Betrieb retten oder verkaufen?",
         text: "Drei Erben, ein Unternehmen, verhärtete Fronten — ohne Einigung droht der Verkauf.",
       },
@@ -65,12 +65,12 @@ const rows: MatrixRow[] = [
       "Gespräche werden vermieden oder laufen nur noch über Dritte.",
     cells: [
       {
-        href: "/cases/maria-thomas",
+        href: "/cases/trennung-mit-kindern",
         title: "Es wird nicht mehr geredet",
         text: "Die Fronten sind verhärtet, der Gang vor Gericht scheint unausweichlich — 2 Kinder mittendrin.",
       },
       {
-        href: "/cases/marie-sophie",
+        href: "/cases/streit-ums-testament",
         title: "Der Erbstreit steht vor Gericht",
         text: "Ein ungleiches Testament, verletzte Gefühle — die Schwestern bereiten rechtliche Schritte vor.",
       },

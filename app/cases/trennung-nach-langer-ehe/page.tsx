@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Scheidung nach 38 Jahren: Rolf & Helga | medipact",
   description:
     "Späte Scheidung mit Pension und ungleicher Rente: Wie Rolf & Helga per Mediation Altersvorsorge und Haus in 6 Monaten fair regelten – für €800 statt €26.500 Verfahrenskosten.",
-  path: "/cases/rolf-helga",
+  path: "/cases/trennung-nach-langer-ehe",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["rolf-helga"]}
+      {...caseStudies["trennung-nach-langer-ehe"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
         { label: "Rolf & Helga" },
       ]}
       relatedCases={[
-        { label: "Peter & Sarah", href: "/cases/peter-sarah" },
-        { label: "Carla & Marco", href: "/cases/carla-marco" },
+        { label: "Peter & Sarah", href: "/cases/trennung-vermoegen-aufteilen" },
+        { label: "Carla & Marco", href: "/cases/trennung-gemeinsame-firma" },
       ]}
       faq={[
         {

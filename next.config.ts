@@ -59,6 +59,54 @@ const nextConfig: NextConfig = {
         destination: '/ratgeber/nachbarschaftsstreit-was-tun',
         permanent: true,
       },
+      // 01.08.2026 – Fallbeispiel-URLs von Namen auf Problem/Lösung umgestellt.
+      // "maria-thomas" sagt niemandem etwas, "trennung-mit-kindern" ist das,
+      // wonach gesucht wird.
+      {
+        source: '/cases/maria-thomas',
+        destination: '/cases/trennung-mit-kindern',
+        permanent: true,
+      },
+      {
+        source: '/cases/alexa-david',
+        destination: '/cases/trennung-patchwork-familie',
+        permanent: true,
+      },
+      {
+        source: '/cases/peter-sarah',
+        destination: '/cases/trennung-vermoegen-aufteilen',
+        permanent: true,
+      },
+      {
+        source: '/cases/rolf-helga',
+        destination: '/cases/trennung-nach-langer-ehe',
+        permanent: true,
+      },
+      {
+        source: '/cases/carla-marco',
+        destination: '/cases/trennung-gemeinsame-firma',
+        permanent: true,
+      },
+      {
+        source: '/cases/jens-katarina',
+        destination: '/cases/internationale-trennung',
+        permanent: true,
+      },
+      {
+        source: '/cases/anna-klaus',
+        destination: '/cases/erbstreit-haus-geschwister',
+        permanent: true,
+      },
+      {
+        source: '/cases/marie-sophie',
+        destination: '/cases/streit-ums-testament',
+        permanent: true,
+      },
+      {
+        source: '/cases/familie-weber',
+        destination: '/cases/unternehmen-geerbt',
+        permanent: true,
+      },
     ];
   },
 

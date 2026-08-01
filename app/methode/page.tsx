@@ -261,13 +261,13 @@ const odrTypes = [
 
 const exampleCases = [
   {
-    href: "/cases/maria-thomas",
+    href: "/cases/trennung-mit-kindern",
     eyebrow: "Trennung mit Kindern",
     title: "Maria & Thomas",
     text: "12 Jahre verheiratet, 2 Kinder. Lösung in 5 Monaten statt 3 Jahre Gericht.",
   },
   {
-    href: "/cases/rolf-helga",
+    href: "/cases/trennung-nach-langer-ehe",
     eyebrow: "Scheidung nach 38 Jahren",
     title: "Rolf & Helga",
     text: "Beamten-Pension trifft geringe Rente. Klarheit in 6 Monaten statt 2+ Jahre Verfahren.",

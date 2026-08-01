@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel Testament-Konflikt: Marie & Sophie | medipact",
   description:
     "Ungleiches Testament, verletzte Gefühle: Wie Marie & Sophie per Mediation in 3 Monaten eine faire Lösung fanden, die Pflegeleistung anerkennt – für €800 statt €28.000 Prozesskosten.",
-  path: "/cases/marie-sophie",
+  path: "/cases/streit-ums-testament",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["marie-sophie"]}
+      {...caseStudies["streit-ums-testament"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Erbschaft", href: "/konflikte/erbschaft" },
         { label: "Marie & Sophie" },
       ]}
       relatedCases={[
-        { label: "Anna & Klaus", href: "/cases/anna-klaus" },
-        { label: "Familie Weber", href: "/cases/familie-weber" },
+        { label: "Anna & Klaus", href: "/cases/erbstreit-haus-geschwister" },
+        { label: "Familie Weber", href: "/cases/unternehmen-geerbt" },
       ]}
       faq={[
         {

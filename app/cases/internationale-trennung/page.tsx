@@ -7,22 +7,22 @@ export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiel internationale Trennung: Jens & Katarina | medipact",
   description:
     "Trennung über Ländergrenzen (Deutschland/Schweiz) mit Kind: Wie Jens & Katarina per Mediation Wohnort, Umgang und Vermögen in 9 Monaten regelten – für €1.200 statt €60.000.",
-  path: "/cases/jens-katarina",
+  path: "/cases/internationale-trennung",
   type: "article",
 });
 
 export default function Page() {
   return (
     <CaseStudyTemplate
-      {...caseStudies["jens-katarina"]}
+      {...caseStudies["internationale-trennung"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
         { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
         { label: "Jens & Katarina" },
       ]}
       relatedCases={[
-        { label: "Alexa & David", href: "/cases/alexa-david" },
-        { label: "Rolf & Helga", href: "/cases/rolf-helga" },
+        { label: "Alexa & David", href: "/cases/trennung-patchwork-familie" },
+        { label: "Rolf & Helga", href: "/cases/trennung-nach-langer-ehe" },
       ]}
       faq={[
         {
