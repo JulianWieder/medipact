@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = {
   mediationId: string | number;
@@ -223,7 +224,7 @@ export default function InviteVideoRecorder({
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {(status === "idle" || status === "error") && (
             <button type="button" onClick={startRecording} className="btn btn-secondary">
-              🎥 Aufnahme starten
+              <Icon name="video" color="currentColor" /> Aufnahme starten
             </button>
           )}
 

@@ -15,6 +15,7 @@ import { MandantenManager } from "./components/MandantenManager";
 import { FirmOnboardingWizard, FirmOnboardingChecklist } from "./components/FirmOnboarding";
 import { cn } from "./ui";
 import { fetchUserRole } from "./api";
+import Icon from "@/app/components/ui/Icon";
 
 // ── Mediator-Qualitätsleitfaden ────────────────────────────────────────────
 const LEITFADEN_SECTIONS = [
@@ -224,7 +225,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         return (
           <div className="flex h-full items-center justify-center p-8">
             <div className="text-center">
-              <div className="text-4xl mb-3">⚖</div>
+              <div className="mb-3"><Icon name="scale" size={36} /></div>
               <p className="text-sm text-neutral-400">Keinen Fall ausgewählt.</p>
               <button
                 onClick={() => setTab("liste")}
@@ -250,7 +251,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
         return (
           <div className="flex h-full items-center justify-center p-8">
             <div className="text-center">
-              <div className="text-4xl mb-3">👥</div>
+              <div className="mb-3"><Icon name="users" size={36} /></div>
               <p className="text-sm text-neutral-400">Kein Benutzer ausgewählt.</p>
               <button
                 onClick={() => setTab("liste")}
@@ -460,7 +461,7 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
           ) : (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center">
-                <div className="mb-3 text-4xl">🛡</div>
+                <div className="mb-3"><Icon name="shield" size={36} /></div>
                 <p className="text-sm font-semibold text-neutral-700">Kein Zugriff</p>
                 <p className="mt-1 text-sm text-neutral-400">
                   Der Admin-Bereich ist nur für Administratoren zugänglich.

@@ -515,9 +515,10 @@ export function makeBlock(type: string): StepBlock {
 //
 // Für Bestands-/Testschritte, die noch keine `blocks` haben: aus den alten
 // content_types plus den Einzelfeldern eine äquivalente Block-Liste ableiten,
-// damit sie im neuen Designer sofort editierbar sind. Reihenfolge: zuerst der
-// Anleitungstext (description) als Textausgabe, dann die content_types in ihrer
-// gespeicherten Reihenfolge.
+// damit sie im neuen Designer sofort editierbar sind, in ihrer gespeicherten
+// Reihenfolge. Die description wird bewusst NICHT als Textausgabe übernommen:
+// Teilnehmer-Ansicht (PhaseNotesClient) und Vorschau rendern sie ohnehin über
+// den Blöcken — als Block erschiene sie doppelt.
 export interface LegacyStepFields {
   description?: string | null;
   placeholder?: string | null;
@@ -535,9 +536,6 @@ export function deriveBlocksFromLegacy(step: LegacyStepFields): StepBlock[] {
   const push = (type: string, config: Record<string, unknown>) =>
     blocks.push({ id: newBlockId(), type, config, visible_if: null });
 
-  if (step.description && step.description.trim()) {
-    push("textausgabe", { text: step.description });
-  }
   for (const t of step.content_types ?? []) {
     switch (t) {
       case "text":

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -63,7 +64,7 @@ function VerifyEmailContent() {
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
-            <div className="mb-4 text-5xl">⚠️</div>
+            <div className="mb-4"><Icon name="warning" size={44} color="#B45309" /></div>
             <h1 className="text-2xl font-black text-amber-900 mb-3">
               Kein Token gefunden
             </h1>
@@ -89,7 +90,7 @@ function VerifyEmailContent() {
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
           <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-            <div className="mb-4 text-5xl">❌</div>
+            <div className="mb-4"><Icon name="x-circle" size={44} color="#B91C1C" /></div>
             <h1 className="text-2xl font-black text-red-900 mb-3">
               Bestätigung fehlgeschlagen
             </h1>
@@ -121,7 +122,7 @@ function VerifyEmailContent() {
     <main className="min-h-screen bg-white pt-[73px]">
       <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
         <div className="rounded-2xl border border-accent-200 bg-accent-50 p-8 text-center">
-          <div className="mb-4 text-5xl">✅</div>
+          <div className="mb-4"><Icon name="check-circle" size={44} /></div>
           <h1 className="text-2xl font-black text-accent-900 mb-3">
             E-Mail bestätigt!
           </h1>

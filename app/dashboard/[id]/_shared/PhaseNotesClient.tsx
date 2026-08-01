@@ -7,6 +7,7 @@ import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from 
 import StepContentBlocks from "./StepContentBlocks";
 import StepBlocks from "./StepBlocks";
 import type { StepBlockDto } from "@/app/workspace/types";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = {
   mediationId: string;
@@ -1181,7 +1182,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                           onClick={() => { setNewStepTitle(tpl.title); setNewStepDesc(tpl.desc); }}
                           className={`flex items-start gap-2 rounded-xl border p-3 text-left text-sm transition hover:border-accent-400 hover:bg-accent-50 ${newStepTitle === tpl.title ? "border-accent-500 bg-accent-50" : "border-neutral-200 bg-white"}`}
                         >
-                          <span className="text-base leading-none mt-0.5">{tpl.emoji}</span>
+                          <span className="leading-none mt-0.5"><Icon name={tpl.emoji} size={16} /></span>
                           <span className="font-medium text-neutral-800">{tpl.title}</span>
                         </button>
                       ))}

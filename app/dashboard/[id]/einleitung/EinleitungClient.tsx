@@ -1538,7 +1538,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5">{item.emoji}</span>
+                <span className="mt-0.5"><Icon name={item.emoji} size={24} /></span>
                 <div>
                   <p className="font-semibold text-neutral-900 text-sm">{item.title}</p>
                   <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">{item.desc}</p>
@@ -1700,7 +1700,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                           : "hover:bg-neutral-100"
                         }`}
                     >
-                      <span className="text-2xl">{item.emoji}</span>
+                      <span><Icon name={item.emoji} size={24} color="currentColor" /></span>
                       <span className="text-[10px] text-neutral-500">{item.label}</span>
                     </button>
                   ))}
@@ -2085,7 +2085,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
               tone === "violet" ? "bg-violet-100 text-violet-700" : "bg-accent-100 text-accent-700"
             }`}
           >
-            {icon}
+            <Icon name={icon} color="currentColor" size={16} />
           </div>
           <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
         </div>
@@ -2372,7 +2372,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   className="text-xs text-neutral-300 hover:text-neutral-500 transition disabled:opacity-50"
                   title="Nur für Tests: Aktuellen Schritt überspringen"
                 >
-                  ⚡ Test: Schritt überspringen
+                  <Icon name="bolt" size={12} color="currentColor" /> Test: Schritt überspringen
                 </button>
                 <button
                   type="button"
@@ -2381,7 +2381,7 @@ export default function EinleitungClient({ mediationId, currentUserName }: Props
                   className="text-xs text-neutral-300 hover:text-neutral-500 transition disabled:opacity-50"
                   title="Nur für Tests: Alle Schritte überspringen und direkt zu Phase 2"
                 >
-                  {advancing ? "…" : "⚡ Test: Phase überspringen"}
+                  {advancing ? "…" : <><Icon name="bolt" size={12} color="currentColor" /> Test: Phase überspringen</>}
                 </button>
               </div>
             )}

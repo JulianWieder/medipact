@@ -659,17 +659,14 @@ def create_invite(
 ):
     invite_limiter.check(request)
 
-    # Konflikt-Logbücher (mode="logbuch") sind bewusst privat: KEINE
-    # Gegenseiten-Kommunikation. Erst in eine Mediation umwandeln
-    # (POST /mediations/{id}/logbuch/convert), dann einladen.
-    if getattr(mediation, "mode", "mediation") == "logbuch":
-        raise HTTPException(
-            status_code=409,
-            detail=(
-                "Ein Konflikt-Logbuch hat keine Gegenseite. Wandeln Sie das "
-                "Logbuch zuerst in eine Mediation um, um jemanden einzuladen."
-            ),
-        )
+    # Konflikt-Logbücher (mode="logbuch") waren bewusst privat (keine
+    # Gegenseiten-Kommunikation). Seit dem Betreuungskalender (Migration
+    # d2e3f4a5b6c7) sind Einladungen erlaubt, damit z. B. Mama den Kalender
+    # mit Papa teilen und Betreuungszeiten tauschen kann. Der Schutz bleibt
+    # über die Sichtbarkeit: Eingeladene sehen NUR Inhalte mit
+    # visibility="shared" – Einträge/Regeln/Termine sind standardmäßig
+    # "personal" und private Journal-Einträge nie sichtbar (routers/logbuch
+    # _visible_to bzw. betreuung._visible).
 
     token = create_invite_token()
 

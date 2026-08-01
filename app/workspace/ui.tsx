@@ -5,6 +5,7 @@
 import React from "react";
 import { STATUS_CONFIG, TYPE_LABEL, TYPE_COLOR, ROLE_LABEL, INVOICE_STATUS_CONFIG } from "./types";
 import { OutlinePill, ThinProgressBar, StatusDot, Skeleton } from "@/app/components/ui/premium";
+import Icon from "@/app/components/ui/Icon";
 
 // ── Utilities ─────────────────────────────────────────────────────────────
 
@@ -290,7 +291,7 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/50 px-6 py-12 text-center">
-      {icon && <div className="mb-3 text-3xl text-neutral-300">{icon}</div>}
+      {icon && <div className="mb-3 text-neutral-300"><Icon name={icon} size={34} color="currentColor" strokeWidth={1.4} /></div>}
       <p className="text-sm text-neutral-400">{text}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>

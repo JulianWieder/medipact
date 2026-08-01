@@ -266,6 +266,100 @@ def upsert_workflow_rule(
     }
 
 
+@router.delete("/{mediation_id}")
+def delete_logbuch(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Löscht ein Konflikt-Logbuch mitsamt Anhang – NUR für mode="logbuch".
+
+    Mediationen (mode="mediation") sind bewusst nicht löschbar (Verfahrens-
+    Dokumentation, Rechnungen, Zahlungen). Logbücher dagegen sind private
+    Notizbücher; ohne diesen Endpunkt sammelten sich Testbücher unbegrenzt an.
+    Nur die Eigentümer:in darf löschen."""
+    participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not participant:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    if (participant.role or "").lower() not in ("owner", "admin", "initiator"):
+        raise HTTPException(
+            status_code=403, detail="Nur die Eigentümer:in kann das Logbuch löschen."
+        )
+    mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+    if not mediation:
+        raise HTTPException(status_code=404, detail="Mediation not found")
+    if mediation.mode != "logbuch":
+        raise HTTPException(
+            status_code=409,
+            detail="Nur Konflikt-Logbücher können gelöscht werden – Mediationen nicht.",
+        )
+
+    from app.models.invite_meet_recording import InviteMeetRecording
+    from app.models.mediation_appointment import MediationAppointment
+    from app.models.mediation_care_rule import MediationCareRule
+    from app.models.mediation_care_time import MediationCareTime
+    from app.models.mediation_chat_message import MediationChatMessage
+    from app.models.mediation_log_entry import MediationLogEntry
+    from app.models.mediation_log_upload import MediationLogUpload
+    from app.routers.logbuch import _UPLOAD_DIR
+
+    # Upload-Dateien vom Datenträger entfernen (Tokens tragen das lb-Präfix).
+    uploads = (
+        db.query(MediationLogUpload)
+        .filter(MediationLogUpload.mediation_id == mediation_id)
+        .all()
+    )
+    for up in uploads:
+        try:
+            path = _UPLOAD_DIR / up.token
+            if path.is_file():
+                path.unlink()
+        except OSError:
+            pass  # Datei fehlt/gesperrt – DB-Aufräumen geht trotzdem weiter.
+
+    # Abhängige Zeilen zuerst (SQLite erzwingt FKs nicht, Ordnung halten wir
+    # trotzdem ein); Notes/Reactions können über den verknüpften Modus existieren.
+    note_ids = [
+        n.id
+        for n in db.query(MediationNote)
+        .filter(MediationNote.mediation_id == mediation_id)
+        .all()
+    ]
+    if note_ids:
+        db.query(NoteReaction).filter(NoteReaction.note_id.in_(note_ids)).delete(
+            synchronize_session=False
+        )
+    for model in (
+        MediationLogUpload,
+        MediationLogEntry,
+        MediationCareTime,
+        MediationCareRule,
+        MediationChatMessage,
+        MediationBlockResponse,
+        MediationNote,
+        MediationAppointment,
+        InviteMeetRecording,
+        MediationInvite,
+        MediationStepRule,
+        MediationCustomStep,
+        MediationStepContent,
+        MediationParticipant,
+    ):
+        db.query(model).filter(model.mediation_id == mediation_id).delete(
+            synchronize_session=False
+        )
+    db.delete(mediation)
+    db.commit()
+    return {"ok": True, "deleted_id": mediation_id}
+
+
 @router.delete("/{mediation_id}/workflow-rules")
 def delete_workflow_rule(
     mediation_id: int,
@@ -435,6 +529,35 @@ def create_mediation(
     # KEIN Standard-Mediator (das Logbuch ist ein privates Gedächtnisprotokoll).
     # Gegenseiten-Einladungen sind für Logbuch-Fälle geblockt (invites-Router).
     if (mediation.mode or "mediation").lower() == "logbuch":
+        # Ein-Buch-Prinzip (Umbau 2026-08-01): Pro Nutzer:in existiert genau
+        # EIN Konflikt-Logbuch – die Bereiche hängen an den Einträgen
+        # (mediation_log_entries.area). Existiert schon ein Buch, geben wir es
+        # zurück statt ein Duplikat anzulegen (vorher sammelten sich beim
+        # wiederholten Anlegen identische Bücher an, ohne Lösch-Möglichkeit).
+        existing = (
+            db.query(Mediation)
+            .join(
+                MediationParticipant,
+                MediationParticipant.mediation_id == Mediation.id,
+            )
+            .filter(
+                Mediation.mode == "logbuch",
+                MediationParticipant.user_id == user.id,
+                MediationParticipant.role.in_(["owner", "admin", "initiator"]),
+            )
+            .order_by(Mediation.id.asc())
+            .first()
+        )
+        if existing:
+            return {
+                "mediation_id": existing.id,
+                "id": existing.id,
+                "title": existing.title,
+                "mediation_type": existing.mediation_type,
+                "mode": existing.mode,
+                "status": existing.status,
+                "existing": True,
+            }
         db_mediation = Mediation(
             title=mediation.title or "Mein Konflikt-Logbuch",
             mediation_type=mediation.mediation_type,

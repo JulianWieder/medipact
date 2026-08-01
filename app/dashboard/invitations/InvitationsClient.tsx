@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { encodeId } from "@/lib/ids";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = {
   token: string;
@@ -92,7 +93,7 @@ export default function InvitationsClient({ token }: Props) {
             {recordingUri ? (
               // Meet-Aufnahme: liegt in Google Drive, öffnet sich in neuem Tab.
               <div className="mt-8 rounded-2xl border border-neutral-200 bg-neutral-50 p-8 text-center">
-                <p className="text-4xl">{messageKind === "audio" ? "🎙️" : "🎥"}</p>
+                <p><Icon name={messageKind === "audio" ? "mic" : "video"} size={36} /></p>
                 <p className="mt-3 text-neutral-600">
                   Die {messageKind === "audio" ? "Audio-Botschaft" : "Video-Botschaft"} wurde über
                   Google Meet aufgenommen und wird bei Google gespeichert.

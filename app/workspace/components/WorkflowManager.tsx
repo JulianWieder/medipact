@@ -334,7 +334,7 @@ function MeetLinkButton({ onLink, summary }: { onLink: (url: string) => void; su
         disabled={loading}
         className="inline-flex items-center gap-1 rounded-md border border-accent-200 bg-accent-50 px-2 py-1 text-[11px] font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
       >
-        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
+        {loading ? "Erzeuge Meet-Raum…" : <><Icon name="video" size={13} color="currentColor" /> Google-Meet-Link erzeugen</>}
       </button>
       {error && <p className="mt-1 text-[11px] font-semibold text-red-600">{error}</p>}
     </div>
@@ -716,7 +716,7 @@ function BlockConfigEditor({
             className={INPUT_CLASS}
           />
           <p className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] text-slate-600">
-            🔒 Sichtbar nur für den Mediator – die Gegenseite sieht diese Eingabe nicht.
+            <Icon name="lock" size={12} color="currentColor" /> Sichtbar nur für den Mediator – die Gegenseite sieht diese Eingabe nicht.
           </p>
         </>
       );
@@ -1104,7 +1104,7 @@ function VisibleIfEditor({
     "w-36 rounded-md border border-neutral-200 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400";
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs">
-      <span className="font-semibold text-neutral-500">👁 Sichtbar wenn Flag</span>
+      <span className="font-semibold text-neutral-500"><Icon name="eye" size={12} color="currentColor" /> Sichtbar wenn Flag</span>
       <input
         value={flag}
         onChange={(e) => upd(e.target.value, eq)}
@@ -1196,7 +1196,7 @@ function StepDesignerPanel({
             className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100 disabled:opacity-50"
             title="Blöcke für diesen Schritt per KI vorschlagen (ersetzt die aktuellen Blöcke)"
           >
-            {aiLoading ? "KI erzeugt …" : "✨ Per KI vorbefüllen"}
+            {aiLoading ? "KI erzeugt …" : <><Icon name="sparkles" size={12} color="currentColor" /> Per KI vorbefüllen</>}
           </button>
           <button
             onClick={onClose}
@@ -1321,7 +1321,7 @@ function StepDesignerPanel({
 
       <details className="mt-5 rounded-xl border border-neutral-200 bg-white">
         <summary className="cursor-pointer px-4 py-2.5 text-sm font-semibold text-neutral-700">
-          🤖 System-KI-Prompts bearbeiten (global)
+          <Icon name="bot" size={13} color="currentColor" /> System-KI-Prompts bearbeiten (global)
         </summary>
         <div className="border-t border-neutral-100 p-2">
           <AiPromptsEditor />
@@ -1364,7 +1364,7 @@ function DesignChat({
   return (
     <div className="mb-6 rounded-2xl border border-fuchsia-200 bg-fuchsia-50/40 p-4">
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-sm font-semibold text-fuchsia-800">✨ KI-Design-Assistent</span>
+        <span className="text-sm font-semibold text-fuchsia-800"><Icon name="sparkles" size={13} color="currentColor" /> KI-Design-Assistent</span>
         <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-700">
           Phase: {phaseLabel}
         </span>

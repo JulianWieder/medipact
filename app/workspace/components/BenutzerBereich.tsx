@@ -24,6 +24,7 @@ import {
   createOrgMember,
 } from "../api";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
+import Icon from "@/app/components/ui/Icon";
 
 // ── Rollen-Konstanten (Fallback, wenn GET /auth/roles nicht erreichbar) ──────
 
@@ -545,7 +546,7 @@ export function BenutzerDetail({
                   {c.mediator_name && (
                     <>
                       <span className="text-neutral-300">·</span>
-                      <span className="text-accent-600">⚖ {c.mediator_name}</span>
+                      <span className="text-accent-600"><Icon name="scale" size={12} color="currentColor" /> {c.mediator_name}</span>
                     </>
                   )}
                 </div>

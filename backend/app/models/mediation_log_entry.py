@@ -35,6 +35,12 @@ class MediationLogEntry(Base):
     )
     # Art des Eintrags: vorkommnis | gedanke | gespraech | email | whatsapp | telefonat
     entry_type = Column(String, nullable=False, default="vorkommnis")
+    # Ein-Buch-Umbau (e3f4a5b6c7d8): Der Bereich (mediation_type-Werte wie
+    # "trennung", "erbschaft" …) hängt jetzt am EINTRAG, nicht mehr am Buch –
+    # ein Nutzer hat genau EIN Konflikt-Logbuch, die Einträge darin sind nach
+    # Bereich getaggt und filterbar. NULL/Altbestand fällt beim Serialisieren
+    # auf mediation.mediation_type zurück.
+    area = Column(String, nullable=True, index=True)
     # Wann das dokumentierte Ereignis stattgefunden hat (nicht: wann erfasst).
     occurred_at = Column(DateTime, nullable=True)
     title = Column(String, nullable=True)

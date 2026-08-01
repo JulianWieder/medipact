@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StepBlockDto } from "@/app/workspace/types";
+import Icon from "@/app/components/ui/Icon";
 import FallFreischaltungBlock from "./FallFreischaltungBlock";
 import {
   fetchBlockResponses,
@@ -377,7 +378,7 @@ export default function StepBlocks({
       case "video_aufnahme":
         return (
           <div key={block.id} className="rounded-2xl border border-orange-200 bg-orange-50/60 p-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-600">⏺ Video aufnehmen<SavedHint id={block.id} /></p>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-600"><Icon name="record" size={12} color="currentColor" /> Video aufnehmen<SavedHint id={block.id} /></p>
             {cfgStr(c, "prompt") && <p className="mb-2 text-sm text-neutral-700">{cfgStr(c, "prompt")}</p>}
             <p className="mb-2 text-[11px] text-orange-700">Aufnahme-Funktion folgt – bis dahin kannst du deine Botschaft schriftlich festhalten.</p>
             <textarea value={str} onChange={(e) => setVal(block, e.target.value)} placeholder="Deine Botschaft / Transkript …" rows={2} className="w-full rounded-xl border border-orange-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-400" />
@@ -386,7 +387,7 @@ export default function StepBlocks({
       case "vertrauliche_notiz":
         return (
           <div key={block.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">🔒 Nur für den Mediator sichtbar<SavedHint id={block.id} /></p>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500"><Icon name="lock" size={12} color="currentColor" /> Nur für den Mediator sichtbar<SavedHint id={block.id} /></p>
             {cfgStr(c, "prompt") && <p className="mb-2 text-sm text-neutral-700">{cfgStr(c, "prompt")}</p>}
             <textarea value={str} onChange={(e) => setVal(block, e.target.value)} placeholder="Vertrauliche Notiz …" rows={2} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400" />
           </div>
@@ -522,7 +523,7 @@ export default function StepBlocks({
         return (
           <div key={block.id} className="rounded-2xl border border-neutral-200 p-4">
             <p className="mb-2 text-sm text-neutral-600">{cfgStr(c, "statement") || "Ich bestätige die Angaben."}<SavedHint id={block.id} /></p>
-            <input value={name} onChange={(e) => setVal(block, { name: e.target.value, at: new Date().toISOString() })} placeholder="✍ Vollständigen Namen eingeben" className="w-full rounded-lg border-b-2 border-neutral-300 px-2 py-1.5 font-serif text-lg italic text-neutral-800 focus:border-accent-400 focus:outline-none" />
+            <input value={name} onChange={(e) => setVal(block, { name: e.target.value, at: new Date().toISOString() })} placeholder="Vollständigen Namen eingeben" className="w-full rounded-lg border-b-2 border-neutral-300 px-2 py-1.5 font-serif text-lg italic text-neutral-800 focus:border-accent-400 focus:outline-none" />
           </div>
         );
       }
@@ -533,12 +534,12 @@ export default function StepBlocks({
             {cfgStr(c, "prompt") && <p className="mb-2 text-sm text-neutral-700">{cfgStr(c, "prompt")}</p>}
             {file?.url ? (
               <div className="mb-2 flex items-center gap-2 text-sm">
-                <a href={file.url} target="_blank" rel="noreferrer" className="font-semibold text-indigo-700 underline break-all">📎 {file.name || "Datei"}</a>
+                <a href={file.url} target="_blank" rel="noreferrer" className="font-semibold text-indigo-700 underline break-all"><Icon name="paperclip" color="currentColor" /> {file.name || "Datei"}</a>
                 <span className="text-emerald-600">✓</span>
               </div>
             ) : null}
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50">
-              {uploading[block.id] ? "Lädt hoch …" : file?.url ? "Andere Datei wählen" : "📎 Datei auswählen"}
+              {uploading[block.id] ? "Lädt hoch …" : file?.url ? "Andere Datei wählen" : <><Icon name="paperclip" color="currentColor" /> Datei auswählen</>}
               <input type="file" accept={cfgStr(c, "accept") || undefined} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(block, f); }} />
             </label>
           </div>
@@ -550,7 +551,7 @@ export default function StepBlocks({
           <div key={block.id} className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-sky-600">Videokonferenz</p>
             {url.trim() ? (
-              <a href={url} target="_blank" rel="noreferrer" className="btn btn-primary text-sm">🎥 Videoraum beitreten</a>
+              <a href={url} target="_blank" rel="noreferrer" className="btn btn-primary text-sm"><Icon name="video" color="currentColor" /> Videoraum beitreten</a>
             ) : (
               <p className="text-sm text-neutral-500">Der Mediator hinterlegt hier den Link zum Videoraum.</p>
             )}
@@ -577,7 +578,7 @@ export default function StepBlocks({
       case "gate":
         return (
           <div key={block.id} className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 text-sm text-blue-700">
-            ⏸ {cfgStr(c, "text") || "Es geht weiter, sobald beide Parteien bestätigt haben."}
+            <Icon name="pause" color="currentColor" /> {cfgStr(c, "text") || "Es geht weiter, sobald beide Parteien bestätigt haben."}
           </div>
         );
       case "fall_freischaltung":
@@ -590,7 +591,7 @@ export default function StepBlocks({
           return (
             <div key={block.id} className="rounded-2xl border border-amber-300 bg-amber-50/70 p-4">
               <p className="text-sm font-semibold text-amber-900">
-                💳 {cfgStr(c, "title") || "Mediation freischalten"}
+                <Icon name="card" color="currentColor" /> {cfgStr(c, "title") || "Mediation freischalten"}
               </p>
               {cfgStr(c, "description") && (
                 <p className="mt-0.5 whitespace-pre-wrap text-sm text-amber-800">
@@ -619,7 +620,7 @@ export default function StepBlocks({
         const isPaid = purchased.has(block.id);
         return (
           <div key={block.id} className="rounded-2xl border border-amber-300 bg-amber-50/70 p-4">
-            <p className="text-sm font-semibold text-amber-900">💳 {cfgStr(c, "title") || "Bonus-Leistung"}</p>
+            <p className="text-sm font-semibold text-amber-900"><Icon name="card" color="currentColor" /> {cfgStr(c, "title") || "Bonus-Leistung"}</p>
             {cfgStr(c, "description") && <p className="mt-0.5 text-sm text-amber-800">{cfgStr(c, "description")}</p>}
             {isPaid ? (
               <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
@@ -642,9 +643,9 @@ export default function StepBlocks({
         );
       }
       case "termin":
-        return <div key={block.id} className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4 text-sm text-teal-700">📅 Terminvereinbarung – siehe Kalender/Termin-Bereich dieses Falls.</div>;
+        return <div key={block.id} className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4 text-sm text-teal-700"><Icon name="calendar" color="currentColor" /> Terminvereinbarung – siehe Kalender/Termin-Bereich dieses Falls.</div>;
       case "feedback":
-        return <div key={block.id} className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-700">★ Feedback-Fragebogen erscheint zum passenden Zeitpunkt.</div>;
+        return <div key={block.id} className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-700"><Icon name="star" color="currentColor" /> Feedback-Fragebogen erscheint zum passenden Zeitpunkt.</div>;
       case "vertrag":
         return <div key={block.id} className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-700">§ Vertrag / Dokument – siehe Vertrags-Bereich dieses Falls.</div>;
       case "ki_prompt":

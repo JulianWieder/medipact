@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = {
   mediationId: string | number;
@@ -149,7 +150,7 @@ export default function InviteMeetRecorder({
               kind === "video" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
             }`}
           >
-            🎥 Video
+            <Icon name="video" color="currentColor" /> Video
           </button>
           <button
             type="button"
@@ -158,7 +159,7 @@ export default function InviteMeetRecorder({
               kind === "audio" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
             }`}
           >
-            🎙️ Nur Audio
+            <Icon name="mic" color="currentColor" /> Nur Audio
           </button>
         </div>
       )}
@@ -178,7 +179,7 @@ export default function InviteMeetRecorder({
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {(status === "idle" || status === "error") && (
           <button type="button" onClick={startRecording} className="btn btn-secondary">
-            {kind === "audio" ? "🎙️" : "🎥"} Aufnahme in Google Meet starten
+            <Icon name={kind === "audio" ? "mic" : "video"} color="currentColor" /> Aufnahme in Google Meet starten
           </button>
         )}
 

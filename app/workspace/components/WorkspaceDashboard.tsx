@@ -10,6 +10,7 @@ import { PHASES, getPhaseIndex, TYPE_LABEL, TYPE_COLOR, MEDIATION_TYPES } from "
 import { StatusBadge, WCard, RowCard, LoadingRows, SectionHeader, ProgressBar, EmptyState, cn } from "../ui";
 import { fetchMediations, fetchAllMediations, fetchAllAppointments, fetchDashboardUebersicht } from "../api";
 import { PremiumHero } from "@/app/components/ui/premium";
+import Icon from "@/app/components/ui/Icon";
 
 /** Fortschritt eines Falls: explizit gesetzter Wert oder aus der Phase abgeleitet. */
 function fallProgress(fall: MediationCase): number {
@@ -517,7 +518,7 @@ export function WorkspaceDashboard({ isAdmin = false, onSelectFall, onSelectTerm
                             )}
                           >
                             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-sm">
-                              {NEWS_ICON[n.kind] ?? "•"}
+                              <Icon name={NEWS_ICON[n.kind] ?? "•"} size={14} />
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="block text-xs leading-snug text-neutral-800">

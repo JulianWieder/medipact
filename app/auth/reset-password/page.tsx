@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/app/components/ui/Button";
@@ -24,7 +25,7 @@ function ResetPasswordForm() {
           <div className="container max-w-md">
             <Card className="p-8">
               <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
-                <div className="mb-3 text-4xl">⚠️</div>
+                <div className="mb-3"><Icon name="warning" size={36} color="#B45309" /></div>
                 <p className="font-semibold text-red-900">
                   Ungültiger oder abgelaufener Link
                 </p>
@@ -110,7 +111,7 @@ function ResetPasswordForm() {
             {success ? (
               <div className="space-y-6 text-center">
                 <div className="rounded-2xl border border-accent-200 bg-accent-50 p-6">
-                  <div className="mb-3 text-4xl">✅</div>
+                  <div className="mb-3"><Icon name="check-circle" size={36} /></div>
                   <p className="text-lg font-semibold text-accent-900">
                     Passwort aktualisiert!
                   </p>

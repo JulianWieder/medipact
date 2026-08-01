@@ -39,6 +39,24 @@ router = APIRouter(prefix="/mediations", tags=["logbuch"])
 
 ENTRY_TYPES = {"vorkommnis", "gedanke", "gespraech", "email", "whatsapp", "telefonat"}
 
+# Ein-Buch-Umbau: Der Bereich hängt am EINTRAG (mediation_log_entries.area),
+# nicht mehr am Buch – pro Nutzer:in existiert genau ein Konflikt-Logbuch
+# (siehe mediations.create_mediation). Werte = mediation_type-Keys.
+AREAS = {
+    "trennung", "erbschaft", "nachbarschaft", "verbraucher", "wg",
+    "odr", "schlichtung", "ecommerce", "b2b", "geschaeft",
+}
+
+
+def _check_area(value: Optional[str], fallback: str) -> str:
+    """Bereich validieren; leer → Bereich des Buchs (Altbestand/Mobile-App)."""
+    v = (value or "").strip().lower()
+    if not v:
+        return fallback
+    if v not in AREAS:
+        raise HTTPException(status_code=422, detail="Unbekannter Bereich.")
+    return v
+
 # Journal-Ausbau: Sichtbarkeit je Eintrag.
 #   private  – Journal: sieht NUR die Autor:in (nie Mediator/Gegenseite).
 #   personal – Dokumentation (Default): nur die Autor:in.
@@ -87,10 +105,11 @@ def _parse_occurred_at(value: Optional[str]) -> Optional[datetime]:
         raise HTTPException(status_code=422, detail="Ungültiges Datum für occurred_at.")
 
 
-def _serialize(e: MediationLogEntry) -> dict:
+def _serialize(e: MediationLogEntry, fallback_area: str = "") -> dict:
     return {
         "id": e.id,
         "entry_type": e.entry_type,
+        "area": e.area or fallback_area or None,
         "occurred_at": e.occurred_at.isoformat() if e.occurred_at else None,
         "title": e.title,
         "content": e.content or {},
@@ -105,6 +124,7 @@ def _serialize(e: MediationLogEntry) -> dict:
 
 class LogEntryCreate(BaseModel):
     entry_type: str = "vorkommnis"
+    area: Optional[str] = None  # Bereich des Eintrags (mediation_type-Key)
     occurred_at: Optional[str] = None  # ISO-Datum/Zeit des Ereignisses
     title: Optional[str] = None
     content: Optional[dict[str, Any]] = None  # {block_id: wert} gemäß WFM-Vorlage
@@ -113,6 +133,7 @@ class LogEntryCreate(BaseModel):
 
 class LogEntryUpdate(BaseModel):
     entry_type: Optional[str] = None
+    area: Optional[str] = None
     occurred_at: Optional[str] = None
     title: Optional[str] = None
     content: Optional[dict[str, Any]] = None
@@ -139,6 +160,7 @@ def list_entries(
     also Mediator/Gegenseite nach Umwandlung oder im verknüpften Fall – sehen
     ausschließlich Einträge mit visibility="shared"."""
     participant = _require_participant(mediation_id, current_user, db)
+    m = _get_mediation(mediation_id, db)
     rows = (
         db.query(MediationLogEntry)
         .filter(MediationLogEntry.mediation_id == mediation_id)
@@ -153,7 +175,10 @@ def list_entries(
         reverse=True,
     )
     return [
-        {**_serialize(e), "is_own": e.author_participant_id == participant.id}
+        {
+            **_serialize(e, m.mediation_type),
+            "is_own": e.author_participant_id == participant.id,
+        }
         for e in rows
     ]
 
@@ -166,7 +191,7 @@ def create_entry(
     current_user: User = Depends(get_current_db_user),
 ):
     participant = _require_participant(mediation_id, current_user, db)
-    _get_mediation(mediation_id, db)
+    m = _get_mediation(mediation_id, db)
 
     entry_type = (payload.entry_type or "vorkommnis").strip().lower()
     if entry_type not in ENTRY_TYPES:
@@ -176,6 +201,7 @@ def create_entry(
         mediation_id=mediation_id,
         author_participant_id=participant.id,
         entry_type=entry_type,
+        area=_check_area(payload.area, m.mediation_type),
         occurred_at=_parse_occurred_at(payload.occurred_at),
         title=(payload.title or "").strip() or None,
         content=payload.content or {},
@@ -184,7 +210,7 @@ def create_entry(
     db.add(entry)
     db.commit()
     db.refresh(entry)
-    return _serialize(entry)
+    return _serialize(entry, m.mediation_type)
 
 
 def _get_own_entry(
@@ -222,6 +248,10 @@ def update_entry(
         if et not in ENTRY_TYPES:
             raise HTTPException(status_code=422, detail="Unbekannte Eintragsart.")
         entry.entry_type = et
+    if payload.area is not None:
+        entry.area = _check_area(
+            payload.area, _get_mediation(mediation_id, db).mediation_type
+        )
     if payload.occurred_at is not None:
         entry.occurred_at = _parse_occurred_at(payload.occurred_at)
     if payload.title is not None:
@@ -232,7 +262,7 @@ def update_entry(
         entry.visibility = _check_visibility(payload.visibility)
     db.commit()
     db.refresh(entry)
-    return _serialize(entry)
+    return _serialize(entry, _get_mediation(mediation_id, db).mediation_type)
 
 
 @router.delete("/{mediation_id}/logbuch/entries/{entry_id}")
@@ -248,17 +278,35 @@ def delete_entry(
     return {"ok": True}
 
 
+class ConvertRequest(BaseModel):
+    # Ein-Buch-Umbau: Bei einem Buch mit Einträgen aus MEHREREN Bereichen wird
+    # nur der gewählte Bereich in eine (neue) Mediation überführt – das Buch
+    # bleibt als Logbuch bestehen. Ohne area: bisheriges Verhalten (das ganze
+    # Buch wird zur Mediation).
+    area: Optional[str] = None
+
+
+def _entry_area(e: MediationLogEntry, fallback: str) -> str:
+    return (e.area or fallback or "").lower()
+
+
 @router.post("/{mediation_id}/logbuch/convert")
 def convert_to_mediation(
     mediation_id: int,
+    payload: Optional[ConvertRequest] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    """Wandelt ein Logbuch in eine normale Mediation um (Upsell-Pfad).
+    """Wandelt ein Logbuch (bzw. einen Bereich daraus) in eine Mediation um.
 
-    Setzt nur mode="mediation" – der Fall durchläuft danach den normalen
-    Start-Flow (start_intake, Paketwahl, Einladung, Paywall). Die Logbuch-
-    Einträge bleiben erhalten und dienen als Chronologie der Fallaufnahme."""
+    Ohne ``area`` (oder wenn alle Einträge zum selben Bereich gehören): das
+    Buch selbst wird zur Mediation (mode="mediation") und durchläuft den
+    normalen Start-Flow (start_intake, Paketwahl, Einladung, Paywall).
+
+    Mit ``area`` bei gemischtem Buch: es entsteht eine NEUE Mediation dieses
+    Bereichs; die Einträge des Bereichs ziehen dorthin um (Chronologie der
+    Fallaufnahme), das Konflikt-Logbuch bleibt mit den übrigen Einträgen
+    bestehen (Ein-Buch-Prinzip)."""
     participant = _require_participant(mediation_id, current_user, db)
     if (participant.role or "").lower() not in ("owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur die Eigentümer:in kann umwandeln.")
@@ -266,14 +314,89 @@ def convert_to_mediation(
     if mediation.mode != "logbuch":
         raise HTTPException(status_code=409, detail="Dieser Fall ist bereits eine Mediation.")
 
+    from app.routers.mediations import _ensure_default_mediator
+
+    entries = (
+        db.query(MediationLogEntry)
+        .filter(MediationLogEntry.mediation_id == mediation_id)
+        .all()
+    )
+    fallback = mediation.mediation_type
+    areas_present = {_entry_area(e, fallback) for e in entries}
+    area = (payload.area if payload else None) or None
+    if area is not None:
+        area = _check_area(area, fallback)
+
+    # Gemischtes Buch + gewählter Bereich → Bereich in NEUE Mediation abspalten.
+    if area is not None and len(areas_present) > 1:
+        new_m = Mediation(
+            title=mediation.title or "Mediation",
+            mediation_type=area,
+            mode="mediation",
+            description=mediation.description,
+            status="draft",
+            package=pricing.normalize_package(None),
+            organization_id=None,
+            is_paid=False,
+        )
+        db.add(new_m)
+        db.commit()
+        db.refresh(new_m)
+
+        # Autoren der umziehenden Einträge als Teilnehmer der neuen Mediation
+        # anlegen (gleiche Rolle) und author_participant_id ummappen – seit der
+        # gelockerten Logbuch-Einladungssperre (Betreuungskalender) kann ein
+        # Buch mehr als eine Teilnehmer:in haben.
+        moving = [e for e in entries if _entry_area(e, fallback) == area]
+        part_map: dict[int, int] = {}
+
+        def _mapped_participant(old_id: Optional[int]) -> Optional[int]:
+            if old_id is None:
+                return None
+            if old_id in part_map:
+                return part_map[old_id]
+            old_p = (
+                db.query(MediationParticipant)
+                .filter(MediationParticipant.id == old_id)
+                .first()
+            )
+            new_p = MediationParticipant(
+                mediation_id=new_m.id,
+                user_id=old_p.user_id if old_p else current_user.id,
+                role=(old_p.role if old_p else None) or "owner",
+            )
+            db.add(new_p)
+            db.commit()
+            db.refresh(new_p)
+            part_map[old_id] = new_p.id
+            return new_p.id
+
+        # Eigentümer:in ist immer Teilnehmer der neuen Mediation.
+        _mapped_participant(participant.id)
+        for e in moving:
+            e.mediation_id = new_m.id
+            e.author_participant_id = _mapped_participant(e.author_participant_id)
+        db.commit()
+
+        _ensure_default_mediator(db, new_m)
+        return {
+            "mediation_id": new_m.id,
+            "mode": new_m.mode,
+            "status": new_m.status,
+            "mediation_type": new_m.mediation_type,
+            "split": True,
+            "moved_entries": len(moving),
+        }
+
+    # Einheitliches Buch (oder keine Bereichswahl): Buch selbst umwandeln.
+    if area is not None and mediation.mediation_type != area:
+        mediation.mediation_type = area
     mediation.mode = "mediation"
     mediation.status = "draft"
     db.commit()
 
     # Jetzt (erst bei Umwandlung) den Standard-Mediator zuordnen – Logbücher
     # sind privat und haben bewusst keinen Mediator.
-    from app.routers.mediations import _ensure_default_mediator
-
     _ensure_default_mediator(db, mediation)
 
     return {
@@ -281,6 +404,7 @@ def convert_to_mediation(
         "mode": mediation.mode,
         "status": mediation.status,
         "mediation_type": mediation.mediation_type,
+        "split": False,
     }
 
 

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, BackHandler, View } from "react-native";
 
 import { loadTokens } from "./src/api";
+import CareCalendarScreen from "./src/screens/CareCalendarScreen";
 import CasesScreen from "./src/screens/CasesScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import LogbookScreen from "./src/screens/LogbookScreen";
@@ -13,7 +14,21 @@ import { colors } from "./src/theme";
 type Route =
   | { name: "login" }
   | { name: "cases" }
-  | { name: "logbook"; id: number; title: string };
+  | {
+      name: "logbook";
+      id: number;
+      title: string;
+      mode: string; // "logbuch" | "mediation" (verknüpfter Fall)
+      mediationType: string;
+    }
+  | {
+      // Betreuungskalender (nur Trennung): Plan- vs. Ist-Zeiten + Tausch.
+      name: "care";
+      id: number;
+      title: string;
+      mode: string;
+      mediationType: string;
+    };
 
 export default function App() {
   const [route, setRoute] = useState<Route | null>(null);
@@ -25,8 +40,12 @@ export default function App() {
     })();
   }, []);
 
-  // Android-Hardware-Back: vom Logbuch zurück zur Übersicht.
+  // Android-Hardware-Back: Kalender → Logbuch → Übersicht.
   const goBack = useCallback(() => {
+    if (route?.name === "care") {
+      setRoute({ ...route, name: "logbook" });
+      return true;
+    }
     if (route?.name === "logbook") {
       setRoute({ name: "cases" });
       return true;
@@ -55,7 +74,9 @@ export default function App() {
       )}
       {route.name === "cases" && (
         <CasesScreen
-          onOpen={(id, title) => setRoute({ name: "logbook", id, title })}
+          onOpen={(id, title, mode, mediationType) =>
+            setRoute({ name: "logbook", id, title, mode, mediationType })
+          }
           onLoggedOut={() => setRoute({ name: "login" })}
         />
       )}
@@ -63,7 +84,17 @@ export default function App() {
         <LogbookScreen
           mediationId={route.id}
           title={route.title}
+          mode={route.mode}
+          mediationType={route.mediationType}
           onBack={() => setRoute({ name: "cases" })}
+          onOpenCare={() => setRoute({ ...route, name: "care" })}
+        />
+      )}
+      {route.name === "care" && (
+        <CareCalendarScreen
+          mediationId={route.id}
+          title={route.title}
+          onBack={() => setRoute({ ...route, name: "logbook" })}
         />
       )}
     </View>

@@ -4,10 +4,10 @@
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { API_URL, ApiError, api, authHeaders } from "../api";
-import { ENTRY_TYPES, blockLabel, isoToGerman, parseGermanDate } from "../logbuch";
+import { blockLabel, entryTypes, isoToGerman, parseGermanDate } from "../logbuch";
 import { colors, radius, spacing } from "../theme";
 import { Block, BlockValue, LogEntry, UploadValue } from "../types";
 import { Button, Chip, ErrorText } from "../ui";
@@ -16,6 +16,7 @@ type Props = {
   mediationId: number;
   blocks: Block[];
   editing: LogEntry | null;
+  isBusiness: boolean;
   onSaved: (entry: LogEntry, wasNew: boolean) => void;
   onCancel: () => void;
   onQuotaExhausted: (message: string) => void;
@@ -26,6 +27,7 @@ export default function EntryComposer({
   mediationId,
   blocks,
   editing,
+  isBusiness,
   onSaved,
   onCancel,
   onQuotaExhausted,
@@ -42,6 +44,9 @@ export default function EntryComposer({
   );
 
   const [entryType, setEntryType] = useState(editing?.entry_type ?? "vorkommnis");
+  // Sensibel-Checkbox wie im Web: checked = "private", unchecked = "personal";
+  // ein geteilter ("shared") Eintrag bleibt beim Bearbeiten geteilt.
+  const [sensitive, setSensitive] = useState((editing?.visibility ?? "personal") === "private");
   const [values, setValues] = useState<Record<string, BlockValue>>(() => {
     const init: Record<string, BlockValue> = { ...(editing?.content ?? {}) };
     if (dateBlockId && editing?.occurred_at && init[dateBlockId] == null) {
@@ -150,7 +155,9 @@ export default function EntryComposer({
         }
       }
 
-      const payload = { entry_type: entryType, occurred_at: occurred, content };
+      const wasShared = (editing?.visibility ?? "personal") === "shared";
+      const visibility = sensitive ? "private" : wasShared ? "shared" : "personal";
+      const payload = { entry_type: entryType, occurred_at: occurred, content, visibility };
       const entry = editing
         ? await api<LogEntry>(`/mediations/${mediationId}/logbuch/entries/${editing.id}`, {
             method: "PATCH",
@@ -259,7 +266,7 @@ export default function EntryComposer({
 
       <Text style={styles.label}>Art des Eintrags</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: spacing.sm }}>
-        {ENTRY_TYPES.map((t) => (
+        {entryTypes(isBusiness).map((t) => (
           <Chip
             key={t.key}
             label={`${t.icon} ${t.label}`}
@@ -270,6 +277,25 @@ export default function EntryComposer({
       </View>
 
       {inputBlocks.map(renderBlock)}
+
+      {!isBusiness && (
+        <Pressable
+          onPress={() => setSensitive((s) => !s)}
+          style={styles.sensitiveRow}
+          hitSlop={8}
+        >
+          <View style={[styles.checkbox, sensitive && styles.checkboxOn]}>
+            {sensitive ? <Text style={styles.checkboxTick}>✓</Text> : null}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>🔒 Sensibel – nur für mich</Text>
+            <Text style={styles.help}>
+              Streng vertraulich: sieht niemals Mediator oder Gegenseite – auch nach einer
+              Umwandlung nicht.
+            </Text>
+          </View>
+        </Pressable>
+      )}
 
       {!hasUploadBlock && (
         <View style={styles.field}>
@@ -326,4 +352,27 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   multiline: { minHeight: 80, textAlignVertical: "top" },
+  sensitiveRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: spacing.lg,
+    backgroundColor: colors.bg,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.border,
+    marginRight: spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.card,
+  },
+  checkboxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  checkboxTick: { color: "#fff", fontSize: 14, fontWeight: "700", lineHeight: 18 },
 });

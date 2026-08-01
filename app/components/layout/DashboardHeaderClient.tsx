@@ -48,7 +48,7 @@ export default function DashboardHeaderClient({ username, email }: Props) {
   const nav = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Neue Mediation", href: "/dashboard/mediation/new" },
-    ...(isAdmin ? [{ label: "⚖ Workspace", href: "/workspace" }] : []),
+    ...(isAdmin ? [{ label: "Workspace", href: "/workspace" }] : []),
   ];
 
   return (

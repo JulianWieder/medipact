@@ -1,0 +1,56 @@
+{
+ "compilerOptions": {
+  "target": "ES2017",
+  "lib": [
+   "dom",
+   "dom.iterable",
+   "esnext"
+  ],
+  "allowJs": true,
+  "skipLibCheck": true,
+  "strict": true,
+  "noEmit": true,
+  "esModuleInterop": true,
+  "module": "esnext",
+  "moduleResolution": "bundler",
+  "resolveJsonModule": true,
+  "isolatedModules": true,
+  "jsx": "preserve",
+  "incremental": false,
+  "paths": {
+   "@/*": [
+    "./*"
+   ]
+  }
+ },
+ "include": [
+  "next-env.d.ts",
+  "types/**/*.ts",
+  "app/components/ui/Icon.tsx",
+  "app/workspace/ui.tsx",
+  "app/preise/page.tsx",
+  "app/konflikt-logbuch/page.tsx",
+  "app/dashboard/logbuch/[id]/LogbuchClient.tsx",
+  "app/dashboard/logbuch/[id]/BetreuungsKalender.tsx",
+  "app/dashboard/DashboardClient.tsx",
+  "app/dashboard/invitations/InvitationsClient.tsx",
+  "app/dashboard/[id]/einleitung/EinleitungClient.tsx",
+  "app/dashboard/[id]/einleitung/leitfaden/LeitfadenClient.tsx",
+  "app/dashboard/[id]/MediationClient.tsx",
+  "app/dashboard/[id]/_shared/PhaseNotesClient.tsx",
+  "app/dashboard/[id]/_shared/StepBlocks.tsx",
+  "app/dashboard/[id]/_shared/StepContentBlocks.tsx",
+  "app/components/layout/DashboardHeaderClient.tsx",
+  "app/components/mediation/InviteMeetRecorder.tsx",
+  "app/components/mediation/InviteVideoRecorder.tsx",
+  "app/workspace/components/FallDetail.tsx",
+  "app/workspace/components/WorkspaceDashboard.tsx",
+  "app/workspace/components/WorkflowManager.tsx",
+  "app/workspace/components/FirmOnboarding.tsx",
+  "app/workspace/components/AiPromptsEditor.tsx",
+  "app/workspace/components/BenutzerBereich.tsx",
+  "app/workspace/components/ParteienListe.tsx",
+  "app/workspace/WorkspaceClient.tsx",
+  "app/auth/**/*.tsx"
+ ]
+}

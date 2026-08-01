@@ -16,6 +16,7 @@ import {
 } from "../ui";
 import { StatusDot, SegmentedControl, Skeleton, SlideOver } from "@/app/components/ui/premium";
 import MediationChat from "@/app/components/mediation/MediationChat";
+import Icon from "@/app/components/ui/Icon";
 import {
   fetchParticipants,
   fetchAllNotes,
@@ -75,7 +76,7 @@ function MeetLinkButton({
         disabled={loading}
         className="inline-flex items-center gap-1 rounded-md border border-accent-300 bg-accent-50 px-2.5 py-1.5 text-xs font-semibold text-accent-700 transition hover:bg-accent-100 disabled:opacity-50"
       >
-        {loading ? "Erzeuge Meet-Raum…" : "🎦 Google-Meet-Link erzeugen"}
+        {loading ? "Erzeuge Meet-Raum…" : <><Icon name="video" size={13} color="currentColor" /> Google-Meet-Link erzeugen</>}
       </button>
       {error && <p className="mt-1 text-xs font-semibold text-red-600">{error}</p>}
     </div>
@@ -1249,7 +1250,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                   <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${AUTHOR_BADGE[br.author_source] ?? AUTHOR_BADGE.user}`}>
-                                    {br.author_source === "ai" ? "🤖 KI" : br.author_name}
+                                    {br.author_source === "ai" ? <><Icon name="bot" size={11} color="currentColor" /> KI</> : br.author_name}
                                   </span>
                                   <span className="text-[10px] text-neutral-400 bg-neutral-100 rounded px-1 py-0.5">
                                     {br.step_title}
@@ -1732,7 +1733,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center gap-2">
                                     <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${AUTHOR_BADGE[br.author_source] ?? AUTHOR_BADGE.user}`}>
-                                      {br.author_source === "ai" ? "🤖 KI" : br.author_name}
+                                      {br.author_source === "ai" ? <><Icon name="bot" size={11} color="currentColor" /> KI</> : br.author_name}
                                     </span>
                                     {br.block_type && (
                                       <span className="text-[10px] text-neutral-400 bg-neutral-100 rounded px-1 py-0.5">{br.block_type}</span>
@@ -1974,7 +1975,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                     weiterer_termin: "Weiterer Termin gewünscht?",
                     restzweifel: "Unausgesprochene Zweifel",
                   };
-                  const EMOJI_MAP: Record<number, string> = { 1: "😔 Belastet", 2: "😕 Unsicher", 3: "😐 Neutral", 4: "🙂 Gut", 5: "😊 Sehr gut" };
+                  const EMOJI_MAP: Record<number, string> = { 1: "Belastet", 2: "Unsicher", 3: "Neutral", 4: "Gut", 5: "Sehr gut" };
                   const SCALE10_KEYS = new Set([
                     "einigung_wahrscheinlichkeit",
                     "vertrauen_in_prozess",
@@ -2010,7 +2011,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                       {Object.entries(grouped).map(([occasion, entries]) => (
                         <div key={occasion}>
                           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600 mb-3 flex items-center gap-2">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-100 text-violet-700 text-[9px] font-bold">💬</span>
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-100 text-violet-700"><Icon name="message" size={11} color="currentColor" /></span>
                             {OCCASION_LABELS[occasion] ?? occasion}
                           </p>
                           <div className="space-y-3 pl-7">

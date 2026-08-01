@@ -40,10 +40,12 @@ Website).
 - Lokales Backend testen: `EXPO_PUBLIC_API_URL=http://<PC-IP>:8000 npx expo start`
   (nicht `localhost` – das Handy muss den PC im WLAN erreichen).
 
-## Was die App kann (V1)
+## Was die App kann (V2)
 
 - Login (JWT, Tokens im SecureStore, automatischer Refresh)
-- Logbuch-Übersicht + neues Logbuch anlegen (6 Konfliktarten)
+- Logbuch-Übersicht + neues Logbuch anlegen (5 Konfliktarten wie im Web)
+- **Logbuch & Journal zum Fall**: laufende Mediationen erscheinen als eigener
+  Abschnitt – das Logbuch läuft nach der Umwandlung dort weiter
 - Einträge erfassen: Formularfelder kommen live aus der WFM-Vorlage
   (`phase=logbuch`, `step_key=logbuch_eintrag`) – Änderungen im Designer
   wirken sofort auch in der App
@@ -53,10 +55,19 @@ Website).
   direkten Kauf-Link enthält)
 - Foto-/Datei-Uploads (Galerie oder Dokumente, max. 25 MB); App-Anhänge
   landen als `anhang_N` im Eintrags-`content`
-- Bearbeiten/Löschen eigener Einträge
+- Bearbeiten/Löschen eigener Einträge (mit Rückfrage vor dem Löschen);
+  fremde (geteilte) Einträge sind schreibgeschützt (`is_own`)
+- **Sichtbarkeit je Eintrag** wie im Web: Checkbox „🔒 Sensibel – nur für mich"
+  (= `private`), Standard `personal`; im verknüpften Fall lassen sich Einträge
+  einzeln „In Mediation teilen" (= `shared`) und wieder zurückziehen
+- **Filter-Chips** (Alle / Dokumentation / Sensibel / Geteilt)
+- **Business/ODR-Variante**: „Falldokumentation" mit sachlichen Labels
+  (Vorgang, Interne Notiz, Besprechung, Nachricht), ohne Sensibel-Schalter und
+  ohne persönlichen KI-Tipp
 
-Bewusst nicht in V1: Intake-Flow (auf der Website erledigen), Umwandlung in
-eine Mediation, Premium-Kauf, Offline-Modus, Push-Notifications.
+Bewusst nicht enthalten: Intake-Flow und Umwandlung in eine Mediation (beides
+auf der Website – dort hängt der Start-Flow mit Paketwahl und Einladung dran),
+Premium-Kauf, Offline-Modus, Push-Notifications.
 
 ## Später: echte Store-Apps bauen
 

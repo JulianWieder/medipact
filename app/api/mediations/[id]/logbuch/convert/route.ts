@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backend";
 
-// POST /api/mediations/[id]/logbuch/convert – Logbuch in Mediation umwandeln
+// POST /api/mediations/[id]/logbuch/convert – Logbuch in Mediation umwandeln.
+// Optionaler Body { area }: Bei einem Buch mit Einträgen aus mehreren
+// Bereichen wird nur der gewählte Bereich abgespalten (Ein-Buch-Prinzip).
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const body = await request.json().catch(() => null);
   const result = await backendFetch(`/mediations/${id}/logbuch/convert`, {
     method: "POST",
+    ...(body ? { body } : {}),
   });
   if (!result.ok) {
     return NextResponse.json(result.data, { status: result.status });

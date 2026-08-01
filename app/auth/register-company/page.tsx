@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { useEffect, useState } from "react";
 
 // Firmenkunden-Registrierung, mehrstufig (granular):
@@ -108,7 +109,7 @@ export default function RegisterCompanyPage() {
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center p-6">
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm">
-          <div className="mb-3 text-4xl">✉️</div>
+          <div className="mb-3"><Icon name="mail" size={36} /></div>
           <h1 className="mb-2 text-xl font-bold text-neutral-900">Unternehmen registriert</h1>
           <p className="text-sm text-neutral-600">
             Bestätige deine Adresse <strong>{registeredEmail}</strong> über den Link in der E-Mail.

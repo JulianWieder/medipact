@@ -26,6 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Reveal } from "@/app/components/ui/motion";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { cardLift, cn } from "@/app/components/ui/premium";
+import BetreuungsKalender from "./BetreuungsKalender";
 
 interface Props {
   mediationId: string;
@@ -57,6 +58,7 @@ interface AiAnalysis {
 interface LogEntry {
   id: number;
   entry_type: string;
+  area?: string | null;
   occurred_at: string | null;
   title: string | null;
   content: Record<string, unknown>;
@@ -94,6 +96,26 @@ const ENTRY_TYPES: { key: string; label: string; icon: string }[] = [
 // Business/ODR: sachliche Falldokumentation statt persönlichem Journal.
 // Gleiche entry_type-Keys (Datenmodell unverändert), nur nüchternere Labels.
 const BUSINESS_TYPES = new Set(["odr", "schlichtung", "ecommerce", "b2b", "geschaeft"]);
+
+// Ein-Buch-Umbau: Es gibt EIN Konflikt-Logbuch pro Nutzer:in; der Bereich
+// hängt am einzelnen Eintrag (Backend: mediation_log_entries.area) und dient
+// als Tag + Filter. Keys = mediation_type-Werte.
+const AREAS: { key: string; label: string; icon: string }[] = [
+  { key: "trennung", label: "Trennung & Familie", icon: "💔" },
+  { key: "erbschaft", label: "Erbschaft", icon: "📜" },
+  { key: "nachbarschaft", label: "Nachbarschaft", icon: "🏡" },
+  { key: "verbraucher", label: "Verbraucher & Handwerker", icon: "🧾" },
+  { key: "odr", label: "Geschäft & Arbeit", icon: "🏢" },
+];
+
+function areaMeta(key: string | null | undefined): { key: string; label: string; icon: string } {
+  const k = (key ?? "").toLowerCase();
+  const found = AREAS.find((a) => a.key === k);
+  if (found) return found;
+  // ODR-Aliasse (schlichtung/ecommerce/b2b/geschaeft) auf "Geschäft & Arbeit".
+  if (BUSINESS_TYPES.has(k)) return AREAS[AREAS.length - 1];
+  return { key: k, label: k || "Allgemein", icon: "📓" };
+}
 const BUSINESS_ENTRY_LABELS: Record<string, string> = {
   vorkommnis: "Vorgang",
   gedanke: "Interne Notiz",
@@ -220,7 +242,7 @@ function BlockField({
               rel="noreferrer"
               className="break-all font-semibold text-accent-700 underline"
             >
-              📎 {file.name || "Datei"}
+              <Icon name="paperclip" color="currentColor" /> {file.name || "Datei"}
             </a>
             <span className="text-emerald-600">✓</span>
             <button
@@ -233,7 +255,7 @@ function BlockField({
           </div>
         )}
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-700 transition hover:border-accent-400 hover:text-accent-700">
-          {uploading ? "Lädt hoch …" : file ? "Andere Datei wählen" : "📎 Foto oder Datei anhängen"}
+          {uploading ? "Lädt hoch …" : file ? "Andere Datei wählen" : <><Icon name="paperclip" color="currentColor" /> Foto oder Datei anhängen</>}
           <input
             type="file"
             accept={cfgStr(c, "accept") || undefined}
@@ -354,7 +376,7 @@ function AnalysisCard({ analysis, showTip = true }: { analysis: AiAnalysis; show
   return (
     <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 sm:p-5">
       <p className="text-xs font-bold uppercase tracking-wide text-violet-600">
-        ✨ KI-Einschätzung
+        <Icon name="sparkles" color="currentColor" /> KI-Einschätzung
       </p>
       {analysis.einschaetzung && (
         <p className="mt-2 text-sm leading-6 text-neutral-700">{analysis.einschaetzung}</p>
@@ -382,7 +404,7 @@ function AnalysisCard({ analysis, showTip = true }: { analysis: AiAnalysis; show
       {showTip && analysis.tipp && (
         <div className="mt-3 rounded-xl bg-white/70 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-            💚 Für Sie persönlich
+            <Icon name="heart" color="currentColor" /> Für Sie persönlich
           </p>
           <p className="mt-1 text-sm leading-6 text-neutral-700">{analysis.tipp}</p>
         </div>
@@ -428,8 +450,11 @@ export default function LogbuchClient({
 
   // Composer (neuer/bearbeiteter Eintrag)
   const [entryType, setEntryType] = useState("vorkommnis");
+  // Bereich des Eintrags (Ein-Buch-Umbau): Default = Bereich des Buchs.
+  const [entryArea, setEntryArea] = useState(areaMeta(mediationType).key);
   const [entryVisibility, setEntryVisibility] = useState("personal");
   const [viewFilter, setViewFilter] = useState("alle");
+  const [areaFilter, setAreaFilter] = useState("alle");
   const [entryValues, setEntryValues] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [entrySaving, setEntrySaving] = useState(false);
@@ -664,6 +689,7 @@ export default function LogbuchClient({
     const occurred = dateBlockId ? entryValues[dateBlockId] : null;
     const payload = {
       entry_type: entryType,
+      area: entryArea,
       occurred_at: typeof occurred === "string" && occurred ? occurred : null,
       content: entryValues,
       visibility: entryVisibility,
@@ -702,7 +728,7 @@ export default function LogbuchClient({
     } finally {
       setEntrySaving(false);
     }
-  }, [dateBlockId, editingId, entryType, entryValues, entryVisibility, mediationId, analyzeEntry, status]);
+  }, [dateBlockId, editingId, entryType, entryArea, entryValues, entryVisibility, mediationId, analyzeEntry, status]);
 
   const deleteEntry = useCallback(
     async (id: number) => {
@@ -746,32 +772,73 @@ export default function LogbuchClient({
   const startEdit = useCallback((entry: LogEntry) => {
     setEditingId(entry.id);
     setEntryType(entry.entry_type);
+    setEntryArea(areaMeta(entry.area ?? mediationType).key);
     setEntryVisibility(entry.visibility ?? "personal");
     setEntryValues(entry.content ?? {});
     setComposerOpen(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [mediationType]);
+
+  // ── Ein-Buch-Umbau: das (leere oder ausgediente) Logbuch löschen ──
+  const [deletingBook, setDeletingBook] = useState(false);
+  const deleteBook = useCallback(async () => {
+    const n = entries.length;
+    const warn =
+      n > 0
+        ? `Dieses Logbuch mit ${n} ${n === 1 ? "Eintrag" : "Einträgen"} unwiderruflich löschen?`
+        : "Dieses leere Logbuch löschen?";
+    if (!window.confirm(warn)) return;
+    setDeletingBook(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/mediations/${mediationId}`, { method: "DELETE" });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(body?.detail ?? body?.error ?? `Löschen fehlgeschlagen (${res.status})`);
+        return;
+      }
+      router.push("/dashboard");
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setDeletingBook(false);
+    }
+  }, [entries.length, mediationId, router]);
 
   // ── Upsell: in Mediation umwandeln ──
+  // Ein-Buch-Umbau: Bereiche, die im Buch tatsächlich vorkommen. Bei mehr als
+  // einem Bereich wird bei der Umwandlung EIN Bereich gewählt und abgespalten
+  // (das Buch bleibt bestehen); bei genau einem wandelt sich das Buch selbst.
+  const areasPresent = useMemo(() => {
+    const keys = new Set(entries.map((e) => areaMeta(e.area ?? mediationType).key));
+    return AREAS.filter((a) => keys.has(a.key));
+  }, [entries, mediationType]);
+  const isMixedBook = areasPresent.length > 1;
+  const [convertArea, setConvertArea] = useState<string | null>(null);
+
   const convert = useCallback(async () => {
     setConverting(true);
     setError("");
     try {
       const res = await fetch(`/api/mediations/${mediationId}/logbuch/convert`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(convertArea ? { area: convertArea } : {}),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok) {
         setError(body?.detail ?? body?.error ?? `Fehler (${res.status})`);
         return;
       }
-      router.push(`/dashboard/mediation/new/${body.mediation_type}?mediationId=${mediationId}`);
+      // Abspaltung: die NEUE Mediation weiterführen, das Buch bleibt.
+      const targetId = body.mediation_id ?? mediationId;
+      router.push(`/dashboard/mediation/new/${body.mediation_type}?mediationId=${targetId}`);
     } catch {
       setError("Server nicht erreichbar.");
     } finally {
       setConverting(false);
     }
-  }, [mediationId, router]);
+  }, [mediationId, router, convertArea]);
 
   // Nach einer fehlgeschlagenen Zahlung ist die genehmigte Order verbraucht –
   // die Buttons müssen neu aufgebaut werden, sonst hängt der Nutzer fest.
@@ -914,10 +981,16 @@ export default function LogbuchClient({
 
   const filteredEntries = useMemo(
     () =>
-      viewFilter === "alle"
-        ? entries
-        : entries.filter((e) => (e.visibility ?? "personal") === viewFilter),
-    [entries, viewFilter],
+      entries
+        .filter(
+          (e) => viewFilter === "alle" || (e.visibility ?? "personal") === viewFilter,
+        )
+        .filter(
+          (e) =>
+            areaFilter === "alle" ||
+            areaMeta(e.area ?? mediationType).key === areaFilter,
+        ),
+    [entries, viewFilter, areaFilter, mediationType],
   );
 
   return (
@@ -965,7 +1038,7 @@ export default function LogbuchClient({
                   E-Mails, WhatsApp, Telefonate, Gedanken, Fotos. Nach jedem
                   Eintrag schlägt Ihnen die KI gute nächste Schritte vor.
                   Standardmäßig sieht das niemand außer Ihnen – und sensible
-                  Einträge (🔒) bleiben in jedem Fall privat, selbst in einer
+                  Einträge (<Icon name="lock" size={12} color="currentColor" />) bleiben in jedem Fall privat, selbst in einer
                   späteren Mediation.
                 </>
               )}
@@ -974,13 +1047,23 @@ export default function LogbuchClient({
             </p>
           </div>
           {!isLinked && (
-            <button
-              type="button"
-              onClick={() => setConfirmConvert(true)}
-              className="btn btn-primary"
-            >
-              In Mediation umwandeln →
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConvert(true)}
+                className="btn btn-primary"
+              >
+                In Mediation umwandeln →
+              </button>
+              <button
+                type="button"
+                onClick={deleteBook}
+                disabled={deletingBook}
+                className="text-xs font-semibold text-neutral-400 transition hover:text-red-500 disabled:opacity-50"
+              >
+                {deletingBook ? "Wird gelöscht …" : "Logbuch löschen"}
+              </button>
+            </div>
           )}
         </div>
 
@@ -1034,6 +1117,7 @@ export default function LogbuchClient({
                           setComposerOpen(false);
                           setEntryValues({});
                           setEntryType("vorkommnis");
+                          setEntryArea(areaMeta(mediationType).key);
                           setEntryVisibility("personal");
                         }}
                         className="shrink-0 text-sm font-semibold text-neutral-400 transition hover:text-neutral-600"
@@ -1052,7 +1136,7 @@ export default function LogbuchClient({
                             : "bg-white text-neutral-500 ring-1 ring-neutral-200"
                         }`}
                       >
-                        ✨ {quotaLine}
+                        <Icon name="sparkles" color="currentColor" /> {quotaLine}
                       </span>
                       {!isPremium && (
                         <button
@@ -1079,10 +1163,37 @@ export default function LogbuchClient({
                             : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
                         }`}
                       >
-                        {t.icon} {typeMeta(t.key).label}
+                        <Icon name={t.icon} color="currentColor" /> {typeMeta(t.key).label}
                       </button>
                     ))}
                   </div>
+
+                  {/* Bereich des Eintrags (Ein-Buch-Umbau): ein Buch für alle
+                      Konflikte, die Zuordnung passiert je Eintrag. Im
+                      verknüpften Modus entfällt die Wahl (Bereich = Fall). */}
+                  {!isLinked && (
+                    <div className="mt-4">
+                      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                        Wozu gehört dieser Eintrag?
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {AREAS.map((a) => (
+                          <button
+                            key={a.key}
+                            type="button"
+                            onClick={() => setEntryArea(a.key)}
+                            className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                              entryArea === a.key
+                                ? "border-neutral-900 bg-neutral-900 text-white"
+                                : "border-neutral-300 bg-white text-neutral-500 hover:border-neutral-400"
+                            }`}
+                          >
+                            {a.icon ? <Icon name={a.icon} color="currentColor" /> : null} {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-6 space-y-5">
                     {entryInputs.map((b) => (
@@ -1123,7 +1234,7 @@ export default function LogbuchClient({
                     />
                     <span>
                       <span className="block text-sm font-semibold text-neutral-800">
-                        🔒 Sensibel – nur für mich
+                        <Icon name="lock" color="currentColor" /> Sensibel – nur für mich
                       </span>
                       <span className="mt-0.5 block text-xs leading-5 text-neutral-500">
                         Bleibt streng vertraulich: niemals sichtbar für Mediator
@@ -1155,6 +1266,7 @@ export default function LogbuchClient({
                           setEditingId(null);
                           setEntryValues({});
                           setEntryType("vorkommnis");
+                          setEntryArea(areaMeta(mediationType).key);
                           setEntryVisibility("personal");
                         }}
                         className="btn btn-ghost"
@@ -1216,6 +1328,17 @@ export default function LogbuchClient({
               )}
             </section>
 
+            {/* ── Betreuungskalender (nur Trennung): Plan- vs. Ist-Zeiten ──
+                Ein-Buch-Umbau: Der Buch-Typ ist nur noch der Start-Bereich –
+                der Kalender erscheint auch, wenn EINTRÄGE zum Bereich
+                "trennung" existieren (oder gerade einer erfasst wird). */}
+            {(mediationType === "trennung" ||
+              (!isLinked &&
+                (areasPresent.some((a) => a.key === "trennung") ||
+                  (composerOpen && entryArea === "trennung")))) && (
+              <BetreuungsKalender mediationId={mediationId} />
+            )}
+
             {/* ── Chronologie ── */}
             <section className="mt-10">
               <h2 className="heading-3 text-neutral-900">
@@ -1226,6 +1349,29 @@ export default function LogbuchClient({
                   </span>
                 )}
               </h2>
+
+              {/* Bereichs-Filter: nur zeigen, wenn das Buch wirklich Einträge
+                  aus mehreren Bereichen enthält (Ein-Buch-Umbau). */}
+              {isMixedBook && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {[{ key: "alle", label: "Alle Bereiche", icon: "" }, ...areasPresent].map(
+                    (a) => (
+                      <button
+                        key={a.key}
+                        type="button"
+                        onClick={() => setAreaFilter(a.key)}
+                        className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                          areaFilter === a.key
+                            ? "border-neutral-900 bg-neutral-900 text-white"
+                            : "border-neutral-300 bg-white text-neutral-500 hover:border-neutral-400"
+                        }`}
+                      >
+                        {a.icon ? <><Icon name={a.icon} color="currentColor" />{" "}</> : null}{a.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
 
               {entries.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -1250,7 +1396,7 @@ export default function LogbuchClient({
                             : "border-neutral-300 bg-white text-neutral-500 hover:border-neutral-400"
                         }`}
                       >
-                        {v.icon ? `${v.icon} ` : ""}{v.label}
+                        {v.icon ? <><Icon name={v.icon} color="currentColor" />{" "}</> : null}{v.label}
                       </button>
                     ),
                   )}
@@ -1268,7 +1414,7 @@ export default function LogbuchClient({
               ) : (
                 /* Ansichts-Filter wechselt per Crossfade (wie die ThemenTabs
                    auf der Landing) statt hart umzuspringen. */
-                <CrossfadePanel activeKey={viewFilter}>
+                <CrossfadePanel activeKey={`${viewFilter}-${areaFilter}`}>
                 <ol className="mt-5 space-y-4">
                   {filteredEntries.map((entry) => {
                     const meta = typeMeta(entry.entry_type);
@@ -1296,6 +1442,13 @@ export default function LogbuchClient({
                             <span className="text-sm text-neutral-500">
                               {formatDate(entry.occurred_at ?? entry.created_at)}
                             </span>
+                            {/* Bereichs-Tag – nur in gemischten Büchern nötig */}
+                            {isMixedBook && (
+                              <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-semibold text-neutral-500">
+                                {areaMeta(entry.area ?? mediationType).icon}{" "}
+                                {areaMeta(entry.area ?? mediationType).label}
+                              </span>
+                            )}
                             <span
                               title={vis.hint}
                               className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
@@ -1306,7 +1459,7 @@ export default function LogbuchClient({
                                     : "bg-neutral-100 text-neutral-500"
                               }`}
                             >
-                              {vis.icon} {vis.label}
+                              <Icon name={vis.icon} color="currentColor" /> {vis.label}
                             </span>
                           </div>
                           {own && (
@@ -1317,7 +1470,7 @@ export default function LogbuchClient({
                                   onClick={() => changeVisibility(entry, "shared")}
                                   className="font-semibold text-emerald-600 transition hover:text-emerald-700"
                                 >
-                                  🤝 In Mediation teilen
+                                  <Icon name="handshake" color="currentColor" /> In Mediation teilen
                                 </button>
                               )}
                               {isLinked && (entry.visibility ?? "personal") === "shared" && (
@@ -1375,7 +1528,7 @@ export default function LogbuchClient({
                                         rel="noreferrer"
                                         className="break-all font-semibold text-accent-700 underline"
                                       >
-                                        📎 {file.name || "Datei"}
+                                        <Icon name="paperclip" color="currentColor" /> {file.name || "Datei"}
                                       </a>
                                     </span>
                                   ) : Array.isArray(v) ? (
@@ -1394,7 +1547,7 @@ export default function LogbuchClient({
                           <AnalysisCard analysis={entry.ai_analysis} showTip={!isBusiness} />
                         ) : analyzingId === entry.id ? (
                           <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 text-sm text-violet-700">
-                            ✨ Die KI prüft, was jetzt ein guter nächster Schritt wäre …
+                            <Icon name="sparkles" color="currentColor" /> Die KI prüft, was jetzt ein guter nächster Schritt wäre …
                           </div>
                         ) : (
                           <div className="mt-4">
@@ -1418,7 +1571,7 @@ export default function LogbuchClient({
                               disabled={analyzingId !== null}
                               className="text-sm font-semibold text-violet-600 transition hover:text-violet-700 disabled:opacity-50"
                             >
-                              ✨ KI-Einschätzung zu diesem Eintrag anfordern
+                              <Icon name="sparkles" color="currentColor" /> KI-Einschätzung zu diesem Eintrag anfordern
                             </button>
                           </div>
                         )}
@@ -1520,23 +1673,54 @@ export default function LogbuchClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
             <h2 className="font-display text-xl font-medium text-neutral-900">
-              Logbuch in Mediation umwandeln?
+              {isMixedBook
+                ? "Welchen Konflikt möchten Sie mediieren?"
+                : "Logbuch in Mediation umwandeln?"}
             </h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              Ihr Fall durchläuft danach den normalen Start (Fallaufnahme,
-              Paketwahl, Einladung der Gegenseite). Alle Logbuch-Einträge
-              bleiben erhalten – und bleiben privat: Mediator oder Gegenseite
-              sehen nur Einträge, die Sie später ausdrücklich in die Mediation
-              teilen.
+              {isMixedBook ? (
+                <>
+                  Ihr Logbuch enthält Einträge aus mehreren Bereichen. Wählen
+                  Sie den Bereich, um den es geht – nur dessen Einträge wandern
+                  in die neue Mediation, Ihr Logbuch bleibt mit dem Rest
+                  bestehen.
+                </>
+              ) : (
+                <>
+                  Ihr Fall durchläuft danach den normalen Start (Fallaufnahme,
+                  Paketwahl, Einladung der Gegenseite). Alle Logbuch-Einträge
+                  bleiben erhalten – und bleiben privat: Mediator oder
+                  Gegenseite sehen nur Einträge, die Sie später ausdrücklich in
+                  die Mediation teilen.
+                </>
+              )}
               {!isBusiness &&
-                " Sensible Einträge (🔒) bleiben immer nur für Sie sichtbar."}{" "}
+                <> Sensible Einträge (<Icon name="lock" size={12} color="currentColor" />) bleiben immer nur für Sie sichtbar.</>}{" "}
               Kosten entstehen erst mit der Freischaltung der Mediation.
             </p>
+            {isMixedBook && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {areasPresent.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => setConvertArea(a.key)}
+                    className={`rounded-full border px-4 py-2 text-sm transition ${
+                      convertArea === a.key
+                        ? "border-accent-500 bg-accent-50 font-semibold text-accent-700 ring-2 ring-accent-200"
+                        : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400"
+                    }`}
+                  >
+                    {a.icon ? <Icon name={a.icon} color="currentColor" /> : null} {a.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
                 onClick={convert}
-                disabled={converting}
+                disabled={converting || (isMixedBook && !convertArea)}
                 className="btn btn-primary disabled:opacity-50"
               >
                 {converting ? "Wird umgewandelt …" : "Ja, umwandeln"}

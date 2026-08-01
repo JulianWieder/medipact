@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { useState } from "react";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
@@ -63,7 +64,7 @@ export default function ForgotPasswordPage() {
             {submitted ? (
               <div className="space-y-6 text-center">
                 <div className="rounded-2xl border border-accent-200 bg-accent-50 p-6">
-                  <div className="mb-3 text-4xl">✅</div>
+                  <div className="mb-3"><Icon name="check-circle" size={36} /></div>
                   <p className="text-lg font-semibold text-accent-900">
                     E-Mail versendet!
                   </p>

@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/app/components/ui/Icon";
+
 // Geteilte, rein darstellende Bausteine für die Inhaltsarten eines Schritts.
 // Werden vom Phasen-Renderer (PhaseNotesClient) oberhalb der Notiz-Eingabe
 // angezeigt, sodass ein im WorkflowManager konfigurierter Video-/Videokonferenz-/
@@ -113,7 +115,7 @@ export default function StepContentBlocks({ meta }: { meta?: StepContentMeta | n
                 rel="noreferrer"
                 className="btn btn-primary text-sm"
               >
-                🎥 Videoraum beitreten
+                <Icon name="video" color="currentColor" /> Videoraum beitreten
               </a>
               <a
                 href={meta.meeting_url}

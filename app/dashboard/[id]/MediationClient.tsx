@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder";
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
 import { Reveal, stagger } from "@/app/components/ui/motion";
+import Icon from "@/app/components/ui/Icon";
 
 // Bezahl-Typen und das PayPal-SDK sind hier bewusst NICHT mehr definiert:
 // die Zahlung ist seit dem Umbau ein Schritt innerhalb der Mediation
@@ -540,7 +541,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                 onClick={() => router.push(`/dashboard/logbuch/${hashId(mediationId)}`)}
                 className="btn btn-ghost text-sm"
               >
-                📓 Logbuch &amp; Journal
+                <Icon name="notebook" color="currentColor" /> Logbuch &amp; Journal
               </button>
               {(userRole === "mediator" || userRole === "admin") && (
                 <button
@@ -548,7 +549,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                   onClick={() => router.push(`/dashboard/${hashId(mediationId)}/workflow`)}
                   className="btn btn-ghost text-sm"
                 >
-                  ⚙ Workflow-Einstellungen
+                  <Icon name="gear" color="currentColor" /> Workflow-Einstellungen
                 </button>
               )}
             </div>
@@ -663,7 +664,7 @@ export default function MediationClient({ mediationId, userRole, currentUserName
                           disabled={generating || !personalMessage.trim()}
                           className="btn btn-primary px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {generating ? "Formuliere…" : "✨ Professionell formulieren"}
+                          {generating ? "Formuliere…" : <><Icon name="sparkles" size={12} color="currentColor" /> Professionell formulieren</>}
                         </button>
                         <button
                           type="button"

@@ -27,6 +27,7 @@ import {
   type OrgOnboardingStatus,
 } from "../api";
 import { cn } from "../ui";
+import Icon from "@/app/components/ui/Icon";
 
 const STEPS = [
   { key: "profil", label: "Firmenprofil", icon: "🏢" },
@@ -603,7 +604,7 @@ export function FirmOnboardingWizard({ onClose, onFinished }: { onClose: () => v
               ) : (
                 <div className="flex items-end gap-3">
                   <div className="flex-1"><Field label="Unterschrift (Name eintippen)" value={signer} onChange={setSigner} placeholder="Vor- und Nachname" /></div>
-                  <button onClick={signContract} disabled={payBusy} className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50">✍ Unterschreiben</button>
+                  <button onClick={signContract} disabled={payBusy} className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50"><Icon name="signature" color="currentColor" /> Unterschreiben</button>
                 </div>
               )}
 
@@ -630,7 +631,7 @@ export function FirmOnboardingWizard({ onClose, onFinished }: { onClose: () => v
 
           {done && (
             <div className="py-6 text-center">
-              <div className="mb-3 text-4xl">🎉</div>
+              <div className="mb-3"><Icon name="party" size={36} /></div>
               <h3 className="text-lg font-semibold text-neutral-900">Alles eingerichtet</h3>
               <p className="mt-1 text-sm text-neutral-500">Weitere Fälle, Mediatoren und Beteiligte verwaltest du jederzeit im Workspace.</p>
             </div>

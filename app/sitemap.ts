@@ -12,7 +12,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  const lastModified = new Date("2026-07-31");
+  // Stand 2026-08-01: 9 Case-URLs auf Problem-Slugs umbenannt (neue URLs!),
+  // interne Links auf /cases, /methode, /konflikte/erbschaft angepasst.
+  const lastModified = new Date("2026-08-01");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -83,11 +85,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/konflikte/trennung`,
-      // Eigenes Datum: H1, Title, Description und Intro wurden am 29.07.
-      // auf "Scheidungsmediation" umgestellt. Mit dem gemeinsamen
-      // lastModified oben (21.07.) würde die Sitemap Google melden, die
-      // Seite sei seit vor der Änderung unverändert.
-      lastModified: new Date("2026-07-29"),
+      // Kein Sonderdatum mehr nötig: Das gemeinsame lastModified (01.08.)
+      // liegt nach der Scheidungsmediation-Umstellung vom 29.07., und die
+      // Seite wurde beim Case-Rename am 01.08. erneut angefasst.
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.7,
     },

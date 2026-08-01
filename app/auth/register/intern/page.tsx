@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { useState } from "react";
 
 export default function RegisterPage() {
@@ -102,7 +103,7 @@ export default function RegisterPage() {
       <main className="min-h-screen bg-white pt-[73px]">
         <div className="mx-auto max-w-md px-6 py-20 lg:px-8 lg:py-32">
           <div className="rounded-2xl border border-accent-200 bg-accent-50 p-8 text-center">
-            <div className="mb-4 text-5xl">📧</div>
+            <div className="mb-4"><Icon name="mail" size={44} /></div>
             <h1 className="text-2xl font-black text-accent-900 mb-3">
               E-Mail bestätigen
             </h1>
@@ -324,7 +325,7 @@ export default function RegisterPage() {
           {/* Info Box */}
           <div className="mt-10 rounded-2xl border border-accent-200 bg-accent-50 p-6">
             <h3 className="font-bold text-accent-900 mb-2">
-              🔐 Sichere Daten
+              <Icon name="lock" size={13} color="currentColor" /> Sichere Daten
             </h3>
             <p className="text-sm text-accent-800">
               Ihre Daten werden verschlüsselt und sicher gespeichert. Wir geben

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   RefreshControl,
@@ -14,11 +15,14 @@ import {
 
 import { ApiError, api, authHeaders, fileUrl } from "../api";
 import {
+  BUSINESS_TYPES,
+  VISIBILITIES,
   entryTypeLabel,
   formatDate,
   isUploadValue,
   labelsFor,
   looksLikeImage,
+  visMeta,
 } from "../logbuch";
 import { colors, radius, spacing } from "../theme";
 import {
@@ -29,12 +33,20 @@ import {
   PhaseStepsResponse,
   UploadValue,
 } from "../types";
-import { Badge, Button, Card, ErrorText } from "../ui";
+import { Badge, Button, Card, Chip, ErrorText } from "../ui";
 import EntryComposer from "./EntryComposer";
 
-type Props = { mediationId: number; title: string; onBack: () => void };
+type Props = {
+  mediationId: number;
+  title: string;
+  mode: string; // "logbuch" | "mediation"
+  mediationType: string;
+  onBack: () => void;
+  // Öffnet den Betreuungskalender (nur bei Trennung angeboten).
+  onOpenCare?: () => void;
+};
 
-export default function LogbookScreen({ mediationId, title, onBack }: Props) {
+export default function LogbookScreen({ mediationId, title, mode, mediationType, onBack, onOpenCare }: Props) {
   const [entries, setEntries] = useState<LogEntry[] | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [status, setStatus] = useState<LogbuchStatus | null>(null);
@@ -45,8 +57,33 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
   const [analyzing, setAnalyzing] = useState<number | null>(null);
   const [aiNotice, setAiNotice] = useState<string | null>(null);
   const [premiumNotice, setPremiumNotice] = useState<string | null>(null);
+  const [viewFilter, setViewFilter] = useState("alle");
+
+  // Wie im Web-LogbuchClient: Business = Falldokumentation (kein Sensibel,
+  // kein persönlicher Tipp); isLinked = Logbuch läuft neben einer Mediation,
+  // erst dann gibt es "In Mediation teilen".
+  const isBusiness = BUSINESS_TYPES.has(mediationType);
+  const isLinked = mode !== "logbuch";
 
   const labels = useMemo(() => labelsFor(blocks), [blocks]);
+
+  const filterOptions = useMemo(
+    () => [
+      { key: "alle", label: "Alle", icon: "" },
+      ...VISIBILITIES.filter(
+        (v) => (!isBusiness || v.key !== "private") && (isLinked || v.key !== "shared"),
+      ),
+    ],
+    [isBusiness, isLinked],
+  );
+
+  const filteredEntries = useMemo(
+    () =>
+      viewFilter === "alle"
+        ? entries ?? []
+        : (entries ?? []).filter((e) => (e.visibility ?? "personal") === viewFilter),
+    [entries, viewFilter],
+  );
 
   const load = useCallback(async () => {
     setError(null);
@@ -135,12 +172,48 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
   );
 
   const deleteEntry = useCallback(
-    async (id: number) => {
+    (id: number) => {
+      Alert.alert("Eintrag löschen?", "Der Eintrag wird endgültig entfernt.", [
+        { text: "Abbrechen", style: "cancel" },
+        {
+          text: "Löschen",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              try {
+                await api(`/mediations/${mediationId}/logbuch/entries/${id}`, {
+                  method: "DELETE",
+                });
+                setEntries((prev) => (prev ?? []).filter((e) => e.id !== id));
+              } catch (e) {
+                setError(
+                  e instanceof ApiError ? e.message : "Eintrag konnte nicht gelöscht werden.",
+                );
+              }
+            })();
+          },
+        },
+      ]);
+    },
+    [mediationId],
+  );
+
+  // Bewusst nicht in der App: Umwandlung in eine Mediation (Start-Flow mit
+  // Paketwahl/Einladung läuft auf der Website).
+
+  // Teilen = PATCH visibility (kein eigener Push-Endpunkt im Backend).
+  const changeVisibility = useCallback(
+    async (entry: LogEntry, visibility: string) => {
       try {
-        await api(`/mediations/${mediationId}/logbuch/entries/${id}`, { method: "DELETE" });
-        setEntries((prev) => (prev ?? []).filter((e) => e.id !== id));
+        const updated = await api<LogEntry>(
+          `/mediations/${mediationId}/logbuch/entries/${entry.id}`,
+          { method: "PATCH", body: { visibility } },
+        );
+        setEntries((prev) =>
+          (prev ?? []).map((e) => (e.id === entry.id ? { ...e, ...updated, is_own: e.is_own } : e)),
+        );
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : "Eintrag konnte nicht gelöscht werden.");
+        setError(e instanceof ApiError ? e.message : "Sichtbarkeit konnte nicht geändert werden.");
       }
     },
     [mediationId],
@@ -225,6 +298,7 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
             mediationId={mediationId}
             blocks={blocks}
             editing={editing}
+            isBusiness={isBusiness}
             onSaved={handleSaved}
             onCancel={() => {
               setComposing(false);
@@ -234,7 +308,17 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
             onUploadCounted={() => void refreshStatus()}
           />
         ) : (
-          <Button title="+ Neuer Eintrag" onPress={() => setComposing(true)} style={{ marginBottom: spacing.lg }} />
+          <View style={{ marginBottom: spacing.lg }}>
+            <Button title="+ Neuer Eintrag" onPress={() => setComposing(true)} />
+            {mediationType === "trennung" && onOpenCare && (
+              <Button
+                title="📅 Betreuungskalender"
+                variant="ghost"
+                onPress={onOpenCare}
+                style={{ marginTop: spacing.sm }}
+              />
+            )}
+          </View>
         )}
 
         {aiNotice && (
@@ -253,12 +337,42 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
           </Card>
         )}
 
-        {entries.map((entry) => (
+        {entries.length > 0 && (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: spacing.sm }}>
+            {filterOptions.map((f) => (
+              <Chip
+                key={f.key}
+                label={f.icon ? `${f.icon} ${f.label}` : f.label}
+                active={viewFilter === f.key}
+                onPress={() => setViewFilter(f.key)}
+              />
+            ))}
+          </View>
+        )}
+
+        {entries.length > 0 && filteredEntries.length === 0 && (
+          <Card>
+            <Text style={styles.emptyText}>Keine Einträge in dieser Ansicht.</Text>
+          </Card>
+        )}
+
+        {filteredEntries.map((entry) => {
+          const vis = (entry.visibility ?? "personal") as string;
+          const own = entry.is_own !== false;
+          return (
           <Card key={entry.id}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={styles.entryType}>{entryTypeLabel(entry.entry_type)}</Text>
+              <Text style={styles.entryType}>{entryTypeLabel(entry.entry_type, isBusiness)}</Text>
               <Text style={styles.entryDate}>{formatDate(entry.occurred_at ?? entry.created_at)}</Text>
             </View>
+            {vis !== "personal" && (
+              <View style={{ marginTop: spacing.sm }}>
+                <Badge
+                  label={`${visMeta(vis).icon} ${visMeta(vis).label}`}
+                  tone={vis === "private" ? "amber" : "accent"}
+                />
+              </View>
+            )}
             {entry.title ? <Text style={styles.entryTitle}>{entry.title}</Text> : null}
             {renderContent(entry)}
 
@@ -276,11 +390,11 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
                     {s.warum ? <Text style={styles.analysisText}>{s.warum}</Text> : null}
                   </View>
                 ))}
-                {entry.ai_analysis.tipp ? (
+                {entry.ai_analysis.tipp && !isBusiness ? (
                   <Text style={styles.analysisTip}>💡 {entry.ai_analysis.tipp}</Text>
                 ) : null}
               </View>
-            ) : (
+            ) : own ? (
               <Button
                 title="KI-Analyse anfordern"
                 variant="ghost"
@@ -288,18 +402,33 @@ export default function LogbookScreen({ mediationId, title, onBack }: Props) {
                 onPress={() => void analyzeEntry(entry.id)}
                 style={{ marginTop: spacing.md }}
               />
-            )}
+            ) : null}
 
-            <View style={{ flexDirection: "row", marginTop: spacing.md }}>
-              <Pressable onPress={() => setEditing(entry)} hitSlop={8} style={{ marginRight: spacing.xl }}>
-                <Text style={styles.actionLink}>Bearbeiten</Text>
-              </Pressable>
-              <Pressable onPress={() => void deleteEntry(entry.id)} hitSlop={8}>
-                <Text style={[styles.actionLink, { color: colors.danger }]}>Löschen</Text>
-              </Pressable>
-            </View>
+            {own && (
+              <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: spacing.md }}>
+                <Pressable onPress={() => setEditing(entry)} hitSlop={8} style={{ marginRight: spacing.xl }}>
+                  <Text style={styles.actionLink}>Bearbeiten</Text>
+                </Pressable>
+                <Pressable onPress={() => deleteEntry(entry.id)} hitSlop={8} style={{ marginRight: spacing.xl }}>
+                  <Text style={[styles.actionLink, { color: colors.danger }]}>Löschen</Text>
+                </Pressable>
+                {isLinked && vis === "personal" && (
+                  <Pressable onPress={() => void changeVisibility(entry, "shared")} hitSlop={8}>
+                    <Text style={[styles.actionLink, { color: colors.accentDark }]}>
+                      🤝 In Mediation teilen
+                    </Text>
+                  </Pressable>
+                )}
+                {isLinked && vis === "shared" && (
+                  <Pressable onPress={() => void changeVisibility(entry, "personal")} hitSlop={8}>
+                    <Text style={styles.actionLink}>Nicht mehr teilen</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
           </Card>
-        ))}
+          );
+        })}
       </ScrollView>
     </View>
   );

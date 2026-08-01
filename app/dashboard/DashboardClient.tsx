@@ -19,6 +19,7 @@ import {
 import { Reveal, stagger } from "@/app/components/ui/motion";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { PHASES } from "@/app/workspace/types";
+import Icon from "@/app/components/ui/Icon";
 
 interface Mediation {
   id: string | number;
@@ -84,11 +85,69 @@ const typeLabel: Record<string, string> = {
   geschaeft: "ODR – Geschäft & Organisation",
 };
 
+// ── Konflikt-Logbuch (Ein-Buch-Umbau) ───────────────────────────────────────
+// Es gibt EIN Logbuch pro Nutzer:in; die Karte zeigt die neuesten Einträge als
+// Vorschau. Bereiche hängen am Eintrag (area) – kurze Labels für die Chips.
+interface LogPreviewEntry {
+  id: number;
+  entry_type: string;
+  area?: string | null;
+  title?: string | null;
+  occurred_at: string | null;
+  created_at: string | null;
+  content?: Record<string, unknown>;
+}
+
+const logEntryMeta: Record<string, { icon: string; label: string }> = {
+  vorkommnis: { icon: "📌", label: "Vorkommnis" },
+  gedanke: { icon: "💭", label: "Gedanke" },
+  gespraech: { icon: "🗣️", label: "Gespräch" },
+  email: { icon: "✉️", label: "E-Mail" },
+  whatsapp: { icon: "💬", label: "WhatsApp" },
+  telefonat: { icon: "📞", label: "Telefonat" },
+};
+
+const areaShortLabel: Record<string, string> = {
+  trennung: "Trennung & Familie",
+  erbschaft: "Erbschaft",
+  nachbarschaft: "Nachbarschaft",
+  wg: "WG",
+  verbraucher: "Verbraucher",
+  odr: "Geschäft & Arbeit",
+  schlichtung: "Geschäft & Arbeit",
+  ecommerce: "Geschäft & Arbeit",
+  b2b: "Geschäft & Arbeit",
+  geschaeft: "Geschäft & Arbeit",
+};
+
+function logEntrySnippet(e: LogPreviewEntry): string {
+  if (e.title && e.title.trim()) return e.title.trim();
+  for (const v of Object.values(e.content ?? {})) {
+    if (typeof v === "string" && v.trim()) {
+      const t = v.trim().replace(/\s+/g, " ");
+      return t.length > 90 ? `${t.slice(0, 90)} …` : t;
+    }
+  }
+  return "";
+}
+
+function logEntryDate(e: LogPreviewEntry): string {
+  const iso = e.occurred_at ?? e.created_at;
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export default function DashboardClient() {
   const [data, setData] = useState<Mediation[]>([]);
   // Kostenlose Konflikt-Logbücher (mode="logbuch") – eigene Sektion, zählen
   // nicht in die Verfahrens-Statistiken hinein.
   const [logbooks, setLogbooks] = useState<Mediation[]>([]);
+  // Eintrags-Vorschau je Logbuch (Ein-Buch-Karte + Erkennung des Hauptbuchs).
+  const [logEntriesByBook, setLogEntriesByBook] = useState<Record<string, LogPreviewEntry[]>>({});
+  const [deletingLogId, setDeletingLogId] = useState<number | null>(null);
+  const [logError, setLogError] = useState("");
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
@@ -141,7 +200,23 @@ export default function DashboardClient() {
             }),
           );
           setData(mapped.filter((m: Mediation) => m.mode !== "logbuch"));
-          setLogbooks(mapped.filter((m: Mediation) => m.mode === "logbuch"));
+          const books = mapped.filter((m: Mediation) => m.mode === "logbuch");
+          setLogbooks(books);
+          // Vorschau-Einträge aller Bücher laden: bestimmt das Hauptbuch
+          // (meiste Einträge – Alt-Duplikate sind meist leer) und füllt die
+          // Eintrags-Vorschau der Karte.
+          void Promise.all(
+            books.map(async (b: Mediation) => {
+              try {
+                const r = await fetch(`/api/mediations/${b.id}/logbuch/entries`, {
+                  cache: "no-store",
+                });
+                return [String(b.id), r.ok ? await r.json() : []] as const;
+              } catch {
+                return [String(b.id), []] as const;
+              }
+            }),
+          ).then((pairs) => setLogEntriesByBook(Object.fromEntries(pairs)));
         }
 
         if (invitesRes.ok) {
@@ -156,6 +231,60 @@ export default function DashboardClient() {
 
     load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Ein-Buch-Prinzip: Hauptbuch = meiste Einträge (Tie: ältestes) ──
+  const primaryBook = useMemo(() => {
+    if (logbooks.length === 0) return null;
+    return [...logbooks].sort((a, b) => {
+      const ea = logEntriesByBook[String(a.id)]?.length ?? 0;
+      const eb = logEntriesByBook[String(b.id)]?.length ?? 0;
+      if (eb !== ea) return eb - ea;
+      return Number(a.id) - Number(b.id);
+    })[0];
+  }, [logbooks, logEntriesByBook]);
+
+  const otherBooks = useMemo(
+    () => logbooks.filter((b) => b.id !== primaryBook?.id),
+    [logbooks, primaryBook],
+  );
+
+  const previewEntries = useMemo(
+    () =>
+      primaryBook
+        ? (logEntriesByBook[String(primaryBook.id)] ?? []).slice(0, 3)
+        : [],
+    [primaryBook, logEntriesByBook],
+  );
+
+  const primaryCount = primaryBook
+    ? (logEntriesByBook[String(primaryBook.id)]?.length ?? 0)
+    : 0;
+
+  // Alte/doppelte Logbücher direkt vom Dashboard aus löschen (Aufräum-Pfad
+  // für die vor dem Ein-Buch-Umbau angesammelten Duplikate).
+  async function deleteLogbook(id: number) {
+    const n = logEntriesByBook[String(id)]?.length ?? 0;
+    const warn =
+      n > 0
+        ? `Dieses Logbuch mit ${n} ${n === 1 ? "Eintrag" : "Einträgen"} unwiderruflich löschen?`
+        : "Dieses leere Logbuch löschen?";
+    if (!window.confirm(warn)) return;
+    setDeletingLogId(id);
+    setLogError("");
+    try {
+      const res = await fetch(`/api/mediations/${id}`, { method: "DELETE" });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        setLogError(body?.detail ?? body?.error ?? `Löschen fehlgeschlagen (${res.status})`);
+        return;
+      }
+      setLogbooks((prev) => prev.filter((b) => Number(b.id) !== id));
+    } catch {
+      setLogError("Server nicht erreichbar.");
+    } finally {
+      setDeletingLogId(null);
+    }
+  }
 
   async function acceptInvite(invite: PendingInvite) {
     setAcceptingId(invite.invite_id);
@@ -649,54 +778,142 @@ export default function DashboardClient() {
           )}
         </CrossfadePanel>
 
-        {/* ── Konflikt-Logbücher (kostenlos) – bewusst UNTER den Mediationen:
-             die Verfahren bleiben im Fokus, das Logbuch ist Ergänzung. ── */}
-        {logbooks.length > 0 && (
+        {/* ── Dein Konflikt-Logbuch (Ein-Buch-Prinzip) – bewusst UNTER den
+             Mediationen: die Verfahren bleiben im Fokus. EINE Karte mit den
+             neuesten Einträgen als Vorschau; alte Duplikat-Bücher aus der
+             Zeit vor dem Umbau lassen sich darunter aufräumen. ── */}
+        {primaryBook && (
           <Reveal className="mt-14">
             <div className="hairline mb-10" />
             <div className="mb-1 flex items-center gap-3">
               <h2 className="font-display text-lg font-medium text-neutral-900">
-                {logbooks.length === 1 ? "Dein Konflikt-Logbuch" : "Deine Konflikt-Logbücher"}
+                Dein Konflikt-Logbuch
               </h2>
               <span className="rounded-full border border-accent-200 bg-accent-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-700">
                 kostenlos
               </span>
             </div>
             <p className="mb-5 text-sm font-light text-neutral-500">
-              Dokumentierter Streit – noch keine Mediation. Umwandeln kannst du
-              jederzeit.
+              Dein privates Gedächtnisprotokoll – ein Buch für alle Konflikte,
+              jeder Eintrag einem Bereich zugeordnet. Umwandeln in eine
+              Mediation kannst du jederzeit.
             </p>
-            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-              {logbooks.map((log, i) => (
-                <a
-                  key={`logbuch-${log.id}`}
-                  href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
-                  className={cn(
-                    "group flex w-full items-center gap-4 px-5 py-4 text-left",
-                    rowHover,
-                    i > 0 && "border-t border-neutral-100",
-                  )}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-neutral-900">
-                      {log.title || "Konflikt-Logbuch"}
-                    </span>
-                    <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
-                      {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
-                    </span>
-                  </span>
-                  <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
-                    ›
-                  </span>
-                </a>
-              ))}
-            </div>
+
+            {logError && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {logError}
+              </div>
+            )}
+
             <a
-              href="/dashboard/logbuch/new"
-              className="mt-3 inline-block text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
+              href={`/dashboard/logbuch/${encodeId(Number(primaryBook.id))}`}
+              className={cn(
+                "group block overflow-hidden rounded-2xl border border-neutral-200 bg-white",
+                cardLift,
+              )}
             >
-              Weiteren Streit dokumentieren →
+              <span className="flex items-center gap-4 px-5 py-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-lg">
+                  <Icon name="notebook" size={20} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-neutral-900">
+                    {primaryBook.title || "Konflikt-Logbuch"}
+                  </span>
+                  <span className="mt-0.5 block text-xs font-light text-neutral-500">
+                    {primaryCount === 0
+                      ? "Noch keine Einträge"
+                      : `${primaryCount} ${primaryCount === 1 ? "Eintrag" : "Einträge"}`}
+                  </span>
+                </span>
+                <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                  ›
+                </span>
+              </span>
+
+              {/* Vorschau: die 3 neuesten Einträge */}
+              {previewEntries.length > 0 ? (
+                <span className="block border-t border-neutral-100">
+                  {previewEntries.map((e) => {
+                    const meta = logEntryMeta[e.entry_type] ?? logEntryMeta.vorkommnis;
+                    const snippet = logEntrySnippet(e);
+                    const area = areaShortLabel[(e.area ?? "").toLowerCase()];
+                    return (
+                      <span
+                        key={`log-preview-${e.id}`}
+                        className="flex items-baseline gap-3 border-t border-neutral-50 px-5 py-2.5 first:border-t-0"
+                      >
+                        <span className="shrink-0"><Icon name={meta.icon} size={15} /></span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-neutral-700">
+                          <span className="font-medium text-neutral-900">{meta.label}</span>
+                          {snippet && <span className="text-neutral-500"> – {snippet}</span>}
+                        </span>
+                        {area && (
+                          <span className="hidden shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500 sm:inline">
+                            {area}
+                          </span>
+                        )}
+                        <span className="shrink-0 text-xs font-light tabular-nums text-neutral-400">
+                          {logEntryDate(e)}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </span>
+              ) : (
+                <span className="block border-t border-neutral-100 px-5 py-3 text-xs font-light text-neutral-400">
+                  Halte das erste Vorkommnis fest – Gespräche, Nachrichten,
+                  Gedanken, Fotos.
+                </span>
+              )}
             </a>
+
+            {/* Alte Duplikat-Bücher (vor dem Ein-Buch-Umbau angelegt) */}
+            {otherBooks.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                  Weitere (ältere) Logbücher – am besten aufräumen
+                </p>
+                <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                  {otherBooks.map((log, i) => {
+                    const count = logEntriesByBook[String(log.id)]?.length ?? 0;
+                    return (
+                      <div
+                        key={`logbuch-${log.id}`}
+                        className={cn(
+                          "flex w-full items-center gap-4 px-5 py-3",
+                          i > 0 && "border-t border-neutral-100",
+                        )}
+                      >
+                        <a
+                          href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
+                          className="min-w-0 flex-1 hover:text-accent-700"
+                        >
+                          <span className="block truncate text-sm font-medium text-neutral-900">
+                            {log.title || "Konflikt-Logbuch"}
+                          </span>
+                          <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
+                            {count === 0
+                              ? "leer"
+                              : `${count} ${count === 1 ? "Eintrag" : "Einträge"}`}
+                            {" · "}
+                            {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
+                          </span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => deleteLogbook(Number(log.id))}
+                          disabled={deletingLogId === Number(log.id)}
+                          className="shrink-0 text-xs font-semibold text-neutral-400 transition hover:text-red-500 disabled:opacity-50"
+                        >
+                          {deletingLogId === Number(log.id) ? "Wird gelöscht …" : "Löschen"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </Reveal>
         )}
       </section>

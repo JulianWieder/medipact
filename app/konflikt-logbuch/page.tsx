@@ -195,7 +195,7 @@ export default function KonfliktLogbuchPage() {
             </div>
             <div className="mt-14 grid gap-8 md:grid-cols-3">
               <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-                <span className="text-2xl">🧠</span>
+                <Icon name="brain" size={26} />
                 <h3 className="heading-3 mt-4 mb-2">Frische Erinnerung</h3>
                 <p className="text-sm leading-6 text-neutral-600">
                   Ein Gedächtnisprotokoll direkt nach dem Vorfall ist präzise –
@@ -204,7 +204,7 @@ export default function KonfliktLogbuchPage() {
                 </p>
               </div>
               <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-                <span className="text-2xl">📈</span>
+                <Icon name="trend-up" size={26} />
                 <h3 className="heading-3 mt-4 mb-2">Muster sichtbar machen</h3>
                 <p className="text-sm leading-6 text-neutral-600">
                   Wie oft kommt es wirklich vor? Ob Lärmprotokoll in der
@@ -213,7 +213,7 @@ export default function KonfliktLogbuchPage() {
                 </p>
               </div>
               <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-                <span className="text-2xl">🧭</span>
+                <Icon name="compass" size={26} />
                 <h3 className="heading-3 mt-4 mb-2">Startpunkt für die Lösung</h3>
                 <p className="text-sm leading-6 text-neutral-600">
                   Ob Mediation, Schlichtung oder anwaltliche Beratung: Eine

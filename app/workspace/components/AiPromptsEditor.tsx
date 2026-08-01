@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchAiPrompts, saveAiPrompt, resetAiPrompt, type AiPromptDto } from "../api";
+import Icon from "@/app/components/ui/Icon";
 
 export default function AiPromptsEditor() {
   const [open, setOpen] = useState(false);
@@ -67,7 +68,7 @@ export default function AiPromptsEditor() {
         className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
       >
         <span>
-          <span className="text-sm font-bold text-neutral-900">🧠 KI-Prompts bearbeiten</span>
+          <span className="text-sm font-bold text-neutral-900"><Icon name="brain" size={15} color="currentColor" /> KI-Prompts bearbeiten</span>
           <span className="ml-2 text-xs text-neutral-400">
             Steuert, wie die KI Einladungstexte, Zusammenfassungen, Verträge und die Analyse formuliert
           </span>

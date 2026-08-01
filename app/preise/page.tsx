@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
+import Icon from "@/app/components/ui/Icon";
 
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
@@ -96,7 +97,7 @@ export default function Preise() {
               {/* ONLINE-PROZESS */}
               <div className="rounded-2xl border-2 border-accent-200 bg-white p-8 hover:shadow-xl transition">
                 <div className="inline-flex items-center gap-2 rounded border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-semibold text-accent-700 uppercase mb-6">
-                  🧭 Online-Prozess
+                  <Icon name="compass" color="currentColor" /> Online-Prozess
                 </div>
                 <h2 className="text-3xl font-black text-neutral-900 mb-2">
                   Schnell &
@@ -125,7 +126,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Pro Partei – Einstiegstarif
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -137,7 +138,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Pro Partei – Einstiegstarif
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
                   </p>
 
                   <p className="text-xs text-neutral-500 mt-1">
@@ -155,7 +156,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Pro Partei (z.B. 2 Personen = je €399)
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei (z.B. 2 Personen = je €399)
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -167,7 +168,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Einmalig für den Fall
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig für den Fall
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -179,7 +180,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Einmalig für den Fall
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig für den Fall
                   </p>
                 </div>
 
@@ -234,7 +235,7 @@ export default function Preise() {
                   Beliebt
                 </div>
                 <div className="inline-flex items-center gap-2 rounded border border-accent-300 bg-accent-100 px-3 py-1.5 text-xs font-semibold text-accent-700 uppercase mb-6">
-                  👥 Hybrid
+                  <Icon name="users" color="currentColor" /> Hybrid
                 </div>
                 <h2 className="text-3xl font-black text-neutral-900 mb-2">
                   Persönlich &
@@ -256,7 +257,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ In der Regel €499 × 2 (beide Parteien) – 2 Std.
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €499 × 2 (beide Parteien) – 2 Std.
                     persönliche Mediation bereits enthalten
                   </p>
 
@@ -269,7 +270,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Nur falls benötigt, aufgeteilt auf alle Parteien
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Nur falls benötigt, aufgeteilt auf alle Parteien
                   </p>
 
                   <div className="bg-neutral-50 rounded-lg p-4 mt-4 border border-neutral-200">
@@ -335,7 +336,7 @@ export default function Preise() {
               {/* VOLLSERVICE */}
               <div className="rounded-2xl border-2 border-neutral-300 bg-white p-8 hover:shadow-xl transition">
                 <div className="inline-flex items-center gap-2 rounded border border-neutral-300 bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-700 uppercase mb-6">
-                  🛡️ Vollservice
+                  <Icon name="shield" color="currentColor" /> Vollservice
                 </div>
                 <h2 className="text-3xl font-black text-neutral-900 mb-2">
                   Komplett &
@@ -358,7 +359,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ In der Regel €899 × 2 – 5 Std. Mediator + anwaltliche
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €899 × 2 – 5 Std. Mediator + anwaltliche
                     Ersteinschätzung bereits enthalten
                   </p>
 
@@ -371,7 +372,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    ➜ Aufgeteilt auf alle Parteien
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Aufgeteilt auf alle Parteien
                   </p>
 
                   <div className="bg-neutral-50 rounded-lg p-4 mt-4 border border-neutral-200">
@@ -525,7 +526,7 @@ export default function Preise() {
                   href="tel:+4915209942351"
                   className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
                 >
-                  📞 Oder direkt anrufen: +49 1520 9942351
+                  <Icon name="phone" color="currentColor" /> Oder direkt anrufen: +49 1520 9942351
                 </a>
               </div>
 
@@ -582,7 +583,7 @@ export default function Preise() {
                   href="tel:+4915209942351"
                   className="mt-3 inline-flex w-full items-center justify-center text-sm font-semibold text-accent-300 transition hover:text-accent-200"
                 >
-                  📞 Oder direkt anrufen: +49 1520 9942351
+                  <Icon name="phone" color="currentColor" /> Oder direkt anrufen: +49 1520 9942351
                 </a>
               </div>
 
@@ -622,7 +623,7 @@ export default function Preise() {
                   href="tel:+4915209942351"
                   className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-accent-700 transition hover:bg-accent-50"
                 >
-                  📞 Bitte direkt anrufen: +49 1520 9942351
+                  <Icon name="phone" color="currentColor" /> Bitte direkt anrufen: +49 1520 9942351
                 </a>
                 <a
                   href="mailto:hallo@medipact.de?subject=Business%20Premium%20%E2%80%93%20R%C3%BCckruf%20erbeten"

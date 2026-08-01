@@ -15,42 +15,38 @@ import { colors, radius, spacing } from "../theme";
 import { CaseSummary } from "../types";
 import { Badge, Button, Card, ErrorText } from "../ui";
 
-const CONFLICT_TYPES: { type: string; title: string; description: string; icon: string }[] = [
+// Gleiche 5 Typen wie LogbuchNewClient im Web (WG wurde gestrichen).
+const CONFLICT_TYPES: { type: string; title: string; description: string; icon: string; business?: boolean }[] = [
   {
     type: "trennung",
     title: "Trennung & Familie",
-    description: "Trennung, Scheidung, Umgang, Familienkonflikte.",
+    description: "Partnerschaft, Trennung, Umgang.",
     icon: "💔",
-  },
-  {
-    type: "nachbarschaft",
-    title: "Nachbarschaft",
-    description: "Lärm, Grenzen, Miteinander im Haus oder am Zaun.",
-    icon: "🏡",
-  },
-  {
-    type: "wg",
-    title: "WG & Zusammenleben",
-    description: "Mitbewohner, Putzplan, Finanzen, Auszug.",
-    icon: "🛋️",
-  },
-  {
-    type: "verbraucher",
-    title: "Verbraucher",
-    description: "Ärger mit Händlern, Werkstätten, Dienstleistern.",
-    icon: "🛒",
   },
   {
     type: "erbschaft",
     title: "Erbschaft",
-    description: "Streit in der Erbengemeinschaft, Nachlass, Immobilie.",
+    description: "Erbengemeinschaft, Nachlass, Immobilie.",
     icon: "📜",
+  },
+  {
+    type: "nachbarschaft",
+    title: "Nachbarschaft",
+    description: "Lärm, Grenze, Garten, Parken.",
+    icon: "🏡",
+  },
+  {
+    type: "verbraucher",
+    title: "Verbraucher & Handwerker",
+    description: "Mängel, Rechnungen, Leistungen.",
+    icon: "🧾",
   },
   {
     type: "odr",
     title: "Geschäft & Arbeit",
-    description: "Team, Gesellschafter, Kunden, Lieferanten (B2B).",
+    description: "Team, Gesellschafter, Kunden, B2B.",
     icon: "🏢",
+    business: true,
   },
 ];
 
@@ -58,10 +54,13 @@ export default function CasesScreen({
   onOpen,
   onLoggedOut,
 }: {
-  onOpen: (id: number, title: string) => void;
+  onOpen: (id: number, title: string, mode: string, mediationType: string) => void;
   onLoggedOut: () => void;
 }) {
   const [cases, setCases] = useState<CaseSummary[] | null>(null);
+  // Laufende Mediationen: das Logbuch läuft dort als "Logbuch & Journal zum
+  // Fall" weiter (wie im Web) – sonst verschwände es nach der Umwandlung.
+  const [linkedCases, setLinkedCases] = useState<CaseSummary[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
@@ -72,6 +71,7 @@ export default function CasesScreen({
     try {
       const all = await api<CaseSummary[]>("/mediations/me");
       setCases(all.filter((c) => c.mode === "logbuch"));
+      setLinkedCases(all.filter((c) => c.mode !== "logbuch"));
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         onLoggedOut();
@@ -92,19 +92,20 @@ export default function CasesScreen({
     setRefreshing(false);
   }, [load]);
 
-  const createLogbook = async (type: string, title: string) => {
+  const createLogbook = async (type: string, title: string, business?: boolean) => {
     setCreating(type);
     setError(null);
+    const fullTitle = business ? `Falldokumentation – ${title}` : `Logbuch – ${title}`;
     try {
       const body = await api<{ mediation_id?: number; id?: number }>("/mediations", {
         method: "POST",
-        body: { mediation_type: type, mode: "logbuch", title: `Logbuch – ${title}` },
+        body: { mediation_type: type, mode: "logbuch", title: fullTitle },
       });
       const id = body.mediation_id ?? body.id;
       if (id != null) {
         setShowNew(false);
         await load();
-        onOpen(Number(id), `Logbuch – ${title}`);
+        onOpen(Number(id), fullTitle, "logbuch", type);
       }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Logbuch konnte nicht angelegt werden.");
@@ -143,7 +144,7 @@ export default function CasesScreen({
               <View>
                 <Text style={styles.sectionLabel}>Worum geht es?</Text>
                 {CONFLICT_TYPES.map((t) => (
-                  <Pressable key={t.type} onPress={() => createLogbook(t.type, t.title)}>
+                  <Pressable key={t.type} onPress={() => createLogbook(t.type, t.title, t.business)}>
                     <Card style={creating === t.type ? { opacity: 0.5 } : undefined}>
                       <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <Text style={{ fontSize: 28, marginRight: spacing.md }}>{t.icon}</Text>
@@ -172,7 +173,11 @@ export default function CasesScreen({
           )
         }
         renderItem={({ item }) => (
-          <Pressable onPress={() => onOpen(item.mediation_id, item.title ?? "Logbuch")}>
+          <Pressable
+            onPress={() =>
+              onOpen(item.mediation_id, item.title ?? "Logbuch", item.mode, item.mediation_type)
+            }
+          >
             <Card>
               <Text style={styles.caseTitle}>{item.title ?? "Logbuch"}</Text>
               <Text style={styles.caseMeta}>
@@ -182,6 +187,31 @@ export default function CasesScreen({
             </Card>
           </Pressable>
         )}
+        ListFooterComponent={
+          showNew || linkedCases.length === 0 ? null : (
+            <View>
+              <Text style={[styles.sectionLabel, { marginTop: spacing.xl }]}>
+                Logbuch & Journal zum Fall
+              </Text>
+              {linkedCases.map((c) => (
+                <Pressable
+                  key={c.mediation_id}
+                  onPress={() =>
+                    onOpen(c.mediation_id, c.title ?? "Fall", c.mode, c.mediation_type)
+                  }
+                >
+                  <Card>
+                    <Text style={styles.caseTitle}>{c.title ?? "Fall"}</Text>
+                    <Text style={styles.caseMeta}>
+                      Laufende Mediation – Ihr Logbuch läuft hier weiter. Geteilte Einträge sehen
+                      alle Beteiligten.
+                    </Text>
+                  </Card>
+                </Pressable>
+              ))}
+            </View>
+          )
+        }
       />
 
       {!showNew && (

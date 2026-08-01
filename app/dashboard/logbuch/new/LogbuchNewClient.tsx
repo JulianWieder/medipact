@@ -1,13 +1,12 @@
 "use client";
 
-// ── Streit anlegen: Einstieg ins kostenlose Konflikt-Logbuch ────────────────
+// ── Ihr Konflikt-Logbuch: anlegen ODER öffnen (Ein-Buch-Prinzip) ────────────
 //
-// EIN Logbuch statt 6 "Produkt"-Karten (Nutzer-Feedback): Die Nutzer:in legt
-// ein Logbuch an und ordnet den Konflikt nur grob einem Bereich zu (kompakte
-// Chips). Der Bereich (mediation_type) bleibt intern wichtig – er bestimmt
-// die Intake-Vorlage und die spätere Umwandlung in eine Mediation.
-// mode="logbuch"; die weitere Aufnahme (logbuch_intake) läuft über
-// WorkflowManager-Blöcke im Logbuch selbst.
+// Es gibt genau EIN Konflikt-Logbuch pro Nutzer:in. Der Bereich hängt seit dem
+// Ein-Buch-Umbau am einzelnen EINTRAG (mediation_log_entries.area) – die Chips
+// hier setzen nur noch den Start-Bereich des Buchs (Intake-Vorlage/Default).
+// Existiert bereits ein Buch, gibt das Backend es zurück (existing=true) und
+// wir leiten einfach dorthin weiter, statt ein Duplikat anzulegen.
 
 import { encodeId } from "@/lib/ids";
 import { Reveal } from "@/app/components/ui/motion";
@@ -54,7 +53,10 @@ export default function LogbuchNewClient() {
         return;
       }
       const id = body?.mediation_id ?? body?.id;
-      router.push(`/dashboard/logbuch/${encodeId(Number(id))}?neu=1`);
+      // Vorhandenes Buch → einfach öffnen (kein "neu"-Zustand).
+      router.push(
+        `/dashboard/logbuch/${encodeId(Number(id))}${body?.existing ? "" : "?neu=1"}`,
+      );
     } catch {
       setError("Server nicht erreichbar.");
     } finally {
@@ -74,17 +76,19 @@ export default function LogbuchNewClient() {
         </span>
         <h1 className="heading-1 mt-4 text-neutral-900">Ihr Konflikt-Logbuch</h1>
         <p className="mt-4 max-w-2xl text-lg leading-8 text-neutral-600">
-          Halten Sie fest, was passiert: Vorkommnisse, Gespräche, E-Mails,
-          Nachrichten, Telefonate und Ihre Gedanken. Vertraulich, kostenlos,
-          jederzeit in eine Mediation umwandelbar.
+          Ein Buch für alles: Halten Sie fest, was passiert – Vorkommnisse,
+          Gespräche, E-Mails, Nachrichten, Telefonate, Gedanken. Jeder Eintrag
+          lässt sich einem Bereich zuordnen. Vertraulich, kostenlos, jederzeit
+          in eine Mediation umwandelbar.
         </p>
 
         <Reveal className="mt-10 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8">
           <p className="text-sm font-semibold text-neutral-800">
-            Wohin gehört Ihr Konflikt am ehesten?
+            Worum geht es im Moment hauptsächlich?
           </p>
           <p className="mt-1 text-xs text-neutral-400">
-            Nur eine grobe Einordnung – alles Weitere halten Sie im Logbuch fest.
+            Nur der Startpunkt – im Logbuch ordnen Sie jeden Eintrag frei einem
+            Bereich zu.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">

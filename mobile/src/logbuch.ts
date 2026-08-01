@@ -10,9 +10,36 @@ export const ENTRY_TYPES: { key: string; label: string; icon: string }[] = [
   { key: "telefonat", label: "Telefonat", icon: "📞" },
 ];
 
-export function entryTypeLabel(key: string): string {
-  const t = ENTRY_TYPES.find((e) => e.key === key);
+// Business/ODR-Logbücher heißen "Falldokumentation": sachliche Labels,
+// kein Sensibel-Schalter, kein persönlicher KI-Tipp (wie LogbuchClient im Web).
+export const BUSINESS_TYPES = new Set(["odr", "schlichtung", "ecommerce", "b2b", "geschaeft"]);
+
+const BUSINESS_ENTRY_LABELS: Record<string, string> = {
+  vorkommnis: "Vorgang",
+  gedanke: "Interne Notiz",
+  gespraech: "Besprechung",
+  whatsapp: "Nachricht",
+};
+
+export function entryTypes(isBusiness: boolean): { key: string; label: string; icon: string }[] {
+  if (!isBusiness) return ENTRY_TYPES;
+  return ENTRY_TYPES.map((t) => ({ ...t, label: BUSINESS_ENTRY_LABELS[t.key] ?? t.label }));
+}
+
+export function entryTypeLabel(key: string, isBusiness = false): string {
+  const t = entryTypes(isBusiness).find((e) => e.key === key);
   return t ? `${t.icon} ${t.label}` : key;
+}
+
+// Sichtbarkeits-Meta für Badge + Filter (Schlüssel wie im Backend).
+export const VISIBILITIES: { key: string; label: string; icon: string }[] = [
+  { key: "personal", label: "Dokumentation", icon: "📓" },
+  { key: "private", label: "Sensibel", icon: "🔒" },
+  { key: "shared", label: "Geteilt", icon: "🤝" },
+];
+
+export function visMeta(key: string | undefined | null) {
+  return VISIBILITIES.find((v) => v.key === (key ?? "personal")) ?? VISIBILITIES[0];
 }
 
 /** Label eines Blocks (prompt/label/title – wie _block_labels im Backend). */

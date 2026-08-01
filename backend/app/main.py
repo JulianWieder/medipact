@@ -5,6 +5,7 @@ from app.config import settings
 from app.routers import (
     ai_prompts,
     auth,
+    betreuung,
     block_responses,
     custom_steps,
     dev_test,
@@ -44,6 +45,7 @@ app.include_router(phase_step_defaults.router)
 app.include_router(mediation_variants.router)
 app.include_router(mediation_chat.router)
 app.include_router(logbuch.router)
+app.include_router(betreuung.router)
 app.include_router(step_content.router)
 app.include_router(block_responses.router)
 app.include_router(invoices.router)

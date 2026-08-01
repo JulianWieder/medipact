@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { hashId } from "@/lib/ids";
+import Icon from "@/app/components/ui/Icon";
 
 type Props = { mediationId: string };
 
@@ -143,7 +144,7 @@ export default function LeitfadenClient({ mediationId }: Props) {
                   </p>
                 )}
                 {"note" in section && section.note && (
-                  <p className="mt-3 text-xs font-medium text-amber-700">⚠ {section.note}</p>
+                  <p className="mt-3 text-xs font-medium text-amber-700"><Icon name="warning" size={12} color="currentColor" /> {section.note}</p>
                 )}
               </div>
             ))}

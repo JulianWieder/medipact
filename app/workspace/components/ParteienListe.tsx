@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ParticipantWithCase } from "../types";
 import { EmptyState, cn } from "../ui";
 import { fetchAllMediations, fetchMediations, fetchParticipants, fetchAllUsers } from "../api";
+import Icon from "@/app/components/ui/Icon";
 
 interface UserEntry {
   id: string;
@@ -208,7 +209,7 @@ export function ParteienListe({ selectedId, onSelect, isAdmin = false }: Parteie
                     {c.mediatorName && (
                       <>
                         <span className="text-xs text-neutral-300">·</span>
-                        <span className="text-xs text-accent-600">⚖ {c.mediatorName}</span>
+                        <span className="text-xs text-accent-600"><Icon name="scale" size={12} color="currentColor" /> {c.mediatorName}</span>
                       </>
                     )}
                   </div>

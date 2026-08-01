@@ -55,6 +55,10 @@ export type LogEntry = {
   title: string | null;
   content: Record<string, BlockValue>;
   author_participant_id: number;
+  // Journal-Ausbau: "private" (Sensibel, nur Autor:in) | "personal" (Default)
+  // | "shared" (in die Mediation gepusht). is_own steuert Bearbeiten/Löschen.
+  visibility: string;
+  is_own?: boolean;
   ai_analysis: Analysis | null;
   ai_analysis_at: string | null;
   created_at: string | null;

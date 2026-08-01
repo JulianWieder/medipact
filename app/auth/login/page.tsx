@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/app/components/ui/Icon";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -155,7 +156,7 @@ function LoginForm() {
           <Card className="p-8">
             {justVerified && !error && (
               <div className="mb-6 rounded-2xl border border-accent-200 bg-accent-50 p-4 text-sm text-accent-800 font-medium">
-                ✅ E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
+                <Icon name="check-circle" color="currentColor" /> E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
               </div>
             )}
             {error && (

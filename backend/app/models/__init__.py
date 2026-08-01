@@ -21,3 +21,5 @@ from app.models.newsletter_subscriber import NewsletterSubscriber
 from app.models.mediation_chat_message import MediationChatMessage
 from app.models.mediation_log_entry import MediationLogEntry
 from app.models.mediation_log_upload import MediationLogUpload
+from app.models.mediation_care_rule import MediationCareRule
+from app.models.mediation_care_time import MediationCareTime
