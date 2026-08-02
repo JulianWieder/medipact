@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import karrierePhoto from "@/fotos/medi_karriere.jpg";
 import { pageMetadata } from "@/lib/seo";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Karriere bei medipact – Mitgestalten statt verwalten",
@@ -68,9 +67,7 @@ export default function KarrierePage() {
             <h1 className="mt-8 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
               Konflikte lösen –
               <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
-                <TiltLastWord className="bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent">
-                  mit Methode und Haltung.
-                </TiltLastWord>
+                mit Methode und Haltung.
               </span>
             </h1>
 

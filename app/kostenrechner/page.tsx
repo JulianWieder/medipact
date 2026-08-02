@@ -11,7 +11,6 @@ import {
 import { ladePreisOverlay } from "@/lib/pricing-matrix";
 import KostenrechnerClient from "./KostenrechnerClient";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 
 // ── /kostenrechner ──────────────────────────────────────────────────────────
@@ -141,9 +140,7 @@ export default async function Kostenrechner({
 
             <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
               Was kostet der Streit?{" "}
-              <span className="text-accent-300">
-                <TiltLastWord>Vor Gericht — und ohne.</TiltLastWord>
-              </span>
+              <span className="text-accent-300">Vor Gericht — und ohne.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
               Gerichts- und Anwaltskosten richten sich nach festen gesetzlichen

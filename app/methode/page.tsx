@@ -14,7 +14,6 @@ import step4Photo from "../../fotos/schritte/4.jpg";
 import step5Photo from "../../fotos/schritte/5.jpg";
 import step6Photo from "../../fotos/schritte/6.jpg";
 import { pageMetadata } from "@/lib/seo";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Ablauf einer Mediation: 6 Schritte bei medipact",
@@ -373,9 +372,7 @@ export default function MethodePage() {
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Drei Gründe, warum es funktioniert.{" "}
-            <span className="text-accent-300">
-              <TiltLastWord>Sechs Schritte zur Einigung.</TiltLastWord>
-            </span>
+            <span className="text-accent-300">Sechs Schritte zur Einigung.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">

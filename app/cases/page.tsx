@@ -5,7 +5,6 @@ import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import MiniMatrix from "@/app/components/MiniMatrix";
 import mediModernPhoto from "@/fotos/medi_modern.jpg";
 import { pageMetadata } from "@/lib/seo";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Fallbeispiele – So löst Mediation echte Konflikte | medipact",
@@ -197,9 +196,7 @@ export default function CasesPage() {
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Wie Mediation echte Konflikte{" "}
-            <span className="text-accent-300">
-              <TiltLastWord>tatsächlich löst</TiltLastWord>
-            </span>
+            <span className="text-accent-300">tatsächlich löst</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">

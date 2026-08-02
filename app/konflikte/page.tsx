@@ -7,7 +7,6 @@ import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
 import { pageMetadata } from "@/lib/seo";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Konfliktarten: die 6 Arten im Überblick | medipact",
@@ -177,9 +176,7 @@ export default function KonfliktePage() {
               der stärkste Impressionen-Lieferant der Seite. */}
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Konfliktarten erkennen.{" "}
-            <span className="text-accent-300">
-              <TiltLastWord>Mediation schafft Klarheit.</TiltLastWord>
-            </span>
+            <span className="text-accent-300">Mediation schafft Klarheit.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">

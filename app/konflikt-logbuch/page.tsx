@@ -7,7 +7,6 @@ import { Card } from "@/app/components/ui/Card";
 import logbuchPhoto from "../../fotos/medi_gespraech.jpg";
 import Icon from "@/app/components/ui/Icon";
 import { pageMetadata } from "@/lib/seo";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
@@ -151,9 +150,7 @@ export default function KonfliktLogbuchPage() {
               <h1 className="mt-5 text-5xl font-black tracking-tight text-white lg:text-6xl">
                 Ihr Streit-Tagebuch.
                 <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                  <TiltLastWord className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
-                    Das Konflikt-Logbuch.
-                  </TiltLastWord>
+                  Das Konflikt-Logbuch.
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">

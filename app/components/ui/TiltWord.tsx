@@ -7,6 +7,14 @@
  * und keine Barrierefreiheit (der Text bleibt normaler, markierbarer
  * Flow-Text; nur die Darstellung ist gedreht).
  *
+ * BEWUSST NUR AUF DER STARTSEITE (HeroScrollPin). Kurz stand die Kippung
+ * auf allen 16 Heros — das war zu viel: Ribbit macht das auf einer
+ * einzigen Seite, bei Wiederholung liest man es nicht mehr als Absicht,
+ * sondern als Template. Dazu kommt, dass die Akzent-Zeile auf Mobil
+ * umbricht; landet das gekippte Wort allein auf der letzten Zeile, wirkt
+ * es wie kaputtes CSS. Vor dem Ausrollen auf weitere Seiten also erst auf
+ * einem echten Geraet ansehen.
+ *
  * ACHTUNG Gradient-Ueberschriften: bei Zeilen mit
  * `bg-clip-text text-transparent` darf der gekippte Teil NICHT einfach
  * innerhalb der Gradient-Span stehen — das transform erzeugt einen eigenen

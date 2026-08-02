@@ -3,7 +3,6 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
 import Icon from "@/app/components/ui/Icon";
-import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
@@ -26,9 +25,7 @@ export default function Preise() {
               <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
                 Transparente Preise.
                 <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                  <TiltLastWord className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
-                    Fair aufgeteilt.
-                  </TiltLastWord>
+                  Fair aufgeteilt.
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
