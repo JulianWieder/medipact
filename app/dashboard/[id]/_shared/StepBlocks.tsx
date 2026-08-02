@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { StepBlockDto } from "@/app/workspace/types";
 import Icon from "@/app/components/ui/Icon";
 import FallFreischaltungBlock from "./FallFreischaltungBlock";
+import VertragBlock from "./VertragBlock";
 import {
   fetchBlockResponses,
   saveBlockResponse,
@@ -62,6 +63,14 @@ function cfgNum(config: Record<string, unknown>, key: string, fallback = 0): num
 function cfgArr(config: Record<string, unknown>, key: string): string[] {
   const v = config?.[key];
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+/** Pflichtfeld? (config.required, im Workflow Manager je Eingabe-Block setzbar) */
+function isRequired(config: Record<string, unknown>): boolean {
+  return config?.required === true;
+}
+/** Roter Stern hinter der Beschriftung eines Pflichtfelds. */
+function Req({ config }: { config: Record<string, unknown> }) {
+  return isRequired(config) ? <span className="ml-0.5 text-red-500">*</span> : null;
 }
 
 function toEmbedUrl(url: string): string | null {
@@ -186,12 +195,22 @@ export default function StepBlocks({
   stepKey,
   blocks,
   onPaid,
+  onValuesChange,
+  viewerRole,
+  viewerName,
   preview = false,
 }: {
   mediationId: string;
   phase: string;
   stepKey: string;
   blocks: StepBlockDto[];
+  /** Meldet die aktuellen Block-Antworten nach oben (Block-id → Wert), damit der
+   *  Schritt seine Pflichtfelder prüfen kann, bevor er abgeschlossen wird. */
+  onValuesChange?: (values: Record<string, unknown>) => void;
+  /** Rolle und Name des angemeldeten Teilnehmers – der Vertrags-Block zeigt dem
+   *  Mediator andere Bedienelemente als den Parteien. */
+  viewerRole?: string;
+  viewerName?: string;
   /** Optional: wird vom Block "fall_freischaltung" gemeldet, sobald der eigene
    *  Anteil reserviert/bezahlt ist. PhaseNotesClient lädt darauf die gesperrte
    *  Phase neu, ohne dass die Seite neu geladen werden muss. */
@@ -239,6 +258,14 @@ export default function StepBlocks({
   useEffect(() => {
     loadPurchases();
   }, [loadPurchases]);
+
+  // Werte nach oben spiegeln. Über eine ref, damit ein neu erzeugter Callback
+  // des Aufrufers keine Endlosschleife auslöst (der Aufrufer setzt darauf State).
+  const valuesChangeRef = useRef(onValuesChange);
+  valuesChangeRef.current = onValuesChange;
+  useEffect(() => {
+    valuesChangeRef.current?.(values);
+  }, [values]);
 
   const persist = useCallback(
     (block: StepBlockDto, value: unknown, immediate = false) => {
@@ -361,7 +388,7 @@ export default function StepBlocks({
         const label = cfgStr(c, "label");
         return (
           <div key={block.id}>
-            {label && <p className="mb-1 text-sm font-medium text-neutral-700">{label}<SavedHint id={block.id} /></p>}
+            {label && <p className="mb-1 text-sm font-medium text-neutral-700">{label}<Req config={c} /><SavedHint id={block.id} /></p>}
             <textarea value={str} onChange={(e) => setVal(block, e.target.value)} placeholder={cfgStr(c, "placeholder") || "Deine Eingabe …"} rows={3} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400" />
             {!label && <div className="text-right"><SavedHint id={block.id} /></div>}
           </div>
@@ -370,7 +397,7 @@ export default function StepBlocks({
       case "frage":
         return (
           <div key={block.id} className="rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-violet-600">Frage<SavedHint id={block.id} /></p>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-violet-600">Frage<Req config={c} /><SavedHint id={block.id} /></p>
             {cfgStr(c, "prompt") && <p className="mb-2 whitespace-pre-wrap text-sm text-neutral-800">{cfgStr(c, "prompt")}</p>}
             <textarea value={str} onChange={(e) => setVal(block, e.target.value)} placeholder="Deine Antwort …" rows={2} className="w-full rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400" />
           </div>
@@ -406,7 +433,7 @@ export default function StepBlocks({
         };
         return (
           <div key={block.id}>
-            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<SavedHint id={block.id} /></p>}
+            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<Req config={c} /><SavedHint id={block.id} /></p>}
             <div className="space-y-1">
               {opts.map((o, i) => (
                 <label key={i} className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 hover:border-accent-300">
@@ -424,7 +451,7 @@ export default function StepBlocks({
         const val = typeof raw === "number" ? raw : Math.round((min + max) / 2);
         return (
           <div key={block.id}>
-            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<SavedHint id={block.id} /></p>}
+            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<Req config={c} /><SavedHint id={block.id} /></p>}
             <div className="flex items-center justify-between text-[11px] text-neutral-400">
               <span>{cfgStr(c, "minLabel") || min}</span>
               <span className="font-semibold text-accent-600">{typeof raw === "number" ? raw : "—"}</span>
@@ -466,7 +493,7 @@ export default function StepBlocks({
         const [addKey] = [`add-${block.id}`];
         return (
           <div key={block.id}>
-            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<SavedHint id={block.id} /></p>}
+            {cfgStr(c, "prompt") && <p className="mb-1 text-sm font-medium text-neutral-700">{cfgStr(c, "prompt")}<Req config={c} /><SavedHint id={block.id} /></p>}
             <div className="space-y-1">
               {items.map((it, i) => (
                 <div key={i} className="flex items-center gap-1">
@@ -493,7 +520,7 @@ export default function StepBlocks({
         const label = cfgStr(c, "label");
         return (
           <div key={block.id}>
-            {label && <p className="mb-1 text-sm font-medium text-neutral-700">{label}<SavedHint id={block.id} /></p>}
+            {label && <p className="mb-1 text-sm font-medium text-neutral-700">{label}<Req config={c} /><SavedHint id={block.id} /></p>}
             <input type="date" value={str} onChange={(e) => setVal(block, e.target.value, true)} className="w-48 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent-400" />
             {cfgStr(c, "help") && <p className="mt-1 text-xs text-neutral-400">{cfgStr(c, "help")}</p>}
           </div>
@@ -514,7 +541,7 @@ export default function StepBlocks({
         return (
           <label key={block.id} className="flex items-start gap-2 rounded-2xl border border-neutral-200 bg-white p-3 text-sm text-neutral-700">
             <input type="checkbox" checked={agreed} onChange={(e) => setVal(block, { agreed: e.target.checked, at: new Date().toISOString() }, true)} className="mt-0.5" />
-            <span>{cfgStr(c, "text") || "Ich stimme zu."}<SavedHint id={block.id} /></span>
+            <span>{cfgStr(c, "text") || "Ich stimme zu."}<Req config={c} /><SavedHint id={block.id} /></span>
           </label>
         );
       }
@@ -522,7 +549,7 @@ export default function StepBlocks({
         const name = typeof raw === "object" && raw !== null ? String((raw as { name?: unknown }).name ?? "") : "";
         return (
           <div key={block.id} className="rounded-2xl border border-neutral-200 p-4">
-            <p className="mb-2 text-sm text-neutral-600">{cfgStr(c, "statement") || "Ich bestätige die Angaben."}<SavedHint id={block.id} /></p>
+            <p className="mb-2 text-sm text-neutral-600">{cfgStr(c, "statement") || "Ich bestätige die Angaben."}<Req config={c} /><SavedHint id={block.id} /></p>
             <input value={name} onChange={(e) => setVal(block, { name: e.target.value, at: new Date().toISOString() })} placeholder="Vollständigen Namen eingeben" className="w-full rounded-lg border-b-2 border-neutral-300 px-2 py-1.5 font-serif text-lg italic text-neutral-800 focus:border-accent-400 focus:outline-none" />
           </div>
         );
@@ -647,7 +674,25 @@ export default function StepBlocks({
       case "feedback":
         return <div key={block.id} className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-700"><Icon name="star" color="currentColor" /> Feedback-Fragebogen erscheint zum passenden Zeitpunkt.</div>;
       case "vertrag":
-        return <div key={block.id} className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-700">§ Vertrag / Dokument – siehe Vertrags-Bereich dieses Falls.</div>;
+        // In der Vorschau statisch – sonst würde der Designer den echten Vertrag
+        // des zuletzt geöffneten Falls laden bzw. erzeugen.
+        if (preview) {
+          return (
+            <div key={block.id} className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-700">
+              § Mediationsvertrag – im Fall steht hier der aus den Antworten erzeugte
+              Vertragstext samt Unterschrift beider Seiten.
+            </div>
+          );
+        }
+        return (
+          <VertragBlock
+            key={block.id}
+            mediationId={mediationId}
+            viewerRole={viewerRole}
+            viewerName={viewerName}
+            template={cfgStr(c, "template")}
+          />
+        );
       case "ki_prompt":
       case "ki_zusammenfassung":
       case "ki_reframing":

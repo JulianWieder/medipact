@@ -1342,6 +1342,20 @@ function StepDesignerPanel({
                   </div>
                   {def?.hint && <p className="mt-1 text-[10px] leading-snug text-neutral-400">{def.hint}</p>}
                   <BlockConfigEditor block={b} onChange={(patch) => onChangeBlockConfig(b.id, patch)} />
+                  {/* Pflichtfeld gilt für JEDEN Eingabe-Block gleich, deshalb hier
+                      zentral statt in jedem Fall des BlockConfigEditor. Ohne diese
+                      Angabe konnte ein Schritt abgeschlossen werden, ohne dass die
+                      für die Einigung nötigen Angaben überhaupt gemacht wurden. */}
+                  {def?.capturesResponse && def.responseAuthor === "user" && (
+                    <label className="mt-2 flex items-center gap-2 text-[11px] text-neutral-600">
+                      <input
+                        type="checkbox"
+                        checked={(b.config ?? {}).required === true}
+                        onChange={(e) => onChangeBlockConfig(b.id, { required: e.target.checked })}
+                      />
+                      Pflichtfeld – Schritt lässt sich ohne Antwort nicht abschließen
+                    </label>
+                  )}
                 </div>
               );
             })

@@ -39,6 +39,7 @@
   "app/dashboard/[id]/MediationClient.tsx",
   "app/dashboard/[id]/_shared/PhaseNotesClient.tsx",
   "app/dashboard/[id]/_shared/StepBlocks.tsx",
+  "app/dashboard/[id]/_shared/VertragBlock.tsx",
   "app/dashboard/[id]/_shared/StepContentBlocks.tsx",
   "app/components/layout/DashboardHeaderClient.tsx",
   "app/components/mediation/InviteMeetRecorder.tsx",

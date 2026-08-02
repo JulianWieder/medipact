@@ -500,6 +500,73 @@ export interface StepBlock {
   visible_if?: unknown | null;
 }
 
+// ── Eingabe-Blöcke & Pflichtfelder ─────────────────────────────────────────
+//
+// Bis hierher rendert JEDER Schritt zusätzlich das generische
+// „Punkt hinzufügen +"-Feld aus PhaseNotesClient — auch dann, wenn der Schritt
+// längst eigene, passende Eingabe-Blöcke hat. Die Teilnehmer sahen also ein
+// beziehungsloses Feld und mussten irgendetwas hineinschreiben, damit sich der
+// Schritt abschließen ließ. Diese Helfer entscheiden, ob ein Schritt seine
+// Eingaben schon selbst mitbringt.
+
+/** Erzeugt dieser Blocktyp eine Eingabe der Teilnehmer (nicht der KI)? */
+export function isUserInputBlock(type: string): boolean {
+  const def = BLOCK_TYPE_BY_ID[type];
+  return def?.capturesResponse === true && def.responseAuthor === "user";
+}
+
+/** Alle Blöcke eines Schritts, in die die Teilnehmer etwas eingeben. */
+export function userInputBlocks<T extends { type: string }>(blocks: T[] | null | undefined): T[] {
+  return (blocks ?? []).filter((b) => isUserInputBlock(b.type));
+}
+
+/** Leerer/nicht beantworteter Wert? Deckt alle Wertformen der Blocktypen ab. */
+export function isBlockValueEmpty(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (typeof value === "number") return Number.isNaN(value);
+  if (typeof value === "boolean") return value === false;
+  if (Array.isArray(value)) return value.filter((v) => String(v ?? "").trim() !== "").length === 0;
+  if (typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    // zustimmung: {agreed}, unterschrift: {name}, datei_upload: {url}
+    if ("agreed" in o) return o.agreed !== true;
+    if ("name" in o) return String(o.name ?? "").trim() === "";
+    if ("url" in o) return String(o.url ?? "").trim() === "";
+    return Object.keys(o).length === 0;
+  }
+  return false;
+}
+
+/** Beschriftung eines Blocks für Fehlermeldungen („Bitte noch ausfüllen: …"). */
+export function blockLabel(block: { type: string; config?: Record<string, unknown> }): string {
+  const c = block.config ?? {};
+  for (const key of ["prompt", "label", "text", "statement"]) {
+    const v = c[key];
+    if (typeof v === "string" && v.trim()) {
+      const one = v.trim().split("\n")[0];
+      return one.length > 60 ? `${one.slice(0, 57)}…` : one;
+    }
+  }
+  return BLOCK_TYPE_BY_ID[block.type]?.label ?? block.type;
+}
+
+/**
+ * Pflichtfelder eines Schritts, die noch keine Antwort haben.
+ * `values` ist die Block-id → Wert-Zuordnung aus StepBlocks.
+ */
+export function missingRequiredBlocks<T extends { id: string; type: string; config?: Record<string, unknown> }>(
+  blocks: T[] | null | undefined,
+  values: Record<string, unknown>,
+): T[] {
+  return (blocks ?? []).filter(
+    (b) =>
+      isUserInputBlock(b.type) &&
+      (b.config ?? {}).required === true &&
+      isBlockValueEmpty(values[b.id]),
+  );
+}
+
 /** Legt einen neuen Block eines Typs mit seinen Startwerten an. */
 export function makeBlock(type: string): StepBlock {
   const def = BLOCK_TYPE_BY_ID[type];

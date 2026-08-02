@@ -234,14 +234,21 @@ def list_block_responses(
     mediation_id: int,
     phase: Optional[str] = None,
     step_key: Optional[str] = None,
+    include_others: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
     """
     Antworten eines Falls. Mediator/Owner/Admin sehen ALLE Beiträge (Grundlage
-    der Auswertung); eine Konfliktpartei sieht ihre eigenen sowie KI- und
-    freigegebene/geteilte Beiträge nicht automatisch – der Einfachheit halber
-    liefert dieser Endpunkt für Parteien nur die EIGENEN Antworten zurück.
+    der Auswertung); eine Konfliktpartei sieht standardmäßig nur die EIGENEN.
+
+    `include_others=true` (nur zusammen mit `step_key`) liefert einer Partei
+    zusätzlich die Antworten der anderen Parteien — aber erst, wenn ALLE für
+    diesen Schritt nötigen Rollen abgegeben haben. Ohne das blieb die
+    Gegenüberstellung nach dem Abschluss eines block-basierten Schritts leer:
+    die Parteien sahen nie, worin sie übereinstimmen und worin nicht — genau
+    das ist aber der Punkt, an dem eine Einigung entsteht. Vertrauliche Notizen
+    (nur für den Mediator) bleiben auch dann ausgeschlossen.
     """
     # Onboarding-Phase ("einladung") ist vor der Zahlung nutzbar (Start-Flow);
     # "logbuch" (kostenloses Konflikt-Logbuch) ist per Design kostenlos.
@@ -260,7 +267,25 @@ def list_block_responses(
     if step_key:
         query = query.filter(MediationBlockResponse.step_key == step_key)
     if own is not None and own.role not in _MEDIATOR_ROLES:
-        query = query.filter(MediationBlockResponse.author_key == str(own.id))
+        share = False
+        if include_others and step_key and phase:
+            # Erst gemeinsam sichtbar, wenn alle nötigen Rollen abgegeben haben —
+            # dieselbe Bedingung, unter der auch die Notizen-Gegenüberstellung
+            # (PhaseNotesClient, view="reflection") erscheint.
+            from app.routers.mediations import _step_all_submitted
+
+            share = _step_all_submitted(db, mediation_id, phase, step_key)
+        if share:
+            # Eigene Beiträge immer; von den anderen alles außer den
+            # vertraulichen Notizen (die gehören ausschließlich dem Mediator).
+            query = query.filter(
+                or_(
+                    MediationBlockResponse.author_key == str(own.id),
+                    MediationBlockResponse.block_type != "vertrauliche_notiz",
+                )
+            )
+        else:
+            query = query.filter(MediationBlockResponse.author_key == str(own.id))
     rows = query.order_by(MediationBlockResponse.step_key, MediationBlockResponse.block_id).all()
     return [_serialize(r) for r in rows]
 

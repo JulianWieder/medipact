@@ -2367,6 +2367,162 @@ class ContractSignRequest(BaseModel):
     signed_name: str
 
 
+# Phase, aus deren Eingaben der Mediationsvertrag entsteht.
+CONTRACT_SOURCE_PHASE = "einleitung"
+
+# Blocktypen, deren Antworten in den Vertrag einfließen. Vertrauliche Notizen
+# fehlen bewusst: sie gehören nur dem Mediator und dürfen nicht über den
+# Vertragstext bei der anderen Seite landen.
+_CONTRACT_INPUT_TYPES = {
+    "texteingabe",
+    "frage",
+    "auswahl",
+    "skala",
+    "ranking",
+    "liste",
+    "datum",
+    "betrag",
+    "zustimmung",
+    "unterschrift",
+}
+
+
+def _fmt_block_value(value) -> str:
+    """Antwortwert eines Blocks als Satzteil für den KI-Prompt."""
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "ja" if value else "nein"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        return "; ".join(str(v).strip() for v in value if str(v).strip())
+    if isinstance(value, dict):
+        if "agreed" in value:
+            return "zugestimmt" if value.get("agreed") is True else "nicht zugestimmt"
+        if "name" in value:
+            return str(value.get("name") or "").strip()
+        if "url" in value:
+            return str(value.get("name") or value.get("url") or "").strip()
+    return str(value)
+
+
+def _cmp_block_value(value) -> str:
+    """Vergleichsform – in Mehrfachauswahlen ist die Reihenfolge egal."""
+    if isinstance(value, list):
+        return "|".join(sorted(str(v).strip().lower() for v in value if str(v).strip()))
+    if isinstance(value, dict) and "agreed" in value:
+        return str(value.get("agreed") is True)
+    return _fmt_block_value(value).strip().lower()
+
+
+def _contract_inputs_text(db: Session, mediation: Mediation) -> str:
+    """Eingaben der Einleitungsphase als geordnete Vorlage für den Vertrag.
+
+    Vorher las diese Funktion nur die Freitext-Notizen und filterte dabei auf
+    `MediationNote.phase in ("einleitung", "einleitung_rollen", …)` – die drei
+    letzten sind aber SCHRITT-Schlüssel, keine Phasen. Es kam also nie etwas
+    anderes an als die Notizen der Phase „einleitung", und die strukturierten
+    Antworten der Blöcke (Ablauf, Regeln, Vertraulichkeit, Kosten) fehlten
+    vollständig. Jetzt gehen genau sie in den Vertrag ein – Frage für Frage,
+    Partei für Partei, mit Markierung, wo sich die Seiten einig sind.
+    """
+    # Konfliktparteien (Mediator/Admin unterschreiben den Vertrag nicht).
+    parties = [
+        (p, u)
+        for p, u in db.query(MediationParticipant, User)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(MediationParticipant.mediation_id == mediation.id)
+        .all()
+        if p.role not in ("mediator", "admin")
+    ]
+    if not parties:
+        return ""
+
+    responses = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation.id,
+            MediationBlockResponse.phase == CONTRACT_SOURCE_PHASE,
+        )
+        .all()
+    )
+    by_block: dict[tuple[str, str], dict[str, object]] = {}
+    for r in responses:
+        by_block.setdefault((r.step_key, r.block_id), {})[r.author_key] = r.value
+
+    sections: list[str] = []
+    for step in _phase_step_defaults_for(db, mediation, CONTRACT_SOURCE_PHASE):
+        lines: list[str] = []
+        for block in step.blocks or []:
+            if not isinstance(block, dict):
+                continue
+            btype = block.get("type")
+            if btype not in _CONTRACT_INPUT_TYPES:
+                continue
+            cfg = block.get("config") or {}
+            label = (
+                cfg.get("prompt")
+                or cfg.get("label")
+                or cfg.get("text")
+                or cfg.get("statement")
+                or str(btype)
+            )
+            answers = by_block.get((step.step_key, str(block.get("id"))), {})
+            given = []
+            for p, u in parties:
+                text = _fmt_block_value(answers.get(str(p.id)))
+                if text:
+                    given.append((u.name, text, _cmp_block_value(answers.get(str(p.id)))))
+            if not given:
+                continue
+            marker = ""
+            if len(given) > 1:
+                marker = (
+                    " [EINIG]"
+                    if len({g[2] for g in given}) == 1
+                    else " [UNTERSCHIEDLICH]"
+                )
+            lines.append(f"Frage: {str(label).strip()}{marker}")
+            for name, text, _ in given:
+                lines.append(f"  {name}: {text}")
+        if lines:
+            sections.append(f"## {step.title}\n" + "\n".join(lines))
+
+    # Altbestand: Schritte ohne Blöcke speichern ihre Eingaben weiterhin als
+    # Notiz-Liste. Ohne diesen Teil verlöre ein laufender Fall seine Antworten.
+    note_rows = (
+        db.query(MediationNote, MediationParticipant, User)
+        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
+        .join(User, MediationParticipant.user_id == User.id)
+        .filter(
+            MediationNote.mediation_id == mediation.id,
+            MediationNote.phase == CONTRACT_SOURCE_PHASE,
+            MediationNote.submitted.is_(True),
+        )
+        .all()
+    )
+    import json as _json
+
+    free_text: list[str] = []
+    for note, _participant, user in note_rows:
+        try:
+            items = _json.loads(note.content)
+            if not isinstance(items, list):
+                items = [note.content]
+        except Exception:
+            items = [note.content]
+        items_text = "\n".join(f"- {i}" for i in items if str(i).strip())
+        if items_text:
+            free_text.append(f"{user.name} (Schritt {note.step}):\n{items_text}")
+    if free_text:
+        sections.append("## Weitere freie Eingaben\n" + "\n\n".join(free_text))
+
+    return "\n\n".join(sections)
+
+
 @router.post("/{mediation_id}/contract/generate")
 def generate_contract(
     mediation_id: int,
@@ -2394,44 +2550,9 @@ def generate_contract(
     if participant is not None:
         billing.ensure_unlocked(mediation, participant, current_user)
 
-    # Alle Phase-1-Notizen laden
-    phase_keys = ["einleitung", "einleitung_rollen", "einleitung_vertrauen", "einleitung_ziel"]
-    notes = (
-        db.query(MediationNote, MediationParticipant, User)
-        .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
-        .join(User, MediationParticipant.user_id == User.id)
-        .filter(
-            MediationNote.mediation_id == mediation_id,
-            MediationNote.phase.in_(phase_keys),
-            MediationNote.submitted == True,
-        )
-        .all()
-    )
-
-    if not notes:
+    notes_text = _contract_inputs_text(db, mediation)
+    if not notes_text.strip():
         raise HTTPException(status_code=422, detail="Noch keine abgeschlossenen Eingaben in Phase 1")
-
-    STEP_LABELS = {
-        "einleitung": "Regeln",
-        "einleitung_rollen": "Rollen",
-        "einleitung_vertrauen": "Vertrauen",
-        "einleitung_ziel": "Ziel",
-    }
-
-    parts = []
-    for note, participant, user in notes:
-        import json as _json
-        try:
-            items = _json.loads(note.content)
-            if not isinstance(items, list):
-                items = [note.content]
-        except Exception:
-            items = [note.content]
-        items_text = "\n".join(f"- {i}" for i in items if i.strip())
-        if items_text:
-            parts.append(f"{user.name} ({STEP_LABELS.get(note.phase, note.phase)}):\n{items_text}")
-
-    notes_text = "\n\n".join(parts)
 
     prompt = get_prompt("contract", notes_text=notes_text)
 

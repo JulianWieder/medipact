@@ -7,6 +7,8 @@ import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from 
 import StepContentBlocks from "./StepContentBlocks";
 import StepBlocks from "./StepBlocks";
 import type { StepBlockDto } from "@/app/workspace/types";
+import { blockLabel, missingRequiredBlocks, userInputBlocks } from "@/app/workspace/blockTypes";
+import { fetchBlockResponses } from "@/app/workspace/api";
 import Icon from "@/app/components/ui/Icon";
 
 type Props = {
@@ -634,6 +636,160 @@ function SimpleReflectionView({
   );
 }
 
+// ── Gegenüberstellung block-basierter Schritte ────────────────────────────────
+//
+// Block-Schritte speichern ihre Antworten nicht in den Notizen, sondern in
+// mediation_block_responses. Die alte Gegenüberstellung liest nur Notizen und
+// blieb deshalb bei jedem gestalteten Schritt leer. Hier stehen die Antworten
+// der Parteien Block für Block nebeneinander — inklusive der Markierung, wo
+// beide dasselbe wollen und wo noch nicht. Genau daraus entsteht die Einigung
+// (und in Phase 1 der Mediationsvertrag).
+
+/** Zeigt einen gespeicherten Blockwert lesbar an. */
+function formatBlockValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "Ja" : "Nein";
+  if (Array.isArray(value)) return value.map((v) => `• ${String(v)}`).join("\n");
+  if (typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    if ("agreed" in o) return o.agreed === true ? "✓ zugestimmt" : "— nicht zugestimmt";
+    if ("name" in o) return String(o.name ?? "");
+    if ("url" in o) return String(o.name ?? o.url ?? "");
+    return JSON.stringify(o);
+  }
+  return String(value);
+}
+
+/** Vergleichbare Form eines Werts (Reihenfolge in Mehrfachauswahlen egal). */
+function comparableValue(value: unknown): string {
+  if (Array.isArray(value)) return JSON.stringify([...value].map(String).sort());
+  if (value && typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    if ("agreed" in o) return String(o.agreed === true);
+    if ("name" in o) return "signed";
+  }
+  return JSON.stringify(value ?? null);
+}
+
+function BlockReflectionView({
+  blocks,
+  phaseKey,
+  mediationId,
+  stepKey,
+  participants,
+  onNext,
+  isLastStep,
+}: {
+  blocks: StepBlockDto[];
+  phaseKey: PhaseKey;
+  mediationId: string;
+  stepKey: string;
+  participants: Participant[];
+  onNext: () => void;
+  isLastStep: boolean;
+}) {
+  // answers[blockId][participantId] = Wert
+  const [answers, setAnswers] = useState<Record<string, Record<string, unknown>>>({});
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchBlockResponses(Number(mediationId), { phase: phaseKey, stepKey, includeOthers: true })
+      .then((rows) => {
+        if (cancelled) return;
+        const map: Record<string, Record<string, unknown>> = {};
+        for (const r of rows) {
+          if (r.author_key === "ai") continue;
+          (map[r.block_id] ??= {})[r.author_key] = r.value;
+        }
+        setAnswers(map);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mediationId, phaseKey, stepKey]);
+
+  const inputs = userInputBlocks(blocks).filter((b) => b.type !== "vertrauliche_notiz");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 rounded-2xl border border-accent-200 bg-accent-50 px-5 py-3">
+        <svg className="h-4 w-4 shrink-0 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <p className="text-sm font-semibold text-accent-800">
+          Alle haben diesen Schritt abgeschlossen – hier stehen eure Antworten nebeneinander.
+        </p>
+      </div>
+
+      {!loaded ? (
+        <Spinner />
+      ) : inputs.length === 0 ? (
+        <p className="text-sm text-neutral-500">Dieser Schritt hatte keine Eingaben.</p>
+      ) : (
+        <div className="space-y-4">
+          {inputs.map((b) => {
+            const perParty = answers[b.id] ?? {};
+            const given = participants
+              .map((p) => ({ p, value: perParty[p.id] }))
+              .filter(({ value }) => formatBlockValue(value).trim() !== "");
+            const agree =
+              given.length > 1 &&
+              new Set(given.map(({ value }) => comparableValue(value))).size === 1;
+            return (
+              <div key={b.id} className="rounded-2xl border border-neutral-200 bg-white p-4">
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <p className="text-sm font-semibold text-neutral-800">{blockLabel(b)}</p>
+                  {given.length > 1 && (
+                    <span
+                      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                        agree
+                          ? "border-accent-200 bg-accent-50 text-accent-700"
+                          : "border-amber-200 bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {agree ? "✓ Einigkeit" : "≠ noch unterschiedlich"}
+                    </span>
+                  )}
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {participants.map((p) => {
+                    const text = formatBlockValue(perParty[p.id]);
+                    return (
+                      <div key={p.id} className="rounded-xl border border-neutral-100 bg-neutral-50 p-3">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
+                          {p.name} · {roleLabel[p.role] ?? p.role}
+                        </p>
+                        {text ? (
+                          <p className="whitespace-pre-wrap text-sm text-neutral-700">{text}</p>
+                        ) : (
+                          <p className="text-sm italic text-neutral-400">Keine Angabe.</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <button type="button" onClick={onNext} className="btn btn-primary">
+          {isLastStep ? "Phase abschließen →" : "Nächster Schritt →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Reflexions-Router ─────────────────────────────────────────────────────────
 function ReflectionView(props: {
   step: StepDetail;
@@ -642,9 +798,25 @@ function ReflectionView(props: {
   allInputs: Record<string, string[]>;
   participants: Participant[];
   currentParticipantId: string;
+  blocks: StepBlockDto[];
   onNext: () => void;
   isLastStep: boolean;
 }) {
+  // Gestaltete Schritte bringen ihre Antworten in den Blöcken mit – die
+  // Notizen-Gegenüberstellung wäre dort zwangsläufig leer.
+  if (userInputBlocks(props.blocks).length > 0) {
+    return (
+      <BlockReflectionView
+        blocks={props.blocks}
+        phaseKey={props.phaseKey}
+        mediationId={props.mediationId}
+        stepKey={props.step.key}
+        participants={props.participants}
+        onNext={props.onNext}
+        isLastStep={props.isLastStep}
+      />
+    );
+  }
   if (props.step.reflectionMode === "interactive") {
     return <InteractiveReflectionView {...props} />;
   }
@@ -689,6 +861,11 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   // Feldern), damit StepContentBlocks Video/Videokonferenz/Frage/… rendern
   // kann. toStepDetailFromAPI verwirft diese Felder, daher separat gehalten.
   const [stepMeta, setStepMeta] = useState<Record<string, PhaseStepFromAPI>>({});
+
+  // Aktuelle Block-Antworten des angezeigten Schritts (Block-id → Wert), von
+  // StepBlocks gemeldet. Nötig, um vor dem Abschließen zu prüfen, ob die
+  // Pflicht-Blöcke des Schritts beantwortet sind.
+  const [blockValues, setBlockValues] = useState<Record<string, unknown>>({});
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -908,6 +1085,13 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [currentStep, stepView, pollStatus]);
 
+  // Beim Schrittwechsel die Block-Antworten und eine offene Fehlermeldung
+  // zurücksetzen – sonst prüft der nächste Schritt gegen die Werte des vorigen.
+  useEffect(() => {
+    setBlockValues({});
+    setSaveError("");
+  }, [currentStep?.key]);
+
   // ── Item-Verwaltung ────────────────────────────────────────────────────────────
   function addItem(stepKey: string) {
     if (!currentParticipant) return;
@@ -939,6 +1123,17 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   // ── Schritt abschließen ────────────────────────────────────────────────────────
   async function submitStep(stepKey: string) {
     if (!currentParticipant) return;
+    // Pflicht-Blöcke prüfen, bevor der Schritt als abgegeben gilt. Ohne das
+    // ließe sich ein Schritt abschließen, ohne genau die Angaben zu machen, die
+    // der Schritt für die Einigung erheben soll (z.B. Zustimmung zur
+    // Vertraulichkeit oder die Entscheidung über Zuschauer).
+    const missing = missingRequiredBlocks(stepMeta[stepKey]?.blocks ?? [], blockValues);
+    if (missing.length > 0) {
+      setSaveError(
+        `Bitte noch ausfüllen: ${missing.map((b) => blockLabel(b)).join(" · ")}`,
+      );
+      return;
+    }
     setSaving(true);
     setSaveError("");
     try {
@@ -1025,6 +1220,18 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
   const view = currentStep ? (stepView[currentStep.key] ?? "input") : "input";
   const myItems = currentParticipant ? (items[currentStep?.key ?? ""]?.[currentParticipant.id] ?? []) : [];
+
+  // ── Woher kommt die Eingabe dieses Schritts? ─────────────────────────────
+  // Hat der Schritt im Workflow Manager gestaltete Blöcke, sind DIESE die
+  // Eingabe. Das frühere generische „Punkt hinzufügen +"-Feld wurde trotzdem
+  // zusätzlich gerendert – ein Feld ohne Frage, ohne Bezug zum Schritt, das man
+  // nur befüllen musste, um weiterzukommen. Es erscheint jetzt nur noch bei
+  // Schritten ganz ohne Blöcke (Altbestand / frei angelegte Schritte).
+  const currentBlocks = currentStep ? (stepMeta[currentStep.key]?.blocks ?? []) : [];
+  const hasBlocks = currentBlocks.length > 0;
+  const blockInputs = userInputBlocks(currentBlocks);
+  const showItemList = !hasBlocks;
+  const canSubmitStep = hasBlocks || myItems.length > 0;
   const isLastStep = stepIndex === allStepDetails.length - 1;
   const allStepsReflected = allStepDetails.every((s) => stepView[s.key] === "reflection");
 
@@ -1360,6 +1567,9 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                       phase={phaseKey}
                       stepKey={currentStep.key}
                       blocks={stepMeta[currentStep.key]!.blocks!}
+                      onValuesChange={setBlockValues}
+                      viewerRole={currentParticipant?.role}
+                      viewerName={currentUserName}
                     />
                   ) : (
                     <StepContentBlocks meta={stepMeta[currentStep.key]} />
@@ -1410,7 +1620,10 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                 {/* Input-Ansicht */}
                 {!isResultStep && view === "input" && (
                   <div className="space-y-5">
-                    {/* Mein Input */}
+                    {/* Generische Punkte-Liste – nur für Schritte OHNE eigene
+                        Blöcke. Sonst stünde neben den passenden Feldern des
+                        Schritts noch ein zweites, beziehungsloses Eingabefeld. */}
+                    {showItemList && (
                     <div className="rounded-2xl border border-accent-300 bg-white p-5 shadow-sm">
                       <div className="mb-3 flex items-center justify-between">
                         <div>
@@ -1450,6 +1663,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                         </ul>
                       )}
                     </div>
+                    )}
 
                     {/* Andere Teilnehmer (noch wartend) */}
                     {accepted.filter((p) => p.name !== currentUserName).map((p) => (
@@ -1474,10 +1688,14 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                       <button
                         type="button"
                         onClick={() => submitStep(currentStep.key)}
-                        disabled={saving || myItems.length === 0}
+                        disabled={saving || !canSubmitStep}
                         className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {saving ? "Wird gespeichert …" : "Schritt abschließen ✓"}
+                        {saving
+                          ? "Wird gespeichert …"
+                          : hasBlocks && blockInputs.length === 0
+                          ? "Gelesen – weiter ✓"
+                          : "Schritt abschließen ✓"}
                       </button>
                     </div>
                   </div>
@@ -1513,6 +1731,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     allInputs={items[currentStep.key] ?? {}}
                     participants={accepted}
                     currentParticipantId={currentParticipant?.id ?? ""}
+                    blocks={currentBlocks}
                     isLastStep={isLastStep}
                     onNext={() => {
                       if (!isLastStep) {

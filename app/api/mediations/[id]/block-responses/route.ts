@@ -9,10 +9,15 @@ export async function GET(
   const { id } = await params;
   const phase = request.nextUrl.searchParams.get("phase");
   const stepKey = request.nextUrl.searchParams.get("step_key");
+  // Gegenüberstellung nach Abschluss eines Schritts: liefert auch die Antworten
+  // der anderen Parteien (das Backend gibt sie erst frei, wenn alle abgegeben
+  // haben – siehe list_block_responses).
+  const includeOthers = request.nextUrl.searchParams.get("include_others");
 
   const qs = new URLSearchParams();
   if (phase) qs.set("phase", phase);
   if (stepKey) qs.set("step_key", stepKey);
+  if (includeOthers === "true" || includeOthers === "1") qs.set("include_others", "true");
   const query = qs.toString();
 
   const result = await backendFetch(

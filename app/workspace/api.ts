@@ -733,11 +733,12 @@ export async function setCaseFlags(
 /** Lädt die gespeicherten Block-Antworten eines Falls (optional gefiltert). */
 export async function fetchBlockResponses(
   mediationId: number,
-  opts?: { phase?: string; stepKey?: string },
+  opts?: { phase?: string; stepKey?: string; includeOthers?: boolean },
 ): Promise<BlockResponseDto[]> {
   const params = new URLSearchParams();
   if (opts?.phase) params.set("phase", opts.phase);
   if (opts?.stepKey) params.set("step_key", opts.stepKey);
+  if (opts?.includeOthers) params.set("include_others", "true");
   const qs = params.toString();
   const res = await fetch(
     `/api/mediations/${mediationId}/block-responses${qs ? `?${qs}` : ""}`,
