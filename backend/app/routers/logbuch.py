@@ -115,6 +115,7 @@ def _serialize(e: MediationLogEntry, fallback_area: str = "") -> dict:
         "content": e.content or {},
         "author_participant_id": e.author_participant_id,
         "visibility": e.visibility or "personal",
+        "linked_mediation_id": e.linked_mediation_id,
         "ai_analysis": e.ai_analysis,
         "ai_analysis_at": e.ai_analysis_at.isoformat() if e.ai_analysis_at else None,
         "created_at": e.created_at.isoformat() if e.created_at else None,
@@ -197,6 +198,7 @@ def create_entry(
     if entry_type not in ENTRY_TYPES:
         raise HTTPException(status_code=422, detail="Unbekannte Eintragsart.")
 
+    visibility = _check_visibility(payload.visibility)
     entry = MediationLogEntry(
         mediation_id=mediation_id,
         author_participant_id=participant.id,
@@ -205,7 +207,12 @@ def create_entry(
         occurred_at=_parse_occurred_at(payload.occurred_at),
         title=(payload.title or "").strip() or None,
         content=payload.content or {},
-        visibility=_check_visibility(payload.visibility),
+        visibility=visibility,
+        # Buch-Verknüpfung als Standard: neue Einträge landen automatisch im
+        # verknüpften Fall – außer sie sind sensibel (private).
+        linked_mediation_id=(
+            m.linked_mediation_id if visibility != "private" else None
+        ),
     )
     db.add(entry)
     db.commit()
@@ -260,6 +267,10 @@ def update_entry(
         entry.content = payload.content
     if payload.visibility is not None:
         entry.visibility = _check_visibility(payload.visibility)
+        # Wird ein Eintrag nachträglich als sensibel markiert, fliegt er aus
+        # dem verknüpften Fall – „private" heißt private, ausnahmslos.
+        if entry.visibility == "private":
+            entry.linked_mediation_id = None
     db.commit()
     db.refresh(entry)
     return _serialize(entry, _get_mediation(mediation_id, db).mediation_type)
@@ -276,6 +287,336 @@ def delete_entry(
     db.delete(entry)
     db.commit()
     return {"ok": True}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Verknüpfung Logbuch ↔ Fall (Migration a7b8c9d0e1f2)
+#
+# Ein Logbuch ist KEIN Fall: es wird nirgends in einer Fall-Liste geführt
+# (siehe mediations.get_all_mediations / FaelleListe). Stattdessen hängt die
+# Nutzer:in Einträge an einen Fall – entweder das ganze Buch (Standard für
+# neue Einträge, einmalig auch rückwirkend) oder einzelne Einträge. Im Fall
+# erscheinen sie im Reiter „Logbuch" (list_linked_entries).
+#
+# Sichtbarkeit im Fall:
+#   private  – wird gar nicht erst verknüpft und ist dort nie sichtbar.
+#   personal – Autor:in + Mediator:in/Kanzlei-Sicht des Falls („verknüpft =
+#              für den Mediator sichtbar"), NICHT die Gegenseite.
+#   shared   – alle Beteiligten des Falls.
+# ═══════════════════════════════════════════════════════════════════════════
+
+class LinkRequest(BaseModel):
+    # Ziel-Fall; None = Verknüpfung aufheben.
+    mediation_id: Optional[int] = None
+    # Nur bei der Buch-Verknüpfung: vorhandene Einträge mitnehmen.
+    apply_to_existing: bool = True
+
+
+def _linkable_case(
+    case_id: Optional[int], user: User, db: Session
+) -> Optional[Mediation]:
+    """Ziel-Fall prüfen: existiert, ist eine Mediation, Nutzer:in ist beteiligt."""
+    if case_id is None:
+        return None
+    case = db.query(Mediation).filter(Mediation.id == case_id).first()
+    if not case:
+        raise HTTPException(status_code=404, detail="Fall nicht gefunden")
+    if (case.mode or "mediation").lower() == "logbuch":
+        raise HTTPException(
+            status_code=422, detail="Ein Logbuch kann nicht mit einem Logbuch verknüpft werden."
+        )
+    linked_as_participant = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == case.id,
+            MediationParticipant.user_id == user.id,
+        )
+        .first()
+    )
+    if not linked_as_participant:
+        raise HTTPException(status_code=403, detail="Sie sind an diesem Fall nicht beteiligt.")
+    return case
+
+
+@router.get("/{mediation_id}/logbuch/link-targets")
+def link_targets(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Fälle, mit denen dieses Buch/seine Einträge verknüpft werden können.
+
+    Das sind alle Mediationen, an denen die Nutzer:in beteiligt ist – Logbücher
+    selbst sind ausgeschlossen."""
+    _require_participant(mediation_id, current_user, db)
+    book = _get_mediation(mediation_id, db)
+    rows = (
+        db.query(Mediation)
+        .join(MediationParticipant, MediationParticipant.mediation_id == Mediation.id)
+        .filter(
+            MediationParticipant.user_id == current_user.id,
+            # NULL-tolerant (Altbestand ohne mode): "!=" liefert sonst NULL.
+            (Mediation.mode.is_(None)) | (Mediation.mode != "logbuch"),
+        )
+        .order_by(Mediation.id.desc())
+        .all()
+    )
+    return {
+        "book_linked_mediation_id": book.linked_mediation_id,
+        "cases": [
+            {
+                "mediation_id": m.id,
+                "title": m.title or "Mediation",
+                "mediation_type": m.mediation_type,
+                "status": m.status,
+            }
+            for m in rows
+        ],
+    }
+
+
+@router.post("/{mediation_id}/logbuch/link")
+def link_book(
+    mediation_id: int,
+    payload: LinkRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Das GANZE Logbuch mit einem Fall verknüpfen (oder die Verknüpfung lösen).
+
+    Setzt den Standard-Fall des Buchs (neue Einträge erben ihn) und trägt ihn
+    mit ``apply_to_existing`` einmalig auf die vorhandenen eigenen Einträge
+    nach. Sensible Einträge (visibility="private") bleiben ausgenommen."""
+    participant = _require_participant(mediation_id, current_user, db)
+    book = _get_mediation(mediation_id, db)
+    if (participant.role or "").lower() not in ("owner", "admin"):
+        raise HTTPException(
+            status_code=403, detail="Nur die Eigentümer:in kann das Logbuch verknüpfen."
+        )
+    case = _linkable_case(payload.mediation_id, current_user, db)
+    previous = book.linked_mediation_id
+    book.linked_mediation_id = case.id if case else None
+
+    changed = 0
+    if payload.apply_to_existing:
+        own = (
+            db.query(MediationLogEntry)
+            .filter(
+                MediationLogEntry.mediation_id == mediation_id,
+                MediationLogEntry.author_participant_id == participant.id,
+            )
+            .all()
+        )
+        for e in own:
+            if (e.visibility or "personal") == "private":
+                continue
+            if case is None:
+                # Aufheben wirkt nur auf Einträge, die am bisherigen Standard-
+                # Fall hingen – einzeln verknüpfte Einträge bleiben, wo sie sind.
+                if e.linked_mediation_id is not None and e.linked_mediation_id == previous:
+                    e.linked_mediation_id = None
+                    changed += 1
+            elif e.linked_mediation_id != case.id:
+                e.linked_mediation_id = case.id
+                changed += 1
+    db.commit()
+    return {
+        "ok": True,
+        "linked_mediation_id": book.linked_mediation_id,
+        "entries_changed": changed,
+    }
+
+
+@router.put("/{mediation_id}/logbuch/entries/{entry_id}/link")
+def link_entry(
+    mediation_id: int,
+    entry_id: int,
+    payload: LinkRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Einen einzelnen Eintrag mit einem Fall verknüpfen / die Verknüpfung lösen.
+
+    Bewusst ein eigener Endpunkt statt eines Felds in PATCH: die Mobile-App
+    schickt beim Bearbeiten das ganze Objekt und würde eine Verknüpfung sonst
+    stillschweigend zurücksetzen (dieselbe Falle wie bei ``visibility``)."""
+    entry = _get_own_entry(mediation_id, entry_id, db, current_user)
+    case = _linkable_case(payload.mediation_id, current_user, db)
+    if case is not None and (entry.visibility or "personal") == "private":
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Sensible Einträge bleiben privat und können nicht mit einem Fall "
+                "verknüpft werden. Ändern Sie zuerst die Sichtbarkeit."
+            ),
+        )
+    entry.linked_mediation_id = case.id if case else None
+    db.commit()
+    db.refresh(entry)
+    return _serialize(entry, _get_mediation(mediation_id, db).mediation_type)
+
+
+def _entry_fields(content: dict, labels: dict[str, str], file_url: Any) -> list[dict]:
+    """Eintragsfelder als [{label, value|file}] – Labels aus der WFM-Vorlage.
+
+    ``file_url`` schreibt die Datei-URL auf die fall-seitige Route um: der
+    Mediator ist NICHT Teilnehmer des Logbuchs und käme über die Buch-Route
+    nicht an den Anhang."""
+    out: list[dict] = []
+    for block_id, v in (content or {}).items():
+        if v is None or v == "":
+            continue
+        label = labels.get(block_id, "")
+        if isinstance(v, dict) and v.get("url"):
+            out.append({
+                "label": label,
+                "file": {"name": v.get("name") or "Datei", "url": file_url(str(v.get("url")))},
+            })
+        elif isinstance(v, list):
+            out.append({"label": label, "value": ", ".join(str(x) for x in v)})
+        else:
+            out.append({"label": label, "value": str(v)})
+    return out
+
+
+def _token_from_url(url: str) -> Optional[str]:
+    marker = "token="
+    idx = url.find(marker)
+    return url[idx + len(marker):].split("&")[0] if idx >= 0 else None
+
+
+@router.get("/{mediation_id}/logbuch/linked")
+def list_linked_entries(
+    mediation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Reiter „Logbuch" IM FALL: alle mit diesem Fall verknüpften Einträge.
+
+    Enthält zwei Quellen: ausdrücklich verknüpfte Einträge fremder Bücher und
+    – für Bestandsfälle aus der Zeit vor der Verknüpfung – Einträge, die direkt
+    an diesem Fall hängen (umgewandeltes Logbuch)."""
+    case = _get_mediation(mediation_id, db)
+    me = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation_id,
+            MediationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    from app.services import tenancy
+
+    is_staff = tenancy.can_view_mediation(current_user, case)
+    if not me and not is_staff:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    # „Verknüpft = für den Mediator sichtbar": Mediator:in des Falls und
+    # Kanzlei-/Admin-Sicht sehen auch nicht ausdrücklich geteilte Einträge.
+    sees_personal = is_staff or (me is not None and (me.role or "").lower() in ("mediator", "admin"))
+
+    rows = (
+        db.query(MediationLogEntry)
+        .filter(
+            (MediationLogEntry.linked_mediation_id == mediation_id)
+            | (MediationLogEntry.mediation_id == mediation_id)
+        )
+        .all()
+    )
+    if not rows:
+        return []
+
+    # author_participant_id -> (user_id, Name) für „ist von mir" + Anzeige.
+    author_ids = {e.author_participant_id for e in rows if e.author_participant_id}
+    authors: dict[int, dict] = {}
+    if author_ids:
+        for p, u in (
+            db.query(MediationParticipant, User)
+            .outerjoin(User, User.id == MediationParticipant.user_id)
+            .filter(MediationParticipant.id.in_(author_ids))
+            .all()
+        ):
+            authors[p.id] = {
+                "user_id": p.user_id,
+                "name": (u.name if u else None) or (u.email if u else None) or "Beteiligte:r",
+            }
+
+    def _is_mine(e: MediationLogEntry) -> bool:
+        a = authors.get(e.author_participant_id or -1)
+        return bool(a and a["user_id"] == current_user.id)
+
+    def _may_see(e: MediationLogEntry) -> bool:
+        vis = e.visibility or "personal"
+        if vis == "private":
+            # Journal: niemals im Fall – auch nicht für die Autor:in selbst,
+            # damit hier nichts steht, was aussieht, als wäre es im Fall.
+            return False
+        if vis == "shared":
+            return True
+        if _is_mine(e):
+            return True
+        # "personal" sieht der Mediator nur, wenn der Eintrag AUSDRÜCKLICH mit
+        # diesem Fall verknüpft wurde. Einträge, die (aus der Zeit vor der
+        # Verknüpfung) direkt am Fall hängen, bleiben privat wie zugesagt –
+        # dort ist "In Mediation teilen" der bewusste Schritt.
+        return sees_personal and e.linked_mediation_id == mediation_id
+
+    visible = [e for e in rows if _may_see(e)]
+    visible.sort(key=lambda e: (e.occurred_at or e.created_at or datetime.min), reverse=True)
+
+    labels = _block_labels(db, case.mediation_type, "logbuch_eintrag")
+
+    def _file_url(url: str) -> str:
+        token = _token_from_url(url)
+        return (
+            f"/api/mediations/{mediation_id}/logbuch/linked-file?token={token}"
+            if token else url
+        )
+
+    return [
+        {
+            **_serialize(e, case.mediation_type),
+            # Die KI-Analyse ist persönliches Coaching der Autor:in und gehört
+            # nicht in die Fall-Ansicht anderer.
+            "ai_analysis": e.ai_analysis if _is_mine(e) else None,
+            # Gerendert wird ausschließlich "fields" (mit Labels und
+            # fall-seitigen Datei-URLs); das Rohformat mit den Buch-URLs wäre
+            # hier nur eine zweite, nicht abrufbare Quelle.
+            "content": {},
+            "is_own": _is_mine(e),
+            "author_name": (authors.get(e.author_participant_id or -1) or {}).get("name"),
+            "source": "linked" if e.mediation_id != mediation_id else "case",
+            "fields": _entry_fields(e.content or {}, labels, _file_url),
+        }
+        for e in visible
+    ]
+
+
+@router.get("/{mediation_id}/logbuch/linked-file")
+def linked_file(
+    mediation_id: int,
+    token: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_db_user),
+):
+    """Anhang eines verknüpften Logbuch-Eintrags – fall-seitig ausgeliefert.
+
+    Der Mediator ist nicht Teilnehmer des Logbuchs; deshalb prüft diese Route
+    den Zugriff über den FALL und lässt nur Tokens durch, die in einem hier
+    sichtbaren Eintrag vorkommen."""
+    if "/" in token or "\\" in token or ".." in token or not token.startswith("lb"):
+        raise HTTPException(status_code=400, detail="Ungültiger Token")
+    entries = list_linked_entries(mediation_id, db, current_user)
+    allowed = any(
+        f.get("file") and _token_from_url(str(f["file"].get("url"))) == token
+        for e in entries
+        for f in e.get("fields", [])
+    )
+    if not allowed:
+        raise HTTPException(status_code=404, detail="Datei nicht gefunden")
+    path = _UPLOAD_DIR / token
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Datei nicht gefunden")
+    return FileResponse(path)
 
 
 class ConvertRequest(BaseModel):

@@ -4,6 +4,7 @@ import SituationCheck from "@/app/components/SituationCheck";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Situation einordnen lassen – Kontakt | medipact",
@@ -28,7 +29,9 @@ export default function KontaktPage() {
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Lassen Sie Ihre Situation{" "}
             <span className="bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent">
-              einordnen.
+              <TiltLastWord className="bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent">
+                einordnen.
+              </TiltLastWord>
             </span>
           </h1>
 

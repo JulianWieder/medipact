@@ -51,6 +51,9 @@
   "app/workspace/components/BenutzerBereich.tsx",
   "app/workspace/components/ParteienListe.tsx",
   "app/workspace/WorkspaceClient.tsx",
-  "app/auth/**/*.tsx"
+  "app/auth/**/*.tsx",
+  "app/components/mediation/LinkedLogbuch.tsx",
+  "app/components/mediation/logbuchMeta.ts",
+  "app/workspace/components/FaelleListe.tsx"
  ]
 }

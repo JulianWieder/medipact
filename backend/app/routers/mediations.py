@@ -1205,11 +1205,20 @@ def get_all_mediations(
     """Fälle ohne Teilnehmerfilter – für Mediatoren, Firmen-Admins und Admins.
 
     Tenant-Scoping: firm_admin und Firmen-Mediatoren sehen nur die Fälle ihres
-    eigenen Unternehmens. Globale Admins und Pool-Mediatoren sehen alle."""
+    eigenen Unternehmens. Globale Admins und Pool-Mediatoren sehen alle.
+
+    Konflikt-Logbücher (mode="logbuch") sind KEINE Fälle: sie sind private
+    Dokumentation und tauchen hier bewusst nicht auf. Was aus einem Logbuch
+    zum Fall gehört, wird verknüpft und erscheint im Reiter „Logbuch" des
+    Falls (routers/logbuch.py list_linked_entries)."""
     if current_user.role not in ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE):
         raise HTTPException(status_code=403, detail="Nur für Mediatoren, Firmen-Admins und Admins zugänglich")
 
-    query = db.query(Mediation)
+    # NULL-tolerant: bei mode IS NULL (Altbestand) liefert "!=" in SQL NULL und
+    # der Fall fiele stillschweigend aus der Liste.
+    query = db.query(Mediation).filter(
+        or_(Mediation.mode.is_(None), Mediation.mode != "logbuch")
+    )
     if tenancy.is_tenant_scoped(current_user):
         # Firmen-Admin/Firmen-Mediator ohne Unternehmen sieht NICHTS (kein
         # versehentlicher Zugriff auf private B2C-Fälle mit organization_id NULL).
@@ -1226,6 +1235,7 @@ def get_all_mediations(
             "variant_key": m.variant_key,
             "status": m.status,
             "phase": m.phase,
+            "mode": m.mode,
             "role": "mediator",
         }
         for m in rows

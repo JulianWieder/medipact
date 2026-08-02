@@ -30,6 +30,12 @@ class Mediation(Base):
     #   "premium" – einmalig 14,95 € (pricing.LOGBUCH_PREMIUM_PRICE_EUR):
     #               1 KI-Tipp pro TAG + unbegrenzte Datei-Uploads.
     logbuch_plan = Column(String, nullable=False, default="free", server_default="free")
+    # Nur bei mode="logbuch" (Migration a7b8c9d0e1f2): der Fall, mit dem das
+    # GANZE Buch verknüpft ist. Ein Logbuch ist kein Fall und wird nirgends als
+    # solcher gelistet – es hängt sich an einen Fall an. Neue Einträge erben
+    # diesen Wert in mediation_log_entries.linked_mediation_id; einzelne
+    # Einträge können abweichend (oder gar nicht) verknüpft werden.
+    linked_mediation_id = Column(Integer, ForeignKey("mediations.id"), nullable=True)
     description = Column(Text, nullable=True)
     priority = Column(Text, nullable=True)
     role = Column(String, nullable=True)

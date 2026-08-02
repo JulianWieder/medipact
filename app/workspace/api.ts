@@ -9,18 +9,26 @@ export async function fetchMediations(): Promise<MediationCase[]> {
   const res = await fetch("/api/mediations/me", { cache: "no-store" });
   if (!res.ok) throw new Error("Fälle konnten nicht geladen werden");
   const data = await res.json();
-  // Normalisiere: mediation_id → id
-  return (data ?? []).map((item: Record<string, unknown>) => ({
-    id: (item.mediation_id ?? item.id) as number,
-    mediation_id: (item.mediation_id ?? item.id) as number,
-    title: (item.title as string) ?? "Neue Mediation",
-    mediation_type: (item.mediation_type ?? item.conflict_type ?? "nachbarschaft") as string,
-    status: (item.status ?? "draft") as string,
-    phase: (item.phase ?? null) as string | null,
-    progress: (item.progress ?? 0) as number,
-    description: (item.description ?? null) as string | null,
-    role: (item.role ?? "") as string,
-  }));
+  // Normalisiere: mediation_id → id.
+  // Konflikt-Logbücher (mode="logbuch") fliegen hier raus: sie sind KEINE
+  // Fälle, sondern private Dokumentation. Sonst stünde das eigene Logbuch im
+  // Workspace zwischen echten Mediationen (und in den KPIs). Was aus einem
+  // Logbuch zum Fall gehört, wird verknüpft und erscheint im Reiter „Logbuch"
+  // des Falls. /mediations/all filtert bereits serverseitig.
+  return (data ?? [])
+    .filter((item: Record<string, unknown>) => (item.mode ?? "mediation") !== "logbuch")
+    .map((item: Record<string, unknown>) => ({
+      id: (item.mediation_id ?? item.id) as number,
+      mediation_id: (item.mediation_id ?? item.id) as number,
+      title: (item.title as string) ?? "Neue Mediation",
+      mediation_type: (item.mediation_type ?? item.conflict_type ?? "nachbarschaft") as string,
+      status: (item.status ?? "draft") as string,
+      phase: (item.phase ?? null) as string | null,
+      progress: (item.progress ?? 0) as number,
+      description: (item.description ?? null) as string | null,
+      role: (item.role ?? "") as string,
+      mode: (item.mode ?? "mediation") as string,
+    }));
 }
 
 export async function fetchMediationDetail(id: number): Promise<MediationDetail> {
@@ -125,6 +133,7 @@ export async function fetchAllMediations(): Promise<MediationCase[]> {
     progress: (item.progress ?? 0) as number,
     description: (item.description ?? null) as string | null,
     role: (item.role ?? "mediator") as string,
+    mode: (item.mode ?? "mediation") as string,
     variant_key: (item.variant_key ?? null) as string | null,
   }));
 }

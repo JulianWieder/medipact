@@ -41,6 +41,15 @@ class MediationLogEntry(Base):
     # Bereich getaggt und filterbar. NULL/Altbestand fällt beim Serialisieren
     # auf mediation.mediation_type zurück.
     area = Column(String, nullable=True, index=True)
+    # Verknüpfung mit einem Fall (Migration a7b8c9d0e1f2): Ein Logbuch ist
+    # KEIN Fall und wird nirgends als solcher gelistet – stattdessen hängt die
+    # Nutzer:in einzelne Einträge (oder per Buch-Verknüpfung alle) an eine
+    # Mediation. Dort erscheinen sie im Reiter „Logbuch" (routers/logbuch.py
+    # list_linked_entries). NULL = nur im eigenen Buch sichtbar.
+    # Wichtig: Einträge mit visibility="private" werden nie verknüpft.
+    linked_mediation_id = Column(
+        Integer, ForeignKey("mediations.id"), nullable=True, index=True
+    )
     # Wann das dokumentierte Ereignis stattgefunden hat (nicht: wann erfasst).
     occurred_at = Column(DateTime, nullable=True)
     title = Column(String, nullable=True)

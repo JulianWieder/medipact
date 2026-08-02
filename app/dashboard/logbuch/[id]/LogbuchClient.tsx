@@ -67,6 +67,16 @@ interface LogEntry {
   created_at: string | null;
   visibility?: string;
   is_own?: boolean;
+  /** Fall, mit dem dieser Eintrag verknüpft ist (null = nur im Logbuch). */
+  linked_mediation_id?: number | null;
+}
+
+/** Fall, mit dem sich das Logbuch bzw. einzelne Einträge verknüpfen lassen. */
+interface LinkTarget {
+  mediation_id: number;
+  title: string;
+  mediation_type: string;
+  status: string;
 }
 
 interface Quota {
@@ -477,6 +487,14 @@ export default function LogbuchClient({
   const [confirmConvert, setConfirmConvert] = useState(false);
   const [error, setError] = useState("");
 
+  // ── Verknüpfung mit einem Fall ──
+  // Ein Logbuch ist kein Fall und taucht in keiner Fall-Liste auf. Wer will,
+  // hängt es (oder einzelne Einträge) an einen laufenden Fall – dort erscheinen
+  // sie im Reiter „Logbuch". Sensible Einträge bleiben ausgenommen.
+  const [linkTargets, setLinkTargets] = useState<LinkTarget[]>([]);
+  const [bookLink, setBookLink] = useState<number | null>(null);
+  const [linkBusy, setLinkBusy] = useState(false);
+
   const isPremium = status?.plan === "premium";
 
   // ── Laden: WFM-Vorlagen + Intake-Antworten + Einträge + Status ──
@@ -517,6 +535,19 @@ export default function LogbuchClient({
         if (statusRes.ok) {
           setStatus(await statusRes.json());
         }
+        // Verknüpfbare Fälle + aktuelle Buch-Verknüpfung (nur im echten
+        // Logbuch; im „Logbuch zum Fall" ist die Zuordnung schon klar).
+        if (!isLinked) {
+          const targetsRes = await fetch(
+            `/api/mediations/${mediationId}/logbuch/link-targets`,
+            { cache: "no-store" },
+          );
+          if (!cancelled && targetsRes.ok) {
+            const data = await targetsRes.json();
+            setLinkTargets(data.cases ?? []);
+            setBookLink(data.book_linked_mediation_id ?? null);
+          }
+        }
       } catch {
         setError("Server nicht erreichbar.");
       } finally {
@@ -524,7 +555,7 @@ export default function LogbuchClient({
       }
     })();
     return () => { cancelled = true; };
-  }, [mediationId]);
+  }, [mediationId, isLinked]);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -752,6 +783,68 @@ export default function LogbuchClient({
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ visibility }),
+          },
+        );
+        const body = await res.json().catch(() => null);
+        if (!res.ok) {
+          setError(body?.detail ?? body?.error ?? `Fehler (${res.status})`);
+          return;
+        }
+        setEntries((prev) =>
+          prev.map((e) => (e.id === entry.id ? { ...e, ...body } : e)),
+        );
+      } catch {
+        setError("Server nicht erreichbar.");
+      }
+    },
+    [mediationId],
+  );
+
+  // Ganzes Logbuch mit einem Fall verknüpfen (oder die Verknüpfung lösen).
+  // Neue Einträge landen danach automatisch im Fall; die vorhandenen zieht der
+  // Server einmalig mit – sensible Einträge bleiben ausgenommen.
+  const linkBook = useCallback(
+    async (caseId: number | null) => {
+      setError("");
+      setLinkBusy(true);
+      try {
+        const res = await fetch(`/api/mediations/${mediationId}/logbuch/link`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mediation_id: caseId, apply_to_existing: true }),
+        });
+        const body = await res.json().catch(() => null);
+        if (!res.ok) {
+          setError(body?.detail ?? body?.error ?? `Fehler (${res.status})`);
+          return;
+        }
+        setBookLink(body?.linked_mediation_id ?? null);
+        const fresh = await fetch(
+          `/api/mediations/${mediationId}/logbuch/entries`,
+          { cache: "no-store" },
+        );
+        if (fresh.ok) setEntries(await fresh.json());
+      } catch {
+        setError("Server nicht erreichbar.");
+      } finally {
+        setLinkBusy(false);
+      }
+    },
+    [mediationId],
+  );
+
+  // Einzelnen Eintrag verknüpfen/lösen (eigener Endpunkt, damit ein PATCH aus
+  // der Mobile-App die Verknüpfung nicht stillschweigend zurücksetzt).
+  const linkEntry = useCallback(
+    async (entry: LogEntry, caseId: number | null) => {
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/mediations/${mediationId}/logbuch/entries/${entry.id}/link`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mediation_id: caseId }),
           },
         );
         const body = await res.json().catch(() => null);
@@ -1070,6 +1163,51 @@ export default function LogbuchClient({
         {error && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
+          </div>
+        )}
+
+        {/* ── Verknüpfung mit einem Fall ──────────────────────────────────
+            Ein Logbuch ist kein Fall und steht in keiner Fall-Liste. Wer es
+            an ein laufendes Verfahren hängt, sieht seine Einträge dort im
+            Reiter „Logbuch": verknüpft = für den Mediator sichtbar, geteilt =
+            für alle Beteiligten, sensibel = für niemanden. */}
+        {!isLinked && linkTargets.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-neutral-200 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-neutral-900">
+                  Mit einem Fall verknüpfen
+                </p>
+                <p className="mt-1 max-w-xl text-xs leading-5 text-neutral-500">
+                  Verknüpfte Einträge erscheinen im Fall im Reiter „Logbuch" –
+                  sichtbar für Ihren Mediator, nicht für die Gegenseite. Erst
+                  „{visMeta("shared").label}" macht einen Eintrag für alle
+                  Beteiligten sichtbar. Sensible Einträge werden nie verknüpft.
+                </p>
+              </div>
+              <select
+                value={bookLink ?? ""}
+                disabled={linkBusy}
+                onChange={(e) =>
+                  linkBook(e.target.value ? Number(e.target.value) : null)
+                }
+                className="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 outline-none transition focus:border-accent-500 disabled:opacity-60"
+              >
+                <option value="">Mit keinem Fall verknüpft</option>
+                {linkTargets.map((c) => (
+                  <option key={c.mediation_id} value={c.mediation_id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {bookLink !== null && (
+              <p className="mt-3 text-xs text-neutral-500">
+                Das ganze Logbuch hängt an diesem Fall – neue Einträge landen
+                automatisch dort. Einzelne Einträge können Sie unten abweichend
+                zuordnen.
+              </p>
+            )}
           </div>
         )}
 
@@ -1463,7 +1601,31 @@ export default function LogbuchClient({
                             </span>
                           </div>
                           {own && (
-                            <div className="flex gap-2 text-xs">
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              {/* Verknüpfung je Eintrag – abweichend vom Buch.
+                                  Sensible Einträge bleiben außen vor. */}
+                              {!isLinked &&
+                                linkTargets.length > 0 &&
+                                (entry.visibility ?? "personal") !== "private" && (
+                                  <select
+                                    value={entry.linked_mediation_id ?? ""}
+                                    onChange={(ev) =>
+                                      linkEntry(
+                                        entry,
+                                        ev.target.value ? Number(ev.target.value) : null,
+                                      )
+                                    }
+                                    title="Diesen Eintrag mit einem Fall verknüpfen"
+                                    className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-500 outline-none transition hover:border-accent-300 focus:border-accent-500"
+                                  >
+                                    <option value="">Kein Fall</option>
+                                    {linkTargets.map((c) => (
+                                      <option key={c.mediation_id} value={c.mediation_id}>
+                                        → {c.title}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
                               {isLinked && (entry.visibility ?? "personal") === "personal" && (
                                 <button
                                   type="button"

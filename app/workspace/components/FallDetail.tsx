@@ -16,6 +16,7 @@ import {
 } from "../ui";
 import { StatusDot, SegmentedControl, Skeleton, SlideOver } from "@/app/components/ui/premium";
 import MediationChat from "@/app/components/mediation/MediationChat";
+import LinkedLogbuch from "@/app/components/mediation/LinkedLogbuch";
 import Icon from "@/app/components/ui/Icon";
 import {
   fetchParticipants,
@@ -151,7 +152,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse" | "chat">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contract" | "steps" | "termin" | "feedback" | "analyse" | "logbuch" | "chat">("overview");
 
   // ── Mediations-Variante (Fall <-> Variante, jederzeit umstellbar) ──
   const [variants, setVariants] = useState<MediationVariantDto[]>([]);
@@ -897,6 +898,7 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
     { id: "contract" as const, label: "Vertrag" },
     { id: "feedback" as const, label: "Feedback" },
     { id: "analyse" as const, label: "✦ Analyse" },
+    { id: "logbuch" as const, label: "Logbuch" },
     { id: "chat" as const, label: "Chat" },
   ];
 
@@ -2347,6 +2349,23 @@ export function FallDetail({ fall, onPhaseAdvanced }: FallDetailProps) {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ── Tab: Logbuch (mit dem Fall verknüpfte Logbuch-Einträge) ──
+                 Logbücher sind KEINE Fälle und stehen deshalb nicht in der
+                 Fall-Liste. Was die Beteiligten daraus mit diesem Fall
+                 verknüpfen, landet hier — sensible Einträge nie. */}
+          {activeTab === "logbuch" && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">
+                Logbuch zum Fall
+              </p>
+              <LinkedLogbuch
+                mediationId={fall.id}
+                mediationType={fall.mediation_type}
+                variant="workspace"
+              />
             </div>
           )}
 

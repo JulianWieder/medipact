@@ -4,9 +4,10 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { JsonLd } from "@/app/components/JsonLd";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { Card } from "@/app/components/ui/Card";
-import logbuchPhoto from "../../fotos/medi_einordnen.jpg";
+import logbuchPhoto from "../../fotos/medi_gespraech.jpg";
 import Icon from "@/app/components/ui/Icon";
 import { pageMetadata } from "@/lib/seo";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
@@ -139,7 +140,7 @@ export default function KonfliktLogbuchPage() {
         {/* HERO */}
         <ImagePinHero
           image={logbuchPhoto}
-          imageAlt="Konflikt dokumentieren mit dem kostenlosen Konflikt-Logbuch"
+          imageAlt="Zwei Menschen im ruhigen Gespräch über einen dokumentierten Konflikt"
         >
           <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
             <div className="max-w-2xl">
@@ -150,7 +151,9 @@ export default function KonfliktLogbuchPage() {
               <h1 className="mt-5 text-5xl font-black tracking-tight text-white lg:text-6xl">
                 Ihr Streit-Tagebuch.
                 <span className="block bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent pb-2">
-                  Das Konflikt-Logbuch.
+                  <TiltLastWord className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
+                    Das Konflikt-Logbuch.
+                  </TiltLastWord>
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">

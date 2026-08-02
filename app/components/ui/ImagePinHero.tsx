@@ -6,6 +6,7 @@ import { useTransform } from "framer-motion";
 import type { ReactNode } from "react";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
 import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
+import { HeroTagline } from "@/app/components/ui/HeroTagline";
 
 /**
  * Standard pattern: full-bleed hero that pins while scrolling and slowly
@@ -18,6 +19,14 @@ import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
  * it's rendered on top, vertically centered in the pinned viewport. For
  * per-element fade/parallax on top of the pin, call useScrollPin directly
  * instead — see HeroScrollPin.tsx.
+ *
+ * Die laufende Tagline (HeroTagline) wird hier zentral gerendert, damit sie
+ * auf allen Unterseiten identisch sitzt — die Seiten selbst müssen nichts
+ * tun. Sie liegt bewusst über dem zentrierten Content (top-24, also unter
+ * dem fixierten Header) und ist pointer-events-none, damit sie keine Klicks
+ * abfängt. Ausschalten mit `tagline={false}`, eigener Text mit
+ * `tagline="…"` — Letzteres nur in gut begründeten Ausnahmen: der Satz
+ * wirkt gerade dadurch, dass er überall derselbe ist.
  */
 export function ImagePinHero({
   id,
@@ -26,6 +35,7 @@ export function ImagePinHero({
   heightVh = 130,
   overlayStrength = "default",
   contentClassName = "",
+  tagline,
   children,
 }: {
   id?: string;
@@ -40,6 +50,8 @@ export function ImagePinHero({
    */
   overlayStrength?: "default" | "strong";
   contentClassName?: string;
+  /** `false` blendet die Laufschrift aus, ein String überschreibt den Satz. */
+  tagline?: string | false;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -50,6 +62,12 @@ export function ImagePinHero({
   return (
     <ScrollPinFrame ref={ref} id={id} heightVh={heightVh} className="bg-neutral-950">
       <HeroBackdrop image={image} imageAlt={imageAlt} scale={imageScale} />
+
+      {tagline !== false && (
+        <div className="pointer-events-none absolute inset-x-0 top-24 z-20">
+          <HeroTagline {...(typeof tagline === "string" ? { text: tagline } : {})} />
+        </div>
+      )}
 
       <div className={`relative z-20 flex h-full items-center ${contentClassName}`}>
         {children}

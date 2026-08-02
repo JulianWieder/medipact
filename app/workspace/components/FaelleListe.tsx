@@ -56,6 +56,8 @@ export function FaelleListe({
       : fetchMediations().then((data) =>
           data.filter((m) => m.role === "mediator" || m.role === "owner" || !m.role),
         );
+    // Konflikt-Logbücher sind keine Fälle und tauchen hier nicht auf – das
+    // filtern fetchMediations() bzw. das Backend (/mediations/all) bereits.
     load
       .then(setFaelle)
       .catch(() => setError("Fälle konnten nicht geladen werden."))

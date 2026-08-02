@@ -6,6 +6,7 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { ratgeberArticles, ratgeberCategories } from "@/app/content/ratgeberArtikel";
 import ratgeberHero from "@/fotos/medi_ratgeber.jpg";
 import { pageMetadata } from "@/lib/seo";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export const metadata: Metadata = pageMetadata({
   title: "Ratgeber Mediation: Ablauf, Kosten & Wissen | medipact",
@@ -47,7 +48,7 @@ export default function RatgeberUebersichtPage() {
             <Breadcrumbs items={[{ label: "Ratgeber" }]} variant="dark" />
             <p className="eyebrow mb-4 text-accent-300">Ratgeber</p>
             <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-              Mediation verständlich erklärt
+              <TiltLastWord>Mediation verständlich erklärt</TiltLastWord>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
               Was ist Mediation, wie läuft sie ab und was kostet sie? In unserem Ratgeber

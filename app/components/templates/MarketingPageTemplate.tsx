@@ -14,6 +14,7 @@ import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumb
 import { LogbuchHinweis } from "@/app/components/ui/LogbuchHinweis";
 import { KostenrechnerHinweis } from "@/app/components/ui/KostenrechnerHinweis";
 import type { Konfliktart } from "@/lib/kostenrecht";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 type PageImage = {
   src: StaticImageData;
@@ -187,7 +188,9 @@ export function MarketingPageTemplate({
                   {title}
                   {titleHighlight && (
                     <span className="mt-2 block bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent pb-2 leading-[1.15]">
-                      {titleHighlight}
+                      <TiltLastWord className="bg-gradient-to-r from-accent-300 via-accent-200 to-white bg-clip-text text-transparent">
+                        {titleHighlight}
+                      </TiltLastWord>
                     </span>
                   )}
                 </h1>
@@ -230,7 +233,9 @@ export function MarketingPageTemplate({
                   {title}
                   {titleHighlight && (
                     <span className="mt-2 block bg-gradient-to-r from-neutral-800 via-accent-600 to-accent-400 bg-clip-text text-transparent pb-2 leading-[1.15]">
-                      {titleHighlight}
+                      <TiltLastWord className="bg-gradient-to-r from-neutral-800 via-accent-600 to-accent-400 bg-clip-text text-transparent">
+                        {titleHighlight}
+                      </TiltLastWord>
                     </span>
                   )}
                 </h1>

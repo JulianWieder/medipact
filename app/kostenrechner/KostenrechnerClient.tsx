@@ -392,15 +392,16 @@ export default function KostenrechnerClient({ className, preise, start }: Props)
           Und was, wenn Ihr Anwalt nach Stunden abrechnet?
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
-          Die Beträge oben sind die <strong className="text-white">gesetzliche
-          Untergrenze</strong>. Bei gerichtlicher Vertretung darf ein Anwalt
-          nicht weniger verlangen (§ 49b Abs. 1 BRAO) – nach oben ist die
-          Vergütung frei vereinbar (§ 3a RVG). Im Familienrecht ist ein
-          Zeithonorar nicht die Ausnahme, sondern der Regelfall. Übliche Sätze
-          bei Fachanwälten liegen bei 250 bis 400 Euro pro Stunde netto;
-          spezialisierte Kanzleien nennen 380 Euro aufwärts, und die
-          Rechtsprechung hält Sätze bis 350 bis 400 Euro seit Jahren für
-          unbedenklich.
+          Die Beträge oben sind das{" "}
+          <strong className="text-white">gesetzliche Minimum</strong>. Weniger
+          darf ein Anwalt vor Gericht nicht nehmen – mehr aber schon, wenn Sie
+          eine Vergütungsvereinbarung unterschreiben. Im Familienrecht ist das
+          der Normalfall: Die meisten Fachanwälte rechnen nach Stunden ab,
+          üblich sind 250 bis 400 Euro pro Stunde zuzüglich Mehrwertsteuer.
+          Gerichte halten solche Sätze seit Jahren für zulässig.
+          <span className="mt-1 block text-xs text-neutral-400">
+            § 49b Abs. 1 BRAO, § 3a RVG
+          </span>
         </p>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -451,26 +452,33 @@ export default function KostenrechnerClient({ className, preise, start }: Props)
         </div>
 
         <p className="mt-6 max-w-3xl text-sm leading-6 text-neutral-300">
-          Bei {euroGlatt(stundensatz)} pro Stunde ist das Zeithonorar ab{" "}
+          Konkret heißt das: Nach Gesetz stehen Ihrem Anwalt für den{" "}
+          <em>gesamten</em> Fall{" "}
+          {euro(gericht.anwalt.netto - gericht.anwalt.auslagen)} zu. Bei{" "}
+          {euroGlatt(stundensatz)} pro Stunde ist dieses Budget nach{" "}
           <strong className="text-white">
             {zeit.breakEvenStunden.toLocaleString("de-DE")} Stunden
           </strong>{" "}
-          teurer als die gesetzliche Gebühr. Schriftsätze, Akteneinsicht,
-          Telefonate, Termine und Korrespondenz mit der Gegenseite summieren
-          sich in einem streitigen Verfahren regelmäßig auf ein Vielfaches
-          davon.
+          aufgebraucht. Jede weitere Stunde zahlen Sie obendrauf – und ein
+          Streit vor Gericht besteht aus sehr viel mehr als vier Stunden
+          Arbeit: jeder Schriftsatz, jedes Telefonat, jeder Gerichtstermin,
+          jeder Brief an die Gegenseite.
         </p>
 
         <p className="mt-4 max-w-3xl rounded-xl bg-white/10 px-4 py-3 text-sm leading-6 text-neutral-200">
           <strong className="text-white">Der Teil, den kaum jemand erwähnt:</strong>{" "}
-          Was über die gesetzliche Gebühr hinausgeht, bekommen Sie nie erstattet
-          – auch wenn Sie den Prozess gewinnen. Die unterlegene Partei muss nur
-          die <em>gesetzlichen</em> Gebühren ersetzen (§ 91 Abs. 2 Satz 1 ZPO).
+          Wenn Sie gewinnen, muss die Gegenseite Ihre Anwaltskosten zahlen –
+          aber nur bis zur gesetzlichen Gebühr. Alles, was Ihr Anwalt darüber
+          hinaus abgerechnet hat, bleibt an Ihnen hängen.
           {istTrennung
-            ? " Bei einer Scheidung wird ohnehin nichts erstattet: Die Kosten werden gegeneinander aufgehoben, jede Seite trägt ihre Anwaltskosten selbst (§ 150 Abs. 1 FamFG)."
+            ? " Bei einer Scheidung bekommen Sie ohnehin nichts erstattet: Jede Seite zahlt ihren eigenen Anwalt, egal wie es ausgeht."
             : ""}{" "}
-          Die Differenz von {euro(Math.max(0, zeit.mehrkosten))} ist in jedem
-          Ausgang verlorenes Geld.
+          Die {euro(Math.max(0, zeit.mehrkosten))} Differenz sind also in jedem
+          Fall weg.
+          <span className="mt-1 block text-xs text-neutral-400">
+            § 91 Abs. 2 Satz 1 ZPO
+            {istTrennung ? ", § 150 Abs. 1 FamFG" : ""}
+          </span>
         </p>
       </div>
 

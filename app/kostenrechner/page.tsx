@@ -10,6 +10,9 @@ import {
 } from "@/lib/kostenrecht";
 import { ladePreisOverlay } from "@/lib/pricing-matrix";
 import KostenrechnerClient from "./KostenrechnerClient";
+import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
+import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 
 // ── /kostenrechner ──────────────────────────────────────────────────────────
 //
@@ -123,28 +126,38 @@ export default async function Kostenrechner({
       <JsonLd data={faqSchema} />
 
       <main className="app-shell pt-[73px]">
-        <section className="section-base pt-10">
-          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+        <ImagePinHero
+          image={kostenrechnerPhoto}
+          imageAlt="Gerichtskosten und Mediationskosten im Vergleich"
+        >
+          <div className="mx-auto w-full max-w-5xl px-6 lg:px-8">
             <Breadcrumbs
-              variant="light"
+              variant="dark"
               items={[{ label: "Prozesskosten-Rechner" }]}
             />
+            <p className="eyebrow mb-4 mt-6 text-accent-300">
+              Prozesskosten-Rechner
+            </p>
 
-            <h1 className="mt-6 text-4xl font-black tracking-tight text-neutral-900 lg:text-5xl">
-              Was kostet der Streit?
-              <span className="block text-accent-600">
-                Vor Gericht — und ohne.
+            <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              Was kostet der Streit?{" "}
+              <span className="text-accent-300">
+                <TiltLastWord>Vor Gericht — und ohne.</TiltLastWord>
               </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-600">
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
               Gerichts- und Anwaltskosten richten sich nach festen gesetzlichen
               Tabellen. Der Rechner wendet sie an, zeigt jede Position mit
               Fundstelle und stellt daneben, was dieselbe Sache in einer
               Mediation kostet. Kostenlos, ohne Anmeldung, Stand{" "}
               {KOSTENRECHT_STAND}.
             </p>
+          </div>
+        </ImagePinHero>
 
-            <KostenrechnerClient className="mt-10" preise={preise} start={start} />
+        <section className="section-base pt-10">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <KostenrechnerClient preise={preise} start={start} />
           </div>
         </section>
 

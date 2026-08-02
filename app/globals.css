@@ -439,3 +439,59 @@
     animation: none !important;
   }
 }
+
+/* ── Hero-Laufschrift ("Mantra-Band") ────────────────────────────────────
+   Gehört zu app/components/ui/HeroTagline.tsx, gerendert von ImagePinHero.
+   Der Track enthält den Satz doppelt (2 × COPIES_PER_HALF), deshalb springt
+   translateX(-50%) nahtlos zurück. Tempo bewusst langsam: das Band soll
+   nicht mit der H1 um Aufmerksamkeit konkurrieren. */
+.hero-tagline {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+}
+.hero-tagline-track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: hero-tagline-scroll 55s linear infinite;
+}
+.hero-tagline-item {
+  padding-right: 3.5rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-neutral-400, #a3a3a3);
+}
+@keyframes hero-tagline-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Auf schmalen Screens steht das Band still: laufender Text direkt über
+   der H1 wirkt auf dem Handy hektisch, und die Maske schneidet ohnehin ab. */
+@media (max-width: 640px) {
+  .hero-tagline-track {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-tagline-track {
+    animation: none !important;
+  }
+}

@@ -7,6 +7,7 @@ import InviteVideoRecorder from "@/app/components/mediation/InviteVideoRecorder"
 import InviteMeetRecorder from "@/app/components/mediation/InviteMeetRecorder";
 import { Reveal, stagger } from "@/app/components/ui/motion";
 import Icon from "@/app/components/ui/Icon";
+import LinkedLogbuch from "@/app/components/mediation/LinkedLogbuch";
 
 // Bezahl-Typen und das PayPal-SDK sind hier bewusst NICHT mehr definiert:
 // die Zahlung ist seit dem Umbau ein Schritt innerhalb der Mediation
@@ -21,6 +22,8 @@ type Props = {
   initialIsPaid?: boolean;
   // Firmenfall (Abo-Modell): organizations.id, NULL/undefined = privater B2C-Fall.
   initialOrganizationId?: number | null;
+  // Nur für den Ton der Labels im Logbuch-Reiter (Business/ODR sachlicher).
+  mediationType?: string;
 };
 
 type Participant = {
@@ -122,8 +125,12 @@ function StepCard({
   );
 }
 
-export default function MediationClient({ mediationId, userRole, currentUserName, initialIsPaid = false, initialOrganizationId = null }: Props) {
+export default function MediationClient({ mediationId, userRole, currentUserName, initialIsPaid = false, initialOrganizationId = null, mediationType = "" }: Props) {
   const router = useRouter();
+  // Reiter der Fall-Seite: Vorbereitung (Onboarding-Schritte) und das mit dem
+  // Fall verknüpfte Logbuch. Logbücher sind keine Fälle – sie hängen sich an
+  // einen Fall an und werden hier gezeigt.
+  const [caseTab, setCaseTab] = useState<"vorbereitung" | "logbuch">("vorbereitung");
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [advancing, setAdvancing] = useState(false);
@@ -487,6 +494,23 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
   }
 
+  // Öffnet das EINE Konflikt-Logbuch der Nutzer:in (Ein-Buch-Prinzip) – dort
+  // werden Einträge mit diesem Fall verknüpft. Gibt es noch keins, führt der
+  // Weg über die Anlage-Seite.
+  async function openOwnLogbuch() {
+    try {
+      const res = await fetch("/api/mediations/me", { cache: "no-store" });
+      const list: { mediation_id?: number; id?: number; mode?: string }[] = res.ok
+        ? await res.json()
+        : [];
+      const book = list.find((m) => m.mode === "logbuch");
+      const bookId = book?.mediation_id ?? book?.id;
+      router.push(bookId ? `/dashboard/logbuch/${hashId(bookId)}` : "/dashboard/logbuch/new");
+    } catch {
+      router.push("/dashboard/logbuch/new");
+    }
+  }
+
   async function copyInviteLink() {
     if (!inviteUrl) return;
     await navigator.clipboard.writeText(inviteUrl);
@@ -571,7 +595,62 @@ export default function MediationClient({ mediationId, userRole, currentUserName
           )}
         </div>
 
-        <div className="mt-8 space-y-5">
+        {/* Reiter: Vorbereitung | Logbuch zum Fall */}
+        <div className="mt-8 flex gap-1 border-b border-neutral-200">
+          {[
+            { key: "vorbereitung" as const, label: "Vorbereitung" },
+            { key: "logbuch" as const, label: "Logbuch zum Fall" },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setCaseTab(t.key)}
+              className={`-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                caseTab === t.key
+                  ? "border-accent-500 text-accent-700"
+                  : "border-transparent text-neutral-500 hover:text-neutral-700"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {caseTab === "logbuch" && (
+          <div className="mt-6 space-y-5">
+            <div className="rounded-3xl border border-neutral-200 bg-white p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
+                    Logbuch zum Fall
+                  </p>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-600">
+                    Hier stehen die Einträge, die aus einem Konflikt-Logbuch mit
+                    diesem Fall verknüpft wurden. Verknüpfte Einträge sieht der
+                    Mediator, ausdrücklich geteilte alle Beteiligten – sensible
+                    Einträge bleiben immer privat.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={openOwnLogbuch}
+                  className="btn btn-secondary text-sm"
+                >
+                  <Icon name="notebook" color="currentColor" /> Einträge verknüpfen
+                </button>
+              </div>
+              <div className="mt-6">
+                <LinkedLogbuch
+                  mediationId={mediationId}
+                  mediationType={mediationType}
+                  variant="dashboard"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={`mt-6 space-y-5 ${caseTab === "vorbereitung" ? "" : "hidden"}`}>
           {/* Schritt 1: Beteiligte verbinden */}
           <StepCard
             index={1}

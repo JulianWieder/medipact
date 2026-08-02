@@ -33,6 +33,14 @@ export interface MediationCase {
   description?: string | null;
   priority?: string | null;
   role?: string;
+  /**
+   * "mediation" oder "logbuch". Konflikt-Logbücher sind KEINE Fälle: sie
+   * werden in keiner Fall-Liste geführt (Backend filtert /mediations/all,
+   * fetchMediations() filtert die eigene /me-Liste). Was aus einem Logbuch
+   * zum Fall gehört, wird verknüpft und erscheint im Reiter „Logbuch" des
+   * Falls.
+   */
+  mode?: string;
   /** Zuordnung zu einer Mediations-Variante (MediationVariant.key) — null = Basis-Workflow. */
   variant_key?: string | null;
 }
