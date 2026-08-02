@@ -136,8 +136,11 @@ export default async function RootLayout({
       className={`${inter.variable} ${playfair.variable}`}
     >
       <head>
-        {/* Favicon */}
-        <link rel="icon" href="/favicon.ico" />
+        {/* Favicon – Google zieht fuer die Suchergebnisse die groesste passende
+            Variante und beschneidet sie kreisrund, darum zusaetzlich 96/192 px */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="antialiased">
