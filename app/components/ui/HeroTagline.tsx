@@ -19,8 +19,12 @@ import type { ReactNode } from "react";
  * (siehe .hero-tagline-track in globals.css).
  *
  * Wird zentral von ImagePinHero gerendert — auf den Unterseiten also
- * nichts zu tun. Einzeln einsetzbar ueber <HeroTagline /> in einem
- * relativ positionierten Container.
+ * nichts zu tun. Die Startseite (HeroScrollPin) setzt sie haendisch, weil
+ * sie eigene Scroll-Transforms hat und die Laufschrift dort mitfaden soll.
+ *
+ * Hinweis: In messages/de.json + en.json steht unter home.hero.tagline
+ * derselbe Satz. Das war die Herkunft, gelesen wird der Key nicht mehr —
+ * einzige Quelle ist HERO_TAGLINE hier.
  */
 export const HERO_TAGLINE =
   "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.";

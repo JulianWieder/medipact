@@ -9,6 +9,8 @@ import {
   useScrollPin,
 } from "@/app/components/ui/ScrollPinSection";
 import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
+import { HeroTagline } from "@/app/components/ui/HeroTagline";
+import { TiltLastWord } from "@/app/components/ui/TiltWord";
 
 export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,6 +41,16 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
         scale={imageScale}
       />
 
+      {/* Laufschrift wie auf allen Unterseiten (ImagePinHero rendert sie dort
+          zentral). Hier haendisch, weil dieser Hero eigene Scroll-Transforms
+          hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben. */}
+      <motion.div
+        style={{ opacity: textOpacity }}
+        className="pointer-events-none absolute inset-x-0 top-24 z-20"
+      >
+        <HeroTagline />
+      </motion.div>
+
       {/* Content */}
       <div className="relative flex h-full items-center z-20">
         <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -54,7 +66,9 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
               <h1 className="mt-4 text-4xl font-black leading-[1.1] tracking-tight text-white sm:text-6xl">
                 {t("titleLine1")}{" "}
                 <span className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
-                  {t("titleLine2")}
+                  <TiltLastWord className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
+                    {t("titleLine2")}
+                  </TiltLastWord>
                 </span>
               </h1>
 
