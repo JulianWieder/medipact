@@ -411,9 +411,14 @@ function ListInput({
 
 /** Nur für den Einsatz in einer Leseansicht (Admin-/Mediator-Einsicht):
  *  denselben Wert schreibgeschützt als Text darstellen.
+ *
  *  Kleingeschrieben, weil es KEINE Komponente ist – ein großes O würde React
- *  und die Lint-Regeln glauben lassen, hier käme JSX zurück. */
-export function onboardingValueText(block: OnboardingBlock, value: unknown): string {
+ *  und die Lint-Regeln glauben lassen, hier käme JSX zurück.
+ *
+ *  Bewusst OHNE den zugehörigen Block: die Wertform allein reicht zur
+ *  Unterscheidung ({agreed}, {street…}, {name…}, Liste, String). Ein
+ *  Block-Parameter wäre ungenutzt – und der Build hat noUnusedParameters an. */
+export function onboardingValueText(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "string") return value.trim() || "—";
   if (typeof value === "boolean") return value ? "Ja" : "Nein";

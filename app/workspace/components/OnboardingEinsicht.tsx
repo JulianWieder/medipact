@@ -170,7 +170,7 @@ export function OnboardingEinsicht({ userId }: { userId: number | null | undefin
                         {onboardingBlockLabel(block)}
                       </span>
                       <span className="shrink-0 text-right text-sm font-medium text-neutral-800">
-                        {onboardingValueText(block, data.values[block.id])}
+                        {onboardingValueText(data.values[block.id])}
                       </span>
                     </div>
                   ))}
