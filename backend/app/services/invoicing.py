@@ -66,15 +66,36 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
             continue
 
         payer = db.query(User).filter(User.id == participant.user_id).first()
+        # Rechnungsanschrift: der Teilnehmer-Datensatz hat Vorrang (fall-
+        # spezifische Abweichung), sonst greift das Nutzerprofil aus dem
+        # Onboarding (users.billing_*). Vor dem Onboarding-Umbau gab es nur die
+        # erste Quelle — Rechnungen wären jetzt ohne Adresse entstanden, weil
+        # die Fall-Seite sie gar nicht mehr abfragt.
+        # Adresse wird als GANZES übernommen, nicht feldweise gemischt: eine
+        # Straße aus dem Fall mit einer Stadt aus dem Profil wäre eine Adresse,
+        # die niemand je eingegeben hat.
+        if (
+            participant.billing_street
+            and participant.billing_postal_code
+            and participant.billing_city
+        ):
+            street = participant.billing_street
+            postal_code = participant.billing_postal_code
+            city = participant.billing_city
+        else:
+            street = payer.billing_street if payer else None
+            postal_code = payer.billing_postal_code if payer else None
+            city = payer.billing_city if payer else None
+
         invoice = Invoice(
             invoice_number=next_invoice_number(db),
             mediation_id=mediation.id,
             participant_id=participant.id,
             payer_name=(payer.name if payer else None),
             payer_email=(payer.email if payer else None),
-            billing_street=participant.billing_street,
-            billing_postal_code=participant.billing_postal_code,
-            billing_city=participant.billing_city,
+            billing_street=street,
+            billing_postal_code=postal_code,
+            billing_city=city,
             amount=billing.participant_final_due(db, mediation, participant),
             tax_rate=0.0,
             currency="EUR",

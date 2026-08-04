@@ -222,6 +222,19 @@ export const CONTENT_TYPE_BY_ID: Record<string, ContentTypeDef> = Object.fromEnt
  */
 export const SHARED_MEDIATION_TYPE = "*";
 
+/**
+ * Pseudo-Mediationstyp für das NUTZER-ONBOARDING: der einmalige Durchlauf, den
+ * jede Person absolviert, bevor sie Fälle bearbeiten kann. Bewusst NICHT "*" —
+ * "*" heißt „gilt in jedem Mediationstyp" und würde die Schritte in jeden Fall
+ * spülen. "@user" taucht in keiner Fall-Auflösung auf.
+ *
+ * Backend-Gegenstück: USER_ONBOARDING_TYPE in models/phase_step_default.py.
+ * Ausgeliefert wird es nicht über die Fall-Endpunkte, sondern über
+ * routers/user_onboarding.py.
+ */
+export const USER_ONBOARDING_TYPE = "@user";
+export const USER_ONBOARDING_PHASE = "onboarding";
+
 export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "trennung", label: "Trennung & Scheidung" },
   { id: "erbschaft", label: "Erbschaft" },
@@ -242,6 +255,11 @@ export interface MediationDetail extends MediationCase {
 
 export interface Participant {
   id: string;
+  /** users.id der Person hinter dieser Teilnahme.
+   *  Fehlt bei noch offenen Einladungen — dort gibt es noch kein Konto.
+   *  Gebraucht für alles, was an der PERSON hängt statt am Fall, v.a. das
+   *  Nutzer-Onboarding (GET /onboarding/users/{user_id}). */
+  user_id?: number;
   name: string;
   email: string;
   role: string;
@@ -482,6 +500,15 @@ export const PHASES: { id: string; label: string; short: string }[] = [
 export const DESIGNER_PHASES: { id: string; label: string; short: string }[] = [
   { id: "logbuch", label: "Logbuch (kostenlos)", short: "L" },
   ...PHASES,
+];
+
+/** Phasen im Reiter „Nutzer-Onboarding" (mediation_type "@user"). Genau eine:
+ *  das Onboarding ist ein linearer Durchlauf, keine Verfahrensphase. Bewusst
+ *  eine eigene Liste statt eines Eintrags in DESIGNER_PHASES — sonst stünde
+ *  „Onboarding" auch in jeder Mediationsart zur Auswahl und liefe dort ins
+ *  Leere. */
+export const USER_ONBOARDING_PHASES: { id: string; label: string; short: string }[] = [
+  { id: USER_ONBOARDING_PHASE, label: "Onboarding-Schritte", short: "◉" },
 ];
 
 // ── Workflow Manager: Schritte pro Phase ────────────────────────────────────

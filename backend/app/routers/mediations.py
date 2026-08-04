@@ -37,7 +37,7 @@ from app.security import get_current_user, get_current_db_user
 from app.services.llm import ai_complete
 from app import pricing
 from app.services import access, billing, invoicing
-from app.services import tenancy
+from app.services import onboarding, tenancy
 from app.models.organization import Organization
 
 
@@ -91,6 +91,11 @@ class ReflectRequest(BaseModel):
 
 
 def _require_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
+    # Onboarding-Sperre auch hier, nicht nur in access.require_participant_or_staff:
+    # die schreibenden Endpunkte (Notizen, Unterschriften, Zahlungen) gehen
+    # bewusst NICHT über access.py, sondern über diese strenge Variante.
+    onboarding.ensure_onboarded(user)
+
     p = (
         db.query(MediationParticipant)
         .filter(
@@ -392,19 +397,55 @@ def delete_workflow_rule(
 # jede zahlungspflichtige Partei eine eigene Rechnung angelegt wird und diese
 # Adresse als Rechnungsempfänger braucht (Invoice.billing_* in models/invoice.py).
 
-def _has_billing_address(participant: MediationParticipant) -> bool:
-    return bool(
+# Seit dem Onboarding-Umbau liegt die Rechnungsanschrift am NUTZERPROFIL
+# (users.billing_*, erfasst im einmaligen Nutzer-Onboarding). Der Teilnehmer-
+# Datensatz behaelt seine eigenen Spalten und hat weiterhin Vorrang — er ist
+# die fall-spezifische AUSNAHME (abweichende Anschrift fuer genau diesen Fall).
+# Ist er leer, greift das Profil. Ohne diesen Fallback muesste jede Partei ihre
+# Adresse trotz Onboarding in jedem Fall erneut eintippen, und genau das sollte
+# der Umbau abschaffen.
+def _effective_billing_address(
+    participant: MediationParticipant, user: User
+) -> tuple[str | None, str | None, str | None]:
+    if (
         participant.billing_street
         and participant.billing_postal_code
         and participant.billing_city
-    )
+    ):
+        return (
+            participant.billing_street,
+            participant.billing_postal_code,
+            participant.billing_city,
+        )
+    return (user.billing_street, user.billing_postal_code, user.billing_city)
 
 
-def _serialize_billing_address(participant: MediationParticipant) -> dict:
+def _has_billing_address(participant: MediationParticipant, user: User | None = None) -> bool:
+    if (
+        participant.billing_street
+        and participant.billing_postal_code
+        and participant.billing_city
+    ):
+        return True
+    if user is None:
+        return False
+    return bool(user.billing_street and user.billing_postal_code and user.billing_city)
+
+
+def _serialize_billing_address(participant: MediationParticipant, user: User) -> dict:
+    street, postal_code, city = _effective_billing_address(participant, user)
     return {
-        "billing_street": participant.billing_street,
-        "billing_postal_code": participant.billing_postal_code,
-        "billing_city": participant.billing_city,
+        "billing_street": street,
+        "billing_postal_code": postal_code,
+        "billing_city": city,
+        # true = kommt aus dem Nutzerprofil, nicht aus einer fall-eigenen
+        # Abweichung. Die Oberflaeche kann damit "aus deinen Stammdaten"
+        # kennzeichnen, statt so zu tun, als haette man es hier eingegeben.
+        "from_profile": not bool(
+            participant.billing_street
+            and participant.billing_postal_code
+            and participant.billing_city
+        ),
     }
 
 
@@ -422,7 +463,7 @@ def get_billing_address(
 ):
     """Liefert die Rechnungsadresse des AUFRUFENDEN Nutzers für diesen Fall."""
     participant = _require_participant(mediation_id, current_user, db)
-    return _serialize_billing_address(participant)
+    return _serialize_billing_address(participant, current_user)
 
 
 @router.patch("/{mediation_id}/billing-address")
@@ -449,7 +490,7 @@ def update_billing_address(
     participant.billing_city = city
     db.commit()
     db.refresh(participant)
-    return _serialize_billing_address(participant)
+    return _serialize_billing_address(participant, current_user)
 
 
 def _mediation_price_eur(db: Session, mediation_id: int) -> float:
@@ -526,6 +567,12 @@ def create_mediation(
     user = db.query(User).filter(User.email == current_user_email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Ohne abgeschlossenes Nutzer-Onboarding wird auch kein Fall ANGELEGT –
+    # sonst stünde man direkt danach vor der Sperre und hätte eine Leiche in
+    # der Fallliste. Das Logbuch ist bewusst mit erfasst: auch dort entstehen
+    # Inhalte, die später in einen Fall konvertiert werden.
+    onboarding.ensure_onboarded(user)
 
     # ── Kostenloses Konflikt-Logbuch (mode="logbuch") ────────────────────────
     # Eigener, schlanker Pfad: immer privat (kein Firmen-Abo, kein Org-Scoping),
@@ -781,6 +828,11 @@ class DiscountApplyRequest(BaseModel):
 
 def _payment_status_payload(db: Session, mediation: Mediation, me: MediationParticipant) -> dict:
     """Vollständiger Bezahl-Status: eigener Anteil + Status aller Parteien."""
+    # Nutzer hinter der eigenen Teilnahme: die Rechnungsanschrift kann seit dem
+    # Onboarding-Umbau aus dem Profil kommen (users.billing_*), nicht nur aus
+    # dem Teilnehmer-Datensatz. Ohne diesen Lookup meldete der Bezahl-Block
+    # "Rechnungsdaten fehlen", obwohl sie längst im Onboarding erfasst wurden.
+    my_user = db.query(User).filter(User.id == me.user_id).first()
     my_base = billing.participant_base_due(db, mediation, me)
     my_final = billing.participant_final_due(db, mediation, me)
 
@@ -807,7 +859,7 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             "authorized": bool(p.authorized) and not bool(p.paid),
             "amount_due_eur": billing.participant_final_due(db, mediation, p) if owes else 0.0,
             "is_you": p.id == me.id,
-            "billing_address_complete": _has_billing_address(p),
+            "billing_address_complete": _has_billing_address(p, u),
         })
 
     return {
@@ -834,7 +886,7 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             "authorized": bool(me.authorized) and not bool(me.paid),
             # Fürs Onboarding: Zahlung ist erst möglich, wenn die
             # Rechnungsadresse hinterlegt ist (Rechnung pro Partei beim Start).
-            "billing_address_complete": _has_billing_address(me),
+            "billing_address_complete": _has_billing_address(me, my_user),
         },
         "participants": parties,
     }
@@ -987,7 +1039,7 @@ async def create_paypal_order(
 
     # Rechnungsadresse ist Voraussetzung für die Zahlung, weil beim Start des
     # Falls für jede zahlende Partei eine Rechnung mit dieser Adresse erzeugt wird.
-    if not _has_billing_address(me):
+    if not _has_billing_address(me, current_user):
         raise HTTPException(
             status_code=422,
             detail="Bitte hinterlege zuerst deine Rechnungsdaten (Straße, PLZ, Ort), bevor du bezahlst.",
@@ -1126,7 +1178,7 @@ async def redeem_free(
 
     # Auch bei 0 € (Voll-Rabatt) entsteht beim Start eine Rechnung für diese
     # Partei – die Adresse ist deshalb ebenfalls Pflicht.
-    if owes and not _has_billing_address(me):
+    if owes and not _has_billing_address(me, current_user):
         raise HTTPException(
             status_code=422,
             detail="Bitte hinterlege zuerst deine Rechnungsdaten (Straße, PLZ, Ort), bevor du freischaltest.",
@@ -1338,6 +1390,11 @@ def get_mediation_participants(
     result = [
         {
             "id": str(participant.id),
+            # user_id zusaetzlich zur participant.id: das Nutzer-Onboarding
+            # haengt an der PERSON, nicht an der Teilnahme. Ohne dieses Feld
+            # koennte die Fall-Ansicht den Onboarding-Stand einer Partei nicht
+            # nachschlagen (GET /onboarding/users/{user_id}).
+            "user_id": user.id,
             "name": user.name,
             "email": user.email,
             "role": participant.role,

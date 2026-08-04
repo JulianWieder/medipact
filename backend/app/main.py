@@ -23,6 +23,7 @@ from app.routers import (
     phase_step_defaults,
     pricing,
     step_content,
+    user_onboarding,
 )
 
 app = FastAPI(title="Mediation API")
@@ -54,6 +55,10 @@ app.include_router(ai_prompts.router)
 app.include_router(discounts.router)
 app.include_router(organizations.router)
 app.include_router(newsletter.router)
+# Einmaliges Nutzer-Onboarding vor der Fallbearbeitung. Bewusst NICHT hinter
+# der Fall-Sperre: wer noch kein Onboarding hat, muss diese Endpunkte gerade
+# erreichen können.
+app.include_router(user_onboarding.router)
 # Öffentliche Preisauskunft für Marketing-Seiten (Kostenrechner) – lesend,
 # ohne Auth, siehe routers/pricing.py.
 app.include_router(pricing.router)

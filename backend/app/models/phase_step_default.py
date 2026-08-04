@@ -13,6 +13,24 @@ from app.database import Base
 # einem Mediationstyp).
 SHARED_MEDIATION_TYPE = "*"
 
+# Pseudo-Mediationstyp fuer das NUTZER-ONBOARDING: Schritte, die eine Person
+# EINMAL durchlaeuft, bevor sie ueberhaupt Faelle bearbeiten kann — nicht pro
+# Fall. Sie werden im Workflow Manager in einem eigenen Reiter gepflegt und
+# ueber routers/user_onboarding.py ausgeliefert.
+#
+# WICHTIG: Diese Schritte duerfen NIE in einem Fall auftauchen. Das ist heute
+# dadurch sichergestellt, dass jede Fall-Aufloesung explizit
+#   mediation_type.in_([mediation.mediation_type, SHARED_MEDIATION_TYPE])
+# filtert — "@user" ist in dieser Liste nie enthalten. Wer diesen Filter
+# jemals lockert (z.B. auf "alle Typen laden und im Code filtern"), muss
+# USER_ONBOARDING_TYPE dort ausdruecklich ausschliessen.
+#
+# Umgekehrt gilt genauso: ein "*"-Schritt gehoert NICHT ins Onboarding. Die
+# Onboarding-Aufloesung filtert deshalb auf mediation_type == "@user" allein,
+# ohne include_shared.
+USER_ONBOARDING_TYPE = "@user"
+USER_ONBOARDING_PHASE = "onboarding"
+
 # Gültige Werte für PhaseStepDefault.gate_mode (Fortschritts-Sperre, siehe dort).
 # "self" ist der Standard und wird als NULL gespeichert.
 GATE_MODES = ("self", "all", "none")

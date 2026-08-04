@@ -53,6 +53,28 @@ async function refreshBackendToken(refreshToken: string): Promise<{
   }
 }
 
+/**
+ * Fragt beim Backend nach, ob das einmalige Nutzer-Onboarding abgeschlossen ist.
+ *
+ * Wird nur aufgerufen, solange das Flag im Token noch nicht true ist — danach
+ * nie wieder. Bei Fehlern wird `false` zurückgegeben: im Zweifel steht das
+ * Onboarding noch aus, und der Nutzer landet dort statt in einem halb
+ * funktionierenden Dashboard.
+ */
+async function fetchOnboardingCompleted(accessToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/me/role`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data?.onboarding_completed === true;
+  } catch {
+    return false;
+  }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
 
@@ -99,6 +121,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: data.user.email,
           name: data.user.name,
           role: data.user.role,
+          // Einmaliges Nutzer-Onboarding abgeschlossen? Liegt im JWT, damit die
+          // Middleware bei JEDEM Seitenaufruf entscheiden kann, ob sie auf
+          // /onboarding umleiten muss — ein Backend-Call pro Request wäre auf
+          // jeder Dashboard-Seite spürbar.
+          onboardingCompleted: data.user.onboarding_completed === true,
           backendAccessToken: data.access_token,
           backendRefreshToken: data.refresh_token,
           backendAccessTokenExpires: getTokenExpiry(data.access_token),
@@ -115,8 +142,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.backendRefreshToken = user.backendRefreshToken;
         token.backendAccessTokenExpires = user.backendAccessTokenExpires;
         token.role = user.role;
+        token.onboardingCompleted = user.onboardingCompleted === true;
         token.refreshError = undefined;
         return token;
+      }
+
+      // Solange das Onboarding NICHT abgeschlossen ist, den Stand bei jedem
+      // Request frisch beim Backend holen. Sonst bliebe das Flag im Token bis
+      // zum nächsten Login false, und die Middleware würde direkt nach dem
+      // Abschluss wieder aufs Onboarding zurückleiten — eine Endlosschleife.
+      //
+      // Der Aufruf kostet nur, solange jemand mitten im Onboarding steckt:
+      // sobald das Flag einmal true ist, wird nie wieder nachgefragt. Ein
+      // SessionProvider mit update() wäre die Alternative gewesen, den gibt es
+      // in dieser App aber nirgends — hier ist der Umbau kleiner.
+      if (token.onboardingCompleted !== true && token.backendAccessToken) {
+        token.onboardingCompleted = await fetchOnboardingCompleted(
+          token.backendAccessToken as string,
+        );
       }
 
       const expires = token.backendAccessTokenExpires as number | null | undefined;
@@ -163,6 +206,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       if (session.user) {
         session.user.role = token.role as string;
+        session.user.onboardingCompleted = token.onboardingCompleted === true;
       }
 
       return session;

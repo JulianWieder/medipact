@@ -7,6 +7,12 @@ declare module "next-auth" {
     error?: string;
     user: {
       role?: string;
+      /**
+       * Einmaliges Nutzer-Onboarding abgeschlossen? Steht im JWT, damit die
+       * Middleware ohne Backend-Call entscheiden kann (siehe middleware.ts).
+       * Nach dem Abschluss aktualisiert der Client die Session per update().
+       */
+      onboardingCompleted?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -15,6 +21,7 @@ declare module "next-auth" {
     backendRefreshToken?: string;
     backendAccessTokenExpires?: number | null;
     role?: string;
+    onboardingCompleted?: boolean;
   }
 }
 
@@ -25,5 +32,6 @@ declare module "next-auth/jwt" {
     backendAccessTokenExpires?: number | null;
     refreshError?: string;
     role?: string;
+    onboardingCompleted?: boolean;
   }
 }

@@ -63,6 +63,10 @@ class UserOut(BaseModel):
     email: EmailStr
     name: str
     role: str
+    # Ob das einmalige Nutzer-Onboarding abgeschlossen ist. Wandert im Frontend
+    # ins NextAuth-JWT, damit die Middleware bei JEDEM Seitenaufruf entscheiden
+    # kann, ohne dafür einen Backend-Call zu machen.
+    onboarding_completed: bool = False
 
 
 class TokenResponse(BaseModel):
@@ -192,6 +196,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
             "email": user.email,
             "name": user.name,
             "role": user.role,
+            "onboarding_completed": user.onboarding_completed_at is not None,
         },
     )
 
@@ -222,6 +227,7 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             "email": user.email,
             "name": user.name,
             "role": user.role,
+            "onboarding_completed": user.onboarding_completed_at is not None,
         },
     )
 
@@ -317,6 +323,9 @@ def get_my_role(
         "organization_id": user.organization_id,
         "email": user.email,
         "name": user.name,
+        # Einmaliges Nutzer-Onboarding abgeschlossen? Wird u.a. gebraucht, um
+        # die Session nach dem Abschluss zu aktualisieren, ohne neu einzuloggen.
+        "onboarding_completed": user.onboarding_completed_at is not None,
     }
 
 

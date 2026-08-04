@@ -41,16 +41,19 @@ const roleLabel: Record<string, string> = {
   owner: "Antragsteller",
 };
 
-// ── Onboarding-Schritte ──────────────────────────────────────────────────────
-// Die erste Seite eines Falls ist ein geführtes Onboarding: erst wenn ein
+// ── Vorbereitung eines Falls ─────────────────────────────────────────────────
+// Die erste Seite eines Falls führt durch die Vorbereitung: erst wenn ein
 // Schritt erledigt ist, wird der nächste relevant. Reihenfolge:
-// 1. Beteiligte verbinden → 2. Rechnungsdaten → 3. Mediation starten.
+// 1. Beteiligte verbinden → 2. Mediation starten.
 //
-// Die ZAHLUNG ist seit dem PayPal-Umbau kein Onboarding-Schritt mehr, sondern
-// ein Block innerhalb des Verfahrens (fall_freischaltung, Einladungs-Phase).
-// Die RECHNUNGSDATEN bleiben aber bewusst hier: sie werden vor dem Start
-// abgefragt, damit beim späteren Zahlungseingang sofort eine korrekte Rechnung
-// erzeugt werden kann. Der Bezahl-Block zeigt sie nur noch mit „Ändern" an.
+// Zwei Dinge standen hier früher und stehen jetzt woanders:
+//   • Die ZAHLUNG ist seit dem PayPal-Umbau ein Block innerhalb des Verfahrens
+//     (fall_freischaltung, Einladungs-Phase, im WorkflowManager gepflegt).
+//   • Die RECHNUNGSDATEN sind seit dem Onboarding-Umbau Stammdaten der PERSON
+//     (/onboarding, änderbar unter /dashboard/stammdaten). Sie in jedem Fall
+//     erneut abzufragen war genau das Problem, das der Umbau gelöst hat; der
+//     Bezahl-Block zieht sie aus dem Profil.
+// Was hier bleibt, ist fallbezogen und kann es nirgendwo anders sein.
 
 type StepState = "done" | "active" | "locked";
 
@@ -156,19 +159,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
   // Zahlungsstatus wird hier nur noch ANGEZEIGT (Hinweis im Start-Schritt) –
   // Rabattcodes, Add-ons und PayPal liegen seit dem Umbau im Bezahl-Block der
   // Einladungs-Phase (_shared/FallFreischaltungBlock.tsx). Die Rechnungsdaten
-  // gehören dagegen weiterhin ins Onboarding (Schritt 2).
+  // liegen seit dem Onboarding-Umbau am NUTZERPROFIL und werden hier gar nicht
+  // mehr abgefragt (siehe /onboarding, /dashboard/stammdaten).
   const [isPaid, setIsPaid] = useState(initialIsPaid);
-
-  // Rechnungsdaten (Schritt 2) – gespeichert pro Teilnehmer über
-  // PATCH /api/mediations/[id]/billing-address (Methode MUSS PATCH sein – die
-  // Route exportiert nur GET/PATCH, ein PUT läuft in ein stilles 405).
-  const [street, setStreet] = useState("");
-  const [postal, setPostal] = useState("");
-  const [city, setCity] = useState("");
-  const [addressSaved, setAddressSaved] = useState(false);
-  const [addressEditing, setAddressEditing] = useState(false);
-  const [addressBusy, setAddressBusy] = useState(false);
-  const [addressError, setAddressError] = useState("");
 
   useEffect(() => {
     async function loadParticipants() {
@@ -210,8 +203,9 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               }
             }
             // Andere Partei erst NACH der Freischaltung direkt zur emotionalen
-            // Einleitung weiterleiten – vorher braucht sie diese Seite, um ihre
-            // Rechnungsdaten zu hinterlegen (Schritt 2).
+            // Einleitung weiterleiten. Vor der Freischaltung braucht sie diese
+            // Seite noch, um den Stand des Verfahrens zu sehen — ihre
+            // Rechnungsdaten hat sie längst im Nutzer-Onboarding hinterlegt.
             if (me?.role === "other_party" && initialIsPaid) {
               // Abo-Fälle (Firmen-Abo): Beteiligte durchlaufen zuerst den
               // schlanken Business-Start (Grundkonfiguration + Rahmen +
@@ -231,69 +225,6 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     }
     loadParticipants();
   }, [mediationId, currentUserName, router, initialIsPaid, initialOrganizationId]);
-
-  // Rechnungsdaten der eigenen Teilnahme laden (leer = Schritt 2 noch offen).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/mediations/${mediationId}/billing-address`, {
-          cache: "no-store",
-        });
-        if (!res.ok || cancelled) return;
-        const d = await res.json().catch(() => null);
-        const s = d?.billing_street ?? "";
-        const p = d?.billing_postal_code ?? "";
-        const c = d?.billing_city ?? "";
-        setStreet(s);
-        setPostal(p);
-        setCity(c);
-        setAddressSaved(Boolean(s && p && c));
-      } catch {
-        // still ignorieren – Schritt bleibt im Eingabezustand
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [mediationId]);
-
-  async function saveAddress() {
-    setAddressBusy(true);
-    setAddressError("");
-    try {
-      const res = await fetch(`/api/mediations/${mediationId}/billing-address`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          billing_street: street,
-          billing_postal_code: postal,
-          billing_city: city,
-        }),
-      });
-      const d = await res.json().catch(() => null);
-      if (!res.ok) {
-        // Status mit ausgeben: bei Fehlern ohne JSON-Body (z.B. 405) stand sonst
-        // nur „konnte nicht gespeichert werden" da und die Ursache blieb unklar.
-        const raw = d?.detail ?? d?.error;
-        const detail = Array.isArray(raw)
-          ? raw.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join(", ")
-          : raw;
-        setAddressError(
-          detail
-            ? `Rechnungsdaten konnten nicht gespeichert werden: ${detail}`
-            : `Rechnungsdaten konnten nicht gespeichert werden (Fehler ${res.status}).`,
-        );
-        return;
-      }
-      setAddressSaved(true);
-      setAddressEditing(false);
-    } catch {
-      setAddressError("Server nicht erreichbar.");
-    } finally {
-      setAddressBusy(false);
-    }
-  }
 
   // Video-Modus der Einladung aus der "einladung"-Phasenkonfiguration laden.
   useEffect(() => {
@@ -518,20 +449,22 @@ export default function MediationClient({ mediationId, userRole, currentUserName
     window.setTimeout(() => setCopied(false), 2000);
   }
 
-  // ── Schritt-Status fürs Onboarding ─────────────────────────────────────────
+  // ── Schritt-Status der Fall-Vorbereitung ──────────────────────────────────
   //
-  // Das Onboarding ist seit dem Umbau ZAHLUNGSunabhängig – die Zahlung selbst
-  // ist der erste Schritt INNERHALB der Mediation (Blocktyp
-  // "fall_freischaltung" in der Einladungs-Phase, gepflegt im WorkflowManager).
-  // Die Rechnungsdaten werden aber weiterhin hier abgefragt:
+  // Übrig sind zwei Schritte, und beide sind echt fallbezogen:
   //   1. Beteiligte verbinden
-  //   2. Rechnungsdaten hinterlegen (Pflicht vor dem Start)
-  //   3. Mediation starten  – darf jede Partei, nicht nur der Initiator
+  //   2. Mediation starten  – darf jede Partei, nicht nur der Initiator
+  //
+  // Weggefallen sind:
+  //   • die ZAHLUNG – seit dem PayPal-Umbau ein Block innerhalb des Verfahrens
+  //     (Typ "fall_freischaltung", Einladungs-Phase, im WorkflowManager gepflegt)
+  //   • die RECHNUNGSDATEN – seit dem Onboarding-Umbau Stammdaten der PERSON
+  //     (/onboarding bzw. /dashboard/stammdaten). Sie in jedem Fall erneut
+  //     abzufragen war der eigentliche Grund für den Umbau. Der Bezahl-Block
+  //     zieht sie aus dem Profil und zeigt sie nur noch mit „Ändern" an.
   const step1Done = hasOtherParty;
   const step1State: StepState = step1Done ? "done" : "active";
-  const step2Done = addressSaved;
-  const step2State: StepState = !step1Done ? "locked" : step2Done ? "done" : "active";
-  const step3State: StepState = step1Done && step2Done ? "active" : "locked";
+  const step2State: StepState = step1Done ? "active" : "locked";
 
   const mediator = participants.find((p) => p.role === "mediator");
   const parties = participants.filter((p) => p.role !== "mediator");
@@ -549,9 +482,13 @@ export default function MediationClient({ mediationId, userRole, currentUserName
               <p className="eyebrow mb-3">Mediation vorbereiten</p>
               <h1 className="heading-2 text-neutral-900">Dein Start in die Mediation</h1>
               <p className="mt-4 max-w-2xl text-neutral-600">
-                Drei Schritte bis zum Start: Beteiligte verbinden, Rechnungsdaten
-                hinterlegen, Mediation starten. Bezahlt wird erst im Verfahren selbst –
-                im Schritt „Verfahren freischalten".
+                Zwei Schritte bis zum Start: Beteiligte verbinden, Mediation starten.
+                Bezahlt wird erst im Verfahren selbst – im Schritt „Verfahren
+                freischalten"; deine Rechnungsdaten liegen bereits in deinen{" "}
+                <a href="/dashboard/stammdaten" className="font-semibold text-accent-700 hover:underline">
+                  Stammdaten
+                </a>
+                .
               </p>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
@@ -856,89 +793,18 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             )}
           </StepCard>
 
-          {/* Schritt 2: Rechnungsdaten – Pflicht vor dem Start. Bezahlt wird
-              später im Verfahren; die Rechnung entsteht aber automatisch beim
-              Zahlungseingang und braucht diese Daten. */}
+          {/* Schritt 2: Mediation starten */}
           <StepCard
             index={2}
-            title="Rechnungsdaten hinterlegen"
-            state={step2State}
-            badge={
-              step2Done
-                ? "Hinterlegt"
-                : step2State === "active"
-                  ? "Offen"
-                  : undefined
-            }
-          >
-            <div className="max-w-xl space-y-3">
-              <p className="text-sm text-neutral-600">
-                Für die Rechnung über deinen Anteil. Es wird hier noch nichts abgebucht –
-                bezahlt wird erst im Verfahren, im Schritt „Verfahren freischalten".
-              </p>
-              {addressSaved && !addressEditing ? (
-                <div className="card-muted flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    {street}, {postal} {city}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setAddressEditing(true)}
-                    className="shrink-0 text-sm font-semibold text-accent-700 hover:underline"
-                  >
-                    Ändern
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="Straße und Hausnummer"
-                    className={inputClass}
-                  />
-                  <div className="flex gap-2">
-                    <input
-                      value={postal}
-                      onChange={(e) => setPostal(e.target.value)}
-                      placeholder="PLZ"
-                      className={`${inputClass} max-w-[140px]`}
-                    />
-                    <input
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Ort"
-                      className={inputClass}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={saveAddress}
-                    disabled={addressBusy || !street.trim() || !postal.trim() || !city.trim()}
-                    className="btn btn-secondary text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {addressBusy ? "Wird gespeichert…" : "Rechnungsdaten speichern"}
-                  </button>
-                  {addressError && (
-                    <p className="text-xs font-semibold text-red-600">{addressError}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </StepCard>
-
-          {/* Schritt 3: Mediation starten */}
-          <StepCard
-            index={3}
             title="Mediation starten"
-            state={step3State}
-            badge={step3State === "active" ? "Bereit" : undefined}
+            state={step2State}
+            badge={step2State === "active" ? "Bereit" : undefined}
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-xl text-sm text-neutral-600">
-                Sobald die Beteiligten verbunden sind und deine Rechnungsdaten vorliegen,
-                kann es losgehen – starten kann jede Partei. Hier fällt noch nichts an:
-                Die Zahlung ist der erste Schritt innerhalb des Verfahrens.
+                Sobald die Beteiligten verbunden sind, kann es losgehen – starten kann
+                jede Partei. Hier fällt noch nichts an: Die Zahlung ist der erste
+                Schritt innerhalb des Verfahrens.
               </p>
               <button
                 type="button"
@@ -957,46 +823,6 @@ export default function MediationClient({ mediationId, userRole, currentUserName
             </div>
           )}
 
-          {/* Gut zu wissen: die relevanten Infos zum Start kompakt an einer Stelle */}
-          <div className="rounded-3xl border border-neutral-200 bg-white p-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
-              Gut zu wissen
-            </p>
-            <div className="mt-4 grid gap-5 sm:grid-cols-2">
-              <div>
-                <p className="font-semibold text-neutral-900">So läuft die Mediation ab</p>
-                <p className="mt-1 text-sm text-neutral-600">
-                  Ihr durchlauft gemeinsam fünf Phasen: Einleitung, Themensammlung,
-                  Interessen, Optionen und Abschlussvereinbarung. Euer Mediator begleitet
-                  jeden Schritt.
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-900">Jede Partei zahlt ihren Anteil</p>
-                <p className="mt-1 text-sm text-neutral-600">
-                  Die Kosten werden fair geteilt und im Verfahren selbst beglichen – im
-                  Schritt „Verfahren freischalten". Der Betrag wird zunächst nur
-                  reserviert und erst abgebucht, wenn der Fall tatsächlich freigeschaltet
-                  ist.
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-900">Deine Rechnung</p>
-                <p className="mt-1 text-sm text-neutral-600">
-                  Sobald deine Zahlung eingegangen ist, wird automatisch eine Rechnung
-                  über deinen Anteil erstellt – mit den Rechnungsdaten aus Schritt 2.
-                  Sie steht als PDF bereit.
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold text-neutral-900">Vertraulich</p>
-                <p className="mt-1 text-sm text-neutral-600">
-                  Alle Inhalte des Verfahrens sind nur für die Beteiligten und den Mediator
-                  sichtbar.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
     </main>

@@ -5,6 +5,7 @@ import type { ParticipantWithCase, MediationCase } from "../types";
 import { PHASES, getPhaseIndex } from "../types";
 import { RoleBadge, InviteStatusDot, StatusBadge, TypeBadge, WCard, SectionHeader, ProgressBar, EmptyState } from "../ui";
 import { fetchMediations, fetchParticipants } from "../api";
+import { OnboardingEinsicht } from "./OnboardingEinsicht";
 
 interface ParteiDetailProps {
   partei: ParticipantWithCase;
@@ -86,6 +87,10 @@ export function ParteiDetail({ partei }: ParteiDetailProps) {
           </div>
         </div>
       </WCard>
+
+      {/* Onboarding-Stand der Person. Sichtbar, weil diese Partei in einem Fall
+          dieses Mediators ist – die Prüfung dafür läuft im Backend. */}
+      <OnboardingEinsicht userId={partei.user_id} />
 
       {/* Beteiligte Fälle */}
       <WCard className="p-5">

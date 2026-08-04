@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.models.mediation import Mediation
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
-from app.services import billing, tenancy
+from app.services import billing, onboarding, tenancy
 
 # Rollen, die einen Fall qua Plattform-Rolle betreuen können.
 STAFF_ROLES = ("mediator", "admin", tenancy.FIRM_ADMIN_ROLE)
@@ -56,6 +56,18 @@ def require_participant_or_staff(
     Plattform-Rolle läuft. Aufrufer, die eine Teilnehmer-ID brauchen, müssen
     diesen None-Fall behandeln.
     """
+    # Harte Onboarding-Sperre, VOR jeder weiteren Prüfung: ohne abgeschlossenes
+    # Nutzer-Onboarding wird kein Fall angefasst. Die Middleware im Frontend
+    # leitet zwar auf /onboarding um, aber wer die API direkt anspricht, käme
+    # sonst durch – genau der Fehler, der bei der Paywall schon einmal passiert
+    # ist (siehe project_paywall_enforcement).
+    #
+    # Ausdrücklich AUCH für Mediatoren und Admins: auch sie haben Stammdaten,
+    # und ein Onboarding, das man per Rolle überspringen kann, ist im Zweifel
+    # gar keins. Wer das für Staff lockern will, tut es hier – nicht verstreut
+    # in den Routern.
+    onboarding.ensure_onboarded(user)
+
     participant = (
         db.query(MediationParticipant)
         .filter(

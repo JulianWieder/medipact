@@ -920,6 +920,34 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
   const bypassesGate = currentParticipant
     ? GATE_BYPASS_ROLES.includes(currentParticipant.role)
     : false;
+
+  // ── Wiedereinstieg beim aktuellen Schritt ─────────────────────────────────
+  //
+  // activeStepIndex startete bisher immer bei 0. Wer sich neu anmeldete, sah
+  // damit Schritt 1 — auch wenn er längst bei Schritt 4 war — und musste sich
+  // jedes Mal durchklicken. Jetzt setzt die Phase EINMAL nach dem Laden auf
+  // `unlockedUntil` auf: den ersten Schritt, dessen Sperre noch zu ist, also
+  // genau die Stelle, an der es weitergeht.
+  //
+  // Abgeleitet statt gespeichert: kein zusätzliches Feld, keine Migration, und
+  // der Wert kann nie auf einen gelöschten Schritt zeigen.
+  //
+  // Der Ref ist entscheidend: ohne ihn würde jede Neuberechnung von
+  // `unlockedUntil` (also jedes Abschließen eines Schritts) den Nutzer wieder
+  // nach vorn reißen — auch wenn er bewusst zurückgeblättert hat.
+  const didResume = useRef(false);
+  useEffect(() => {
+    if (didResume.current) return;
+    if (loading || allStepDetails.length === 0) return;
+    // Mediatoren/Admins umgehen die Sperre und haben deshalb kein sinnvolles
+    // „hier geht es weiter" — sie starten wie bisher bei Schritt 1.
+    if (bypassesGate) {
+      didResume.current = true;
+      return;
+    }
+    didResume.current = true;
+    if (unlockedUntil > 0) setActiveStepIndex(unlockedUntil);
+  }, [loading, allStepDetails.length, unlockedUntil, bypassesGate]);
   const isStepLocked = (idx: number) => !bypassesGate && idx > unlockedUntil;
   // Angezeigt wird immer ein erreichbarer Schritt – auch wenn activeStepIndex
   // von außen weiter vorn steht (neu eingefügter Schritt, Schritt-Löschung).

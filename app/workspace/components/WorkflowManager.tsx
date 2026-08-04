@@ -37,6 +37,9 @@ import {
   DESIGNER_PHASES,
   MEDIATION_TYPES,
   SHARED_MEDIATION_TYPE,
+  USER_ONBOARDING_TYPE,
+  USER_ONBOARDING_PHASE,
+  USER_ONBOARDING_PHASES,
   GATE_MODE_OPTIONS,
   type GateMode,
   type MediationVariantDto,
@@ -50,7 +53,9 @@ import {
   BLOCK_TYPE_BY_ID,
   makeBlock,
   deriveBlocksFromLegacy,
+  isOnboardingOnlyBlock,
   type BlockTypeDef,
+  type BlockGroup,
 } from "../blockTypes";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import Icon from "@/app/components/ui/Icon";
@@ -840,6 +845,42 @@ function BlockConfigEditor({
           />
         </>
       );
+    // ── Nutzer-Onboarding ────────────────────────────────────────────────
+    // Beide Blöcke haben absichtlich nur Überschrift und Erklärtext: WELCHE
+    // Felder abgefragt werden, ist fest (sie werden serverseitig in die
+    // users-Spalten gespiegelt, siehe services/onboarding.PROFILE_MIRROR).
+    // Frei konfigurierbare Feldlisten würden diese Zuordnung brechen.
+    case "stammdaten":
+    case "rechnungsdaten":
+      return (
+        <>
+          <FieldLabel>Überschrift</FieldLabel>
+          <input
+            value={cfgStr(c, "title")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder={
+              block.type === "stammdaten" ? "z.B. Deine Angaben" : "z.B. Rechnungsanschrift"
+            }
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Erklärtext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "description")}
+            onChange={(e) => onChange({ description: e.target.value })}
+            rows={3}
+            placeholder="Warum wird das gebraucht, wer sieht es?"
+            className={INPUT_CLASS}
+          />
+          <p className="mt-2 rounded-xl border border-lime-200 bg-lime-50 p-2 text-xs text-lime-800">
+            {block.type === "stammdaten"
+              ? "Abgefragt werden Name (Pflicht) und Telefonnummer (optional)."
+              : "Abgefragt werden Straße, PLZ und Ort – alle drei sind Pflicht, sonst lässt sich keine Rechnung erstellen."}{" "}
+            Die Angaben landen am <strong>Nutzerprofil</strong>, nicht am Fall, und werden
+            in neuen Fällen automatisch vorbefüllt. Dieser Block gehört ins
+            <strong> Nutzer-Onboarding</strong>.
+          </p>
+        </>
+      );
     case "fall_freischaltung":
       return (
         <>
@@ -1174,6 +1215,15 @@ function VisibleIfEditor({
 }
 
 // ── Der eigentliche Seiten-Designer (Palette + Blockliste + Vorschau) ────────
+/** Block-Gruppen, die einen laufenden Fall voraussetzen und deshalb im
+ *  Nutzer-Onboarding nicht angeboten werden. "KI" fehlt hier bewusst: eine
+ *  KI-Auswertung der Onboarding-Antworten ist denkbar, nur heute ungenutzt. */
+const FALL_ONLY_GROUPS = new Set<BlockGroup>([
+  "Gespräch & Termin",
+  "Bezahlung",
+  "Speziell",
+]);
+
 function StepDesignerPanel({
   step,
   onAddBlock,
@@ -1185,6 +1235,7 @@ function StepDesignerPanel({
   onAiFill,
   onClose,
   shared = false,
+  userOnboarding = false,
   phaseLabel,
   phaseIndex,
   phaseTotal,
@@ -1193,6 +1244,10 @@ function StepDesignerPanel({
   step: PhaseStepDefaultDto;
   /** true = globaler Schritt, geöffnet aus der Ansicht eines konkreten Typs. */
   shared?: boolean;
+  /** true = Schritt des Nutzer-Onboardings (Reiter "@user"). Steuert, welche
+   *  Blocktypen die Palette anbietet: Stammdaten/Rechnungsanschrift gibt es
+   *  nur hier, alles Fallbezogene (Bezahlung, Termin, Vertrag) nur dort. */
+  userOnboarding?: boolean;
   /** Für die Vorschau-Hülle: Phasen-Zeile und Schritt-Nummer wie im Dashboard. */
   phaseLabel: string;
   phaseIndex: number;
@@ -1259,9 +1314,17 @@ function StepDesignerPanel({
         </div>
       )}
 
-      <GateModeEditor value={step.gate_mode} onChange={onChangeGateMode} />
-
-      <VisibleIfEditor cond={step.visible_if} onChange={onChangeVisibleIf} />
+      {/* Beide Regler setzen einen Fall voraus: die Fortschritts-Sperre regelt,
+          wann die ANDERE Partei weiterdarf (im Onboarding gibt es keine), und
+          die Sichtbarkeitsbedingung prüft mediations.flags (die es ohne Fall
+          nicht gibt). Im Onboarding deshalb ausgeblendet statt wirkungslos
+          anzubieten. */}
+      {!userOnboarding && (
+        <>
+          <GateModeEditor value={step.gate_mode} onChange={onChangeGateMode} />
+          <VisibleIfEditor cond={step.visible_if} onChange={onChangeVisibleIf} />
+        </>
+      )}
 
       {/* Palette: Methoden nach Gruppe */}
       <div className="mb-5 rounded-xl border border-neutral-200 bg-white p-3">
@@ -1270,7 +1333,16 @@ function StepDesignerPanel({
         </p>
         <div className="space-y-2">
           {BLOCK_GROUPS.map((group) => {
-            const items = BLOCK_TYPES.filter((b) => b.group === group);
+            // Im Onboarding gibt es keinen Fall, keine Gegenseite und keine
+            // Zahlung – dort wären Bezahl-, Termin- und Vertragsblöcke
+            // Blindgänger. Umgekehrt haben Stammdaten in einem Fall-Schritt
+            // keinen Adressaten, die Person ist da längst bekannt.
+            const items = BLOCK_TYPES.filter((b) => {
+              if (b.group !== group) return false;
+              return userOnboarding
+                ? !FALL_ONLY_GROUPS.has(b.group)
+                : !isOnboardingOnlyBlock(b.type);
+            });
             if (items.length === 0) return null;
             return (
               <div key={group} className="flex flex-wrap items-center gap-1.5">
@@ -1481,10 +1553,27 @@ export function WorkflowManager() {
   // in jeder Mediationsart laufen. Varianten gibt es dort nicht (sie gehören zu
   // genau einem Typ).
   const isShared = mediationType === SHARED_MEDIATION_TYPE;
+  // Tab „Nutzer-Onboarding": der einmalige Durchlauf pro Person. Auch hier
+  // keine Varianten — und nur eine einzige Phase, weil das Onboarding kein
+  // Verfahren ist, sondern eine lineare Strecke.
+  const isUserOnboarding = mediationType === USER_ONBOARDING_TYPE;
+  const phaseList = isUserOnboarding ? USER_ONBOARDING_PHASES : DESIGNER_PHASES;
+
+  // Beim Wechsel in den Onboarding-Reiter (und wieder heraus) muss die Phase
+  // mitziehen: "themensammlung" gibt es im Onboarding nicht und "onboarding"
+  // nicht in einer Mediationsart — sonst zeigt der Designer eine leere Liste,
+  // die wie „nichts konfiguriert" aussieht.
+  useEffect(() => {
+    if (isUserOnboarding) {
+      setActivePhase(USER_ONBOARDING_PHASE);
+    } else if (activePhase === USER_ONBOARDING_PHASE) {
+      setActivePhase(PHASES[0].id);
+    }
+  }, [isUserOnboarding, activePhase]);
 
   useEffect(() => {
     setActiveVariant(null);
-    if (mediationType === SHARED_MEDIATION_TYPE) {
+    if (mediationType === SHARED_MEDIATION_TYPE || mediationType === USER_ONBOARDING_TYPE) {
       setVariants([]);
       return;
     }
@@ -1501,7 +1590,10 @@ export function WorkflowManager() {
     const loads: Promise<PhaseStepDefaultDto[]>[] = [
       // In einer Typ-Ansicht kommen die globalen Schritte mit in die Basis-
       // Liste (an ihrer echten Position), im Tab „Alle Typen" nicht.
-      fetchPhaseStepDefaults(mediationType, activePhase, null, !isShared),
+      // Globale ("*") Schritte gehören weder in den Reiter „Alle Typen"
+      // (da stehen sie ohnehin) noch ins Nutzer-Onboarding — dort wäre ein
+      // fallbezogener Schritt sinnlos.
+      fetchPhaseStepDefaults(mediationType, activePhase, null, !isShared && !isUserOnboarding),
     ];
     if (activeVariant) {
       loads.push(fetchPhaseStepDefaults(mediationType, activePhase, activeVariant));
@@ -1521,7 +1613,7 @@ export function WorkflowManager() {
     return () => {
       cancelled = true;
     };
-  }, [mediationType, activePhase, activeVariant, isShared]);
+  }, [mediationType, activePhase, activeVariant, isShared, isUserOnboarding]);
 
   // baseSteps enthält in einer Typ-Ansicht auch die globalen Schritte (Feld
   // `shared`) – sie sind Teil der Reihenfolge, aber inhaltlich gesperrt.
@@ -1530,10 +1622,12 @@ export function WorkflowManager() {
   const setEditableSteps = activeVariant ? setVariantSteps : setBaseSteps;
   const chain = useMemo(() => [...lockedSteps, ...editableSteps], [lockedSteps, editableSteps]);
 
-  const activePhaseLabel = DESIGNER_PHASES.find((p) => p.id === activePhase)?.label ?? activePhase;
+  const activePhaseLabel = phaseList.find((p) => p.id === activePhase)?.label ?? activePhase;
   const typeLabel = isShared
     ? "Alle Typen"
-    : MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
+    : isUserOnboarding
+      ? "Nutzer-Onboarding"
+      : MEDIATION_TYPES.find((t) => t.id === mediationType)?.label ?? mediationType;
 
   // ── Schritt-Aktionen ──────────────────────────────────────────────────────
   async function addStep() {
@@ -1914,7 +2008,31 @@ export function WorkflowManager() {
         >
           ★ Alle Typen
         </button>
+        <button
+          onClick={() => setMediationType(USER_ONBOARDING_TYPE)}
+          className={cn(
+            "rounded-full px-4 py-1.5 text-sm font-medium transition",
+            isUserOnboarding
+              ? "bg-lime-600 text-white"
+              : "bg-lime-50 text-lime-700 hover:bg-lime-100",
+          )}
+          title="Der einmalige Durchlauf jeder Person, bevor sie Fälle bearbeiten kann"
+        >
+          ◉ Nutzer-Onboarding
+        </button>
       </div>
+
+      {isUserOnboarding && (
+        <div className="mb-6 rounded-xl border border-lime-200 bg-lime-50/60 px-4 py-2.5 text-xs text-lime-900">
+          Diese Schritte laufen <span className="font-semibold">einmal pro Person</span>, bevor
+          sie überhaupt einen Fall bearbeiten kann — nicht in jedem Fall erneut. Solange ein
+          Pflichtfeld offen ist, kommt niemand ins Dashboard.
+          Die Blöcke <span className="font-semibold">Stammdaten</span> und{" "}
+          <span className="font-semibold">Rechnungsanschrift</span> schreiben ins Nutzerprofil und
+          befüllen neue Fälle automatisch vor. Formuliere alles fallneutral: hier gibt es noch
+          keinen Konflikt und keine Gegenseite.
+        </div>
+      )}
 
       {isShared && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-xs text-amber-800">
@@ -1975,7 +2093,7 @@ export function WorkflowManager() {
       <div className="flex gap-6">
         {/* Phasen-Liste */}
         <div className="flex w-56 shrink-0 flex-col gap-1">
-          {DESIGNER_PHASES.map((phase, idx) => {
+          {phaseList.map((phase, idx) => {
             const active = phase.id === activePhase;
             return (
               <button
@@ -2079,9 +2197,12 @@ export function WorkflowManager() {
               onMoveBlock={(bid, dir) => moveBlock(designStep.id, bid, dir)}
               onChangeBlockConfig={(bid, patch) => changeBlockConfig(designStep.id, bid, patch)}
               shared={!isShared && !!designStep.shared}
+              userOnboarding={isUserOnboarding}
               phaseLabel={activePhaseLabel}
-              phaseIndex={PHASES.findIndex((p) => p.id === activePhase) + 1}
-              phaseTotal={PHASES.length}
+              // Das Onboarding ist keine Verfahrensphase – die Vorschau würde
+              // sonst „Phase 0 von 6" behaupten.
+              phaseIndex={isUserOnboarding ? 1 : PHASES.findIndex((p) => p.id === activePhase) + 1}
+              phaseTotal={isUserOnboarding ? 1 : PHASES.length}
               stepNumber={chain.findIndex((s) => s.id === designStep.id) + 1}
               onChangeVisibleIf={(cond) => changeVisibleIf(designStep.id, cond)}
               onChangeGateMode={(mode) => changeGateMode(designStep.id, mode)}

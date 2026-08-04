@@ -18,3 +18,28 @@ class User(Base):
     verification_token = Column(String, nullable=True, index=True)
     password_reset_token = Column(String, nullable=True, index=True)
     password_reset_token_expires = Column(DateTime, nullable=True)
+
+    # ── Nutzer-Onboarding ────────────────────────────────────────────────────
+    # Das Onboarding laeuft EINMAL pro Person, bevor sie Faelle bearbeiten kann
+    # (frueher steckte es als Checkliste in jedem einzelnen Fall). Die Schritte
+    # selbst sind im Workflow Manager unter dem Pseudo-Typ "@user" gepflegt
+    # (siehe models/phase_step_default.py), die Antworten liegen in
+    # user_onboarding_responses.
+    #
+    # Dieses Feld ist bewusst redundant zu "alle Pflichtbloecke beantwortet":
+    # Die Sperre wird bei JEDEM Fall-Request geprueft, und dafuer darf sie nicht
+    # jedes Mal die komplette Blockliste durchrechnen muessen. Gesetzt wird es
+    # ausschliesslich von POST /onboarding/complete, nachdem dort genau diese
+    # Vollstaendigkeitspruefung gelaufen ist.
+    onboarding_completed_at = Column(DateTime, nullable=True)
+
+    # ── Stammdaten (aus dem Onboarding) ──────────────────────────────────────
+    # Frueher wurden die Rechnungsdaten pro Mediation am Teilnehmer erfasst
+    # (mediation_participants.billing_*) — jede Partei musste sie in jedem Fall
+    # neu eintippen. Jetzt haengen sie an der Person; der Teilnehmer-Datensatz
+    # wird daraus vorbefuellt und bleibt als fall-spezifische Ausnahme bestehen
+    # (abweichende Rechnungsanschrift fuer einen einzelnen Fall).
+    phone = Column(String, nullable=True)
+    billing_street = Column(String, nullable=True)
+    billing_postal_code = Column(String, nullable=True)
+    billing_city = Column(String, nullable=True)

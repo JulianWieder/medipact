@@ -9,11 +9,16 @@
 // Einladungs-Phase bezahlt wird.
 //
 // WICHTIG – Reihenfolge im Block:
-//   1. Rechnungsdaten – werden normalerweise schon im Onboarding hinterlegt
-//      (Schritt 2 in MediationClient.tsx) und hier nur noch angezeigt, mit
-//      „Ändern". Fehlen sie (z. B. Partei über einen Direktlink im Verfahren),
-//      erscheint hier das Formular; ohne sie ist keine Zahlung möglich, weil
-//      beim Zahlungseingang automatisch die Rechnung erzeugt wird.
+//   1. Rechnungsdaten – kommen seit dem Onboarding-Umbau aus dem NUTZERPROFIL
+//      (einmalig erfasst unter /onboarding, änderbar unter
+//      /dashboard/stammdaten) und werden hier nur noch angezeigt, mit
+//      „Ändern". Ein „Ändern" hier schreibt bewusst an den TEILNEHMER, nicht
+//      ins Profil: es ist die fall-spezifische Ausnahme (abweichende
+//      Rechnungsanschrift für genau dieses Verfahren). GET billing-address
+//      liefert deshalb den Teilnehmer-Wert, sonst den aus dem Profil
+//      (Feld `from_profile` sagt, welcher es war).
+//      Ohne Adresse ist keine Zahlung möglich, weil beim Zahlungseingang
+//      automatisch die Rechnung erzeugt wird.
 //   2. Betrag inkl. Rabattcode und Add-ons
 //   3. PayPal – reserviert nur, abgebucht wird erst, wenn ALLE zugesagt haben
 //      (siehe backend/app/paypal.py und services/billing.py)

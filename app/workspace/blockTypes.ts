@@ -20,6 +20,7 @@ export type BlockGroup =
   | "KI"
   | "Ablauf & Layout"
   | "Bezahlung"
+  | "Onboarding"
   | "Speziell";
 
 export const BLOCK_GROUPS: BlockGroup[] = [
@@ -30,6 +31,7 @@ export const BLOCK_GROUPS: BlockGroup[] = [
   "KI",
   "Ablauf & Layout",
   "Bezahlung",
+  "Onboarding",
   "Speziell",
 ];
 
@@ -470,6 +472,51 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     hint: "Kostenpflichtiger Zusatz (z.B. Gutachter). Inhalt wird erst nach Zahlung freigeschaltet.",
   },
 
+  // ── Onboarding (Stammdaten der Person, nicht des Falls) ──────────────────
+  //
+  // Diese beiden Blöcke gehören ins NUTZER-Onboarding (Pseudo-Typ "@user",
+  // Phase "onboarding"), das jede Person EINMAL durchläuft. Ihre Werte werden
+  // serverseitig zusätzlich in die users-Spalten gespiegelt
+  // (services/onboarding.PROFILE_MIRROR), damit Rechnungsstellung und die
+  // Vorbefüllung neuer Fälle sie lesen können, ohne die Blockliste des
+  // Onboardings zu kennen.
+  //
+  // In einem Fall-Schritt ergeben sie keinen Sinn – dort gibt es die Person
+  // schon längst. Der Designer blendet sie deshalb außerhalb des
+  // Onboarding-Reiters aus (siehe onboardingOnly).
+  {
+    type: "stammdaten",
+    label: "Stammdaten (Name, Telefon)",
+    short: "Stammdaten",
+    icon: "👤",
+    group: "Onboarding",
+    badge: "bg-lime-50 text-lime-700 border-lime-200",
+    defaultConfig: {
+      title: "Deine Angaben",
+      description: "",
+      required: true,
+    },
+    capturesResponse: true,
+    responseAuthor: "user",
+    hint: "Name und Telefonnummer der Person. Landet im Profil, nicht im Fall.",
+  },
+  {
+    type: "rechnungsdaten",
+    label: "Rechnungsanschrift",
+    short: "Rechnung",
+    icon: "🏠",
+    group: "Onboarding",
+    badge: "bg-lime-50 text-lime-700 border-lime-200",
+    defaultConfig: {
+      title: "Rechnungsanschrift",
+      description: "",
+      required: true,
+    },
+    capturesResponse: true,
+    responseAuthor: "user",
+    hint: "Straße, PLZ, Ort für spätere Rechnungen. Landet im Profil, nicht im Fall.",
+  },
+
   // ── Speziell ─────────────────────────────────────────────────────────────
   {
     type: "individuell",
@@ -487,6 +534,18 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
 export const BLOCK_TYPE_BY_ID: Record<string, BlockTypeDef> = Object.fromEntries(
   BLOCK_TYPES.map((b) => [b.type, b]),
 );
+
+/** Blocktypen, die ausschließlich ins Nutzer-Onboarding gehören.
+ *  In einem Fall-Schritt hätten sie keinen Adressaten – die Person ist dort
+ *  längst bekannt –, deshalb blendet der Designer sie außerhalb des
+ *  Onboarding-Reiters aus. Bewusst als Liste und nicht über group ===
+ *  "Onboarding" abgefragt: eine Gruppe ist eine Sortier-Kategorie, keine
+ *  Sichtbarkeitsregel. */
+export const ONBOARDING_ONLY_BLOCK_TYPES = new Set(["stammdaten", "rechnungsdaten"]);
+
+export function isOnboardingOnlyBlock(type: string): boolean {
+  return ONBOARDING_ONLY_BLOCK_TYPES.has(type);
+}
 
 /** Erzeugt eine stabile, eindeutige Block-id (für die Antwort-Zuordnung). */
 export function newBlockId(): string {
@@ -529,10 +588,17 @@ export function isBlockValueEmpty(value: unknown): boolean {
   if (Array.isArray(value)) return value.filter((v) => String(v ?? "").trim() !== "").length === 0;
   if (typeof value === "object") {
     const o = value as Record<string, unknown>;
+    const filled = (k: string) => String(o[k] ?? "").trim() !== "";
     // zustimmung: {agreed}, unterschrift: {name}, datei_upload: {url}
     if ("agreed" in o) return o.agreed !== true;
-    if ("name" in o) return String(o.name ?? "").trim() === "";
-    if ("url" in o) return String(o.url ?? "").trim() === "";
+    // rechnungsdaten: {street, postal_code, city} – erst mit allen dreien ist
+    // eine Rechnung erstellbar, deshalb sind alle drei Pflicht. Muss VOR der
+    // "name"-Prüfung stehen, sonst greift die dort für den Straßen-Block.
+    if ("street" in o) return !(filled("street") && filled("postal_code") && filled("city"));
+    // stammdaten: {name, phone} – nur der Name ist Pflicht, die Telefonnummer
+    // ist bewusst optional. Deckt zugleich unterschrift: {name} ab.
+    if ("name" in o) return !filled("name");
+    if ("url" in o) return !filled("url");
     return Object.keys(o).length === 0;
   }
   return false;

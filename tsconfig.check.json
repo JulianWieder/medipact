@@ -55,6 +55,13 @@
   "app/auth/**/*.tsx",
   "app/components/mediation/LinkedLogbuch.tsx",
   "app/components/mediation/logbuchMeta.ts",
-  "app/workspace/components/FaelleListe.tsx"
+  "app/workspace/components/FaelleListe.tsx",
+  "app/onboarding/OnboardingBlocks.tsx",
+  "app/onboarding/OnboardingClient.tsx",
+  "app/dashboard/stammdaten/StammdatenClient.tsx",
+  "app/workspace/components/OnboardingEinsicht.tsx",
+  "app/workspace/components/ParteiDetail.tsx",
+  "middleware.ts",
+  "auth.ts"
  ]
 }

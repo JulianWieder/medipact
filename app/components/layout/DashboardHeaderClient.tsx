@@ -162,6 +162,20 @@ export default function DashboardHeaderClient({ username, email }: Props) {
 
                 {/* Actions */}
                 <div className="p-1.5">
+                  {/* Stammdaten: die Angaben aus dem einmaligen Nutzer-Onboarding
+                      (Name, Telefon, Rechnungsanschrift). Bewusst hier und nicht
+                      in der Sidebar — es sind Konto-Daten, keine Fall-Daten. */}
+                  <Link
+                    href="/dashboard/stammdaten"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+                  >
+                    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0v.75h-15v-.75z" />
+                    </svg>
+                    Stammdaten
+                  </Link>
+                  <div className="my-1 h-px bg-neutral-100" />
                   <button
                     type="button"
                     onClick={() => signOut({ callbackUrl: "/auth/login" })}

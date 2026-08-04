@@ -25,6 +25,7 @@ import {
 } from "../api";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import Icon from "@/app/components/ui/Icon";
+import { OnboardingEinsicht } from "./OnboardingEinsicht";
 
 // ── Rollen-Konstanten (Fallback, wenn GET /auth/roles nicht erreichbar) ──────
 
@@ -509,6 +510,11 @@ export function BenutzerDetail({
           </div>
         </div>
       </WCard>
+
+      {/* Onboarding-Stand: Stammdaten und Antworten aus dem einmaligen
+          Nutzer-Onboarding. Solange es offen ist, kommt die Person gar nicht
+          erst ins Dashboard – hier sieht man, woran es hängt. */}
+      <OnboardingEinsicht userId={benutzer.id} />
 
       {/* Fälle */}
       <WCard className="p-5">
