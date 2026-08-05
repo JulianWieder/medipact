@@ -49,7 +49,83 @@ export const trennungPageContent = {
       title: "Druck durch Zeit und Geld",
       text: "Finanzielle Unsicherheit und schnelle Entscheidungen erhöhen den Konfliktdruck zusätzlich.",
     },
+    {
+      title: "Die Kinder geraten zwischen die Fronten",
+      text: "Betreuungszeiten werden zum Verhandlungspfand, Absprachen kippen kurzfristig. Kinder merken das sofort – und richten ihr Verhalten danach aus, was gerade weniger Ärger macht.",
+    },
+    {
+      title: "Niemand hat den vollständigen Überblick",
+      text: "Konten, Versicherungen, Altersvorsorge, Kredite: Oft hat sich eine Seite jahrelang darum gekümmert. Ohne gemeinsame Zahlenbasis wird jede Diskussion über Fairness zum Misstrauensgespräch.",
+    },
+    {
+      title: "Jeder Schritt schafft Fakten",
+      text: "Wer auszieht, wer das Konto trennt, wer zuerst zum Anwalt geht – vieles davon lässt sich später nur schwer korrigieren. Genau deshalb lohnt eine Klärung, bevor die ersten Entscheidungen fallen.",
+    },
   ],
+
+  // Vertiefungs-Abschnitt zur Ziel-Suchphrase "Scheidungsmediation".
+  //
+  // Grund: Die Seite hatte rund 530 Wörter eigenen Text — praktisch nur das
+  // Template-Skelett, das wortgleich auch auf erbschaft, nachbarschaft und
+  // verbraucher steht. Sie rankte deshalb unterhalb der Sichtbarkeit (0
+  // Impressionen in GSC über 3 Monate), obwohl technisch alles stimmte.
+  //
+  // Bewusst KEINE eigene URL: /konflikte/trennung soll die Verfahrensspur
+  // besitzen ("was ist Scheidungsmediation, was wird darin geregelt"). Die
+  // inhaltlichen Einzelfragen — Haus, Unterhaltshöhe, Trennungsjahr,
+  // Sorgerecht — gehören weiter den Ratgeber-Artikeln und werden hier nur
+  // verlinkt, nicht wiederholt. Sonst kannibalisieren sich die neun
+  // Trennungs-Artikel und diese Seite gegenseitig.
+  deepDive: {
+    eyebrow: "Scheidungsmediation im Detail",
+    title: "Scheidungsmediation: Was darin geregelt wird – und was nicht",
+    intro:
+      "Scheidungsmediation ist kein Paartherapie-Ersatz und keine Rechtsberatung. Sie ist das Verfahren, in dem Sie die Folgen einer Trennung selbst regeln, statt sie regeln zu lassen. Am Ende steht eine Scheidungsfolgenvereinbarung – ein Dokument, das beim Familiengericht die Arbeit macht, die sonst zwei Anwälte streitig verhandeln. Diese sechs Themen kommen dabei fast immer auf den Tisch.",
+    items: [
+      {
+        title: "Kindes- und Ehegattenunterhalt",
+        text: "Die Höhe folgt Tabellen und Einkommen – darüber lässt sich wenig verhandeln. Verhandelbar ist alles drumherum: Wie wird mit Sonderbedarf umgegangen, was passiert bei Jobwechsel oder Krankheit, wann wird neu gerechnet. Genau diese Punkte fehlen in gerichtlichen Titeln meistens und führen später zurück vor Gericht.",
+      },
+      {
+        title: "Betreuung und Umgang",
+        text: "Residenz-, Wechsel- oder Nestmodell ist keine Rechtsfrage, sondern eine Alltagsfrage: Arbeitszeiten, Schulweg, Ferien, Krankheitstage. In der Mediation entsteht ein konkreter Betreuungsplan statt einer abstrakten Umgangsregelung – inklusive der Frage, wie Sie künftig miteinander kommunizieren.",
+      },
+      {
+        title: "Die gemeinsame Immobilie",
+        text: "Verkaufen, übernehmen, vermieten oder halten bis die Kinder aus dem Haus sind: Jede Variante hat steuerliche und finanzielle Folgen, die sich rechnen lassen. Die Mediation legt die Optionen nebeneinander, statt dass jede Seite nur ihre eigene durchsetzen will.",
+      },
+      {
+        title: "Zugewinn und Altersvorsorge",
+        text: "Der Versorgungsausgleich läuft grundsätzlich über das Gericht, der Zugewinn nicht. Beides hängt an einer vollständigen Vermögensaufstellung – und genau daran scheitern streitige Verfahren am häufigsten, weil Auskunft erzwungen statt gegeben wird.",
+      },
+      {
+        title: "Schulden und laufende Verträge",
+        text: "Gemeinsame Kredite, Leasing, Versicherungen, Handyverträge: Die Bank interessiert die Trennung nicht, beide bleiben in der Haftung. Wer welche Verbindlichkeit übernimmt und wie die andere Seite abgesichert wird, gehört in die Vereinbarung – nicht in eine mündliche Absprache.",
+      },
+      {
+        title: "Wie Sie künftig miteinander umgehen",
+        text: "Der am meisten unterschätzte Punkt. Wenn Kinder da sind, endet die Beziehung nicht mit der Scheidung, sie ändert nur ihre Form. Vereinbarungen darüber, wie und worüber kommuniziert wird, verhindern mehr Folgestreit als jede Unterhaltsklausel.",
+      },
+    ],
+    bulletsTitle: "Wann Scheidungsmediation der bessere erste Schritt ist",
+    bullets: [
+      "Sie wollen sich trennen, aber nicht jahrelang streiten – und beide wissen das.",
+      "Es gibt Kinder, und Sie werden sich zwangsläufig weiter begegnen.",
+      "Eine Immobilie, ein Unternehmen oder Altersvorsorge steht im Raum.",
+      "Sie wollen wissen, was Sie das kostet, bevor Sie loslaufen.",
+      "Beide Seiten sind bereit, ihre Zahlen offenzulegen.",
+      "Sie suchen eine Regelung, die auch in fünf Jahren noch trägt.",
+    ],
+    note:
+      "Wichtig und oft missverstanden: Mediation ersetzt die Scheidung nicht. Eine Ehe wird in Deutschland ausschließlich durch das Familiengericht geschieden, und für den Antrag ist mindestens ein Anwalt zwingend (§ 114 FamFG). Was die Mediation ersetzt, ist der Streit über die Folgen – und damit den zweiten Anwalt und die Verfahrensdauer. Gespart wird also nicht das Gericht, sondern die Eskalation. Was das konkret bedeutet, rechnet der Kostenrechner weiter unten für Ihre Zahlen aus.",
+    links: [
+      { label: "Ratgeber: Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
+      { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
+      { label: "Ratgeber: Trennungsjahr nachweisen", href: "/ratgeber/trennungsjahr-nachweisen" },
+      { label: "Ratgeber: Vermögen aufteilen bei Scheidung", href: "/ratgeber/vermoegensauseinandersetzung" },
+      { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner?art=trennung" },
+    ],
+  },
 
   processTitle: "Wie medipact unterstützt",
   process: [

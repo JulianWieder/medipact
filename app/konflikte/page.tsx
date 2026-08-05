@@ -263,7 +263,10 @@ export default function KonfliktePage() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {/* 3 Spalten, nicht 4: conflictTypes hat seit dem ODR-Umbau fünf
+              Einträge — bei 4 Spalten stand die fünfte Karte allein in der
+              zweiten Reihe. */}
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {conflictTypes.map((item) => (
               <Link
                 key={item.href}
@@ -479,6 +482,35 @@ export default function KonfliktePage() {
                 Wirtschaftsmediation – Konflikte im Unternehmen lösen
               </Link>
               .
+            </p>
+
+            {/* Die Seite verlinkte bisher nur nach unten in die Konfliktart-
+                Seiten. Die beiden meistgesuchten Ratgeber-Themen — Ablauf und
+                Kosten — fehlten ganz, obwohl sie die naheliegenden
+                Anschlussfragen beantworten. */}
+            <p className="mt-4 leading-7 text-neutral-300">
+              Wie so ein Verfahren konkret abläuft, steht in{" "}
+              <Link
+                href="/ratgeber/5-phasen-der-mediation"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Die 5 Phasen der Mediation
+              </Link>
+              . Was es kostet, klärt der Überblick{" "}
+              <Link
+                href="/ratgeber/mediation-kosten"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Was kostet eine Mediation?
+              </Link>{" "}
+              – oder direkt der{" "}
+              <Link
+                href="/kostenrechner"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Kostenrechner
+              </Link>{" "}
+              für Ihren Fall.
             </p>
           </div>
         </div>

@@ -3,17 +3,67 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "5-phasen-der-mediation",
   category: "Mediation",
-  title: "Die Phasen der Mediation – das 7-Phasen-Modell erklärt",
-  metaTitle: "Phasen der Mediation: der Ablauf erklärt | medipact",
+  // Slug, gerankte Suchphrase und Sichtbares müssen dasselbe Kompositum
+  // tragen: Gesucht wird "5 Phasen der Mediation". Titel und H1 sprachen
+  // vorher nur von "Phasen der Mediation" bzw. dem 7-Phasen-Modell — die
+  // Zahl stand nirgends prominent. Dass das 7-Phasen-Modell die genauere
+  // Darstellung ist, bleibt inhaltlich richtig und steht weiter im Text;
+  // es gehört nur nicht an die Stelle, an der Google die Übereinstimmung
+  // mit der Suchanfrage prüft.
+  title: "Die 5 Phasen der Mediation – Ablauf und 7-Phasen-Modell",
+  metaTitle: "Die 5 Phasen der Mediation: Ablauf erklärt | medipact",
   description:
-    "Die Phasen der Mediation im Überblick – oft als 5 Phasen zusammengefasst, hier als 7-Phasen-Modell: von der Vorbereitung bis zur Umsetzung.",
+    "Die 5 Phasen der Mediation im Überblick: von der Themensammlung bis zur Abschlussvereinbarung – mit Ablauf-Tabelle und was in jeder Phase passiert.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-07-04",
+  updated: "2026-08-05",
   readingMinutes: 8,
   intro:
-    "Eine Mediation folgt einem klaren, aufeinander aufbauenden Ablauf. Häufig wird er als Fünf-Phasen-Modell zusammengefasst; ausführlicher betrachtet gliedert er sich in sieben Phasen – von der Vorbereitung bis zur Umsetzung. Dieses Modell gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits.",
+    "Die 5 Phasen der Mediation sind der Standard-Ablauf jedes Mediationsverfahrens: Einleitung, Themensammlung, Interessenklärung, Lösungssuche und Abschlussvereinbarung. Zählt man Vorbereitung und Umsetzung dazu, ergibt sich das ausführlichere 7-Phasen-Modell – gemeint ist derselbe Prozess. Dieser Ablauf gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits.",
   blocks: [
-    { type: "heading", text: "Der Ablauf einer Mediation im Überblick" },
+    { type: "heading", text: "Die 5 Phasen der Mediation im Überblick" },
+    {
+      type: "paragraph",
+      text: "Wer nach den 5 Phasen der Mediation sucht, meint in aller Regel das Modell nach Christoph Besemer: Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen und Abschlussvereinbarung. Die folgende Tabelle zeigt diese fünf Kernphasen mit ihrem jeweiligen Ziel – darunter gehen wir den vollständigen Ablauf in sieben Schritten durch, inklusive Vorbereitung und Umsetzung.",
+    },
+    {
+      type: "table",
+      caption:
+        "Die 5 Phasen der Mediation: Bezeichnung, Ziel der Phase und typische Leitfrage",
+      headers: ["Phase", "Bezeichnung", "Ziel", "Leitfrage"],
+      rows: [
+        [
+          "1",
+          "Einleitung",
+          "Rahmen, Rolle und Gesprächsregeln klären",
+          "Wie arbeiten wir miteinander?",
+        ],
+        [
+          "2",
+          "Themensammlung",
+          "Alle Streitpunkte offen auf den Tisch legen",
+          "Worüber müssen wir sprechen?",
+        ],
+        [
+          "3",
+          "Interessenklärung",
+          "Bedürfnisse hinter den Forderungen herausarbeiten",
+          "Warum ist das wichtig?",
+        ],
+        [
+          "4",
+          "Lösungsoptionen",
+          "Möglichst viele Ideen ohne Bewertung sammeln",
+          "Was wäre denkbar?",
+        ],
+        [
+          "5",
+          "Abschlussvereinbarung",
+          "Die beste Option auswählen und schriftlich festhalten",
+          "Worauf einigen wir uns?",
+        ],
+      ],
+    },
+    { type: "heading", text: "Vom 5-Phasen- zum 7-Phasen-Modell" },
     {
       type: "paragraph",
       text: "Mediation ist ein strukturiertes Verfahren zur Konfliktlösung, bei dem eine neutrale dritte Person – der Mediator – die Beteiligten dabei unterstützt, selbst eine Lösung zu finden. Damit dieser Prozess nicht im Kreis läuft, folgt er einem festen Ablauf. Häufig wird er kurz als Fünf-Phasen-Modell (nach Christoph Besemer) beschrieben; zählt man Vorbereitung und Umsetzung mit, ergibt sich das ausführlichere Sieben-Phasen-Modell. Gemeint ist derselbe Prozess – wir gehen ihn hier in sieben Schritten durch.",
@@ -98,6 +148,14 @@ export const article: RatgeberArticle = {
     },
   ],
   faq: [
+    // Erste Frage bewusst wörtlich die Suchanfrage, erster Satz der Antwort
+    // ist die vollständige Aufzählung – das ist das Format, das Google für
+    // "Nutzer fragen auch" und Featured Snippets übernimmt.
+    {
+      question: "Was sind die 5 Phasen der Mediation?",
+      answer:
+        "Die 5 Phasen der Mediation sind: Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen und Abschlussvereinbarung. Jede Phase baut auf der vorherigen auf – erst wenn Themen und Interessen geklärt sind, ergibt die Lösungssuche Sinn.",
+    },
     {
       question: "Wie viele Phasen hat eine Mediation?",
       answer:
@@ -119,10 +177,18 @@ export const article: RatgeberArticle = {
         "Das bekannte Fünf-Phasen-Modell geht auf den Mediator und Autor Christoph Besemer zurück. Es ist heute ein weit verbreiteter Standard für den Ablauf von Mediationsverfahren.",
     },
   ],
+  // Der Artikel hing bisher nur im Ratgeber-Cluster. Die Links auf die
+  // Konfliktart-Seiten führen die Leser vom Ablauf-Wissen zum konkreten
+  // Anliegen — und geben den /konflikte-Seiten Linkkraft aus einem der
+  // stärksten Artikel.
   related: [
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Was ist Mediation? Definition & Ablauf", href: "/ratgeber/was-ist-mediation" },
     { label: "Was ist ein Mediator?", href: "/ratgeber/was-ist-ein-mediator" },
+    { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
+    { label: "Konfliktarten: die 6 Arten im Überblick", href: "/konflikte" },
+    { label: "Mediation bei Trennung & Scheidung", href: "/konflikte/trennung" },
+    { label: "Mediation bei Erbstreit", href: "/konflikte/erbschaft" },
     { label: "So funktioniert medipact", href: "/methode" },
   ],
 };

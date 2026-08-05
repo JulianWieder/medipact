@@ -36,7 +36,77 @@ export const nachbarschaftPageContent = {
       title: "Dauerhafte Nähe",
       text: "Der Konflikt verschwindet nicht von selbst, weil sich die Beteiligten regelmäßig begegnen.",
     },
+    {
+      title: "Recht haben hilft nicht weiter",
+      text: "Selbst ein gewonnenes Urteil ändert nichts daran, dass Sie am nächsten Morgen wieder nebeneinander aufwachen. Wer den Prozess gewinnt, hat den Nachbarn trotzdem noch – jetzt nur verärgert.",
+    },
+    {
+      title: "Der Streitwert rechtfertigt kein Verfahren",
+      text: "Bei einer Hecke oder Ruhezeiten steht kein Betrag im Raum, der Anwalts- und Gerichtskosten wirtschaftlich sinnvoll macht. Der Ärger ist trotzdem real – und bleibt ohne Klärung bestehen.",
+    },
+    {
+      title: "Beide dokumentieren gegeneinander",
+      text: "Lärmprotokolle, Fotos, Zeugen: Wenn beide Seiten Beweise sammeln, ist das ein sicheres Zeichen dafür, dass niemand mehr an ein Gespräch glaubt – und dass der Konflikt gerade eskaliert.",
+    },
   ],
+
+  // Vertiefungs-Abschnitt zur Ziel-Suchphrase "Nachbarschaftsmediation".
+  // Die Seite hatte rund 520 Wörter und bestand fast nur aus dem
+  // Template-Skelett.
+  //
+  // Zuständigkeitsgrenze: Diese Seite besitzt die Verfahrensspur. Die
+  // konkreten Einzelfragen — Lärm, Heckenhöhe, WEG-Beschluss — gehören den
+  // Ratgeber-Artikeln und werden nur verlinkt, nicht wiederholt.
+  deepDive: {
+    eyebrow: "Nachbarschaftsmediation im Detail",
+    title: "Nachbarschaftsmediation: Typische Streitpunkte und was sich regeln lässt",
+    intro:
+      "Nachbarschaftsstreit hat eine Eigenart, die ihn von fast jedem anderen Konflikt unterscheidet: Sie können ihn nicht beenden, indem Sie gewinnen. Die Beteiligten bleiben – und mit ihnen die Beziehung, in der das Urteil künftig gilt. Deshalb zielt Mediation hier nicht auf Rechtspositionen, sondern auf Regeln, mit denen beide Seiten leben können. Das sind die Themen, die dabei am häufigsten auf den Tisch kommen.",
+    items: [
+      {
+        title: "Lärm und Ruhezeiten",
+        text: "Musik, Renovierung, Kinder, Hunde, Rasenmäher. Was zumutbar ist, steht nur teilweise in Verordnungen – der Rest ist Auslegung. In der Mediation entstehen konkrete Absprachen für die Situationen, die tatsächlich stören, statt eines Verweises auf die Hausordnung.",
+      },
+      {
+        title: "Grenzen, Hecken und Bäume",
+        text: "Höhe, Abstand, Überhang, Laub: Hier gibt es Landesrecht, und es ist von Bundesland zu Bundesland verschieden. Der Streit dreht sich aber selten um den Zentimeter, sondern um Licht, Sicht und das Gefühl, übergangen worden zu sein.",
+      },
+      {
+        title: "Parken, Zufahrt und gemeinsame Flächen",
+        text: "Der Klassiker in Reihenhaussiedlungen und Mehrparteienhäusern. Weil niemand formal im Unrecht ist, lässt sich der Fall nicht entscheiden – nur vereinbaren. Eine schriftliche Nutzungsregel beendet die meisten dieser Konflikte dauerhaft.",
+      },
+      {
+        title: "WEG: Beschlüsse und Verwaltung",
+        text: "In der Eigentümergemeinschaft treffen Eigeninteresse und Gemeinschaftsentscheidung aufeinander. Wer regelmäßig überstimmt wird, blockiert irgendwann grundsätzlich. Mediation setzt hier vor der Beschlussanfechtung an, nicht danach.",
+      },
+      {
+        title: "Tiere, Gerüche und Grillen",
+        text: "Themen, bei denen Toleranzgrenzen weit auseinanderliegen und beide Seiten sich im Recht fühlen. Verhandelbar ist fast nie das Ob, aber sehr oft das Wie oft, Wann und Wo.",
+      },
+      {
+        title: "Der alte Streit hinter dem aktuellen",
+        text: "Wenn eine Hecke seit zwölf Jahren dieselbe Höhe hat und plötzlich stört, geht es nicht um die Hecke. Solche Konflikte lassen sich sachlich nicht lösen, weil das Sachthema nur der Anlass ist – die Mediation trennt beides.",
+      },
+    ],
+    bulletsTitle: "Wann Nachbarschaftsmediation der bessere erste Schritt ist",
+    bullets: [
+      "Sie wohnen weiter Tür an Tür und wollen den Alltag zurück, nicht ein Urteil.",
+      "Der Streitwert würde ein Gerichtsverfahren wirtschaftlich nie rechtfertigen.",
+      "Gespräche enden inzwischen sofort im Vorwurf – oder finden gar nicht mehr statt.",
+      "Mehrere Parteien sind betroffen, etwa im Mehrfamilienhaus oder in der WEG.",
+      "Eine Seite hat bereits mit Anwalt oder Anzeige gedroht.",
+      "Sie wissen, dass Sie im Recht sind – und merken, dass es nichts ändert.",
+    ],
+    note:
+      "In einigen Bundesländern ist ein außergerichtlicher Einigungsversuch bei Nachbarschaftsstreitigkeiten sogar Voraussetzung, bevor Klage erhoben werden kann. Unabhängig davon gilt: Ein Verfahren, das den Streitwert übersteigt, ist auch dann ein schlechtes Geschäft, wenn Sie es gewinnen. Bei medipact liegt die Nachbarschaftsmediation deshalb im Einstiegstarif von 49 € pro Partei.",
+    links: [
+      { label: "Ratgeber: Nachbarschaftsstreit – was tun?", href: "/ratgeber/nachbarschaftsstreit-was-tun" },
+      { label: "Ratgeber: Nachbar macht Lärm – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
+      { label: "Ratgeber: Wie hoch darf die Hecke sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
+      { label: "Ratgeber: WEG-Streit und Mediation", href: "/ratgeber/weg-streit-mediation" },
+      { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
+    ],
+  },
 
   processTitle: "Wie medipact unterstützt",
   process: [
