@@ -175,7 +175,14 @@ def _maybe_set_flag_from_response(db: Session, mediation_id: int, payload) -> No
 
 
 # Rollen, die im Namen des Falls (Mediator-Sicht) schreiben/alle Antworten lesen.
-_MEDIATOR_ROLES = {"mediator", "owner", "admin"}
+#
+# "owner" gehört hier ausdrücklich NICHT hinein: der Antragsteller ist eine
+# Konfliktpartei, keine Verfahrensleitung. Solange er als Mediator galt, lieferte
+# list_block_responses ihm ALLE Antworten des Schritts – die der Gegenseite und
+# jede "vertrauliche_notiz" ("Nur für den Mediator sichtbar"). Dasselbe steht
+# schon im Frontend (PhaseNotesClient GATE_BYPASS_ROLES); beide Listen müssen
+# gleich bleiben.
+_MEDIATOR_ROLES = {"mediator", "admin"}
 
 
 def _require_participant(mediation_id: int, user: User, db: Session) -> MediationParticipant:
@@ -239,8 +246,10 @@ def list_block_responses(
     current_user: User = Depends(get_current_db_user),
 ):
     """
-    Antworten eines Falls. Mediator/Owner/Admin sehen ALLE Beiträge (Grundlage
-    der Auswertung); eine Konfliktpartei sieht standardmäßig nur die EIGENEN.
+    Antworten eines Falls. Standard ist für JEDEN – auch für den Mediator – die
+    eigene Sicht: nur die selbst verfassten Beiträge. Alles Weitere muss über
+    `include_others` ausdrücklich angefordert werden; Mediator/Admin bekommen
+    damit ALLE Beiträge (Grundlage der Auswertung).
 
     `include_others=true` (nur zusammen mit `step_key`) liefert einer Partei
     zusätzlich die Antworten der anderen Parteien — aber erst, wenn ALLE für
@@ -266,16 +275,28 @@ def list_block_responses(
         query = query.filter(MediationBlockResponse.phase == phase)
     if step_key:
         query = query.filter(MediationBlockResponse.step_key == step_key)
-    if own is not None and own.role not in _MEDIATOR_ROLES:
-        share = False
-        if include_others and step_key and phase:
-            # Erst gemeinsam sichtbar, wenn alle nötigen Rollen abgegeben haben —
-            # dieselbe Bedingung, unter der auch die Notizen-Gegenüberstellung
-            # (PhaseNotesClient, view="reflection") erscheint.
-            from app.routers.mediations import _step_all_submitted
+    if own is not None:
+        is_staff = own.role in _MEDIATOR_ROLES
+        # Ohne `include_others` liefert der Endpunkt IMMER nur die eigenen
+        # Beiträge – auch dem Mediator. Sonst füllt StepBlocks sein Formular mit
+        # fremden Antworten (dort gewinnt pro block_id die zuletzt gelesene
+        # Zeile), und die eigene Eingabe überschreibt still die der anderen.
+        share_all = False
+        share_others = False
+        if include_others:
+            if is_staff:
+                # Verfahrensleitung: volle Sicht, das ist die Auswertungs-Ansicht.
+                share_all = True
+            elif step_key and phase:
+                # Erst gemeinsam sichtbar, wenn alle nötigen Rollen abgegeben haben —
+                # dieselbe Bedingung, unter der auch die Notizen-Gegenüberstellung
+                # (PhaseNotesClient, view="reflection") erscheint.
+                from app.routers.mediations import _step_all_submitted
 
-            share = _step_all_submitted(db, mediation_id, phase, step_key)
-        if share:
+                share_others = _step_all_submitted(db, mediation_id, phase, step_key)
+        if share_all:
+            pass
+        elif share_others:
             # Eigene Beiträge immer; von den anderen alles außer den
             # vertraulichen Notizen (die gehören ausschließlich dem Mediator).
             query = query.filter(

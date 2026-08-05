@@ -32,7 +32,11 @@ type ContractState = {
   is_released?: boolean;
 };
 
-const MEDIATOR_ROLES = ["mediator", "admin", "owner"];
+// "owner" gehört hier NICHT hinein: der Antragsteller ist eine Konfliktpartei.
+// Erzeugen und Freigeben des Vertrags ist Sache der mediierenden Person – das
+// Backend (contract/generate, contract/release) lässt genau diese Rollen zu,
+// die Buttons für den owner liefen ins 403.
+const MEDIATOR_ROLES = ["mediator", "admin"];
 
 export default function VertragBlock({
   mediationId,

@@ -15,6 +15,7 @@ type Props = {
   mediationId: string;
   phaseKey: PhaseKey;
   currentUserName: string;
+  currentUserEmail?: string;
 };
 
 type Participant = {
@@ -22,7 +23,38 @@ type Participant = {
   name: string;
   role: string;
   invitationStatus: "accepted" | "pending";
+  email?: string | null;
+  // Vom Backend gesetzt: dieser Teilnehmer bin ich (Abgleich über user_id).
+  is_self?: boolean;
 };
+
+/**
+ * Welcher Teilnehmer bin ich?
+ *
+ * Früher wurde das über den Anzeigenamen erraten. Zwei Konten mit gleichem
+ * (oder leerem) Namen trafen denselben Eintrag – dann sahen BEIDE Parteien die
+ * Eingaben derselben Person, inklusive der Inhalte, die nur ihr gehören.
+ * Maßgeblich ist jetzt `is_self` vom Server; E-Mail und Name sind nur noch
+ * Rückfallebenen für Sessions/Backends, die das Feld noch nicht liefern.
+ */
+function findSelf(
+  parts: Participant[],
+  userName: string,
+  userEmail?: string,
+): Participant | undefined {
+  const self = parts.find((p) => p.is_self);
+  if (self) return self;
+  const mail = (userEmail ?? "").trim().toLowerCase();
+  if (mail) {
+    const byMail = parts.find((p) => (p.email ?? "").trim().toLowerCase() === mail);
+    if (byMail) return byMail;
+  }
+  if (!userName) return undefined;
+  const byName = parts.filter((p) => p.name === userName);
+  // Mehrdeutig → lieber niemanden zuordnen als den Falschen: die Seite zeigt
+  // dann keine Eingaben statt fremder.
+  return byName.length === 1 ? byName[0] : undefined;
+}
 
 type StepParticipant = {
   participant_id: string;
@@ -824,7 +856,12 @@ function ReflectionView(props: {
 }
 
 // ── Haupt-Komponente ──────────────────────────────────────────────────────────
-export default function PhaseNotesClient({ mediationId, phaseKey, currentUserName }: Props) {
+export default function PhaseNotesClient({
+  mediationId,
+  phaseKey,
+  currentUserName,
+  currentUserEmail,
+}: Props) {
   const router = useRouter();
   const phase = getPhase(phaseKey);
   const currentIndex = getPhaseIndex(phaseKey);
@@ -895,7 +932,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
 
   const allStepDetails = stepDetails;
   const accepted = participants.filter((p) => p.invitationStatus === "accepted");
-  const currentParticipant = participants.find((p) => p.name === currentUserName);
+  const currentParticipant = findSelf(participants, currentUserName, currentUserEmail);
 
   // ── Fortschritts-Sperre ───────────────────────────────────────────────────
   // Vorher war jeder Schritt jederzeit anklickbar; man konnte Schritt 5 öffnen,
@@ -1051,7 +1088,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
             }
           }
 
-          const myParticipant = parts.find((p) => p.name === currentUserName);
+          const myParticipant = findSelf(parts, currentUserName, currentUserEmail);
           const myStatus = status.participants.find(
             (p) => myParticipant && p.participant_id === myParticipant.id
           );
@@ -1694,7 +1731,7 @@ export default function PhaseNotesClient({ mediationId, phaseKey, currentUserNam
                     )}
 
                     {/* Andere Teilnehmer (noch wartend) */}
-                    {accepted.filter((p) => p.name !== currentUserName).map((p) => (
+                    {accepted.filter((p) => p.id !== currentParticipant?.id).map((p) => (
                       <div key={p.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
                         <div className="flex items-center justify-between">
                                    <div>

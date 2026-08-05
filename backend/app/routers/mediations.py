@@ -826,6 +826,86 @@ class DiscountApplyRequest(BaseModel):
     code: str
 
 
+def _can_be_covered_by(
+    db: Session,
+    mediation: Mediation,
+    me: MediationParticipant,
+    target: MediationParticipant,
+) -> bool:
+    """Ob ``me`` den Anteil von ``target`` freiwillig übernehmen darf.
+
+    Absichtlich streng: eine Übernahme ist ein Geschenk, kein Eingriff in die
+    Angelegenheiten der anderen Seite. Sie ist deshalb nur möglich, solange die
+    andere Seite noch gar nichts zugesagt hat – wer bereits reserviert oder
+    bezahlt hat, soll nicht plötzlich doppelt im Verfahren stehen.
+    """
+    if mediation.is_paid or billing.is_org_case(mediation):
+        return False
+    if target.id == me.id:
+        return False
+    # Übernehmen kann nur, wer selbst Partei ist – Mediator und Beobachter nicht.
+    if not billing.is_paying_party(me) or not billing.is_paying_party(target):
+        return False
+    # Nichts zu übernehmen, wenn für die andere Seite ohnehin kein Betrag
+    # anfällt (Modell "einmalig") oder sie bereits versorgt ist.
+    if not billing.owes_by_role(mediation, target):
+        return False
+    if target.paid or target.authorized:
+        return False
+    # Steht dort schon eine Übernahme, ist nichts mehr anzubieten – ES SEI DENN,
+    # es ist meine eigene und sie hat nie getragen (separate Übernahme, deren
+    # PayPal-Vorgang abgebrochen wurde). Sonst könnte man sie nie wiederholen.
+    if target.covered_by_participant_id and (
+        target.covered_by_participant_id != me.id
+        or billing.is_effectively_covered(target)
+    ):
+        return False
+    # Wer selbst übernommen wurde, übernimmt nicht seinerseits.
+    if me.covered_by_participant_id:
+        return False
+    return True
+
+
+def _require_coverable(
+    db: Session,
+    mediation: Mediation,
+    me: MediationParticipant,
+    participant_id: int,
+) -> MediationParticipant:
+    """Holt die Ziel-Partei einer Übernahme oder wirft mit klarer Begründung."""
+    target = (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.id == participant_id,
+            MediationParticipant.mediation_id == mediation.id,
+        )
+        .first()
+    )
+    if not target:
+        raise HTTPException(status_code=404, detail="Diese Partei gibt es in dem Fall nicht.")
+    if target.id == me.id:
+        raise HTTPException(status_code=400, detail="Deinen eigenen Anteil zahlst du ohnehin selbst.")
+    if target.covered_by_participant_id and target.covered_by_participant_id != me.id:
+        raise HTTPException(status_code=400, detail="Diesen Anteil hat bereits jemand anderes übernommen.")
+    if target.paid or target.authorized:
+        raise HTTPException(
+            status_code=400,
+            detail="Die andere Seite hat ihren Anteil bereits zugesagt – eine Übernahme ist nicht mehr nötig.",
+        )
+    # Läuft die Übernahme bereits auf mich, ist der Zustand gültig – sonst muss
+    # sie überhaupt erst zulässig sein.
+    if target.covered_by_participant_id != me.id and not _can_be_covered_by(
+        db, mediation, me, target
+    ):
+        raise HTTPException(status_code=400, detail="Für diese Partei ist keine Kostenübernahme möglich.")
+    return target
+
+
+class CoverageRequest(BaseModel):
+    participant_id: int
+    cover: bool = True
+
+
 def _payment_status_payload(db: Session, mediation: Mediation, me: MediationParticipant) -> dict:
     """Vollständiger Bezahl-Status: eigener Anteil + Status aller Parteien."""
     # Nutzer hinter der eigenen Teilnahme: die Rechnungsanschrift kann seit dem
@@ -837,6 +917,10 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
     my_final = billing.participant_final_due(db, mediation, me)
 
     parties = []
+    # Parteien, deren Anteil ich freiwillig übernehmen könnte. Bewusst erst
+    # nach der Schleife ausgewertet, damit die Namen schon feststehen.
+    coverage_offers: list[dict] = []
+    names: dict[int, str | None] = {}
     for p in (
         db.query(MediationParticipant)
         .filter(MediationParticipant.mediation_id == mediation.id)
@@ -848,6 +932,7 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             continue
         owes = billing.participant_owes(mediation, p)
         u = db.query(User).filter(User.id == p.user_id).first()
+        names[p.id] = u.name if u else None
         parties.append({
             "participant_id": p.id,
             "role": p.role,
@@ -860,7 +945,46 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
             "amount_due_eur": billing.participant_final_due(db, mediation, p) if owes else 0.0,
             "is_you": p.id == me.id,
             "billing_address_complete": _has_billing_address(p, u),
+            # Wer trägt den Anteil dieser Partei? None = sie selbst. Eine
+            # angefangene, aber nie bestätigte Übernahme zählt hier nicht.
+            "covered_by_participant_id": (
+                p.covered_by_participant_id
+                if billing.is_effectively_covered(p)
+                else None
+            ),
         })
+        if _can_be_covered_by(db, mediation, me, p):
+            coverage_offers.append({
+                "participant_id": p.id,
+                "name": (u.name if u else None),
+                "role": p.role,
+                "amount_eur": billing.coverage_amount(db, mediation, p),
+                # "bundle" = geht in meinen eigenen, noch offenen Betrag ein
+                # (eine Zahlung). "separate" = mein Anteil steht schon fest,
+                # die Übernahme braucht eine eigene Zahlung.
+                "mode": "separate" if (me.paid or me.authorized) else "bundle",
+            })
+
+    # Namen für die Anzeige "X hat deinen Anteil übernommen" bzw. "du zahlst
+    # für Y" nachtragen.
+    for party in parties:
+        cb = party["covered_by_participant_id"]
+        party["covered_by_name"] = names.get(cb) if cb else None
+
+    covered_by = billing.coverer_of(db, me) if billing.is_effectively_covered(me) else None
+    # Nur Übernahmen, die tatsächlich tragen: eine separate Übernahme, deren
+    # PayPal-Vorgang abgebrochen wurde, ist keine – sie taucht stattdessen
+    # wieder als Angebot auf.
+    covers = [
+        {
+            "participant_id": p.id,
+            "name": names.get(p.id),
+            "amount_eur": billing.coverage_amount(db, mediation, p),
+            "settled": bool(p.paid or p.authorized) or bool(mediation.is_paid),
+        }
+        for p in billing.covered_participants(db, mediation, me)
+        if billing.is_effectively_covered(p)
+    ]
 
     return {
         "mediation_type": mediation.mediation_type,
@@ -871,6 +995,9 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
         "all_owing_paid": billing.all_owing_paid(db, mediation),
         # Buchbare Add-ons des Einstiegs-Tarifs (leer bei Premium-Typen).
         "addons_available": pricing.addons_for(mediation.mediation_type),
+        # Parteien, deren Anteil ich übernehmen könnte (leer, wenn niemand
+        # offen ist oder Übernahme hier keinen Sinn ergibt).
+        "coverage_offers": coverage_offers,
         "you": {
             "owes": billing.participant_owes(mediation, me),
             "base_due_eur": my_base,
@@ -881,12 +1008,27 @@ def _payment_status_payload(db: Session, mediation: Mediation, me: MediationPart
                 for a in billing.participant_addons(db, mediation, me)
             ],
             "addons_total_eur": billing.participant_addons_total(db, mediation, me),
+            # Eigener Anteil und übernommene fremde Anteile getrennt, damit die
+            # Oberfläche den Gesamtbetrag aufschlüsseln kann.
+            "own_due_eur": billing.participant_own_due(db, mediation, me),
+            "coverage_due_eur": billing.coverage_due(db, mediation, me),
             "amount_due_eur": my_final,
             "paid": bool(me.paid),
             "authorized": bool(me.authorized) and not bool(me.paid),
             # Fürs Onboarding: Zahlung ist erst möglich, wenn die
             # Rechnungsadresse hinterlegt ist (Rechnung pro Partei beim Start).
             "billing_address_complete": _has_billing_address(me, my_user),
+            # Meine Kosten wurden übernommen (None = ich zahle selbst).
+            "covered_by": (
+                {
+                    "participant_id": covered_by.id,
+                    "name": names.get(covered_by.id),
+                }
+                if covered_by
+                else None
+            ),
+            # Anteile, die ich für andere übernommen habe.
+            "covers": covers,
         },
         "participants": parties,
     }
@@ -992,8 +1134,73 @@ def set_addons(
     return _payment_status_payload(db, mediation, me)
 
 
+@router.post("/{mediation_id}/coverage")
+def set_coverage(
+    mediation_id: int,
+    payload: CoverageRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_db_user),
+):
+    """Übernimmt (oder widerruft) freiwillig den Anteil einer anderen Partei –
+    GEBÜNDELT, also als Aufschlag auf den eigenen, noch offenen Betrag.
+
+    Nur solange der eigene Anteil noch änderbar ist: eine PayPal-Reservierung
+    lautet auf einen festen Betrag und lässt sich nicht nachträglich erhöhen.
+    Wer schon zugesagt hat und trotzdem übernehmen will, zahlt den fremden
+    Anteil separat (create-order mit ``for_participant_id``).
+    """
+    me = _require_participant(mediation_id, user, db)
+    mediation = _get_mediation_or_404(db, mediation_id)
+    if mediation.is_paid:
+        raise HTTPException(status_code=400, detail="Der Fall ist bereits freigeschaltet.")
+
+    # Sonderfall: ich lehne eine Übernahme ab, die MIR gilt. Freiwillig heißt
+    # auf beiden Seiten freiwillig – niemand muss sich beschenken lassen. Geht
+    # nur, solange nichts geflossen ist (gebündelt, also noch im offenen Betrag
+    # der anderen Seite).
+    if payload.participant_id == me.id and not payload.cover:
+        coverer = billing.coverer_of(db, me)
+        if not billing.is_bundled_coverage(me) or (
+            coverer and (coverer.paid or coverer.authorized)
+        ):
+            # Der Betrag steckt bereits in einer Reservierung der anderen Seite
+            # und lässt sich hier nicht mehr herauslösen.
+            raise HTTPException(
+                status_code=400,
+                detail="Für diesen Anteil ist bereits bezahlt worden – bitte wende dich an den Support.",
+            )
+        me.covered_by_participant_id = None
+        me.coverage_mode = None
+        db.commit()
+        db.refresh(me)
+        return _payment_status_payload(db, mediation, me)
+
+    _require_amount_still_changeable(me)
+
+    target = _require_coverable(db, mediation, me, payload.participant_id)
+
+    if payload.cover:
+        target.covered_by_participant_id = me.id
+        target.coverage_mode = "bundle"
+    elif target.covered_by_participant_id == me.id:
+        target.covered_by_participant_id = None
+        target.coverage_mode = None
+    db.commit()
+    db.refresh(me)
+    return _payment_status_payload(db, mediation, me)
+
+
 class PayPalCaptureRequest(BaseModel):
     order_id: str
+    # Gesetzt, wenn diese Zahlung den Anteil einer ANDEREN Partei separat
+    # übernimmt (siehe create_paypal_order).
+    for_participant_id: int | None = None
+
+
+class PayPalOrderRequest(BaseModel):
+    """Optionaler Body von create-order. Ohne Body: der eigene Anteil."""
+
+    for_participant_id: int | None = None
 
 
 def _parse_paypal_time(value: str | None) -> datetime | None:
@@ -1014,6 +1221,7 @@ def _parse_paypal_time(value: str | None) -> datetime | None:
 @router.post("/{mediation_id}/pay/paypal/create-order")
 async def create_paypal_order(
     mediation_id: int,
+    payload: PayPalOrderRequest | None = None,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_db_user),
 ):
@@ -1023,29 +1231,44 @@ async def create_paypal_order(
     Einzug erfolgt erst, wenn alle zahlungspflichtigen Parteien zugesagt haben
     (siehe services/billing.py settle_and_unlock) - sonst läge das Geld der
     ersten Partei bei uns, während der Fall nie startet.
+
+    Mit ``for_participant_id`` wird stattdessen der Anteil einer ANDEREN Partei
+    separat übernommen. Diesen Weg braucht nur, wer seinen eigenen Anteil schon
+    zugesagt hat – vorher geht die Übernahme über POST /coverage in denselben
+    Betrag ein und kostet keine zweite Zahlung.
     """
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
-    if me.paid:
-        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
-    if me.authorized:
-        raise HTTPException(
-            status_code=400,
-            detail="Dein Betrag ist bereits reserviert. Er wird eingezogen, sobald die Gegenseite zugestimmt hat.",
-        )
+    for_id = payload.for_participant_id if payload else None
 
-    if not billing.participant_owes(mediation, me):
-        raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an.")
+    # Die Zeile, auf der die Reservierung landet: normal die eigene, bei einer
+    # separaten Übernahme die der anderen Partei.
+    if for_id:
+        target = _require_coverable(db, mediation, me, for_id)
+        amount = billing.coverage_amount(db, mediation, target)
+    else:
+        target = me
+        if me.paid:
+            raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+        if me.authorized:
+            raise HTTPException(
+                status_code=400,
+                detail="Dein Betrag ist bereits reserviert. Er wird eingezogen, sobald die Gegenseite zugestimmt hat.",
+            )
+        if not billing.participant_owes(mediation, me):
+            raise HTTPException(status_code=400, detail="Für dich fällt kein Betrag an.")
+        amount = billing.participant_final_due(db, mediation, me)
 
     # Rechnungsadresse ist Voraussetzung für die Zahlung, weil beim Start des
-    # Falls für jede zahlende Partei eine Rechnung mit dieser Adresse erzeugt wird.
-    if not _has_billing_address(me, current_user):
+    # Falls für jede zahlende Partei eine Rechnung mit dieser Adresse erzeugt
+    # wird. Geprüft wird immer die des ZAHLERS – bei einer Übernahme geht die
+    # Rechnung an ihn, nicht an die übernommene Partei.
+    if not _has_billing_address(me, user):
         raise HTTPException(
             status_code=422,
             detail="Bitte hinterlege zuerst deine Rechnungsdaten (Straße, PLZ, Ort), bevor du bezahlst.",
         )
 
-    amount = billing.participant_final_due(db, mediation, me)
     if amount <= 0:
         raise HTTPException(
             status_code=400,
@@ -1061,7 +1284,15 @@ async def create_paypal_order(
     # lässt sich ein Webhook später dieser Partei zuordnen, wenn der Browser
     # zwischen PayPal-Bestätigung und unserem Autorisierungs-Aufruf abbricht
     # (siehe routers/paypal_webhooks.py).
-    me.paypal_order_id = order["id"]
+    target.paypal_order_id = order["id"]
+    # Übernahme schon hier festhalten, damit ein Webhook die Reservierung
+    # richtig zuordnet, wenn der Browser nach der PayPal-Bestätigung abbricht.
+    # Ungefährlich: eine "separate" Übernahme zählt erst mit eigener
+    # Reservierung (billing.is_effectively_covered) – bricht der Vorgang ab,
+    # bleibt die Partei schlicht weiter zahlungspflichtig.
+    if for_id:
+        target.covered_by_participant_id = me.id
+        target.coverage_mode = "separate"
     db.commit()
 
     return {"order_id": order["id"], "amount_eur": amount}
@@ -1080,11 +1311,22 @@ async def capture_paypal_order(
     Sobald alle zahlungspflichtigen Parteien reserviert haben, zieht
     ``settle_and_unlock`` sämtliche Reservierungen ein und schaltet den Fall
     frei. Der Endpunktname bleibt aus Kompatibilität "capture-order".
+
+    Mit ``for_participant_id`` landet die Reservierung auf der Zeile der
+    übernommenen Partei – gezahlt und in Rechnung gestellt wird sie beim
+    Übernehmenden.
     """
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
-    if me.paid:
-        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+
+    if payload.for_participant_id:
+        target = _require_coverable(db, mediation, me, payload.for_participant_id)
+        amount = billing.coverage_amount(db, mediation, target)
+    else:
+        target = me
+        if me.paid:
+            raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+        amount = billing.participant_final_due(db, mediation, me)
 
     try:
         auth = await authorize_order(payload.order_id)
@@ -1100,10 +1342,14 @@ async def capture_paypal_order(
         )
 
     expires_at = _parse_paypal_time(auth.get("expires_at"))
-    amount = billing.participant_final_due(db, mediation, me)
+    if payload.for_participant_id:
+        # Übernahme: Reservierung und Betrag gehören auf die Zeile der
+        # übernommenen Partei, der Vermerk „bezahlt von mir" ebenfalls.
+        target.covered_by_participant_id = me.id
+        target.coverage_mode = "separate"
     billing.mark_participant_authorized(
         db,
-        me,
+        target,
         amount=amount,
         order_id=payload.order_id,
         authorization_id=auth["authorization_id"],
@@ -1151,6 +1397,20 @@ async def release_own_authorization(
         raise HTTPException(status_code=502, detail=str(e))
 
     billing.clear_participant_authorization(db, me)
+
+    # Separat übernommene Anteile hängen an MEINEM Geld – wer den eigenen
+    # Rückzieher macht, soll nicht weiter für die Gegenseite blockiert sein.
+    # Gebündelte Übernahmen brauchen nichts: sie steckten im gerade
+    # freigegebenen Betrag.
+    for covered in billing.covered_participants(db, mediation, me):
+        if covered.paid or not covered.paypal_authorization_id:
+            continue
+        try:
+            await void_authorization(covered.paypal_authorization_id)
+        except PayPalError:
+            continue
+        billing.clear_participant_authorization(db, covered)
+
     db.refresh(me)
     return {"ok": True, **_payment_status_payload(db, mediation, me)}
 
@@ -1168,6 +1428,12 @@ async def redeem_free(
     if me.paid:
         raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
 
+    if billing.is_effectively_covered(me):
+        raise HTTPException(
+            status_code=400,
+            detail="Deinen Anteil hat bereits die andere Seite übernommen – du musst nichts freischalten.",
+        )
+
     amount = billing.participant_final_due(db, mediation, me)
     owes = billing.participant_owes(mediation, me)
     if owes and amount > 0:
@@ -1178,7 +1444,7 @@ async def redeem_free(
 
     # Auch bei 0 € (Voll-Rabatt) entsteht beim Start eine Rechnung für diese
     # Partei – die Adresse ist deshalb ebenfalls Pflicht.
-    if owes and not _has_billing_address(me, current_user):
+    if owes and not _has_billing_address(me, user):
         raise HTTPException(
             status_code=422,
             detail="Bitte hinterlege zuerst deine Rechnungsdaten (Straße, PLZ, Ort), bevor du freischaltest.",
@@ -1399,6 +1665,12 @@ def get_mediation_participants(
             "email": user.email,
             "role": participant.role,
             "invitationStatus": "accepted",
+            # Wer von den Teilnehmern bin ICH? Das Frontend hat das bisher über
+            # den Anzeigenamen erraten (participants.find(p => p.name === …)).
+            # Bei zwei gleich benannten oder namenlosen Konten trafen beide
+            # Parteien denselben Eintrag – und sahen damit die Eingaben des
+            # jeweils anderen. Die Zuordnung gehört auf den Server.
+            "is_self": user.id == current_user.id,
         }
         for participant, user in confirmed
     ]
@@ -1418,6 +1690,7 @@ def get_mediation_participants(
             "email": invite.invited_email,
             "role": invite.role,
             "invitationStatus": "pending",
+            "is_self": False,
         })
     return result
 
@@ -1482,7 +1755,7 @@ def get_notes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_paid_participant(mediation_id, current_user, db)
+    own = _require_paid_participant(mediation_id, current_user, db)
     notes = (
         db.query(MediationNote)
         .filter(
@@ -1492,6 +1765,16 @@ def get_notes(
         )
         .all()
     )
+    # Eine Konfliktpartei sieht die Eingaben der anderen erst, wenn alle für
+    # diesen Schritt nötigen Rollen abgegeben haben – dieselbe Regel wie bei den
+    # Block-Antworten und genau der Moment, in dem die Oberfläche auf die
+    # Gegenüberstellung umschaltet (PhaseNotesClient, view="reflection"). Vorher
+    # lieferte der Endpunkt jedem Teilnehmer alle Notizen, auch die noch nicht
+    # abgegebenen Entwürfe der Gegenseite.
+    if own.role not in ("mediator", "admin") and not _step_all_submitted(
+        db, mediation_id, phase, step
+    ):
+        notes = [n for n in notes if n.participant_id == own.id]
     return [
         {"participant_id": str(n.participant_id), "content": n.content, "submitted": n.submitted}
         for n in notes
@@ -2156,14 +2439,27 @@ def get_all_phase_notes(
         if mediation:
             billing.ensure_unlocked(mediation, is_participant, current_user)
 
-    rows = (
+    # Sichtbarkeit wie in list_block_responses: die Verfahrensleitung sieht alle
+    # Beiträge, eine Konfliktpartei nur die eigenen. "owner" zählt dabei NICHT
+    # zur Leitung – der Antragsteller ist eine Partei.
+    is_case_manager = current_user.role in ("mediator", "admin") or (
+        is_participant is not None and is_participant.role in ("mediator", "admin")
+    )
+
+    notes_query = (
         db.query(MediationNote, MediationParticipant, User)
         .join(MediationParticipant, MediationNote.participant_id == MediationParticipant.id)
         .join(User, MediationParticipant.user_id == User.id)
         .filter(MediationNote.mediation_id == mediation_id)
-        .order_by(MediationNote.phase, MediationNote.step)
-        .all()
     )
+    if not is_case_manager and is_participant is not None:
+        # Vorher lieferte dieser Endpunkt jeder Partei die Notizen ALLER
+        # Teilnehmer über alle Phasen – der direkte Weg zu den Eingaben der
+        # Gegenseite, an der Schritt-für-Schritt-Freigabe vorbei.
+        notes_query = notes_query.filter(
+            MediationNote.participant_id == is_participant.id
+        )
+    rows = notes_query.order_by(MediationNote.phase, MediationNote.step).all()
 
     from collections import defaultdict
     grouped: dict[str, list] = defaultdict(list)
@@ -2203,11 +2499,6 @@ def get_all_phase_notes(
     })
     step_titles["__ki__"] = "KI-Auswertung"
 
-    # Sichtbarkeit wie in list_block_responses: Mediator/Owner/Admin sehen alle
-    # Beiträge, eine Konfliktpartei nur die eigenen.
-    is_case_manager = current_user.role in ("mediator", "admin") or (
-        is_participant is not None and is_participant.role in ("mediator", "owner", "admin")
-    )
     grouped_blocks: dict[str, list] = defaultdict(list)
     block_query = db.query(MediationBlockResponse).filter(
         MediationBlockResponse.mediation_id == mediation_id
@@ -2596,8 +2887,17 @@ def generate_contract(
         )
         .first()
     )
-    if not participant and current_user.role not in ("mediator", "admin"):
-        raise HTTPException(status_code=403, detail="Nicht an dieser Mediation beteiligt")
+    # Nur die Verfahrensleitung darf generieren – die Antwort enthält den
+    # Vertragsentwurf, also die zusammengeführten Eingaben BEIDER Parteien.
+    # Vorher genügte ein beliebiger Teilnehmer-Eintrag ("if not participant
+    # and role not in …"), womit jede Partei den Entwurf über die Angaben der
+    # Gegenseite abrufen konnte, lange bevor er freigegeben war.
+    is_case_staff = participant is not None and participant.role in ("mediator", "admin")
+    if not is_case_staff and current_user.role not in ("mediator", "admin"):
+        raise HTTPException(
+            status_code=403,
+            detail="Nur die mediierende Person darf den Vertrag erzeugen",
+        )
 
     mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not mediation:

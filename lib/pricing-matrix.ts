@@ -23,6 +23,12 @@ const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
  * "b2b" steht im Rechner stellvertretend für die ganze ODR-Familie
  * (odr / schlichtung / ecommerce / b2b). Alle vier kosten dasselbe und
  * werden identisch abgerechnet; für den Rechner reicht ein Eintrag.
+ *
+ * "kindschaft" (Sorge- und Umgangsstreit) hat bewusst KEINEN eigenen
+ * Konflikttyp im Backend: Fachlich ist das eine Trennungsmediation, und sie
+ * wird auch so abgerechnet. Der Rechner trennt die beiden nur, weil sich
+ * die Kostenseite grundlegend unterscheidet — Sorge und Umgang lassen sich
+ * ohne Gericht regeln, eine Scheidung nicht (§ 114 FamFG).
  */
 const TYP_MAPPING: Record<Konfliktart, string> = {
   nachbarschaft: "nachbarschaft",
@@ -30,6 +36,7 @@ const TYP_MAPPING: Record<Konfliktart, string> = {
   erbschaft: "erbschaft",
   b2b: "b2b",
   trennung: "trennung",
+  kindschaft: "trennung",
 };
 
 type MatrixAntwort = {

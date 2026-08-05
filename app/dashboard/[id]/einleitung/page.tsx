@@ -27,6 +27,7 @@ export default async function EinleitungPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="einleitung"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

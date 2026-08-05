@@ -109,7 +109,13 @@ async def _recover_authorization(db: Session, participant: MediationParticipant)
         )
         return
 
-    amount = billing.participant_final_due(db, mediation, participant)
+    # Trägt die Zeile eine freiwillige Kostenübernahme, lautete die Order auf
+    # den Grundanteil dieser Partei – nicht auf ihren eigenen Betrag (der
+    # Rabatte und Add-ons enthielte, die der Übernehmende nie gewählt hat).
+    if participant.covered_by_participant_id and participant.coverage_mode == "separate":
+        amount = billing.coverage_amount(db, mediation, participant)
+    else:
+        amount = billing.participant_final_due(db, mediation, participant)
     billing.mark_participant_authorized(
         db,
         participant,

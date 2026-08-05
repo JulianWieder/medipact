@@ -19,64 +19,21 @@
 //      (Feld `from_profile` sagt, welcher es war).
 //      Ohne Adresse ist keine Zahlung möglich, weil beim Zahlungseingang
 //      automatisch die Rechnung erzeugt wird.
-//   2. Betrag inkl. Rabattcode und Add-ons
+//   2. Betrag inkl. Rabattcode, Add-ons und freiwilliger Kostenübernahme
 //   3. PayPal – reserviert nur, abgebucht wird erst, wenn ALLE zugesagt haben
 //      (siehe backend/app/paypal.py und services/billing.py)
 //
 // Der Block ist nur in der Einladungs-Phase erreichbar – alle anderen Phasen
 // sind bis zur vollständigen Zahlung durch die Paywall geschützt.
+//
+// KOSTENÜBERNAHME: Wer möchte, trägt den Anteil der anderen Seite mit. Die
+// Auswahl steckt in KostenuebernahmeBlock (hier eingebettet, damit sie direkt
+// über dem Betrag steht) – der Betrag unten enthält sie dann bereits.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-
-type PayPalSdk = {
-  Buttons: (options: Record<string, unknown>) => {
-    render: (container: HTMLElement) => Promise<void>;
-  };
-};
-
-// Eigene SDK-Instanz mit intent=authorize. MUSS getrennt vom Standard-SDK
-// (intent=capture, für Bonus-Leistungen) geladen werden: passt der Intent im
-// Script-URL nicht zur serverseitig erzeugten Order, öffnet sich das
-// PayPal-Fenster und schließt sofort wieder.
-const SDK_ID = "paypal-sdk-authorize";
-const SDK_NAMESPACE = "paypalAuthorize";
-
-function getSdk(): PayPalSdk | undefined {
-  return (window as unknown as Record<string, PayPalSdk | undefined>)[SDK_NAMESPACE];
-}
-
-type PartyStatus = {
-  participant_id: number;
-  role: string;
-  name: string | null;
-  owes: boolean;
-  paid: boolean;
-  authorized?: boolean;
-  amount_due_eur: number;
-  is_you: boolean;
-};
-
-type AddonOffer = { key: string; label: string; description: string; price_eur: number };
-
-type PayStatus = {
-  is_paid: boolean;
-  all_owing_paid: boolean;
-  addons_available?: AddonOffer[];
-  you: {
-    owes: boolean;
-    base_due_eur: number;
-    discount_code: string | null;
-    discount_amount_eur: number;
-    addons?: { key: string; price_eur: number }[];
-    addons_total_eur?: number;
-    amount_due_eur: number;
-    paid: boolean;
-    authorized?: boolean;
-    billing_address_complete?: boolean;
-  };
-  participants: PartyStatus[];
-  warning?: string;
-};
+import KostenuebernahmeBlock from "./KostenuebernahmeBlock";
+import PayPalAuthorizeButtons from "./PayPalAuthorizeButtons";
+import type { PayStatus } from "./paymentTypes";
 
 const INPUT =
   "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100";
@@ -113,10 +70,6 @@ export default function FallFreischaltungBlock({
   const [codeBusy, setCodeBusy] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [addonBusy, setAddonBusy] = useState(false);
-
-  const paypalRef = useRef<HTMLDivElement>(null);
-  const mountedNode = useRef<HTMLElement | null>(null);
-  const [retry, setRetry] = useState(0);
 
   const loadStatus = useCallback(async () => {
     try {
@@ -252,12 +205,6 @@ export default function FallFreischaltungBlock({
     }
   }
 
-  function resetButtons() {
-    mountedNode.current = null;
-    if (paypalRef.current) paypalRef.current.innerHTML = "";
-    setRetry((n) => n + 1);
-  }
-
   // Statuswechsel -> einmalig onPaid melden (nicht bei jedem Re-Render).
   //
   // ACHTUNG – hier zählt AUSSCHLIESSLICH status.is_paid: die Paywall im Backend
@@ -277,105 +224,13 @@ export default function FallFreischaltungBlock({
   }, [caseUnlocked]);
 
   const iAmAuthorized = !!status && !!status.you.authorized && !status.you.paid;
-  const showPaypal =
-    !!status &&
-    status.you.owes &&
-    !status.you.paid &&
-    !iAmAuthorized &&
-    status.you.amount_due_eur > 0 &&
-    !status.is_paid &&
-    addressSaved;
 
-  useEffect(() => {
-    if (!showPaypal) {
-      if (paypalRef.current) paypalRef.current.innerHTML = "";
-      mountedNode.current = null;
-      return;
-    }
-    if (mountedNode.current && mountedNode.current === paypalRef.current) return;
-
-    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-    if (!clientId) {
-      setError("PayPal ist noch nicht konfiguriert.");
-      return;
-    }
-
-    function render() {
-      const sdk = getSdk();
-      const container = paypalRef.current;
-      if (!sdk || !container) return;
-      if (mountedNode.current === container) return;
-      mountedNode.current = container;
-      container.innerHTML = "";
-      sdk
-        .Buttons({
-          style: { layout: "vertical", color: "gold", label: "paypal" },
-          createOrder: async () => {
-            setError("");
-            const res = await fetch(
-              `/api/mediations/${mediationId}/pay/paypal/create-order`,
-              { method: "POST" },
-            );
-            const d = await res.json().catch(() => null);
-            if (!res.ok) throw new Error(d?.detail ?? "Order konnte nicht erstellt werden");
-            return d.order_id;
-          },
-          onApprove: async (data: { orderID: string }) => {
-            setBusy(true);
-            setError("");
-            try {
-              const res = await fetch(
-                `/api/mediations/${mediationId}/pay/paypal/capture-order`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ order_id: data.orderID }),
-                },
-              );
-              const d = await res.json().catch(() => null);
-              if (!res.ok) {
-                setError(`Zahlung fehlgeschlagen: ${d?.detail ?? "Unbekannter Fehler"}`);
-                resetButtons();
-                return;
-              }
-              setStatus(d);
-              if (d.warning) setError(d.warning);
-            } catch {
-              setError("Server nicht erreichbar.");
-              resetButtons();
-            } finally {
-              setBusy(false);
-            }
-          },
-          onError: () => {
-            setError("PayPal hat einen Fehler gemeldet. Bitte erneut versuchen.");
-            resetButtons();
-          },
-          onCancel: () => setBusy(false),
-        })
-        .render(container)
-        .catch(() => {
-          mountedNode.current = null;
-          setError("Der PayPal-Button konnte nicht geladen werden. Bitte Seite neu laden.");
-        });
-    }
-
-    const existing = document.getElementById(SDK_ID) as HTMLScriptElement | null;
-    if (getSdk()) render();
-    else if (existing) existing.addEventListener("load", render);
-    else {
-      const s = document.createElement("script");
-      s.id = SDK_ID;
-      s.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=authorize`;
-      s.setAttribute("data-namespace", SDK_NAMESPACE);
-      s.addEventListener("load", render);
-      s.addEventListener("error", () =>
-        setError("Das PayPal-SDK konnte nicht geladen werden (Netzwerk oder Adblocker?)."),
-      );
-      document.body.appendChild(s);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediationId, showPaypal, status?.you.amount_due_eur, retry]);
+  /** Antwort von capture-order übernehmen (enthält den vollen Status). */
+  function applyPayResult(d: unknown) {
+    const data = d as PayStatus & { warning?: string };
+    setStatus(data);
+    if (data?.warning) setError(data.warning);
+  }
 
   // ── Darstellung ──────────────────────────────────────────────────────────
   if (!status) {
@@ -401,29 +256,67 @@ export default function FallFreischaltungBlock({
           </p>
         </div>
       ) : !you.owes ? (
-        <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-          <p className="font-semibold text-neutral-800">Für dich fällt kein Betrag an.</p>
-          <p className="mt-1 text-sm text-neutral-600">
-            Bei diesem Fall zahlt die andere Seite.
-          </p>
-        </div>
+        <>
+          <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+            <p className="font-semibold text-neutral-800">Für dich fällt kein Betrag an.</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {you.covered_by
+                ? `${you.covered_by.name ?? "Die andere Seite"} hat deinen Anteil freiwillig übernommen.`
+                : "Bei diesem Fall zahlt die andere Seite."}
+            </p>
+          </div>
+          {/* Freiwillig gilt in beide Richtungen – der Übernahme-Block bietet
+              hier den Weg zurück zum Selbstzahlen. */}
+          {you.covered_by && (
+            <div className="mt-4">
+              <KostenuebernahmeBlock
+                mediationId={mediationId}
+                status={status}
+                onStatus={setStatus}
+                embedded
+              />
+            </div>
+          )}
+        </>
       ) : you.paid ? (
-        <div className="mt-4 rounded-xl border border-accent-200 bg-accent-50 p-4">
-          <p className="font-bold text-accent-700">Dein Anteil ist bezahlt ✓</p>
-          <p className="mt-1 text-sm text-neutral-600">
-            {status.all_owing_paid
-              ? "Alle Parteien haben bezahlt."
-              : "Warten auf die Zahlung der anderen Seite …"}
-          </p>
-        </div>
+        <>
+          <div className="mt-4 rounded-xl border border-accent-200 bg-accent-50 p-4">
+            <p className="font-bold text-accent-700">Dein Anteil ist bezahlt ✓</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {status.all_owing_paid
+                ? "Alle Parteien haben bezahlt."
+                : "Warten auf die Zahlung der anderen Seite …"}
+            </p>
+          </div>
+          {/* Hängt es an der Gegenseite, ist das der Moment, in dem die
+              Übernahme ihren Sinn bekommt – hier als eigene Zahlung. */}
+          <div className="mt-4">
+            <KostenuebernahmeBlock
+              mediationId={mediationId}
+              status={status}
+              onStatus={setStatus}
+              embedded
+            />
+          </div>
+        </>
       ) : iAmAuthorized ? (
-        <div className="mt-4 rounded-xl border border-accent-200 bg-accent-50 p-4">
-          <p className="font-bold text-accent-700">Dein Betrag ist reserviert ✓</p>
-          <p className="mt-1 text-sm text-neutral-600">
-            {you.amount_due_eur.toFixed(2)} € sind bei PayPal vorgemerkt, aber noch nicht
-            abgebucht. Der Einzug erfolgt, sobald auch die andere Seite zugestimmt hat.
-          </p>
-        </div>
+        <>
+          <div className="mt-4 rounded-xl border border-accent-200 bg-accent-50 p-4">
+            <p className="font-bold text-accent-700">Dein Betrag ist reserviert ✓</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {you.amount_due_eur.toFixed(2)} € sind bei PayPal vorgemerkt, aber noch nicht
+              abgebucht. Der Einzug erfolgt, sobald auch die andere Seite zugestimmt hat.
+            </p>
+          </div>
+          <div className="mt-4">
+            <KostenuebernahmeBlock
+              mediationId={mediationId}
+              status={status}
+              onStatus={setStatus}
+              embedded
+            />
+          </div>
+        </>
       ) : (
         <>
           {/* 1 – Rechnungsdaten (aus dem Onboarding, hier nur änderbar) */}
@@ -481,10 +374,21 @@ export default function FallFreischaltungBlock({
             )}
           </div>
 
-          {/* 2 – Betrag */}
+          {/* 2 – Freiwillige Kostenübernahme (steht bewusst VOR dem Betrag:
+              sie verändert ihn) */}
+          <div className="mt-5">
+            <KostenuebernahmeBlock
+              mediationId={mediationId}
+              status={status}
+              onStatus={setStatus}
+              embedded
+            />
+          </div>
+
+          {/* 3 – Betrag */}
           <div className="mt-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-accent-600">
-              Dein Anteil
+              {(you.coverage_due_eur ?? 0) > 0 ? "Dein Betrag" : "Dein Anteil"}
             </p>
             <div className="flex items-baseline justify-center gap-2">
               {you.discount_amount_eur > 0 && (
@@ -497,6 +401,12 @@ export default function FallFreischaltungBlock({
               </span>
               <span className="text-lg font-bold text-neutral-900">€</span>
             </div>
+            {(you.coverage_due_eur ?? 0) > 0 && (
+              <p className="text-xs text-neutral-500">
+                {(you.own_due_eur ?? 0).toFixed(2)} € eigener Anteil +{" "}
+                {(you.coverage_due_eur ?? 0).toFixed(2)} € übernommen
+              </p>
+            )}
             <p className="text-xs text-neutral-400">inkl. MwSt.</p>
           </div>
 
@@ -574,7 +484,7 @@ export default function FallFreischaltungBlock({
             </div>
           )}
 
-          {/* 3 – Zahlung */}
+          {/* 4 – Zahlung */}
           <div className="mx-auto mt-6 w-full max-w-sm">
             {!addressSaved ? (
               <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
@@ -588,7 +498,15 @@ export default function FallFreischaltungBlock({
                   Parteien zugestimmt haben. Kommt die Mediation nicht zustande, wird die
                   Reservierung freigegeben.
                 </p>
-                <div ref={paypalRef} />
+                {/* key = Betrag: ändert sich der Anteil (Rabatt, Add-on,
+                    Übernahme), werden die Buttons neu aufgebaut. */}
+                <PayPalAuthorizeButtons
+                  key={you.amount_due_eur}
+                  mediationId={mediationId}
+                  onDone={applyPayResult}
+                  onError={setError}
+                  onBusyChange={setBusy}
+                />
               </>
             ) : (
               <button
@@ -623,7 +541,11 @@ export default function FallFreischaltungBlock({
                   {p.is_you && <span className="text-neutral-400"> (du)</span>}
                 </span>
                 <span className="font-semibold">
-                  {!p.owes ? (
+                  {p.covered_by_participant_id ? (
+                    <span className="text-accent-700">
+                      übernommen{p.covered_by_name ? ` · ${p.covered_by_name}` : ""}
+                    </span>
+                  ) : !p.owes ? (
                     <span className="text-neutral-400">kein Betrag</span>
                   ) : p.paid ? (
                     <span className="text-accent-700">bezahlt ✓</span>

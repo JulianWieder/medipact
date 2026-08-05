@@ -22,6 +22,7 @@ export default async function OptionenPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="optionen"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

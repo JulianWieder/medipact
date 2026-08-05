@@ -14,12 +14,15 @@
 //   § 34 GKG       https://dejure.org/gesetze/GKG/34.html
 //   Anlage 2 RVG   https://dejure.org/gesetze/RVG/Anlage_2.html
 //   § 13 RVG       https://dejure.org/gesetze/RVG/13.html
+//   § 44, § 45 FamGKG, KV FamGKG   https://lxgesetze.de/famgkg/44
+//   § 158c FamFG   https://dejure.org/gesetze/FamFG/158c.html
+//   Anlage 1 JVEG  https://dejure.org/gesetze/JVEG/9.html
 //
 // ── Wichtige Vereinfachung ──────────────────────────────────────────────────
 // Die Wertgebührentabelle nach § 34 GKG (Zivilsachen) und die nach § 28
 // FamGKG (Familiensachen) sind WERTGLEICH. Es gibt hier deshalb nur EINE
 // Gerichtsgebührentabelle; Zivil- und Familiensachen unterscheiden sich
-// ausschließlich im Gebührensatz (3,0 vs. 2,0).
+// ausschließlich im Gebührensatz (3,0 vs. 2,0 vs. 0,5).
 //
 // ── Was dieser Code NICHT tut ───────────────────────────────────────────────
 // Keine Bewertung von Erfolgsaussichten, keine Handlungsempfehlung, keine
@@ -92,12 +95,22 @@ export const anwaltsgebuehr1 = (wert: number) =>
 export const SAETZE = {
   /** KV 1210 GKG – Zivilprozess 1. Instanz */
   gerichtZivil: 3.0,
-  /** KV 1110 FamGKG – Ehesache 1. Instanz */
+  /** KV 1110 FamGKG – Ehesache 1. Instanz (Verbund) */
   gerichtEhesache: 2.0,
-  /** Nr. 3100 VV RVG – Verfahrensgebühr */
+  /** KV 1310 FamGKG – selbständige Kindschaftssache, Familiengericht */
+  gerichtKindschaft: 0.5,
+  /** KV 1314 FamGKG – Beschwerde in Kindschaftssachen (OLG) */
+  gerichtKindschaftBeschwerde: 1.0,
+  /** KV 1410 FamGKG – einstweilige Anordnung in Kindschaftssachen */
+  gerichtKindschaftEilverfahren: 0.3,
+  /** Nr. 3100 VV RVG – Verfahrensgebühr 1. Instanz */
   verfahren: 1.3,
-  /** Nr. 3104 VV RVG – Terminsgebühr */
+  /** Nr. 3104 VV RVG – Terminsgebühr 1. Instanz */
   termin: 1.2,
+  /** Nr. 3200 VV RVG – Verfahrensgebühr Beschwerde */
+  verfahrenBeschwerde: 1.6,
+  /** Nr. 3202 VV RVG – Terminsgebühr Beschwerde */
+  terminBeschwerde: 1.2,
 } as const;
 
 /**
@@ -122,11 +135,21 @@ export type Anwaltskosten = {
   brutto: number;
 };
 
-/** Anwaltskosten EINER Partei für ein gerichtliches Verfahren 1. Instanz. */
-export function anwaltskosten(wert: number): Anwaltskosten {
+/**
+ * Anwaltskosten EINER Partei für ein gerichtliches Verfahren.
+ *
+ * Ohne weitere Argumente: erster Rechtszug (1,3 / 1,2). Für die Beschwerde
+ * die Sätze aus SAETZE.verfahrenBeschwerde / terminBeschwerde übergeben –
+ * Nr. 3200 VV RVG liegt mit 1,6 über der erstinstanzlichen Verfahrensgebühr.
+ */
+export function anwaltskosten(
+  wert: number,
+  satzVerfahren: number = SAETZE.verfahren,
+  satzTermin: number = SAETZE.termin,
+): Anwaltskosten {
   const basis = anwaltsgebuehr1(wert);
-  const verfahrensgebuehr = basis * SAETZE.verfahren;
-  const terminsgebuehr = basis * SAETZE.termin;
+  const verfahrensgebuehr = basis * satzVerfahren;
+  const terminsgebuehr = basis * satzTermin;
   const gebuehren = verfahrensgebuehr + terminsgebuehr;
   const auslagen = Math.min(AUSLAGENPAUSCHALE_MAX, 0.2 * gebuehren);
   const netto = gebuehren + auslagen;
@@ -162,6 +185,83 @@ export function verfahrenswertVersorgungsausgleich(
   return Math.max(1000, anrechte * 0.1 * 3 * monatsnettoBeide);
 }
 
+// ── Kindschaftssachen: Sorge, Aufenthalt, Umgang ────────────────────────────
+//
+// Der Teil des Familienrechts, in dem die Gebührentabellen am wenigsten über
+// die tatsächlichen Kosten aussagen. Zwei Dinge muss man auseinanderhalten:
+//
+//   1. ISOLIERT (§ 45 Abs. 1 FamGKG) – Eltern, die nicht verheiratet waren,
+//      oder ein Streit nach rechtskräftiger Scheidung. Jeder Gegenstand hat
+//      einen festen Verfahrenswert von 5.000 €. Das Gericht nimmt davon nur
+//      eine 0,5-Gebühr (KV 1310 FamGKG); die Anwälte rechnen normal ab.
+//
+//   2. IM VERBUND (§ 44 Abs. 2 Satz 1 FamGKG) – Sorge oder Umgang als
+//      Folgesache der Scheidung. Dann gibt es keinen eigenen Wert, sondern
+//      einen Zuschlag von 20 % auf den Wert der Ehesache, höchstens 5.000 €
+//      je Kindschaftssache.
+//
+// In beiden Fällen gilt: eine Kindschaftssache ist EIN Gegenstand, auch wenn
+// sie mehrere Kinder betrifft (§ 44 Abs. 2 Satz 1 Halbsatz 2, § 45 Abs. 2
+// FamGKG). Mehr Kinder erhöhen den Wert also nicht – wohl aber die Vergütung
+// des Verfahrensbeistands, siehe unten.
+
+/** § 45 Abs. 1 FamGKG – Regelwert je selbständiger Kindschaftssache. */
+export const KINDSCHAFT_WERT = 5000;
+/** § 44 Abs. 2 Satz 1 FamGKG – Zuschlag je Kindschaftssache im Verbund. */
+export const KINDSCHAFT_VERBUND_ANTEIL = 0.2;
+export const KINDSCHAFT_VERBUND_MAX = 5000;
+
+export type Kindschaftsgegenstand = "sorge" | "umgang" | "herausgabe";
+
+export type KindschaftsInfo = {
+  key: Kindschaftsgegenstand;
+  label: string;
+  hinweis: string;
+};
+
+export const KINDSCHAFTSSACHEN: readonly KindschaftsInfo[] = [
+  {
+    key: "sorge",
+    label: "Elterliche Sorge",
+    hinweis:
+      "Auch dann ein einziger Gegenstand, wenn nur ein Teil beantragt wird – etwa das Aufenthaltsbestimmungsrecht. Das Gesetz fasst „die elterliche Sorge oder einen Teil der elterlichen Sorge“ zusammen (§ 45 Abs. 1 Nr. 1 FamGKG). Sorgerecht und Aufenthaltsbestimmung nebeneinander verdoppeln den Wert also nicht.",
+  },
+  {
+    key: "umgang",
+    label: "Umgangsrecht",
+    hinweis:
+      "Einschließlich Umgangspflegschaft (§ 45 Abs. 1 Nr. 2 FamGKG). Anders als die Aufenthaltsbestimmung ist der Umgang ein eigener Gegenstand – sein Wert kommt zum Sorgerecht hinzu.",
+  },
+  {
+    key: "herausgabe",
+    label: "Kindesherausgabe",
+    hinweis:
+      "Der seltenere Fall: Ein Elternteil verlangt die Herausgabe des Kindes, meist nach einem einseitigen Umzug (§ 45 Abs. 1 Nr. 4 FamGKG).",
+  },
+];
+
+/** Verfahrenswert selbständiger Kindschaftssachen (§ 45 Abs. 1 FamGKG). */
+export function verfahrenswertKindschaft(anzahlGegenstaende: number): number {
+  return Math.max(1, anzahlGegenstaende) * KINDSCHAFT_WERT;
+}
+
+/**
+ * Werterhöhung durch Kindschafts-Folgesachen im Verbund
+ * (§ 44 Abs. 2 Satz 1 FamGKG). Basis ist der Wert der EHESACHE nach § 43,
+ * nicht der Gesamtwert des Verbunds – der Versorgungsausgleich zählt hier
+ * also nicht mit.
+ */
+export function kindschaftZuschlagVerbund(
+  ehesachenwert: number,
+  anzahlGegenstaende: number,
+): number {
+  if (anzahlGegenstaende <= 0) return 0;
+  return (
+    anzahlGegenstaende *
+    Math.min(KINDSCHAFT_VERBUND_MAX, KINDSCHAFT_VERBUND_ANTEIL * ehesachenwert)
+  );
+}
+
 // ── Ergebnis eines Szenarios ────────────────────────────────────────────────
 
 export type GerichtsSzenario = {
@@ -190,6 +290,200 @@ export function gerichtsSzenario(
   };
 }
 
+// ── Was ein Sorge- oder Umgangsstreit wirklich kostet ───────────────────────
+//
+// Die Gebührentabellen bilden bei Kindschaftssachen nur einen Bruchteil der
+// Rechnung ab, und zwar aus einem strukturellen Grund: Der Verfahrenswert ist
+// gedeckelt (5.000 € je Gegenstand), die Kosten sind es nicht. Was den Betrag
+// treibt, hängt am Verfahren, nicht am Wert:
+//
+//   • Das familienpsychologische Gutachten. Nach dem JVEG vergütet, in der
+//     Praxis 40–100 Stunden. Das ist regelmäßig der größte Einzelposten und
+//     übersteigt die gesamten Gerichts- und Anwaltsgebühren deutlich.
+//   • Der Verfahrensbeistand (§ 158c Abs. 1 FamFG), je Rechtszug.
+//   • Die Zahl der Verfahren. Eilantrag, Hauptsache, Beschwerde und später
+//     die Abänderung nach § 1696 BGB sind kostenrechtlich je ein eigenes
+//     Verfahren mit eigenen Gebühren.
+//
+// Kostenverteilung: § 81 FamFG stellt sie ins Ermessen des Gerichts. In
+// Sorge- und Umgangssachen ist die Regel, dass die Gerichtskosten samt
+// Auslagen hälftig geteilt werden und jeder Elternteil seinen eigenen Anwalt
+// zahlt – unabhängig vom Ausgang. Genau das rechnet `eskalation()` ab.
+
+/** Anlage 1 Teil 2 zu § 9 JVEG, Stand 01.06.2025. */
+export const JVEG_SATZ = { m2: 98, m3: 131 } as const;
+export const GUTACHTEN_STUNDEN_DEFAULT = 60;
+export const GUTACHTEN_STUNDEN_MIN = 20;
+export const GUTACHTEN_STUNDEN_MAX = 120;
+
+/** § 158c Abs. 1 FamFG (Fassung seit 11.04.2025). */
+export const VERFAHRENSBEISTAND_ERSTES_KIND = 690;
+export const VERFAHRENSBEISTAND_WEITERE_KINDER = 555;
+
+/** Pauschale des Verfahrensbeistands für einen Rechtszug. */
+export function verfahrensbeistandKosten(kinder: number): number {
+  const n = Math.max(1, kinder);
+  return (
+    VERFAHRENSBEISTAND_ERSTES_KIND +
+    (n - 1) * VERFAHRENSBEISTAND_WEITERE_KINDER
+  );
+}
+
+/**
+ * Sachverständigenhonorar brutto. § 12 Abs. 1 Satz 2 Nr. 4 JVEG: Die
+ * Umsatzsteuer wird zusätzlich zum Stundenhonorar ersetzt.
+ */
+export function gutachtenKosten(stunden: number, stundensatz: number): number {
+  return round2(stunden * stundensatz * (1 + UST));
+}
+
+export type EskalationEingabe = {
+  /** Verfahrenswert der Kindschaftssache(n) nach § 45 Abs. 1 FamGKG. */
+  wert: number;
+  kinder: number;
+  /** Erstinstanzliche Hauptsache mitrechnen? Im Verbund nein – die steckt
+   *  dort bereits in der Scheidungsrechnung. */
+  hauptsache: boolean;
+  eilantrag: boolean;
+  gutachten: boolean;
+  gutachtenStunden: number;
+  gutachtenSatz: number;
+  verfahrensbeistand: boolean;
+  beschwerde: boolean;
+  /** Spätere Abänderungsverfahren (§ 1696 BGB, § 166 FamFG). */
+  abaenderungen: number;
+};
+
+export type EskalationPosten = {
+  label: string;
+  quelle: string;
+  wert: number;
+  /** true = Gerichtskosten oder Auslage, wird nach § 81 FamFG geteilt. */
+  geteilt: boolean;
+};
+
+export type Eskalation = {
+  posten: EskalationPosten[];
+  /** Eigener Anwalt – trägt jeder Elternteil selbst. */
+  eigeneAnwaltskosten: number;
+  /** Gerichtskosten und Auslagen – in der Regel hälftig. */
+  geteilteKosten: number;
+  /** Was auf einen Elternteil entfällt. */
+  proElternteil: number;
+  /** Was die Familie insgesamt zahlt. */
+  gesamt: number;
+};
+
+export function eskalation(e: EskalationEingabe): Eskalation {
+  const posten: EskalationPosten[] = [];
+  const add = (label: string, quelle: string, wert: number, geteilt: boolean) => {
+    if (wert > 0) posten.push({ label, quelle, wert: round2(wert), geteilt });
+  };
+
+  // § 41 FamGKG: Der Wert der einstweiligen Anordnung ist in der Regel die
+  // Hälfte des Hauptsachewerts.
+  const eilwert = Math.max(1, e.wert / 2);
+
+  if (e.eilantrag) {
+    add(
+      "Einstweilige Anordnung: Gericht",
+      "KV 1410 FamGKG",
+      SAETZE.gerichtKindschaftEilverfahren * gerichtsgebuehr1(eilwert),
+      true,
+    );
+    add(
+      "Einstweilige Anordnung: eigener Anwalt",
+      "§ 41 FamGKG, Nrn. 3100/3104 VV RVG",
+      anwaltskosten(eilwert).brutto,
+      false,
+    );
+  }
+
+  if (e.hauptsache) {
+    add(
+      "Hauptsacheverfahren: Gericht",
+      "KV 1310 FamGKG",
+      SAETZE.gerichtKindschaft * gerichtsgebuehr1(e.wert),
+      true,
+    );
+    add(
+      "Hauptsacheverfahren: eigener Anwalt",
+      "Nrn. 3100/3104 VV RVG",
+      anwaltskosten(e.wert).brutto,
+      false,
+    );
+  }
+
+  if (e.gutachten) {
+    add(
+      "Familienpsychologisches Gutachten",
+      "§ 9 JVEG, Anlage 1 Teil 2",
+      gutachtenKosten(e.gutachtenStunden, e.gutachtenSatz),
+      true,
+    );
+  }
+
+  if (e.verfahrensbeistand) {
+    const rechtszuege = e.beschwerde ? 2 : 1;
+    add(
+      "Verfahrensbeistand",
+      "§ 158c Abs. 1 FamFG",
+      rechtszuege * verfahrensbeistandKosten(e.kinder),
+      true,
+    );
+  }
+
+  if (e.beschwerde) {
+    add(
+      "Beschwerde zum OLG: Gericht",
+      "KV 1314 FamGKG",
+      SAETZE.gerichtKindschaftBeschwerde * gerichtsgebuehr1(e.wert),
+      true,
+    );
+    add(
+      "Beschwerde zum OLG: eigener Anwalt",
+      "Nrn. 3200/3202 VV RVG",
+      anwaltskosten(
+        e.wert,
+        SAETZE.verfahrenBeschwerde,
+        SAETZE.terminBeschwerde,
+      ).brutto,
+      false,
+    );
+  }
+
+  const n = Math.max(0, Math.round(e.abaenderungen));
+  if (n > 0) {
+    add(
+      n === 1 ? "Späteres Abänderungsverfahren: Gericht" : `${n} spätere Abänderungsverfahren: Gericht`,
+      "§ 1696 BGB, § 166 FamFG, KV 1310 FamGKG",
+      n * SAETZE.gerichtKindschaft * gerichtsgebuehr1(e.wert),
+      true,
+    );
+    add(
+      n === 1 ? "Späteres Abänderungsverfahren: eigener Anwalt" : `${n} spätere Abänderungsverfahren: eigener Anwalt`,
+      "Nrn. 3100/3104 VV RVG",
+      n * anwaltskosten(e.wert).brutto,
+      false,
+    );
+  }
+
+  const eigeneAnwaltskosten = round2(
+    posten.filter((p) => !p.geteilt).reduce((s, p) => s + p.wert, 0),
+  );
+  const geteilteKosten = round2(
+    posten.filter((p) => p.geteilt).reduce((s, p) => s + p.wert, 0),
+  );
+
+  return {
+    posten,
+    eigeneAnwaltskosten,
+    geteilteKosten,
+    proElternteil: round2(eigeneAnwaltskosten + geteilteKosten / 2),
+    gesamt: round2(2 * eigeneAnwaltskosten + geteilteKosten),
+  };
+}
+
 // ── Zeithonorar (Vergütungsvereinbarung nach § 3a RVG) ──────────────────────
 //
 // Die gesetzlichen Gebühren sind bei gerichtlicher Vertretung nur die
@@ -205,7 +499,10 @@ export function gerichtsSzenario(
 //   • Scheidung: Es wird ohnehin nichts erstattet – die Kosten werden
 //     gegeneinander aufgehoben (§ 150 Abs. 1 FamFG), jede Seite trägt ihre
 //     Anwaltskosten selbst.
-// Das Zeithonorar-Delta ist damit in beiden Fällen verlorenes Geld.
+//   • Sorge und Umgang: dasselbe Ergebnis über § 81 FamFG – das Gericht
+//     entscheidet nach Ermessen und hebt die außergerichtlichen Kosten in
+//     aller Regel gegeneinander auf.
+// Das Zeithonorar-Delta ist damit in allen Fällen verlorenes Geld.
 
 export const STUNDENSATZ_DEFAULT = 350;
 export const STUNDENSATZ_MIN = 150;
@@ -259,7 +556,8 @@ export type Konfliktart =
   | "verbraucher"
   | "erbschaft"
   | "b2b"
-  | "trennung";
+  | "trennung"
+  | "kindschaft";
 
 export type KonfliktartInfo = {
   key: Konfliktart;
@@ -332,6 +630,20 @@ export const KONFLIKTARTEN: readonly KonfliktartInfo[] = [
     streitwertDefault: 16200,
     streitwertHinweis:
       "Wird aus dem gemeinsamen Nettoeinkommen berechnet – siehe Felder oben.",
+  },
+  {
+    key: "kindschaft",
+    label: "Sorge- & Umgangsstreit",
+    preis: 399,
+    proPartei: true,
+    // KV 1310 FamGKG. Der niedrigste Gerichtssatz im ganzen Rechner – und
+    // gerade deshalb irreführend, wenn man nur ihn zeigt: Gutachten und
+    // Verfahrensbeistand hängen nicht am Verfahrenswert.
+    gerichtssatz: SAETZE.gerichtKindschaft,
+    href: "/konflikte/trennung",
+    streitwertDefault: 2 * KINDSCHAFT_WERT,
+    streitwertHinweis:
+      "Fester Wert von 5.000 € je Gegenstand (§ 45 Abs. 1 FamGKG) – nicht verhandelbar und unabhängig von der Kinderzahl.",
   },
 ];
 

@@ -42,18 +42,39 @@ def next_invoice_number(db: Session) -> str:
 
 
 def ensure_invoices(db: Session, mediation: Mediation) -> int:
-    """Legt für jede zahlungspflichtige Partei eine eigene Rechnung an.
+    """Legt für jeden bezahlten Anteil eine eigene Rechnung an.
 
     Anteilige Zahlung = KEINE Sammelrechnung: jede Partei bekommt ihre eigene
     (siehe models/invoice.py). Idempotent - existiert für (Fall, Partei) bereits
     eine Rechnung, wird keine zweite erzeugt. Gibt die Anzahl neu erzeugter
     Rechnungen zurück.
+
+    KOSTENÜBERNAHME: Wer den Anteil einer anderen Partei mitbezahlt, bekommt
+    ihn auch in Rechnung gestellt - die übernommene Partei nie. Bei einer
+    gebündelten Übernahme steckt der fremde Anteil ohnehin schon im Betrag des
+    Übernehmenden. Bei einer separaten Übernahme entsteht eine zweite Rechnung:
+    Zeile der übernommenen Partei, adressiert an den Übernehmenden (deshalb
+    unten die Trennung zwischen `participant` = wessen Anteil und `billed_to`
+    = wer zahlt).
     """
     # Import hier, um einen Zirkelbezug billing <-> invoicing zu vermeiden.
     from app.services import billing
 
+    # (Anteil-Zeile, Rechnungsempfänger-Zeile, Betrag)
+    positions: list[tuple] = [
+        (p, p, billing.participant_final_due(db, mediation, p))
+        for p in billing.owing_participants(db, mediation)
+    ]
+    for p in billing.settlement_participants(db, mediation):
+        if not p.covered_by_participant_id or not p.paid:
+            continue
+        coverer = billing.coverer_of(db, p)
+        if coverer is None:
+            continue
+        positions.append((p, coverer, billing.coverage_amount(db, mediation, p)))
+
     created = 0
-    for participant in billing.owing_participants(db, mediation):
+    for participant, billed_to, amount in positions:
         existing = (
             db.query(Invoice)
             .filter(
@@ -65,7 +86,10 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
         if existing:
             continue
 
-        payer = db.query(User).filter(User.id == participant.user_id).first()
+        # Adresse und Empfänger kommen von der ZAHLENDEN Zeile: bei einer
+        # separaten Kostenübernahme ist das nicht die Partei, um deren Anteil
+        # es geht.
+        payer = db.query(User).filter(User.id == billed_to.user_id).first()
         # Rechnungsanschrift: der Teilnehmer-Datensatz hat Vorrang (fall-
         # spezifische Abweichung), sonst greift das Nutzerprofil aus dem
         # Onboarding (users.billing_*). Vor dem Onboarding-Umbau gab es nur die
@@ -75,13 +99,13 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
         # Straße aus dem Fall mit einer Stadt aus dem Profil wäre eine Adresse,
         # die niemand je eingegeben hat.
         if (
-            participant.billing_street
-            and participant.billing_postal_code
-            and participant.billing_city
+            billed_to.billing_street
+            and billed_to.billing_postal_code
+            and billed_to.billing_city
         ):
-            street = participant.billing_street
-            postal_code = participant.billing_postal_code
-            city = participant.billing_city
+            street = billed_to.billing_street
+            postal_code = billed_to.billing_postal_code
+            city = billed_to.billing_city
         else:
             street = payer.billing_street if payer else None
             postal_code = payer.billing_postal_code if payer else None
@@ -96,7 +120,7 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
             billing_street=street,
             billing_postal_code=postal_code,
             billing_city=city,
-            amount=billing.participant_final_due(db, mediation, participant),
+            amount=amount,
             tax_rate=0.0,
             currency="EUR",
             status="paid",

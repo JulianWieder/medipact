@@ -18,6 +18,29 @@ Mediation vielleicht nie zustande kommt. Deshalb:
 zugesagt hat, und schaltet den Fall frei. Scheitert der Einzug (Reservierung
 abgelaufen), wird die betroffene Partei zurückgesetzt und muss erneut zahlen -
 der Fall bleibt so lange zu.
+
+FREIWILLIGE KOSTENÜBERNAHME
+───────────────────────────
+Eine Partei darf den Anteil einer anderen mittragen ("Ich zahle für uns
+beide"). Getragen wird das von einem einzigen Feld: ``participant.
+covered_by_participant_id`` zeigt auf die Partei, die zahlt. Eine übernommene
+Partei ist dadurch NICHT MEHR zahlungspflichtig (``participant_owes`` = False)
+und blockiert die Freischaltung nicht.
+
+Zwei Wege, je nachdem, ob der Übernehmende seinen eigenen Anteil schon
+zugesagt hat:
+
+  gebündelt (Regelfall, vor der eigenen Zahlung)
+      Der fremde Anteil wird auf den eigenen Betrag addiert
+      (``participant_final_due``). Eine Reservierung, eine Rechnung. Auf der
+      übernommenen Zeile passiert nichts.
+
+  separat (Nachzügler-Fall: eigener Anteil steht schon fest)
+      Eine Reservierung KANN nachträglich nicht erhöht werden. Deshalb
+      bekommt die übernommene Zeile eine eigene PayPal-Reservierung über den
+      fremden Anteil - bezahlt vom Übernehmenden, dem auch die Rechnung dazu
+      gestellt wird. Solche Zeilen sind nicht "owing", müssen aber mit
+      eingezogen werden: dafür ``settlement_participants()``.
 """
 from __future__ import annotations
 
@@ -123,16 +146,78 @@ def is_owner(participant: MediationParticipant) -> bool:
     return (participant.role or "").lower() == "owner"
 
 
-def participant_owes(mediation: Mediation, participant: MediationParticipant) -> bool:
-    """Ob diese konkrete Partei zahlungspflichtig ist: nur echte Parteien
-    (owner/other_party) und je nach Abrechnungsmodell (einmalig = nur Owner).
-    Firmenfälle haben KEINE zahlungspflichtigen Parteien – sie laufen über das
-    Firmen-Abo."""
+def owes_by_role(mediation: Mediation, participant: MediationParticipant) -> bool:
+    """Ob für diese Partei dem Grunde nach ein Anteil anfällt – noch OHNE
+    Rücksicht darauf, wer ihn am Ende trägt.
+
+    Das ist die Frage "fällt hier überhaupt Geld an?": echte Partei
+    (owner/other_party), kein Firmenfall, und beim Modell "einmalig" nur die
+    Eigentümer:in. Für "muss diese Partei selbst zahlen?" ist
+    ``participant_owes`` zuständig – der Unterschied ist die Kostenübernahme.
+    """
     if is_org_case(mediation):
         return False
     if not is_paying_party(participant):
         return False
     return pricing.participant_owes(mediation.mediation_type, is_owner=is_owner(participant))
+
+
+def participant_owes(mediation: Mediation, participant: MediationParticipant) -> bool:
+    """Ob diese konkrete Partei ihren Anteil SELBST zu zahlen hat.
+
+    False, sobald eine andere Partei die Kosten WIRKSAM übernommen hat. Wirksam
+    heißt: gebündelt (der Betrag steckt im offenen Anteil des Übernehmenden)
+    oder separat MIT eigener Reservierung. Eine separate Übernahme, deren
+    PayPal-Bestätigung nie ankam, zählt bewusst nicht – sonst fiele der Anteil
+    zwischen die Stühle und der Fall würde ohne dieses Geld freigeschaltet.
+    """
+    if is_effectively_covered(participant):
+        return False
+    return owes_by_role(mediation, participant)
+
+
+def is_bundled_coverage(participant: MediationParticipant) -> bool:
+    """Übernahme, die im Betrag des Übernehmenden mitläuft (eine Zahlung)."""
+    return (
+        bool(participant.covered_by_participant_id)
+        and (participant.coverage_mode or "bundle") == "bundle"
+    )
+
+
+def is_effectively_covered(participant: MediationParticipant) -> bool:
+    """Ob die Übernahme dieser Partei tatsächlich trägt – siehe participant_owes."""
+    if not participant.covered_by_participant_id:
+        return False
+    if is_bundled_coverage(participant):
+        return True
+    return bool(participant.authorized or participant.paid)
+
+
+def coverer_of(db: Session, participant: MediationParticipant) -> MediationParticipant | None:
+    """Die Partei, die den Anteil dieser Partei übernommen hat (oder None)."""
+    if not participant.covered_by_participant_id:
+        return None
+    return (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.id == participant.covered_by_participant_id)
+        .first()
+    )
+
+
+def covered_participants(
+    db: Session, mediation: Mediation, payer: MediationParticipant
+) -> list[MediationParticipant]:
+    """Alle Parteien, deren Anteil ``payer`` übernommen hat."""
+    return (
+        db.query(MediationParticipant)
+        .filter(
+            MediationParticipant.mediation_id == mediation.id,
+            MediationParticipant.covered_by_participant_id == payer.id,
+        )
+        .all()
+    )
+
+
 
 
 def participant_base_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
@@ -204,23 +289,90 @@ def set_participant_addons(
     return participant_addons(db, mediation, participant)
 
 
-def participant_final_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
-    """Zu zahlender Betrag dieser Partei: Basis nach Rabatt (>= 0) plus die von
-    ihr gewählten Add-ons (Rabattcodes gelten nur auf den Basispreis)."""
+def coverage_amount(db: Session, mediation: Mediation, target: MediationParticipant) -> float:
+    """Betrag, den eine Übernahme des Anteils von ``target`` kostet.
+
+    Bewusst der GRUNDANTEIL aus der Preis-Matrix: Rabattcodes gehören der
+    Person, die sie eingegeben hat, und Add-ons sind eine Wahl, die der
+    Übernehmende nicht für die andere Seite treffen kann. Wer übernimmt, zahlt
+    das Verfahren – nicht die Extras der Gegenseite.
+    """
+    return participant_base_due(db, mediation, target)
+
+
+def participant_own_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
+    """Der EIGENE Anteil dieser Partei: Basis nach Rabatt (>= 0) plus die von
+    ihr gewählten Add-ons (Rabattcodes gelten nur auf den Basispreis).
+
+    0 €, sobald eine andere Partei die Kosten übernommen hat.
+    """
+    if is_effectively_covered(participant):
+        return 0.0
+    if not owes_by_role(mediation, participant):
+        return 0.0
     base = participant_base_due(db, mediation, participant)
     discount = participant.discount_amount or 0.0
     addons = participant_addons_total(db, mediation, participant)
     return round(max(base - discount, 0.0) + addons, 2)
 
 
+def coverage_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
+    """Summe der GEBÜNDELT übernommenen fremden Anteile dieser Partei.
+
+    Separate Übernahmen (eigene Reservierung auf der übernommenen Zeile) sind
+    hier bewusst NICHT enthalten – sie sind bereits zugesagt und dürfen den
+    noch offenen eigenen Betrag nicht erneut erhöhen.
+    """
+    return round(
+        sum(
+            coverage_amount(db, mediation, p)
+            for p in covered_participants(db, mediation, participant)
+            if is_bundled_coverage(p)
+        ),
+        2,
+    )
+
+
+def participant_final_due(db: Session, mediation: Mediation, participant: MediationParticipant) -> float:
+    """Was diese Partei insgesamt zu zahlen hat: eigener Anteil plus die
+    freiwillig übernommenen Anteile anderer Parteien."""
+    return round(
+        participant_own_due(db, mediation, participant)
+        + coverage_due(db, mediation, participant),
+        2,
+    )
+
+
 def owing_participants(db: Session, mediation: Mediation) -> list[MediationParticipant]:
-    """Alle Parteien, die bei diesem Abrechnungsmodell zahlungspflichtig sind."""
+    """Alle Parteien, die ihren Anteil selbst zu zahlen haben (ohne die, deren
+    Kosten eine andere Partei übernommen hat)."""
     parts = (
         db.query(MediationParticipant)
         .filter(MediationParticipant.mediation_id == mediation.id)
         .all()
     )
     return [p for p in parts if participant_owes(mediation, p)]
+
+
+def settlement_participants(db: Session, mediation: Mediation) -> list[MediationParticipant]:
+    """Alle Zeilen, auf denen Geld liegt oder liegen muss: die selbst
+    zahlungspflichtigen Parteien PLUS separat übernommene Anteile.
+
+    Nur diese Liste darf für Einzug und Storno benutzt werden. ``owing_
+    participants`` allein würde eine separat reservierte Übernahme übersehen –
+    das Geld bliebe bei PayPal blockiert und käme nie an.
+    """
+    parts = (
+        db.query(MediationParticipant)
+        .filter(MediationParticipant.mediation_id == mediation.id)
+        .all()
+    )
+    return [
+        p
+        for p in parts
+        if participant_owes(mediation, p)
+        or (is_effectively_covered(p) and not is_bundled_coverage(p))
+    ]
 
 
 def all_owing_paid(db: Session, mediation: Mediation) -> bool:
@@ -335,7 +487,20 @@ def clear_participant_authorization(db: Session, participant: MediationParticipa
     """Setzt eine (abgelaufene/fehlgeschlagene) Reservierung zurück.
 
     Die Partei erscheint danach wieder als "offen" und kann erneut bezahlen.
+
+    Bei einer SEPARAT übernommenen Zeile fällt dabei auch die Übernahme selbst
+    weg. Sonst bliebe eine Partei zurück, die weder selbst zahlungspflichtig
+    ist noch bezahltes Geld hinter sich hat - der Fall würde freigeschaltet,
+    obwohl ihr Anteil nie geflossen ist. Wer erneut übernehmen will, tut das
+    bewusst neu.
     """
+    if (
+        participant.covered_by_participant_id
+        and not is_bundled_coverage(participant)
+        and not participant.paid
+    ):
+        participant.covered_by_participant_id = None
+        participant.coverage_mode = None
     participant.authorized = False
     participant.authorized_at = None
     participant.paypal_authorization_id = None
@@ -362,7 +527,9 @@ async def settle_and_unlock(db: Session, mediation: Mediation) -> dict:
         return {"is_paid": False, "expired": []}
 
     expired: list[int] = []
-    for p in owing_participants(db, mediation):
+    # settlement_participants statt owing_participants: separat übernommene
+    # Anteile haben eine eigene Reservierung, sind aber nicht "owing".
+    for p in settlement_participants(db, mediation):
         if p.paid:
             continue  # bereits eingezogen (z.B. 0-€-Freischaltung)
         if not p.paypal_authorization_id:
@@ -404,7 +571,7 @@ async def release_authorizations(db: Session, mediation: Mediation) -> int:
     freigegebener Reservierungen zurück.
     """
     released = 0
-    for p in owing_participants(db, mediation):
+    for p in settlement_participants(db, mediation):
         if p.paid or not p.paypal_authorization_id:
             continue
         try:

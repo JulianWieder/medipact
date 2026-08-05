@@ -93,7 +93,10 @@ def run(dry_run: bool = False) -> dict:
                 continue
 
             expires = p.authorization_expires_at
-            payer = _user(db, p)
+            # Bei einer freiwilligen Kostenübernahme liegt die Reservierung auf
+            # der Zeile der übernommenen Partei, das Geld aber beim
+            # Übernehmenden – die Mail muss an ihn gehen.
+            payer = _user(db, billing.coverer_of(db, p) or p)
 
             # ── Fall A: bereits abgelaufen ───────────────────────────────
             if expires <= now:

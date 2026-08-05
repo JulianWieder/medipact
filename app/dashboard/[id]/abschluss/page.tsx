@@ -22,6 +22,7 @@ export default async function AbschlussPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="abschluss"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

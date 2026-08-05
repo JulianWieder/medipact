@@ -22,6 +22,7 @@ export default async function VerhandlungPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="verhandlung"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

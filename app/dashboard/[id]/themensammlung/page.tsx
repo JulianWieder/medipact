@@ -22,6 +22,7 @@ export default async function ThemensammlungPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="themensammlung"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

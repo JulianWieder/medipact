@@ -454,11 +454,27 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     defaultConfig: {
       title: "Mediation freischalten",
       description:
-        "Jede Partei trägt ihren eigenen Anteil. Der Betrag wird zunächst nur reserviert und erst abgebucht, wenn alle zugestimmt haben.",
+        "Jede Partei trägt ihren eigenen Anteil – wer möchte, kann den Anteil der anderen Seite freiwillig mitbezahlen. Der Betrag wird zunächst nur reserviert und erst abgebucht, wenn alle zugestimmt haben.",
     },
     capturesResponse: false,
     hint:
-      "Der eigentliche Bezahl-Schritt des Falls: Rechnungsdaten + Anteil der jeweiligen Partei (PayPal). Gehört in die Einladungs-Phase – nur dort ist er vor der Zahlung erreichbar.",
+      "Der eigentliche Bezahl-Schritt des Falls: Rechnungsdaten + Anteil der jeweiligen Partei (PayPal). Gehört in die Einladungs-Phase – nur dort ist er vor der Zahlung erreichbar. Die freiwillige Kostenübernahme ist hier bereits enthalten.",
+  },
+  {
+    type: "kostenuebernahme",
+    label: "Kosten der anderen Seite übernehmen",
+    short: "Übernahme €",
+    icon: "🤝",
+    group: "Bezahlung",
+    badge: "bg-amber-100 text-amber-700 border-amber-300",
+    defaultConfig: {
+      title: "Kosten freiwillig übernehmen",
+      description:
+        "Jede Seite trägt normalerweise ihren eigenen Anteil. Wenn du möchtest, kannst du den Anteil der anderen Seite mitbezahlen – freiwillig und ohne Gegenleistung.",
+    },
+    capturesResponse: false,
+    hint:
+      "Bietet an, den Anteil der Gegenseite mitzutragen – für Fälle, in denen eine Seite die Mediation will und die andere an den Kosten hängen bleibt. Zeigt sich nur, solange es tatsächlich etwas zu übernehmen gibt; hat die zahlende Partei ihren Anteil schon zugesagt, läuft die Übernahme als eigene Zahlung.",
   },
   {
     type: "bezahlung",

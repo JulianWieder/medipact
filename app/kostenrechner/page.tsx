@@ -29,7 +29,7 @@ import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 export const metadata: Metadata = pageMetadata({
   title: "Prozesskosten-Rechner: Gericht oder Mediation? | medipact",
   description:
-    "Was kostet Ihr Streit vor Gericht — und was ohne? Kostenrisiko nach GKG/RVG berechnen, inklusive Stundenhonorar-Vergleich. Kostenlos, ohne Anmeldung.",
+    "Was kostet Ihr Streit vor Gericht — und was ohne? Gerichts-, Anwalts- und Gutachterkosten berechnen, auch für Sorgerecht und Umgang. Ohne Anmeldung.",
   path: "/kostenrechner",
 });
 
@@ -42,7 +42,7 @@ const appSchema = {
   operatingSystem: "Web",
   inLanguage: "de-DE",
   description:
-    "Berechnet das Kostenrisiko eines Gerichtsverfahrens nach den gesetzlichen Gebührentabellen (GKG, FamGKG, RVG) und stellt ihm die Kosten einer Mediation gegenüber.",
+    "Berechnet das Kostenrisiko eines Gerichtsverfahrens nach den gesetzlichen Gebührentabellen (GKG, FamGKG, RVG, JVEG) — einschließlich Sorge- und Umgangsverfahren mit Gutachten und Verfahrensbeistand — und stellt ihm die Kosten einer Mediation gegenüber.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   publisher: { "@type": "Organization", name: "medipact", url: SITE_URL },
 };
@@ -73,6 +73,27 @@ const FAQ = [
     question: "Spart Mediation die Scheidungskosten komplett?",
     answer:
       "Nein, und wer das behauptet, rechnet falsch. Eine Ehe wird in Deutschland nur durch gerichtlichen Beschluss geschieden, und für den Antrag ist mindestens ein Anwalt zwingend vorgeschrieben (§ 114 FamFG). Mediation macht aus einer streitigen eine einvernehmliche Scheidung — die Gerichtskosten und ein Anwalt bleiben.",
+  },
+  {
+    question: "Was kostet ein Sorgerechts- oder Umgangsverfahren?",
+    answer:
+      "Der Verfahrenswert steht fest: 5.000 Euro je Gegenstand (§ 45 Absatz 1 FamGKG). Daraus ergeben sich bei Sorge und Umgang zusammen rund 2.100 Euro an Gerichts- und Anwaltsgebühren für beide Seiten. Diese Zahl ist allerdings irreführend, weil die größten Posten nicht am Verfahrenswert hängen: ein familienpsychologisches Gutachten kostet je nach Umfang 4.000 bis 15.000 Euro, der Verfahrensbeistand 690 Euro je Rechtszug. In hoch strittigen Verfahren mit Eilantrag, Beschwerde und späterer Abänderung liegt der Betrag pro Elternteil regelmäßig im fünfstelligen Bereich.",
+  },
+  {
+    question:
+      "Erhöht sich der Wert, wenn ich Sorgerecht und Aufenthaltsbestimmungsrecht beantrage?",
+    answer:
+      "Nein. Das Gesetz behandelt die elterliche Sorge und jeden Teil davon — also auch das Aufenthaltsbestimmungsrecht — als einen einzigen Gegenstand (§ 45 Absatz 1 Nummer 1 FamGKG). Das Umgangsrecht ist dagegen ein eigener Gegenstand, sein Wert kommt hinzu. Und die Zahl der betroffenen Kinder ändert am Verfahrenswert gar nichts (§ 45 Absatz 2 FamGKG).",
+  },
+  {
+    question: "Wer zahlt das Gutachten im Sorgerechtsverfahren?",
+    answer:
+      "Zunächst die Staatskasse, die es anschließend als gerichtliche Auslage in Rechnung stellt. Wie die Kosten verteilt werden, entscheidet das Gericht nach billigem Ermessen (§ 81 FamFG); in Sorge- und Umgangssachen ist die Regel, dass Gerichtskosten und Auslagen halbiert werden und jeder Elternteil seinen eigenen Anwalt zahlt. Ein Gewinnen, das die Rechnung kleiner macht, gibt es hier nicht.",
+  },
+  {
+    question: "Kann man Sorgerecht und Umgang ohne Gericht regeln?",
+    answer:
+      "Ja, und das ist der wesentliche Unterschied zur Scheidung. Eltern dürfen Sorge und Umgang frei vereinbaren; ein gerichtliches Verfahren ist dafür nicht vorgeschrieben. Wer die Vereinbarung vollstreckbar haben möchte, lässt sie vom Familiengericht billigen (§ 156 Absatz 2 FamFG) — ein Termin, ohne Beweisaufnahme und ohne Gutachten.",
   },
   {
     question: "Was passiert, wenn die Mediation scheitert?",
@@ -195,6 +216,39 @@ export default async function Kostenrechner({
             </p>
 
             <h2 className="mt-12 font-display text-2xl font-medium text-neutral-900">
+              Warum Sorge und Umgang aus dem Rahmen fallen
+            </h2>
+            <p className="mt-4 leading-7 text-neutral-700">
+              In jedem anderen Verfahren steigen die Kosten mit dem Streitwert.
+              Bei Kindschaftssachen ist es umgekehrt: Der Wert ist gesetzlich
+              gedeckelt — 5.000 Euro je Gegenstand, egal wie viele Kinder
+              betroffen sind und wie lange gestritten wird — und das Gericht
+              nimmt daraus nur eine halbe Gebühr. Auf dem Papier sind das die
+              billigsten Familienverfahren überhaupt.
+            </p>
+            <p className="mt-4 leading-7 text-neutral-700">
+              Tatsächlich sind sie die teuersten, weil die drei größten Posten
+              vom Verfahrenswert vollständig entkoppelt sind: das
+              familienpsychologische Gutachten, das nach Stunden vergütet wird,
+              der Verfahrensbeistand mit seiner Pauschale je Rechtszug — und
+              die Zahl der Verfahren. Eilantrag, Hauptsache, Beschwerde und
+              jede spätere Abänderung nach § 1696 BGB sind kostenrechtlich
+              eigenständige Verfahren mit eigenen Gebühren. Ein Sorge- oder
+              Umgangsstreit hört nicht mit einem Beschluss auf; er kann sich
+              über die gesamte Kindheit erstrecken und dabei bei jedem Elternteil
+              einen fünfstelligen Betrag hinterlassen.
+            </p>
+            <p className="mt-4 leading-7 text-neutral-700">
+              Anders als bei der Scheidung gibt es hier aber auch keinen Zwang
+              zum Gericht. Eltern dürfen Sorge und Umgang selbst regeln, und
+              eine getroffene Vereinbarung lässt sich auf Antrag
+              familiengerichtlich billigen und damit vollstreckbar machen
+              (§ 156 Absatz 2 FamFG). Der gesamte Kostenblock oben ist damit
+              vermeidbar — er entsteht erst, wenn die Eltern die Entscheidung
+              abgeben.
+            </p>
+
+            <h2 className="mt-12 font-display text-2xl font-medium text-neutral-900">
               Häufige Fragen
             </h2>
             <dl className="mt-6 space-y-6">
@@ -237,10 +291,14 @@ export default async function Kostenrechner({
             </ul>
 
             <p className="mt-10 text-xs leading-6 text-neutral-500">
-              Rechtsgrundlagen: Anlage 2 und § 34 Gerichtskostengesetz, § 28
-              Gesetz über Gerichtskosten in Familiensachen, Anlage 2 und § 13
-              Rechtsanwaltsvergütungsgesetz, Vergütungsverzeichnis Nrn. 3100,
-              3104, 7002 und 7008 RVG — alle in der seit dem{" "}
+              Rechtsgrundlagen: Anlage 2 und § 34 Gerichtskostengesetz, §§ 28,
+              43, 44, 45 und 50 sowie Kostenverzeichnis Nrn. 1110, 1310, 1314
+              und 1410 des Gesetzes über Gerichtskosten in Familiensachen,
+              Anlage 2 und § 13 Rechtsanwaltsvergütungsgesetz,
+              Vergütungsverzeichnis Nrn. 3100, 3104, 3200, 3202, 7002 und 7008
+              RVG, § 158c Gesetz über das Verfahren in Familiensachen sowie § 9
+              und Anlage 1 Justizvergütungs- und -entschädigungsgesetz — alle in
+              der seit dem{" "}
               {KOSTENRECHT_STAND} geltenden Fassung (Kosten- und
               Betreuervergütungsrechtsänderungsgesetz 2025, BGBl. I Nr. 109).
             </p>

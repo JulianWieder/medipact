@@ -129,10 +129,15 @@ STEPS = [
                     "title": "Was kostet das, und wann?",
                     "text": (
                         "Die Kosten werden fair geteilt: jede Partei trägt ihren "
-                        "eigenen Anteil. Bezahlt wird im Verfahren selbst, im "
-                        "Schritt „Verfahren freischalten\". Der Betrag wird "
-                        "zunächst nur reserviert und erst abgebucht, wenn der "
-                        "Fall tatsächlich freigeschaltet ist."
+                        "eigenen Anteil. Wer möchte, kann den Anteil der anderen "
+                        "Seite freiwillig mitbezahlen – ohne Gegenleistung und "
+                        "ohne dass sich dadurch am Verfahren etwas ändert. Du "
+                        "musst dich jetzt nicht entscheiden: das Angebot "
+                        "begegnet dir im Verfahren noch einmal.\n\n"
+                        "Bezahlt wird im Verfahren selbst, im Schritt "
+                        "„Verfahren freischalten\". Der Betrag wird zunächst nur "
+                        "reserviert und erst abgebucht, wenn der Fall "
+                        "tatsächlich freigeschaltet ist."
                     ),
                 },
                 "visible_if": None,

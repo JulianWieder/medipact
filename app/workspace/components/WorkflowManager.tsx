@@ -903,6 +903,34 @@ function BlockConfigEditor({
             Betrag, Rabattcodes und Add-ons kommen automatisch aus der Preis-Matrix des
             Falls – hier gibt es dafür bewusst keine Felder. Dieser Block gehört in die
             <strong> Einladungs-Phase</strong>: nur dort ist er erreichbar, bevor bezahlt wurde.
+            Das Angebot, den Anteil der Gegenseite mitzubezahlen, steckt bereits darin.
+          </p>
+        </>
+      );
+    case "kostenuebernahme":
+      return (
+        <>
+          <FieldLabel>Überschrift</FieldLabel>
+          <input
+            value={cfgStr(c, "title")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="z.B. Kosten freiwillig übernehmen"
+            className={INPUT_CLASS}
+          />
+          <FieldLabel>Erklärtext</FieldLabel>
+          <textarea
+            value={cfgStr(c, "description")}
+            onChange={(e) => onChange({ description: e.target.value })}
+            rows={3}
+            placeholder="Warum es dieses Angebot gibt und was es bedeutet."
+            className={INPUT_CLASS}
+          />
+          <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+            Betrag und Parteien kommen aus dem Fall. Der Block <strong>verschwindet</strong>,
+            wenn es nichts zu übernehmen gibt – etwa weil beide Seiten schon zugesagt haben.
+            Im Bezahl-Block ist dasselbe Angebot bereits enthalten; ein eigener Block lohnt
+            sich vor allem <strong>vor</strong> dem Bezahl-Schritt, wenn die Übernahme früh
+            zur Sprache kommen soll.
           </p>
         </>
       );

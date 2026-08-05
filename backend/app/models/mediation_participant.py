@@ -41,6 +41,30 @@ class MediationParticipant(Base):
     # ginge die Mail jede Stunde erneut raus). Wird mit der Reservierung
     # zurückgesetzt.
     authorization_reminder_sent_at = Column(DateTime, nullable=True)
+    # ── Freiwillige Kostenübernahme ───────────────────────────────────────
+    # Eine Partei darf den Anteil einer anderen mitbezahlen (Ausgangslage ist
+    # oft asymmetrisch: eine Seite will die Mediation, die andere scheut die
+    # Kosten). Steht hier eine Teilnehmer-ID, hat DIESE Partei ihren Anteil
+    # nicht selbst zu tragen – die genannte Partei übernimmt ihn.
+    #
+    # Zwei Wege, beide über dieses eine Feld (siehe services/billing.py):
+    #   gebündelt – der Übernehmende hat selbst noch nicht bezahlt. Dann
+    #     steckt der fremde Anteil in SEINEM Betrag (eine PayPal-Reservierung,
+    #     eine Rechnung); die übernommene Partei bleibt auf 0 € und
+    #     `authorized`/`paid` bleiben hier False.
+    #   separat – der Übernehmende hat seinen Anteil schon reserviert/bezahlt
+    #     und kann ihn nicht mehr ändern. Dann bekommt DIESE Zeile eine eigene
+    #     PayPal-Reservierung über den fremden Anteil; die Rechnung dazu geht
+    #     an den Übernehmenden.
+    covered_by_participant_id = Column(
+        Integer, ForeignKey("mediation_participants.id"), nullable=True
+    )
+    # "bundle" | "separate" – welcher der beiden Wege oben. BEWUSST gespeichert
+    # und nicht aus dem Zustand abgeleitet: eine separate Übernahme, deren
+    # PayPal-Bestätigung nie ankommt, sähe sonst aus wie eine gebündelte und
+    # der Fall würde freigeschaltet, obwohl dieser Anteil nie bezahlt wurde.
+    coverage_mode = Column(String, nullable=True)
+
     # Angewendeter Rabattcode (Groß-/Kleinschreibung wie eingegeben) + Rabattbetrag in EUR.
     discount_code = Column(String, nullable=True)
     discount_amount = Column(Float, nullable=False, default=0.0, server_default="0")

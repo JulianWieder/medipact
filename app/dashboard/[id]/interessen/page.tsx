@@ -22,6 +22,7 @@ export default async function InteressenPage({ params }: PageProps) {
       mediationId={numericId.toString()}
       phaseKey="interessen"
       currentUserName={session?.user?.name ?? ""}
+      currentUserEmail={session?.user?.email ?? ""}
     />
   );
 }

@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { StepBlockDto } from "@/app/workspace/types";
 import Icon from "@/app/components/ui/Icon";
 import FallFreischaltungBlock from "./FallFreischaltungBlock";
+import KostenuebernahmeBlock from "./KostenuebernahmeBlock";
 import VertragBlock from "./VertragBlock";
 import {
   fetchBlockResponses,
@@ -246,7 +247,16 @@ export default function StepBlocks({
       .then((rows) => {
         if (cancelled) return;
         const map: Record<string, unknown> = {};
-        for (const r of rows) map[r.block_id] = r.value;
+        // Nur eigene Beiträge ins Formular übernehmen. Der Aufruf ohne
+        // include_others liefert serverseitig bereits genau die – dieser Filter
+        // ist die zweite Schranke: käme je wieder eine fremde oder eine
+        // KI-Zeile mit, stünde sie sonst im eigenen Eingabefeld (pro block_id
+        // gewinnt die zuletzt gelesene Zeile) und würde beim nächsten Speichern
+        // als eigene Antwort zurückgeschrieben.
+        for (const r of rows) {
+          if (r.author_source === "ai" || r.author_key === "ai") continue;
+          map[r.block_id] = r.value;
+        }
         setValues(map);
       })
       .catch(() => {});
@@ -639,6 +649,37 @@ export default function StepBlocks({
             title={cfgStr(c, "title")}
             description={cfgStr(c, "description")}
             onPaid={onPaid}
+          />
+        );
+      case "kostenuebernahme":
+        // Freiwillige Übernahme des fremden Anteils. Rendert sich selbst weg,
+        // wenn es nichts zu übernehmen gibt – im Seiten-Designer würde man den
+        // Block dann aber gar nicht mehr sehen, deshalb dort ein Platzhalter.
+        if (preview) {
+          return (
+            <div key={block.id} className="rounded-2xl border border-amber-300 bg-amber-50/70 p-4">
+              <p className="text-sm font-semibold text-amber-900">
+                <Icon name="card" color="currentColor" />{" "}
+                {cfgStr(c, "title") || "Kosten freiwillig übernehmen"}
+              </p>
+              {cfgStr(c, "description") && (
+                <p className="mt-0.5 whitespace-pre-wrap text-sm text-amber-800">
+                  {cfgStr(c, "description")}
+                </p>
+              )}
+              <p className="mt-3 rounded-xl border border-dashed border-amber-300 bg-white/60 px-3 py-2 text-xs text-amber-700">
+                Im Fall steht hier das Angebot, den Anteil der anderen Seite mitzubezahlen –
+                und nichts, solange es nichts zu übernehmen gibt.
+              </p>
+            </div>
+          );
+        }
+        return (
+          <KostenuebernahmeBlock
+            key={block.id}
+            mediationId={mediationId}
+            title={cfgStr(c, "title")}
+            description={cfgStr(c, "description")}
           />
         );
       case "bezahlung": {
