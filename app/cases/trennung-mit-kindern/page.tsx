@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Trennung mit Kindern: Maria & Thomas | medipact",
+  title: "Trennung mit Kindern: 499 € statt 52.000 € | medipact",
   description:
-    "Trennung nach 12 Jahren Ehe, 2 Kinder: Wie Maria & Thomas mit Mediation in 5 Monaten Sorgerecht, Unterhalt und Haus fair geregelt haben – für €499 statt €52.000 Gerichtskosten.",
+    "Zwölf Jahre Ehe, zwei Kinder: Wie Sorgerecht, Unterhalt und Haus in fünf Monaten fair geregelt wurden – ohne Rosenkrieg und ohne jahrelanges Verfahren.",
   path: "/cases/trennung-mit-kindern",
   type: "article",
 });

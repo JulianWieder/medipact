@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Grenzstreit: Familien Krüger & Hoffmann | medipact",
+  title: "Streit um die Grundstücksgrenze beigelegt | medipact",
   description:
-    "Ein neuer Zaun, zwei Meinungen zur Grundstücksgrenze: Wie zwei Familien den Grenzstreit per Mediation schnell und ohne Gerichtskosten beilegten – die Nachbarschaft blieb intakt.",
+    "Ein neuer Zaun, zwei Meinungen zur Grenze: Wie zwei Familien den Streit ohne Vermessung, Anwalt und Gerichtskosten lösten – und weiter miteinander reden.",
   path: "/cases/nachbarschaft-zaun",
   type: "article",
 });

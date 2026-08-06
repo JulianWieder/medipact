@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Teamkonflikt: Vertrieb gegen Entwicklung | medipact",
+  title: "Vertrieb gegen Entwicklung: Frieden in 6 Wochen | medipact",
   description:
-    "Eskalierte Meetings, Krankmeldungen, drei Kündigungen: Wie ein Software-Mittelständler den Konflikt zwischen Vertrieb und Entwicklung in 6 Wochen per Teammediation gelöst hat.",
+    "Eskalierte Meetings, Krankmeldungen, drei Kündigungen: Wie ein Software-Mittelständler den Abteilungskonflikt in sechs Wochen aufgelöst hat.",
   path: "/cases/team-konflikt",
   type: "article",
 });

@@ -17,7 +17,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Konflikt-Logbuch: Streit kostenlos dokumentieren | medipact",
   description:
-    "Streit kostenlos dokumentieren: Vorkommnisse, Gespräche & Nachrichten im Konflikt-Logbuch festhalten – Basis fürs klärende Gespräch, für Mediation oder Gericht.",
+    "Vorkommnisse, Gespräche und Nachrichten festhalten – dauerhaft kostenlos. Ihre Chronologie als Basis fürs klärende Gespräch, für Mediation oder Gericht.",
   path: "/konflikt-logbuch",
 });
 

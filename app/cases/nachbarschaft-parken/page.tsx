@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Parkstreit: Herr Wagner & Frau Lehmann | medipact",
+  title: "Parkstreit vor der Einfahrt: endlich geregelt | medipact",
   description:
-    "Blockierte Einfahrt, täglicher Streit: Wie eine Nachbarschaftsmediation in wenigen Sitzungen eine klare Parkregelung schuf und den Dauerkonflikt vor der Haustür beendete.",
+    "Blockierte Einfahrt, täglicher Ärger beim Nachhausekommen: Wie in wenigen Sitzungen eine Regelung entstand, an die sich seither beide halten.",
   path: "/cases/nachbarschaft-parken",
   type: "article",
 });

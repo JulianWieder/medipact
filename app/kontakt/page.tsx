@@ -6,9 +6,9 @@ import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Situation einordnen lassen – Kontakt | medipact",
+  title: "Ist Mediation für Sie geeignet? 5 Fragen | medipact",
   description:
-    "Lassen Sie Ihre Situation in 5 kurzen Fragen einordnen: Ist Mediation geeignet, unklar – oder eher nicht der richtige Weg? Inklusive Hilfsangeboten für akute Fälle.",
+    "Fünf kurze Fragen, ein klares Ergebnis: geeignet, unklar – oder eher nicht der richtige Weg. Inklusive Hilfsangeboten, wenn es akut ist.",
   path: "/kontakt",
 });
 

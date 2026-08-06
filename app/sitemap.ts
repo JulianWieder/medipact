@@ -12,9 +12,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  // Stand 2026-08-01: 9 Case-URLs auf Problem-Slugs umbenannt (neue URLs!),
-  // interne Links auf /cases, /methode, /konflikte/erbschaft angepasst.
-  const lastModified = new Date("2026-08-01");
+  // Stand 2026-08-06: neues /einigung-Cluster (4 URLs) aufgenommen, siehe
+  // docs/einigung-cluster-konzept.md. Davor 2026-08-01: 9 Case-URLs auf
+  // Problem-Slugs umbenannt (neue URLs!), interne Links auf /cases, /methode,
+  // /konflikte/erbschaft angepasst.
+  const lastModified = new Date("2026-08-06");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -40,6 +42,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    // /einigung-Cluster. Bewusst mit hoher Prioritaet: Die Parent-Seite
+    // traegt das Preis-/Standardisierungs-Argument, /ohne-mediator bedient
+    // eine Suchintention ("Mediation ohne Mediator", "Streit klaeren ohne
+    // Anwalt"), die bisher auf keiner Seite beantwortet war.
+    {
+      url: `${BASE_URL}/einigung`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/einigung/ohne-mediator`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/einigung/abgleich`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/einigung/gleichbehandlung`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/kostenrechner`,

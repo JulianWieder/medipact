@@ -16,9 +16,9 @@ import step6Photo from "../../fotos/schritte/6.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Ablauf einer Mediation: 6 Schritte bei medipact",
+  title: "Ablauf einer Mediation: 6 Schritte bis zur Einigung",
   description:
-    "Vom ersten Schritt bis zur Vereinbarung: der 6-Schritte-Prozess, alle Mediationsphasen, vier Methoden und die Rollen von KI und Mediator.",
+    "Was in jedem der sechs Schritte passiert, wie sie zum Fünf-Phasen-Modell stehen und wie viel Begleitung Ihr Fall wirklich braucht. Ohne Anmeldung lesbar.",
   path: "/methode",
 });
 
@@ -130,25 +130,13 @@ const mediationPhases = [
   },
 ];
 
-const kiTasks = [
-  {
-    title: "Struktur & Führung",
-    text: "Die KI führt beide Seiten Schritt für Schritt durch die Phasen – rund um die Uhr, in Ihrem Tempo, ohne Terminabsprachen.",
-  },
-  {
-    title: "Deeskalation",
-    text: "Formulierungen werden versachlicht, bevor sie die Gegenseite erreichen. Vorwürfe werden zu Themen, Angriffe zu Anliegen.",
-  },
-  {
-    title: "Zusammenfassungen",
-    text: "Nach jeder Phase fasst die KI zusammen, was beide Seiten eingebracht haben – neutral und für beide gleich sichtbar.",
-  },
-  {
-    title: "Lösungsvorschläge",
-    text: "Aus den Interessen beider Seiten entwickelt die KI konkrete Optionen als Verhandlungsgrundlage – entscheiden tun immer Sie.",
-  },
-];
-
+// Was das System uebernimmt, stand hier frueher als zweite Spalte ("Was die
+// KI uebernimmt") und noch einmal als Vertraulich/Freiwillig/Neutral-Kasten.
+// Beides ist am 06.08.2026 ins /einigung-Cluster umgezogen: die Faehigkeiten
+// nach /einigung, die Transparenz- und Fairness-Aussagen nach
+// /einigung/gleichbehandlung, die Grenzen nach /einigung/ohne-mediator.
+// Diese Seite beantwortet nur noch, WER den Fall verantwortet - das ist ihr
+// eigener Job und der einzige Teil, den das Cluster nicht abdeckt.
 const mediatorTasks = [
   {
     title: "Verantwortung für den Fall",
@@ -497,9 +485,11 @@ export default function MethodePage() {
             <h2 className="heading-2">Die Mediationsphasen im Detail</h2>
             <p className="mt-4 text-lg text-neutral-700">
               Hinter den sechs Schritten steht das bewährte Phasenmodell der
-              Mediation. Der Rahmen ist fest – welche Schritte Ihr Fall in
-              jeder Phase braucht, legt der verantwortliche Mediator
-              individuell fest.
+              Mediation. Klassisch werden fünf Phasen unterschieden; bei
+              medipact sind Verhandlung und Abschluss getrennt, und davor steht
+              Phase 0 mit Onboarding und Einladung. Der Rahmen ist fest –
+              welche Schritte Ihr Fall in jeder Phase braucht, legt der
+              verantwortliche Mediator individuell fest.
             </p>
           </div>
 
@@ -534,77 +524,62 @@ export default function MethodePage() {
         </div>
       </section>
 
-      {/* ROLLEN: KI & MEDIATOR */}
+      {/* ROLLEN: WER VERANTWORTET DEN FALL */}
       <section id="rollen" className="section section-strong">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 max-w-2xl">
             <div className="eyebrow mb-4 text-accent-300">Wer macht was</div>
             <h2 className="heading-2 text-white">
-              Die KI strukturiert. Der Mediator verantwortet.
+              Der Prozess strukturiert. Ein Mensch verantwortet.
             </h2>
             <p className="mt-4 text-lg leading-8 text-neutral-300">
-              Medipact ist kein Chatbot, der Ihren Streit „löst“. Die KI
-              übernimmt die Struktur- und Fleißarbeit – die Verantwortung für
-              Ihren Fall trägt immer ein Mensch.
+              Medipact ist kein Chatbot, der Ihren Streit „löst“. Der geführte
+              Prozess übernimmt die Struktur- und Fleißarbeit – die
+              Verantwortung für Ihren Fall trägt immer ein Mensch.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur sm:p-10">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
-                Was die KI übernimmt
-              </div>
-              <div className="mt-6 space-y-6">
-                {kiTasks.map((t) => (
-                  <div key={t.title}>
-                    <h3 className="font-bold text-white">{t.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">
-                      {t.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
+          <div className="rounded-[2rem] border border-accent-500/30 bg-accent-500/10 p-8 backdrop-blur sm:p-10">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
+              Was der Mediator übernimmt
             </div>
-
-            <div className="rounded-[2rem] border border-accent-500/30 bg-accent-500/10 p-8 backdrop-blur sm:p-10">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
-                Was der Mediator übernimmt
-              </div>
-              <div className="mt-6 space-y-6">
-                {mediatorTasks.map((t) => (
-                  <div key={t.title}>
-                    <h3 className="font-bold text-white">{t.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">
-                      {t.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              {mediatorTasks.map((t) => (
+                <div key={t.title}>
+                  <h3 className="font-bold text-white">{t.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">
+                    {t.text}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-8 sm:grid-cols-3 sm:p-10">
-            {[
-              {
-                title: "Vertraulich",
-                text: "Ihre Eingaben sind nicht öffentlich. Die Gegenseite sieht nur, was für den Prozess bestimmt ist.",
-              },
-              {
-                title: "Freiwillig",
-                text: "Mediation funktioniert nur ohne Zwang. Beide Seiten können jederzeit aussteigen.",
-              },
-              {
-                title: "Neutral",
-                text: "Weder KI noch Mediator ergreifen Partei. Beide Seiten bekommen denselben fairen Rahmen.",
-              },
-            ].map((item) => (
-              <div key={item.title}>
-                <h3 className="font-bold text-white">{item.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">
-                  {item.text}
-                </p>
-              </div>
-            ))}
+          <div className="mt-8 rounded-[2rem] border border-white/10 bg-white/5 p-8 sm:p-10">
+            <h3 className="text-lg font-bold text-white">
+              Und was übernimmt der Prozess?
+            </h3>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-300">
+              Themen ordnen, Formulierungen versachlichen, Interessen aus
+              Forderungen lösen, strittige Punkte gewichtet abgleichen und die
+              Vereinbarung erzeugen. Weil daran auch der Preis hängt, hat das
+              eine eigene Seite bekommen – zusammen mit den Grenzen des
+              Verfahrens und der Frage, wo und wie KI eingesetzt wird.
+            </p>
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-x-8">
+              <ArrowLink href="/einigung" tone="light">
+                Der Einigungsprozess im Überblick
+              </ArrowLink>
+              <ArrowLink href="/einigung/ohne-mediator" tone="light">
+                Wie weit kommt man ohne Mediator?
+              </ArrowLink>
+              <ArrowLink href="/einigung/abgleich" tone="light">
+                Der gewichtete Abgleich
+              </ArrowLink>
+              <ArrowLink href="/einigung/gleichbehandlung" tone="light">
+                Fairness und KI-Einsatz
+              </ArrowLink>
+            </div>
           </div>
 
           <div className="mt-10">
@@ -679,6 +654,9 @@ export default function MethodePage() {
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-4">
+            <ArrowLink href="/einigung">
+              Warum der Prozess zum Festpreis geht
+            </ArrowLink>
             <ArrowLink href="/preise">
               Alle Preise und Leistungen im Detail
             </ArrowLink>

@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Lärmstreit mit Nachbarn: Familie Schneider | medipact",
+  title: "Lärmstreit beendet – ohne Polizei und Gericht | medipact",
   description:
-    "Laute Musik bis in die Nacht, mehrfache Polizeieinsätze: Wie eine Nachbarschaftsmediation verbindliche Ruhezeiten schuf, die beide Seiten akzeptieren – ohne Gericht.",
+    "Musik bis in die Nacht, mehrfache Polizeieinsätze: Wie Ruhezeiten entstanden, an die sich beide Seiten seither halten – und was das gekostet hat.",
   path: "/cases/nachbarschaft-laerm",
   type: "article",
 });

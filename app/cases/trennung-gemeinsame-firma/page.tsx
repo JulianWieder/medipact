@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Trennung mit Firma: Carla & Marco | medipact",
+  title: "Trennung mit gemeinsamer GmbH: Firma gerettet | medipact",
   description:
-    "Trennung mit gemeinsamer GmbH: Wie Carla & Marco per Mediation Abfindung und Firmenfortbestand in 6 Monaten regelten – €200k Abfindung, Jobs gesichert, €600 statt €37.000 Kosten.",
+    "Privat getrennt, geschäftlich verbunden: Wie Abfindung und Fortbestand in sechs Monaten geregelt wurden – 600 € statt 37.000 €, alle Jobs erhalten.",
   path: "/cases/trennung-gemeinsame-firma",
   type: "article",
 });

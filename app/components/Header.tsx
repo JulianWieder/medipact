@@ -79,7 +79,21 @@ export default function Header() {
         { label: t("konflikteGeschaeft"), href: "/konflikte/odr" },
       ],
     },
-    { label: t("methode"), href: "/methode" },
+    {
+      // "So funktioniert es" bekommt das /einigung-Cluster als Untermenue,
+      // statt einen weiteren Top-Level-Punkt aufzumachen: Die Navigation hat
+      // bereits sieben Eintraege, und inhaltlich sind Ablauf (/methode) und
+      // Einigungsprozess (/einigung) zwei Seiten derselben Frage.
+      label: t("methode"),
+      href: "/methode",
+      children: [
+        { label: t("methodeAblauf"), href: "/methode" },
+        { label: t("methodeEinigung"), href: "/einigung" },
+        { label: t("methodeOhneMediator"), href: "/einigung/ohne-mediator" },
+        { label: t("methodeAbgleich"), href: "/einigung/abgleich" },
+        { label: t("methodeGleichbehandlung"), href: "/einigung/gleichbehandlung" },
+      ],
+    },
     {
       label: t("beispiele"),
       href: "/cases",

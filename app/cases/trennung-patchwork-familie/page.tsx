@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Patchwork-Trennung: Alexa & David | medipact",
+  title: "Patchwork-Trennung: klare Rollen für alle | medipact",
   description:
-    "Trennung mit 2 Kindern, neuem Partner und Stiefkind: Wie Alexa & David mit Mediation in 4 Monaten klare Rollen für alle fanden – für €499 statt €33.000 Verfahrenskosten.",
+    "Zwei Kinder, ein Stiefkind, ein neuer Partner: Wie in vier Monaten klare Zuständigkeiten für alle Beteiligten entstanden – 499 € statt 33.000 €.",
   path: "/cases/trennung-patchwork-familie",
   type: "article",
 });

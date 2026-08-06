@@ -141,9 +141,16 @@ export default async function MedipactLanding() {
               </p>
             </div>
             <NumberedSteps steps={processSteps} className="mt-12" />
-            <ArrowLink href="/methode" className="mt-10 text-base">
-              {t("processLink")}
-            </ArrowLink>
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-10">
+              <ArrowLink href="/methode" className="text-base">
+                {t("processLink")}
+              </ArrowLink>
+              {/* Zweiter Ausgang bewusst hierhin: Der Preis-Einwand entsteht
+                  direkt nach der Prozessbeschreibung, nicht erst auf /preise. */}
+              <ArrowLink href="/einigung" className="text-base">
+                {t("processLinkEinigung")}
+              </ArrowLink>
+            </div>
           </div>
         </section>
 

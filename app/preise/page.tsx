@@ -87,6 +87,19 @@ export default function Preise() {
               nach den gesetzlichen Gebührentabellen aus – inklusive der Frage,
               was passiert, wenn Ihr Anwalt nach Stunden abrechnet.
             </p>
+            {/* Der Einwand "warum ist das so günstig?" entsteht genau hier,
+                auf der Preisseite – und wurde bis dahin nirgends beantwortet. */}
+            <p className="mt-3 text-sm text-neutral-600">
+              Warum bei uns überhaupt ein Festpreis und kein Stundensatz steht,
+              erklärt der{" "}
+              <a
+                href="/einigung"
+                className="font-semibold text-accent-700 underline"
+              >
+                standardisierte Einigungsprozess
+              </a>
+              .
+            </p>
           </div>
         </section>
 

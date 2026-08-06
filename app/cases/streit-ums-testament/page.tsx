@@ -4,9 +4,9 @@ import { caseStudies } from "@/app/content/caseStudies";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Fallbeispiel Testament-Konflikt: Marie & Sophie | medipact",
+  title: "Ungleiches Testament: 800 € statt 28.000 € | medipact",
   description:
-    "Ungleiches Testament, verletzte Gefühle: Wie Marie & Sophie per Mediation in 3 Monaten eine faire Lösung fanden, die Pflegeleistung anerkennt – für €800 statt €28.000 Prozesskosten.",
+    "Eine Schwester pflegte, beide erbten gleich viel: Wie sie in drei Monaten eine Lösung fanden, die die Pflege anerkennt – für 800 € statt 28.000 €.",
   path: "/cases/streit-ums-testament",
   type: "article",
 });

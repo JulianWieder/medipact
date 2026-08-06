@@ -7,9 +7,9 @@ import aboutPhoto from "@/fotos/medi_about.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Über medipact – strukturierte Mediation mit klarem Ergebnisfokus",
+  title: "Über medipact – Struktur für festgefahrene Konflikte",
   description:
-    "Medipact steht für strukturierte Mediation bei privaten Konflikten. Wir helfen Menschen, festgefahrene Situationen zu klären – vertraulich und lösungsorientiert.",
+    "Warum wir den Einigungsprozess standardisiert haben, wer dahintersteht und wofür medipact geradesteht: vertraulich, ohne Sieger und ohne Verlierer.",
   path: "/about",
 });
 
