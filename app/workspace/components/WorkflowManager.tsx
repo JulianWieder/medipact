@@ -54,9 +54,12 @@ import {
   makeBlock,
   deriveBlocksFromLegacy,
   isOnboardingOnlyBlock,
+  isUserInputBlock,
+  blockLabel,
   type BlockTypeDef,
   type BlockGroup,
 } from "../blockTypes";
+import { PRIO_OPTIONS } from "@/lib/abgleich";
 import { SectionHeader, WCard, EmptyState, cn } from "../ui";
 import Icon from "@/app/components/ui/Icon";
 import AiPromptsEditor from "./AiPromptsEditor";
@@ -423,12 +426,170 @@ function OptionListEditor({
 function BlockConfigEditor({
   block,
   onChange,
+  siblings = [],
+  phaseId = "",
 }: {
   block: StepBlockDto;
   onChange: (patch: Record<string, unknown>) => void;
+  /** Die übrigen Schritte derselben Phase, in Reihenfolge. Nur der
+   *  „abgleich"-Block braucht sie: er verweist auf einen FRÜHEREN Schritt,
+   *  und der soll auswählbar sein statt abgetippt. */
+  siblings?: PhaseStepDefaultDto[];
+  phaseId?: string;
 }) {
   const c = block.config ?? {};
   switch (block.type) {
+    case "abgleich": {
+      // Nur Schritte VOR diesem anbieten: ein Abgleich über einen Schritt, der
+      // erst später kommt, hätte nie Antworten zum Vergleichen.
+      const idx = siblings.findIndex((s) => (s.blocks ?? []).some((b) => b.id === block.id));
+      const earlier = idx > 0 ? siblings.slice(0, idx) : idx === 0 ? [] : siblings;
+      const chosen = cfgStr(c, "sourceStepKey");
+      const chosenMissing = chosen !== "" && !siblings.some((s) => s.step_key === chosen);
+      return (
+        <>
+          <FieldLabel>Welchen Schritt gleicht dieser Block ab?</FieldLabel>
+          <select
+            value={chosen}
+            onChange={(e) => onChange({ sourceStepKey: e.target.value, sourcePhase: phaseId })}
+            className={INPUT_CLASS}
+          >
+            <option value="">– Schritt wählen –</option>
+            {earlier.map((s) => (
+              <option key={s.id} value={s.step_key}>
+                {s.title || s.step_key}
+              </option>
+            ))}
+            {chosenMissing && (
+              <option value={chosen}>{chosen} (nicht in dieser Phase)</option>
+            )}
+          </select>
+          {earlier.length === 0 && (
+            <p className="mt-1 text-[10px] leading-snug text-amber-600">
+              Vor diesem Schritt liegt noch keiner. Der Abgleich braucht einen früheren Schritt, in
+              dem beide Seiten geantwortet haben.
+            </p>
+          )}
+          <FieldLabel>Wie viele „unverzichtbar/ausgeschlossen" pro Seite?</FieldLabel>
+          <input
+            type="number"
+            min={0}
+            max={10}
+            value={typeof c.hardLimit === "number" ? c.hardLimit : 2}
+            onChange={(e) => onChange({ hardLimit: Math.max(0, Number(e.target.value) || 0) })}
+            className={INPUT_CLASS}
+          />
+          <p className="mt-1 text-[10px] leading-snug text-neutral-400">
+            Das Kontingent entscheidet, ob der Tausch funktioniert. Ohne Grenze markiert jede Seite
+            alles als unverzichtbar – dann gibt es nichts mehr zu tauschen und alles landet beim
+            Mediator. 2 ist ein guter Startwert.
+          </p>
+          {/* Welche Fragen des Quell-Schritts überhaupt verhandelt werden. */}
+          {(() => {
+            const src = siblings.find((s) => s.step_key === chosen);
+            const usable = (src?.blocks ?? []).filter(
+              (b) => isUserInputBlock(b.type) && b.type !== "vertrauliche_notiz" && b.type !== "abgleich",
+            );
+            if (usable.length === 0) return null;
+            const picked = Array.isArray(c.sourceBlockIds) ? (c.sourceBlockIds as string[]) : [];
+            const toggle = (id: string) => {
+              const next = picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id];
+              onChange({ sourceBlockIds: next });
+            };
+            return (
+              <>
+                <FieldLabel>Welche Fragen daraus werden verhandelt?</FieldLabel>
+                <div className="space-y-1 rounded-lg border border-neutral-200 p-2">
+                  {usable.map((b) => (
+                    <label key={b.id} className="flex items-start gap-2 text-[11px] text-neutral-600">
+                      <input
+                        type="checkbox"
+                        checked={picked.length === 0 || picked.includes(b.id)}
+                        onChange={() => toggle(b.id)}
+                      />
+                      <span className="leading-snug">{blockLabel(b)}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1 text-[10px] leading-snug text-neutral-400">
+                  Nichts angehakt = alle. Nicht jede Frage eignet sich zum Verhandeln – reine
+                  Gefühls- oder Hintergrundfragen gehören hier meist nicht hinein.
+                </p>
+              </>
+            );
+          })()}
+
+          <FieldLabel>Mechanik</FieldLabel>
+          <div className="space-y-1 rounded-lg border border-neutral-200 p-2">
+            <label className="flex items-start gap-2 text-[11px] text-neutral-600">
+              <input
+                type="checkbox"
+                checked={c.allowTrade !== false}
+                onChange={(e) => onChange({ allowTrade: e.target.checked })}
+              />
+              <span className="leading-snug">
+                <span className="font-semibold">Tausch anbieten</span> – gleich starke Gegensätze
+                paarweise auflösen: jede Seite bekommt den ihr wichtigeren Punkt.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-[11px] text-neutral-600">
+              <input
+                type="checkbox"
+                checked={c.allowBalance !== false}
+                onChange={(e) => onChange({ allowBalance: e.target.checked })}
+              />
+              <span className="leading-snug">
+                <span className="font-semibold">Ausgleich</span> – bleibt ein Punkt ohne Tauschpartner,
+                bekommt ihn die Seite, die bisher öfter nachgegeben hat. Aus = solche Punkte gehen
+                direkt an die mediierende Person.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-[11px] text-neutral-600">
+              <input
+                type="checkbox"
+                checked={c.requireConfirm !== false}
+                onChange={(e) => onChange({ requireConfirm: e.target.checked })}
+              />
+              <span className="leading-snug">
+                <span className="font-semibold">Bestätigung verlangen</span> – beide Seiten müssen den
+                Vorschlag ausdrücklich annehmen. Nur dann geht er in den Vertragsentwurf ein.
+              </span>
+            </label>
+          </div>
+
+          <FieldLabel>Beschriftung der Stufen (optional)</FieldLabel>
+          <div className="space-y-1">
+            {PRIO_OPTIONS.map((o) => {
+              const labels = (c.labels ?? {}) as Record<string, unknown>;
+              return (
+                <input
+                  key={o.value}
+                  value={typeof labels[String(o.value)] === "string" ? (labels[String(o.value)] as string) : ""}
+                  onChange={(e) =>
+                    onChange({ labels: { ...labels, [String(o.value)]: e.target.value } })
+                  }
+                  placeholder={o.short}
+                  className={INPUT_CLASS}
+                />
+              );
+            })}
+          </div>
+          <p className="mt-1 text-[10px] leading-snug text-neutral-400">
+            Von „unverzichtbar" bis „ausgeschlossen". Leer = Standardtext. Die Bedeutung der Stufen
+            (und damit die Rechnung) ändert sich dadurch nicht – nur der Ton.
+          </p>
+
+          <FieldLabel>Einleitungstext (optional)</FieldLabel>
+          <textarea
+            value={cfgStr(c, "prompt")}
+            onChange={(e) => onChange({ prompt: e.target.value })}
+            rows={2}
+            placeholder="Leer lassen – dann erklärt der Block sich selbst."
+            className={INPUT_CLASS}
+          />
+        </>
+      );
+    }
     case "textausgabe":
       return (
         <>
@@ -1268,8 +1429,12 @@ function StepDesignerPanel({
   phaseIndex,
   phaseTotal,
   stepNumber,
+  siblings = [],
 }: {
   step: PhaseStepDefaultDto;
+  /** Alle Schritte dieser Phase in Reihenfolge – der „abgleich"-Block wählt
+   *  daraus seinen Quell-Schritt aus. */
+  siblings?: PhaseStepDefaultDto[];
   /** true = globaler Schritt, geöffnet aus der Ansicht eines konkreten Typs. */
   shared?: boolean;
   /** true = Schritt des Nutzer-Onboardings (Reiter "@user"). Steuert, welche
@@ -1441,7 +1606,12 @@ function StepDesignerPanel({
                     </div>
                   </div>
                   {def?.hint && <p className="mt-1 text-[10px] leading-snug text-neutral-400">{def.hint}</p>}
-                  <BlockConfigEditor block={b} onChange={(patch) => onChangeBlockConfig(b.id, patch)} />
+                  <BlockConfigEditor
+                    block={b}
+                    onChange={(patch) => onChangeBlockConfig(b.id, patch)}
+                    siblings={siblings}
+                    phaseId={step.phase}
+                  />
                   {/* Pflichtfeld gilt für JEDEN Eingabe-Block gleich, deshalb hier
                       zentral statt in jedem Fall des BlockConfigEditor. Ohne diese
                       Angabe konnte ein Schritt abgeschlossen werden, ohne dass die
@@ -2232,6 +2402,7 @@ export function WorkflowManager() {
               phaseIndex={isUserOnboarding ? 1 : PHASES.findIndex((p) => p.id === activePhase) + 1}
               phaseTotal={isUserOnboarding ? 1 : PHASES.length}
               stepNumber={chain.findIndex((s) => s.id === designStep.id) + 1}
+              siblings={chain}
               onChangeVisibleIf={(cond) => changeVisibleIf(designStep.id, cond)}
               onChangeGateMode={(mode) => changeGateMode(designStep.id, mode)}
               onAiFill={() =>

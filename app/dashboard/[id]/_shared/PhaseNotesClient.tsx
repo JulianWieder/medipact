@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { PHASES, getPhase, getPhaseIndex, type PhaseKey, type StepDetail } from "./phaseData";
 import StepContentBlocks from "./StepContentBlocks";
 import StepBlocks from "./StepBlocks";
+import AbgleichBlock from "./AbgleichBlock";
 import type { StepBlockDto } from "@/app/workspace/types";
 import { blockLabel, missingRequiredBlocks, userInputBlocks } from "@/app/workspace/blockTypes";
+import { diffBlock, normalizePoint } from "@/lib/abgleich";
 import { fetchBlockResponses } from "@/app/workspace/api";
 import Icon from "@/app/components/ui/Icon";
 
@@ -694,16 +696,11 @@ function formatBlockValue(value: unknown): string {
   return String(value);
 }
 
-/** Vergleichbare Form eines Werts (Reihenfolge in Mehrfachauswahlen egal). */
-function comparableValue(value: unknown): string {
-  if (Array.isArray(value)) return JSON.stringify([...value].map(String).sort());
-  if (value && typeof value === "object") {
-    const o = value as Record<string, unknown>;
-    if ("agreed" in o) return String(o.agreed === true);
-    if ("name" in o) return "signed";
-  }
-  return JSON.stringify(value ?? null);
-}
+// Der frühere `comparableValue` verglich ganze Werte gegeneinander und ist
+// ersatzlos entfallen: verglichen wird jetzt Eintrag für Eintrag über
+// diffBlock() aus lib/abgleich.ts — dieselbe Funktion, auf der auch der
+// Abgleich rechnet. Damit können Gegenüberstellung und Einigungsvorschlag gar
+// nicht mehr auseinanderlaufen.
 
 function BlockReflectionView({
   blocks,
@@ -747,7 +744,49 @@ function BlockReflectionView({
     };
   }, [mediationId, phaseKey, stepKey]);
 
-  const inputs = userInputBlocks(blocks).filter((b) => b.type !== "vertrauliche_notiz");
+  const inputs = userInputBlocks(blocks).filter(
+    (b) => b.type !== "vertrauliche_notiz" && b.type !== "abgleich",
+  );
+  // Abgleich-Blöcke gehören auch hierher: dort steht der Einigungsvorschlag,
+  // und der wird erst jetzt sichtbar (vorher darf niemand die Gewichtung der
+  // anderen Seite sehen). Als Rohwert dargestellt wären sie nur JSON.
+  const abgleichBlocks = (blocks ?? []).filter((b) => b.type === "abgleich");
+  const partyIds = participants.map((p) => p.id);
+
+  // Gibt es überhaupt etwas zu verhandeln? Wird einmal vorab gerechnet, weil
+  // davon abhängt, ob der Abgleich unten erscheint.
+  const hasOpenPoints = inputs.some(
+    (b) =>
+      diffBlock(
+        {
+          blockId: b.id,
+          blockType: b.type,
+          blockLabel: blockLabel(b),
+          config: b.config,
+          answers: answers[b.id] ?? {},
+        },
+        partyIds,
+      ).open.length > 0,
+  );
+
+  // Kein im Workflow Manager gesetzter Abgleich, aber offene Punkte? Dann wird
+  // hier einer eingeblendet.
+  //
+  // Sonst hinge die wichtigste Stelle des Verfahrens daran, dass jemand daran
+  // gedacht hat, in jedem Schritt einen Block zu ergänzen: die Gegenüberstellung
+  // sagte "noch unterschiedlich" und bot nichts an. Ein Abgleich ohne
+  // Unterschiede wäre andersherum nur Lärm – deshalb die Bedingung.
+  //
+  // Der Mediator behält die Kontrolle: sobald er einen echten "abgleich"-Block
+  // in den Schritt legt, gilt dessen Konfiguration und dieser hier verschwindet.
+  const autoAbgleich: StepBlockDto | null =
+    abgleichBlocks.length === 0 && hasOpenPoints
+      ? {
+          id: `auto_abgleich:${stepKey}`,
+          type: "abgleich",
+          config: { sourcePhase: phaseKey, sourceStepKey: stepKey, hardLimit: 2 },
+        }
+      : null;
 
   return (
     <div className="space-y-6">
@@ -771,9 +810,27 @@ function BlockReflectionView({
             const given = participants
               .map((p) => ({ p, value: perParty[p.id] }))
               .filter(({ value }) => formatBlockValue(value).trim() !== "");
-            const agree =
-              given.length > 1 &&
-              new Set(given.map(({ value }) => comparableValue(value))).size === 1;
+
+            // Punktgenau statt pauschal: verglichen werden die EINZELNEN
+            // Einträge, nicht der ganze Wert. Vorher stand über einer
+            // Regelliste, in der sechs von sieben Regeln wortgleich waren,
+            // schlicht "≠ noch unterschiedlich" – das ist zwar formal richtig,
+            // aber es verdeckt genau das, worauf es ankommt: die Seiten sind
+            // sich fast einig, und strittig ist ein einzelner Punkt.
+            const diff = diffBlock(
+              {
+                blockId: b.id,
+                blockType: b.type,
+                blockLabel: blockLabel(b),
+                config: b.config,
+                answers: perParty,
+              },
+              partyIds,
+            );
+            const sharedNorm = new Set(diff.shared.map(normalizePoint));
+            const agree = given.length > 1 && diff.open.length === 0;
+            const partial = given.length > 1 && diff.shared.length > 0 && diff.open.length > 0;
+
             return (
               <div key={b.id} className="rounded-2xl border border-neutral-200 bg-white p-4">
                 <div className="mb-2 flex items-start justify-between gap-3">
@@ -783,22 +840,52 @@ function BlockReflectionView({
                       className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
                         agree
                           ? "border-accent-200 bg-accent-50 text-accent-700"
+                          : partial
+                          ? "border-sky-200 bg-sky-50 text-sky-700"
                           : "border-amber-200 bg-amber-50 text-amber-700"
                       }`}
                     >
-                      {agree ? "✓ Einigkeit" : "≠ noch unterschiedlich"}
+                      {agree
+                        ? "✓ Einigkeit"
+                        : partial
+                        ? `${diff.shared.length} gemeinsam · ${diff.open.length} offen`
+                        : "≠ noch unterschiedlich"}
                     </span>
                   )}
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
                   {participants.map((p) => {
-                    const text = formatBlockValue(perParty[p.id]);
+                    const raw = perParty[p.id];
+                    const items = Array.isArray(raw)
+                      ? raw.map((v) => String(v ?? "")).filter((v) => v.trim() !== "")
+                      : null;
+                    const text = formatBlockValue(raw);
                     return (
                       <div key={p.id} className="rounded-xl border border-neutral-100 bg-neutral-50 p-3">
                         <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
                           {p.name} · {roleLabel[p.role] ?? p.role}
                         </p>
-                        {text ? (
+                        {items ? (
+                          <ul className="space-y-0.5">
+                            {items.map((it, i) => {
+                              const isShared = sharedNorm.has(normalizePoint(it));
+                              return (
+                                <li
+                                  key={i}
+                                  className={`text-sm ${
+                                    isShared ? "text-neutral-700" : "font-medium text-amber-800"
+                                  }`}
+                                  title={isShared ? "Beide Seiten haben das genannt" : "Nur von dieser Seite genannt"}
+                                >
+                                  <span className={isShared ? "mr-1 text-emerald-600" : "mr-1 text-amber-500"}>
+                                    {isShared ? "✓" : "•"}
+                                  </span>
+                                  {it}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        ) : text ? (
                           <p className="whitespace-pre-wrap text-sm text-neutral-700">{text}</p>
                         ) : (
                           <p className="text-sm italic text-neutral-400">Keine Angabe.</p>
@@ -810,6 +897,16 @@ function BlockReflectionView({
               </div>
             );
           })}
+
+          {[...abgleichBlocks, ...(autoAbgleich ? [autoAbgleich] : [])].map((b) => (
+            <AbgleichBlock
+              key={b.id}
+              mediationId={mediationId}
+              phase={phaseKey}
+              stepKey={stepKey}
+              block={b}
+            />
+          ))}
         </div>
       )}
 

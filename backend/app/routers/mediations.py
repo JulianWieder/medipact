@@ -2868,7 +2868,80 @@ def _contract_inputs_text(db: Session, mediation: Mediation) -> str:
     if free_text:
         sections.append("## Weitere freie Eingaben\n" + "\n\n".join(free_text))
 
+    agreed_section = _abgleich_agreement_text(db, mediation, parties)
+    if agreed_section:
+        # Bewusst ganz vorn: was beide Seiten ausdrücklich bestätigt haben, ist
+        # dem Entwurf mehr wert als die Rohantworten weiter unten – aus denen
+        # geht ja gerade nicht hervor, worauf man sich geeinigt hat.
+        sections.insert(0, agreed_section)
+
     return "\n\n".join(sections)
+
+
+def _abgleich_agreement_text(db: Session, mediation: Mediation, parties: list) -> str:
+    """Die von BEIDEN Seiten bestätigte Einigung aus den „abgleich"-Blöcken.
+
+    Der Vorschlag selbst entsteht im Frontend (lib/abgleich.ts) – Tausch und
+    Ausgleich lassen sich hier nicht sinnvoll nachrechnen. Bestätigt eine
+    Partei den Vorschlag, legt sie ihn deshalb im Klartext mit ab; hier wird
+    nur noch geprüft, ob ALLE Parteien dieselbe Fassung bestätigt haben
+    (gleiche `signature`). Eine einseitige oder veraltete Bestätigung fließt
+    nicht ein – sonst stünde im Vertrag eine Einigung, die es nicht gibt.
+    """
+    if len(parties) < 2:
+        return ""
+    rows = (
+        db.query(MediationBlockResponse)
+        .filter(
+            MediationBlockResponse.mediation_id == mediation.id,
+            MediationBlockResponse.phase == CONTRACT_SOURCE_PHASE,
+            MediationBlockResponse.block_type == "abgleich_ergebnis",
+        )
+        .all()
+    )
+    if not rows:
+        return ""
+
+    by_block: dict[str, dict[str, dict]] = {}
+    for r in rows:
+        if isinstance(r.value, dict):
+            by_block.setdefault(r.block_id, {})[r.author_key] = r.value
+
+    party_keys = {str(p.id) for p, _u in parties}
+    blocks_out: list[str] = []
+    for _block_id, per_author in sorted(by_block.items()):
+        confirmed = {
+            k: v for k, v in per_author.items() if k in party_keys and v.get("agreed") is True
+        }
+        if set(confirmed) != party_keys:
+            continue
+        signatures = {v.get("signature") for v in confirmed.values()}
+        if len(signatures) != 1:
+            continue  # jemand hat nach der Zustimmung noch an der Gewichtung gedreht
+        snapshot = next(iter(confirmed.values()))
+        for entry in snapshot.get("result") or []:
+            if not isinstance(entry, dict):
+                continue
+            items = [str(i).strip() for i in (entry.get("items") or []) if str(i).strip()]
+            if not items:
+                continue
+            label = str(entry.get("label") or "").strip() or "Vereinbart"
+            blocks_out.append(f"{label}:\n" + "\n".join(f"  - {i}" for i in items))
+        offen = [str(i).strip() for i in (snapshot.get("open") or []) if str(i).strip()]
+        if offen:
+            blocks_out.append(
+                "Bewusst offen geblieben (gehört ins Gespräch, nicht in den Vertrag):\n"
+                + "\n".join(f"  - {i}" for i in offen)
+            )
+
+    if not blocks_out:
+        return ""
+    return (
+        "## VERBINDLICH VEREINBART (von allen Parteien bestätigt)\n"
+        "Diese Punkte sind das Ergebnis des Abgleichs und wurden von beiden Seiten "
+        "ausdrücklich bestätigt. Sie gehen unverändert in den Vertrag ein.\n"
+        + "\n\n".join(blocks_out)
+    )
 
 
 @router.post("/{mediation_id}/contract/generate")

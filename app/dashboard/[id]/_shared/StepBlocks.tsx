@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StepBlockDto } from "@/app/workspace/types";
 import Icon from "@/app/components/ui/Icon";
+import AbgleichBlock from "./AbgleichBlock";
 import FallFreischaltungBlock from "./FallFreischaltungBlock";
 import KostenuebernahmeBlock from "./KostenuebernahmeBlock";
 import VertragBlock from "./VertragBlock";
@@ -498,6 +499,23 @@ export default function StepBlocks({
           </div>
         );
       }
+      case "abgleich":
+        // Der Block bringt seine eigene Ladelogik mit (Quell-Schritt, Antworten
+        // der anderen Seite, Gewichtungen). Gespeichert wird er wie jeder andere
+        // Eingabe-Block über setVal – sofort, weil eine Gewichtung ein Klick ist
+        // und kein Tippen, auf das man 600 ms warten müsste.
+        return (
+          <AbgleichBlock
+            key={block.id}
+            mediationId={mediationId}
+            phase={phase}
+            stepKey={stepKey}
+            block={block}
+            value={raw}
+            onChange={(v) => setVal(block, v, true)}
+            preview={preview}
+          />
+        );
       case "liste": {
         const items: string[] = Array.isArray(raw) ? (raw as string[]) : [];
         const [addKey] = [`add-${block.id}`];

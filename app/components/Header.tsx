@@ -122,7 +122,12 @@ export default function Header() {
             width={36}
             height={36}
             className="h-7 w-7 rounded-md object-cover md:h-9 md:w-9"
-            priority
+            // Kein `preload`/`priority`: das Logo ist 28x28 CSS-Pixel und darf
+            // nicht mit dem Hero-Foto (dem LCP-Element) um einen Preload-Slot
+            // konkurrieren. `loading="eager"` holt es trotzdem sofort, nur ohne
+            // <link> im <head> und ohne Vorrang.
+            loading="eager"
+            fetchPriority="low"
           />
           <span className="text-base font-semibold tracking-tight text-neutral-900 md:text-lg">
             Medipact

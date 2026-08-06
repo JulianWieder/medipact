@@ -13,19 +13,32 @@ import { socialProfiles } from "@/app/content/social";
 // externes Stylesheet mehr, kein Layout-Shift (size-adjust-Fallback), Fonts
 // kommen vom eigenen Server. Die CSS-Variablen werden in globals.css
 // (--font-body / --font-display) referenziert.
+//
+// KEIN `weight` ANGEBEN. Inter und Playfair Display sind Variable Fonts: ohne
+// `weight` liefert next/font pro Familie EINE Datei, die alle Gewichte
+// enthaelt. Mit `weight: ["400","500","600","700"]` schneidet Google daraus
+// statische Instanzen — je Gewicht (und je Style) eine eigene woff2. Das waren
+// hier 15 Dateien / 424 KB, davon 126 KB mit rel=preload direkt im kritischen
+// Pfad, wo sie auf dem Handy mit dem LCP-Bild um die Leitung konkurrierten.
+// Nebeneffekt der Umstellung: `font-black` (900) gibt es jetzt wirklich, vorher
+// war bei 700 Schluss und der Browser hat gefaelscht.
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
   display: "swap",
 });
 
+// `preload: false` mit Absicht: Playfair ist die Display-Schrift der
+// Abschnittsueberschriften — auf dem Handy steht davon beim First Paint nichts
+// im Viewport (die H1 im Hero laeuft auf Inter). Preloaden wuerde nur Bandbreite
+// vom LCP-Bild abziehen; geladen wird sie trotzdem, nur ohne Vorrang, und
+// `display: "swap"` haelt den Text dabei sichtbar.
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-playfair",
   display: "swap",
+  preload: false,
 });
 
 const organizationSchema = {

@@ -1,0 +1,11 @@
+{
+ "//": "Schnelle Typprüfung nur für die Abgleich/Tausch-Dateien: npx tsc -p tsconfig.abgleich.json --noEmit. Die volle Prüfung läuft weiterhin über tsconfig.check.json (dort sind diese Dateien ebenfalls eingetragen). Kann gelöscht werden, wenn nicht mehr gebraucht.",
+ "extends": "./tsconfig.check.json",
+ "include": [
+  "next-env.d.ts",
+  "types/**/*.ts",
+  "lib/abgleich.ts",
+  "app/dashboard/[id]/_shared/AbgleichBlock.tsx",
+  "app/dashboard/[id]/_shared/AbgleichErgebnis.tsx"
+ ]
+}

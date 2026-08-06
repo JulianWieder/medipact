@@ -68,6 +68,9 @@
   "app/workspace/components/OnboardingEinsicht.tsx",
   "app/workspace/components/ParteiDetail.tsx",
   "middleware.ts",
-  "auth.ts"
+  "auth.ts",
+  "app/dashboard/[id]/_shared/AbgleichBlock.tsx",
+  "app/dashboard/[id]/_shared/AbgleichErgebnis.tsx",
+  "lib/abgleich.ts"
  ]
 }

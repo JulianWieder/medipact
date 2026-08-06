@@ -229,6 +229,18 @@ export const BLOCK_TYPES: BlockTypeDef[] = [
     hint: "Vorgegebene Punkte in eine persönliche Reihenfolge bringen.",
   },
   {
+    type: "abgleich",
+    label: "Abgleich & Tausch",
+    short: "Abgleich",
+    icon: "⇄",
+    group: "Eingabe",
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    defaultConfig: { prompt: "", sourcePhase: "", sourceStepKey: "", hardLimit: 2 },
+    capturesResponse: true,
+    responseAuthor: "user",
+    hint: "Nimmt die strittigen Punkte eines FRÜHEREN Schritts, lässt beide Seiten gewichten und macht daraus einen Einigungsvorschlag (inkl. Tausch).",
+  },
+  {
     type: "liste",
     label: "Listensammlung",
     short: "Liste",
@@ -607,6 +619,13 @@ export function isBlockValueEmpty(value: unknown): boolean {
     const filled = (k: string) => String(o[k] ?? "").trim() !== "";
     // zustimmung: {agreed}, unterschrift: {name}, datei_upload: {url}
     if ("agreed" in o) return o.agreed !== true;
+    // abgleich: {ratings} – gefüllt, sobald mindestens ein strittiger Punkt
+    // gewichtet wurde. Ein leeres Objekt zählt NICHT als Antwort, sonst wäre
+    // der Block schon durch das bloße Öffnen der Seite erledigt.
+    if ("ratings" in o) {
+      const r = o.ratings;
+      return !(r && typeof r === "object" && Object.keys(r as object).length > 0);
+    }
     // rechnungsdaten: {street, postal_code, city} – erst mit allen dreien ist
     // eine Rechnung erstellbar, deshalb sind alle drei Pflicht. Muss VOR der
     // "name"-Prüfung stehen, sonst greift die dort für den Straßen-Block.

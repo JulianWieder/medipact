@@ -13,6 +13,22 @@ const nextConfig: NextConfig = {
   // komplett deaktiviert — 2-3 MB große Original-JPGs gingen 1:1 ans Handy.
   images: {
     formats: ['image/avif', 'image/webp'],
+
+    // Seit Next 16 ist `qualities` eine Allowlist mit Default `[75]` — ein
+    // `quality`-Prop, das hier nicht steht, wird stillschweigend auf den
+    // nächsten erlaubten Wert gerundet. 55 ist für die Hero-Fotos gedacht
+    // (HeroBackdrop): die liegen hinter kräftigen Schwarz-Gradienten, dort
+    // sieht man den Unterschied zu 75 nicht, spart auf dem Handy aber Bytes.
+    // 75 bleibt der Default für alle übrigen Bilder.
+    qualities: [55, 75],
+
+    // Ein Jahr statt der 4 Stunden Default. Die Quellbilder sind alle statische
+    // Imports aus fotos/ — ihr Dateiname enthält einen Inhalts-Hash, ändert
+    // sich der Inhalt, ändert sich die URL. Ein kurzes TTL bringt hier also
+    // nichts und kostet nur: nach jedem Ablauf transkodiert der VPS dieselbe
+    // Variante neu, und AVIF-Encoding eines 1600px-Fotos dauert auf einem
+    // geteilten Kern rund eine Sekunde. Genau das trifft das LCP-Bild.
+    minimumCacheTTL: 31536000,
   },
   /**
    * Dauerhafte Weiterleitungen (301).
