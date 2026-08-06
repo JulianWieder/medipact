@@ -18,6 +18,11 @@ app/dashboard/[id]/layout.tsx
 tsconfig.check.json
 ```
 
+**Nicht verwechseln:** `app/components/layout/` enthält beides — die fremden
+`DashboardHeader*.tsx` und `SessionTimer.tsx` bleiben draußen, die neue
+`NavMegaPanel.tsx` gehört dazu. Deshalb wird die Datei einzeln aufgeführt und
+nicht der Ordner.
+
 Deshalb unten **kein `git add -A`**, sondern eine explizite Dateiliste.
 Wenn der SessionTimer mit soll, häng ihn bewusst als zweiten Commit an.
 
@@ -35,6 +40,7 @@ git add `
   app/content/einigungAbgleichPage.ts `
   app/content/einigungGleichbehandlungPage.ts `
   app/components/AbgleichDiagramm.tsx `
+  app/components/layout/NavMegaPanel.tsx `
   app/sitemap.ts `
   app/components/Header.tsx `
   "app/[locale]/page.tsx" `
@@ -86,6 +92,13 @@ Ausserdem:
 - Interne Links von Landing (Prozess-Sektion), /methode und /preise, damit
   das Cluster nicht abseits liegt
 - FAQPage-JSON-LD auf allen vier Seiten, Service-Schema auf /einigung
+
+Navigation auf Mega-Panel umgestellt (NavMegaPanel.tsx): alle drei Dropdowns
+zeigen jetzt Icon, Titel und einen Halbsatz je Eintrag, gruppiert in
+betitelte Spalten, sekundaere Wege in einer getoenten Fussleiste. Grund: die
+Cluster-Seiten heissen abstrakt ('Abgleich & Tausch') - erst der Halbsatz
+macht sie anklickbar. Oeffnen mit 100 ms Verzoegerung, Schliessen sofort;
+mobil bewusst ohne Icons und Beschreibungen.
 
 /methode entschlackt: KI-Spalte und der Vertraulich/Freiwillig/Neutral-Kasten
 sind ins Cluster umgezogen, die Seite beantwortet nur noch, WER den Fall

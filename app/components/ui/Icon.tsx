@@ -62,6 +62,7 @@ const P: Record<string, string> = {
   mirror: '<ellipse cx="12" cy="9.5" rx="6" ry="7"/><path d="M9 20h6M12 16.5V20"/>',
   "arrow-right": '<path d="M4.5 12h14"/><path d="M13 6.5l5.5 5.5-5.5 5.5"/>',
   "check-circle": '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.2l2.7 2.7 5.3-6"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 6.8V12l3.6 2.2"/>',
   "x-circle": '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
   warning: '<path d="M12 4L2.8 19.5h18.4z"/><path d="M12 10v4.5"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
   notebook: '<rect x="5.5" y="3.5" width="13" height="17" rx="2"/><path d="M9 3.5v17"/><path d="M12 8.5h4M12 12h4"/>',

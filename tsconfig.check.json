@@ -71,6 +71,9 @@
   "auth.ts",
   "app/dashboard/[id]/_shared/AbgleichBlock.tsx",
   "app/dashboard/[id]/_shared/AbgleichErgebnis.tsx",
-  "lib/abgleich.ts"
+  "lib/abgleich.ts",
+  "app/components/layout/SessionTimer.tsx",
+  "app/components/layout/DashboardHeader.tsx",
+  "lib/session.ts"
  ]
 }

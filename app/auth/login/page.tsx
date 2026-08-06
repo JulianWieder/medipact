@@ -12,6 +12,9 @@ import { Card } from "@/app/components/ui/Card";
 function LoginForm() {
   const searchParams = useSearchParams();
   const justVerified = searchParams.get("verified") === "1";
+  // Der Countdown im Dashboard-Header hat die Sitzung beendet (SessionTimer).
+  // Ohne diesen Hinweis wirkt der Sprung zum Login wie ein Fehler.
+  const timedOut = searchParams.get("reason") === "timeout";
   // Ziel nach dem Login (z.B. /dashboard/invitations?token=... aus einem
   // Einladungslink). Nur relative Pfade zulassen (kein Open Redirect).
   const rawCallbackUrl = searchParams.get("callbackUrl") ?? "";
@@ -157,6 +160,13 @@ function LoginForm() {
             {justVerified && !error && (
               <div className="mb-6 rounded-2xl border border-accent-200 bg-accent-50 p-4 text-sm text-accent-800 font-medium">
                 <Icon name="check-circle" color="currentColor" /> E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
+              </div>
+            )}
+            {timedOut && !error && (
+              <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800">
+                <Icon name="clock" color="currentColor" /> Du wurdest nach einer
+                Stunde ohne Aktivität automatisch abgemeldet. Bitte melde dich
+                erneut an.
               </div>
             )}
             {error && (

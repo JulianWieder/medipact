@@ -11,5 +11,13 @@ export async function DashboardHeader() {
 
   const email = session?.user?.email ?? "";
 
-  return <DashboardHeaderClient username={username} email={email} />;
+  return (
+    <DashboardHeaderClient
+      username={username}
+      email={email}
+      // Ablaufzeitpunkt der Session (rollend, wird bei jeder Anfrage neu
+      // gesetzt) — der Countdown im Header startet damit.
+      sessionExpiresAt={session?.expires ?? null}
+    />
+  );
 }

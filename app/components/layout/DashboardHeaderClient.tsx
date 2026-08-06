@@ -6,13 +6,19 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import logo from "@/fotos/medi logo.png";
+import SessionTimer from "./SessionTimer";
 
 type Props = {
   username: string;
   email: string;
+  sessionExpiresAt?: string | null;
 };
 
-export default function DashboardHeaderClient({ username, email }: Props) {
+export default function DashboardHeaderClient({
+  username,
+  email,
+  sessionExpiresAt,
+}: Props) {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -99,6 +105,9 @@ export default function DashboardHeaderClient({ username, email }: Props) {
 
         {/* Right: bell + user */}
         <div className="flex shrink-0 items-center gap-2">
+
+          {/* Countdown bis zur automatischen Abmeldung */}
+          <SessionTimer expiresAt={sessionExpiresAt} />
 
           {/* Notification bell */}
           <Link

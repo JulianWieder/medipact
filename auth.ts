@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { SESSION_MAX_AGE_SECONDS } from "@/lib/session";
 
 const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
 
@@ -84,7 +85,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60,  // 1 Stunde — Session läuft ab wenn 1h keine Aktivität
+    // 1 Stunde — Session läuft ab, wenn 1 h keine Aktivität. Die Zahl steht in
+    // lib/session.ts, weil der sichtbare Countdown im Header dieselbe braucht.
+    maxAge: SESSION_MAX_AGE_SECONDS,
     updateAge: 0,     // Bei jeder Anfrage erneuern (Rolling Session / Idle-Timeout)
   },
 

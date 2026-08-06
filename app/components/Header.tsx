@@ -7,6 +7,11 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { isMigratedLocalePath } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
+import {
+  NavMegaPanel,
+  type NavPanelGroup,
+  type NavPanelFooterLink,
+} from "@/app/components/layout/NavMegaPanel";
 import logo from "@/fotos/medi logo.png";
 
 /**
@@ -65,42 +70,151 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems = [
+  // Untermenues als Mega-Panel (siehe NavMegaPanel.tsx): jeder Eintrag mit
+  // Icon, Titel und Halbsatz, gruppiert in betitelte Spalten, sekundaere
+  // Wege in der Fussleiste. `desc` ist kein Beiwerk — die Seitennamen im
+  // /einigung-Cluster sind abstrakt ("Abgleich & Tausch"), erst der Halbsatz
+  // macht sie anklickbar.
+  type NavItem = {
+    label: string;
+    href: string;
+    groups?: NavPanelGroup[];
+    footer?: NavPanelFooterLink[];
+    /** Breite des Panels. Zwei Spalten brauchen mehr. */
+    wide?: boolean;
+  };
+
+  const navItems: NavItem[] = [
     { label: t("start"), href: "/" },
     { label: t("about"), href: "/about" },
     {
       label: t("konflikte"),
       href: "/konflikte",
-      children: [
-        { label: t("konflikteTrennung"), href: "/konflikte/trennung" },
-        { label: t("konflikteNachbarschaft"), href: "/konflikte/nachbarschaft" },
-        { label: t("konflikteVerbraucher"), href: "/konflikte/verbraucher" },
-        { label: t("konflikteErbschaft"), href: "/konflikte/erbschaft" },
-        { label: t("konflikteGeschaeft"), href: "/konflikte/odr" },
+      wide: true,
+      groups: [
+        {
+          title: t("konflikteGruppe"),
+          items: [
+            {
+              label: t("konflikteTrennung"),
+              href: "/konflikte/trennung",
+              desc: t("konflikteTrennungDesc"),
+              icon: "heartbreak",
+            },
+            {
+              label: t("konflikteNachbarschaft"),
+              href: "/konflikte/nachbarschaft",
+              desc: t("konflikteNachbarschaftDesc"),
+              icon: "home",
+            },
+            {
+              label: t("konflikteVerbraucher"),
+              href: "/konflikte/verbraucher",
+              desc: t("konflikteVerbraucherDesc"),
+              icon: "receipt",
+            },
+          ],
+        },
+        {
+          items: [
+            {
+              label: t("konflikteErbschaft"),
+              href: "/konflikte/erbschaft",
+              desc: t("konflikteErbschaftDesc"),
+              icon: "scroll",
+            },
+            {
+              label: t("konflikteGeschaeft"),
+              href: "/konflikte/odr",
+              desc: t("konflikteGeschaeftDesc"),
+              icon: "building",
+            },
+          ],
+        },
+      ],
+      footer: [
+        { label: t("konflikteAlle"), href: "/konflikte" },
+        { label: t("konflikteCheck"), href: "/kontakt" },
       ],
     },
     {
-      // "So funktioniert es" bekommt das /einigung-Cluster als Untermenue,
-      // statt einen weiteren Top-Level-Punkt aufzumachen: Die Navigation hat
-      // bereits sieben Eintraege, und inhaltlich sind Ablauf (/methode) und
-      // Einigungsprozess (/einigung) zwei Seiten derselben Frage.
+      // "So funktioniert es" traegt zwei verschiedene Dinge: den konkreten
+      // Ablauf (/methode) und den Einigungsprozess (/einigung-Cluster). Als
+      // flache Fuenferliste sah das aus wie eine Aufzaehlung; zwei betitelte
+      // Spalten machen die Struktur sichtbar.
       label: t("methode"),
       href: "/methode",
-      children: [
-        { label: t("methodeAblauf"), href: "/methode" },
-        { label: t("methodeEinigung"), href: "/einigung" },
-        { label: t("methodeOhneMediator"), href: "/einigung/ohne-mediator" },
-        { label: t("methodeAbgleich"), href: "/einigung/abgleich" },
+      wide: true,
+      groups: [
+        {
+          title: t("methodeGruppeAblauf"),
+          items: [
+            {
+              label: t("methodeAblauf"),
+              href: "/methode",
+              desc: t("methodeAblaufDesc"),
+              icon: "compass",
+            },
+            {
+              label: t("methodeBegleitung"),
+              href: "/preise",
+              desc: t("methodeBegleitungDesc"),
+              icon: "users",
+            },
+          ],
+        },
+        {
+          title: t("methodeGruppeEinigung"),
+          items: [
+            {
+              label: t("methodeEinigung"),
+              href: "/einigung",
+              desc: t("methodeEinigungDesc"),
+              icon: "euro",
+            },
+            {
+              label: t("methodeAbgleich"),
+              href: "/einigung/abgleich",
+              desc: t("methodeAbgleichDesc"),
+              icon: "scale",
+            },
+            {
+              label: t("methodeOhneMediator"),
+              href: "/einigung/ohne-mediator",
+              desc: t("methodeOhneMediatorDesc"),
+              icon: "user",
+            },
+          ],
+        },
+      ],
+      footer: [
         { label: t("methodeGleichbehandlung"), href: "/einigung/gleichbehandlung" },
+        { label: t("kostenrechner"), href: "/kostenrechner" },
       ],
     },
     {
       label: t("beispiele"),
       href: "/cases",
-      children: [
-        { label: t("beispieleFallbeispiele"), href: "/cases" },
-        { label: t("beispieleMatrix"), href: "/cases#matrix" },
+      groups: [
+        {
+          title: t("beispieleGruppe"),
+          items: [
+            {
+              label: t("beispieleFallbeispiele"),
+              href: "/cases",
+              desc: t("beispieleFallbeispieleDesc"),
+              icon: "clipboard",
+            },
+            {
+              label: t("beispieleMatrix"),
+              href: "/cases#matrix",
+              desc: t("beispieleMatrixDesc"),
+              icon: "grid",
+            },
+          ],
+        },
       ],
+      footer: [{ label: t("ratgeber"), href: "/ratgeber" }],
     },
     { label: t("ratgeber"), href: "/ratgeber" },
     { label: t("kostenrechner"), href: "/kostenrechner" },
@@ -151,7 +265,7 @@ export default function Header() {
         {/* NAV */}
         <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) =>
-            item.children ? (
+            item.groups ? (
               <div key={item.href} className="group relative">
                 <NavLink
                   href={item.href}
@@ -172,22 +286,28 @@ export default function Header() {
                   </svg>
                 </NavLink>
 
-                {/* Dropdown */}
+                {/* Mega-Panel. `pt-3` ueberbrueckt die Luecke zwischen
+                    Nav-Eintrag und Panel, sonst schliesst es beim Runterfahren
+                    der Maus. `delay-100` auf der Basis-Klasse verzoegert nur
+                    das OEFFNEN (CSS wendet die Basis-Transition beim Wechsel
+                    in den Hover-Zustand an) — `group-hover:delay-0` laesst es
+                    sofort wieder schliessen. */}
                 <div
-                  className="invisible absolute left-1/2 top-full z-50 w-56 -translate-x-1/2 pt-3 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                  className={`invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all delay-100 duration-150 group-hover:visible group-hover:opacity-100 group-hover:delay-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:delay-0 ${
+                    item.wide
+                      ? "w-[min(40rem,calc(100vw-2rem))]"
+                      : "w-[min(22rem,calc(100vw-2rem))]"
+                  }`}
                 >
-                  <ul className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white py-2 shadow-[0_20px_40px_-15px_rgba(30,41,59,0.18)]">
-                    {item.children.map((child) => (
-                      <li key={child.href}>
-                        <NavLink
-                          href={child.href}
-                          className="block px-4 py-2.5 text-sm text-neutral-700 transition hover:bg-accent-50/60 hover:text-accent-700"
-                        >
-                          {child.label}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
+                  <NavMegaPanel
+                    groups={item.groups}
+                    footer={item.footer}
+                    renderLink={(href, className, children) => (
+                      <NavLink href={href} className={className}>
+                        {children}
+                      </NavLink>
+                    )}
+                  />
                 </div>
               </div>
             ) : (
@@ -266,9 +386,12 @@ export default function Header() {
                 >
                   {item.label}
                 </NavLink>
-                {item.children && (
+                {/* Mobil bewusst ohne Icons und ohne `desc`: die Halbsaetze
+                    verdoppeln die Menuehoehe, und auf dem Handy scrollt man
+                    ohnehin, statt zu ueberfliegen. */}
+                {item.groups && (
                   <ul className="ml-3 flex flex-col gap-1 border-l border-neutral-200 pl-3">
-                    {item.children.map((child) => (
+                    {item.groups.flatMap((g) => g.items).map((child) => (
                       <li key={child.href}>
                         <NavLink
                           href={child.href}
