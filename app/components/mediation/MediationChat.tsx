@@ -57,8 +57,11 @@ export default function MediationChat({
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const lastIdRef = useRef(0);
+  const knownIdsRef = useRef<Set<number>>(new Set());
+  const inFlightRef = useRef(false);
   const openRef = useRef(open);
   const listRef = useRef<HTMLDivElement | null>(null);
   const shouldScrollRef = useRef(true);
@@ -68,41 +71,61 @@ export default function MediationChat({
     if (open) setUnread(0);
   }, [open]);
 
+  // Wichtig: Der setMessages-Updater muss PUR bleiben. Vorher standen hier
+  // `lastIdRef`-Zuweisung und ein `setUnread` INNERHALB des Updaters. React
+  // ruft Updater in StrictMode doppelt und während des Renders auf — ein
+  // setState darin ist ein Render-Phase-Update, das sich selbst neu auslöst
+  // ("Too many re-renders") und die Komponente samt Nachrichtenliste killt.
+  // Deshalb wird die Duplikat-Erkennung hier über eine Ref gemacht.
   const appendMessages = useCallback((incoming: ChatMessage[]) => {
-    if (incoming.length === 0) return;
-    setMessages((prev) => {
-      const known = new Set(prev.map((m) => m.id));
-      const fresh = incoming.filter((m) => !known.has(m.id));
-      if (fresh.length === 0) return prev;
-      lastIdRef.current = Math.max(lastIdRef.current, ...fresh.map((m) => m.id));
-      if (!openRef.current) {
-        setUnread((u) => u + fresh.filter((m) => !m.is_own).length);
-      }
-      shouldScrollRef.current = true;
-      return [...prev, ...fresh];
-    });
+    const fresh = incoming.filter((m) => !knownIdsRef.current.has(m.id));
+    if (fresh.length === 0) return;
+    fresh.forEach((m) => knownIdsRef.current.add(m.id));
+    lastIdRef.current = Math.max(lastIdRef.current, ...fresh.map((m) => m.id));
+    if (!openRef.current) {
+      setUnread((u) => u + fresh.filter((m) => !m.is_own).length);
+    }
+    shouldScrollRef.current = true;
+    setMessages((prev) => [...prev, ...fresh]);
   }, []);
 
   const poll = useCallback(async () => {
+    // Überlappende Polls verschlucken sonst Nachrichten: zwei Requests mit
+    // demselben `after` liefern dieselben IDs doppelt.
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     try {
       const res = await fetch(
         `/api/mediations/${mediationId}/chat?after=${lastIdRef.current}`,
+        { cache: "no-store" },
       );
       if (res.status === 402 || res.status === 403 || res.status === 404) {
         setAvailable(false);
         return;
       }
-      if (!res.ok) return;
+      // Jeder andere Fehler wurde hier früher stumm verschluckt — ein 401
+      // (abgelaufene Session), 422 oder 500 sah für die Nutzer exakt aus wie
+      // "Noch keine Nachrichten". Deshalb sichtbar machen.
+      if (!res.ok) {
+        console.error("Fall-Chat: Laden fehlgeschlagen", res.status);
+        setError(`Nachrichten konnten nicht geladen werden (Fehler ${res.status}).`);
+        return;
+      }
       const data = await res.json();
       setAvailable(true);
+      setError(null);
       appendMessages(data.messages ?? []);
-    } catch {
-      // Netzwerkfehler still ignorieren — nächster Poll versucht es erneut.
+    } catch (err) {
+      console.error("Fall-Chat: Netzwerkfehler beim Laden", err);
+      setError("Keine Verbindung zum Chat.");
+    } finally {
+      inFlightRef.current = false;
     }
   }, [mediationId, appendMessages]);
 
   useEffect(() => {
     lastIdRef.current = 0;
+    knownIdsRef.current = new Set();
     setMessages([]);
     poll();
     const t = setInterval(poll, POLL_MS);
@@ -130,8 +153,23 @@ export default function MediationChat({
       if (res.ok) {
         const msg = (await res.json()) as ChatMessage;
         setDraft("");
+        setError(null);
         appendMessages([msg]);
+        return;
       }
+      // Fehlgeschlagenes Senden sah bisher aus wie "nichts passiert": der
+      // Entwurf blieb stehen, keine Meldung. Der Entwurf bleibt weiterhin
+      // erhalten (nichts geht verloren), aber jetzt mit Begründung.
+      const detail = await res.json().catch(() => null);
+      console.error("Fall-Chat: Senden fehlgeschlagen", res.status, detail);
+      setError(
+        res.status === 401
+          ? "Sitzung abgelaufen — bitte neu einloggen."
+          : `Nachricht konnte nicht gesendet werden (Fehler ${res.status}).`,
+      );
+    } catch (err) {
+      console.error("Fall-Chat: Netzwerkfehler beim Senden", err);
+      setError("Nachricht konnte nicht gesendet werden.");
     } finally {
       setSending(false);
     }
@@ -173,9 +211,15 @@ export default function MediationChat({
         )}
       </div>
 
+      {error && (
+        <p className="border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs text-rose-700">
+          {error}
+        </p>
+      )}
+
       {/* Nachrichten */}
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-        {messages.length === 0 && (
+        {messages.length === 0 && !error && (
           <p className="pt-8 text-center text-sm text-neutral-400">
             Noch keine Nachrichten. Schreib die erste — auch gern zu Themen
             außerhalb der Mediations-Schritte.
