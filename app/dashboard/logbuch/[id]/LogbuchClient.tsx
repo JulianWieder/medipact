@@ -1282,7 +1282,7 @@ export default function LogbuchClient({
                           onClick={() => setPremiumOpen(true)}
                           className="rounded-full bg-violet-600 px-3 py-1 text-xs font-bold text-white transition hover:bg-violet-700"
                         >
-                          Premium: 1 Tipp pro Tag – einmalig {premiumPrice}
+                          Täglich statt wöchentlich – einmalig {premiumPrice}
                         </button>
                       )}
                     </div>
@@ -1749,13 +1749,15 @@ export default function LogbuchClient({
             {!isPremium && (
               <Reveal className="mt-10 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 sm:p-8">
                 <h2 className="font-display text-xl font-medium text-neutral-900">
-                  Mehr Unterstützung mit Logbuch-Premium
+                  Nicht erst nächste Woche wissen, was zu tun ist
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-600">
-                  Einmalig {premiumPrice} für dieses Logbuch – kein Abo: ein
-                  KI-Tipp mit konkreten nächsten Schritten pro Tag statt pro
-                  Woche und unbegrenzte Foto- und Datei-Uploads für Ihre
-                  Beweis-Dokumentation.
+                  Konflikte eskalieren an einzelnen Tagen – nicht im
+                  Wochenrhythmus. Mit Premium bekommen Sie zu jedem Eintrag noch
+                  am selben Tag eine Einschätzung, wie Sie reagieren sollten,
+                  und können jeden Beleg sofort ablegen, statt zu wählen, was
+                  diese Woche wichtig genug ist. Einmalig {premiumPrice} – kein
+                  Abo.
                 </p>
                 <button
                   type="button"
@@ -1800,22 +1802,24 @@ export default function LogbuchClient({
               Logbuch-Premium freischalten
             </h2>
             <p className="mt-2 text-sm leading-6 text-neutral-600">
-              Einmalig {premiumPrice} für dieses Logbuch – kein Abo.
+              Einmalig {premiumPrice} – kein Abo, keine Verlängerung.
             </p>
             <ul className="mt-4 space-y-2 text-sm leading-6 text-neutral-700">
               <li className="flex gap-2">
                 <span className="text-violet-600">✓</span>
-                Jeden Tag eine KI-Einschätzung mit konkreten nächsten Schritten
-                (statt einmal pro Woche)
+                Sie stehen nicht allein da: zu jedem Eintrag eine Einschätzung
+                mit konkreten nächsten Schritten – am selben Tag, nicht erst
+                kommende Woche
               </li>
               <li className="flex gap-2">
                 <span className="text-violet-600">✓</span>
-                Unbegrenzte Foto- und Datei-Uploads für Ihre Beweis-Dokumentation
+                Nichts geht verloren: jedes Foto, jeder Screenshot, jeder Beleg
+                landet sofort im Logbuch – ohne Limit
               </li>
               <li className="flex gap-2">
                 <span className="text-violet-600">✓</span>
-                Gilt dauerhaft für dieses Logbuch – Ihre Dokumentation bleibt
-                auch bei einer späteren Umwandlung in eine Mediation erhalten
+                Bleibt dauerhaft freigeschaltet – auch wenn aus Ihrer
+                Dokumentation später eine Mediation wird
               </li>
             </ul>
             <div ref={paypalContainerRef} className="mt-6 min-h-[45px]" />
