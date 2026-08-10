@@ -12,8 +12,12 @@ import Icon from "@/app/components/ui/Icon";
 //
 // Die Karte holt sich alles selbst (`/api/kalender/mein` löst das eigene
 // Logbuch auf) – so bleibt DashboardClient von der Kalender-Logik frei.
-// Gibt es keinen Kalender, rendert sie nichts: eine leere Karte für ein
-// Feature, das man nicht nutzt, ist nur Lärm.
+//
+// Sie versteckt sich NUR, wenn es gar keinen Kalender gibt (kein Logbuch).
+// Ein leerer Kalender ist kein Grund zum Verstecken: wer noch nichts
+// eingetragen hat, sucht das Feature am dringendsten. Der frühere Zustand
+// „blendet sich auch bei leerem Kalender aus" war genau der Fehler, den
+// dieses Feature beheben sollte.
 
 type Mein = {
   mediation_id: number | null;
@@ -95,10 +99,9 @@ export default function KalenderKarte() {
     };
   }, []);
 
-  // Kein Kalender, nichts drin und nichts offen → gar nicht erst anzeigen.
+  // Nur ohne Logbuch gar nichts zeigen – dann gibt es auch nichts zu öffnen.
   if (!geladen || !mein?.mediation_id) return null;
   const offen = mein.wartet_auf_mich ?? 0;
-  if (items.length === 0 && offen === 0) return null;
 
   return (
     <Link
@@ -121,7 +124,9 @@ export default function KalenderKarte() {
               ? offen === 1
                 ? "Eine Absprache wartet auf deine Antwort"
                 : `${offen} Absprachen warten auf deine Antwort`
-              : "Betreuungszeiten und Termine"}
+              : items.length > 0
+                ? "Betreuungszeiten und Termine"
+                : "Betreuungszeiten planen, tauschen und festhalten"}
           </span>
         </span>
         {offen > 0 && (
@@ -133,6 +138,13 @@ export default function KalenderKarte() {
           ›
         </span>
       </span>
+
+      {items.length === 0 && offen === 0 && (
+        <span className="block border-t border-neutral-100 px-5 py-3 text-xs font-light text-neutral-400">
+          Noch nichts eingetragen – lege das Wochenmuster an, dann steht hier,
+          wer das Kind wann betreut.
+        </span>
+      )}
 
       {items.length > 0 && (
         <span className="block border-t border-neutral-100">

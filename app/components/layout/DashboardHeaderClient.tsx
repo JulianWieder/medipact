@@ -53,6 +53,11 @@ export default function DashboardHeaderClient({
 
   const nav = [
     { label: "Dashboard", href: "/dashboard" },
+    // Der Kalender ist ein eigenes Feature und braucht einen Weg, der nicht
+    // davon abhängt, ob gerade etwas darin steht. Eine Karte, die sich bei
+    // leerem Kalender ausblendet, ist für den ERSTEN Besuch wertlos – genau
+    // dann sucht man ihn.
+    { label: "Kalender", href: "/dashboard/kalender" },
     { label: "Neue Mediation", href: "/dashboard/mediation/new" },
     ...(isAdmin ? [{ label: "Workspace", href: "/workspace" }] : []),
   ];
