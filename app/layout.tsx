@@ -98,7 +98,20 @@ export const metadata: Metadata = {
   authors: [{ name: "medipact" }],
   creator: "medipact",
   publisher: "medipact",
-  robots: "index, follow",
+  // Objektform statt "index, follow": Ohne `max-image-preview: large` darf
+  // Google in den Suchergebnissen nur ein winziges Thumbnail zeigen — und
+  // waehlt dann bevorzugt kleine, quadratisch beschneidbare Inhaltsbilder
+  // (bei uns die Kachelfotos aus ThemenTabs/EmpfehlungenGrid) statt des
+  // grossen Hero-Fotos. `max-snippet: -1` und `max-video-preview: -1` heben
+  // die entsprechenden Laengenlimits auf; beides ist fuer eine oeffentliche
+  // Marketing-Seite gewollt.
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
+  },
   openGraph: {
     type: "website",
     locale: "de_DE",

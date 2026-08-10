@@ -37,13 +37,45 @@ type CareItem = {
   actual_end: string | null;
   status: string;
   note: string | null;
+  title: string | null;
+  // betreuung | ferien | feiertag – nur für die Darstellung.
+  category: string;
   visibility: string;
-  swap_status: string | null;
-  swap_requested_by: number | null;
-  swap_proposed_start: string | null;
-  swap_proposed_end: string | null;
-  swap_message: string | null;
+  // false = erbetener Zusatztag, dem noch niemand zugestimmt hat. Er steht im
+  // Kalender, zählt aber nicht als Plan (Backend: _is_binding).
+  verbindlich: boolean;
+  request_kind: string | null;
+  request_status: string | null;
+  request_by: number | null;
+  request_start: string | null;
+  request_end: string | null;
+  request_message: string | null;
+  request_answered_at: string | null;
 };
+
+type VerlaufEvent = {
+  id: number;
+  participant_id: number | null;
+  action: string;
+  kind: string | null;
+  proposed_start: string | null;
+  proposed_end: string | null;
+  message: string | null;
+  created_at: string | null;
+};
+
+const KIND_LABELS: Record<string, string> = {
+  tausch: "Tausch",
+  zusatztag: "Zusätzlicher Tag",
+  absage: "Absage",
+  verschiebung: "Verschiebung",
+};
+
+const CATEGORY_OPTIONS = [
+  { key: "betreuung", label: "Betreuung" },
+  { key: "ferien", label: "Ferien" },
+  { key: "feiertag", label: "Feiertag" },
+];
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const WEEKDAYS_LONG = [
@@ -119,6 +151,7 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [showRuleForm, setShowRuleForm] = useState(false);
   const [showTerminForm, setShowTerminForm] = useState(false);
+  const [showZusatzForm, setShowZusatzForm] = useState(false);
   const [showRules, setShowRules] = useState(false);
 
   // Sichtbares Raster: Montag der Woche des Monatsersten + 6 Wochen.
@@ -164,9 +197,28 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
     if (open) void load();
   }, [open, load]);
 
+  // Ein Termin gehört an JEDEN Tag, über den er läuft – ein Ferienblock oder
+  // ein Wochenende von Freitag bis Sonntag stand bisher nur am ersten Tag im
+  // Raster, was den Kalender an allen Folgetagen leer aussehen ließ.
   const byDate = useMemo(() => {
-    const map: Record<string, CareItem[]> = {};
-    for (const it of items) (map[it.date] ??= []).push(it);
+    const map: Record<string, { it: CareItem; fortsetzung: boolean }[]> = {};
+    for (const it of items) {
+      const endDay = it.planned_end ? it.planned_end.slice(0, 10) : it.date;
+      const days = [it.date];
+      if (endDay > it.date) {
+        const d = new Date(`${it.date}T00:00:00`);
+        // Deckel: kein Block wird länger als ein Quartal gezeichnet.
+        for (let i = 0; i < 92; i++) {
+          d.setDate(d.getDate() + 1);
+          const cur = iso(d);
+          if (cur > endDay) break;
+          days.push(cur);
+        }
+      }
+      days.forEach((day, i) => {
+        (map[day] ??= []).push({ it, fortsetzung: i > 0 });
+      });
+    }
     return map;
   }, [items]);
 
@@ -179,7 +231,13 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
   const monthLabel = monthDate.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 
   const itemTone = (it: CareItem): string => {
+    // Reihenfolge ist Absicht: was noch verhandelt wird, sticht vor dem, was
+    // schon dokumentiert ist – sonst übersieht man eine offene Bitte.
+    if (!it.verbindlich) return "border-dashed border-amber-400 bg-white text-amber-700";
+    if (it.request_status === "offen") return "border-amber-300 bg-amber-50 text-amber-800";
     if (it.status === "ausgefallen") return "border-red-200 bg-red-50 text-red-700";
+    if (it.category === "ferien" || it.category === "feiertag")
+      return "border-neutral-300 bg-neutral-100 text-neutral-700";
     if (it.actual_start || it.actual_end) {
       const dev =
         (diffMinutes(it.planned_start, it.actual_start) ?? 0) !== 0 &&
@@ -263,9 +321,21 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
                 onClick={() => {
                   setShowTerminForm((v) => !v);
                   setShowRuleForm(false);
+                  setShowZusatzForm(false);
                 }}
               >
                 + Einzeltermin
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost text-xs"
+                onClick={() => {
+                  setShowZusatzForm((v) => !v);
+                  setShowRuleForm(false);
+                  setShowTerminForm(false);
+                }}
+              >
+                <Icon name="repeat" color="currentColor" /> Zusätzlichen Tag erbitten
               </button>
               <button
                 type="button"
@@ -273,6 +343,7 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
                 onClick={() => {
                   setShowRuleForm((v) => !v);
                   setShowTerminForm(false);
+                  setShowZusatzForm(false);
                 }}
               >
                 + Wiederkehrende Betreuung
@@ -314,6 +385,16 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
               onCancel={() => setShowTerminForm(false)}
             />
           )}
+          {showZusatzForm && (
+            <ZusatztagForm
+              mediationId={mediationId}
+              onSaved={() => {
+                setShowZusatzForm(false);
+                void load();
+              }}
+              onCancel={() => setShowZusatzForm(false)}
+            />
+          )}
 
           {/* Monatsraster */}
           <div className="mt-4 grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-neutral-200 bg-neutral-200">
@@ -339,19 +420,30 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
                   >
                     {Number(day.slice(8, 10))}
                   </div>
-                  {dayItems.map((it) => (
+                  {dayItems.map(({ it, fortsetzung }) => (
                     <button
-                      key={it.key}
+                      key={`${it.key}${fortsetzung ? "-f" : ""}`}
                       type="button"
                       onClick={() => setSelectedKey(it.key === selectedKey ? null : it.key)}
                       className={`mb-1 block w-full truncate rounded border px-1 py-0.5 text-left text-[10px] leading-4 ${itemTone(it)} ${
                         it.key === selectedKey ? "ring-2 ring-accent-400" : ""
                       }`}
-                      title={it.label ?? it.caregiver ?? "Betreuung"}
+                      title={[
+                        it.title ?? it.label ?? it.caregiver ?? "Betreuung",
+                        it.request_status === "offen"
+                          ? `Offene Anfrage: ${KIND_LABELS[it.request_kind ?? ""] ?? "Änderung"}`
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     >
-                      {it.swap_status === "angefragt" ? <><Icon name="repeat" size={10} color="currentColor" />{" "}</> : null}
-                      {fmtTime(it.planned_start)}
-                      {it.caregiver ? ` ${it.caregiver}` : it.label ? ` ${it.label}` : ""}
+                      {!fortsetzung && it.request_status === "offen" ? (
+                        <>
+                          <Icon name="repeat" size={10} color="currentColor" />{" "}
+                        </>
+                      ) : null}
+                      {fortsetzung ? "↳ " : `${fmtTime(it.planned_start)} `}
+                      {it.caregiver || it.title || it.label || ""}
                     </button>
                   ))}
                 </div>
@@ -363,7 +455,9 @@ export default function BetreuungsKalender({ mediationId }: { mediationId: strin
             <span className="mr-3"><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-accent-200 bg-accent-50 align-middle" /> geplant</span>
             <span className="mr-3"><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-emerald-300 bg-emerald-100 align-middle" /> stattgefunden (wie geplant)</span>
             <span className="mr-3"><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-amber-300 bg-amber-100 align-middle" /> mit Abweichung</span>
-            <span><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-red-300 bg-red-100 align-middle" /> ausgefallen</span>
+            <span className="mr-3"><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-red-300 bg-red-100 align-middle" /> ausgefallen</span>
+            <span className="mr-3"><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-dashed border-amber-400 bg-white align-middle" /> erbeten, noch offen</span>
+            <span><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm border border-neutral-300 bg-neutral-100 align-middle" /> Ferien / Feiertag</span>
           </p>
 
           {loading && <p className="mt-3 text-sm text-neutral-400">Wird geladen …</p>}
@@ -562,16 +656,17 @@ function IstErfassung({
         )}
       </div>
 
-      <TauschBlock mediationId={mediationId} me={me} item={item} onChanged={onSaved} />
+      <AbspracheBlock mediationId={mediationId} me={me} item={item} onChanged={onSaved} />
     </div>
   );
 }
 
-// ── Betreuungszeiten-Tausch (nur geteilte Termine) ──────────────────────────
-// Ein Elternteil schlägt neue Zeiten vor, die Gegenseite nimmt an oder lehnt
-// ab. Für Serien-Vorkommen ohne Erfassung wird zuerst still ein Override
-// angelegt (POST …/termine), dann die Anfrage gestellt.
-function TauschBlock({
+// ── Absprachen (nur geteilte Termine) ───────────────────────────────────────
+// Vier Arten, ein Ablauf: eine Seite bittet um eine Änderung, die andere
+// stimmt zu, lehnt ab oder schlägt etwas anderes vor. Für Serien-Vorkommen
+// ohne eigene Erfassung wird zuerst still ein Override angelegt
+// (POST …/termine), weil eine Anfrage eine Termin-ID braucht.
+function AbspracheBlock({
   mediationId,
   me,
   item,
@@ -582,7 +677,8 @@ function TauschBlock({
   item: CareItem;
   onChanged: () => void;
 }) {
-  const [formOpen, setFormOpen] = useState(false);
+  // Welches Formular offen ist: eine Anfrage-Art oder "gegenvorschlag".
+  const [formKind, setFormKind] = useState<string | null>(null);
   const [startDate, setStartDate] = useState(toDateInput(item.planned_start) || item.date);
   const [startTime, setStartTime] = useState(toTimeInput(item.planned_start));
   const [endDate, setEndDate] = useState(toDateInput(item.planned_end) || item.date);
@@ -590,20 +686,27 @@ function TauschBlock({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [verlauf, setVerlauf] = useState<VerlaufEvent[] | null>(null);
+
+  const base = `/api/mediations/${mediationId}/logbuch/betreuung`;
+  const offen = item.request_status === "offen";
+  const meine = item.request_by != null && item.request_by === me;
+  const kindLabel = KIND_LABELS[item.request_kind ?? ""] ?? "Änderung";
 
   if (item.visibility !== "shared") {
     return (
       <p className="mt-3 border-t border-accent-200/60 pt-3 text-xs text-neutral-400">
-        <Icon name="repeat" size={12} color="currentColor" /> Tausch anfragen geht nur bei geteilten Terminen – stellen Sie die
-        Sichtbarkeit der Regel bzw. des Termins auf „Geteilt“, damit die
-        eingeladene Person (z. B. der andere Elternteil) den Kalender sieht.
+        <Icon name="repeat" size={12} color="currentColor" /> Absprachen gehen nur bei
+        geteilten Terminen – stellen Sie die Sichtbarkeit der Regel bzw. des
+        Termins auf „Geteilt“, damit die eingeladene Person (z. B. der andere
+        Elternteil) den Kalender sieht.
       </p>
     );
   }
 
   const ensureEntryId = async (): Promise<number | null> => {
     if (item.entry_id) return item.entry_id;
-    const res = await fetch(`/api/mediations/${mediationId}/logbuch/betreuung/termine`, {
+    const res = await fetch(`${base}/termine`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -618,32 +721,34 @@ function TauschBlock({
     return data.id ?? null;
   };
 
-  const requestSwap = async () => {
+  const fehler = async (res: Response, fallback: string) => {
+    const data = await res.json().catch(() => null);
+    setError(data?.detail ?? data?.error ?? fallback);
+  };
+
+  const anfragen = async (kind: string) => {
     setBusy(true);
     setError("");
     try {
       const entryId = await ensureEntryId();
       if (!entryId) {
-        setError("Tausch-Anfrage fehlgeschlagen.");
+        setError("Anfrage fehlgeschlagen – der Termin ließ sich nicht anlegen.");
         return;
       }
-      const res = await fetch(
-        `/api/mediations/${mediationId}/logbuch/betreuung/termine/${entryId}/tausch`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            proposed_start: combine(startDate, startTime),
-            proposed_end: combine(endDate, endTime),
-            message: message || null,
-          }),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setError(data?.detail ?? "Tausch-Anfrage fehlgeschlagen.");
-        return;
-      }
+      const zeiten = kind === "absage";
+      const res = await fetch(`${base}/termine/${entryId}/anfrage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind,
+          proposed_start: zeiten ? null : combine(startDate, startTime),
+          proposed_end: zeiten ? null : combine(endDate, endTime),
+          message: message || null,
+        }),
+      });
+      if (!res.ok) return void (await fehler(res, "Anfrage fehlgeschlagen."));
+      setFormKind(null);
+      setMessage("");
       onChanged();
     } catch {
       setError("Server nicht erreichbar.");
@@ -652,24 +757,24 @@ function TauschBlock({
     }
   };
 
-  const answer = async (akzeptieren: boolean) => {
+  const antworten = async (aktion: "akzeptieren" | "ablehnen" | "gegenvorschlag") => {
     if (!item.entry_id) return;
     setBusy(true);
     setError("");
     try {
-      const res = await fetch(
-        `/api/mediations/${mediationId}/logbuch/betreuung/termine/${item.entry_id}/tausch/antwort`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ akzeptieren }),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setError(data?.detail ?? "Antwort fehlgeschlagen.");
-        return;
-      }
+      const res = await fetch(`${base}/termine/${item.entry_id}/anfrage/antwort`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          aktion,
+          proposed_start: aktion === "gegenvorschlag" ? combine(startDate, startTime) : null,
+          proposed_end: aktion === "gegenvorschlag" ? combine(endDate, endTime) : null,
+          message: message || null,
+        }),
+      });
+      if (!res.ok) return void (await fehler(res, "Antwort fehlgeschlagen."));
+      setFormKind(null);
+      setMessage("");
       onChanged();
     } catch {
       setError("Server nicht erreichbar.");
@@ -678,96 +783,215 @@ function TauschBlock({
     }
   };
 
-  const mineRequest = item.swap_requested_by != null && item.swap_requested_by === me;
+  const zurueckziehen = async () => {
+    if (!item.entry_id) return;
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`${base}/termine/${item.entry_id}/anfrage`, { method: "DELETE" });
+      if (!res.ok) return void (await fehler(res, "Zurückziehen fehlgeschlagen."));
+      onChanged();
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const ladeVerlauf = async () => {
+    if (!item.entry_id) return;
+    if (verlauf) return setVerlauf(null); // zweiter Klick klappt zu
+    try {
+      const res = await fetch(`${base}/termine/${item.entry_id}/verlauf`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setVerlauf(data.events ?? []);
+    } catch {
+      /* Verlauf ist Beiwerk – ein Fehler darf die Ansicht nicht stören. */
+    }
+  };
+
+  const zeitFelder = formKind !== "absage";
 
   return (
     <div className="mt-3 border-t border-accent-200/60 pt-3">
-      {item.swap_status === "angefragt" ? (
+      {offen ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
           <p className="text-xs font-bold text-amber-800">
-            <Icon name="repeat" color="currentColor" /> Tausch-Anfrage {mineRequest ? "(von Ihnen)" : "der Gegenseite"}
+            <Icon name="repeat" color="currentColor" /> {kindLabel}{" "}
+            {meine ? "– von Ihnen erbeten" : "– die andere Seite bittet darum"}
           </p>
-          <p className="mt-1 text-xs text-amber-800">
-            Vorschlag: {fmtDay(item.swap_proposed_start?.slice(0, 10) ?? item.date)}{" "}
-            {fmtSpan(item.swap_proposed_start, item.swap_proposed_end)}
-          </p>
-          {item.swap_message && (
-            <p className="mt-1 text-xs italic text-amber-700">„{item.swap_message}“</p>
+          {item.request_start ? (
+            <p className="mt-1 text-xs text-amber-800">
+              Vorschlag: {fmtDay(item.request_start.slice(0, 10))}{" "}
+              {fmtSpan(item.request_start, item.request_end)}
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-amber-800">
+              Der Termin soll ersatzlos entfallen.
+            </p>
           )}
-          {!mineRequest && (
-            <div className="mt-2 flex gap-2">
-              <button type="button" className="btn btn-primary text-xs" onClick={() => answer(true)} disabled={busy}>
-                Annehmen
+          {item.request_message && (
+            <p className="mt-1 text-xs italic text-amber-700">„{item.request_message}“</p>
+          )}
+
+          {!meine && formKind !== "gegenvorschlag" && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" className="btn btn-primary text-xs" onClick={() => antworten("akzeptieren")} disabled={busy}>
+                Zustimmen
               </button>
-              <button type="button" className="btn btn-ghost text-xs" onClick={() => answer(false)} disabled={busy}>
+              <button type="button" className="btn btn-ghost text-xs" onClick={() => antworten("ablehnen")} disabled={busy}>
                 Ablehnen
+              </button>
+              <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormKind("gegenvorschlag")} disabled={busy}>
+                Anderes vorschlagen
               </button>
             </div>
           )}
-          {mineRequest && (
-            <p className="mt-1 text-[11px] text-amber-600">
-              Wartet auf Antwort der Gegenseite.
-            </p>
-          )}
-        </div>
-      ) : !formOpen ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormOpen(true)}>
-            <Icon name="repeat" color="currentColor" /> Tausch anfragen
-          </button>
-          {item.swap_status === "akzeptiert" && (
-            <span className="text-[11px] font-semibold text-emerald-700">
-              Letzter Tausch wurde angenommen.
-            </span>
-          )}
-          {item.swap_status === "abgelehnt" && (
-            <span className="text-[11px] font-semibold text-red-600">
-              Letzter Tausch wurde abgelehnt.
-            </span>
+          {meine && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-amber-600">Wartet auf Antwort.</span>
+              <button type="button" className="btn btn-ghost text-xs" onClick={zurueckziehen} disabled={busy}>
+                Zurückziehen
+              </button>
+            </div>
           )}
         </div>
       ) : (
-        <div>
-          <p className="text-xs font-bold text-neutral-700">
-            <Icon name="repeat" color="currentColor" /> Neue Zeiten vorschlagen
-          </p>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className={labelCls}>Neuer Beginn</label>
-              <div className="flex gap-2">
-                <input type="date" className={inputCls} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                <input type="time" className={inputCls} value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-              </div>
-            </div>
-            <div>
-              <label className={labelCls}>Neues Ende</label>
-              <div className="flex gap-2">
-                <input type="date" className={inputCls} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                <input type="time" className={inputCls} value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-              </div>
-            </div>
+        !formKind && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-neutral-500">Absprechen:</span>
+            <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormKind("tausch")}>
+              Tausch
+            </button>
+            <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormKind("verschiebung")}>
+              Verschieben
+            </button>
+            <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormKind("absage")}>
+              Absagen
+            </button>
+            {item.request_status === "akzeptiert" && (
+              <span className="text-[11px] font-semibold text-emerald-700">
+                Letzte Anfrage ({kindLabel}) wurde angenommen.
+              </span>
+            )}
+            {item.request_status === "abgelehnt" && (
+              <span className="text-[11px] font-semibold text-red-600">
+                Letzte Anfrage ({kindLabel}) wurde abgelehnt.
+              </span>
+            )}
+            {item.request_status === "zurueckgezogen" && (
+              <span className="text-[11px] font-semibold text-neutral-500">
+                Letzte Anfrage wurde zurückgezogen.
+              </span>
+            )}
           </div>
+        )
+      )}
+
+      {formKind && (
+        <div className={offen ? "mt-3" : ""}>
+          <p className="text-xs font-bold text-neutral-700">
+            <Icon name="repeat" color="currentColor" />{" "}
+            {formKind === "gegenvorschlag"
+              ? "Etwas anderes vorschlagen"
+              : formKind === "absage"
+                ? "Termin absagen"
+                : `${KIND_LABELS[formKind]} vorschlagen`}
+          </p>
+          {zeitFelder && (
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelCls}>Neuer Beginn</label>
+                <div className="flex gap-2">
+                  <input type="date" className={inputCls} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <input type="time" className={inputCls} value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className={labelCls}>Neues Ende</label>
+                <div className="flex gap-2">
+                  <input type="date" className={inputCls} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                  <input type="time" className={inputCls} value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
           <div className="mt-2">
             <label className={labelCls}>Nachricht (optional)</label>
             <input
               className={`${inputCls} w-full`}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="z. B. Am Freitag habe ich einen Termin – können wir tauschen?"
+              placeholder={
+                formKind === "absage"
+                  ? "z. B. Ich bin an dem Wochenende krank."
+                  : "z. B. Am Freitag habe ich einen Termin – ginge Samstag?"
+              }
             />
           </div>
           <div className="mt-2 flex gap-2">
-            <button type="button" className="btn btn-primary text-xs" onClick={requestSwap} disabled={busy}>
-              {busy ? "Sendet …" : "Anfrage senden"}
+            <button
+              type="button"
+              className="btn btn-primary text-xs"
+              onClick={() =>
+                formKind === "gegenvorschlag" ? antworten("gegenvorschlag") : anfragen(formKind)
+              }
+              disabled={busy}
+            >
+              {busy ? "Sendet …" : "Absenden"}
             </button>
-            <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormOpen(false)}>
+            <button type="button" className="btn btn-ghost text-xs" onClick={() => setFormKind(null)}>
               Abbrechen
             </button>
           </div>
         </div>
       )}
+
+      {item.entry_id != null && item.request_kind && (
+        <button type="button" className="mt-2 text-[11px] font-semibold text-neutral-500 underline" onClick={ladeVerlauf}>
+          {verlauf ? "Verlauf ausblenden" : "Verlauf anzeigen"}
+        </button>
+      )}
+      {verlauf && <VerlaufListe events={verlauf} me={me} />}
+
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
+  );
+}
+
+// ── Verlauf einer Absprache ─────────────────────────────────────────────────
+// Wichtig bei Betreuungszeiten: nach zwei Gegenvorschlägen weiß sonst niemand
+// mehr, worum ursprünglich gebeten wurde.
+const ACTION_LABELS: Record<string, string> = {
+  angefragt: "hat gebeten um",
+  gegenvorschlag: "schlägt stattdessen vor",
+  akzeptiert: "hat zugestimmt",
+  abgelehnt: "hat abgelehnt",
+  zurueckgezogen: "hat zurückgezogen",
+};
+
+function VerlaufListe({ events, me }: { events: VerlaufEvent[]; me: number | null }) {
+  if (events.length === 0) {
+    return <p className="mt-2 text-[11px] text-neutral-400">Noch kein Verlauf.</p>;
+  }
+  return (
+    <ol className="mt-2 space-y-1.5 border-l-2 border-neutral-200 pl-3">
+      {events.map((e) => (
+        <li key={e.id} className="text-[11px] leading-4 text-neutral-600">
+          <span className="font-semibold text-neutral-800">
+            {e.participant_id != null && e.participant_id === me ? "Sie" : "Die andere Seite"}
+          </span>{" "}
+          {ACTION_LABELS[e.action] ?? e.action}
+          {e.kind ? ` (${KIND_LABELS[e.kind] ?? e.kind})` : ""}
+          {e.proposed_start ? `: ${fmtDay(e.proposed_start.slice(0, 10))} ${fmtSpan(e.proposed_start, e.proposed_end)}` : ""}
+          {e.created_at ? (
+            <span className="text-neutral-400"> · {fmtDay(e.created_at.slice(0, 10))}</span>
+          ) : null}
+          {e.message ? <span className="block italic text-neutral-500">„{e.message}“</span> : null}
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -916,6 +1140,8 @@ function TerminForm({
   const [endTime, setEndTime] = useState("18:00");
   const [caregiver, setCaregiver] = useState("");
   const [note, setNote] = useState("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("betreuung");
   const [visibility, setVisibility] = useState("personal");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -933,6 +1159,8 @@ function TerminForm({
           planned_end: combine(endDate || date, endTime),
           caregiver: caregiver || null,
           note: note || null,
+          title: title || null,
+          category,
           status: "geplant",
           visibility,
         }),
@@ -955,6 +1183,7 @@ function TerminForm({
       <p className="text-sm font-bold text-neutral-900">Einzeltermin anlegen</p>
       <p className="mt-0.5 text-xs text-neutral-500">
         Für Ferien, Feiertage oder getauschte Tage außerhalb des Wochenmusters.
+        Über mehrere Tage laufende Blöcke stehen im Raster an jedem Tag.
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
@@ -976,6 +1205,18 @@ function TerminForm({
           <input className={`${inputCls} w-full`} value={caregiver} onChange={(e) => setCaregiver(e.target.value)} placeholder="Papa / Mama / Name" />
         </div>
         <div>
+          <label className={labelCls}>Art</label>
+          <select className={`${inputCls} w-full`} value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORY_OPTIONS.map((c) => (
+              <option key={c.key} value={c.key}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Bezeichnung (optional)</label>
+          <input className={`${inputCls} w-full`} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z. B. Sommerferien, erste Hälfte" />
+        </div>
+        <div>
           <label className={labelCls}>Sichtbarkeit</label>
           <select className={`${inputCls} w-full`} value={visibility} onChange={(e) => setVisibility(e.target.value)}>
             {VIS_OPTIONS.map((v) => (
@@ -986,12 +1227,129 @@ function TerminForm({
       </div>
       <div className="mt-3">
         <label className={labelCls}>Notiz (optional)</label>
-        <input className={`${inputCls} w-full`} value={note} onChange={(e) => setNote(e.target.value)} placeholder="z. B. Osterferien 1. Hälfte" />
+        <input className={`${inputCls} w-full`} value={note} onChange={(e) => setNote(e.target.value)} placeholder="z. B. Abholung an der Schule" />
       </div>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       <div className="mt-3 flex gap-2">
         <button type="button" className="btn btn-primary text-sm" onClick={save} disabled={saving}>
           {saving ? "Speichert …" : "Termin speichern"}
+        </button>
+        <button type="button" className="btn btn-ghost text-sm" onClick={onCancel}>
+          Abbrechen
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Zusätzlichen Tag erbitten ───────────────────────────────────────────────
+// Anders als der Einzeltermin ist das eine BITTE: der Termin entsteht sofort,
+// steht aber gestrichelt im Kalender und zählt erst als Plan, wenn die andere
+// Seite zugestimmt hat. Deshalb immer geteilt – eine Bitte, die nur man selbst
+// sieht, wäre sinnlos.
+function ZusatztagForm({
+  mediationId,
+  onSaved,
+  onCancel,
+}: {
+  mediationId: string;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [date, setDate] = useState(iso(new Date()));
+  const [startTime, setStartTime] = useState("09:00");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("18:00");
+  const [caregiver, setCaregiver] = useState("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("betreuung");
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const save = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `/api/mediations/${mediationId}/logbuch/betreuung/anfragen/zusatztag`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            date,
+            proposed_start: combine(date, startTime),
+            proposed_end: combine(endDate || date, endTime),
+            caregiver: caregiver || null,
+            title: title || null,
+            category,
+            message: message || null,
+          }),
+        },
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.detail ?? data?.error ?? "Anfrage konnte nicht gestellt werden.");
+        return;
+      }
+      onSaved();
+    } catch {
+      setError("Server nicht erreichbar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/40 p-4 sm:p-5">
+      <p className="text-sm font-bold text-neutral-900">Zusätzlichen Tag erbitten</p>
+      <p className="mt-0.5 text-xs text-neutral-500">
+        Die andere Seite bekommt eine Anfrage und kann zustimmen, ablehnen oder
+        etwas anderes vorschlagen. Bis dahin steht der Tag nur als Vorschlag im
+        Kalender.
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Von</label>
+          <div className="flex gap-2">
+            <input type="date" className={inputCls} value={date} onChange={(e) => setDate(e.target.value)} />
+            <input type="time" className={inputCls} value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>Bis</label>
+          <div className="flex gap-2">
+            <input type="date" className={inputCls} value={endDate || date} onChange={(e) => setEndDate(e.target.value)} />
+            <input type="time" className={inputCls} value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>Wer betreut?</label>
+          <input className={`${inputCls} w-full`} value={caregiver} onChange={(e) => setCaregiver(e.target.value)} placeholder="Papa / Mama / Name" />
+        </div>
+        <div>
+          <label className={labelCls}>Art</label>
+          <select className={`${inputCls} w-full`} value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORY_OPTIONS.map((c) => (
+              <option key={c.key} value={c.key}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Bezeichnung (optional)</label>
+          <input className={`${inputCls} w-full`} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z. B. Geburtstag Oma" />
+        </div>
+        <div>
+          <label className={labelCls}>Nachricht (optional)</label>
+          <input className={`${inputCls} w-full`} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Warum wäre dieser Tag wichtig?" />
+        </div>
+      </div>
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <div className="mt-3 flex gap-2">
+        <button type="button" className="btn btn-primary text-sm" onClick={save} disabled={saving}>
+          {saving ? "Sendet …" : "Anfrage senden"}
         </button>
         <button type="button" className="btn btn-ghost text-sm" onClick={onCancel}>
           Abbrechen

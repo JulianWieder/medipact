@@ -20,11 +20,24 @@ import { pageMetadata } from "@/lib/seo";
 // Body copy lives in messages/*.json under "home" (see migration-notes.md
 // for the lift-into-translations pattern used here and in HeroScrollPin).
 
+// Das Foto, das die Startseite in der Google-Suche repraesentieren soll.
+//
+// Warum eine eigene Datei in public/ und nicht der Import aus fotos/: Bilder,
+// die ueber `next/image` laufen, bekommen eine gehashte, gebaute URL
+// (/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fmedi_main.<hash>.jpg&…). Die
+// laesst sich in JSON-LD nicht stabil hinschreiben. public/ liefert eine feste
+// URL, die Build-Wechsel ueberlebt. Inhaltlich ist es dieselbe Aufnahme wie im
+// Hero (fotos/medi_main.jpg, 1600x912) — nur eben unter eigener Adresse.
+const HERO_IMAGE = "https://medipact.de/startseite-mediation.jpg";
+
 export const metadata: Metadata = pageMetadata({
   title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
   description:
     "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
   path: "",
+  image: HERO_IMAGE,
+  imageWidth: 1600,
+  imageHeight: 912,
 });
 
 const serviceSchema = {
@@ -45,11 +58,41 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de",
+  image: HERO_IMAGE,
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
     price: "49",
     description: "Online-Mediation ab €49",
+  },
+};
+
+// Sagt Google explizit, welches Bild diese Seite repraesentiert.
+//
+// Ohne diese Angabe sucht Google sich das Vorschaubild selbst aus allen
+// Bildern der Seite — und nahm bisher eines der Themen-Kacheln
+// (fotos/medi_trennung.jpg), weil das Hero-Foto als ganzflaechiger
+// Hintergrund hinter zwei Schwarz-Gradienten liegt und dadurch eher wie
+// Dekoration aussieht. `primaryImageOfPage` ist das staerkste Signal, das
+// wir dagegen setzen koennen — eine Garantie ist es nicht, die Auswahl
+// bleibt Googles Entscheidung.
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://medipact.de/#webpage",
+  url: "https://medipact.de",
+  name: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+  inLanguage: "de",
+  isPartOf: { "@id": "https://medipact.de/#organization" },
+  primaryImageOfPage: {
+    "@type": "ImageObject",
+    "@id": "https://medipact.de/#primaryimage",
+    url: HERO_IMAGE,
+    contentUrl: HERO_IMAGE,
+    width: 1600,
+    height: 912,
+    caption:
+      "Mediationssitzung: zwei Konfliktparteien im Gespräch mit einer Mediatorin",
   },
 };
 
@@ -61,6 +104,7 @@ export default async function MedipactLanding() {
 
   return (
     <>
+      <JsonLd data={webPageSchema} />
       <JsonLd data={serviceSchema} />
       <main className="app-shell pt-0">
         <HeroScrollPin heroPhoto={heroPhoto} />

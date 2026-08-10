@@ -336,6 +336,69 @@ def _simple_email(
     return msg
 
 
+KIND_LABELS = {
+    "tausch": "Tausch",
+    "zusatztag": "zusätzlicher Tag",
+    "absage": "Absage",
+    "verschiebung": "Verschiebung",
+}
+
+
+def send_care_request_email(
+    to_email: str,
+    to_name: str,
+    mediation_id: int,
+    kind: str,
+    action: str,
+    when_text: str,
+    message: str | None = None,
+) -> None:
+    """Benachrichtigt die andere Person über eine Absprache im Betreuungskalender.
+
+    Bewusst im Ton des Logbuchs, nicht im Verfahrensdeutsch der Einladungen:
+    hier stimmen sich zwei Eltern über Betreuungszeiten ab, es läuft kein
+    Verfahren. Der Inhalt der Anfrage steht in der Mail, damit man nicht erst
+    einloggen muss, um zu wissen, worum es geht.
+    """
+    label = KIND_LABELS.get(kind, "Änderung")
+    headings = {
+        "angefragt": f"Bitte um {label}",
+        "gegenvorschlag": f"Gegenvorschlag zur {label}",
+        "akzeptiert": f"{label.capitalize()} angenommen",
+        "abgelehnt": f"{label.capitalize()} abgelehnt",
+        "zurueckgezogen": f"{label.capitalize()} zurückgezogen",
+    }
+    leads = {
+        "angefragt": f"Im Betreuungskalender wurde um eine {label} gebeten.",
+        "gegenvorschlag": "Zu deiner Anfrage im Betreuungskalender gibt es einen Gegenvorschlag.",
+        "akzeptiert": "Deine Anfrage im Betreuungskalender wurde angenommen. Der Plan ist angepasst.",
+        "abgelehnt": "Deine Anfrage im Betreuungskalender wurde abgelehnt. Der Plan bleibt wie er war.",
+        "zurueckgezogen": "Eine Anfrage im Betreuungskalender wurde zurückgezogen.",
+    }
+    heading = headings.get(action, "Neues im Betreuungskalender")
+    paragraphs = [
+        f"Hallo {to_name},",
+        leads.get(action, "Es gibt Neues im Betreuungskalender."),
+        f"<strong>Betrifft:</strong> {when_text}",
+    ]
+    if message and message.strip():
+        paragraphs.append(f"„{message.strip()}“")
+    if action in ("angefragt", "gegenvorschlag"):
+        paragraphs.append(
+            "Du kannst im Kalender zustimmen, ablehnen oder selbst etwas anderes vorschlagen."
+        )
+
+    url = f"{settings.APP_BASE_URL}/dashboard/logbuch/{mediation_id}"
+    msg = _simple_email(
+        to_email,
+        f"Betreuungskalender: {heading}",
+        heading,
+        paragraphs,
+        ("Kalender öffnen", url),
+    )
+    _send(msg, to_email, f"care-request {action}/{kind} -> {to_email}")
+
+
 def send_authorization_expiring_email(
     to_email: str, to_name: str, mediation_id: int, mediation_title: str, hours_left: int
 ) -> None:

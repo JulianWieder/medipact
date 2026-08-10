@@ -10,18 +10,28 @@ Aufbau (Migration d2e3f4a5b6c7):
     Overrides eines Serien-Vorkommens (rule_id + date). Dort werden die
     TATSÄCHLICHEN Zeiten (actual_start/actual_end), Status und Notiz erfasst.
 
+  • Absprachen (Migration i4j5k6l7m8n9) – request_* auf den Terminen plus
+    MediationCareRequestEvent als Verlauf. Vier Arten: tausch, zusatztag,
+    absage, verschiebung. Alle laufen über dieselben drei Endpunkte
+    (anfrage / anfrage/antwort / anfrage zurückziehen), weil sie dieselbe
+    Frage stellen: die eine Seite schlägt vor, die andere entscheidet.
+
 Kostenlos wie das übrige Logbuch (keine Paywall), Sichtbarkeit je Zeile wie
 bei Logbuch-Einträgen (private/personal/shared – Filter aus routers/logbuch).
 """
+import logging
 from datetime import date as date_cls
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.email import send_care_request_email
+from app.models.mediation_care_request_event import MediationCareRequestEvent
 from app.models.mediation_care_rule import MediationCareRule
 from app.models.mediation_care_time import MediationCareTime
 from app.models.mediation_participant import MediationParticipant
@@ -29,9 +39,19 @@ from app.models.user import User
 from app.routers.logbuch import VISIBILITIES, _get_mediation, _require_participant
 from app.security import get_current_db_user
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/mediations", tags=["betreuung"])
 
 STATUSES = {"geplant", "stattgefunden", "ausgefallen"}
+CATEGORIES = {"betreuung", "ferien", "feiertag"}
+# Arten der Absprache. Der Unterschied liegt in der Bedeutung, nicht in der
+# Mechanik: alle vier sind "eine Seite schlägt vor, die andere entscheidet".
+# Nur beim Annehmen wird unterschieden (siehe _apply_accepted_request).
+REQUEST_KINDS = {"tausch", "zusatztag", "absage", "verschiebung"}
+# Arten, die konkrete Zeiten brauchen – eine Absage schlägt nichts vor.
+KINDS_NEEDING_TIMES = {"tausch", "zusatztag", "verschiebung"}
+REQUEST_ACTIONS = {"akzeptieren", "ablehnen", "gegenvorschlag"}
 
 
 # ── Helfer ──────────────────────────────────────────────────────────────────
@@ -82,6 +102,12 @@ def _check_visibility(value: str) -> str:
     return value
 
 
+def _check_category(value: str) -> str:
+    if value not in CATEGORIES:
+        raise HTTPException(status_code=422, detail="Ungültige Art des Eintrags.")
+    return value
+
+
 def _serialize_rule(r: MediationCareRule) -> dict:
     return {
         "id": r.id,
@@ -112,14 +138,55 @@ def _serialize_time(t: MediationCareTime) -> dict:
         "status": t.status or "geplant",
         "caregiver": t.caregiver,
         "note": t.note,
+        "title": t.title,
+        "category": t.category or "betreuung",
         "visibility": t.visibility or "personal",
         "author_participant_id": t.author_participant_id,
-        "swap_status": t.swap_status,
-        "swap_requested_by": t.swap_requested_by,
-        "swap_proposed_start": t.swap_proposed_start.isoformat() if t.swap_proposed_start else None,
-        "swap_proposed_end": t.swap_proposed_end.isoformat() if t.swap_proposed_end else None,
-        "swap_message": t.swap_message,
+        "verbindlich": _is_binding(t),
+        **_serialize_request(t),
     }
+
+
+def _serialize_request(t: MediationCareTime) -> dict:
+    return {
+        "request_kind": t.request_kind,
+        "request_status": t.request_status,
+        "request_by": t.request_by,
+        "request_start": t.request_start.isoformat() if t.request_start else None,
+        "request_end": t.request_end.isoformat() if t.request_end else None,
+        "request_message": t.request_message,
+        "request_answered_at": (
+            t.request_answered_at.isoformat() if t.request_answered_at else None
+        ),
+    }
+
+
+def _no_request() -> dict:
+    """Leere Anfrage-Felder für Serien-Vorkommen ohne Override."""
+    return {
+        "request_kind": None,
+        "request_status": None,
+        "request_by": None,
+        "request_start": None,
+        "request_end": None,
+        "request_message": None,
+        "request_answered_at": None,
+    }
+
+
+def _is_binding(t: Optional[MediationCareTime]) -> bool:
+    """Zählt dieser Termin als geplante Betreuung?
+
+    Ein erbetener Zusatztag entsteht sofort als Zeile, damit die Gegenseite ihn
+    im Kalender sehen und beantworten kann – verbindlich wird er aber erst mit
+    der Zustimmung. Alles andere (Tausch, Absage, Verschiebung) verändert einen
+    Termin, der ohnehin schon geplant war, und bleibt währenddessen gültig.
+    """
+    if t is None:
+        return True
+    if (t.request_kind or "") != "zusatztag":
+        return True
+    return (t.request_status or "") == "akzeptiert"
 
 
 def _rule_occurrences(
@@ -322,6 +389,19 @@ def delete_rule(
     participant = _require_participant(mediation_id, user, db)
     rule = _get_own_rule(mediation_id, rule_id, participant, db)
     # Overrides der Serie mitlöschen – ohne Regel sind sie bedeutungslos.
+    override_ids = [
+        row.id
+        for row in db.query(MediationCareTime.id)
+        .filter(
+            MediationCareTime.mediation_id == mediation_id,
+            MediationCareTime.rule_id == rule.id,
+        )
+        .all()
+    ]
+    if override_ids:
+        db.query(MediationCareRequestEvent).filter(
+            MediationCareRequestEvent.care_time_id.in_(override_ids)
+        ).delete(synchronize_session=False)
     db.query(MediationCareTime).filter(
         MediationCareTime.mediation_id == mediation_id,
         MediationCareTime.rule_id == rule.id,
@@ -344,6 +424,10 @@ class CareTimeCreate(BaseModel):
     status: str = "geplant"
     caregiver: Optional[str] = None
     note: Optional[str] = None
+    # Name des Blocks, z. B. "Sommerferien, erste Hälfte".
+    title: Optional[str] = None
+    # betreuung | ferien | feiertag
+    category: str = "betreuung"
     visibility: str = "personal"
 
 
@@ -356,6 +440,8 @@ class CareTimeUpdate(BaseModel):
     status: Optional[str] = None
     caregiver: Optional[str] = None
     note: Optional[str] = None
+    title: Optional[str] = None
+    category: Optional[str] = None
     visibility: Optional[str] = None
 
 
@@ -384,13 +470,20 @@ def list_termine(
         .all()
         if _visible(r, participant)
     ]
+    # `date` ist der Beginn. Ein Ferienblock, der VOR dem Fenster anfängt und
+    # hineinreicht (typisch beim Blättern in den Folgemonat), würde bei einem
+    # reinen date-Bereich fehlen – deshalb zusätzlich über planned_end greifen.
+    window_start = datetime.combine(start, time(0, 0))
     times = [
         t
         for t in db.query(MediationCareTime)
         .filter(
             MediationCareTime.mediation_id == mediation_id,
-            MediationCareTime.date >= start.isoformat(),
             MediationCareTime.date <= end.isoformat(),
+            or_(
+                MediationCareTime.date >= start.isoformat(),
+                MediationCareTime.planned_end >= window_start,
+            ),
         )
         .all()
         if _visible(t, participant)
@@ -423,17 +516,19 @@ def list_termine(
                 "actual_end": ov.actual_end.isoformat() if ov and ov.actual_end else None,
                 "status": (ov.status if ov else "geplant") or "geplant",
                 "note": ov.note if ov else None,
+                "title": ov.title if ov else None,
+                "category": (ov.category if ov else None) or "betreuung",
                 "visibility": (ov.visibility if ov else rule.visibility) or "personal",
-                "author_participant_id": rule.author_participant_id,
-                "swap_status": ov.swap_status if ov else None,
-                "swap_requested_by": ov.swap_requested_by if ov else None,
-                "swap_proposed_start": (
-                    ov.swap_proposed_start.isoformat() if ov and ov.swap_proposed_start else None
+                # Der Override kann von der ANDEREN Person stammen als die
+                # Regel. Für "darf ich das bearbeiten?" zählt, wer die Zeile
+                # angelegt hat – sonst zeigt die Oberfläche einen Knopf an,
+                # der im 403 endet (update_termin prüft die Autorschaft).
+                "author_participant_id": (
+                    ov.author_participant_id if ov else rule.author_participant_id
                 ),
-                "swap_proposed_end": (
-                    ov.swap_proposed_end.isoformat() if ov and ov.swap_proposed_end else None
-                ),
-                "swap_message": ov.swap_message if ov else None,
+                "rule_author_participant_id": rule.author_participant_id,
+                "verbindlich": _is_binding(ov),
+                **(_serialize_request(ov) if ov else _no_request()),
             }
             items.append(item)
 
@@ -449,7 +544,8 @@ def list_termine(
                 "source": "einzeltermin",
                 **_serialize_time(t),
                 "entry_id": t.id,
-                "label": None,
+                "label": t.title,
+                "rule_author_participant_id": None,
             }
         )
 
@@ -477,6 +573,7 @@ def create_termin(
         raise HTTPException(status_code=422, detail="date ist erforderlich.")
     if payload.status not in STATUSES:
         raise HTTPException(status_code=422, detail="Ungültiger Status.")
+    _check_category(payload.category)
     _check_visibility(payload.visibility)
     if payload.rule_id is not None:
         # Override: Regel muss existieren; je Vorkommen nur EIN Override.
@@ -517,6 +614,8 @@ def create_termin(
         status=payload.status,
         caregiver=payload.caregiver,
         note=payload.note,
+        title=payload.title,
+        category=payload.category,
         visibility=payload.visibility,
     )
     db.add(t)
@@ -551,6 +650,8 @@ def update_termin(
     data = payload.model_dump(exclude_unset=True)
     if "status" in data and data["status"] not in STATUSES:
         raise HTTPException(status_code=422, detail="Ungültiger Status.")
+    if data.get("category"):
+        _check_category(data["category"])
     if "visibility" in data:
         _check_visibility(data["visibility"])
     if "date" in data:
@@ -569,21 +670,121 @@ def update_termin(
     return _serialize_time(t)
 
 
-# ── Betreuungszeiten-Tausch ─────────────────────────────────────────────────
-# Nur bei GETEILTEN Terminen (visibility="shared"): ein Elternteil schlägt
-# neue Zeiten vor, die Gegenseite nimmt an (Plan wird überschrieben) oder
-# lehnt ab. Für Serien-Vorkommen legt der Client zuerst per POST …/termine
-# einen Override an und ruft dann diesen Endpunkt auf.
+# ── Absprachen ──────────────────────────────────────────────────────────────
+# Nur bei GETEILTEN Terminen (visibility="shared"): eine Person bittet um eine
+# Änderung, die andere stimmt zu, lehnt ab oder schlägt etwas anderes vor.
+#
+# Vier Arten, ein Mechanismus. Der Unterschied liegt allein darin, was beim
+# Annehmen passiert (_apply_accepted_request) – deshalb teilen sie sich die
+# Endpunkte und die Oberfläche muss nur eine Sprache sprechen.
+#
+# Für ein Serien-Vorkommen legt der Client zuerst per POST …/termine einen
+# Override an und stellt die Anfrage dann auf dessen ID. Ein zusätzlicher Tag
+# hat noch keinen Termin und bekommt seinen eigenen Endpunkt, der beides in
+# einem Zug erledigt.
 
 
-class SwapRequest(BaseModel):
-    proposed_start: str
-    proposed_end: str
+class RequestCreate(BaseModel):
+    kind: str  # tausch | absage | verschiebung
+    proposed_start: Optional[str] = None
+    proposed_end: Optional[str] = None
     message: Optional[str] = None
 
 
-class SwapAnswer(BaseModel):
-    akzeptieren: bool
+class ExtraDayCreate(BaseModel):
+    date: str
+    proposed_start: str
+    proposed_end: str
+    caregiver: Optional[str] = None
+    title: Optional[str] = None
+    category: str = "betreuung"
+    message: Optional[str] = None
+
+
+class RequestAnswer(BaseModel):
+    aktion: str  # akzeptieren | ablehnen | gegenvorschlag
+    # Nur bei aktion="gegenvorschlag".
+    proposed_start: Optional[str] = None
+    proposed_end: Optional[str] = None
+    message: Optional[str] = None
+
+
+def _now() -> datetime:
+    """Naiver UTC-Zeitstempel – wie planned_*/actual_* in diesem Modul."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _log_event(
+    db: Session,
+    t: MediationCareTime,
+    participant_id: Optional[int],
+    action: str,
+    message: Optional[str] = None,
+) -> None:
+    """Schreibt den Verlauf mit. Wird nie geändert, nur ergänzt."""
+    db.add(
+        MediationCareRequestEvent(
+            mediation_id=t.mediation_id,
+            care_time_id=t.id,
+            participant_id=participant_id,
+            action=action,
+            kind=t.request_kind,
+            proposed_start=t.request_start,
+            proposed_end=t.request_end,
+            message=message,
+        )
+    )
+
+
+def _when_text(t: MediationCareTime) -> str:
+    """Kurzbeschreibung des Termins für Benachrichtigungen."""
+    ref_start = t.request_start or t.planned_start
+    ref_end = t.request_end or t.planned_end
+    name = t.title or "Betreuungstermin"
+    if not ref_start:
+        return f"{name} am {t.date}"
+    tag = ref_start.strftime("%d.%m.%Y")
+    von = ref_start.strftime("%H:%M")
+    bis = ref_end.strftime("%H:%M") if ref_end else "offen"
+    return f"{name} am {tag}, {von} – {bis} Uhr"
+
+
+def _notify_others(
+    db: Session,
+    t: MediationCareTime,
+    actor: MediationParticipant,
+    action: str,
+) -> None:
+    """Benachrichtigt die übrigen Teilnehmer des Logbuchs.
+
+    Fehlschläge werden nur geloggt: eine nicht zustellbare E-Mail darf die
+    Absprache nicht scheitern lassen – der Kalender ist die Wahrheit, die Mail
+    nur der Hinweis darauf.
+    """
+    try:
+        rows = (
+            db.query(MediationParticipant, User)
+            .join(User, MediationParticipant.user_id == User.id)
+            .filter(
+                MediationParticipant.mediation_id == t.mediation_id,
+                MediationParticipant.id != actor.id,
+            )
+            .all()
+        )
+        for _participant, user in rows:
+            if not user.email:
+                continue
+            send_care_request_email(
+                user.email,
+                getattr(user, "name", None) or user.email.split("@")[0],
+                t.mediation_id,
+                t.request_kind or "tausch",
+                action,
+                _when_text(t),
+                message=t.request_message,
+            )
+    except Exception:  # pragma: no cover - Benachrichtigung ist Beiwerk
+        logger.exception("Benachrichtigung zur Betreuungs-Absprache fehlgeschlagen")
 
 
 def _get_shared_termin(
@@ -602,9 +803,296 @@ def _get_shared_termin(
     if (t.visibility or "personal") != "shared":
         raise HTTPException(
             status_code=409,
-            detail="Tausch geht nur bei geteilten Terminen – Sichtbarkeit erst auf „Geteilt“ stellen.",
+            detail="Absprachen gehen nur bei geteilten Terminen – Sichtbarkeit erst auf „Geteilt“ stellen.",
         )
     return t
+
+
+def _apply_accepted_request(t: MediationCareTime) -> None:
+    """Überträgt eine angenommene Anfrage in den Plan."""
+    if t.request_kind == "absage":
+        # Der Termin bleibt stehen, gilt aber als nicht stattgefunden. So
+        # bleibt im Kalender sichtbar, dass er einmal geplant war.
+        t.status = "ausgefallen"
+    elif t.request_kind == "zusatztag":
+        # planned_* stehen seit dem Anlegen; die Zustimmung macht den Termin
+        # verbindlich (siehe _is_binding), sonst ändert sich nichts.
+        pass
+    else:  # tausch | verschiebung
+        t.planned_start = t.request_start
+        t.planned_end = t.request_end
+        # Nur bei Einzelterminen wandert das Kalenderdatum mit – bei Serien-
+        # Overrides bleibt `date` der Vorkommens-Schlüssel (sonst löst sich der
+        # Override von seinem Serien-Vorkommen und der Termin erscheint doppelt).
+        if t.rule_id is None and t.planned_start:
+            t.date = t.planned_start.date().isoformat()
+
+
+@router.post("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/anfrage")
+def create_request(
+    mediation_id: int,
+    termin_id: int,
+    payload: RequestCreate,
+    user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db),
+):
+    """Bittet um Tausch, Absage oder Verschiebung eines geteilten Termins."""
+    _get_mediation(mediation_id, db)
+    participant = _require_participant(mediation_id, user, db)
+    t = _get_shared_termin(mediation_id, termin_id, participant, db)
+
+    if payload.kind not in REQUEST_KINDS:
+        raise HTTPException(status_code=422, detail="Unbekannte Art der Anfrage.")
+    if payload.kind == "zusatztag":
+        raise HTTPException(
+            status_code=422,
+            detail="Ein zusätzlicher Tag wird über …/anfragen/zusatztag erbeten.",
+        )
+    if t.request_status == "offen":
+        raise HTTPException(
+            status_code=409, detail="Zu diesem Termin ist bereits eine Anfrage offen."
+        )
+
+    start = _parse_dt(payload.proposed_start, "proposed_start")
+    end = _parse_dt(payload.proposed_end, "proposed_end")
+    if payload.kind in KINDS_NEEDING_TIMES and not (start and end):
+        raise HTTPException(
+            status_code=422, detail="Für diese Anfrage werden neue Zeiten gebraucht."
+        )
+    if start and end and end <= start:
+        raise HTTPException(status_code=422, detail="Das Ende muss nach dem Beginn liegen.")
+
+    t.request_kind = payload.kind
+    t.request_status = "offen"
+    t.request_by = participant.id
+    t.request_start = start
+    t.request_end = end
+    t.request_message = payload.message
+    t.request_answered_at = None
+    _log_event(db, t, participant.id, "angefragt", payload.message)
+    db.commit()
+    db.refresh(t)
+    _notify_others(db, t, participant, "angefragt")
+    return _serialize_time(t)
+
+
+@router.post("/{mediation_id}/logbuch/betreuung/anfragen/zusatztag")
+def request_extra_day(
+    mediation_id: int,
+    payload: ExtraDayCreate,
+    user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db),
+):
+    """Erbittet einen zusätzlichen Betreuungstag.
+
+    Der Termin wird sofort angelegt – anders wäre er für die Gegenseite gar
+    nicht sichtbar und nicht beantwortbar. Verbindlich ist er erst mit der
+    Zustimmung (_is_binding), bis dahin zeichnet die Oberfläche ihn als
+    Vorschlag. Sichtbarkeit ist zwingend „geteilt“: eine Bitte, die nur man
+    selbst sieht, ergibt keinen Sinn.
+    """
+    _get_mediation(mediation_id, db)
+    participant = _require_participant(mediation_id, user, db)
+    day = _parse_date(payload.date, "date")
+    if not day:
+        raise HTTPException(status_code=422, detail="date ist erforderlich.")
+    _check_category(payload.category)
+    start = _parse_dt(payload.proposed_start, "proposed_start")
+    end = _parse_dt(payload.proposed_end, "proposed_end")
+    if not (start and end):
+        raise HTTPException(status_code=422, detail="Beginn und Ende werden gebraucht.")
+    if end <= start:
+        raise HTTPException(status_code=422, detail="Das Ende muss nach dem Beginn liegen.")
+
+    t = MediationCareTime(
+        mediation_id=mediation_id,
+        author_participant_id=participant.id,
+        rule_id=None,
+        date=day.isoformat(),
+        planned_start=start,
+        planned_end=end,
+        status="geplant",
+        caregiver=payload.caregiver,
+        title=payload.title,
+        category=payload.category,
+        visibility="shared",
+        request_kind="zusatztag",
+        request_status="offen",
+        request_by=participant.id,
+        request_start=start,
+        request_end=end,
+        request_message=payload.message,
+    )
+    db.add(t)
+    db.flush()  # ID für den Verlaufseintrag
+    _log_event(db, t, participant.id, "angefragt", payload.message)
+    db.commit()
+    db.refresh(t)
+    _notify_others(db, t, participant, "angefragt")
+    return _serialize_time(t)
+
+
+@router.post("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/anfrage/antwort")
+def answer_request(
+    mediation_id: int,
+    termin_id: int,
+    payload: RequestAnswer,
+    user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db),
+):
+    """Zustimmen, ablehnen – oder etwas anderes vorschlagen.
+
+    Der Gegenvorschlag hält die Anfrage offen und dreht die Richtung um: ab
+    jetzt ist die andere Person am Zug. Aus einer Absage kann dabei eine
+    Verschiebung werden („nicht absagen, aber später“) – das ist der häufigste
+    Ausgang und soll nicht zwei Anfragen kosten.
+    """
+    _get_mediation(mediation_id, db)
+    participant = _require_participant(mediation_id, user, db)
+    t = _get_shared_termin(mediation_id, termin_id, participant, db)
+
+    if payload.aktion not in REQUEST_ACTIONS:
+        raise HTTPException(status_code=422, detail="Unbekannte Antwort.")
+    if t.request_status != "offen":
+        raise HTTPException(status_code=409, detail="Keine offene Anfrage.")
+    if t.request_by == participant.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Die eigene Anfrage kann man nicht selbst beantworten – aber zurückziehen.",
+        )
+
+    if payload.aktion == "gegenvorschlag":
+        start = _parse_dt(payload.proposed_start, "proposed_start")
+        end = _parse_dt(payload.proposed_end, "proposed_end")
+        if not (start and end):
+            raise HTTPException(
+                status_code=422, detail="Für einen Gegenvorschlag werden Zeiten gebraucht."
+            )
+        if end <= start:
+            raise HTTPException(status_code=422, detail="Das Ende muss nach dem Beginn liegen.")
+        if t.request_kind == "absage":
+            t.request_kind = "verschiebung"
+        t.request_start = start
+        t.request_end = end
+        t.request_message = payload.message
+        t.request_by = participant.id
+        _log_event(db, t, participant.id, "gegenvorschlag", payload.message)
+        action = "gegenvorschlag"
+    elif payload.aktion == "akzeptieren":
+        _apply_accepted_request(t)
+        t.request_status = "akzeptiert"
+        t.request_answered_at = _now()
+        _log_event(db, t, participant.id, "akzeptiert", payload.message)
+        action = "akzeptiert"
+    else:
+        t.request_status = "abgelehnt"
+        t.request_answered_at = _now()
+        _log_event(db, t, participant.id, "abgelehnt", payload.message)
+        action = "abgelehnt"
+
+    db.commit()
+    db.refresh(t)
+    _notify_others(db, t, participant, action)
+    return _serialize_time(t)
+
+
+@router.delete("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/anfrage")
+def withdraw_request(
+    mediation_id: int,
+    termin_id: int,
+    user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db),
+):
+    """Zieht die eigene, noch offene Anfrage zurück.
+
+    Ein zurückgezogener Zusatztag wird gelöscht – er war nie Teil des Plans,
+    und eine Karteileiche im Kalender hilft niemandem. Bei den übrigen Arten
+    bleibt der Termin bestehen, nur die Anfrage verfällt.
+    """
+    _get_mediation(mediation_id, db)
+    participant = _require_participant(mediation_id, user, db)
+    t = _get_shared_termin(mediation_id, termin_id, participant, db)
+
+    if t.request_status != "offen":
+        raise HTTPException(status_code=409, detail="Keine offene Anfrage.")
+    if t.request_by != participant.id:
+        raise HTTPException(status_code=403, detail="Nur die eigene Anfrage ist zurückziehbar.")
+
+    if t.request_kind == "zusatztag":
+        db.query(MediationCareRequestEvent).filter(
+            MediationCareRequestEvent.care_time_id == t.id
+        ).delete(synchronize_session=False)
+        db.delete(t)
+        db.commit()
+        return {"ok": True, "geloescht": True}
+
+    t.request_status = "zurueckgezogen"
+    t.request_answered_at = _now()
+    _log_event(db, t, participant.id, "zurueckgezogen")
+    db.commit()
+    db.refresh(t)
+    return _serialize_time(t)
+
+
+@router.get("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/verlauf")
+def list_request_events(
+    mediation_id: int,
+    termin_id: int,
+    user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db),
+):
+    """Wer hat wann was vorgeschlagen – die Vorgeschichte einer Absprache."""
+    _get_mediation(mediation_id, db)
+    participant = _require_participant(mediation_id, user, db)
+    t = (
+        db.query(MediationCareTime)
+        .filter(
+            MediationCareTime.id == termin_id,
+            MediationCareTime.mediation_id == mediation_id,
+        )
+        .first()
+    )
+    if not t or not _visible(t, participant):
+        raise HTTPException(status_code=404, detail="Termin nicht gefunden.")
+
+    events = (
+        db.query(MediationCareRequestEvent)
+        .filter(MediationCareRequestEvent.care_time_id == termin_id)
+        .order_by(MediationCareRequestEvent.created_at, MediationCareRequestEvent.id)
+        .all()
+    )
+    return {
+        "me": participant.id,
+        "events": [
+            {
+                "id": e.id,
+                "participant_id": e.participant_id,
+                "action": e.action,
+                "kind": e.kind,
+                "proposed_start": e.proposed_start.isoformat() if e.proposed_start else None,
+                "proposed_end": e.proposed_end.isoformat() if e.proposed_end else None,
+                "message": e.message,
+                "created_at": e.created_at.isoformat() if e.created_at else None,
+            }
+            for e in events
+        ],
+    }
+
+
+# ── Altlast: die ursprünglichen Tausch-Endpunkte ────────────────────────────
+# Die Mobile-App (mobile/src/screens/CareCalendarScreen.tsx) spricht in bereits
+# installierten Ständen noch diese Adressen an. Sie bleiben als dünne Hülle auf
+# den Absprachen stehen, damit ein alter App-Stand nicht bricht.
+
+
+class SwapRequest(BaseModel):
+    proposed_start: str
+    proposed_end: str
+    message: Optional[str] = None
+
+
+class SwapAnswer(BaseModel):
+    akzeptieren: bool
 
 
 @router.post("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/tausch")
@@ -615,20 +1103,18 @@ def request_swap(
     user: User = Depends(get_current_db_user),
     db: Session = Depends(get_db),
 ):
-    _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
-    t = _get_shared_termin(mediation_id, termin_id, participant, db)
-    if t.swap_status == "angefragt":
-        raise HTTPException(status_code=409, detail="Es liegt bereits eine offene Tausch-Anfrage vor.")
-
-    t.swap_status = "angefragt"
-    t.swap_requested_by = participant.id
-    t.swap_proposed_start = _parse_dt(payload.proposed_start, "proposed_start")
-    t.swap_proposed_end = _parse_dt(payload.proposed_end, "proposed_end")
-    t.swap_message = payload.message
-    db.commit()
-    db.refresh(t)
-    return _serialize_time(t)
+    return create_request(
+        mediation_id,
+        termin_id,
+        RequestCreate(
+            kind="tausch",
+            proposed_start=payload.proposed_start,
+            proposed_end=payload.proposed_end,
+            message=payload.message,
+        ),
+        user,
+        db,
+    )
 
 
 @router.post("/{mediation_id}/logbuch/betreuung/termine/{termin_id}/tausch/antwort")
@@ -639,30 +1125,13 @@ def answer_swap(
     user: User = Depends(get_current_db_user),
     db: Session = Depends(get_db),
 ):
-    _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
-    t = _get_shared_termin(mediation_id, termin_id, participant, db)
-    if t.swap_status != "angefragt":
-        raise HTTPException(status_code=409, detail="Keine offene Tausch-Anfrage.")
-    if t.swap_requested_by == participant.id:
-        raise HTTPException(
-            status_code=403, detail="Die eigene Tausch-Anfrage kann nicht selbst beantwortet werden."
-        )
-
-    if payload.akzeptieren:
-        t.planned_start = t.swap_proposed_start
-        t.planned_end = t.swap_proposed_end
-        # Nur bei Einzelterminen wandert das Kalenderdatum mit – bei Serien-
-        # Overrides bleibt `date` der Vorkommens-Schlüssel (sonst löst sich der
-        # Override von seinem Serien-Vorkommen und der Termin erscheint doppelt).
-        if t.rule_id is None and t.planned_start:
-            t.date = t.planned_start.date().isoformat()
-        t.swap_status = "akzeptiert"
-    else:
-        t.swap_status = "abgelehnt"
-    db.commit()
-    db.refresh(t)
-    return _serialize_time(t)
+    return answer_request(
+        mediation_id,
+        termin_id,
+        RequestAnswer(aktion="akzeptieren" if payload.akzeptieren else "ablehnen"),
+        user,
+        db,
+    )
 
 
 @router.delete("/{mediation_id}/logbuch/betreuung/termine/{termin_id}")
@@ -686,6 +1155,10 @@ def delete_termin(
         raise HTTPException(status_code=404, detail="Termin nicht gefunden.")
     if t.author_participant_id != participant.id:
         raise HTTPException(status_code=403, detail="Nur eigene Termine löschbar.")
+    # Verlauf hängt am Termin und wäre sonst verwaist.
+    db.query(MediationCareRequestEvent).filter(
+        MediationCareRequestEvent.care_time_id == t.id
+    ).delete(synchronize_session=False)
     db.delete(t)
     db.commit()
     return {"ok": True}

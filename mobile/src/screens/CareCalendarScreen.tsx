@@ -48,11 +48,14 @@ type CareItem = {
   status: string;
   note: string | null;
   visibility: string;
-  swap_status: string | null;
-  swap_requested_by: number | null;
-  swap_proposed_start: string | null;
-  swap_proposed_end: string | null;
-  swap_message: string | null;
+  // Absprachen (Backend: request_* auf mediation_care_times). "offen" ist der
+  // frühere Status "angefragt".
+  request_kind: string | null;
+  request_status: string | null;
+  request_by: number | null;
+  request_start: string | null;
+  request_end: string | null;
+  request_message: string | null;
 };
 
 type TermineResponse = { items: CareItem[]; rules: CareRule[]; me: number | null };
@@ -289,7 +292,7 @@ export default function CareCalendarScreen({ mediationId, title, onBack }: Props
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: "700" }}>
                     {fmtDayShort(it.date)}
                     {it.caregiver ? ` · ${it.caregiver}` : it.label ? ` · ${it.label}` : ""}
-                    {it.swap_status === "angefragt" ? " 🔁" : ""}
+                    {it.request_status === "offen" ? " 🔁" : ""}
                   </Text>
                   <Text style={{ color: colors.textMuted, fontSize: 12 }}>{t.label}</Text>
                 </View>
@@ -355,7 +358,7 @@ function IstForm({
 
   const devStart = diffLabel(diffMinutes(item.planned_start, item.actual_start), "Beginn");
   const devEnd = diffLabel(diffMinutes(item.planned_end, item.actual_end), "Ende");
-  const mineRequest = item.swap_requested_by != null && item.swap_requested_by === me;
+  const mineRequest = item.request_by != null && item.request_by === me;
 
   /** Für Serien-Vorkommen ohne Erfassung zuerst einen Override anlegen. */
   const ensureEntryId = async (): Promise<number> => {
@@ -487,17 +490,17 @@ function IstForm({
         <Text style={{ color: colors.textSoft, fontSize: 11, marginTop: spacing.sm }}>
           🔁 Tausch geht nur bei geteilten Terminen (Sichtbarkeit „Geteilt“).
         </Text>
-      ) : item.swap_status === "angefragt" ? (
+      ) : item.request_status === "offen" ? (
         <Card style={{ marginTop: spacing.sm, borderColor: colors.amber, backgroundColor: colors.amberSoft }}>
           <Text style={{ color: colors.amber, fontSize: 12, fontWeight: "700" }}>
             🔁 Tausch-Anfrage {mineRequest ? "(von Ihnen)" : "der Gegenseite"}
           </Text>
           <Text style={{ color: colors.amber, fontSize: 12, marginTop: 2 }}>
-            Vorschlag: {fmtSpan(item.swap_proposed_start, item.swap_proposed_end)}
+            Vorschlag: {fmtSpan(item.request_start, item.request_end)}
           </Text>
-          {item.swap_message ? (
+          {item.request_message ? (
             <Text style={{ color: colors.amber, fontSize: 12, fontStyle: "italic", marginTop: 2 }}>
-              „{item.swap_message}“
+              „{item.request_message}“
             </Text>
           ) : null}
           {!mineRequest ? (

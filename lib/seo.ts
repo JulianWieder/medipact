@@ -41,6 +41,14 @@ type PageMetadataInput = {
    * überschreiben.
    */
   image?: string;
+  /**
+   * Echte Pixelmaße von `image`. Ohne Angabe wird 1200x630 gemeldet — das
+   * Format des Standard-Banners. Wer ein Foto in anderem Seitenverhältnis
+   * übergibt, muss die Maße mitliefern, sonst stehen im og:image:width/height
+   * schlicht falsche Zahlen.
+   */
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 export function pageMetadata({
@@ -49,6 +57,8 @@ export function pageMetadata({
   path,
   type = "website",
   image,
+  imageWidth = 1200,
+  imageHeight = 630,
 }: PageMetadataInput): Metadata {
   const url = `${SITE_URL}${path}`;
 
@@ -61,7 +71,9 @@ export function pageMetadata({
     title,
     description,
     ...(image && {
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
+      images: [
+        { url: image, width: imageWidth, height: imageHeight, alt: title },
+      ],
     }),
   };
 

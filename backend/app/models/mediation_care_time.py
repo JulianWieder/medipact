@@ -12,7 +12,9 @@ class MediationCareTime(Base):
     Zwei Spielarten, unterschieden über rule_id:
 
       • rule_id IS NULL – Einzeltermin: eigenständig geplanter Termin
-        (Ferien, Feiertag, Tausch); planned_start/planned_end sind gesetzt.
+        (Ferien, Feiertag, Zusatztag); planned_start/planned_end sind
+        gesetzt. Mehrtägige Blöcke sind gewöhnliche Einzeltermine mit
+        category="ferien"/"feiertag".
       • rule_id gesetzt – Override eines Serientermins der MediationCareRule:
         `date` (ISO-Datum des geplanten Beginns) identifiziert das Vorkommen.
         Hier landen Ist-Zeiten, Status und Notiz zu diesem einen Termin;
@@ -47,17 +49,35 @@ class MediationCareTime(Base):
     status = Column(String, nullable=False, default="geplant", server_default="geplant")
     caregiver = Column(String, nullable=True)
     note = Column(Text, nullable=True)
-    # ── Betreuungszeiten-Tausch (nur bei visibility="shared") ──
-    # Ein Elternteil schlägt neue Zeiten für diesen Termin vor, der andere
-    # nimmt an oder lehnt ab (routers/betreuung.py tausch/tausch_antwort).
-    # Bei Annahme werden planned_start/planned_end auf den Vorschlag gesetzt.
-    swap_status = Column(String, nullable=True)  # angefragt | akzeptiert | abgelehnt
-    swap_requested_by = Column(
+    # Anzeigename – vor allem für Ferien- und Feiertagsblöcke ("Sommerferien,
+    # erste Hälfte"). Bei Serien-Overrides bleibt das label der Regel maßgeblich.
+    title = Column(String, nullable=True)
+    # betreuung | ferien | feiertag. Nur für die Darstellung: ein Ferienblock
+    # ist technisch ein mehrtägiger Einzeltermin, wird aber anders gezeichnet.
+    category = Column(
+        String, nullable=False, default="betreuung", server_default="betreuung"
+    )
+    # ── Absprachen (nur bei visibility="shared") ──
+    # Eine Person bittet um eine Änderung, die andere stimmt zu oder lehnt ab
+    # (routers/betreuung.py, Endpunkte …/anfrage*). Bei Zustimmung wird der
+    # Plan übernommen. Der Verlauf – auch Gegenvorschläge – liegt in
+    # MediationCareRequestEvent, damit eine Anfrage ihre Vorgeschichte behält.
+    #
+    #   tausch       – geplante Zeiten dieses Termins tauschen
+    #   zusatztag    – dieser Termin ist erst erbeten; er zählt NICHT als Plan,
+    #                  solange request_status "offen" oder "abgelehnt" ist
+    #   absage       – geplanten Termin zurückgeben (request_start/-end leer)
+    #   verschiebung – denselben Termin auf andere Zeiten legen
+    request_kind = Column(String, nullable=True)
+    # offen | akzeptiert | abgelehnt | zurueckgezogen
+    request_status = Column(String, nullable=True)
+    request_by = Column(
         Integer, ForeignKey("mediation_participants.id"), nullable=True
     )
-    swap_proposed_start = Column(DateTime, nullable=True)
-    swap_proposed_end = Column(DateTime, nullable=True)
-    swap_message = Column(Text, nullable=True)
+    request_start = Column(DateTime, nullable=True)
+    request_end = Column(DateTime, nullable=True)
+    request_message = Column(Text, nullable=True)
+    request_answered_at = Column(DateTime, nullable=True)
     visibility = Column(
         String, nullable=False, default="personal", server_default="personal"
     )

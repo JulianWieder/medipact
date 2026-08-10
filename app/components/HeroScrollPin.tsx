@@ -37,7 +37,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       {/* Hintergrund (Foto + Gradients + Wirbel) kommt zentral aus HeroBackdrop */}
       <HeroBackdrop
         image={heroPhoto}
-        imageAlt="Paar in einer Mediationssitzung"
+        imageAlt="Mediationssitzung: zwei Konfliktparteien im Gespräch mit einer Mediatorin"
         scale={imageScale}
       />
 

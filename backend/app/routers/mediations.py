@@ -312,6 +312,7 @@ def delete_logbuch(
 
     from app.models.invite_meet_recording import InviteMeetRecording
     from app.models.mediation_appointment import MediationAppointment
+    from app.models.mediation_care_request_event import MediationCareRequestEvent
     from app.models.mediation_care_rule import MediationCareRule
     from app.models.mediation_care_time import MediationCareTime
     from app.models.mediation_chat_message import MediationChatMessage
@@ -348,6 +349,8 @@ def delete_logbuch(
     for model in (
         MediationLogUpload,
         MediationLogEntry,
+        # vor MediationCareTime: der Verlauf hängt an den Terminen
+        MediationCareRequestEvent,
         MediationCareTime,
         MediationCareRule,
         MediationChatMessage,

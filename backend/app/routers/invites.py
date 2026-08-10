@@ -264,6 +264,7 @@ def send_invite_email(
     personal_message: str | None = None,
     has_video: bool = False,
     heading: str | None = None,
+    is_logbuch: bool = False,
 ) -> None:
     """Send invitation email via SMTP. Logs errors without raising so invite creation always succeeds."""
     if not settings.SMTP_HOST or not settings.SMTP_USER:
@@ -292,7 +293,37 @@ def send_invite_email(
                 <p style="margin:0;font-size:15px;color:#0f172a;line-height:1.7;font-style:italic;">„{escaped_message}“</p>
               </div>"""
 
-    heading_text = (heading or "").strip() or "Du wurdest zu einer Mediation eingeladen"
+    # Ein Konflikt-Logbuch ist kein Verfahren: dort lädt man die andere Person
+    # ein, um z. B. Betreuungszeiten abzustimmen. Die Verfahrenssprache wäre
+    # für den Empfänger irreführend, deshalb ein eigener Textsatz.
+    if is_logbuch:
+        default_heading = "Du wurdest zu einem gemeinsamen Logbuch eingeladen"
+        doc_title = "Einladung zum gemeinsamen Logbuch"
+        subject_line = f"Einladung zum gemeinsamen Logbuch: {mediation_title}"
+        intro_html = (
+            "Du wurdest eingeladen, folgendes Konflikt-Logbuch gemeinsam zu nutzen "
+            "\u2013 zum Beispiel, um Betreuungszeiten abzustimmen:"
+        )
+        action_html = (
+            "Klicke auf den Button, um die Einladung anzunehmen. Du siehst dort "
+            '<strong style="color:#0f172a;">nur Eintr\u00e4ge und Termine, die '
+            "ausdr\u00fccklich geteilt wurden</strong> \u2013 pers\u00f6nliche Notizen "
+            "der anderen Person bleiben privat. Der Link ist 7 Tage gueltig."
+        )
+    else:
+        default_heading = "Du wurdest zu einer Mediation eingeladen"
+        doc_title = "Einladung zur Mediation"
+        subject_line = f"Einladung zur Mediation: {mediation_title}"
+        intro_html = (
+            f'Du wurdest als <strong style="color:#0f172a;">{role_label}</strong> zu '
+            "folgendem Mediationsverfahren eingeladen:"
+        )
+        action_html = (
+            "Klicke auf den Button, um die Einladung anzunehmen und dem Verfahren "
+            "beizutreten. Der Link ist 7 Tage gueltig."
+        )
+
+    heading_text = (heading or "").strip() or default_heading
     heading_html = (
         heading_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     )
@@ -310,7 +341,7 @@ def send_invite_email(
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Einladung zur Mediation</title>
+  <title>{doc_title}</title>
 </head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:40px 0;">
@@ -338,15 +369,14 @@ def send_invite_email(
                 {heading_html}
               </h1>
               <p style="margin:0 0 16px;font-size:15px;color:#475569;line-height:1.7;">
-                Du wurdest als <strong style="color:#0f172a;">{role_label}</strong> zu folgendem Mediationsverfahren eingeladen:
+                {intro_html}
               </p>
               <div style="background:#f1f5f9;border-radius:12px;padding:20px 24px;margin:0 0 28px;">
                 <p style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">{mediation_title}</p>
               </div>
               {personal_message_html}
               <p style="margin:0 0 28px;font-size:15px;color:#475569;line-height:1.7;">
-                Klicke auf den Button, um die Einladung anzunehmen und dem Verfahren beizutreten.
-                Der Link ist 7 Tage gueltig.
+                {action_html}
               </p>
               {video_notice_html}
               <table cellpadding="0" cellspacing="0">
@@ -380,7 +410,7 @@ def send_invite_email(
 </html>"""
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"Einladung zur Mediation: {mediation_title}"
+    msg["Subject"] = subject_line
     msg["From"] = settings.EMAIL_FROM
     msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html", "utf-8"))
@@ -670,7 +700,16 @@ def create_invite(
 
     token = create_invite_token()
 
-    if effective_video_mode(db, mediation.mediation_type) == "required" and not payload.video_token:
+    # Ein Logbuch behält seine Mediationsart (z. B. "trennung"), ist aber kein
+    # Verfahren. Ohne diese Ausnahme würde ein im Workflow Manager gesetzter
+    # Video-Pflichtschritt der Phase "einladung" auch die reine Kalender-
+    # Einladung blockieren – dort gibt es gar keinen Recorder in der Oberfläche.
+    is_logbuch = (mediation.mode or "mediation") == "logbuch"
+    if (
+        not is_logbuch
+        and effective_video_mode(db, mediation.mediation_type) == "required"
+        and not payload.video_token
+    ):
         raise HTTPException(
             status_code=400,
             detail="Eine persönliche Video-Botschaft ist für diese Einladung erforderlich.",
@@ -744,6 +783,7 @@ def create_invite(
         personal_message=paraphrased_message,
         has_video=bool(video_filename) or bool(meet_recording_uri),
         heading=payload.invitation_heading,
+        is_logbuch=is_logbuch,
     )
 
     return {
