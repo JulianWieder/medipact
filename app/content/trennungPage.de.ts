@@ -123,6 +123,7 @@ export const trennungPageContent = {
       { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
       { label: "Ratgeber: Trennungsjahr nachweisen", href: "/ratgeber/trennungsjahr-nachweisen" },
       { label: "Ratgeber: Vermögen aufteilen bei Scheidung", href: "/ratgeber/vermoegensauseinandersetzung" },
+      { label: "Ratgeber: Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
       { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner?art=trennung" },
     ],
   },

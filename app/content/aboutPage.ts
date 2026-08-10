@@ -18,11 +18,13 @@
 // des Vertrauens ist. Wer im Streit steckt, will nicht von einem Algorithmus
 // beurteilt werden; die Intelligenz muss aus dem Mechanismus hervorgehen.
 //
-// Alle Preise unten stammen aus backend/app/pricing.py (Stand 06.08.2026) und
+// Alle Preise unten stammen aus backend/app/pricing.py (Stand 10.08.2026) und
 // müssen bei einer Preisänderung dort UND hier nachgezogen werden:
 //   nachbarschaft/verbraucher 49 € per_party · trennung 399 € per_party
-//   (Hybrid 499 €, Vollservice 899 € — nur trennung) · erbschaft/ODR-Familie
-//   399 € once · Add-ons 79/49/29 € · Logbuch-Premium 14,95 €.
+//   (Hybrid 499 €, Vollservice 899 € — nur trennung) · erbschaft 399 € once
+//   · ODR-Familie gestaffelt: odr 1.900 €, b2b 1.200 €, schlichtung und
+//   ecommerce je 399 € (alle once) · Add-ons 79/49/29 € · Logbuch-Premium
+//   14,95 €.
 
 import { mediationsgesetzFacts } from "@/app/components/ui/DidYouKnowSection";
 
@@ -109,7 +111,8 @@ export const aboutPageContent = {
     bullets: [
       "Nachbarschaft sowie Verbraucher- und Handwerkerstreit: 49 € pro Partei.",
       "Trennung und Scheidung: 399 € pro Partei, mit Begleitung 499 € (Hybrid) oder 899 € (Vollservice).",
-      "Erbe und Unternehmenskonflikte: 399 € einmalig für den Fall, nicht pro Kopf.",
+      "Erbstreit: 399 € einmalig für den Fall, nicht pro Kopf.",
+      "Unternehmenskonflikte: 1.900 € bei Gesellschaftern, Nachfolge und Team, 1.200 € beim B2B-Vertragsstreit, 399 € bei Schlichtung und E-Commerce — jeweils einmalig für den Fall.",
       "Zu den Einstiegstarifen zubuchbar: Videositzung 79 €, geprüfte Abschlussvereinbarung 49 €, Express-Bearbeitung 29 €.",
       "Konflikt-Logbuch: kostenlos, Premium-Funktionen 14,95 €.",
       "Fall anlegen und Situation schildern kostet nichts — bezahlt wird erst, wenn das Verfahren startet.",

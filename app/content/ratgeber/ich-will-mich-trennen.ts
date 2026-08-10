@@ -125,6 +125,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
+    { label: "Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },

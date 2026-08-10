@@ -74,6 +74,10 @@
   "lib/abgleich.ts",
   "app/components/layout/SessionTimer.tsx",
   "app/components/layout/DashboardHeader.tsx",
-  "lib/session.ts"
+  "lib/session.ts",
+  "app/components/kalender/BetreuungsKalender.tsx",
+  "app/components/kalender/KalenderKarte.tsx",
+  "app/dashboard/kalender/KalenderSeite.tsx",
+  "app/dashboard/kalender/page.tsx"
  ]
 }

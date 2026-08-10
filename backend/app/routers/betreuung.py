@@ -34,6 +34,7 @@ from app.email import send_care_request_email
 from app.models.mediation_care_request_event import MediationCareRequestEvent
 from app.models.mediation_care_rule import MediationCareRule
 from app.models.mediation_care_time import MediationCareTime
+from app.models.mediation_child import MediationChild
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.routers.logbuch import VISIBILITIES, _get_mediation, _require_participant
@@ -52,6 +53,37 @@ REQUEST_KINDS = {"tausch", "zusatztag", "absage", "verschiebung"}
 # Arten, die konkrete Zeiten brauchen – eine Absage schlägt nichts vor.
 KINDS_NEEDING_TIMES = {"tausch", "zusatztag", "verschiebung"}
 REQUEST_ACTIONS = {"akzeptieren", "ablehnen", "gegenvorschlag"}
+
+# Klartext je Art – für Benachrichtigungen und für die Absprachen-Übersicht
+# (routers/kalender.py). Die Oberfläche soll dieselben Wörter benutzen wie die
+# E-Mail, sonst liest man zweimal dasselbe und glaubt, es sei zweierlei.
+KIND_LABELS_DE = {
+    "tausch": "Tausch",
+    "zusatztag": "Zusätzlicher Tag",
+    "absage": "Absage",
+    "verschiebung": "Verschiebung",
+}
+
+# Die Rolle des Kind-Zugangs. Ein Kind darf seinen Betreuungsplan sehen – aber
+# nichts daran ändern und an keiner Absprache teilnehmen. Die Aushandlung ist
+# Sache der Eltern; ein Kind, das zustimmen oder ablehnen kann, wird zur Partei
+# im Streit seiner Eltern. Deshalb hängt die Sperre am Schreiben, nicht am
+# Lesen (Migration j5k6l7m8n9o0).
+READ_ONLY_ROLES = {"kind"}
+
+
+def _require_writer(
+    mediation_id: int, user: User, db: Session
+) -> MediationParticipant:
+    """Teilnehmer:in mit Schreibrecht – wie _require_participant, aber ohne
+    die reinen Lese-Rollen."""
+    p = _require_participant(mediation_id, user, db)
+    if (p.role or "") in READ_ONLY_ROLES:
+        raise HTTPException(
+            status_code=403,
+            detail="Dieser Zugang darf den Betreuungsplan nur ansehen.",
+        )
+    return p
 
 
 # ── Helfer ──────────────────────────────────────────────────────────────────
@@ -102,6 +134,33 @@ def _check_visibility(value: str) -> str:
     return value
 
 
+def _check_children(
+    mediation_id: int, ids: Optional[list[int]], db: Session
+) -> Optional[list[int]]:
+    """Prüft eine Kind-Zuordnung und normalisiert sie.
+
+    Leer wird zu None – „keine Kinder genannt" heißt im ganzen Kalender „gilt
+    für alle" (so bleiben auch alle vor Migration j5k6l7m8n9o0 angelegten
+    Zeilen gültig, ohne dass sie angefasst werden müssten).
+    """
+    if not ids:
+        return None
+    eindeutig = sorted({int(i) for i in ids})
+    vorhanden = {
+        c.id
+        for c in db.query(MediationChild.id)
+        .filter(
+            MediationChild.mediation_id == mediation_id,
+            MediationChild.id.in_(eindeutig),
+        )
+        .all()
+    }
+    fehlend = [i for i in eindeutig if i not in vorhanden]
+    if fehlend:
+        raise HTTPException(status_code=422, detail="Unbekanntes Kind in der Zuordnung.")
+    return eindeutig
+
+
 def _check_category(value: str) -> str:
     if value not in CATEGORIES:
         raise HTTPException(status_code=422, detail="Ungültige Art des Eintrags.")
@@ -123,6 +182,9 @@ def _serialize_rule(r: MediationCareRule) -> dict:
         "valid_until": r.valid_until,
         "visibility": r.visibility or "personal",
         "author_participant_id": r.author_participant_id,
+        # Leere Liste statt None nach außen: der Client muss nicht zwischen
+        # „keine Angabe" und „alle" unterscheiden – beides heißt alle.
+        "child_ids": r.child_ids or [],
     }
 
 
@@ -142,6 +204,7 @@ def _serialize_time(t: MediationCareTime) -> dict:
         "category": t.category or "betreuung",
         "visibility": t.visibility or "personal",
         "author_participant_id": t.author_participant_id,
+        "child_ids": t.child_ids or [],
         "verbindlich": _is_binding(t),
         **_serialize_request(t),
     }
@@ -252,6 +315,8 @@ class CareRuleCreate(BaseModel):
     valid_from: Optional[str] = None
     valid_until: Optional[str] = None
     visibility: str = "personal"
+    # IDs aus mediation_children. Leer = gilt für alle Kinder.
+    child_ids: Optional[list[int]] = None
 
 
 class CareRuleUpdate(BaseModel):
@@ -266,6 +331,7 @@ class CareRuleUpdate(BaseModel):
     valid_from: Optional[str] = None
     valid_until: Optional[str] = None
     visibility: Optional[str] = None
+    child_ids: Optional[list[int]] = None
 
 
 @router.get("/{mediation_id}/logbuch/betreuung/rules")
@@ -293,7 +359,7 @@ def create_rule(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     _check_weekday(payload.start_weekday, "start_weekday")
     _check_weekday(payload.end_weekday, "end_weekday")
     _parse_hhmm(payload.start_time, "start_time")
@@ -318,6 +384,7 @@ def create_rule(
         valid_from=payload.valid_from,
         valid_until=payload.valid_until,
         visibility=payload.visibility,
+        child_ids=_check_children(mediation_id, payload.child_ids, db),
     )
     db.add(rule)
     db.commit()
@@ -352,7 +419,7 @@ def update_rule(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     rule = _get_own_rule(mediation_id, rule_id, participant, db)
 
     data = payload.model_dump(exclude_unset=True)
@@ -370,6 +437,8 @@ def update_rule(
         _check_visibility(data["visibility"])
     if "interval_weeks" in data and (data["interval_weeks"] or 0) < 1:
         raise HTTPException(status_code=422, detail="interval_weeks muss ≥ 1 sein.")
+    if "child_ids" in data:
+        data["child_ids"] = _check_children(mediation_id, data["child_ids"], db)
 
     for key, value in data.items():
         setattr(rule, key, value)
@@ -386,7 +455,7 @@ def delete_rule(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     rule = _get_own_rule(mediation_id, rule_id, participant, db)
     # Overrides der Serie mitlöschen – ohne Regel sind sie bedeutungslos.
     override_ids = [
@@ -429,6 +498,7 @@ class CareTimeCreate(BaseModel):
     # betreuung | ferien | feiertag
     category: str = "betreuung"
     visibility: str = "personal"
+    child_ids: Optional[list[int]] = None
 
 
 class CareTimeUpdate(BaseModel):
@@ -443,6 +513,7 @@ class CareTimeUpdate(BaseModel):
     title: Optional[str] = None
     category: Optional[str] = None
     visibility: Optional[str] = None
+    child_ids: Optional[list[int]] = None
 
 
 @router.get("/{mediation_id}/logbuch/betreuung/termine")
@@ -527,6 +598,10 @@ def list_termine(
                     ov.author_participant_id if ov else rule.author_participant_id
                 ),
                 "rule_author_participant_id": rule.author_participant_id,
+                # Der Override darf die Kinder des Vorkommens einschränken
+                # („diesmal nur der Kleine"); ohne eigene Angabe gilt die Regel.
+                "child_ids": (ov.child_ids if ov and ov.child_ids else rule.child_ids)
+                or [],
                 "verbindlich": _is_binding(ov),
                 **(_serialize_request(ov) if ov else _no_request()),
             }
@@ -567,7 +642,7 @@ def create_termin(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     day = _parse_date(payload.date, "date")
     if not day:
         raise HTTPException(status_code=422, detail="date ist erforderlich.")
@@ -617,6 +692,7 @@ def create_termin(
         title=payload.title,
         category=payload.category,
         visibility=payload.visibility,
+        child_ids=_check_children(mediation_id, payload.child_ids, db),
     )
     db.add(t)
     db.commit()
@@ -633,7 +709,7 @@ def update_termin(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     t = (
         db.query(MediationCareTime)
         .filter(
@@ -662,6 +738,8 @@ def update_termin(
     for f in ("planned_start", "planned_end", "actual_start", "actual_end"):
         if f in data:
             data[f] = _parse_dt(data[f], f)
+    if "child_ids" in data:
+        data["child_ids"] = _check_children(mediation_id, data["child_ids"], db)
 
     for key, value in data.items():
         setattr(t, key, value)
@@ -699,6 +777,7 @@ class ExtraDayCreate(BaseModel):
     title: Optional[str] = None
     category: str = "betreuung"
     message: Optional[str] = None
+    child_ids: Optional[list[int]] = None
 
 
 class RequestAnswer(BaseModel):
@@ -838,7 +917,7 @@ def create_request(
 ):
     """Bittet um Tausch, Absage oder Verschiebung eines geteilten Termins."""
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     t = _get_shared_termin(mediation_id, termin_id, participant, db)
 
     if payload.kind not in REQUEST_KINDS:
@@ -869,6 +948,10 @@ def create_request(
     t.request_end = end
     t.request_message = payload.message
     t.request_answered_at = None
+    # Neue Anfrage = neue Frist: sonst bliebe der Merker der vorigen Anfrage
+    # stehen und diese hier bekäme nie eine Erinnerung
+    # (scripts/check_care_requests.py).
+    t.request_reminder_sent_at = None
     _log_event(db, t, participant.id, "angefragt", payload.message)
     db.commit()
     db.refresh(t)
@@ -892,7 +975,7 @@ def request_extra_day(
     selbst sieht, ergibt keinen Sinn.
     """
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     day = _parse_date(payload.date, "date")
     if not day:
         raise HTTPException(status_code=422, detail="date ist erforderlich.")
@@ -922,6 +1005,7 @@ def request_extra_day(
         request_start=start,
         request_end=end,
         request_message=payload.message,
+        child_ids=_check_children(mediation_id, payload.child_ids, db),
     )
     db.add(t)
     db.flush()  # ID für den Verlaufseintrag
@@ -948,7 +1032,7 @@ def answer_request(
     Ausgang und soll nicht zwei Anfragen kosten.
     """
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     t = _get_shared_termin(mediation_id, termin_id, participant, db)
 
     if payload.aktion not in REQUEST_ACTIONS:
@@ -976,6 +1060,9 @@ def answer_request(
         t.request_end = end
         t.request_message = payload.message
         t.request_by = participant.id
+        # Die Richtung dreht sich um – jetzt ist die andere Seite am Zug und
+        # die Frist beginnt neu (scripts/check_care_requests.py).
+        t.request_reminder_sent_at = None
         _log_event(db, t, participant.id, "gegenvorschlag", payload.message)
         action = "gegenvorschlag"
     elif payload.aktion == "akzeptieren":
@@ -1010,7 +1097,7 @@ def withdraw_request(
     bleibt der Termin bestehen, nur die Anfrage verfällt.
     """
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     t = _get_shared_termin(mediation_id, termin_id, participant, db)
 
     if t.request_status != "offen":
@@ -1142,7 +1229,7 @@ def delete_termin(
     db: Session = Depends(get_db),
 ):
     _get_mediation(mediation_id, db)
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_writer(mediation_id, user, db)
     t = (
         db.query(MediationCareTime)
         .filter(

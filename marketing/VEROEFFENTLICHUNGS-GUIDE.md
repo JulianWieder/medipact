@@ -22,7 +22,7 @@ Stand: 17.07.2026. Vier fertige Texte, jeweils auf Plattform-Typ zugeschnitten.
 ## Wichtig vor dem Veröffentlichen
 
 - **Zitate prüfen:** Ich habe dir Zitate als Gründer in den Mund gelegt – anpassen, falls sie nicht passen.
-- **Ort/Impressum:** „Berlin" in den PMs ist Platzhalter – durch echten Firmensitz ersetzen.
+- **Ort/Impressum:** erledigt – die PMs tragen jetzt „Dreieich" (Firmensitz laut Impressum).
 - **Pressekontakt:** aktuell julianvwieder@gmail.com – ggf. presse@medipact.de einrichten (wirkt professioneller).
 - **Deploy zuerst:** PMs verlinken auf /konflikte/geschaeft und /ratgeber – die neuen Ratgeber-Artikel und Meta-SEO-Änderungen sind noch nicht deployed.
 - **Presseportal-Regeln:** openPR lehnt rein werbliche Texte ab; die PMs sind bewusst nachrichtlich gehalten – beim Kürzen nicht werblicher machen.

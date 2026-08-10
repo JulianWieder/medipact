@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 
 from app.database import Base
 
@@ -78,6 +78,14 @@ class MediationCareTime(Base):
     request_end = Column(DateTime, nullable=True)
     request_message = Column(Text, nullable=True)
     request_answered_at = Column(DateTime, nullable=True)
+    # Merker für die Erinnerung an eine unbeantwortete Anfrage
+    # (scripts/check_care_requests.py). Wird mit jeder neuen Anfrage geleert –
+    # ohne diesen Merker ginge die Mail bei jedem Lauf erneut raus.
+    request_reminder_sent_at = Column(DateTime, nullable=True)
+    # Welche Kinder betrifft dieser Termin (Liste von MediationChild-IDs).
+    # NULL/leer = alle. Bei einem Serien-Override schlägt die Liste des
+    # Overrides die der Regel – so lässt sich „diesmal nur der Kleine" abbilden.
+    child_ids = Column(JSON, nullable=True)
     visibility = Column(
         String, nullable=False, default="personal", server_default="personal"
     )

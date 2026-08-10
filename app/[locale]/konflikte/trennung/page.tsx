@@ -78,6 +78,8 @@ export default async function TrennungPage({
           { label: "Ratgeber: Wer muss aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
           { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
           { label: "Ratgeber: Sorgerecht und Umgang regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
+          { label: "Ratgeber: Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
+          { label: "Ratgeber: Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
           { label: "Trennung mit 2 Kindern", href: "/cases/trennung-mit-kindern" },
           { label: "Hohes Vermögen, komplexe Aufteilung", href: "/cases/trennung-vermoegen-aufteilen" },
           { label: "Nach 38 Jahren Ehe", href: "/cases/trennung-nach-langer-ehe" },

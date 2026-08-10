@@ -1,11 +1,47 @@
 "use client";
 
+import type { ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { isMigratedLocalePath } from "@/i18n/routing";
 import { resetCookieConsent } from "@/app/components/CookieConsent";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import { socialProfiles } from "@/app/content/social";
+
+/**
+ * Gleiches Problem wie im Header, gleiche Lösung: Der lokalisierte Link aus
+ * @/i18n/navigation darf nur für Pfade benutzt werden, die wirklich unter
+ * app/[locale]/ liegen (siehe MIGRATED_LOCALE_ROUTES in i18n/routing.ts).
+ * Für alle anderen berechnet next-intl ein Locale-Präfix, das die Zielseite
+ * nie wieder abstreift — das war die "/de/en/methode"-Schleife.
+ *
+ * Der Footer stand bis 10.08.2026 komplett auf dem lokalisierten Link,
+ * obwohl KEIN einziger seiner Pfade migriert ist. Sichtbar wurde das nur im
+ * /en-Zweig, weil im deutschen Default kein Präfix entsteht.
+ */
+function FooterLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (isMigratedLocalePath(href.split("#")[0])) {
+    return (
+      <Link href={href} className={className}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <UnlocalizedLink href={href} className={className}>
+      {children}
+    </UnlocalizedLink>
+  );
+}
 
 interface FooterProps {
   brandName?: string;
@@ -69,24 +105,24 @@ export default function Footer({
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
-                <Link href="/preise" className="transition hover:text-white">
+                <FooterLink href="/preise" className="transition hover:text-white">
                   {t("productPricing")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/methode" className="transition hover:text-white">
+                <FooterLink href="/methode" className="transition hover:text-white">
                   {t("productMethod")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/cases" className="transition hover:text-white">
+                <FooterLink href="/cases" className="transition hover:text-white">
                   {t("productCases")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/kostenrechner" className="transition hover:text-white">
+                <FooterLink href="/kostenrechner" className="transition hover:text-white">
                   {t("productCalculator")}
-                </Link>
+                </FooterLink>
               </li>
             </ul>
           </div>
@@ -98,19 +134,24 @@ export default function Footer({
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
-                <Link href="/about" className="transition hover:text-white">
+                <FooterLink href="/about" className="transition hover:text-white">
                   {t("companyAbout")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/karriere" className="transition hover:text-white">
+                <FooterLink href="/karriere" className="transition hover:text-white">
                   {t("companyCareers")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/kontakt" className="transition hover:text-white">
+                <FooterLink href="/kontakt" className="transition hover:text-white">
                   {t("companyContact")}
-                </Link>
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/fuer-berater" className="transition hover:text-white">
+                  {t("companyForAdvisors")}
+                </FooterLink>
               </li>
             </ul>
           </div>
@@ -122,24 +163,24 @@ export default function Footer({
             </h4>
             <ul className="mt-4 space-y-2 text-neutral-400">
               <li>
-                <Link href="/datenschutz" className="transition hover:text-white">
+                <FooterLink href="/datenschutz" className="transition hover:text-white">
                   {t("legalPrivacy")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/agb" className="transition hover:text-white">
+                <FooterLink href="/agb" className="transition hover:text-white">
                   {t("legalTerms")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/impressum" className="transition hover:text-white">
+                <FooterLink href="/impressum" className="transition hover:text-white">
                   {t("legalImprint")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
-                <Link href="/cookies" className="transition hover:text-white">
+                <FooterLink href="/cookies" className="transition hover:text-white">
                   {t("legalCookies")}
-                </Link>
+                </FooterLink>
               </li>
               <li>
                 <button

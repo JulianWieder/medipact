@@ -555,6 +555,7 @@ export type Konfliktart =
   | "nachbarschaft"
   | "verbraucher"
   | "erbschaft"
+  | "odr"
   | "b2b"
   | "trennung"
   | "kindschaft";
@@ -609,10 +610,27 @@ export const KONFLIKTARTEN: readonly KonfliktartInfo[] = [
     streitwertHinweis:
       "Maßgeblich ist der Wert des strittigen Nachlassanteils, nicht der gesamte Nachlass.",
   },
+  // Bis 10.08.2026 stand hier EIN Eintrag für die ganze ODR-Familie, weil alle
+  // vier Typen 399 € kosteten. Seit der Preisstaffel in pricing.py stimmt das
+  // nicht mehr: Ein Gesellschafterkonflikt (1.900 €) und ein B2B-Vertrags-
+  // streit (1.200 €) sind zwei Zeilen. Streitwerte unterscheiden sich ebenso —
+  // beim Gesellschafterstreit hängt er am Anteilswert, beim Vertragsstreit an
+  // der Forderung.
+  {
+    key: "odr",
+    label: "Gesellschafter- & Unternehmenskonflikt",
+    preis: 1900,
+    proPartei: false,
+    gerichtssatz: SAETZE.gerichtZivil,
+    href: "/konflikte/odr",
+    streitwertDefault: 150000,
+    streitwertHinweis:
+      "Maßgeblich ist der Wert der strittigen Anteile bzw. der Abfindung – nicht der Unternehmenswert insgesamt.",
+  },
   {
     key: "b2b",
-    label: "Geschäftlicher Streit (B2B, ODR)",
-    preis: 399,
+    label: "B2B-Vertragsstreit",
+    preis: 1200,
     proPartei: false,
     gerichtssatz: SAETZE.gerichtZivil,
     href: "/konflikte/odr",

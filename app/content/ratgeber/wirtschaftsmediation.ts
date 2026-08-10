@@ -95,6 +95,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kündigung ohne Gericht klären", href: "/ratgeber/kuendigung-ohne-gericht" },
     { label: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/odr" },
     { label: "Fallbeispiel: Gesellschafterstreit", href: "/cases/gesellschafter-streit" },
     { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },

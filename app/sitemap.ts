@@ -12,11 +12,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
+  // Stand 2026-08-10: /fuer-berater aufgenommen — Landingpage fuer
+  // Multiplikatoren (Steuerberater, Notare, Nachfolgeberater). Bewusst
+  // KEINE Konflikt-Suchphrasen, damit /konflikte/odr "Mediation bei
+  // Geschaeftspartnern" allein traegt.
   // Stand 2026-08-06: neues /einigung-Cluster (4 URLs) aufgenommen, siehe
   // docs/einigung-cluster-konzept.md. Davor 2026-08-01: 9 Case-URLs auf
   // Problem-Slugs umbenannt (neue URLs!), interne Links auf /cases, /methode,
   // /konflikte/erbschaft angepasst.
-  const lastModified = new Date("2026-08-06");
+  const lastModified = new Date("2026-08-10");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -36,6 +40,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 0.9,
+    },
+    // Vertriebs-Asset, kein SEO-Duplikat: eigene Zielgruppe (beratende
+    // Berufe), eigene Suchsprache. Prioritaet bewusst moderat — die Seite
+    // soll ueber Direktlinks aus Mails und Gespraechen erreicht werden.
+    {
+      url: `${BASE_URL}/fuer-berater`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/methode`,

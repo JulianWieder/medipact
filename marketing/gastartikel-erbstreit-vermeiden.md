@@ -37,4 +37,4 @@ Fairerweise: Mediation setzt voraus, dass alle Beteiligten freiwillig mitwirken.
 ---
 
 **Autorenbox:**
-*Julian von Wieder ist Gründer von [medipact](https://medipact.de), einer Plattform für Online-Mediation bei Trennungs-, Familien- und Erbkonflikten (ab 249 € pro Partei). Im [Ratgeber](https://medipact.de/ratgeber) finden sich weitere Fachartikel und Fallbeispiele.*
+*Julian von Wieder ist Gründer von [medipact](https://medipact.de), einer Plattform für Online-Mediation bei Trennungs-, Familien- und Erbkonflikten (zum Festpreis ab 399 €). Im [Ratgeber](https://medipact.de/ratgeber) finden sich weitere Fachartikel und Fallbeispiele.*

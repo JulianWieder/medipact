@@ -167,7 +167,7 @@ const variants = [
     badge: "Online-Prozess",
     title: "Schnell & günstig",
     price: "ab €49",
-    priceNote: "Nachbarschaft und Verbraucher je Partei; Trennung, Erbe und Geschäft ab €399",
+    priceNote: "Nachbarschaft und Verbraucher je Partei; Trennung und Erbe ab €399, Geschäftskonflikte ab €1.200",
     availability: "Für alle Konfliktarten",
     text: "Der geführte Prozess bringt Sie Schritt für Schritt zur Lösung – rund um die Uhr, ganz in Ihrem Tempo.",
     facts: ["Geführter Prozess, 24/7 verfügbar", "Dauer: meist 1–2 Wochen", "Ideal für klare bis mittelschwere Fälle"],
@@ -227,7 +227,8 @@ const methodVariants = [
 ];
 
 // ODR = Online Dispute Resolution. Die vier Typen aus pricing.py (ODR_TYPES).
-// Einzelfall 399 € "once", alternativ im Firmen-Abo (Organization).
+// Alle "once", aber seit 10.08.2026 gestaffelt: odr 1.900 €, b2b 1.200 €,
+// schlichtung und ecommerce je 399 €. Alternativ im Firmen-Abo (Organization).
 const odrTypes = [
   {
     title: "Wirtschaftsmediation",
@@ -281,7 +282,7 @@ const faqs = [
   },
   {
     q: "Kann ich Hybrid oder Vollservice für jeden Konflikt buchen?",
-    a: "Nein. Die persönlich begleiteten Pakete bieten wir derzeit nur bei Trennung und Scheidung an. Alle übrigen Konfliktarten laufen über den Online-Prozess – Nachbarschaft und Verbraucher ab 49 Euro je Partei, Erbe und Geschäftskonflikte pauschal 399 Euro pro Fall.",
+    a: "Nein. Die persönlich begleiteten Pakete bieten wir derzeit nur bei Trennung und Scheidung an. Alle übrigen Konfliktarten laufen über den Online-Prozess – Nachbarschaft und Verbraucher ab 49 Euro je Partei, Erbstreit pauschal 399 Euro pro Fall, Geschäftskonflikte 1.900 Euro (Gesellschafter, Nachfolge, Team) beziehungsweise 1.200 Euro (B2B-Vertragsstreit).",
   },
   {
     q: "Nach welcher Methode wird mediiert?",
@@ -741,8 +742,9 @@ export default function MethodePage() {
               Für Unternehmen mit vielen Fällen
             </h3>
             <p className="mt-3 max-w-3xl leading-7 text-neutral-300">
-              Ein Einzelfall kostet pauschal 399 € und wird von der Seite
-              bezahlt, die ihn anlegt. Wer regelmäßig Streitfälle abzuwickeln
+              Ein einzelnes Massenverfahren – Online-Schlichtung oder
+              E-Commerce-Streit – kostet pauschal 399 € und wird von der Seite
+              bezahlt, die es anlegt. Wer regelmäßig Streitfälle abzuwickeln
               hat – Fluggastrechte, Mietforderungen, E-Commerce-Reklamationen –
               nutzt stattdessen ein Firmen-Abo, in dem die Fälle enthalten sind.
             </p>

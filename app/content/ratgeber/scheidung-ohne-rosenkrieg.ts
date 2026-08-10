@@ -103,6 +103,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },

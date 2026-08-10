@@ -24,4 +24,5 @@ from app.models.mediation_log_upload import MediationLogUpload
 from app.models.mediation_care_rule import MediationCareRule
 from app.models.mediation_care_time import MediationCareTime
 from app.models.mediation_care_request_event import MediationCareRequestEvent
+from app.models.mediation_child import MediationChild
 from app.models.user_onboarding_response import UserOnboardingResponse

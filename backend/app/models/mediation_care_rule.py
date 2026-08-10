@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
 
 from app.database import Base
 
@@ -48,6 +48,10 @@ class MediationCareRule(Base):
     # Geltungszeitraum als ISO-Datum, beide optional (offenes Ende).
     valid_from = Column(String, nullable=True)
     valid_until = Column(String, nullable=True)
+    # Welche Kinder betrifft dieses Betreuungsfenster (Liste von
+    # MediationChild-IDs). NULL oder leer heißt „alle Kinder" – dadurch bleiben
+    # alle vor Migration j5k6l7m8n9o0 angelegten Regeln unverändert gültig.
+    child_ids = Column(JSON, nullable=True)
     visibility = Column(
         String, nullable=False, default="personal", server_default="personal"
     )

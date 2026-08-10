@@ -367,6 +367,8 @@ def send_care_request_email(
         "akzeptiert": f"{label.capitalize()} angenommen",
         "abgelehnt": f"{label.capitalize()} abgelehnt",
         "zurueckgezogen": f"{label.capitalize()} zurückgezogen",
+        # Erinnerung an eine unbeantwortete Bitte (scripts/check_care_requests.py).
+        "erinnerung": f"{label.capitalize()} wartet auf deine Antwort",
     }
     leads = {
         "angefragt": f"Im Betreuungskalender wurde um eine {label} gebeten.",
@@ -374,6 +376,11 @@ def send_care_request_email(
         "akzeptiert": "Deine Anfrage im Betreuungskalender wurde angenommen. Der Plan ist angepasst.",
         "abgelehnt": "Deine Anfrage im Betreuungskalender wurde abgelehnt. Der Plan bleibt wie er war.",
         "zurueckgezogen": "Eine Anfrage im Betreuungskalender wurde zurückgezogen.",
+        "erinnerung": (
+            "Eine Bitte im Betreuungskalender ist noch unbeantwortet. Solange "
+            "niemand antwortet, bleibt der Plan wie er war – und beide Seiten "
+            "planen womöglich unterschiedlich."
+        ),
     }
     heading = headings.get(action, "Neues im Betreuungskalender")
     paragraphs = [
@@ -383,7 +390,7 @@ def send_care_request_email(
     ]
     if message and message.strip():
         paragraphs.append(f"„{message.strip()}“")
-    if action in ("angefragt", "gegenvorschlag"):
+    if action in ("angefragt", "gegenvorschlag", "erinnerung"):
         paragraphs.append(
             "Du kannst im Kalender zustimmen, ablehnen oder selbst etwas anderes vorschlagen."
         )

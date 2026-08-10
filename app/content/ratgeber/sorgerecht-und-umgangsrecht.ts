@@ -178,6 +178,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },

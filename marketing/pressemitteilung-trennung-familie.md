@@ -6,7 +6,7 @@
 
 ## Streit um Trennung oder Erbe? Online-Mediation löst Konflikte, bevor sie vor Gericht landen
 
-**Berlin, Juli 2026.** Trennungen, Scheidungen und Erbstreitigkeiten gehören zu den belastendsten Konflikten überhaupt – emotional wie finanziell. Gerichtsverfahren ziehen sich oft über Jahre, kosten Tausende Euro und hinterlassen zerrüttete Familien. Die Online-Plattform medipact bietet eine Alternative: professionelle Mediation, digital geführt und ab 249 € pro Partei.
+**Dreieich, Juli 2026.** Trennungen, Scheidungen und Erbstreitigkeiten gehören zu den belastendsten Konflikten überhaupt – emotional wie finanziell. Gerichtsverfahren ziehen sich oft über Jahre, kosten Tausende Euro und hinterlassen zerrüttete Familien. Die Online-Plattform medipact bietet eine Alternative: professionelle Mediation, digital geführt, zum Festpreis ab 399 € pro Partei.
 
 **Vom Konflikt zur verbindlichen Vereinbarung – in drei Schritten**
 

@@ -87,6 +87,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kündigung ohne Gericht klären", href: "/ratgeber/kuendigung-ohne-gericht" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Wirtschaftsmediation", href: "/ratgeber/wirtschaftsmediation" },
     { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },

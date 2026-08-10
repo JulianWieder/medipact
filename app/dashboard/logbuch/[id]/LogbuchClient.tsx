@@ -26,7 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Reveal } from "@/app/components/ui/motion";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { cardLift, cn } from "@/app/components/ui/premium";
-import BetreuungsKalender from "./BetreuungsKalender";
+import BetreuungsKalender from "@/app/components/kalender/BetreuungsKalender";
 
 interface Props {
   mediationId: string;
@@ -1466,16 +1466,25 @@ export default function LogbuchClient({
               )}
             </section>
 
-            {/* ── Betreuungskalender (nur Trennung): Plan- vs. Ist-Zeiten ──
-                Ein-Buch-Umbau: Der Buch-Typ ist nur noch der Start-Bereich –
-                der Kalender erscheint auch, wenn EINTRÄGE zum Bereich
-                "trennung" existieren (oder gerade einer erfasst wird). */}
-            {(mediationType === "trennung" ||
-              (!isLinked &&
-                (areasPresent.some((a) => a.key === "trennung") ||
-                  (composerOpen && entryArea === "trennung")))) && (
-              <BetreuungsKalender mediationId={mediationId} />
-            )}
+            {/* ── Kalender: Plan- vs. Ist-Zeiten ──
+                Die Bedingung „nur bei Trennung" ist bewusst gefallen. Sie
+                stammte aus der Zeit, als der Kalender ausschließlich
+                Betreuungszeiten von Kindern konnte; inzwischen ist er ein
+                eigenes Feature (/dashboard/kalender) und trägt auch Termine
+                und Fristen, die mit einer Trennung nichts zu tun haben. Wer
+                ihn nicht braucht, klappt ihn zu – das ist billiger als ihn
+                nicht zu finden.
+                Angezeigt wird hier dieselbe Komponente wie auf der eigenen
+                Seite, nur eingebettet und ohne die Mediations-Termine. */}
+            <BetreuungsKalender
+              mediationId={mediationId}
+              titel={
+                mediationType === "trennung" ||
+                areasPresent.some((a) => a.key === "trennung")
+                  ? "Betreuungskalender"
+                  : "Kalender"
+              }
+            />
 
             {/* ── Chronologie ── */}
             <section className="mt-10">

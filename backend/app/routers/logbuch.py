@@ -89,6 +89,32 @@ def _require_participant(mediation_id: int, user: User, db: Session) -> Mediatio
     return p
 
 
+# Rollen, die im Logbuch NICHTS zu suchen haben. Der Kind-Zugang (Migration
+# j5k6l7m8n9o0) darf den Betreuungsplan sehen – aber niemals die Einträge:
+# das Logbuch ist das Gedächtnisprotokoll eines Elternteils über den Konflikt,
+# oft über die andere Person. Ein Kind, das darin liest, ist der schlimmste
+# denkbare Ausgang dieses Features.
+LOGBUCH_EXCLUDED_ROLES = {"kind"}
+
+
+def _require_logbuch_access(
+    mediation_id: int, user: User, db: Session
+) -> MediationParticipant:
+    """Teilnahme UND Berechtigung für die Logbuch-Inhalte.
+
+    Absichtlich getrennt von `_require_participant`: routers/betreuung.py
+    braucht die reine Teilnahme-Prüfung weiterhin, weil der Kalender auch für
+    den Kind-Zugang offensteht.
+    """
+    p = _require_participant(mediation_id, user, db)
+    if (p.role or "") in LOGBUCH_EXCLUDED_ROLES:
+        raise HTTPException(
+            status_code=403,
+            detail="Dieser Zugang sieht ausschließlich den Betreuungskalender.",
+        )
+    return p
+
+
 def _get_mediation(mediation_id: int, db: Session) -> Mediation:
     m = db.query(Mediation).filter(Mediation.id == mediation_id).first()
     if not m:
@@ -160,7 +186,7 @@ def list_entries(
     für Teilnehmer. Sichtbarkeitsfilter (Journal-Ausbau): Nicht-Autoren –
     also Mediator/Gegenseite nach Umwandlung oder im verknüpften Fall – sehen
     ausschließlich Einträge mit visibility="shared"."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     rows = (
         db.query(MediationLogEntry)
@@ -191,7 +217,7 @@ def create_entry(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
 
     entry_type = (payload.entry_type or "vorkommnis").strip().lower()
@@ -223,7 +249,7 @@ def create_entry(
 def _get_own_entry(
     mediation_id: int, entry_id: int, db: Session, user: User
 ) -> MediationLogEntry:
-    participant = _require_participant(mediation_id, user, db)
+    participant = _require_logbuch_access(mediation_id, user, db)
     entry = (
         db.query(MediationLogEntry)
         .filter(
@@ -348,7 +374,7 @@ def link_targets(
 
     Das sind alle Mediationen, an denen die Nutzer:in beteiligt ist – Logbücher
     selbst sind ausgeschlossen."""
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     book = _get_mediation(mediation_id, db)
     rows = (
         db.query(Mediation)
@@ -387,7 +413,7 @@ def link_book(
     Setzt den Standard-Fall des Buchs (neue Einträge erben ihn) und trägt ihn
     mit ``apply_to_existing`` einmalig auf die vorhandenen eigenen Einträge
     nach. Sensible Einträge (visibility="private") bleiben ausgenommen."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_logbuch_access(mediation_id, current_user, db)
     book = _get_mediation(mediation_id, db)
     if (participant.role or "").lower() not in ("owner", "admin"):
         raise HTTPException(
@@ -648,7 +674,7 @@ def convert_to_mediation(
     Bereichs; die Einträge des Bereichs ziehen dorthin um (Chronologie der
     Fallaufnahme), das Konflikt-Logbuch bleibt mit den übrigen Einträgen
     bestehen (Ein-Buch-Prinzip)."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_logbuch_access(mediation_id, current_user, db)
     if (participant.role or "").lower() not in ("owner", "admin"):
         raise HTTPException(status_code=403, detail="Nur die Eigentümer:in kann umwandeln.")
     mediation = _get_mediation(mediation_id, db)
@@ -840,7 +866,7 @@ def logbuch_status(
     current_user: User = Depends(get_current_db_user),
 ):
     """Stufe + Kontingente – Grundlage für Quota-Anzeige und Premium-CTA."""
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     return {
         "plan": _plan(m),
@@ -929,7 +955,7 @@ def analyze_entry(
     Verbraucht NUR dann Kontingent, wenn die KI tatsächlich eine Empfehlung
     liefert (Qualitäts-Gate: dünne Einträge → "skipped", kostenlos). Bereits
     analysierte Einträge geben ihr gespeichertes Ergebnis zurück."""
-    participant = _require_participant(mediation_id, current_user, db)
+    participant = _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     entry = _get_own_entry(mediation_id, entry_id, db, current_user)
 
@@ -1057,7 +1083,7 @@ async def logbuch_upload(
 ):
     """Datei-Upload fürs Logbuch – OHNE Paywall, aber mit Stufen-Quote
     (free: 1/Woche; premium: unbegrenzt)."""
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
 
     quota = _quota(db, m, "uploads")
@@ -1106,7 +1132,7 @@ def logbuch_file(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     if not token.startswith(f"lb{mediation_id}_") or "/" in token or "\\" in token or ".." in token:
         raise HTTPException(status_code=400, detail="Ungültiger Token")
     path = _UPLOAD_DIR / token
@@ -1127,7 +1153,7 @@ async def logbuch_upgrade_create_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     if m.mode != "logbuch":
         raise HTTPException(status_code=409, detail="Dieser Fall ist kein Logbuch.")
@@ -1147,7 +1173,7 @@ async def logbuch_upgrade_capture_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_db_user),
 ):
-    _require_participant(mediation_id, current_user, db)
+    _require_logbuch_access(mediation_id, current_user, db)
     m = _get_mediation(mediation_id, db)
     if _plan(m) == "premium":
         return {"ok": True, "plan": "premium"}

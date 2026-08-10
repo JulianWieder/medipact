@@ -7,7 +7,7 @@ import Icon from "@/app/components/ui/Icon";
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
   description:
-    "Einstieg ab 49 € pro Partei, Wirtschaftsmediation ab 399 € oder Business-Tarife ab 1.000 €/Monat (10 Mediationen). Transparent, ohne versteckte Kosten.",
+    "Einstieg ab 49 € pro Partei, Trennung 399 €, Wirtschaftsmediation ab 1.200 € oder Business-Tarife ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
   path: "/preise",
 });
 
@@ -186,7 +186,31 @@ export default function Preise() {
 
                   <div className="flex justify-between items-center mt-4">
                     <span className="font-medium text-neutral-900">
-                      Business-Konflikt (Team & B2B)
+                      Gesellschafter, Nachfolge & Team
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €1.900
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig für den Fall
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      B2B-Vertragsstreit
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €1.200
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig für den Fall
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Schlichtung & E-Commerce
                     </span>
                     <span className="text-lg font-bold text-accent-600">
                       €399
@@ -509,7 +533,7 @@ export default function Preise() {
                   <strong className="text-white">
                     10 Mediationen pro Monat
                   </strong>{" "}
-                  – rechnerisch €100 pro Fall statt €399 einzeln.
+                  – rechnerisch €100 pro Fall statt €1.900 einzeln.
                 </p>
                 <div className="mt-6 flex-1 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
                   <p>
@@ -785,7 +809,7 @@ export default function Preise() {
                 },
                 {
                   q: "Was kosten die Business-Tarife für Unternehmen?",
-                  a: "Es gibt drei Business-Tarife: Business Light für €1.000 pro Monat mit bis zu 10 Mediationen, Business für €5.000 pro Monat mit bis zu 50 Mediationen, und Business Premium als Full-Service-Paket mit persönlicher Betreuung und individuellem Kontingent – dafür rufen Sie uns am besten direkt an (+49 1520 9942351). Abgedeckt sind interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Einzelfälle ohne Tarif kosten €399.",
+                  a: "Es gibt drei Business-Tarife: Business Light für €1.000 pro Monat mit bis zu 10 Mediationen, Business für €5.000 pro Monat mit bis zu 50 Mediationen, und Business Premium als Full-Service-Paket mit persönlicher Betreuung und individuellem Kontingent – dafür rufen Sie uns am besten direkt an (+49 1520 9942351). Abgedeckt sind interne Fälle (Team, Führung, Gesellschafter, Nachfolge) ebenso wie B2B-Konflikte (Lieferanten, IT-Projekte, M&A). Ohne Tarif kostet der Einzelfall €1.900 (Gesellschafter, Nachfolge, Team), €1.200 (B2B-Vertragsstreit) oder €399 (Online-Schlichtung, E-Commerce).",
                 },
                 {
                   q: "Gibt es ein kostenloses Angebot?",

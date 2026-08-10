@@ -7,7 +7,7 @@ auf die Parteien verteilt wird, bestimmt ``BILLING_MODEL[mediation_type]``:
   • "split"     – der Preis wird gleichmäßig auf alle Parteien geteilt
                   (z.B. Nachbarschaft 249 € bei 2 Parteien = je 124,50 €).
   • "once"      – nur EINE Partei (die Fall-Eigentümer:in) zahlt; die andere 0 €
-                  (z.B. Erbschaft/Geschäft: einmalig für den Fall).
+                  (z.B. Erbschaft 399 €, Gesellschafterkonflikt 1.900 €: einmalig für den Fall).
 
 WICHTIG: Alle Zahlen stehen bewusst NUR hier, an einer Stelle. Werte stammen von
 der Preisseite (/preise). Mit ``None`` markierte (Typ, Paket)-Kombinationen
@@ -42,9 +42,21 @@ PACKAGE_LABELS = {
 # ODR-Familie (Online Dispute Resolution, ehemals "geschaeft"/Wirtschafts-
 # mediation): "odr" (Wirtschafts-Mediation online), "schlichtung" (Online-
 # Schlichtung mit Schlichterspruch), "ecommerce" (E-Commerce/Plattform-Streit),
-# "b2b" (B2B-Vertragsstreit). Einzelfall = 399 € once; alternativ laufen die
-# Typen im Firmen-Abo (Organization → is_paid=True, Fälle inkl.) – insbesondere
-# für die digitalisierte Massen-ODR (Fluggastrechte, Mietpreisbremse, E-Commerce).
+# "b2b" (B2B-Vertragsstreit). Alle vier rechnen "once" ab, aber seit dem
+# 10.08.2026 NICHT mehr zum selben Preis:
+#
+#   odr         1.900 €  Gesellschafter, Nachfolge, Team, Führung
+#   b2b         1.200 €  Vertragsstreit zwischen Unternehmen
+#   schlichtung   399 €  Massenverfahren, kleiner Streitwert
+#   ecommerce     399 €  Massenverfahren, kleiner Streitwert
+#
+# Warum gestaffelt: Vorher kostete ein Gesellschafterkonflikt 399 € einmalig
+# und damit HALB so viel wie eine Trennung (399 € × 2 Parteien) – bei
+# ungleich höherem Aufwand und Streitwert. "schlichtung"/"ecommerce" bleiben
+# bewusst niedrig: Das sind die Massenverfahren, die ohnehin über das
+# Firmen-Abo laufen sollen (Organization → is_paid=True, Fälle inkl.) –
+# insbesondere die digitalisierte Massen-ODR (Fluggastrechte,
+# Mietpreisbremse, E-Commerce).
 PRICE_MATRIX: dict[str, dict[str, float | None]] = {
     "nachbarschaft": {"online": 49.0,  "hybrid": None,  "vollservice": None},
     "verbraucher":   {"online": 49.0,  "hybrid": None,  "vollservice": None},
@@ -52,10 +64,10 @@ PRICE_MATRIX: dict[str, dict[str, float | None]] = {
     "wg":            {"online": 49.0,  "hybrid": None,  "vollservice": None},
     "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
     "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "odr":           {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "odr":           {"online": 1900.0, "hybrid": None, "vollservice": None},
     "schlichtung":   {"online": 399.0, "hybrid": None,  "vollservice": None},
     "ecommerce":     {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "b2b":           {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "b2b":           {"online": 1200.0, "hybrid": None, "vollservice": None},
 }
 
 # ODR-Verfahrensfamilie – Firmenkunden dürfen genau diese Typen anlegen

@@ -13,6 +13,7 @@ from app.routers import (
     integrations,
     invites,
     invoices,
+    kalender,
     logbuch,
     mediation_chat,
     mediation_variants,
@@ -47,6 +48,7 @@ app.include_router(mediation_variants.router)
 app.include_router(mediation_chat.router)
 app.include_router(logbuch.router)
 app.include_router(betreuung.router)
+app.include_router(kalender.router)
 app.include_router(step_content.router)
 app.include_router(block_responses.router)
 app.include_router(invoices.router)

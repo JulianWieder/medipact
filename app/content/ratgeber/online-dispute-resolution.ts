@@ -80,7 +80,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Was kostet Online Dispute Resolution?" },
     {
       type: "paragraph",
-      text: "Bei medipact kostet ein ODR-Verfahren im geschäftlichen Bereich – ob Mediation oder Schlichtung, auch bei E-Commerce- und B2B-Streitigkeiten – einmalig 399 € pro Fall. Für Unternehmen mit laufendem Bedarf gibt es die Business-Tarife: Business Light (1.000 €/Monat, bis zu 10 Verfahren), Business (5.000 €/Monat, bis zu 50 Verfahren) und Business Premium als Full Service auf Anfrage – das Modell für die digitalisierte Massen-ODR. Zum Vergleich: Schon ein einziger Zivilprozess mit mittlerem Streitwert kostet über Anwälte, Gericht und gebundene Arbeitszeit ein Vielfaches.",
+      text: "Bei medipact kostet ein ODR-Verfahren einmalig pro Fall, gestaffelt nach Verfahrensart: 1.900 € bei Gesellschafter-, Nachfolge- und Teamkonflikten, 1.200 € beim B2B-Vertragsstreit, 399 € bei Online-Schlichtung und E-Commerce-Streitigkeiten. Für Unternehmen mit laufendem Bedarf gibt es die Business-Tarife: Business Light (1.000 €/Monat, bis zu 10 Verfahren), Business (5.000 €/Monat, bis zu 50 Verfahren) und Business Premium als Full Service auf Anfrage – das Modell für die digitalisierte Massen-ODR. Zum Vergleich: Schon ein einziger Zivilprozess mit mittlerem Streitwert kostet über Anwälte, Gericht und gebundene Arbeitszeit ein Vielfaches.",
     },
     {
       type: "cta",
@@ -117,7 +117,7 @@ export const article: RatgeberArticle = {
     {
       question: "Was kostet ein ODR-Verfahren?",
       answer:
-        "Bei medipact einmalig 399 € pro geschäftlichem Fall; für Unternehmen mit vielen Fällen gibt es Business-Tarife ab 1.000 €/Monat (10 Verfahren) bis 5.000 €/Monat (50 Verfahren), Full Service auf Anfrage. Das ist meist ein Bruchteil der Kosten eines Gerichtsverfahrens.",
+        "Bei medipact einmalig pro Fall und nach Verfahrensart gestaffelt: 1.900 € bei Gesellschafter-, Nachfolge- und Teamkonflikten, 1.200 € beim B2B-Vertragsstreit, 399 € bei Online-Schlichtung und E-Commerce. Für Unternehmen mit vielen Fällen gibt es Business-Tarife ab 1.000 €/Monat (10 Verfahren) bis 5.000 €/Monat (50 Verfahren), Full Service auf Anfrage. Das ist meist ein Bruchteil der Kosten eines Gerichtsverfahrens.",
     },
   ],
   related: [

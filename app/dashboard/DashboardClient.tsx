@@ -20,6 +20,7 @@ import { Reveal, stagger } from "@/app/components/ui/motion";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { PHASES } from "@/app/workspace/types";
 import Icon from "@/app/components/ui/Icon";
+import KalenderKarte from "@/app/components/kalender/KalenderKarte";
 
 interface Mediation {
   id: string | number;
@@ -777,6 +778,12 @@ export default function DashboardClient() {
             </div>
           )}
         </CrossfadePanel>
+
+        {/* ── Kalender ──
+             Über dem Logbuch, weil er die dringendere Frage beantwortet: was
+             steht an und wartet etwas auf mich. Die Karte blendet sich selbst
+             aus, wenn es weder Termine noch offene Absprachen gibt. */}
+        <KalenderKarte />
 
         {/* ── Dein Konflikt-Logbuch (Ein-Buch-Prinzip) – bewusst UNTER den
              Mediationen: die Verfahren bleiben im Fokus. EINE Karte mit den

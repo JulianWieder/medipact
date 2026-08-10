@@ -28,7 +28,7 @@ Mediation dreht die Logik um: Statt zu fragen „Wer hat Recht?", fragt sie „W
 
 Mediation galt lange als Nischenverfahren: schwer zugänglich, Präsenztermine, unklare Kosten. Das digitalisiert sich gerade. Online-Mediation macht den Einstieg so einfach wie ein Videocall – jede Partei schildert ihre Sicht erst einmal in Ruhe schriftlich, dann führt ein strukturierter Prozess zur Vereinbarung. Methodisch steckt dahinter das, was sich seit Jahrzehnten bewährt: Harvard-Konzept, Shuttle-Mediation bei verhärteten Fronten, transformative Ansätze, wenn die Beziehung selbst das Thema ist.
 
-Wir haben mit medipact eine Plattform dafür gebaut – Einzelfälle ab 399 €, für Unternehmen auch als Pauschale. Aber unabhängig davon, welches Werkzeug Sie nutzen: Wenn Sie in Ihrem Unternehmen einen Konflikt kennen, der seit Monaten schwelt – rechnen Sie einmal aus, was er Sie pro Woche kostet. Die Zahl ist unangenehm. Und sie ist das beste Argument, ihn jetzt anzugehen.
+Wir haben mit medipact eine Plattform dafür gebaut – Einzelfälle ab 1.200 €, für Unternehmen auch als Monatspauschale. Aber unabhängig davon, welches Werkzeug Sie nutzen: Wenn Sie in Ihrem Unternehmen einen Konflikt kennen, der seit Monaten schwelt – rechnen Sie einmal aus, was er Sie pro Woche kostet. Die Zahl ist unangenehm. Und sie ist das beste Argument, ihn jetzt anzugehen.
 
 *Wie geht Ihr Unternehmen mit internen Konflikten um? Ich freue mich über Perspektiven in den Kommentaren.*
 

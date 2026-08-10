@@ -1487,6 +1487,14 @@ def get_my_mediations(
 
     result = []
     for mediation, participant in rows:
+        # Der Kind-Zugang gehört zwar zum Logbuch, hat dort aber nichts zu
+        # sehen (routers/logbuch.py `_require_logbuch_access`). Stünde das Buch
+        # trotzdem in seiner Liste, bekäme das Kind eine Karte, die beim Klick
+        # in einem 403 endet – und den Titel des Konflikts gleich mit dazu.
+        # Sein Weg ist /dashboard/kalender.
+        if (participant.role or "") == "kind":
+            continue
+
         # Wartet auf meine Eingabe: aktive Mediation, aber noch keine
         # submitted Note für die aktuelle Phase von diesem Teilnehmer
         is_my_turn = False

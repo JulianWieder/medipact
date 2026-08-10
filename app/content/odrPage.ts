@@ -7,7 +7,9 @@
 // (Online-Schlichtung, E-Commerce/Plattform, B2B-Vertragsstreit) und die
 // digitalisierte Massen-ODR über das Firmen-Abo. Workflow-Hintergrund:
 // docs/konzept_organisationskonflikt.md und docs/faelle-phasen-inhalte.md.
-// Preise: /preise (Einzelfall €399; Business-Tarife: Light €1.000/Monat bis
+// Preise: /preise (Einzelfall: Gesellschafter/Team €1.900, B2B-Vertrags-
+// streit €1.200, Schlichtung und E-Commerce €399; Business-Tarife: Light
+// €1.000/Monat bis
 // 10 Mediationen, Business €5.000/Monat bis 50, Premium Full Service auf
 // Anfrage – Direktanruf).
 
@@ -111,7 +113,7 @@ export const odrPageContent = {
       "Beide Seiten sind grundsätzlich gesprächsbereit, kommen allein aber nicht weiter.",
     ],
     note:
-      "Der Ablauf ist derselbe wie bei jedem ODR-Verfahren: strukturierte, getrennte Fallaufnahme, Diagnose der Konfliktart und Eskalationsstufe, dann die passende Methode – facilitativ nach Harvard, evaluativ bei harten Vertrags- und Bewertungsfragen oder Shuttle-Mediation, wenn ein gemeinsamer Termin (noch) nicht möglich ist. Ergebnis ist eine verbindliche Vereinbarung, die notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden kann. Einzelfall ab €399.",
+      "Der Ablauf ist derselbe wie bei jedem ODR-Verfahren: strukturierte, getrennte Fallaufnahme, Diagnose der Konfliktart und Eskalationsstufe, dann die passende Methode – facilitativ nach Harvard, evaluativ bei harten Vertrags- und Bewertungsfragen oder Shuttle-Mediation, wenn ein gemeinsamer Termin (noch) nicht möglich ist. Ergebnis ist eine verbindliche Vereinbarung, die notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden kann. Gesellschafter- und Nachfolgekonflikte kosten €1.900 einmalig für den Fall.",
     links: [
       { label: "Fallbeispiel: Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
       { label: "Fallbeispiel: B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
@@ -207,12 +209,12 @@ export const odrPageContent = {
     {
       question: "Wie läuft eine Mediation bei Geschäftspartnern ab?",
       answer:
-        "Eine Mediation bei Geschäftspartnern läuft in vier Schritten: getrennte, vertrauliche Fallaufnahme beider Seiten, Diagnose von Konfliktart und Eskalationsstufe, moderierte Klärung mit der passenden Methode – und zum Schluss eine schriftliche, verbindliche Vereinbarung. Bei medipact läuft das vollständig online und asynchron, meist in Tagen bis wenigen Wochen statt in Monaten. Der Einzelfall kostet €399.",
+        "Eine Mediation bei Geschäftspartnern läuft in vier Schritten: getrennte, vertrauliche Fallaufnahme beider Seiten, Diagnose von Konfliktart und Eskalationsstufe, moderierte Klärung mit der passenden Methode – und zum Schluss eine schriftliche, verbindliche Vereinbarung. Bei medipact läuft das vollständig online und asynchron, meist in Tagen bis wenigen Wochen statt in Monaten. Der Einzelfall kostet €1.900 – einmalig für den Fall, nicht pro Partei.",
     },
     {
       question: "Was kostet eine Mediation zwischen Geschäftspartnern?",
       answer:
-        "Bei medipact kostet der Einzelfall €399 als Pauschale für den geführten Online-Prozess – unabhängig davon, ob es um einen Gesellschafterstreit, einen Ausstieg oder einen B2B-Vertragskonflikt geht. Unternehmen mit laufendem Bedarf nutzen die Business-Tarife ab €1.000 pro Monat. Zum Vergleich: Ein Gesellschafterprozess erreicht über mehrere Instanzen schnell einen fünfstelligen Betrag.",
+        "Bei medipact ist der Preis eine Pauschale, die vorab feststeht: €1.900 für Gesellschafter-, Nachfolge-, Team- und Führungskonflikte, €1.200 für einen B2B-Vertragsstreit – jeweils einmalig für den Fall, nicht pro Partei. Online-Schlichtung und E-Commerce-Streitigkeiten kosten €399. Unternehmen mit laufendem Bedarf nutzen die Business-Tarife ab €1.000 pro Monat. Zum Vergleich: Ein Gesellschafterprozess erreicht über mehrere Instanzen schnell einen fünfstelligen Betrag.",
     },
     {
       question: "Lohnt sich Mediation bei einem Gesellschafterstreit?",
@@ -237,7 +239,7 @@ export const odrPageContent = {
     {
       question: "Was kosten ungelöste Konflikte im Unternehmen?",
       answer:
-        "Mehr als jede Mediation: Laut KPMG-Konfliktkostenstudie verbringen Mitarbeitende 10–15 % ihrer Arbeitszeit mit Konflikten, Führungskräfte je nach Eskalation 30–50 %. Dazu kommen Fluktuation, Krankheitstage, blockierte Projekte – und im Streitfall Anwalts- und Gerichtskosten über Jahre. Eine Wirtschaftsmediation bei medipact kostet ab €399 pro Fall und klärt in Tagen bis Wochen.",
+        "Mehr als jede Mediation: Laut KPMG-Konfliktkostenstudie verbringen Mitarbeitende 10–15 % ihrer Arbeitszeit mit Konflikten, Führungskräfte je nach Eskalation 30–50 %. Dazu kommen Fluktuation, Krankheitstage, blockierte Projekte – und im Streitfall Anwalts- und Gerichtskosten über Jahre. Eine Wirtschaftsmediation bei medipact kostet €1.900 pauschal pro Fall und klärt in Tagen bis Wochen.",
     },
     {
       question: "Ist eine Wirtschaftsmediation rechtssicher?",
@@ -257,7 +259,7 @@ export const odrPageContent = {
     {
       question: "Was kostet Business-Mediation bei medipact?",
       answer:
-        "Der einzelne Fall kostet €399 (einmalig, geführter Online-Prozess). Für Unternehmen mit laufendem Bedarf gibt es drei Business-Tarife: Business Light (€1.000/Monat, bis zu 10 Mediationen), Business (€5.000/Monat, bis zu 50 Mediationen) und Business Premium als Full Service mit individuellem Kontingent – Preis auf Anfrage, am besten direkt anrufen. Details auf der Preisseite.",
+        "Der einzelne Fall kostet €1.900 bei Gesellschafter-, Nachfolge- und Teamkonflikten, €1.200 beim B2B-Vertragsstreit und €399 bei Online-Schlichtung und E-Commerce – jeweils einmalig für den geführten Online-Prozess. Für Unternehmen mit laufendem Bedarf gibt es drei Business-Tarife: Business Light (€1.000/Monat, bis zu 10 Mediationen), Business (€5.000/Monat, bis zu 50 Mediationen) und Business Premium als Full Service mit individuellem Kontingent – Preis auf Anfrage, am besten direkt anrufen. Details auf der Preisseite.",
     },
     {
       question: "Intern oder extern – was passt zu unserem Konflikt?",

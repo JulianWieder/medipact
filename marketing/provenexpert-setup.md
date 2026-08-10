@@ -196,7 +196,7 @@ günstiger und erheblich weniger belastend.
 | Erbschaftsmediation | Nachlass, Pflichtteil, Immobilie in der Erbengemeinschaft – einigen, bevor die Familie zerbricht. |
 | Nachbarschaftsmediation | Lärm, Grenzbepflanzung, Hausgemeinschaft. Einstiegstarif ab 49 € pro Partei. |
 | Verbraucher- und Handwerkerstreit | Mängel, Rechnungen, nicht erbrachte Leistungen – ohne Klage klären. |
-| Wirtschaftsmediation | Team, Führung, Gesellschafter, Nachfolge. Einzelfall ab 399 € pro Partei. |
+| Wirtschaftsmediation | Team, Führung, Gesellschafter, Nachfolge. Einzelfall 1.900 € einmalig für den Fall (nicht pro Partei); B2B-Vertragsstreit 1.200 €. |
 | Business-Tarife für Unternehmen | Mediationskontingent für Unternehmen ab 1.000 €/Monat (bis zu 10 Verfahren). |
 | Konflikt-Logbuch | Dauerhaft kostenlos: Konflikt vertraulich dokumentieren und später in eine Mediation überführen. |
 
@@ -442,7 +442,7 @@ Das ProvenExpert-Widget lädt ein externes Script. In diesem Setup heißt das:
 - [ ] Entscheidung: Opt-in-Checkbox im Workspace oder QR-Code-Weg (Abschnitt 4)
 - [ ] Datenschutz-Passus formulieren lassen
 - [ ] ProvenExpert-Icon für `Icon.tsx`, falls Footer-Verlinkung gewünscht
-- [ ] Prüfen, ob die 49 €/399 €/499 €-Angaben in den Profiltexten noch zur
+- [ ] Prüfen, ob die 49 €/399 €/499 €/1.200 €/1.900 €-Angaben in den Profiltexten noch zur
       aktuellen `pricing-matrix.ts` passen
 
 ---

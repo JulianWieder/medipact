@@ -21,6 +21,7 @@ from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_invite import MediationInvite
 from app.models.invite_meet_recording import InviteMeetRecording
+from app.models.mediation_child import MediationChild
 from app.models.mediation_participant import MediationParticipant
 from app.models.user import User
 from app.models.phase_step_default import SHARED_MEDIATION_TYPE, PhaseStepDefault
@@ -275,6 +276,9 @@ def send_invite_email(
         "other_party": "Gegenpartei",
         "mediator": "Mediator",
         "observer": "Beobachter",
+        # Kind-Zugang zum Betreuungskalender: darf ausschließlich lesen und
+        # sieht das Logbuch selbst nie (routers/logbuch _require_logbuch_access).
+        "kind": "Kind (nur Betreuungskalender)",
     }
     role_label = role_labels.get(role, role)
 
@@ -705,6 +709,16 @@ def create_invite(
     # Video-Pflichtschritt der Phase "einladung" auch die reine Kalender-
     # Einladung blockieren – dort gibt es gar keinen Recorder in der Oberfläche.
     is_logbuch = (mediation.mode or "mediation") == "logbuch"
+
+    # Der Kind-Zugang gehört zum Betreuungskalender und nirgendwo sonst. In
+    # einem laufenden Verfahren gäbe es kein Recht, das eng genug wäre: dort
+    # hängen Notizen, Verträge und Chat an derselben Teilnahme.
+    if payload.role == "kind" and not is_logbuch:
+        raise HTTPException(
+            status_code=400,
+            detail="Ein Kind-Zugang ist nur für den Betreuungskalender vorgesehen, nicht für ein Verfahren.",
+        )
+
     if (
         not is_logbuch
         and effective_video_mode(db, mediation.mediation_type) == "required"
@@ -792,6 +806,30 @@ def create_invite(
     }
 
 
+def _verknuepfe_kind_zugang(db: Session, mediation_id: int, user: User) -> None:
+    """Hängt ein angenommenes Kind-Konto an sein Stammdatum.
+
+    Die Verknüpfung geht erst hier: beim Einladen gibt es noch kein Konto,
+    nur eine E-Mail. Gefunden wird über genau diese Adresse – ein Rateweg
+    („das Kind ohne Konto") wäre bei mehreren Kindern eine Verwechslung mit
+    Ansage.
+    """
+    if not user.email:
+        return
+    child = (
+        db.query(MediationChild)
+        .filter(
+            MediationChild.mediation_id == mediation_id,
+            MediationChild.user_id.is_(None),
+        )
+        .all()
+    )
+    for c in child:
+        if (c.access_email or "").lower() == user.email.lower():
+            c.user_id = user.id
+            return
+
+
 @router.get("/invites/me")
 def get_my_invites(
     db: Session = Depends(get_db),
@@ -874,6 +912,9 @@ def accept_invite_direct(
             user_id=user.id,
             role=invite.role,
         ))
+
+    if invite.role == "kind":
+        _verknuepfe_kind_zugang(db, invite.mediation_id, user)
 
     invite.status = "accepted"
     invite.accepted_at = datetime.now(timezone.utc)
@@ -977,6 +1018,9 @@ def accept_invite(
             role=invite.role,
         )
         db.add(participant)
+
+    if invite.role == "kind":
+        _verknuepfe_kind_zugang(db, invite.mediation_id, user)
 
     invite.status = "accepted"
     invite.accepted_at = datetime.now(timezone.utc)

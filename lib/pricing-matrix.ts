@@ -20,9 +20,11 @@ const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
 /**
  * Zuordnung Frontend-Konfliktart -> Konflikttyp in pricing.py.
  *
- * "b2b" steht im Rechner stellvertretend für die ganze ODR-Familie
- * (odr / schlichtung / ecommerce / b2b). Alle vier kosten dasselbe und
- * werden identisch abgerechnet; für den Rechner reicht ein Eintrag.
+ * "odr" (Gesellschafter, Nachfolge, Team) und "b2b" (Vertragsstreit) sind
+ * seit dem 10.08.2026 getrennte Zeilen, weil sie nicht mehr dasselbe kosten
+ * (1.900 € vs. 1.200 €, siehe pricing.py). "schlichtung" und "ecommerce"
+ * haben bewusst keinen Eintrag: Das sind Massenverfahren über das Firmen-Abo,
+ * für die ein Gerichtsvergleich im Kostenrechner nichts erklärt.
  *
  * "kindschaft" (Sorge- und Umgangsstreit) hat bewusst KEINEN eigenen
  * Konflikttyp im Backend: Fachlich ist das eine Trennungsmediation, und sie
@@ -34,6 +36,7 @@ const TYP_MAPPING: Record<Konfliktart, string> = {
   nachbarschaft: "nachbarschaft",
   verbraucher: "verbraucher",
   erbschaft: "erbschaft",
+  odr: "odr",
   b2b: "b2b",
   trennung: "trennung",
   kindschaft: "trennung",
