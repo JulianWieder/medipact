@@ -61,7 +61,14 @@ function fmtZeit(ts: string | null): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export default function KalenderKarte() {
+export default function KalenderKarte({
+  // Der Außenabstand ist ein Prop, weil die Karte in zwei Kontexten steht:
+  // gestapelt unter der Fallliste (Default `mt-14`) und in der Seitenspalte
+  // des Dashboards, wo der Abstand vom `space-y` des Containers kommt.
+  className = "mt-14",
+}: {
+  className?: string;
+} = {}) {
   const [mein, setMein] = useState<Mein | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [geladen, setGeladen] = useState(false);
@@ -106,14 +113,20 @@ export default function KalenderKarte() {
   return (
     <Link
       href="/dashboard/kalender"
-      // Der Abstand sitzt hier und nicht beim Aufrufer: die Karte blendet sich
-      // selbst aus, und ein leerer Platzhalter mit Rand wäre ein Loch im
-      // Dashboard.
-      className="group mt-14 block overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-shadow hover:shadow-sm"
+      // Der Abstand kommt per `className` vom Aufrufer (Default `mt-14`): die
+      // Karte blendet sich selbst aus, und ein leerer Platzhalter mit Rand
+      // wäre ein Loch im Dashboard.
+      className={`group relative block overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18)] ${className}`}
     >
-      <span className="flex items-center gap-4 px-5 py-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50">
-          <Icon name="calendar" size={20} />
+      {/* Glanzstrich oben – dieselbe Kartensprache wie `.app-surface` auf der
+          Landing und die Seitenspalten-Karten im Dashboard. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-300/70 to-transparent"
+      />
+      <span className="flex items-center gap-3 px-4 py-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
+          <Icon name="calendar" size={18} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-neutral-900">
@@ -140,7 +153,7 @@ export default function KalenderKarte() {
       </span>
 
       {items.length === 0 && offen === 0 && (
-        <span className="block border-t border-neutral-100 px-5 py-3 text-xs font-light text-neutral-400">
+        <span className="block border-t border-neutral-100 px-4 py-3 text-xs font-light leading-relaxed text-neutral-400">
           Noch nichts eingetragen – lege das Wochenmuster an, dann steht hier,
           wer das Kind wann betreut.
         </span>
@@ -151,7 +164,7 @@ export default function KalenderKarte() {
           {items.map((it) => (
             <span
               key={it.key}
-              className="flex items-baseline gap-3 border-t border-neutral-50 px-5 py-2.5 first:border-t-0"
+              className="flex items-baseline gap-2.5 border-t border-neutral-50 px-4 py-2.5 first:border-t-0"
             >
               <span className="w-16 shrink-0 text-xs font-semibold text-neutral-500">
                 {fmtTag(it.date)}
