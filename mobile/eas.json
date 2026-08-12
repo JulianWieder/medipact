@@ -1,0 +1,55 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "entwicklung": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "MEDIPACT_APP": "logbuch" }
+    },
+    "entwicklung-kalender": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "MEDIPACT_APP": "kalender" }
+    },
+
+    "test-kalender": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": { "MEDIPACT_APP": "kalender" },
+      "channel": "test"
+    },
+    "testflight-kalender": {
+      "distribution": "store",
+      "env": { "MEDIPACT_APP": "kalender" },
+      "channel": "test",
+      "ios": { "simulator": false }
+    },
+
+    "produktion": {
+      "autoIncrement": true,
+      "env": { "MEDIPACT_APP": "logbuch" },
+      "channel": "produktion"
+    },
+    "produktion-kalender": {
+      "autoIncrement": true,
+      "env": { "MEDIPACT_APP": "kalender" },
+      "channel": "produktion",
+      "android": { "buildType": "app-bundle" }
+    }
+  },
+  "submit": {
+    "produktion-kalender": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      },
+      "ios": {
+        "ascAppId": "HIER_DIE_APP_ID_AUS_APP_STORE_CONNECT",
+        "appleTeamId": "HIER_DIE_TEAM_ID"
+      }
+    }
+  }
+}

@@ -125,6 +125,9 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
+    { label: "Trennungsvereinbarung: was hineingehört", href: "/ratgeber/trennungsvereinbarung" },
+    { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
     { label: "Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },

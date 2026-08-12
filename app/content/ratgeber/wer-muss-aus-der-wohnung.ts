@@ -156,6 +156,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
+    { label: "Trennungsvereinbarung: was hineingehört", href: "/ratgeber/trennungsvereinbarung" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Muss ich bei der Scheidung das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },
     { label: "„Ich will mich trennen“ aussprechen", href: "/ratgeber/ich-will-mich-trennen" },

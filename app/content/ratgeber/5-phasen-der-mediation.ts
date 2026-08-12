@@ -182,6 +182,7 @@ export const article: RatgeberArticle = {
   // Anliegen — und geben den /konflikte-Seiten Linkkraft aus einem der
   // stärksten Artikel.
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Was ist Mediation? Definition & Ablauf", href: "/ratgeber/was-ist-mediation" },
     { label: "Was ist ein Mediator?", href: "/ratgeber/was-ist-ein-mediator" },

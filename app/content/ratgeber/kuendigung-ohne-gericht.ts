@@ -101,6 +101,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=odr" },
     { label: "Mediation am Arbeitsplatz", href: "/ratgeber/mediation-am-arbeitsplatz" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Wirtschaftsmediation im Überblick", href: "/ratgeber/wirtschaftsmediation" },

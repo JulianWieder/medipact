@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline &ndash; medipact Kalender</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        color: #334155;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        padding: 2rem;
+      }
+      main { max-width: 24rem; text-align: center; }
+      img { width: 64px; height: 64px; border-radius: 14px; }
+      h1 { font-size: 1.125rem; font-weight: 600; color: #0f172a; margin: 1.25rem 0 0; }
+      p { font-size: 0.875rem; font-weight: 300; color: #64748b; margin: 0.5rem 0 0; line-height: 1.6; }
+      button {
+        margin-top: 1.5rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 0.75rem;
+        padding: 0.55rem 1.1rem;
+        font: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #0f172a;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icon-192.png" alt="medipact" />
+      <h1>Keine Verbindung</h1>
+      <p>
+        Der Kalender braucht Internet, um den aktuellen Stand zu zeigen. Sobald
+        du wieder online bist, geht es hier weiter.
+      </p>
+      <button type="button" onclick="location.reload()">Erneut versuchen</button>
+    </main>
+  </body>
+</html>

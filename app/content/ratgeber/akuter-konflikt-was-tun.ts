@@ -93,6 +93,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
     { label: "Konflikt dokumentieren: das Streit-Tagebuch", href: "/ratgeber/konflikt-dokumentieren" },
     { label: "Konflikt-Journal: Gefühle privat sortieren", href: "/ratgeber/konflikt-journal" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },

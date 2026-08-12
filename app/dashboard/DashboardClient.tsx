@@ -12,6 +12,8 @@ import {
   SegmentedControl,
   Skeleton,
   SlideOver,
+  Kicker,
+  cardSurface,
   cardLift,
   rowHover,
   cn,
@@ -138,6 +140,60 @@ function logEntryDate(e: LogPreviewEntry): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+// ── Sektionskopf (Landing-Sprache im Produkt) ───────────────────────────────
+// Kicker + Serif-Überschrift, wie auf der Landing (ZweiWelten/OutcomeWand),
+// nur eine Stufe kleiner. Rechts optional ein Zähler oder eine Aktion.
+function SectionHeading({
+  kicker,
+  title,
+  hint,
+  right,
+  className,
+}: {
+  kicker: string;
+  title: string;
+  hint?: string;
+  right?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("mb-5", className)}>
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <Kicker className="mb-2">{kicker}</Kicker>
+          <h2 className="font-display text-xl font-medium tracking-tight text-neutral-900">
+            {title}
+          </h2>
+        </div>
+        {right && <div className="shrink-0">{right}</div>}
+      </div>
+      {hint && <p className="mt-2 max-w-prose text-sm font-light text-neutral-500">{hint}</p>}
+    </div>
+  );
+}
+
+// ── Seitenspalten-Karte ─────────────────────────────────────────────────────
+// Die schmale Karte der rechten Spalte: Hairline-Fläche mit dem Glanzstrich
+// oben, den `.app-surface` auf der Landing benutzt – nur ohne deren
+// Hover-Transform, weil hier auch statische Panels (Erste Schritte) stehen.
+function SideCard({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn(cardSurface, "relative overflow-hidden", className)}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-300/70 to-transparent"
+      />
+      {children}
+    </div>
+  );
 }
 
 export default function DashboardClient() {
@@ -430,30 +486,37 @@ export default function DashboardClient() {
             <Skeleton tone="dark" className="h-3 w-24" />
             <Skeleton tone="dark" className="mt-5 h-10 w-72 max-w-full" />
             <Skeleton tone="dark" className="mt-4 h-4 w-96 max-w-full" />
-            <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-10 lg:grid-cols-4">
-              {[0, 1, 2, 3].map((i) => (
+            <div className="mt-14 grid grid-cols-3 gap-x-8 border-t border-white/10 pt-8">
+              {[0, 1, 2].map((i) => (
                 <div key={i}>
                   <Skeleton tone="dark" className="h-3 w-20" />
-                  <Skeleton tone="dark" className="mt-4 h-10 w-14" />
-                  <Skeleton tone="dark" className="mt-3 h-3 w-24" />
+                  <Skeleton tone="dark" className="mt-3 h-8 w-12" />
                 </div>
               ))}
             </div>
           </div>
         </div>
-        <section className="container py-16 lg:py-20">
-          <Skeleton className="h-9 w-96 max-w-full rounded-full" />
-          <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={cn("flex items-center gap-6 px-5 py-5", i > 0 && "border-t border-neutral-100")}
-              >
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="ml-auto h-3 w-20" />
-                <Skeleton className="hidden h-3 w-28 sm:block" />
+        <section className="container py-14 lg:py-16">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-8">
+              <Skeleton className="h-9 w-96 max-w-full rounded-full" />
+              <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={cn("flex items-center gap-6 px-5 py-5", i > 0 && "border-t border-neutral-100")}
+                  >
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="ml-auto h-3 w-20" />
+                    <Skeleton className="hidden h-3 w-28 sm:block" />
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="space-y-6 lg:col-span-4">
+              <Skeleton className="h-44 w-full rounded-2xl" />
+              <Skeleton className="h-32 w-full rounded-2xl" />
+            </div>
           </div>
         </section>
       </main>
@@ -487,11 +550,11 @@ export default function DashboardClient() {
       >
         {/* Aktions-Fokus statt Kennzahl-Kacheln – nur wenn es Fälle gibt. */}
         {data.length > 0 && (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-300">
+              <Kicker tone="light">
                 Das wartet auf dich{waiting.length > 0 ? ` · ${waiting.length}` : ""}
-              </p>
+              </Kicker>
               {waiting.length > 0 ? (
                 <div className="mt-4 space-y-2.5">
                   {waiting.map((m) => (
@@ -524,37 +587,50 @@ export default function DashboardClient() {
               )}
             </div>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-1 border-t border-white/10 pt-5 text-sm">
-              <span className="font-light text-neutral-300">
-                <span className="font-semibold tabular-nums text-white">{counts.active}</span> laufend
-              </span>
-              <span className="font-light text-neutral-300">
-                <span className="font-semibold tabular-nums text-white">{counts.pending}</span> ausstehend
-              </span>
-              <span className="font-light text-neutral-300">
-                <span className="font-semibold tabular-nums text-white">{counts.completed}</span> abgeschlossen
-              </span>
+            {/* Zahlen-Zeile in der Landing-Typo: Kicker-Label über einer
+                Serif-Zahl, getrennt durch Haarlinien statt Kacheln. */}
+            <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10 pt-7">
+              {[
+                { label: "Laufend", value: counts.active, accent: true },
+                { label: "Ausstehend", value: counts.pending, accent: false },
+                { label: "Abgeschlossen", value: counts.completed, accent: false },
+              ].map((c, i) => (
+                <div key={c.label} className={cn(i === 0 ? "pr-5" : "px-5", i === 2 && "pr-0")}>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+                    {c.label}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-2 font-display text-3xl font-medium tracking-tight tabular-nums lg:text-4xl",
+                      c.accent && c.value > 0 ? "text-accent-300" : "text-white",
+                    )}
+                  >
+                    {c.value}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         )}
       </PremiumHero>
 
-      <section className="container py-16 lg:py-20">
-        {/* ── Eingehende Mediationsanfragen ─────────────────────────── */}
+      <section className="container py-14 lg:py-16">
+        {/* ── Eingehende Mediationsanfragen ───────────────────────────
+             Bleibt über beiden Spalten: eine offene Einladung ist die
+             dringendste Sache auf der Seite und darf nicht in einer
+             Seitenspalte verschwinden. */}
         {invites.length > 0 && (
-          <Reveal className="mb-14">
-            <div className="mb-1 flex items-center gap-3">
-              <h2 className="font-display text-xl font-medium text-neutral-900">
-                Eingehende Mediationsanfragen
-              </h2>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
-                {invites.length}
-              </span>
-            </div>
-            <p className="mb-6 text-sm font-light text-neutral-500">
-              Du wurdest zu folgenden Mediationsverfahren eingeladen. Nimm die
-              Einladung an, um beizutreten.
-            </p>
+          <Reveal className="mb-12">
+            <SectionHeading
+              kicker="Aktion nötig"
+              title="Eingehende Mediationsanfragen"
+              hint="Du wurdest zu folgenden Mediationsverfahren eingeladen. Nimm die Einladung an, um beizutreten."
+              right={
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
+                  {invites.length}
+                </span>
+              }
+            />
 
             <div className="space-y-3">
               {invites.map((invite, i) => (
@@ -610,319 +686,396 @@ export default function DashboardClient() {
           </Reveal>
         )}
 
-        {/* ── Erste Schritte (Onboarding-Checkliste, Stripe-Stil) ────── */}
-        {showOnboarding && (
-          <Reveal className="mb-14 rounded-2xl border border-neutral-200 bg-white p-6 lg:p-8">
-            <div className="mb-1 flex items-center justify-between gap-4">
-              <h2 className="font-display text-xl font-medium text-neutral-900">Erste Schritte</h2>
-              <span className="text-sm font-medium tabular-nums text-neutral-500">
-                {onboarding.doneCount} von {onboarding.steps.length}
-              </span>
-            </div>
-            <p className="mb-5 text-sm font-light text-neutral-500">
-              So kommst du in deinem Mediationsverfahren voran.
-            </p>
-            <ThinProgressBar
-              value={(onboarding.doneCount / onboarding.steps.length) * 100}
-              tone="accent"
-            />
-            <ul className="mt-6 space-y-3">
-              {onboarding.steps.map((step) => (
-                <li key={step.label} className="flex items-start gap-3">
-                  {step.done ? (
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[10px] font-bold text-white">
-                      ✓
+        {/* ── Zwei Spalten ────────────────────────────────────────────
+             Links die Arbeit (Verfahren), rechts der Kontext (Fortschritt,
+             Kalender, Logbuch). Vorher lag alles untereinander: der Kalender
+             und das Logbuch standen dadurch immer unter einer beliebig
+             langen Fallliste und wurden faktisch nie gesehen. */}
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          {/* ── Hauptspalte: Verfahren ───────────────────────────────── */}
+          <div className="min-w-0 lg:col-span-8">
+            {data.length > 0 && (
+              <Reveal>
+                <SectionHeading
+                  kicker="Verfahren"
+                  title="Meine Mediationen"
+                  right={
+                    <span className="hidden text-xs font-medium tabular-nums text-neutral-400 sm:block">
+                      {visibleData.length} von {data.length}
                     </span>
-                  ) : (
-                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full border border-dashed border-neutral-300" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span
-                        className={cn(
-                          "text-sm",
-                          step.done
-                            ? "font-light text-neutral-400 line-through decoration-neutral-300"
-                            : "font-medium text-neutral-800",
-                        )}
-                      >
-                        {step.label}
-                      </span>
-                      {!step.done && step.action && (
-                        <a
-                          href={step.action.href}
-                          className="ml-auto text-xs font-semibold text-accent-600 transition-colors hover:text-accent-700"
-                        >
-                          {step.action.label} →
-                        </a>
-                      )}
-                    </div>
-                    {!step.done && step.hint && (
-                      <p className="mt-1 text-xs font-light text-neutral-500">{step.hint}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        )}
-
-        {/* ── Meine Mediationen ─────────────────────────────────────── */}
-        {data.length > 0 && (
-          <Reveal className="mb-6">
-            <SegmentedControl
-              segments={segments}
-              activeKey={filter?.key ?? null}
-              onChange={(key) =>
-                setFilter(key ? { key, label: segmentLabels[key] ?? key } : null)
-              }
-            />
-          </Reveal>
-        )}
-
-        {/* Filterwechsel als Crossfade statt hartem Umschalten – dieselbe
-            Mechanik wie die ThemenTabs auf der Landing. `activeKey` ist der
-            Filter, damit AnimatePresence beim Wechsel neu mountet. */}
-        <CrossfadePanel activeKey={filter?.key ?? "__all__"}>
-          {data.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
-              <p className="text-lg font-light text-neutral-500">
-                Sie haben noch keine Mediationen gestartet.
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <PillButton href="/dashboard/mediation/new">
-                  Neue Mediation starten →
-                </PillButton>
-                <a
-                  href="/dashboard/logbuch/new"
-                  className="text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
-                >
-                  Oder erst einmal nur dokumentieren – kostenloses Logbuch →
-                </a>
-              </div>
-            </div>
-          ) : visibleData.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
-              <p className="text-lg font-light text-neutral-500">
-                Keine Mediationen für diesen Filter.
-              </p>
-            </div>
-          ) : (
-            /* Stripe-Stil: dichte, hover-bare Zeilen mit Haarlinien statt Karten.
-               Klick öffnet das Slide-over-Panel für eine schnelle Vorschau. */
-            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-              <div className="hidden border-b border-neutral-200 bg-neutral-50/60 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400 sm:grid sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6">
-                <span>Fall</span>
-                <span>Status</span>
-                <span className="text-right">Fortschritt</span>
-                <span />
-              </div>
-              {visibleData.map((mediation, i) => {
-                const status = mediation.status ?? "pending";
-                const config = statusConfig[status] ?? fallbackStatus;
-                const waitingForOther = status === "active" && !mediation.is_my_turn;
-
-                return (
-                  <button
-                    key={`mediation-${mediation.id}`}
-                    type="button"
-                    onClick={() => setSelected(mediation)}
-                    className={cn(
-                      "group grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left sm:grid-cols-[minmax(0,1fr)_150px_170px_20px] sm:gap-6",
-                      i > 0 && "border-t border-neutral-100",
-                      /* Entweder-oder: zwei `hover:bg-*`-Klassen auf einem
-                         Element entscheidet die Stylesheet-Reihenfolge, nicht
-                         die Reihenfolge hier. */
-                      mediation.is_my_turn
-                        ? "bg-amber-50/40 transition-colors duration-200 hover:bg-amber-50/70"
-                        : rowHover,
-                    )}
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-neutral-900">
-                        {mediation.title || mediation.conflict_type || "Neue Mediation"}
-                      </span>
-                      <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
-                        {phaseLabel(mediation.phase)}
-                      </span>
-                    </span>
-
-                    <span className="hidden flex-col gap-1 sm:flex">
-                      <StatusDot label={config.label} tone={config.tone} />
-                      {mediation.is_my_turn && (
-                        <StatusDot label="Deine Eingabe" tone="amber" pulse />
-                      )}
-                      {waitingForOther && (
-                        <span className="text-[11px] font-light text-neutral-400">
-                          Warte auf Gegenpartei
-                        </span>
-                      )}
-                    </span>
-
-                    <span className="hidden items-center justify-end gap-3 sm:flex">
-                      <span className="w-20">
-                        <ThinProgressBar value={mediation.progress ?? 0} />
-                      </span>
-                      <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-900">
-                        {mediation.progress ?? 0}%
-                      </span>
-                    </span>
-
-                    <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
-                      ›
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </CrossfadePanel>
-
-        {/* ── Kalender ──
-             Über dem Logbuch, weil er die dringendere Frage beantwortet: was
-             steht an und wartet etwas auf mich. Die Karte blendet sich selbst
-             aus, wenn es weder Termine noch offene Absprachen gibt. */}
-        <KalenderKarte />
-
-        {/* ── Dein Konflikt-Logbuch (Ein-Buch-Prinzip) – bewusst UNTER den
-             Mediationen: die Verfahren bleiben im Fokus. EINE Karte mit den
-             neuesten Einträgen als Vorschau; alte Duplikat-Bücher aus der
-             Zeit vor dem Umbau lassen sich darunter aufräumen. ── */}
-        {primaryBook && (
-          <Reveal className="mt-14">
-            <div className="hairline mb-10" />
-            <div className="mb-1 flex items-center gap-3">
-              <h2 className="font-display text-lg font-medium text-neutral-900">
-                Dein Konflikt-Logbuch
-              </h2>
-              <span className="rounded-full border border-accent-200 bg-accent-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-700">
-                kostenlos
-              </span>
-            </div>
-            <p className="mb-5 text-sm font-light text-neutral-500">
-              Dein privates Gedächtnisprotokoll – ein Buch für alle Konflikte,
-              jeder Eintrag einem Bereich zugeordnet. Umwandeln in eine
-              Mediation kannst du jederzeit.
-            </p>
-
-            {logError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {logError}
-              </div>
+                  }
+                />
+                <div className="mb-5">
+                  <SegmentedControl
+                    segments={segments}
+                    activeKey={filter?.key ?? null}
+                    onChange={(key) =>
+                      setFilter(key ? { key, label: segmentLabels[key] ?? key } : null)
+                    }
+                  />
+                </div>
+              </Reveal>
             )}
 
-            <a
-              href={`/dashboard/logbuch/${encodeId(Number(primaryBook.id))}`}
-              className={cn(
-                "group block overflow-hidden rounded-2xl border border-neutral-200 bg-white",
-                cardLift,
-              )}
-            >
-              <span className="flex items-center gap-4 px-5 py-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-lg">
-                  <Icon name="notebook" size={20} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-neutral-900">
-                    {primaryBook.title || "Konflikt-Logbuch"}
+            {/* Filterwechsel als Crossfade statt hartem Umschalten – dieselbe
+                Mechanik wie die ThemenTabs auf der Landing. `activeKey` ist der
+                Filter, damit AnimatePresence beim Wechsel neu mountet. */}
+            <CrossfadePanel activeKey={filter?.key ?? "__all__"}>
+              {data.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/50 p-12 text-center sm:p-16">
+                  <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-50 text-accent-700">
+                    <Icon name="dove" size={24} />
                   </span>
-                  <span className="mt-0.5 block text-xs font-light text-neutral-500">
-                    {primaryCount === 0
-                      ? "Noch keine Einträge"
-                      : `${primaryCount} ${primaryCount === 1 ? "Eintrag" : "Einträge"}`}
-                  </span>
-                </span>
-                <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
-                  ›
-                </span>
-              </span>
+                  <p className="font-display text-lg font-medium text-neutral-900">
+                    Noch keine Mediation gestartet
+                  </p>
+                  <p className="mx-auto mt-2 max-w-sm text-sm font-light text-neutral-500">
+                    Jeder Konflikt hat einen Ausgang. Der erste Schritt ist,
+                    ihn zu benennen.
+                  </p>
 
-              {/* Vorschau: die 3 neuesten Einträge */}
-              {previewEntries.length > 0 ? (
-                <span className="block border-t border-neutral-100">
-                  {previewEntries.map((e) => {
-                    const meta = logEntryMeta[e.entry_type] ?? logEntryMeta.vorkommnis;
-                    const snippet = logEntrySnippet(e);
-                    const area = areaShortLabel[(e.area ?? "").toLowerCase()];
-                    return (
-                      <span
-                        key={`log-preview-${e.id}`}
-                        className="flex items-baseline gap-3 border-t border-neutral-50 px-5 py-2.5 first:border-t-0"
-                      >
-                        <span className="shrink-0"><Icon name={meta.icon} size={15} /></span>
-                        <span className="min-w-0 flex-1 truncate text-sm text-neutral-700">
-                          <span className="font-medium text-neutral-900">{meta.label}</span>
-                          {snippet && <span className="text-neutral-500"> – {snippet}</span>}
-                        </span>
-                        {area && (
-                          <span className="hidden shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500 sm:inline">
-                            {area}
-                          </span>
-                        )}
-                        <span className="shrink-0 text-xs font-light tabular-nums text-neutral-400">
-                          {logEntryDate(e)}
-                        </span>
-                      </span>
-                    );
-                  })}
-                </span>
+                  <div className="mt-7 flex flex-col items-center justify-center gap-3">
+                    <PillButton href="/dashboard/mediation/new">
+                      Neue Mediation starten →
+                    </PillButton>
+                    <a
+                      href="/dashboard/logbuch/new"
+                      className="text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
+                    >
+                      Oder erst einmal nur dokumentieren – kostenloses Logbuch →
+                    </a>
+                  </div>
+                </div>
+              ) : visibleData.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-300 p-16 text-center">
+                  <p className="text-lg font-light text-neutral-500">
+                    Keine Mediationen für diesen Filter.
+                  </p>
+                </div>
               ) : (
-                <span className="block border-t border-neutral-100 px-5 py-3 text-xs font-light text-neutral-400">
-                  Halte das erste Vorkommnis fest – Gespräche, Nachrichten,
-                  Gedanken, Fotos.
-                </span>
-              )}
-            </a>
-
-            {/* Alte Duplikat-Bücher (vor dem Ein-Buch-Umbau angelegt) */}
-            {otherBooks.length > 0 && (
-              <div className="mt-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                  Weitere (ältere) Logbücher – am besten aufräumen
-                </p>
+                /* Stripe-Stil: dichte, hover-bare Zeilen mit Haarlinien statt Karten.
+                   Klick öffnet das Slide-over-Panel für eine schnelle Vorschau. */
                 <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-                  {otherBooks.map((log, i) => {
-                    const count = logEntriesByBook[String(log.id)]?.length ?? 0;
+                  <div className="hidden border-b border-neutral-200 bg-neutral-50/60 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400 sm:grid sm:grid-cols-[minmax(0,1fr)_150px_140px_20px] sm:gap-5">
+                    <span>Fall</span>
+                    <span>Status</span>
+                    <span className="text-right">Fortschritt</span>
+                    <span />
+                  </div>
+                  {visibleData.map((mediation, i) => {
+                    const status = mediation.status ?? "pending";
+                    const config = statusConfig[status] ?? fallbackStatus;
+                    const waitingForOther = status === "active" && !mediation.is_my_turn;
+
                     return (
-                      <div
-                        key={`logbuch-${log.id}`}
+                      <button
+                        key={`mediation-${mediation.id}`}
+                        type="button"
+                        onClick={() => setSelected(mediation)}
                         className={cn(
-                          "flex w-full items-center gap-4 px-5 py-3",
+                          "group relative grid w-full grid-cols-[minmax(0,1fr)_20px] items-center gap-4 px-5 py-4 text-left sm:grid-cols-[minmax(0,1fr)_150px_140px_20px] sm:gap-5",
                           i > 0 && "border-t border-neutral-100",
+                          /* Entweder-oder: zwei `hover:bg-*`-Klassen auf einem
+                             Element entscheidet die Stylesheet-Reihenfolge, nicht
+                             die Reihenfolge hier. */
+                          mediation.is_my_turn
+                            ? "bg-amber-50/40 transition-colors duration-200 hover:bg-amber-50/70"
+                            : rowHover,
                         )}
                       >
-                        <a
-                          href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
-                          className="min-w-0 flex-1 hover:text-accent-700"
-                        >
+                        {/* Akzentkante links bei "du bist dran" – dieselbe
+                            Markierung wie im Hero, nur ruhiger. */}
+                        {mediation.is_my_turn && (
+                          <span
+                            aria-hidden
+                            className="absolute inset-y-0 left-0 w-0.5 bg-amber-400"
+                          />
+                        )}
+                        <span className="min-w-0">
                           <span className="block truncate text-sm font-medium text-neutral-900">
-                            {log.title || "Konflikt-Logbuch"}
+                            {mediation.title || mediation.conflict_type || "Neue Mediation"}
                           </span>
                           <span className="mt-0.5 block truncate text-xs font-light text-neutral-500">
-                            {count === 0
-                              ? "leer"
-                              : `${count} ${count === 1 ? "Eintrag" : "Einträge"}`}
-                            {" · "}
-                            {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
+                            {phaseLabel(mediation.phase)}
                           </span>
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => deleteLogbook(Number(log.id))}
-                          disabled={deletingLogId === Number(log.id)}
-                          className="shrink-0 text-xs font-semibold text-neutral-400 transition hover:text-red-500 disabled:opacity-50"
-                        >
-                          {deletingLogId === Number(log.id) ? "Wird gelöscht …" : "Löschen"}
-                        </button>
-                      </div>
+                        </span>
+
+                        <span className="hidden flex-col gap-1 sm:flex">
+                          <StatusDot label={config.label} tone={config.tone} />
+                          {mediation.is_my_turn && (
+                            <StatusDot label="Deine Eingabe" tone="amber" pulse />
+                          )}
+                          {waitingForOther && (
+                            <span className="text-[11px] font-light text-neutral-400">
+                              Warte auf Gegenpartei
+                            </span>
+                          )}
+                        </span>
+
+                        <span className="hidden items-center justify-end gap-3 sm:flex">
+                          <span className="w-16">
+                            <ThinProgressBar value={mediation.progress ?? 0} />
+                          </span>
+                          <span className="w-9 text-right text-sm font-medium tabular-nums text-neutral-900">
+                            {mediation.progress ?? 0}%
+                          </span>
+                        </span>
+
+                        <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                          ›
+                        </span>
+                      </button>
                     );
                   })}
                 </div>
-              </div>
+              )}
+            </CrossfadePanel>
+          </div>
+
+          {/* ── Seitenspalte: Fortschritt, Kalender, Logbuch ───────────
+               Bewusst NICHT `sticky`: die Spalte kann mit Checkliste,
+               Kalender und Logbuch höher werden als der Viewport, und ein
+               gepinntes Element, dessen Unterkante man nie erreicht, ist
+               schlechter als gar kein Pinning. */}
+          <aside className="min-w-0 space-y-6 lg:col-span-4">
+            {/* Erste Schritte (Onboarding-Checkliste) */}
+            {showOnboarding && (
+              <Reveal>
+                <SideCard className="p-5">
+                  <div className="mb-3 flex items-baseline justify-between gap-3">
+                    <Kicker>Erste Schritte</Kicker>
+                    <span className="text-xs font-semibold tabular-nums text-neutral-400">
+                      {onboarding.doneCount}/{onboarding.steps.length}
+                    </span>
+                  </div>
+                  <ThinProgressBar
+                    value={(onboarding.doneCount / onboarding.steps.length) * 100}
+                    tone="accent"
+                  />
+                  <ul className="mt-5 space-y-3">
+                    {onboarding.steps.map((step) => (
+                      <li key={step.label} className="flex items-start gap-2.5">
+                        {step.done ? (
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent-500 text-white">
+                            <Icon name="check" size={10} />
+                          </span>
+                        ) : (
+                          <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full border border-dashed border-neutral-300" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <span
+                            className={cn(
+                              "block text-[13px] leading-snug",
+                              step.done
+                                ? "font-light text-neutral-400 line-through decoration-neutral-300"
+                                : "font-medium text-neutral-800",
+                            )}
+                          >
+                            {step.label}
+                          </span>
+                          {!step.done && step.hint && (
+                            <p className="mt-1 text-[11px] font-light leading-relaxed text-neutral-500">
+                              {step.hint}
+                            </p>
+                          )}
+                          {!step.done && step.action && (
+                            <a
+                              href={step.action.href}
+                              className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-accent-600 transition-colors hover:text-accent-700"
+                            >
+                              {step.action.label}
+                              <span aria-hidden>→</span>
+                            </a>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </SideCard>
+              </Reveal>
             )}
-          </Reveal>
-        )}
+
+            {/* ── Kalender ──
+                 Über dem Logbuch, weil er die dringendere Frage beantwortet:
+                 was steht an und wartet etwas auf mich. Die Karte blendet
+                 sich selbst aus, wenn es kein Logbuch gibt. */}
+            <KalenderKarte className="" />
+
+            {/* ── Dein Konflikt-Logbuch (Ein-Buch-Prinzip) ── */}
+            {primaryBook && (
+              <Reveal>
+                <div className="mb-3 flex items-center gap-2">
+                  <Kicker>Dein Konflikt-Logbuch</Kicker>
+                  <span className="rounded-full border border-accent-200 bg-accent-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent-700">
+                    kostenlos
+                  </span>
+                </div>
+
+                {logError && (
+                  <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {logError}
+                  </div>
+                )}
+
+                <a
+                  href={`/dashboard/logbuch/${encodeId(Number(primaryBook.id))}`}
+                  className={cn(
+                    "group relative block overflow-hidden rounded-2xl border border-neutral-200 bg-white",
+                    cardLift,
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-300/70 to-transparent"
+                  />
+                  <span className="flex items-center gap-3 px-4 py-4">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
+                      <Icon name="notebook" size={18} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-neutral-900">
+                        {primaryBook.title || "Konflikt-Logbuch"}
+                      </span>
+                      <span className="mt-0.5 block text-xs font-light text-neutral-500">
+                        {primaryCount === 0
+                          ? "Noch keine Einträge"
+                          : `${primaryCount} ${primaryCount === 1 ? "Eintrag" : "Einträge"}`}
+                      </span>
+                    </span>
+                    <span className="text-neutral-300 transition-transform duration-200 group-hover:translate-x-0.5">
+                      ›
+                    </span>
+                  </span>
+
+                  {/* Vorschau: die 3 neuesten Einträge */}
+                  {previewEntries.length > 0 ? (
+                    <span className="block border-t border-neutral-100">
+                      {previewEntries.map((e) => {
+                        const meta = logEntryMeta[e.entry_type] ?? logEntryMeta.vorkommnis;
+                        const snippet = logEntrySnippet(e);
+                        const area = areaShortLabel[(e.area ?? "").toLowerCase()];
+                        return (
+                          /* Zweizeilig statt einzeilig: in der schmalen
+                             Seitenspalte hätten Art, Bereich, Datum und
+                             Textauszug nebeneinander keinen Platz – der
+                             Bereichs-Chip war deshalb vorher der Erste, der
+                             wegfiel. */
+                          <span
+                            key={`log-preview-${e.id}`}
+                            className="block border-t border-neutral-50 px-4 py-2.5 first:border-t-0"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="shrink-0 text-neutral-400">
+                                <Icon name={meta.icon} size={13} />
+                              </span>
+                              <span className="truncate text-[12px] font-semibold text-neutral-900">
+                                {meta.label}
+                              </span>
+                              {area && (
+                                <span className="shrink-0 truncate rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-500">
+                                  {area}
+                                </span>
+                              )}
+                              <span className="ml-auto shrink-0 text-[11px] font-light tabular-nums text-neutral-400">
+                                {logEntryDate(e)}
+                              </span>
+                            </span>
+                            {snippet && (
+                              <span className="mt-1 block truncate pl-[21px] text-[12px] font-light text-neutral-500">
+                                {snippet}
+                              </span>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </span>
+                  ) : (
+                    <span className="block border-t border-neutral-100 px-4 py-3 text-xs font-light leading-relaxed text-neutral-400">
+                      Halte das erste Vorkommnis fest – Gespräche, Nachrichten,
+                      Gedanken, Fotos.
+                    </span>
+                  )}
+                </a>
+
+                {/* Alte Duplikat-Bücher (vor dem Ein-Buch-Umbau angelegt) */}
+                {otherBooks.length > 0 && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-neutral-400">
+                      Ältere Logbücher – am besten aufräumen
+                    </p>
+                    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                      {otherBooks.map((log, i) => {
+                        const count = logEntriesByBook[String(log.id)]?.length ?? 0;
+                        return (
+                          <div
+                            key={`logbuch-${log.id}`}
+                            className={cn(
+                              "flex w-full items-center gap-3 px-4 py-3",
+                              i > 0 && "border-t border-neutral-100",
+                            )}
+                          >
+                            <a
+                              href={`/dashboard/logbuch/${encodeId(Number(log.id))}`}
+                              className="min-w-0 flex-1 hover:text-accent-700"
+                            >
+                              <span className="block truncate text-[13px] font-medium text-neutral-900">
+                                {log.title || "Konflikt-Logbuch"}
+                              </span>
+                              <span className="mt-0.5 block truncate text-[11px] font-light text-neutral-500">
+                                {count === 0
+                                  ? "leer"
+                                  : `${count} ${count === 1 ? "Eintrag" : "Einträge"}`}
+                                {" · "}
+                                {typeLabel[log.conflict_type ?? ""] ?? log.conflict_type}
+                              </span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => deleteLogbook(Number(log.id))}
+                              disabled={deletingLogId === Number(log.id)}
+                              className="shrink-0 text-[11px] font-semibold text-neutral-400 transition hover:text-red-500 disabled:opacity-50"
+                            >
+                              {deletingLogId === Number(log.id) ? "Lösche …" : "Löschen"}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </Reveal>
+            )}
+
+            {/* Wer noch kein Logbuch hat, sieht hier den Einstieg statt einer
+                leeren Spalte – der kostenlose Pfad war vorher nur im Hero
+                und im Empty-State verlinkt. */}
+            {!primaryBook && (
+              <Reveal>
+                <SideCard className="p-5">
+                  <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
+                    <Icon name="notebook" size={18} />
+                  </span>
+                  <Kicker className="mb-1.5">Kostenlos</Kicker>
+                  <p className="font-display text-base font-medium text-neutral-900">
+                    Konflikt-Logbuch
+                  </p>
+                  <p className="mt-1.5 text-[13px] font-light leading-relaxed text-neutral-500">
+                    Dein privates Gedächtnisprotokoll: ein Buch für alle
+                    Konflikte, jeder Eintrag einem Bereich zugeordnet. In eine
+                    Mediation umwandeln kannst du jederzeit.
+                  </p>
+                  <a
+                    href="/dashboard/logbuch/new"
+                    className="mt-4 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-accent-600 transition-colors hover:text-accent-700"
+                  >
+                    Logbuch anlegen
+                    <span aria-hidden>→</span>
+                  </a>
+                </SideCard>
+              </Reveal>
+            )}
+          </aside>
+        </div>
       </section>
     </main>
 

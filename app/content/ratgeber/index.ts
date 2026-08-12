@@ -50,6 +50,11 @@ import { article as wegStreitMediation } from "./weg-streit-mediation";
 // das Wort nicht. Hintergrund in docs/ratgeber-suchsprache.md.
 import { article as wasStehtMirBeiDerScheidungZu } from "./was-steht-mir-bei-der-scheidung-zu";
 import { article as hausBeiScheidung } from "./haus-bei-scheidung";
+// 12.08.2026 – der Vertrag, den der medipact-Prozess inhaltlich produziert.
+// Transaktionale Suchintention, siehe docs/kaufabsicht-scheidung.md.
+import { article as scheidungsfolgenvereinbarung } from "./scheidungsfolgenvereinbarung";
+import { article as trennungsvereinbarung } from "./trennungsvereinbarung";
+import { article as scheidungOhneAnwalt } from "./scheidung-ohne-anwalt";
 import { article as werMussAusDerWohnung } from "./wer-muss-aus-der-wohnung";
 import { article as trennungsjahrNachweisen } from "./trennungsjahr-nachweisen";
 import { article as geschwisterStreitenUmsErbe } from "./geschwister-streiten-ums-erbe";
@@ -75,6 +80,12 @@ export const ratgeberArticles: RatgeberArticle[] = [
   // sind der Einstieg für Betroffene, die den Begriff "Mediation" noch gar
   // nicht kennen. Die Verfahrens-Artikel folgen dahinter.
   wasStehtMirBeiDerScheidungZu,
+  // Die drei Vertrags- und Verfahrensartikel (12.08.2026) stehen in der
+  // Reihenfolge, in der Betroffene sie brauchen: erst die Trennungszeit, dann
+  // die Regelung der Folgen, dann die Frage nach dem Anwalt.
+  trennungsvereinbarung,
+  scheidungsfolgenvereinbarung,
+  scheidungOhneAnwalt,
   hausBeiScheidung,
   werMussAusDerWohnung,
   trennungsjahrNachweisen,

@@ -333,7 +333,36 @@ def my_calendar(
     )
     buecher = [(p, m) for p, m in teilnahmen if (m.mode or "mediation") == "logbuch"]
     if not buecher:
-        return {"mediation_id": None, "rolle": None, "titel": None, "offene_anfragen": 0}
+        # Kein Buch – aber vielleicht ein Verfahren. Das ist der Regelfall NACH
+        # der Umwandlung (logbuch/convert setzt mode auf "mediation"), und der
+        # Unterschied ist für die Oberfläche entscheidend:
+        #
+        #   noch nie ein Buch  -> „Leg eines an" (Einstieg ins kostenlose Angebot)
+        #   umgewandelt        -> „Läuft jetzt im Verfahren weiter" (kein Rückweg)
+        #
+        # Vorher lieferten beide Fälle dasselbe leere Ergebnis. Wer gerade eine
+        # Mediation gestartet hatte, bekam „Noch kein Kalender" angeboten und
+        # hätte sich ein zweites Buch neben sein eigenes Verfahren gelegt.
+        verfahren = [(p, m) for p, m in teilnahmen if (m.mode or "mediation") != "logbuch"]
+        if verfahren:
+            _p, m = max(verfahren, key=lambda paar: paar[1].id)
+            return {
+                "mediation_id": None,
+                "rolle": None,
+                "titel": None,
+                "offene_anfragen": 0,
+                "gesperrt": True,
+                "grund": "in_mediation",
+                "fall_id": m.id,
+                "fall_titel": m.title,
+            }
+        return {
+            "mediation_id": None,
+            "rolle": None,
+            "titel": None,
+            "offene_anfragen": 0,
+            "gesperrt": False,
+        }
 
     # Bei Altbestand mit mehreren Büchern gewinnt das mit den meisten
     # Betreuungszeiten – das ist der Kalender, den die Person tatsächlich nutzt.

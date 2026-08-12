@@ -1,6 +1,17 @@
 // Ziel-Suchbegriffe: "muss ich bei scheidung das haus verkaufen", "haus bei
 // scheidung", "wer bekommt das haus bei scheidung", "hausübernahme scheidung".
 //
+// 12.08.2026 – ergänzt um den Verkaufs-Ablauf. Anlass: GSC zeigt "trennung haus
+// verkaufen" (10 Impr.) und "haus verkaufen trennung" (7 Impr.) auf Position 97,
+// obwohl diese Seite thematisch exakt passt. Die Begriffe fehlten nicht — der
+// Artikel beantwortete nur die Frage "muss ich verkaufen?" (Antwort: nein) und
+// behandelte den Verkauf als eine von vier Optionen. Wer "trennung haus
+// verkaufen" sucht, hat die Entscheidung aber schon getroffen und will wissen,
+// WIE das abläuft: Makler, Zeitpunkt, Erlösverteilung, Vorfälligkeit. Das war
+// hier nicht beantwortet. Kein Slug-Umzug — der letzte liegt erst zwei Wochen
+// zurück, und der Slug trägt die Begriffe bereits.
+// Belege: docs/gsc-analyse-2026-08-12.md, Abschnitt 5.
+//
 // Suchsprache-Artikel. Hohe Suchintention, weil an der Immobilie die meisten
 // einvernehmlichen Trennungen kippen — sie ist meist der größte Posten und
 // gleichzeitig emotional aufgeladen.
@@ -18,14 +29,14 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "haus-bei-scheidung",
   category: "Trennung & Scheidung",
-  title: "Muss ich bei der Scheidung das Haus verkaufen?",
-  metaTitle: "Haus bei Scheidung: verkaufen oder behalten? | medipact",
+  title: "Muss ich bei Trennung oder Scheidung das Haus verkaufen?",
+  metaTitle: "Haus verkaufen bei Scheidung oder Trennung | medipact",
   description:
-    "Verkaufen, auszahlen, vermieten oder wohnen bleiben: die vier Wege mit dem Haus bei einer Scheidung – und warum die Bank das letzte Wort hat.",
+    "Haus verkaufen bei Trennung oder Scheidung: Ablauf, Erlösverteilung und Vorfälligkeit – oder doch auszahlen? Die vier Wege und warum die Bank entscheidet.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-07-31",
   published: "2026-07-31",
-  readingMinutes: 9,
+  readingMinutes: 11,
   intro:
     "Nein, Sie müssen nicht verkaufen. Niemand kann Sie dazu zwingen, solange Sie sich einigen. Zwangsläufig wird ein Verkauf erst, wenn Sie sich nicht einigen – dann entscheidet am Ende ein Verfahren, das für beide Seiten das schlechteste Ergebnis bringt. Dieser Artikel zeigt die vier realistischen Wege und die eine Hürde, die fast immer unterschätzt wird.",
   blocks: [
@@ -83,6 +94,32 @@ export const article: RatgeberArticle = {
     {
       type: "callout",
       text: "Klären Sie die Frage der Haftungsentlassung mit der Bank, BEVOR Sie eine Vereinbarung unterschreiben – nicht danach. Eine Einigung, die an der Bank scheitert, muss komplett neu verhandelt werden, meist unter deutlich schlechterer Stimmung.",
+    },
+    {
+      type: "heading",
+      text: "Wenn Sie verkaufen: so läuft es ab",
+    },
+    {
+      type: "paragraph",
+      text: "Haben Sie sich für den gemeinsamen Verkauf entschieden, ist der schwierige Teil nicht der Markt, sondern die Reihenfolge der Entscheidungen. Fast alle Verkäufe in Trennungssituationen geraten an denselben drei Stellen ins Stocken: bei der Wahl des Maklers, beim Mindestpreis und bei der Frage, wer bis zum Auszug die Rate zahlt. Wer diese drei Punkte vorab schriftlich klärt, verkauft schneller und teurer.",
+    },
+    {
+      type: "list",
+      items: [
+        "Einen gemeinsamen Makler beauftragen, nicht jeder seinen eigenen. Zwei Makler mit demselben Objekt schaden dem Preis: Interessenten sehen dieselbe Immobilie doppelt inseriert und lesen daraus Verkaufsdruck.",
+        "Vorher einen Mindestpreis vereinbaren, unter dem nicht verkauft wird – schriftlich, mit einem Datum, ab dem er neu verhandelt wird. Ohne diese Grenze wird jedes Gebot zur neuen Verhandlung zwischen Ihnen beiden.",
+        "Festlegen, wer bis zum Notartermin in der Immobilie wohnt, wer die Rate zahlt und wer die laufenden Kosten trägt. Wird das offengelassen, entsteht in genau der Zeit Streit, in der Sie gemeinsam auftreten müssten.",
+        "Klären, wer für Besichtigungen zuständig ist. Ein Haus, in dem sichtbar Konflikt herrscht, verkauft sich schlechter – Interessenten spüren das und rechnen es in ihr Gebot ein.",
+        "Die Vorfälligkeitsentschädigung vorab bei der Bank abfragen, nicht schätzen. Bei laufender Zinsbindung kann sie einen fünfstelligen Betrag erreichen und die gesamte Rechnung umwerfen.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Beim Erlös gilt eine feste Reihenfolge, und sie ist der Grund, warum der Betrag am Ende oft kleiner ausfällt als gedacht: Zuerst wird das Darlehen abgelöst, dann kommen Vorfälligkeitsentschädigung, Maklercourtage und Notarkosten. Erst was danach übrig bleibt, wird zwischen Ihnen aufgeteilt – im Regelfall hälftig, wenn Sie je zur Hälfte im Grundbuch stehen. Ungleiche Beiträge zum Kauf, etwa Eigenkapital nur von einer Seite oder Zahlungen aus einer Erbschaft, ändern daran nichts automatisch. Sie müssen ausdrücklich vereinbart werden, sonst fallen sie unter den Tisch.",
+    },
+    {
+      type: "callout",
+      text: "Der Zeitpunkt ist keine reine Marktfrage. Ein Verkauf innerhalb der zehnjährigen Spekulationsfrist kann Einkommensteuer auslösen, wenn die Immobilie nicht durchgehend selbst genutzt wurde – und die Eigennutzung endet für die ausgezogene Person mit dem Auszug. Lassen Sie das vor dem Inserat steuerlich prüfen, nicht nach dem Notartermin.",
     },
     {
       type: "heading",
@@ -158,6 +195,16 @@ export const article: RatgeberArticle = {
         "Nur wenn die Bank Sie ausdrücklich aus der Haftung entlässt. Ihre interne Vereinbarung bindet die Bank nicht. Sie prüft, ob die übernehmende Person das Darlehen allein tragen kann, und stimmt nur dann zu. Klären Sie das unbedingt vor Abschluss einer Vereinbarung – sonst haften Sie weiter für ein Haus, das Ihnen nicht mehr gehört.",
     },
     {
+      question: "Wie wird der Erlös aus dem Hausverkauf bei einer Trennung aufgeteilt?",
+      answer:
+        "In einer festen Reihenfolge: Zuerst wird das Darlehen abgelöst, dann werden Vorfälligkeitsentschädigung, Maklercourtage und Notarkosten abgezogen. Was übrig bleibt, wird nach den Anteilen im Grundbuch geteilt – bei je 50 % also hälftig. Ungleiche Beiträge zum Kauf, etwa Eigenkapital nur von einer Seite, werden dabei nicht automatisch berücksichtigt; sie müssen ausdrücklich vereinbart werden.",
+    },
+    {
+      question: "Sollten wir das Haus vor oder nach der Scheidung verkaufen?",
+      answer:
+        "Rechtlich spielt der Zeitpunkt der Scheidung für den Verkauf keine Rolle – Sie können jederzeit gemeinsam verkaufen. Wirtschaftlich zählen zwei andere Fragen: ob die Zehnjahresfrist für die Spekulationssteuer abgelaufen ist und wie hoch eine Vorfälligkeitsentschädigung bei laufender Zinsbindung ausfällt. Beides sollte vor dem Inserat geklärt sein, weil es die Rechnung erheblich verändern kann.",
+    },
+    {
       question: "Was ist eine Teilungsversteigerung?",
       answer:
         "Ein gerichtliches Verfahren, mit dem ein Miteigentümer die Aufhebung der Gemeinschaft erzwingen kann, wenn keine Einigung zustande kommt. Die Immobilie wird versteigert und der Erlös geteilt. In der Praxis liegen die Erlöse regelmäßig unter dem freien Marktwert, sodass beide Seiten verlieren – deshalb ist es das letzte und nicht das erste Mittel.",
@@ -169,6 +216,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
     { label: "Vermögen aufteilen bei Scheidung", href: "/ratgeber/vermoegensauseinandersetzung" },

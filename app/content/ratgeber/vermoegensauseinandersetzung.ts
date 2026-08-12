@@ -140,6 +140,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
+    { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Muss ich bei der Scheidung das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },

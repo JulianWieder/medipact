@@ -1,5 +1,10 @@
-// Einstieg der medipact-Logbuch-App: Auth-Gate + einfache Stack-Navigation
-// (bewusst ohne react-navigation – drei Screens brauchen keinen Navigator).
+// Einstieg BEIDER Store-Apps: Auth-Gate + einfache Stack-Navigation (bewusst
+// ohne react-navigation – so wenige Screens brauchen keinen Navigator).
+//
+// Welche App das hier gerade ist, steht in src/variante.ts und wird beim
+// Bauen gesetzt. Der einzige Unterschied ist der Einstiegspunkt nach dem
+// Login: die Logbuch-App zeigt die Fallliste, die Kalender-App springt direkt
+// in den Betreuungskalender.
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, BackHandler, View } from "react-native";
@@ -7,13 +12,18 @@ import { ActivityIndicator, BackHandler, View } from "react-native";
 import { loadTokens } from "./src/api";
 import CareCalendarScreen from "./src/screens/CareCalendarScreen";
 import CasesScreen from "./src/screens/CasesScreen";
+import KalenderStartScreen from "./src/screens/KalenderStartScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import LogbookScreen from "./src/screens/LogbookScreen";
 import { colors } from "./src/theme";
+import { istKalenderApp } from "./src/variante";
 
 type Route =
   | { name: "login" }
   | { name: "cases" }
+  // Startbildschirm der Kalender-App: löst den eigenen Kalender auf und
+  // rendert ihn. In der Logbuch-App wird diese Route nie gesetzt.
+  | { name: "kalenderStart" }
   | {
       name: "logbook";
       id: number;
@@ -36,7 +46,11 @@ export default function App() {
   useEffect(() => {
     void (async () => {
       const hasSession = await loadTokens();
-      setRoute(hasSession ? { name: "cases" } : { name: "login" });
+      if (!hasSession) {
+        setRoute({ name: "login" });
+        return;
+      }
+      setRoute(istKalenderApp ? { name: "kalenderStart" } : { name: "cases" });
     })();
   }, []);
 
@@ -70,7 +84,14 @@ export default function App() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="dark" />
       {route.name === "login" && (
-        <LoginScreen onLoggedIn={() => setRoute({ name: "cases" })} />
+        <LoginScreen
+          onLoggedIn={() =>
+            setRoute(istKalenderApp ? { name: "kalenderStart" } : { name: "cases" })
+          }
+        />
+      )}
+      {route.name === "kalenderStart" && (
+        <KalenderStartScreen onLoggedOut={() => setRoute({ name: "login" })} />
       )}
       {route.name === "cases" && (
         <CasesScreen

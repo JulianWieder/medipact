@@ -80,6 +80,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=odr" },
     { label: "Kündigung ohne Gericht klären", href: "/ratgeber/kuendigung-ohne-gericht" },
     { label: "Mediation im Unternehmen (Arbeitgeber-Sicht)", href: "/ratgeber/mediation-im-unternehmen" },
     { label: "Fallbeispiel: Konflikt im Team", href: "/cases/team-konflikt" },

@@ -178,6 +178,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Sorge- und Umgangsverfahren", href: "/kostenrechner?art=kindschaft" },
     { label: "Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },

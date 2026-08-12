@@ -315,6 +315,8 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Scheidung ohne Anwalt: geht das?", href: "/ratgeber/scheidung-ohne-anwalt" },
+    { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },

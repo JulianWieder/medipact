@@ -111,6 +111,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
     { label: "Die Phasen der Mediation im Detail", href: "/ratgeber/5-phasen-der-mediation" },
     { label: "Was ist Mediation?", href: "/ratgeber/was-ist-mediation" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },

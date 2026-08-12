@@ -280,6 +280,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Sorge- und Umgangsverfahren", href: "/kostenrechner?art=kindschaft" },
     { label: "Sorgerecht und Umgang: Wer bekommt was?", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Gericht oder Mediation – was ist sinnvoller?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Konflikt dokumentieren: Worauf es ankommt", href: "/ratgeber/konflikt-dokumentieren" },

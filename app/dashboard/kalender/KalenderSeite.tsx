@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Icon from "@/app/components/ui/Icon";
 import BetreuungsKalender from "@/app/components/kalender/BetreuungsKalender";
+import InstallKalender from "@/app/components/pwa/InstallKalender";
 
 // Rahmen um die Kalender-Komponente: Überschrift, Einordnung und der Fall,
 // dass es noch gar keinen Kalender gibt. Die Komponente selbst ist dieselbe
@@ -12,11 +13,50 @@ export default function KalenderSeite({
   mediationId,
   nurLesen = false,
   startDatum = null,
+  gesperrt = false,
+  fallId = null,
+  fallTitel = null,
 }: {
   mediationId: string | null;
   nurLesen?: boolean;
   startDatum?: string | null;
+  gesperrt?: boolean;
+  fallId?: number | null;
+  fallTitel?: string | null;
 }) {
+  // Umgewandelt: Der Kalender ist kein eigenes Angebot mehr, die
+  // Betreuungszeiten sind Teil des Verfahrens. Das ist eine Übergabe, keine
+  // Sackgasse – deshalb führt hier ein Weg raus und keiner zurück ins
+  // kostenlose Logbuch.
+  if (gesperrt) {
+    return (
+      <section className="container max-w-3xl py-12">
+        <h1 className="font-display text-2xl font-medium text-neutral-900">
+          <Icon name="calendar" size={22} /> Kalender
+        </h1>
+        <div className="mt-6 rounded-2xl border border-neutral-200 bg-white px-6 py-8">
+          <p className="text-sm font-semibold text-neutral-900">
+            Läuft jetzt im Verfahren weiter
+          </p>
+          <p className="mt-2 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
+            Aus deinem Logbuch ist eine Mediation geworden
+            {fallTitel ? ` („${fallTitel}“)` : ""}. Deine Betreuungszeiten,
+            Regeln und Absprachen sind vollständig mit umgezogen – wer wann bei
+            wem war, ist im Verfahren der Ausgangspunkt und nicht mehr eine
+            Sache nebenher. Geändert wird ab jetzt dort, damit beide Seiten
+            denselben Stand sehen.
+          </p>
+          <Link
+            href={fallId ? `/dashboard/${fallId}` : "/dashboard"}
+            className="btn btn-primary mt-5 text-sm"
+          >
+            Zum Verfahren
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
   if (!mediationId) {
     return (
       <section className="container max-w-3xl py-12">
@@ -69,6 +109,11 @@ export default function KalenderSeite({
           </Link>
         )}
       </div>
+
+      {/* Steht bewusst oben, nicht unter dem Kalender: wer bis hierher
+          gescrollt hat, hat den Kalender schon benutzt und braucht keinen
+          Hinweis mehr. Rendert sich selbst weg, sobald installiert. */}
+      <InstallKalender />
 
       <div className="mt-8">
         <BetreuungsKalender

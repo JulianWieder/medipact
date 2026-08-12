@@ -103,6 +103,9 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
+    { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
+    { label: "Scheidung ohne Anwalt: geht das?", href: "/ratgeber/scheidung-ohne-anwalt" },
     { label: "Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },

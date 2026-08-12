@@ -121,6 +121,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=b2b" },
     { label: "ODR-Verfahren bei medipact im Überblick", href: "/konflikte/odr" },
     { label: "Wirtschaftsmediation: Konflikte im Unternehmen lösen", href: "/ratgeber/wirtschaftsmediation" },
     { label: "Gericht oder Mediation – was passt wann?", href: "/ratgeber/gericht-oder-mediation" },

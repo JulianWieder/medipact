@@ -85,12 +85,12 @@ export default function NewsletterSignup({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("placeholder")}
                 autoComplete="email"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                className="min-w-0 flex-1 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[15px] text-white placeholder:text-neutral-400 focus:border-accent-500 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="shrink-0 rounded-xl bg-accent-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-accent-500 disabled:opacity-60"
+                className="shrink-0 rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-accent-500 disabled:opacity-60"
               >
                 {status === "loading" ? t("submitting") : t("footerButton")}
               </button>
@@ -130,7 +130,7 @@ export default function NewsletterSignup({
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="mx-auto mt-8 max-w-md"
+            className="mx-auto mt-8 max-w-2xl"
             noValidate
           >
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -144,12 +144,12 @@ export default function NewsletterSignup({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("placeholder")}
                 autoComplete="email"
-                className="w-full rounded-2xl border border-neutral-300 bg-white px-5 py-3.5 text-base text-neutral-900 placeholder:text-neutral-400 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                className="min-w-0 flex-1 rounded-2xl border-2 border-neutral-300 bg-white px-6 py-4 text-lg text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-accent-500/25"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="shrink-0 rounded-2xl bg-accent-600 px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-accent-900/20 transition hover:scale-[1.02] hover:bg-accent-500 disabled:opacity-60 disabled:hover:scale-100"
+                className="shrink-0 rounded-2xl bg-accent-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/20 transition hover:scale-[1.02] hover:bg-accent-500 disabled:opacity-60 disabled:hover:scale-100"
               >
                 {status === "loading" ? t("submitting") : t("button")}
               </button>

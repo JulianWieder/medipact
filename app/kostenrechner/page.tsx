@@ -75,6 +75,16 @@ const FAQ = [
       "Nein, und wer das behauptet, rechnet falsch. Eine Ehe wird in Deutschland nur durch gerichtlichen Beschluss geschieden, und für den Antrag ist mindestens ein Anwalt zwingend vorgeschrieben (§ 114 FamFG). Mediation macht aus einer streitigen eine einvernehmliche Scheidung — die Gerichtskosten und ein Anwalt bleiben.",
   },
   {
+    question: "Was kostet ein Mediator pro Stunde?",
+    answer:
+      "Frei tätige Mediatorinnen und Mediatoren rechnen nach Stunden ab. Die Sätze reichen von rund 80 bis 500 Euro, der übliche Bereich liegt zwischen 150 und 300 Euro pro Stunde; in der Familienmediation sind Werte um 160 Euro verbreitet. Abgerechnet wird meist je Sitzung, und die Zahl der Sitzungen steht vorher nicht fest — das ist der entscheidende Unterschied zu einem Festpreis.",
+  },
+  {
+    question: "Was kostet eine Mediation insgesamt?",
+    answer:
+      "Bei stundenweiser Abrechnung sind für eine Familienmediation üblicherweise drei bis acht Sitzungen anzusetzen; die Gesamtkosten liegen dann grob zwischen 800 und 3.000 Euro pro Partei, je nach Stundensatz und Zahl der Termine. Das ist deutlich weniger als ein streitiges Verfahren, aber ein offener Betrag: Wie viele Sitzungen es werden, entscheidet sich erst im Verlauf.",
+  },
+  {
     question: "Was kostet ein Sorgerechts- oder Umgangsverfahren?",
     answer:
       "Der Verfahrenswert steht fest: 5.000 Euro je Gegenstand (§ 45 Absatz 1 FamGKG). Daraus ergeben sich bei Sorge und Umgang zusammen rund 2.100 Euro an Gerichts- und Anwaltsgebühren für beide Seiten. Diese Zahl ist allerdings irreführend, weil die größten Posten nicht am Verfahrenswert hängen: ein familienpsychologisches Gutachten kostet je nach Umfang 4.000 bis 15.000 Euro, der Verfahrensbeistand 690 Euro je Rechtszug. In hoch strittigen Verfahren mit Eilantrag, Beschwerde und späterer Abänderung liegt der Betrag pro Elternteil regelmäßig im fünfstelligen Bereich.",
@@ -215,6 +225,102 @@ export default async function Kostenrechner({
               mehr auf.
             </p>
 
+            {/* Der Rechner stellte bisher nur zwei Zahlen gegenüber: Gericht
+                und medipact. Damit fehlte der Vergleich, den Suchende
+                tatsächlich anstellen — nämlich der zur frei tätigen
+                Mediatorin, nicht zum Prozess. Genau darauf zielen Suchen wie
+                "was kostet ein mediator pro stunde" und "mediator
+                stundensatz". Ohne diese Einordnung wirkt ein Festpreis nicht
+                günstig, sondern verdächtig.
+                Keine medipact-Preise hart hineinschreiben: die kommen aus
+                backend/app/pricing.py und stehen oben im Rechner. */}
+            <h2 className="mt-12 font-display text-2xl font-medium text-neutral-900">
+              Womit der Rechner eigentlich vergleicht
+            </h2>
+            <p className="mt-4 leading-7 text-neutral-700">
+              Die zweite Spalte oben zeigt einen Festpreis. Das ist nicht der
+              übliche Weg, eine Mediation abzurechnen — und wer nur diese beiden
+              Zahlen sieht, vergleicht die falschen Dinge. Der ehrliche
+              Vergleich hat drei Spalten, nicht zwei.
+            </p>
+
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Wege der Konfliktklärung im Kostenvergleich: Gerichtsverfahren,
+                  frei tätige Mediation nach Stundensatz und Online-Mediation zum
+                  Festpreis
+                </caption>
+                <thead>
+                  <tr className="border-b border-neutral-300">
+                    <th scope="col" className="py-3 pr-4 font-semibold text-neutral-900">
+                      Weg
+                    </th>
+                    <th scope="col" className="py-3 pr-4 font-semibold text-neutral-900">
+                      Kostenlogik
+                    </th>
+                    <th scope="col" className="py-3 font-semibold text-neutral-900">
+                      Steht der Betrag vorher fest?
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-neutral-700">
+                  <tr className="border-b border-neutral-200">
+                    <th scope="row" className="py-3 pr-4 font-medium text-neutral-900">
+                      Gerichtsverfahren
+                    </th>
+                    <td className="py-3 pr-4">
+                      Nach Streitwert, gesetzliche Tabellen; Gutachten und
+                      weitere Instanzen kommen hinzu
+                    </td>
+                    <td className="py-3">
+                      Nein — es ist ein Risiko, kein Preis
+                    </td>
+                  </tr>
+                  <tr className="border-b border-neutral-200">
+                    <th scope="row" className="py-3 pr-4 font-medium text-neutral-900">
+                      Freie Mediation vor Ort
+                    </th>
+                    <td className="py-3 pr-4">
+                      Nach Stundensatz, üblich 150–300 € pro Stunde; für eine
+                      Familienmediation meist 3–8 Sitzungen
+                    </td>
+                    <td className="py-3">
+                      Nein — die Zahl der Sitzungen zeigt sich erst im Verlauf
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row" className="py-3 pr-4 font-medium text-neutral-900">
+                      Online-Mediation zum Festpreis
+                    </th>
+                    <td className="py-3 pr-4">
+                      Einmalige Pauschale für den geführten Prozess, unabhängig
+                      von der Dauer
+                    </td>
+                    <td className="py-3">Ja</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-6 leading-7 text-neutral-700">
+              In Zahlen heißt das: Eine Familienmediation über Stundensätze
+              landet erfahrungsgemäß bei grob 800 bis 3.000 Euro pro Partei —
+              deutlich unter einem streitigen Verfahren, aber eben ein offener
+              Betrag. Genau diese Offenheit ist der Grund, warum viele Paare
+              die Mediation gar nicht erst beginnen: Nicht die Höhe schreckt ab,
+              sondern die Unklarheit.
+            </p>
+            <p className="mt-4 leading-7 text-neutral-700">
+              Der Festpreis oben löst dieses Problem, aber er kauft etwas
+              anderes: einen strukturierten, überwiegend schriftlichen
+              Online-Prozess statt gemeinsamer Sitzungen mit einer Mediatorin im
+              Raum. Für viele Konflikte ist das der bessere Weg — bei hoher
+              Eskalation, Angst vor der Gegenseite oder komplexen
+              Unternehmensbeteiligungen ist die persönliche Begleitung es. Wer
+              vergleicht, sollte beides wissen.
+            </p>
+
             <h2 className="mt-12 font-display text-2xl font-medium text-neutral-900">
               Warum Sorge und Umgang aus dem Rahmen fallen
             </h2>
@@ -281,6 +387,16 @@ export default async function Kostenrechner({
               <li>
                 <Link href="/ratgeber/scheidung-mediator-kosten" className="underline">
                   Scheidung mit Mediator: Kosten im Detail
+                </Link>
+              </li>
+              <li>
+                <Link href="/ratgeber/scheidungsfolgenvereinbarung" className="underline">
+                  Scheidungsfolgenvereinbarung: Inhalt und Kosten
+                </Link>
+              </li>
+              <li>
+                <Link href="/ratgeber/scheidung-ohne-anwalt" className="underline">
+                  Scheidung ohne Anwalt: was das wirklich spart
                 </Link>
               </li>
               <li>

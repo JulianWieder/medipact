@@ -146,6 +146,36 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Der Service Worker darf NIE aus dem Browser-Cache kommen. Er ist die
+      // einzige Datei, die sich selbst ersetzt: liefert ein Zwischenspeicher
+      // die alte Fassung aus, bleibt ein fehlerhafter Worker beliebig lange
+      // aktiv, und niemand kann ihn per Deploy loswerden.
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/kalender.webmanifest',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600',
+          },
+        ],
+      },
     ];
   },
 };

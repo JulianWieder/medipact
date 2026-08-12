@@ -95,6 +95,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=odr" },
     { label: "Kündigung ohne Gericht klären", href: "/ratgeber/kuendigung-ohne-gericht" },
     { label: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/odr" },
     { label: "Fallbeispiel: Gesellschafterstreit", href: "/cases/gesellschafter-streit" },

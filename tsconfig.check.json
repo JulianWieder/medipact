@@ -78,6 +78,11 @@
   "app/components/kalender/BetreuungsKalender.tsx",
   "app/components/kalender/KalenderKarte.tsx",
   "app/dashboard/kalender/KalenderSeite.tsx",
-  "app/dashboard/kalender/page.tsx"
+  "app/dashboard/kalender/page.tsx",
+  "app/components/pwa/InstallKalender.tsx",
+  "app/konto-loeschen/page.tsx",
+  "app/konto-loeschen/KontoLoeschenClient.tsx",
+  "app/kostenrechner/page.tsx",
+  "app/content/ratgeber/index.ts"
  ]
 }
