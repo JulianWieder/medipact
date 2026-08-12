@@ -6,15 +6,26 @@ import type { AppLocale } from "@/i18n/routing";
 import trennungPhoto from "@/fotos/medi_trennung.jpg";
 import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata({
-  // Keyword-Ziel ist das Kompositum "Scheidungsmediation" — vorher stand hier
-  // "Trennung & Scheidung", also zwei getrennte Wörter. Die URL bleibt
-  // bewusst /konflikte/trennung (kein Umzug, siehe Entscheidung vom 27.07.).
-  title: "Scheidungsmediation online: fair einigen | medipact",
-  description:
-    "Scheidungsmediation online ab 399 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
-  path: "/konflikte/trennung",
-});
+// generateMetadata statt statischem Objekt — Begruendung wie auf der
+// Startseite: /en liefert denselben deutschen Text und bleibt deshalb
+// unindexiert (siehe lib/seo.ts).
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata({
+    // Keyword-Ziel ist das Kompositum "Scheidungsmediation" — vorher stand
+    // hier "Trennung & Scheidung", also zwei getrennte Wörter. Die URL
+    // bleibt bewusst /konflikte/trennung (kein Umzug, Entscheidung 27.07.).
+    title: "Scheidungsmediation online: fair einigen | medipact",
+    description:
+      "Scheidungsmediation online ab 399 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
+    path: "/konflikte/trennung",
+    locale,
+  });
+}
 
 const serviceSchema = {
   "@context": "https://schema.org",

@@ -49,6 +49,23 @@ type PageMetadataInput = {
    */
   imageWidth?: number;
   imageHeight?: number;
+  /**
+   * Sprache der ausgelieferten Seite. Nur fuer Seiten unter app/[locale]/
+   * noetig — unpraefixierte Seiten lassen den Wert weg und verhalten sich
+   * unveraendert.
+   *
+   * Alles ausser "de" bekommt zwei Dinge: ein Canonical auf SICH SELBST
+   * (/en/...) und `noindex`. Beides gehoert zusammen. Das Canonical zeigte
+   * vorher auf die deutsche Fassung — bei identischem Inhalt ist das aber nur
+   * ein Hinweis, den Google ignorieren darf. Und ein `noindex` mit einem
+   * Canonical auf eine ANDERE URL ist die eine Kombination, die man nicht
+   * bauen darf: Google kann das noindex dann auf das Canonical-Ziel
+   * uebertragen — also ausgerechnet auf die deutsche Seite, die ranken soll.
+   *
+   * Faellt weg, sobald /en wirklich uebersetzt ist (dann: Canonical auf sich
+   * selbst, kein noindex, dazu hreflang-Alternates).
+   */
+  locale?: string;
 };
 
 export function pageMetadata({
@@ -59,8 +76,11 @@ export function pageMetadata({
   image,
   imageWidth = 1200,
   imageHeight = 630,
+  locale,
 }: PageMetadataInput): Metadata {
-  const url = `${SITE_URL}${path}`;
+  const istStandardsprache = !locale || locale === "de";
+  const praefix = istStandardsprache ? "" : `/${locale}`;
+  const url = `${SITE_URL}${praefix}${path}`;
 
   // og:url pro Seite ist hier unproblematisch: Der Wert wird aus `path`
   // abgeleitet und stimmt damit immer mit dem Canonical überein. Der alte
@@ -90,6 +110,11 @@ export function pageMetadata({
     title,
     description,
     alternates: { canonical: url },
+    // Sprachvarianten bleiben erreichbar und verlinkt, aber draussen aus dem
+    // Index (Begruendung oben bei `locale`).
+    ...(istStandardsprache
+      ? {}
+      : { robots: { index: false, follow: true } }),
     openGraph,
     twitter: {
       card: "summary_large_image",

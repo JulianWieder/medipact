@@ -16,6 +16,7 @@ import OutcomeWand from "@/app/components/OutcomeWand";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 import { pageMetadata } from "@/lib/seo";
+import type { AppLocale } from "@/i18n/routing";
 
 // Body copy lives in messages/*.json under "home" (see migration-notes.md
 // for the lift-into-translations pattern used here and in HeroScrollPin).
@@ -30,15 +31,27 @@ import { pageMetadata } from "@/lib/seo";
 // Hero (fotos/medi_main.jpg, 1600x912) — nur eben unter eigener Adresse.
 const HERO_IMAGE = "https://medipact.de/startseite-mediation.jpg";
 
-export const metadata: Metadata = pageMetadata({
-  title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
-  description:
-    "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
-  path: "",
-  image: HERO_IMAGE,
-  imageWidth: 1600,
-  imageHeight: 912,
-});
+// Muss `generateMetadata` sein und darf kein statisches Objekt bleiben: Diese
+// Seite liegt unter app/[locale]/ und wird fuer JEDE Sprache ausgeliefert.
+// Ob sie indexiert werden darf, haengt genau daran (siehe lib/seo.ts) — /en
+// zeigt heute deutschen Text und hat im Index nichts verloren.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata({
+    title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+    description:
+      "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
+    path: "",
+    image: HERO_IMAGE,
+    imageWidth: 1600,
+    imageHeight: 912,
+    locale,
+  });
+}
 
 const serviceSchema = {
   "@context": "https://schema.org",
