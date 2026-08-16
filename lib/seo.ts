@@ -23,7 +23,7 @@
 
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://medipact.de";
+export const SITE_URL = "https://www.medipact.de";
 
 type PageMetadataInput = {
   /** Vollständiger <title>, inkl. "| medipact". Wird 1:1 als og:title gespiegelt. */
