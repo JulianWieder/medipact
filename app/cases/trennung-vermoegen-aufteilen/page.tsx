@@ -17,7 +17,7 @@ export default function Page() {
       {...caseStudies["trennung-vermoegen-aufteilen"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
-        { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
+        { label: "Trennung & Scheidung", href: "/scheidungsmediation" },
         { label: "Peter & Sarah" },
       ]}
       relatedCases={[

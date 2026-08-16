@@ -3,7 +3,7 @@ import { defineRouting } from "next-intl/routing";
 /**
  * Central i18n config. Add new languages here only — nothing else needs to
  * change. `localePrefix: "as-needed"` means the default locale (de) keeps
- * today's unprefixed URLs (e.g. /konflikte/trennung), so no existing link,
+ * today's unprefixed URLs (e.g. /impressum), so no existing link,
  * bookmark, or SEO ranking breaks. Other locales get a prefix (/en/...).
  *
  * Translation status (architecture only, see migration-notes.md):
@@ -32,7 +32,7 @@ export type AppLocale = (typeof routing.locales)[number];
  * back off. Add a path here ONLY the same moment it's moved into
  * app/[locale]/ (see migration-notes.md).
  */
-export const MIGRATED_LOCALE_ROUTES = ["/", "/konflikte/trennung"];
+export const MIGRATED_LOCALE_ROUTES = ["/", "/scheidungsmediation"];
 
 export function isMigratedLocalePath(pathname: string): boolean {
   const withoutLocalePrefix = pathname.replace(/^\/en(?=\/|$)/, "") || "/";

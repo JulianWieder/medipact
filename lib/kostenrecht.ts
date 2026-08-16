@@ -644,7 +644,7 @@ export const KONFLIKTARTEN: readonly KonfliktartInfo[] = [
     preis: 399,
     proPartei: true,
     gerichtssatz: SAETZE.gerichtEhesache,
-    href: "/konflikte/trennung",
+    href: "/scheidungsmediation",
     streitwertDefault: 16200,
     streitwertHinweis:
       "Wird aus dem gemeinsamen Nettoeinkommen berechnet – siehe Felder oben.",
@@ -658,7 +658,7 @@ export const KONFLIKTARTEN: readonly KonfliktartInfo[] = [
     // gerade deshalb irreführend, wenn man nur ihn zeigt: Gutachten und
     // Verfahrensbeistand hängen nicht am Verfahrenswert.
     gerichtssatz: SAETZE.gerichtKindschaft,
-    href: "/konflikte/trennung",
+    href: "/scheidungsmediation",
     streitwertDefault: 2 * KINDSCHAFT_WERT,
     streitwertHinweis:
       "Fester Wert von 5.000 € je Gegenstand (§ 45 Abs. 1 FamGKG) – nicht verhandelbar und unabhängig von der Kinderzahl.",

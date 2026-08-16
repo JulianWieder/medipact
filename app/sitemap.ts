@@ -131,10 +131,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/konflikte/trennung`,
-      // Kein Sonderdatum mehr nötig: Das gemeinsame lastModified (01.08.)
-      // liegt nach der Scheidungsmediation-Umstellung vom 29.07., und die
-      // Seite wurde beim Case-Rename am 01.08. erneut angefasst.
+      url: `${BASE_URL}/scheidungsmediation`,
+      // Bis 15.08.2026 stand hier /konflikte/trennung (301 in next.config.ts).
+      // Die alte URL steht bewusst NICHT mehr in der Sitemap: eine Sitemap
+      // listet Ziele, keine Weiterleitungen.
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,

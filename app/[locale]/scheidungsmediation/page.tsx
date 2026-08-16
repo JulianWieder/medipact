@@ -17,12 +17,15 @@ export async function generateMetadata({
   const { locale } = await params;
   return pageMetadata({
     // Keyword-Ziel ist das Kompositum "Scheidungsmediation" — vorher stand
-    // hier "Trennung & Scheidung", also zwei getrennte Wörter. Die URL
-    // bleibt bewusst /konflikte/trennung (kein Umzug, Entscheidung 27.07.).
+    // hier "Trennung & Scheidung", also zwei getrennte Wörter. Seit dem
+    // 15.08.2026 trägt auch die URL das Kompositum: /scheidungsmediation
+    // statt /konflikte/trennung (301 in next.config.ts). Die Seite hatte in
+    // drei Monaten 6 Impressionen — es gab hier keine Historie zu verlieren,
+    // anders als bei /konflikte und /konflikte/odr (Entscheidung 27.07.).
     title: "Scheidungsmediation online: fair einigen | medipact",
     description:
       "Scheidungsmediation online ab 399 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
-    path: "/konflikte/trennung",
+    path: "/scheidungsmediation",
     locale,
   });
 }
@@ -44,7 +47,7 @@ const serviceSchema = {
     name: "Germany",
   },
   availableLanguage: "German",
-  url: "https://medipact.de/konflikte/trennung",
+  url: "https://medipact.de/scheidungsmediation",
 };
 
 export default async function TrennungPage({
@@ -79,8 +82,10 @@ export default async function TrennungPage({
           alt: "Paar im Gespräch über eine Trennung",
         }}
         breadcrumbs={[
+          // Die Seite liegt nicht mehr unter /konflikte, bleibt inhaltlich
+          // aber dessen Kind. Breadcrumbs dürfen vom URL-Pfad abweichen.
           { label: "Konfliktarten", href: "/konflikte" },
-          { label: "Trennung & Scheidung" },
+          { label: "Scheidungsmediation" },
         ]}
         kostenrechnerArt="trennung"
         relatedCases={[

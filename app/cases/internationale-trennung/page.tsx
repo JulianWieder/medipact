@@ -17,7 +17,7 @@ export default function Page() {
       {...caseStudies["internationale-trennung"]}
       breadcrumbs={[
         { label: "Fallbeispiele", href: "/cases" },
-        { label: "Trennung & Scheidung", href: "/konflikte/trennung" },
+        { label: "Trennung & Scheidung", href: "/scheidungsmediation" },
         { label: "Jens & Katarina" },
       ]}
       relatedCases={[

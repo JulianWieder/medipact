@@ -123,6 +123,24 @@ const nextConfig: NextConfig = {
         destination: '/cases/unternehmen-geerbt',
         permanent: true,
       },
+      // 15.08.2026 – Die Angebotsseite fuer Trennung/Scheidung traegt das
+      // Keyword-Kompositum jetzt auch in der URL. "trennung" war der Begriff
+      // aus der eigenen Angebotslogik, gesucht wird nach "Scheidungsmediation"
+      // (beste Position der Domain im Cluster: "scheidungsmediation kosten",
+      // Pos. 5,5). Die alte URL hatte in drei Monaten 6 Impressionen, es ging
+      // also keine Historie verloren – anders als bei /konflikte und
+      // /konflikte/odr, weshalb der Umzug am 27.07. noch abgelehnt wurde.
+      // Hintergrund: docs/kaufabsicht-scheidung.md
+      {
+        source: '/konflikte/trennung',
+        destination: '/scheidungsmediation',
+        permanent: true,
+      },
+      {
+        source: '/en/konflikte/trennung',
+        destination: '/en/scheidungsmediation',
+        permanent: true,
+      },
     ];
   },
 

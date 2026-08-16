@@ -1,6 +1,6 @@
 // app/content/trennungPage.de.ts
 //
-// German source content for /konflikte/trennung. This is the same object
+// German source content for /scheidungsmediation. This is the same object
 // that used to live directly in trennungPage.ts. Structure (keys, shape,
 // referenced types) must stay identical across every locale file so
 // MarketingPageTemplate never needs to change when a language is added.
@@ -70,7 +70,7 @@ export const trennungPageContent = {
   // verbraucher steht. Sie rankte deshalb unterhalb der Sichtbarkeit (0
   // Impressionen in GSC über 3 Monate), obwohl technisch alles stimmte.
   //
-  // Bewusst KEINE eigene URL: /konflikte/trennung soll die Verfahrensspur
+  // Bewusst KEINE eigene URL: /scheidungsmediation soll die Verfahrensspur
   // besitzen ("was ist Scheidungsmediation, was wird darin geregelt"). Die
   // inhaltlichen Einzelfragen — Haus, Unterhaltshöhe, Trennungsjahr,
   // Sorgerecht — gehören weiter den Ratgeber-Artikeln und werden hier nur

@@ -68,7 +68,7 @@ export const trennungPageContent = {
   // verbraucher steht. Sie rankte deshalb unterhalb der Sichtbarkeit (0
   // Impressionen in GSC über 3 Monate), obwohl technisch alles stimmte.
   //
-  // Bewusst KEINE eigene URL: /konflikte/trennung soll die Verfahrensspur
+  // Bewusst KEINE eigene URL: /scheidungsmediation soll die Verfahrensspur
   // besitzen ("was ist Scheidungsmediation, was wird darin geregelt"). Die
   // inhaltlichen Einzelfragen — Haus, Unterhaltshöhe, Trennungsjahr,
   // Sorgerecht — gehören weiter den Ratgeber-Artikeln und werden hier nur
