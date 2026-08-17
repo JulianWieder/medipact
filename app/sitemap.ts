@@ -12,6 +12,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
+  // Stand 2026-08-17: /konflikte/arbeitsplatz und /konflikte/mietverhaeltnis
+  // neu aufgenommen, dazu die Landing-Texte auf das Respekt-Wording
+  // umgestellt. Das Hochsetzen ist hier Pflicht und keine Kosmetik: die
+  // beiden neuen Seiten haetten sonst ein lastmod von VOR ihrer eigenen
+  // Entstehung gemeldet — dasselbe falsche Signal, das weiter unten fuer
+  // die Ratgeber-Artikel bereits behoben wurde.
   // Stand 2026-08-12: Kostenrechner um die dritte Spalte (Stundensatz frei
   // taetiger Mediation) und zwei FAQ-Eintraege erweitert. Die drei neuen
   // Ratgeber-Artikel brauchen hier nichts — die tragen ihr eigenes
@@ -24,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // docs/einigung-cluster-konzept.md. Davor 2026-08-01: 9 Case-URLs auf
   // Problem-Slugs umbenannt (neue URLs!), interne Links auf /cases, /methode,
   // /konflikte/erbschaft angepasst.
-  const lastModified = new Date("2026-08-12");
+  const lastModified = new Date("2026-08-17");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
