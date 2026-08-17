@@ -554,6 +554,8 @@ export function zeithonorar(
 export type Konfliktart =
   | "nachbarschaft"
   | "verbraucher"
+  | "mietverhaeltnis"
+  | "arbeitsplatz"
   | "erbschaft"
   | "odr"
   | "b2b"
@@ -598,6 +600,43 @@ export const KONFLIKTARTEN: readonly KonfliktartInfo[] = [
     streitwertDefault: 4000,
     streitwertHinweis:
       "Der Streitwert entspricht in der Regel dem strittigen Rechnungs- oder Mangelbetrag.",
+  },
+  {
+    key: "mietverhaeltnis",
+    label: "Streit im Mietverhältnis",
+    preis: 49,
+    proPartei: true,
+    gerichtssatz: SAETZE.gerichtZivil,
+    href: "/konflikte/mietverhaeltnis",
+    // Streitwert-Vorbelegung an der häufigsten Konstellation: eine strittige
+    // Nebenkostennachzahlung. Bei Streit über Bestand oder Dauer des Miet-
+    // verhältnisses bemisst § 41 GKG den Wert dagegen am Entgelt für den
+    // strittigen Zeitraum, höchstens am Jahresbetrag — bei einer Räumung also
+    // an einer Jahresmiete, was den Wert deutlich nach oben zieht.
+    streitwertDefault: 1500,
+    streitwertHinweis:
+      "Bei Nebenkosten, Kaution oder Mängeln ist der strittige Betrag maßgeblich. Geht es um Bestand oder Dauer des Mietverhältnisses (Kündigung, Räumung), bemisst § 41 GKG den Wert am Entgelt für den strittigen Zeitraum – höchstens am Jahresbetrag.",
+  },
+  {
+    key: "arbeitsplatz",
+    label: "Konflikt am Arbeitsplatz",
+    preis: 399,
+    proPartei: false,
+    // ACHTUNG beim Lesen dieser Zeile: Der Gerichtssatz allein unterzeichnet
+    // das Bild im Arbeitsrecht systematisch — aber in die andere Richtung als
+    // bei "kindschaft". § 12a Abs. 1 ArbGG schließt in erster Instanz die
+    // Erstattung der Anwaltskosten aus: Wer gewinnt, zahlt seinen Anwalt
+    // trotzdem selbst. Ein Vergleich, der nur Gebühren gegenüberstellt, macht
+    // das Arbeitsgericht deshalb teurer aussehen, als es sich für die klagende
+    // Seite anfühlt. Siehe docs/konzept_trennung_arbeitsverhaeltnis.md § 1.
+    gerichtssatz: SAETZE.gerichtZivil,
+    href: "/konflikte/arbeitsplatz",
+    // § 42 Abs. 2 GKG: Bei Streit über den Bestand des Arbeitsverhältnisses
+    // höchstens das Vierteljahresentgelt. 3 × 3.600 € Bruttomonatsverdienst
+    // als realistische Vorbelegung.
+    streitwertDefault: 10800,
+    streitwertHinweis:
+      "Beim Streit über den Bestand des Arbeitsverhältnisses gilt höchstens das Vierteljahresentgelt (§ 42 Abs. 2 GKG) – also rund drei Bruttomonatsgehälter.",
   },
   {
     key: "erbschaft",

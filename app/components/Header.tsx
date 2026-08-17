@@ -108,6 +108,12 @@ export default function Header() {
               icon: "home",
             },
             {
+              label: t("konflikteMietverhaeltnis"),
+              href: "/konflikte/mietverhaeltnis",
+              desc: t("konflikteMietverhaeltnisDesc"),
+              icon: "file",
+            },
+            {
               label: t("konflikteVerbraucher"),
               href: "/konflikte/verbraucher",
               desc: t("konflikteVerbraucherDesc"),
@@ -122,6 +128,12 @@ export default function Header() {
               href: "/konflikte/erbschaft",
               desc: t("konflikteErbschaftDesc"),
               icon: "scroll",
+            },
+            {
+              label: t("konflikteArbeitsplatz"),
+              href: "/konflikte/arbeitsplatz",
+              desc: t("konflikteArbeitsplatzDesc"),
+              icon: "handshake",
             },
             {
               label: t("konflikteGeschaeft"),

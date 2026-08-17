@@ -29,9 +29,23 @@ PACKAGE_LABELS = {
 # EUR-Grundpreis je (Konflikttyp, Paket). None = Kombination nicht angeboten.
 # TODO(Julian): fehlende Werte (None) füllen, falls die Kombination angeboten wird.
 #
-# Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/Verbraucher = nied-
-# rigschwellig, 49 € pro Partei, Umsatz über buchbare Add-ons – siehe ADDONS).
-# Monetarisierung über Trennung/Erbschaft/ODR-Familie (Premium-Typen).
+# Einstiegs-Typen (Strategie "Trichter": Nachbarschaft/Verbraucher/Miet-
+# verhältnis = niedrigschwellig, 49 € pro Partei, Umsatz über buchbare
+# Add-ons – siehe ADDONS). Monetarisierung über Trennung/Erbschaft/
+# Arbeitsplatz/ODR-Familie (Premium-Typen).
+#
+# "mietverhaeltnis" (seit 17.08.2026): Streit zwischen Mieter und Vermieter –
+# Nebenkosten, Mängel und Minderung, Kaution, Eigenbedarf, Schönheits-
+# reparaturen. Bewusst im 49-€-Einstieg wie Nachbarschaft: Die typischen
+# Streitwerte liegen bei 1.000–5.000 €; ein Preis von 399 € stünde bei einer
+# strittigen Nebenkostenabrechnung außer Verhältnis zur Sache.
+#
+# "arbeitsplatz" (seit 17.08.2026): Konflikte im Beschäftigungsverhältnis –
+# Führung, Team, Mobbingvorwürfe, Rückkehr nach längerer Abwesenheit,
+# Aufhebungsverhandlung. 399 € "once": Auftraggeber ist der Arbeitgeber,
+# nicht die beschäftigte Person. Preislich zwischen den Einstiegstypen und
+# der ODR-Familie, weil der Aufwand über einem Nachbarschaftsfall liegt,
+# der Streitwert aber nicht an einem Unternehmensanteil hängt.
 #
 # "wg" wird seit 25.07.2026 NICHT mehr angeboten: kein Eintrag in der Typ-
 # Auswahl, keine Landingpage, kein Marketing (/konflikte/wg leitet auf
@@ -62,8 +76,10 @@ PRICE_MATRIX: dict[str, dict[str, float | None]] = {
     "verbraucher":   {"online": 49.0,  "hybrid": None,  "vollservice": None},
     # Legacy, nicht mehr buchbar – siehe Kommentar oben.
     "wg":            {"online": 49.0,  "hybrid": None,  "vollservice": None},
+    "mietverhaeltnis": {"online": 49.0, "hybrid": None, "vollservice": None},
     "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
     "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
+    "arbeitsplatz":  {"online": 399.0, "hybrid": None,  "vollservice": None},
     "odr":           {"online": 1900.0, "hybrid": None, "vollservice": None},
     "schlichtung":   {"online": 399.0, "hybrid": None,  "vollservice": None},
     "ecommerce":     {"online": 399.0, "hybrid": None,  "vollservice": None},
@@ -72,15 +88,25 @@ PRICE_MATRIX: dict[str, dict[str, float | None]] = {
 
 # ODR-Verfahrensfamilie – Firmenkunden dürfen genau diese Typen anlegen
 # (Abo-Modell), B2C-Einzelfälle zahlen 399 € once.
-ODR_TYPES: set[str] = {"odr", "schlichtung", "ecommerce", "b2b"}
+# "arbeitsplatz" gehört preislich nicht zur ODR-Familie (399 € statt 1.900 €),
+# steht aber bewusst in dieser Menge: Zuschnitt D des Arbeits-Konzepts
+# (Restrukturierung / Sozialplan) ist ein Massenverfahren und soll über das
+# Firmen-Abo laufen, nicht als n Einzelfälle.
+ODR_TYPES: set[str] = {"odr", "schlichtung", "ecommerce", "b2b", "arbeitsplatz"}
 
 # Abrechnungsmodell je Konflikttyp (laut /preise). Gilt paketübergreifend.
 BILLING_MODEL: dict[str, str] = {
     "nachbarschaft": "per_party",  # 49 € je Partei (früher 20 €, davor 249 € split)
     "verbraucher": "per_party",
+    "mietverhaeltnis": "per_party",
     "wg": "per_party",  # legacy
     "trennung": "per_party",
     "erbschaft": "once",
+    # "once": Der Arbeitgeber legt den Fall an und trägt ihn. Ein "per_party"-
+    # Modell würde bedeuten, dass die beschäftigte Person für die Klärung
+    # eines Konflikts zahlt, den sie meist nicht ausgelöst hat — das würde
+    # das Verfahren an genau der Stelle blockieren, an der es ansetzt.
+    "arbeitsplatz": "once",
     "odr": "once",
     "schlichtung": "once",
     "ecommerce": "once",

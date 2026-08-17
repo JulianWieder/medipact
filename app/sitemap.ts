@@ -131,6 +131,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${BASE_URL}/konflikte/mietverhaeltnis`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/konflikte/arbeitsplatz`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${BASE_URL}/scheidungsmediation`,
       // Bis 15.08.2026 stand hier /konflikte/trennung (301 in next.config.ts).
       // Die alte URL steht bewusst NICHT mehr in der Sitemap: eine Sitemap

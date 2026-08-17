@@ -1,6 +1,8 @@
 import { trennungConfig } from './trennung/config'
 import { erbschaftConfig } from './erbschaft/config'
 import { nachbarschaftConfig } from './nachbarschaft/config'
+import { mietverhaeltnisConfig } from './mietverhaeltnis/config'
+import { arbeitsplatzConfig } from './arbeitsplatz/config'
 import { odrConfig } from './odr/config'
 import { schlichtungConfig } from './schlichtung/config'
 import { ecommerceConfig } from './ecommerce/config'
@@ -13,6 +15,8 @@ export const mediationRegistry: Record<MediationType, NewMediationConfig> = {
   trennung: trennungConfig,
   erbschaft: erbschaftConfig,
   nachbarschaft: nachbarschaftConfig,
+  mietverhaeltnis: mietverhaeltnisConfig,
+  arbeitsplatz: arbeitsplatzConfig,
   wg: wgConfig,
   verbraucher: verbraucherConfig,
   // ODR-Familie (Online Dispute Resolution, ehemals "geschaeft")

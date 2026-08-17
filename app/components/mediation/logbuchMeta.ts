@@ -22,7 +22,7 @@ export const ENTRY_TYPE_META: LogbuchMeta[] = [
 
 /** Geschäftliche Fälle: sachliche Labels statt persönlichem Journal-Ton. */
 export const BUSINESS_TYPES = new Set([
-  "odr", "schlichtung", "ecommerce", "b2b", "geschaeft",
+  "odr", "schlichtung", "ecommerce", "b2b", "geschaeft", "arbeitsplatz",
 ]);
 
 const BUSINESS_ENTRY_LABELS: Record<string, string> = {
@@ -38,6 +38,7 @@ export const AREA_META: LogbuchMeta[] = [
   { key: "erbschaft", label: "Erbschaft", icon: "📜" },
   { key: "nachbarschaft", label: "Nachbarschaft", icon: "🏡" },
   { key: "verbraucher", label: "Verbraucher & Handwerker", icon: "🧾" },
+  { key: "mietverhaeltnis", label: "Mietverhältnis", icon: "🏢" },
   { key: "odr", label: "Geschäft & Arbeit", icon: "🏢" },
 ];
 

@@ -241,6 +241,8 @@ export const MEDIATION_TYPES: { id: string; label: string }[] = [
   { id: "nachbarschaft", label: "Nachbarschaft" },
   { id: "wg", label: "WG & Mitbewohner" },
   { id: "verbraucher", label: "Verbraucher & Handwerker" },
+  { id: "mietverhaeltnis", label: "Mietverhältnis" },
+  { id: "arbeitsplatz", label: "Arbeitsplatz" },
   { id: "odr", label: "ODR – Geschäft & Organisation" },
   { id: "schlichtung", label: "ODR – Online-Schlichtung" },
   { id: "ecommerce", label: "ODR – E-Commerce & Plattform" },

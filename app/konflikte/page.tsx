@@ -27,9 +27,19 @@ const conflictTypes = [
     href: "/konflikte/nachbarschaft",
   },
   {
+    title: "Mietverhältnis",
+    text: "Wenn Nebenkosten, Mängel, Kaution oder eine Kündigung zwischen Mieter und Vermieter stehen.",
+    href: "/konflikte/mietverhaeltnis",
+  },
+  {
     title: "Verbraucher & Handwerker",
     text: "Wenn strittige Rechnungen, Mängel oder nicht erbrachte Leistungen zum Streit führen.",
     href: "/konflikte/verbraucher",
+  },
+  {
+    title: "Arbeitsplatz",
+    text: "Wenn Spannungen im Team, mit der Führungskraft oder rund um eine Trennung das Arbeitsverhältnis belasten.",
+    href: "/konflikte/arbeitsplatz",
   },
   {
     title: "Erbe & Familie",
@@ -458,6 +468,13 @@ export default function KonfliktePage() {
               >
                 Nachbarschaftskonflikten
               </Link>
+              {" "}oder{" "}
+              <Link
+                href="/konflikte/mietverhaeltnis"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Streit im Mietverhältnis
+              </Link>
               {" "}– was eine{" "}
               <Link
                 href="/ratgeber/scheidung-mediator-kosten"
@@ -474,6 +491,15 @@ export default function KonfliktePage() {
               </Link>{" "}
               blockierte Teams, Gesellschafterstreits und Führungskonflikte –
               diskret, schnell und deutlich günstiger als ein Rechtsstreit.
+              Geht es dagegen um das Verhältnis zu einzelnen Beschäftigten, ist
+              der{" "}
+              <Link
+                href="/konflikte/arbeitsplatz"
+                className="font-semibold text-accent-300 underline-offset-4 hover:underline"
+              >
+                Konflikt am Arbeitsplatz
+              </Link>{" "}
+              der passende Zuschnitt.
               Mehr dazu im Ratgeber:{" "}
               <Link
                 href="/ratgeber/wirtschaftsmediation"

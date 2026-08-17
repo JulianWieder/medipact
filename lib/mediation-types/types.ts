@@ -4,6 +4,8 @@ export type MediationType =
   | 'trennung'
   | 'erbschaft'
   | 'nachbarschaft'
+  | 'mietverhaeltnis'
+  | 'arbeitsplatz'
   | 'wg'
   | 'verbraucher'
   | 'odr'

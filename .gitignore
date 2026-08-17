@@ -68,3 +68,8 @@ next-env.d.ts
 # ── Custom Project Ignores ──────────────────────────────────────────────────
 backend/migrate_now.py
 /components/
+
+# Der Cowork-Mount verbietet `rm` ("Operation not permitted"). Dateien, die aus
+# der Sandbox heraus gelöscht werden sollen, landen deshalb hier und werden in
+# PowerShell entfernt — sie gehören nie ins Repo.
+/_to_delete/

@@ -154,6 +154,18 @@ export default function Preise() {
                     <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
                   </p>
 
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Streit im Mietverhältnis
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €49
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
+                  </p>
+
                   <p className="text-xs text-neutral-500 mt-1">
                     Optional zubuchbar: Live-Videositzung mit Mediator:in
                     (+€79), geprüfte Abschlussvereinbarung (+€49),
@@ -170,6 +182,18 @@ export default function Preise() {
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
                     <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei (z.B. 2 Personen = je €399)
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Konflikt am Arbeitsplatz
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €399
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig pro Fall – in der Regel vom Arbeitgeber getragen
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -793,7 +817,7 @@ export default function Preise() {
               {[
                 {
                   q: "Wie wird die Aufteilung der Kosten berechnet?",
-                  a: "Jede Partei zahlt ihren eigenen Anteil. Beim Einstiegstarif (Nachbarschaft, Verbraucher/Handwerker) sind das nur 49 € pro Partei – optionale Zusatzleistungen wie eine Live-Videositzung oder eine geprüfte Abschlussvereinbarung können einzeln dazugebucht werden. Vollständige Transparenz!",
+                  a: "Jede Partei zahlt ihren eigenen Anteil. Beim Einstiegstarif (Nachbarschaft, Verbraucher/Handwerker, Mietverhältnis) sind das nur 49 € pro Partei – optionale Zusatzleistungen wie eine Live-Videositzung oder eine geprüfte Abschlussvereinbarung können einzeln dazugebucht werden. Vollständige Transparenz!",
                 },
                 {
                   q: "Welches Modell passt zu meinem Fall?",

@@ -35,6 +35,8 @@ const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
 const TYP_MAPPING: Record<Konfliktart, string> = {
   nachbarschaft: "nachbarschaft",
   verbraucher: "verbraucher",
+  mietverhaeltnis: "mietverhaeltnis",
+  arbeitsplatz: "arbeitsplatz",
   erbschaft: "erbschaft",
   odr: "odr",
   b2b: "b2b",

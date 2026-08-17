@@ -31,6 +31,8 @@ TYPE_LABELS = {
     "nachbarschaft": "Nachbarschaftskonflikt",
     "wg": "WG-Konflikt",
     "verbraucher": "Verbraucherstreit",
+    "mietverhaeltnis": "Streit im Mietverhältnis",
+    "arbeitsplatz": "Konflikt am Arbeitsplatz",
 }
 
 INVOICE_STATUS_LABELS = {

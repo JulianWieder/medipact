@@ -11,11 +11,15 @@ import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { erbschaftPageContent } from "@/app/content/erbschaftPage";
 import { odrPageContent } from "@/app/content/odrPage";
 import { verbraucherPageContent } from "@/app/content/verbraucherPage";
+import { mietverhaeltnisPageContent } from "@/app/content/mietverhaeltnisPage";
+import { arbeitsplatzPageContent } from "@/app/content/arbeitsplatzPage";
 import trennungPhoto from "../../fotos/medi_trennung.jpg";
 import nachbarnPhoto from "../../fotos/medi_nachbarn.jpg";
 import erbschaftPhoto from "../../fotos/medi_Erbe.jpg";
 import geschaeftPhoto from "../../fotos/medi_buiness.jpg";
 import verbraucherPhoto from "../../fotos/kosten.jpg";
+import mietPhoto from "../../fotos/medi_modern.jpg";
+import arbeitsplatzPhoto from "../../fotos/medi_karriere.jpg";
 
 type ThemaContent = {
   eyebrow: string;
@@ -67,6 +71,20 @@ const themen: Thema[] = [
     href: "/konflikte/verbraucher",
     image: verbraucherPhoto,
     content: verbraucherPageContent,
+  },
+  {
+    key: "mietverhaeltnis",
+    label: "Mietverhältnis",
+    href: "/konflikte/mietverhaeltnis",
+    image: mietPhoto,
+    content: mietverhaeltnisPageContent,
+  },
+  {
+    key: "arbeitsplatz",
+    label: "Arbeitsplatz",
+    href: "/konflikte/arbeitsplatz",
+    image: arbeitsplatzPhoto,
+    content: arbeitsplatzPageContent,
   },
 ];
 

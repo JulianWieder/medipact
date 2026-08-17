@@ -170,6 +170,60 @@ export const erbschaftFacts: DidYouKnowFact[] = [
   },
 ];
 
+export const mietverhaeltnisFacts: DidYouKnowFact[] = [
+  {
+    eyebrow: "Immer das Amtsgericht",
+    text: "Nach § 23 Nr. 2a GVG ist für Streitigkeiten aus einem Wohnraummietverhältnis ausschließlich das Amtsgericht zuständig – und zwar ohne Rücksicht auf den Wert des Streitgegenstands. Anders als sonst im Zivilrecht entscheidet die Höhe der Forderung hier also nicht über das Gericht.",
+  },
+  {
+    eyebrow: "Zwölf Monate – in beide Richtungen",
+    text: "§ 556 Abs. 3 BGB gibt dem Vermieter zwölf Monate nach Ende des Abrechnungszeitraums, um abzurechnen; danach ist eine Nachforderung ausgeschlossen. Dieselbe Frist hat der Mieter, um Einwendungen zu erheben – gerechnet ab Zugang der Abrechnung. Wer schweigt, verliert also auf beiden Seiten.",
+  },
+  {
+    eyebrow: "Die Minderung entsteht von selbst",
+    text: "Ein Mangel mindert die Miete nach § 536 BGB kraft Gesetzes – es braucht dafür keine Zustimmung des Vermieters und keinen Gerichtsbeschluss. Gestritten wird deshalb fast nie über das Ob, sondern über die Höhe und darum, ab wann der Mangel angezeigt war.",
+  },
+  {
+    eyebrow: "Drei Kaltmieten, in drei Raten",
+    text: "§ 551 BGB begrenzt die Mietsicherheit auf das Dreifache der Nettokaltmiete und gibt dem Mieter ausdrücklich das Recht, sie in drei gleichen Monatsraten zu zahlen. Abweichende Vereinbarungen zum Nachteil des Mieters sind unwirksam.",
+  },
+  {
+    eyebrow: "Der Streitwert hängt an der Jahresmiete",
+    text: "Geht es um Bestand oder Dauer des Mietverhältnisses, bemisst sich der Streitwert nach § 41 GKG am Entgelt für den strittigen Zeitraum – höchstens am Jahresbetrag. Eine Räumungsklage ist damit unabhängig von der Dauer des Streits mit einer Jahresmiete bewertet.",
+  },
+  {
+    eyebrow: "Der Konflikt überdauert das Urteil",
+    text: "Anders als bei einem einmaligen Kaufvertrag läuft das Mietverhältnis nach dem Prozess in aller Regel weiter – mit denselben Beteiligten, derselben Abrechnung im nächsten Jahr und derselben Heizung. Genau deshalb löst ein gewonnener Prozess hier seltener als anderswo das eigentliche Problem.",
+  },
+];
+
+export const arbeitsplatzFacts: DidYouKnowFact[] = [
+  {
+    eyebrow: "Gewinnen kostet trotzdem",
+    text: "§ 12a Abs. 1 ArbGG schließt in der ersten Instanz vor dem Arbeitsgericht den Anspruch der obsiegenden Partei auf Erstattung der Anwaltskosten aus. Wer den Prozess gewinnt, zahlt seinen Anwalt also selbst – eine Besonderheit, die es im übrigen Zivilrecht nicht gibt.",
+  },
+  {
+    eyebrow: "Jedes Verfahren beginnt mit einem Einigungsversuch",
+    text: "Nach § 54 ArbGG startet die mündliche Verhandlung zwingend mit der Güteverhandlung vor dem Vorsitzenden – dem Versuch einer gütlichen Einigung. Der Gesetzgeber stellt die Verständigung im Arbeitsrecht also an den Anfang, nicht ans Ende.",
+  },
+  {
+    eyebrow: "Drei Wochen, dann ist die Kündigung wirksam",
+    text: "§ 4 KSchG lässt für die Kündigungsschutzklage nur drei Wochen ab Zugang der schriftlichen Kündigung. Die Frist läuft unabhängig davon weiter, ob parallel verhandelt oder mediiert wird – sie ist der Grund, warum Klarheit im Arbeitskonflikt früh entstehen muss.",
+  },
+  {
+    eyebrow: "Das Beschwerderecht steht im Gesetz",
+    text: "§ 84 BetrVG gibt jeder beschäftigten Person das Recht, sich bei den zuständigen Stellen im Betrieb zu beschweren, wenn sie sich benachteiligt oder ungerecht behandelt fühlt – unabhängig davon, ob ein Betriebsrat existiert.",
+  },
+  {
+    eyebrow: "Konflikte binden Arbeitszeit",
+    text: "Laut der KPMG-Konfliktkostenstudie verbringen Mitarbeitende 10–15 % ihrer Arbeitszeit mit Konfliktbewältigung, Führungskräfte je nach Eskalationsgrad 30–50 %. Der teuerste Posten eines Arbeitsplatzkonflikts steht damit in keiner Akte.",
+  },
+  {
+    eyebrow: "Vertraulichkeit gilt auch hier",
+    text: "§ 4 MediationsG verpflichtet Mediator:innen zur Verschwiegenheit über alles, was ihnen im Verfahren bekannt wird. Für Konflikte im Betrieb ist das entscheidend: Was in der Mediation gesagt wird, landet weder in der Personalakte noch in einer öffentlichen Verhandlung.",
+  },
+];
+
 export const geschaeftFacts: DidYouKnowFact[] = [
   {
     eyebrow: "Konflikte fressen Arbeitszeit",

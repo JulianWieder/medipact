@@ -53,6 +53,8 @@ const MEDIATION_TYPES: { value: MediationType; label: string }[] = [
   { value: "nachbarschaft", label: "Nachbarschaft" },
   { value: "wg", label: "WG & Mitbewohner" },
   { value: "verbraucher", label: "Verbraucher & Handwerker" },
+  { value: "mietverhaeltnis", label: "Mietverhältnis" },
+  { value: "arbeitsplatz", label: "Arbeitsplatz" },
   { value: "erbschaft", label: "Erbschaft" },
 ];
 
