@@ -2674,14 +2674,7 @@ def generate_title(
     current_user: User = Depends(get_current_db_user),
 ):
     """Generiert einen kurzen, prägnanten Mediationstitel aus der Beschreibung."""
-    type_labels = {
-        "trennung": "Trennung & Scheidung",
-        "erbschaft": "Erbschaftsstreit",
-        "nachbarschaft": "Nachbarschaftskonflikt",
-        "wg": "WG-Konflikt",
-        "verbraucher": "Verbraucherstreit",
-    }
-    type_label = type_labels.get(payload.mediation_type, payload.mediation_type)
+    type_label = pricing.type_label(payload.mediation_type)
 
     prompt = get_prompt("generate_title", type_label=type_label, description=payload.description)
 
@@ -3668,14 +3661,7 @@ def analyse_mediation(
             pass
         notes_text += f"\n[{user.name} / {note.phase} / {note.step}]: {content}"
 
-    type_labels = {
-        "trennung": "Trennung & Scheidung",
-        "erbschaft": "Erbschaftsstreit",
-        "nachbarschaft": "Nachbarschaftskonflikt",
-        "wg": "WG-Konflikt",
-        "verbraucher": "Verbraucherstreit",
-    }
-    type_label = type_labels.get(mediation.mediation_type or "", mediation.mediation_type or "")
+    type_label = pricing.type_label(mediation.mediation_type)
     phase_labels = {
         "einleitung": "Einleitung",
         "themensammlung": "Themensammlung",
@@ -4161,17 +4147,8 @@ PHASE_LABELS_ANALYSE = {
     "abschluss": "Abschluss",
 }
 
-TYPE_LABELS_ANALYSE = {
-    "trennung": "Trennung & Scheidung",
-    "erbschaft": "Erbschaftsstreit",
-    "nachbarschaft": "Nachbarschaftskonflikt",
-    "wg": "WG-Konflikt",
-    "verbraucher": "Verbraucherstreit",
-    "odr": "Geschäftskonflikt (ODR)",
-    "schlichtung": "Online-Schlichtung (ODR)",
-    "ecommerce": "E-Commerce-/Plattform-Streit (ODR)",
-    "b2b": "B2B-Vertragsstreit (ODR)",
-}
+# Beibehalten als Name, Inhalt kommt jetzt aus pricing (Single Source).
+TYPE_LABELS_ANALYSE = pricing.MEDIATION_TYPE_LABELS
 
 
 def _collect_inputs_text(db: Session, mediation_id: int, phase: str | None = None) -> str:

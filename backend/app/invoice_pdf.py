@@ -9,6 +9,8 @@ Invoice-Datensatz, es wird nirgends auf Platte gespeichert.
 import io
 from datetime import datetime
 
+from app import pricing
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -25,15 +27,7 @@ PROVIDER_CITY = "63303 Dreieich"
 PROVIDER_COUNTRY = "Deutschland"
 PROVIDER_EMAIL = "hallo@medipact.de"
 
-TYPE_LABELS = {
-    "trennung": "Trennung & Scheidung",
-    "erbschaft": "Erbschaftsstreit",
-    "nachbarschaft": "Nachbarschaftskonflikt",
-    "wg": "WG-Konflikt",
-    "verbraucher": "Verbraucherstreit",
-    "mietverhaeltnis": "Streit im Mietverhältnis",
-    "arbeitsplatz": "Konflikt am Arbeitsplatz",
-}
+TYPE_LABELS = pricing.MEDIATION_TYPE_LABELS
 
 INVOICE_STATUS_LABELS = {
     "paid": "Bezahlt",

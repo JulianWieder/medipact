@@ -20,6 +20,7 @@ const TYPES: { type: string; title: string; hint: string; icon: string; business
   { type: "erbschaft", title: "Erbschaft", hint: "Erbengemeinschaft, Nachlass, Immobilie", icon: "📜" },
   { type: "nachbarschaft", title: "Nachbarschaft", hint: "Lärm, Grenze, Garten, Parken", icon: "🏡" },
   { type: "verbraucher", title: "Verbraucher & Handwerker", hint: "Mängel, Rechnungen, Leistungen", icon: "🧾" },
+  { type: "mietverhaeltnis", title: "Mietverhältnis", hint: "Nebenkosten, Mängel, Kaution, Kündigung", icon: "🏢" },
   { type: "odr", title: "Geschäft & Arbeit", hint: "Team, Gesellschafter, Kunden, B2B", icon: "🏢", business: true },
 ];
 

@@ -21,7 +21,7 @@ type Category = "privat" | "business";
 
 // "wg" ist seit 25.07.2026 nicht mehr neu anlegbar (Bestandsfälle laufen
 // weiter, siehe backend/app/pricing.py).
-const PRIVATE_TYPES = ["trennung", "erbschaft", "nachbarschaft", "verbraucher"] as const;
+const PRIVATE_TYPES = ["trennung", "erbschaft", "nachbarschaft", "verbraucher", "mietverhaeltnis"] as const;
 
 // Spezialverfahren ohne "ODR –"-Jargon; der allgemeine Einstieg ist "odr".
 const BUSINESS_SPECIAL: { type: string; title: string; description: string }[] = [
@@ -36,6 +36,12 @@ const BUSINESS_SPECIAL: { type: string; title: string; description: string }[] =
     title: "E-Commerce & Plattform",
     description:
       "Streit um Online-Käufe, Rücksendungen, Bewertungen oder Plattform-Konten digital beilegen.",
+  },
+  {
+    type: "arbeitsplatz",
+    title: "Konflikt am Arbeitsplatz",
+    description:
+      "Spannungen im Team, mit der Führungskraft oder rund um eine Trennung klären. Der Fall wird vom Arbeitgeber angelegt und getragen.",
   },
   {
     type: "b2b",

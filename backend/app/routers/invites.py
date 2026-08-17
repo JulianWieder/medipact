@@ -10,6 +10,7 @@ import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from app import pricing
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr
@@ -197,14 +198,7 @@ def generate_invite_content(
     if not description:
         raise HTTPException(status_code=400, detail="Bitte zuerst kurz beschreiben, worum es geht.")
 
-    type_labels = {
-        "trennung": "Trennung & Scheidung",
-        "erbschaft": "Erbschaftsstreit",
-        "nachbarschaft": "Nachbarschaftskonflikt",
-        "wg": "WG-Konflikt",
-        "verbraucher": "Verbraucherstreit",
-    }
-    type_label = type_labels.get(mediation_type, mediation_type or "Mediation")
+    type_label = pricing.type_label(mediation_type)
 
     prompt = get_prompt(
         "invite_generate",

@@ -113,6 +113,33 @@ BILLING_MODEL: dict[str, str] = {
     "b2b": "once",
 }
 
+# Anzeigename je Konflikttyp — die EINZIGE Quelle. Bis 17.08.2026 lag dieselbe
+# Abbildung in vier Kopien in invoice_pdf.py, invites.py und mediations.py
+# (2×); die drei Router-Kopien kannten die ODR-Familie seit Juli nicht und
+# haben stattdessen den rohen Key in den KI-Prompt geschrieben. Wer einen Typ
+# ergaenzt, ergaenzt ihn hier — sonst nirgends.
+MEDIATION_TYPE_LABELS: dict[str, str] = {
+    "trennung": "Trennung & Scheidung",
+    "erbschaft": "Erbschaftsstreit",
+    "nachbarschaft": "Nachbarschaftskonflikt",
+    "mietverhaeltnis": "Streit im Mietverhältnis",
+    "arbeitsplatz": "Konflikt am Arbeitsplatz",
+    "verbraucher": "Verbraucherstreit",
+    "wg": "WG-Konflikt",  # legacy, nur Bestandsfälle
+    "odr": "Geschäftskonflikt (ODR)",
+    "schlichtung": "Online-Schlichtung (ODR)",
+    "ecommerce": "E-Commerce-/Plattform-Streit (ODR)",
+    "b2b": "B2B-Vertragsstreit (ODR)",
+    "geschaeft": "Geschäftskonflikt (ODR)",  # Altbestand vor der Migration
+}
+
+
+def type_label(mediation_type: str | None) -> str:
+    """Anzeigename; unbekannter Typ faellt auf den Rohwert zurueck."""
+    key = (mediation_type or "").strip().lower()
+    return MEDIATION_TYPE_LABELS.get(key, mediation_type or "Mediation")
+
+
 # Fallback, falls ein unbekannter Typ/ein unbekanntes Paket auftaucht.
 FALLBACK_PRICE = 499.0
 FALLBACK_BILLING_MODEL = "per_party"

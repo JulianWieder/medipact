@@ -105,7 +105,7 @@ const ENTRY_TYPES: { key: string; label: string; icon: string }[] = [
 
 // Business/ODR: sachliche Falldokumentation statt persönlichem Journal.
 // Gleiche entry_type-Keys (Datenmodell unverändert), nur nüchternere Labels.
-const BUSINESS_TYPES = new Set(["odr", "schlichtung", "ecommerce", "b2b", "geschaeft"]);
+const BUSINESS_TYPES = new Set(["odr", "schlichtung", "ecommerce", "b2b", "geschaeft", "arbeitsplatz"]);
 
 // Ein-Buch-Umbau: Es gibt EIN Konflikt-Logbuch pro Nutzer:in; der Bereich
 // hängt am einzelnen Eintrag (Backend: mediation_log_entries.area) und dient
@@ -115,6 +115,7 @@ const AREAS: { key: string; label: string; icon: string }[] = [
   { key: "erbschaft", label: "Erbschaft", icon: "📜" },
   { key: "nachbarschaft", label: "Nachbarschaft", icon: "🏡" },
   { key: "verbraucher", label: "Verbraucher & Handwerker", icon: "🧾" },
+  { key: "mietverhaeltnis", label: "Mietverhältnis", icon: "🏢" },
   { key: "odr", label: "Geschäft & Arbeit", icon: "🏢" },
 ];
 

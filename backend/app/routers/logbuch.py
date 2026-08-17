@@ -44,6 +44,7 @@ ENTRY_TYPES = {"vorkommnis", "gedanke", "gespraech", "email", "whatsapp", "telef
 # (siehe mediations.create_mediation). Werte = mediation_type-Keys.
 AREAS = {
     "trennung", "erbschaft", "nachbarschaft", "verbraucher", "wg",
+    "mietverhaeltnis", "arbeitsplatz",
     "odr", "schlichtung", "ecommerce", "b2b", "geschaeft",
 }
 

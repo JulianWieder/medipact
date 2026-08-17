@@ -2,17 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type MediationType =
-  | "trennung"
-  | "nachbarschaft"
-  | "erbschaft"
-  | "wg"
-  | "verbraucher"
-  // ODR-Familie (Online Dispute Resolution, ehemals "geschaeft")
-  | "odr"
-  | "schlichtung"
-  | "ecommerce"
-  | "b2b";
+// Bis 17.08.2026 stand hier eine zweite, handgepflegte Kopie der Typ-Liste.
+// Sie ist beim Anlegen von "mietverhaeltnis"/"arbeitsplatz" auseinander-
+// gelaufen und hat den Production-Build gebrochen. Jetzt kommt der Typ aus
+// der einzigen Quelle — ein neuer Mediationstyp muss nur noch dort und in
+// MEDIATION_TYPES unten eingetragen werden.
+import type { MediationType } from "@/lib/mediation-types/types";
 type Phase =
   | "einleitung"
   | "themensammlung"
