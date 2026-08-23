@@ -14,6 +14,7 @@ import json
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -22,7 +23,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app import pricing
-from app.database import DB_PATH, get_db
+from app.config import settings
+from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_block_response import MediationBlockResponse
 from app.models.mediation_log_entry import MediationLogEntry
@@ -788,7 +790,9 @@ def convert_to_mediation(
 # Uploads liegen im selben Verzeichnis wie Block-Uploads, aber mit eigenem
 # "lb"-Token-Präfix und eigener (paywall-freier) Auslieferungsroute.
 _MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-_UPLOAD_DIR = DB_PATH.parent / "block_uploads"
+# Früher DB_PATH.parent / "block_uploads" — also das Verzeichnis der
+# SQLite-Datei. Mit Postgres gibt es das nicht mehr, siehe settings.DATA_DIR.
+_UPLOAD_DIR = Path(settings.DATA_DIR) / "block_uploads"
 
 # Mindest-Substanz eines Eintrags, bevor überhaupt die KI gefragt wird –
 # spart Kosten und verhindert banale Empfehlungen bei Einwort-Einträgen.

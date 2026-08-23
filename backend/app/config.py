@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     # database.py nicht gelesen (das liest DATABASE_URL direkt aus der
     # Umgebung), dient hier nur der Doku/Vollständigkeit der Settings.
     DATABASE_URL: str = ""
+    # Basisverzeichnis für hochgeladene Dateien (Block- und Logbuch-Uploads
+    # unter DATA_DIR/block_uploads). Früher ergab sich das implizit aus
+    # DB_PATH.parent, also dem Verzeichnis der SQLite-Datei — mit Postgres
+    # gibt es diesen Pfad nicht mehr, deshalb jetzt explizit. In Docker wird
+    # DATA_DIR=/data gesetzt und auf ein persistentes Volume gemountet
+    # (siehe docker-compose.yml); lokal reicht der relative Ordner "data".
+    DATA_DIR: str = "data"
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen + Paraphrasierung der Einladungsnachricht
     OPENAI_API_KEY: str = ""  # Für die Transkription der Einladungs-Video-Botschaft (Whisper)
     OPENAI_TRANSCRIBE_MODEL: str = "whisper-1"

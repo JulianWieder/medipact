@@ -10,6 +10,7 @@ Reibungspunkte und Einigungschancen sichtbar.
 import os
 import secrets
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -18,7 +19,8 @@ from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.database import DB_PATH, get_db
+from app.config import settings
+from app.database import get_db
 from app.models.mediation import Mediation
 from app.models.mediation_block_purchase import MediationBlockPurchase
 from app.models.mediation_block_response import MediationBlockResponse
@@ -35,7 +37,9 @@ router = APIRouter(prefix="/mediations", tags=["block_responses"])
 
 # Max. Upload-Größe für Datei-Blöcke.
 _MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-_UPLOAD_DIR = DB_PATH.parent / "block_uploads"
+# Früher DB_PATH.parent / "block_uploads" — also das Verzeichnis der
+# SQLite-Datei. Mit Postgres gibt es das nicht mehr, siehe settings.DATA_DIR.
+_UPLOAD_DIR = Path(settings.DATA_DIR) / "block_uploads"
 
 
 def _get_mediation(mediation_id: int, db: Session) -> Mediation:

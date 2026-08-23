@@ -42,10 +42,17 @@ services:
       # Portvergabe auf diesem Server: 8000 = medipact, 8001 = mandexis,
       # 8002 = pontai-finance.
       - "127.0.0.1:8000:8000"
+    volumes:
+      # Hochgeladene Dateien (Block-/Logbuch-Uploads unter /data/block_uploads).
+      # Lagen früher neben der SQLite-Datei auf dem alten db-data-Volume; mit
+      # Postgres brauchen sie ein eigenes, persistentes Volume — sonst wären
+      # sie nach jedem "docker compose up --build" verschwunden.
+      - uploads:/data
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql+psycopg://medipact:changeme@db:5432/medipact
+      DATA_DIR: /data
 
 # Hinweis: das alte "db-data"-Volume (enthielt die SQLite-Datei unter /data)
 # wird hier bewusst NICHT wiederverwendet — ein neuer Name ("postgres-data")
@@ -54,3 +61,4 @@ services:
 # erhalten (docker volume ls) und lässt sich bei Bedarf noch auslesen.
 volumes:
   postgres-data:
+  uploads:
