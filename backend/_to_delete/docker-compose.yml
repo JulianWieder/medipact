@@ -1,0 +1,64 @@
+# WICHTIG: expliziter Projektname. Ohne diese Zeile leitet Docker Compose den
+# Projektnamen vom Ordnernamen ab — der hier "backend" heißt, genau wie der
+# Ordner von pontai-finance auf demselben Server. Compose hielt beide daraufhin
+# für dasselbe Projekt: ein "docker compose up" drüben ersetzte den Container
+# medipact-api (beide Services heißen "api"), und ein "docker compose down -v"
+# löschte das gemeinsame Volume backend_db-data — also medipacts Datenbank.
+name: medipact
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: medipact-db
+    restart: always
+    environment:
+      POSTGRES_USER: medipact
+      POSTGRES_PASSWORD: changeme # TODO: vor dem Deploy überschreiben (z.B. via .env + env_file statt inline)
+      POSTGRES_DB: medipact
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      # Host-Port 5433, NICHT 5432: dort läuft bereits die Postgres-Instanz von
+      # pontai-finance. Postgres-Ports auf diesem Server: 5432 = pontai-finance,
+      # 5433 = medipact, 5434 = mandexis (geplant). Nur für Backups/Debugging vom
+      # Host aus — die API erreicht die DB über das Compose-Netz unter "db:5432".
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medipact"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: medipact-api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # 8000 ist fest verdrahtet: nginx/medipact.conf leitet /backend/ auf
+      # 127.0.0.1:8000 weiter. Nicht ändern, ohne die nginx-Conf mitzuziehen.
+      # Portvergabe auf diesem Server: 8000 = medipact, 8001 = mandexis,
+      # 8002 = pontai-finance.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # Hochgeladene Dateien (Block-/Logbuch-Uploads unter /data/block_uploads).
+      # Lagen früher neben der SQLite-Datei auf dem alten db-data-Volume; mit
+      # Postgres brauchen sie ein eigenes, persistentes Volume — sonst wären
+      # sie nach jedem "docker compose up --build" verschwunden.
+      - uploads:/data
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://medipact:changeme@db:5432/medipact
+      DATA_DIR: /data
+
+# Hinweis: das alte "db-data"-Volume (enthielt die SQLite-Datei unter /data)
+# wird hier bewusst NICHT wiederverwendet — ein neuer Name ("postgres-data")
+# vermeidet, dass Postgres beim ersten Start auf ein nicht-leeres Verzeichnis
+# mit einer alten medipact.db trifft. Das alte Volume bleibt auf dem Server
+# erhalten (docker volume ls) und lässt sich bei Bedarf noch auslesen.
+volumes:
+  postgres-data:
+  uploads:

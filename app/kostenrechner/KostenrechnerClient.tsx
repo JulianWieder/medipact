@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { betragsStufe, trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import {
   GUTACHTEN_STUNDEN_DEFAULT,
@@ -198,6 +199,45 @@ export default function KostenrechnerClient({ className, preise, start }: Props)
       abaenderungen,
     ],
   );
+
+  // ── Messung ───────────────────────────────────────────────────────────────
+  // Der Rechner hat keinen Absenden-Knopf, er rechnet live mit. "Benutzt"
+  // heisst hier darum: Der Besucher hat mindestens einen Wert vom
+  // Startzustand weg veraendert. Genau einmal pro Aufruf melden — sonst
+  // feuert jeder Zug am Schieberegler ein eigenes Ereignis.
+  const startSignatur = useRef<string | null>(null);
+  const gemeldet = useRef(false);
+  const signatur = JSON.stringify([
+    art,
+    streitwert,
+    monatsnetto,
+    anrechte,
+    gegenseiteAnwalt,
+    stundensatz,
+    stunden,
+    gegenstaende,
+    kinder,
+    gutachten,
+    gutachtenStunden,
+    gutachtenSatz,
+    beistand,
+    eilantrag,
+    beschwerde,
+    abaenderungen,
+  ]);
+
+  useEffect(() => {
+    if (startSignatur.current === null) {
+      startSignatur.current = signatur;
+      return;
+    }
+    if (gemeldet.current || signatur === startSignatur.current) return;
+    gemeldet.current = true;
+    trackEvent("rechner_genutzt", {
+      konfliktart: art,
+      ersparnis_stufe: betragsStufe(ersparnis),
+    });
+  }, [signatur, art, ersparnis]);
 
   const wechseln = (k: Konfliktart) => {
     setArt(k);

@@ -160,12 +160,62 @@ export default function DatenschutzPage() {
             </p>
           </Section>
 
-          <Section title="10. Cookies und Tracking">
+          <Section title="10. Cookies und Reichweitenmessung">
             <p>
-              Unsere Website verwendet technisch notwendige Cookies, um die
-              Funktionalität der Plattform sicherzustellen. Sofern wir
-              darüber hinaus Analyse- oder Marketing-Tools einsetzen, erfolgt
-              dies nur auf Grundlage Ihrer ausdrücklichen Einwilligung.
+              Technisch notwendige Cookies setzen wir ein, um die
+              Funktionalität der Plattform sicherzustellen — etwa um Ihre
+              Anmeldung über einen Besuch hinweg zu halten. Diese
+              Verarbeitung ist nach § 25 Abs. 2 Nr. 2 TDDDG
+              einwilligungsfrei; Rechtsgrundlage ist Art. 6 Abs. 1 lit. f
+              DSGVO (berechtigtes Interesse am Betrieb der Plattform).
+            </p>
+            <p>
+              Darüber hinaus setzen wir <strong>Google Analytics 4</strong>
+              {" "}ein, einen Dienst der Google Ireland Limited, Gordon House,
+              Barrow Street, Dublin 4, Irland. Der Dienst wird ausschließlich
+              geladen, wenn Sie im Cookie-Hinweis zugestimmt haben. Ohne Ihre
+              Zustimmung werden weder Cookies gesetzt noch Daten an Google
+              übertragen.
+            </p>
+            <p>
+              Verarbeitet werden dabei insbesondere: die aufgerufenen Seiten
+              und die Verweildauer, die Herkunft des Zugriffs (etwa
+              Suchmaschine oder verweisende Seite), Gerätetyp und Browser,
+              der ungefähre Standort auf Basis der gekürzten IP-Adresse sowie
+              eine zufällig vergebene Kennung, die Ihr Gerät über die Dauer
+              des Besuchs wiedererkennt. Zusätzlich messen wir einzelne
+              Ereignisse, die uns zeigen, ob unser Angebot verständlich ist —
+              etwa die Nutzung des Kostenrechners, das Anklicken einer
+              Kontaktmöglichkeit oder den Fortschritt im Onboarding. Eine
+              Zusammenführung dieser Daten mit Ihrem Nutzerkonto oder mit den
+              Inhalten Ihres Konflikts findet nicht statt.
+            </p>
+            <p>
+              Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1 lit. a
+              DSGVO in Verbindung mit § 25 Abs. 1 TDDDG. Sie können sie
+              jederzeit mit Wirkung für die Zukunft widerrufen, ohne dass die
+              Rechtmäßigkeit der bis dahin erfolgten Verarbeitung berührt
+              wird — über den Link „Cookie-Einstellungen“ im Seitenfuß. Auf
+              die Nutzung der Plattform hat Ihre Entscheidung keinen Einfluss.
+            </p>
+            <p>
+              Eine Übermittlung an die Google LLC in den USA lässt sich nicht
+              ausschließen. Google LLC ist unter dem EU-US Data Privacy
+              Framework zertifiziert, für das ein Angemessenheitsbeschluss der
+              Europäischen Kommission vorliegt; ergänzend hat Google die
+              Standardvertragsklauseln der EU-Kommission vereinbart. Die
+              erhobenen Ereignisdaten werden nach 14 Monaten automatisch
+              gelöscht. Weitere Informationen finden Sie in der
+              Datenschutzerklärung von Google unter{" "}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-700 hover:underline"
+              >
+                policies.google.com/privacy
+              </a>
+              .
             </p>
           </Section>
 

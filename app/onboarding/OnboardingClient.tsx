@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { useSearchParams } from "next/navigation";
 import Icon from "@/app/components/ui/Icon";
 import {
@@ -197,6 +198,13 @@ export default function OnboardingClient({ userName }: { userName: string }) {
     setShowErrors(false);
     await flushStep(current);
     if (!isLast) {
+      // Pro abgeschlossenem Schritt ein Ereignis: Der Abbruch ist nicht
+      // direkt messbar, wohl aber die Stelle, an der die Kette abreisst.
+      trackEvent("onboarding_schritt", {
+        schritt: index + 1,
+        schritt_key: current.step_key,
+        schritte_gesamt: steps.length,
+      });
       setIndex((i) => i + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -234,6 +242,7 @@ export default function OnboardingClient({ userName }: { userName: string }) {
       // nächsten echten Request steht das Flag also auf true und die Umleitung
       // greift nicht mehr. Ein router.push würde die Middleware umgehen und
       // ins Dashboard rendern, bevor das Cookie aktualisiert ist.
+      trackEvent("onboarding_abgeschlossen", { schritte_gesamt: steps.length });
       window.location.href = callbackUrl;
     } catch {
       setError("Server nicht erreichbar.");
