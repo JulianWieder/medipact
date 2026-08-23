@@ -17,11 +17,13 @@ target_metadata = Base.metadata
 # access to the values within the .ini file in use.
 config = context.config
 
-# In Docker wird DB_PATH=/data/medipact.db gesetzt — alembic.ini zeigt aber
-# auf ./medipact.db (falsche Datei). Hier überschreiben wir die URL dynamisch.
-_db_path = os.environ.get("DB_PATH")
-if _db_path:
-    config.set_main_option("sqlalchemy.url", f"sqlite:///{_db_path}")
+# In Docker/Produktion wird DATABASE_URL per Env gesetzt (siehe
+# docker-compose.yml/.env) — hier überschreiben wir die alembic.ini-URL
+# dynamisch, damit Migrationen immer gegen die tatsächlich konfigurierte DB
+# laufen. Ungesetzt = alembic.ini-Default (siehe dort).
+_database_url = os.environ.get("DATABASE_URL")
+if _database_url:
+    config.set_main_option("sqlalchemy.url", _database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

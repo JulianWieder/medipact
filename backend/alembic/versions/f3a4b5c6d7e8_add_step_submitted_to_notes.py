@@ -14,16 +14,20 @@ branch_labels = None
 depends_on = None
 
 
+# Hinweis: Diese Prüfungen liefen ursprünglich über "PRAGMA table_info" bzw.
+# "PRAGMA index_list" – das gibt es nur in SQLite und ließ die Migration beim
+# Wechsel auf Postgres scheitern. sa.inspect() liefert dieselbe Information
+# dialektneutral, verhält sich auf SQLite also unverändert.
 def _column_exists(table: str, column: str) -> bool:
-    bind = op.get_bind()
-    cols = [row[1] for row in bind.execute(sa.text(f"PRAGMA table_info({table})"))]
-    return column in cols
+    inspector = sa.inspect(op.get_bind())
+    return column in {col["name"] for col in inspector.get_columns(table)}
 
 
 def _constraint_exists(table: str, name: str) -> bool:
-    bind = op.get_bind()
-    rows = bind.execute(sa.text(f"PRAGMA index_list({table})")).fetchall()
-    return any(row[1] == name for row in rows)
+    inspector = sa.inspect(op.get_bind())
+    names = {ix["name"] for ix in inspector.get_indexes(table)}
+    names |= {uc["name"] for uc in inspector.get_unique_constraints(table)}
+    return name in names
 
 
 def upgrade() -> None:

@@ -14,8 +14,8 @@ Neuer Ablauf (siehe app/paypal.py und services/billing.py):
 
 Diese Migration ergänzt die dafür nötigen Felder an mediation_participants.
 
-Bestandsdaten: bereits bezahlte Parteien (paid = 1) werden auf
-authorized = 1 gesetzt, damit sie in der neuen Logik nicht als "noch nicht
+Bestandsdaten: bereits bezahlte Parteien (paid = true) werden auf
+authorized = true gesetzt, damit sie in der neuen Logik nicht als "noch nicht
 zugesagt" gelten und ein bereits freigeschalteter Fall freigeschaltet bleibt.
 Eine paypal_authorization_id haben sie nicht - der Einzug ist bei ihnen ja
 bereits erfolgt, und services/billing.py überspringt Parteien mit paid = True.
@@ -36,7 +36,7 @@ depends_on = None
 def upgrade() -> None:
     op.add_column(
         "mediation_participants",
-        sa.Column("authorized", sa.Boolean(), nullable=False, server_default="0"),
+        sa.Column("authorized", sa.Boolean(), nullable=False, server_default=sa.false()),
     )
     op.add_column(
         "mediation_participants",
@@ -52,9 +52,13 @@ def upgrade() -> None:
     )
 
     # Bestandsdaten: was bezahlt ist, gilt auch als zugesagt.
+    # Hinweis: hier stand ursprünglich "authorized = 1 ... WHERE paid = 1".
+    # SQLite akzeptiert 1/0 für Boolean-Spalten, Postgres nicht ("column is of
+    # type boolean but expression is of type integer") – true/false ist in
+    # beiden Datenbanken gültig.
     op.execute(
-        "UPDATE mediation_participants SET authorized = 1, authorized_at = paid_at "
-        "WHERE paid = 1"
+        "UPDATE mediation_participants SET authorized = true, authorized_at = paid_at "
+        "WHERE paid = true"
     )
 
 

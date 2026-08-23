@@ -30,7 +30,12 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True    # STARTTLS on port 587
     SMTP_USE_SSL: bool = False   # SSL on port 465 — set True and SMTP_USE_TLS=False
     EMAIL_FROM: str = "medipact <noreply@medipact.de>"
-    DB_PATH: str = ""  # Optional: Pfad zur SQLite-DB (z.B. /data/medipact.db in Docker)
+    # Postgres-Verbindung, z.B. postgresql+psycopg://user:pass@host:5432/medipact.
+    # Ungesetzt (Standard): database.py fällt auf die bisherige lokale
+    # SQLite-Datei zurück (siehe dort) — dieses Feld selbst wird von
+    # database.py nicht gelesen (das liest DATABASE_URL direkt aus der
+    # Umgebung), dient hier nur der Doku/Vollständigkeit der Settings.
+    DATABASE_URL: str = ""
     ANTHROPIC_API_KEY: str = ""  # Für KI-Reflexion in Mediationsphasen + Paraphrasierung der Einladungsnachricht
     OPENAI_API_KEY: str = ""  # Für die Transkription der Einladungs-Video-Botschaft (Whisper)
     OPENAI_TRANSCRIBE_MODEL: str = "whisper-1"

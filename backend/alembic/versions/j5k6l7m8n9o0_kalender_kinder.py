@@ -33,21 +33,20 @@ branch_labels = None
 depends_on = None
 
 
+# Hinweis: Diese beiden Helfer liefen ursprünglich über "PRAGMA table_info"
+# bzw. "SELECT name FROM sqlite_master" – beides gibt es nur in SQLite und
+# ließ die Migration beim Wechsel auf Postgres scheitern. sa.inspect() liefert
+# dieselbe Information dialektneutral, auf SQLite also unverändertes Verhalten.
 def _columns(table: str) -> set[str]:
     """Vorhandene Spalten – die Migration soll auch auf einer Datenbank
     durchlaufen, auf der Teile schon von Hand angelegt wurden."""
-    bind = op.get_bind()
-    return {row[1] for row in bind.exec_driver_sql(f"PRAGMA table_info({table})")}
+    inspector = sa.inspect(op.get_bind())
+    return {col["name"] for col in inspector.get_columns(table)}
 
 
 def _tables() -> set[str]:
-    bind = op.get_bind()
-    return {
-        row[0]
-        for row in bind.exec_driver_sql(
-            "SELECT name FROM sqlite_master WHERE type='table'"
-        )
-    }
+    inspector = sa.inspect(op.get_bind())
+    return set(inspector.get_table_names())
 
 
 def upgrade() -> None:
