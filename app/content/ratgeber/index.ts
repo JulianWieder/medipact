@@ -28,6 +28,9 @@ import { article as wasIstMediation } from "./was-ist-mediation";
 import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
 import { article as mediationKosten } from "./mediation-kosten";
 import { article as gerichtOderMediation } from "./gericht-oder-mediation";
+// 03.09.2026 - emotionaler Einstiegstext fuer den Trennungs-Cluster:
+// erst wie Naehe verloren geht, dann wie man in Wuerde auseinandergeht.
+import { article as trennungInWuerde } from "./trennung-in-wuerde";
 import { article as scheidungOhneRosenkrieg } from "./scheidung-ohne-rosenkrieg";
 import { article as scheidungMediatorKosten } from "./scheidung-mediator-kosten";
 import { article as sorgerechtUndUmgangsrecht } from "./sorgerecht-und-umgangsrecht";
@@ -89,6 +92,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   hausBeiScheidung,
   werMussAusDerWohnung,
   trennungsjahrNachweisen,
+  trennungInWuerde,
   scheidungOhneRosenkrieg,
   scheidungMediatorKosten,
   sorgerechtUndUmgangsrecht,

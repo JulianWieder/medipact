@@ -104,6 +104,7 @@ export const article: RatgeberArticle = {
   ],
   related: [
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
+    { label: "Trennung in Würde: fair auseinandergehen", href: "/ratgeber/trennung-in-wuerde" },
     { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Scheidung ohne Anwalt: geht das?", href: "/ratgeber/scheidung-ohne-anwalt" },
     { label: "Trennung von einem Narzissten", href: "/ratgeber/trennung-von-einem-narzissten" },

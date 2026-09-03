@@ -80,6 +80,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Trennung in Würde: fair auseinandergehen", href: "/ratgeber/trennung-in-wuerde" },
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
     { label: "Konflikt dokumentieren: das Streit-Tagebuch", href: "/ratgeber/konflikt-dokumentieren" },
     { label: "Konflikt-Journal: Gefühle privat sortieren", href: "/ratgeber/konflikt-journal" },

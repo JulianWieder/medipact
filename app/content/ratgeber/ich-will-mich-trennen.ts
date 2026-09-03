@@ -125,6 +125,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Trennung in Würde: fair auseinandergehen", href: "/ratgeber/trennung-in-wuerde" },
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=trennung" },
     { label: "Trennungsvereinbarung: was hineingehört", href: "/ratgeber/trennungsvereinbarung" },
     { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
