@@ -444,7 +444,21 @@ export default function WorkspaceClient({ userEmail }: WorkspaceClientProps) {
                   Liste + Detail mit Admin-Aktionen. Hier bleiben nur globale
                   Admin-Werkzeuge wie der MandantenManager. */}
               {isSuperAdmin ? (
-                <MandantenManager />
+                <>
+                  {/* Werkzeuge, die eine eigene Seite haben statt eines
+                      Sidebar-Bereichs – ohne diesen Link sind sie nur über die
+                      URL erreichbar. */}
+                  <div className="px-6 pt-6">
+                    <a
+                      href="/dashboard/admin/newsletter"
+                      className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+                    >
+                      Newsletter verwalten
+                      <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                  <MandantenManager />
+                </>
               ) : (
                 <div className="p-6 text-sm text-neutral-500">
                   Die Benutzerverwaltung findest du jetzt im Bereich{" "}

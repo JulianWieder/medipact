@@ -28,7 +28,7 @@ export default function DatenschutzPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Datenschutzerklärung</h1>
-        <p className="mb-12 text-sm text-neutral-500">Stand: Juni 2026</p>
+        <p className="mb-12 text-sm text-neutral-500">Stand: September 2026</p>
 
         <div className="space-y-10">
 
@@ -219,7 +219,32 @@ export default function DatenschutzPage() {
             </p>
           </Section>
 
-          <Section title="11. Datensicherheit">
+          <Section title="11. Newsletter">
+            <p>
+              Für den Versand unseres Newsletters verwenden wir das
+              Double-Opt-in-Verfahren: Nach Ihrer Anmeldung erhalten Sie eine
+              E-Mail, in der Sie den Versand bestätigen. Ohne diese Bestätigung
+              versenden wir keinen Newsletter.
+            </p>
+            <p>
+              Verarbeitet werden Ihre E-Mail-Adresse sowie – zum Nachweis der
+              Einwilligung – der Zeitpunkt der Anmeldung, der Zeitpunkt der
+              Bestätigung und die bei der Anmeldung verwendete IP-Adresse.
+              Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1 lit. a
+              DSGVO in Verbindung mit § 7 Abs. 2 Nr. 3 UWG.
+            </p>
+            <p>
+              Sie können die Einwilligung jederzeit mit Wirkung für die Zukunft
+              widerrufen – über den Abmeldelink am Ende jeder Ausgabe oder per
+              Nachricht an uns. Nach dem Widerruf speichern wir Ihre Adresse
+              lediglich als Sperrvermerk, damit Sie nicht versehentlich erneut
+              angeschrieben werden. Der Versand erfolgt über unseren eigenen
+              Mailserver; ein externer Newsletter-Dienstleister ist nicht
+              eingebunden. Die Ausgaben enthalten keine Zähl- oder Tracking-Pixel.
+            </p>
+          </Section>
+
+          <Section title="12. Datensicherheit">
             <p>
               Wir setzen technische und organisatorische Maßnahmen ein, um
               Ihre Daten gegen Verlust, Missbrauch und unbefugten Zugriff zu
@@ -228,7 +253,7 @@ export default function DatenschutzPage() {
             </p>
           </Section>
 
-          <Section title="12. Änderungen dieser Datenschutzerklärung">
+          <Section title="13. Änderungen dieser Datenschutzerklärung">
             <p>
               Wir behalten uns vor, diese Datenschutzerklärung anzupassen,
               sofern dies aufgrund geänderter Rechtslage oder

@@ -257,10 +257,10 @@
     "footerText": "Impulses on fair conflict resolution – once or twice a month.",
     "footerButton": "Subscribe",
     "submitting": "Sending …",
-    "success": "Almost done – thank you for signing up!",
+    "success": "Almost done: we have sent you a confirmation email. Please click the link inside – your subscription starts only after that.",
     "error": "Sign-up failed. Please try again later.",
     "invalid": "Please enter a valid email address.",
-    "consent": "By subscribing you agree to receive the newsletter. Details in our",
+    "consent": "You will receive a confirmation email; the newsletter starts only once you click the link in it. You can unsubscribe at any time via the link in every issue. Details in our",
     "privacyLink": "privacy policy."
   }
 }

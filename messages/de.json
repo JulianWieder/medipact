@@ -257,10 +257,10 @@
     "footerText": "Impulse zu fairer Konfliktlösung – ein- bis zweimal im Monat.",
     "footerButton": "Abonnieren",
     "submitting": "Wird gesendet …",
-    "success": "Fast geschafft – vielen Dank für Ihre Anmeldung!",
+    "success": "Fast geschafft: Wir haben Ihnen eine Bestätigungsmail geschickt. Bitte klicken Sie den Link darin an – erst danach ist die Anmeldung aktiv.",
     "error": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
     "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-    "consent": "Mit der Anmeldung stimmen Sie dem Erhalt des Newsletters zu. Details in der",
+    "consent": "Sie erhalten eine Bestätigungsmail; erst mit dem Klick darauf beginnt der Versand. Abmeldung jederzeit über den Link in jeder Ausgabe. Details in der",
     "privacyLink": "Datenschutzerklärung."
   }
 }

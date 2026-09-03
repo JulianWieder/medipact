@@ -4,6 +4,7 @@ Versendet Bestätigungs-E-Mails via SMTP (STARTTLS oder SSL).
 """
 import smtplib
 import ssl
+from contextlib import contextmanager
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -579,3 +580,194 @@ def send_invoice_email(
             if settings.SMTP_USER and settings.SMTP_PASSWORD:
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.sendmail(settings.SMTP_USER or settings.EMAIL_FROM, to_email, msg.as_string())
+
+
+# ── Newsletter ───────────────────────────────────────────────────────────────
+#
+# Zwei Sorten Mail: die Bestätigungsmail des Double-Opt-in und der Newsletter
+# selbst. Beide tragen bewusst NICHT dasselbe Layout wie die Kontomails: der
+# Newsletter braucht Abmeldelink und Anbieterangabe im Fuß, sonst ist er in
+# Deutschland nicht versandfähig.
+
+
+def _newsletter_frame(inner_html: str, footer_html: str) -> str:
+    return f"""\
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+        <tr><td style="background:#059669;padding:32px 40px;">
+          <span style="font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;">medipact</span>
+        </td></tr>
+        <tr><td style="padding:40px 40px 32px;">{inner_html}</td></tr>
+        <tr><td style="background:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;">{footer_html}</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>
+"""
+
+
+def build_newsletter_confirm_email(to_email: str, confirm_url: str) -> MIMEMultipart:
+    """Bestätigungsmail des Double-Opt-in.
+
+    Enthält absichtlich keinerlei Werbung – erst der Klick macht die Adresse
+    zu einem Empfänger. Eine Bestätigungsmail mit Inhalt wäre bereits der
+    Newsletter, den es noch nicht bestellt hat.
+    """
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Bitte bestätigen Sie Ihre Newsletter-Anmeldung"
+    msg["From"] = settings.EMAIL_FROM
+    msg["To"] = to_email
+
+    text = f"""\
+Guten Tag,
+
+Sie haben sich auf medipact.de für unseren Newsletter angemeldet.
+
+Bitte bestätigen Sie die Anmeldung über diesen Link:
+
+{confirm_url}
+
+Erst danach erhalten Sie den Newsletter. Wenn Sie sich nicht angemeldet haben,
+ignorieren Sie diese E-Mail einfach – ohne Bestätigung wird nichts versendet
+und die Adresse nach kurzer Zeit wieder gelöscht.
+
+Viele Grüße
+Das medipact-Team
+"""
+
+    inner = (
+        '<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;line-height:1.3;">'
+        "Newsletter-Anmeldung bestätigen</h1>"
+        '<p style="margin:0 0 12px;font-size:15px;color:#475569;line-height:1.6;">'
+        "Sie haben sich auf medipact.de für unseren Newsletter angemeldet. "
+        "Bitte bestätigen Sie die Anmeldung – erst danach versenden wir etwas an Sie.</p>"
+        f'<a href="{confirm_url}" style="display:inline-block;margin-top:16px;background:#059669;'
+        'color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;'
+        'border-radius:12px;">Anmeldung bestätigen</a>'
+        '<p style="margin:28px 0 0;font-size:13px;color:#94a3b8;line-height:1.6;">'
+        "Sie haben sich nicht angemeldet? Dann ignorieren Sie diese E-Mail. "
+        "Ohne Bestätigung erhalten Sie keinen Newsletter.</p>"
+    )
+    footer = (
+        '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">'
+        '© 2026 medipact · <a href="https://medipact.de" style="color:#059669;text-decoration:none;">medipact.de</a>'
+        "</p>"
+    )
+
+    msg.attach(MIMEText(text, "plain", "utf-8"))
+    msg.attach(MIMEText(_newsletter_frame(inner, footer), "html", "utf-8"))
+    return msg
+
+
+def send_newsletter_confirm_email(to_email: str, token: str) -> None:
+    confirm_url = f"{settings.APP_BASE_URL}/newsletter/bestaetigen?token={token}"
+    _send(
+        build_newsletter_confirm_email(to_email, confirm_url),
+        to_email,
+        "Newsletter-Bestätigung",
+    )
+
+
+def build_newsletter_email(
+    to_email: str,
+    subject: str,
+    heading: str,
+    paragraphs: list[str],
+    cta: tuple[str, str] | None,
+    unsubscribe_url: str,
+) -> MIMEMultipart:
+    """Eine Newsletter-Ausgabe an einen Empfänger.
+
+    Der Abmeldelink steht im Fuß UND im List-Unsubscribe-Header: Gmail und
+    Outlook blenden daraus ihren eigenen „Abbestellen“-Knopf ein, was die
+    Wahrscheinlichkeit senkt, dass jemand stattdessen „Spam“ drückt.
+    """
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = settings.EMAIL_FROM
+    msg["To"] = to_email
+    msg["List-Unsubscribe"] = f"<{unsubscribe_url}>"
+    msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+
+    text = "\n\n".join(paragraphs)
+    if cta:
+        text += f"\n\n{cta[0]}: {cta[1]}"
+    text += (
+        "\n\n—\nSie erhalten diese E-Mail, weil Sie den medipact-Newsletter "
+        f"bestätigt haben.\nAbmelden: {unsubscribe_url}\n"
+        "medipact · Julian Wieder · https://medipact.de/impressum\n"
+    )
+
+    body_html = "".join(
+        f'<p style="margin:0 0 12px;font-size:15px;color:#475569;line-height:1.6;">{p}</p>'
+        for p in paragraphs
+    )
+    cta_html = (
+        f'<a href="{cta[1]}" style="display:inline-block;margin-top:16px;background:#059669;'
+        'color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;'
+        f'border-radius:12px;">{cta[0]}</a>'
+        if cta
+        else ""
+    )
+    inner = (
+        f'<h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0f172a;line-height:1.3;">{heading}</h1>'
+        f"{body_html}{cta_html}"
+    )
+    footer = (
+        '<p style="margin:0 0 8px;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">'
+        "Sie erhalten diese E-Mail, weil Sie den medipact-Newsletter bestätigt haben."
+        "</p>"
+        '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">'
+        f'<a href="{unsubscribe_url}" style="color:#64748b;text-decoration:underline;">Newsletter abbestellen</a>'
+        ' · <a href="https://medipact.de/impressum" style="color:#64748b;text-decoration:underline;">Impressum</a>'
+        ' · <a href="https://medipact.de/datenschutz" style="color:#64748b;text-decoration:underline;">Datenschutz</a>'
+        "</p>"
+    )
+
+    msg.attach(MIMEText(text, "plain", "utf-8"))
+    msg.attach(MIMEText(_newsletter_frame(inner, footer), "html", "utf-8"))
+    return msg
+
+
+@contextmanager
+def smtp_session():
+    """Eine SMTP-Verbindung für viele Mails.
+
+    Für den Newsletter-Versand: pro Mail eine neue Verbindung aufzubauen ist
+    langsam und lässt den Server nach Massenversand aussehen. Ohne
+    SMTP_HOST (Dev) wird `None` geliefert – die Aufrufer loggen dann nur.
+    """
+    if not settings.SMTP_HOST:
+        yield None
+        return
+
+    context = ssl.create_default_context()
+    if settings.SMTP_USE_SSL:
+        server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context)
+    else:
+        server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
+        if settings.SMTP_USE_TLS:
+            server.starttls(context=context)
+    try:
+        if settings.SMTP_USER and settings.SMTP_PASSWORD:
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+        yield server
+    finally:
+        try:
+            server.quit()
+        except Exception:
+            pass
+
+
+def send_on_session(server, msg: MIMEMultipart, to_email: str) -> None:
+    """Verschickt eine Mail über eine offene Verbindung (oder loggt im Dev-Modus)."""
+    if server is None:
+        print(f"[DEV] Newsletter -> {to_email}")
+        return
+    sender = settings.SMTP_USER or settings.EMAIL_FROM
+    server.sendmail(sender, to_email, msg.as_string())

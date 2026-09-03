@@ -6,13 +6,23 @@ from app.database import Base
 
 
 class NewsletterSubscriber(Base):
-    """E-Mail-Anmeldung für den Newsletter über die Landing Page.
+    """E-Mail-Anmeldung für den Newsletter (Double-Opt-in).
 
-    Bewusst schlank gehalten (einfaches Speichern, kein Double-Opt-in): Die
-    Anmeldung wird direkt mit `active=True` abgelegt. Ein späteres Double-Opt-in
-    lässt sich über `confirmed`/`confirm_token` nachrüsten, ohne die Tabelle
-    umzubauen. `source` hält fest, wo die Anmeldung herkam (z. B. "landing",
-    "footer"), damit sich Kanäle später auswerten lassen.
+    Ablauf: Das Formular legt die Adresse mit `active=True`, aber
+    `confirmed=False` an und verschickt eine Bestätigungsmail mit
+    `confirm_token`. Erst der Klick darauf setzt `confirmed=True` – und nur
+    bestätigte Adressen bekommen jemals einen Newsletter (siehe
+    routers/newsletter.py). Ohne diesen Nachweis ist der Versand in
+    Deutschland nicht zulässig (§ 7 UWG).
+
+    `consent_ip` und `consent_at` halten fest, woher die Einwilligung kam –
+    das ist der Nachweis, wenn jemand die Anmeldung bestreitet.
+
+    `unsubscribe_token` steht in jeder versendeten Mail: ein Klick genügt, kein
+    Login, kein Formular.
+
+    `source` hält fest, wo die Anmeldung herkam ("landing", "footer"), damit
+    sich Kanäle auswerten lassen.
     """
 
     __tablename__ = "newsletter_subscribers"
@@ -23,7 +33,20 @@ class NewsletterSubscriber(Base):
     # doppelte Anmeldungen (die App behandelt das idempotent, kein 500).
     email = Column(String, nullable=False, unique=True, index=True)
 
+    # active = nicht abgemeldet. Für den Versand zählt zusätzlich confirmed.
     active = Column(Boolean, nullable=False, default=True, server_default="1")
+
+    # ── Double-Opt-in ────────────────────────────────────────────────────────
+    confirmed = Column(Boolean, nullable=False, default=False, server_default="0")
+    confirm_token = Column(String, nullable=True, unique=True, index=True)
+    confirmed_at = Column(DateTime, nullable=True)
+
+    # ── Abmeldung ohne Login ─────────────────────────────────────────────────
+    unsubscribe_token = Column(String, nullable=True, unique=True, index=True)
+
+    # ── Nachweis der Einwilligung ────────────────────────────────────────────
+    consent_ip = Column(String, nullable=True)
+    consent_at = Column(DateTime, nullable=True)
 
     # Herkunft der Anmeldung ("landing", "footer", ...), rein informativ.
     source = Column(String, nullable=True)

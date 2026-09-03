@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "next-env.d.ts",
+    "types/**/*.ts",
+    "app/newsletter/bestaetigen/page.tsx",
+    "app/newsletter/abmelden/page.tsx",
+    "app/dashboard/admin/newsletter/page.tsx",
+    "app/dashboard/admin/newsletter/NewsletterAdminClient.tsx",
+    "app/api/newsletter/route.ts",
+    "app/api/newsletter/confirm/route.ts",
+    "app/api/newsletter/unsubscribe/route.ts",
+    "app/api/admin/newsletter/route.ts",
+    "app/api/admin/newsletter/campaigns/route.ts",
+    "app/robots.ts"
+  ]
+}
