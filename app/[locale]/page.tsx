@@ -42,9 +42,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata({
-    title: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+    // Title und Description tragen den Prozess-Intent, nicht die H1.
+    //
+    // Warum hier und nicht in der Überschrift: Google klassifiziert eine Seite
+    // über Title, Fließtext und strukturierte Daten deutlich stärker als über
+    // die H1. Die sichtbare H1 ("Jeder Konflikt hat einen Ausgang.") bleibt
+    // deshalb unangetastet — sie trägt die Marke, während Title, Subline und
+    // JSON-LD der Maschine sagen: hier wird ein Verfahren DURCHGEFÜHRT, hier
+    // wird nicht über Mediation informiert.
+    //
+    // "Online-Mediation" steht bewusst weiter vorn — das ist der Head-Term, auf
+    // den die Seite heute rankt; verloren geht nur "ohne Gericht", das im
+    // Ratgeber-Cluster ohnehin mehrfach abgedeckt ist.
+    title: "Online-Mediation: Verfahren, KI-Fallanalyse & Mediatoren | medipact",
     description:
-      "Streit bei Trennung, Erbe, Nachbarschaft oder im Unternehmen? Online-Mediation löst Ihren Konflikt fair, vertraulich und ohne Gericht. Jetzt starten.",
+      "Führen Sie Ihre Mediation online durch: strukturiertes Verfahren in sechs Schritten, KI-gestützte Fallanalyse und zertifizierte Mediatoren. Fall kostenlos anlegen.",
     path: "",
     image: HERO_IMAGE,
     imageWidth: 1600,
@@ -53,18 +65,38 @@ export async function generateMetadata({
   });
 }
 
+const SERVICE_ID = "https://medipact.de/#service";
+const APP_ID = "https://medipact.de/#webapp";
+
+// Drei verzahnte Knoten statt eines losen Service-Objekts.
+//
+// Das Problem, das sie loesen: medipact.de besteht zum groessten Teil aus
+// Ratgeber-Texten. Google leitet die Einordnung einer Domain stark aus dieser
+// Masse ab und behandelt dann auch die Startseite als Informationsangebot —
+// mit der Folge, dass sie zu "Was ist Mediation"-Anfragen ausgespielt wird
+// statt zu "Mediation online durchfuehren".
+//
+//   WebPage        -> mainEntity zeigt auf den Service: Diese Seite HAT ein
+//                     Angebot, sie beschreibt nicht bloss ein Thema.
+//   Service        -> das Verfahren selbst, mit Ergebnis (serviceOutput) und
+//                     einem Kanal, ueber den es beginnt (availableChannel).
+//   WebApplication -> die Plattform, in der es laeuft. Dieser Knoten ist der
+//                     eigentliche Hebel: Er unterscheidet uns von einer
+//                     Kanzlei-Website, die denselben Service beschreiben
+//                     wuerde, aber keine Software ist.
+//
+// Bewusst NICHT verwendet: HowTo. Das waere technisch naheliegend fuer die
+// sechs Schritte, signalisiert aber genau das Gegenteil von dem, was wir
+// wollen — eine Anleitung zum Selbermachen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Online-Mediation",
-  provider: {
-    "@type": "Organization",
-    name: "medipact",
-    url: "https://medipact.de",
-  },
-  serviceType: "Mediation",
+  "@id": SERVICE_ID,
+  name: "Geführte Online-Mediation",
+  serviceType: "Online-Mediation",
+  provider: { "@id": "https://medipact.de/#organization" },
   description:
-    "Strukturierte Online-Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten. Von erfahrenen Mediatoren begleitet, nach dem Harvard-Prinzip.",
+    "Strukturiertes Mediationsverfahren in sechs Schritten, das vollständig online durchgeführt wird: KI-gestützte Fallanalyse, gemeinsamer Fall-Workspace und Begleitung durch zertifizierte Mediatorinnen und Mediatoren — bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -72,11 +104,78 @@ const serviceSchema = {
   availableLanguage: "German",
   url: "https://medipact.de",
   image: HERO_IMAGE,
+  audience: {
+    "@type": "Audience",
+    audienceType: "Privatpersonen und Unternehmen in Konfliktsituationen",
+  },
+  // Was am Ende herauskommt. "rechtsverbindlich dokumentiert" statt
+  // "rechtssicher": Eine Mediationsvereinbarung ist nicht per se vollstreckbar
+  // — die Zusage waere angreifbar. Beschrieben wird, was medipact tatsaechlich
+  // liefert, naemlich eine von beiden Seiten unterzeichnete Vereinbarung.
+  serviceOutput: {
+    "@type": "Thing",
+    name: "Schriftliche Abschlussvereinbarung",
+    description:
+      "Von beiden Parteien unterzeichnete, rechtsverbindlich dokumentierte Vereinbarung am Ende des Verfahrens.",
+  },
+  availableChannel: {
+    "@type": "ServiceChannel",
+    name: "medipact Online-Workspace",
+    serviceUrl: "https://medipact.de/auth/register",
+    availableLanguage: "German",
+  },
   offers: {
     "@type": "Offer",
     priceCurrency: "EUR",
     price: "49",
-    description: "Online-Mediation ab €49",
+    description: "Festpreis je Partei, ab 49 € — kein Stundenhonorar",
+    url: "https://medipact.de/preise",
+  },
+};
+
+const webApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "@id": APP_ID,
+  name: "medipact",
+  url: "https://medipact.de",
+  applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Online Dispute Resolution",
+  operatingSystem: "Web",
+  browserRequirements: "Requires JavaScript",
+  inLanguage: "de",
+  provider: { "@id": "https://medipact.de/#organization" },
+  description:
+    "Digitaler Workspace für geführte Online-Mediation: KI-gestützte Fallanalyse, strukturiertes Verfahren in sechs Schritten und Begleitung durch zertifizierte Mediatorinnen und Mediatoren.",
+  // Nur Funktionen, die es wirklich gibt — jede Zeile ist im Produkt belegbar.
+  featureList: [
+    "KI-gestützte Fallanalyse",
+    "Strukturiertes Mediationsverfahren in sechs Schritten",
+    "Gemeinsamer Fall-Workspace für beide Parteien",
+    "Begleitung durch zertifizierte Mediatorinnen und Mediatoren",
+    "Konflikt-Logbuch zur Dokumentation",
+    "Schriftliche Abschlussvereinbarung",
+  ],
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "49",
+    description: "Festpreis je Partei, ab 49 €",
+    url: "https://medipact.de/preise",
+  },
+  // Kein SearchAction (siehe app/layout.tsx), sondern die Handlung, die diese
+  // Seite tatsaechlich anbietet: einen Fall anlegen.
+  potentialAction: {
+    "@type": "RegisterAction",
+    name: "Fall kostenlos anlegen",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://medipact.de/auth/register",
+      actionPlatform: [
+        "https://schema.org/DesktopWebPlatform",
+        "https://schema.org/MobileWebPlatform",
+      ],
+    },
   },
 };
 
@@ -94,9 +193,13 @@ const webPageSchema = {
   "@type": "WebPage",
   "@id": "https://medipact.de/#webpage",
   url: "https://medipact.de",
-  name: "Mediation online: Konflikte lösen ohne Gericht | medipact",
+  name: "Online-Mediation: Verfahren, KI-Fallanalyse & Mediatoren | medipact",
   inLanguage: "de",
   isPartOf: { "@id": "https://medipact.de/#organization" },
+  // Der entscheidende Satz fuer die Einordnung: Hauptgegenstand dieser Seite
+  // ist ein Dienst, kein Artikel.
+  mainEntity: { "@id": SERVICE_ID },
+  about: { "@id": APP_ID },
   primaryImageOfPage: {
     "@type": "ImageObject",
     "@id": "https://medipact.de/#primaryimage",
@@ -119,6 +222,7 @@ export default async function MedipactLanding() {
     <>
       <JsonLd data={webPageSchema} />
       <JsonLd data={serviceSchema} />
+      <JsonLd data={webApplicationSchema} />
       <main className="app-shell pt-0">
         <HeroScrollPin heroPhoto={heroPhoto} />
 
