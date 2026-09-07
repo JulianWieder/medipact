@@ -23,14 +23,28 @@
 
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://www.medipact.de";
+// 07.09.2026: Stand bis heute "https://www.medipact.de" — und damit als
+// einziger Ort im Projekt. Sitemap (app/sitemap.ts), robots.ts und saemtliche
+// JSON-LD-Knoten verwenden die Domain ohne www, und nginx leitet www seit dem
+// 17.08.2026 per 301 auf medipact.de um (nginx/mailcow/medipact.conf).
+//
+// Das Canonical zeigte damit auf jeder einzelnen Seite auf eine URL, die sich
+// sofort selbst weiterleitet — die Seite sagte "die www-Fassung ist das
+// Original", der Server sagte das Gegenteil. Google loest das meist zugunsten
+// des Redirect-Ziels auf, aber es ist genau der widerspruechliche Zustand, in
+// dem im GSC-Export vom 07.09. drei Wochen nach dem Redirect immer noch 7
+// www-URLs mit 51 Impressionen standen.
+//
+// Kanonischer Host ist medipact.de ohne www. Wer das aendert, muss nginx,
+// sitemap.ts, robots.ts und die JSON-LD-Knoten gleichzeitig mitziehen.
+export const SITE_URL = "https://medipact.de";
 
 type PageMetadataInput = {
   /** Vollständiger <title>, inkl. "| medipact". Wird 1:1 als og:title gespiegelt. */
   title: string;
   /** Meta-Description. Wird 1:1 als og:description gespiegelt. */
   description: string;
-  /** Pfad ab Root, mit führendem Slash, z. B. "/konflikte/trennung". */
+  /** Pfad ab Root, mit führendem Slash, z. B. "/konflikte/nachbarschaft". */
   path: string;
   /** "article" für Ratgeber-Artikel und Fallbeispiele, sonst "website". */
   type?: "website" | "article";

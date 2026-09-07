@@ -12,6 +12,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // nutzen, um echte Änderungen zu priorisieren) und verschwendet
   // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
   // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
+  // Stand 2026-09-07: Der Intent-Umbau (Verfahren statt Ratgeber) hat
+  // /konflikte, /preise, /konflikt-logbuch und /scheidungsmediation
+  // veraendert — Titles, Descriptions und neue Service-/Offer-Knoten. Diese
+  // vier tragen unten `lastModifiedIntent`, ALLE anderen bleiben bewusst auf
+  // dem 17.08. stehen: Wer das Datum global hochsetzt, meldet Google, dass
+  // sich auch die 30 unveraenderten Seiten geaendert haben — dasselbe
+  // wertlose Signal, das der Absatz ganz oben verhindern soll.
+  // Die beiden Ratgeber-Artikel (schwelender-konflikt,
+  // sorgerecht-verloren-was-tun) haben nur neue Snippets bekommen, keinen
+  // neuen Text. Ihr `updated`-Feld bleibt deshalb unangetastet — es steht
+  // sichtbar als "zuletzt aktualisiert" auf der Seite. Fuer diese beiden
+  // stattdessen in der Search Console die Indexierung anfordern.
   // Stand 2026-08-17: /konflikte/arbeitsplatz und /konflikte/mietverhaeltnis
   // neu aufgenommen, dazu die Landing-Texte auf das Respekt-Wording
   // umgestellt. Das Hochsetzen ist hier Pflicht und keine Kosmetik: die
@@ -32,6 +44,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // /konflikte/erbschaft angepasst.
   const lastModified = new Date("2026-08-17");
 
+  // Nur fuer die vier Seiten des Intent-Umbaus vom 07.09.2026.
+  const lastModifiedIntent = new Date("2026-09-07");
+
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -47,7 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/preise`,
-      lastModified,
+      lastModified: lastModifiedIntent,
       changeFrequency: "monthly",
       priority: 0.9,
     },
@@ -102,13 +117,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/konflikt-logbuch`,
-      lastModified,
+      lastModified: lastModifiedIntent,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/konflikte`,
-      lastModified,
+      lastModified: lastModifiedIntent,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -153,7 +168,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // Bis 15.08.2026 stand hier /konflikte/trennung (301 in next.config.ts).
       // Die alte URL steht bewusst NICHT mehr in der Sitemap: eine Sitemap
       // listet Ziele, keine Weiterleitungen.
-      lastModified,
+      lastModified: lastModifiedIntent,
       changeFrequency: "monthly",
       priority: 0.7,
     },
