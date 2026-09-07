@@ -54,9 +54,17 @@ export async function generateMetadata({
     // "Online-Mediation" steht bewusst weiter vorn — das ist der Head-Term, auf
     // den die Seite heute rankt; verloren geht nur "ohne Gericht", das im
     // Ratgeber-Cluster ohnehin mehrfach abgedeckt ist.
-    title: "Online-Mediation: Verfahren, KI-Fallanalyse & Mediatoren | medipact",
+    //
+    // Bewusst NICHT im Title/Description: "KI-Fallanalyse". Der Begriff ist ein
+    // Analyse-Wort und zieht die Seite genau in die Ecke, aus der wir sie
+    // herausholen wollen — Wissen ueber Mediation statt Mediation selbst.
+    // Stattdessen tragen ein Handlungsverb ("Konflikt loesen") und die
+    // menschliche Begleitung ("zertifizierte Mediatoren") den Intent. Die
+    // KI-Faehigkeit bleibt im WebApplication-Schema (featureList) stehen, wo
+    // sie als Produktmerkmal gelesen wird und nicht als Themenschwerpunkt.
+    title: "Online-Mediation: Konflikt lösen mit zertifizierten Mediatoren | medipact",
     description:
-      "Führen Sie Ihre Mediation online durch: strukturiertes Verfahren in sechs Schritten, KI-gestützte Fallanalyse und zertifizierte Mediatoren. Fall kostenlos anlegen.",
+      "Lösen Sie Ihren Konflikt online: strukturiertes Mediationsverfahren in sechs Schritten, begleitet von zertifizierten Mediatorinnen und Mediatoren. Fall kostenlos anlegen.",
     path: "",
     image: HERO_IMAGE,
     imageWidth: 1600,
@@ -193,7 +201,7 @@ const webPageSchema = {
   "@type": "WebPage",
   "@id": "https://medipact.de/#webpage",
   url: "https://medipact.de",
-  name: "Online-Mediation: Verfahren, KI-Fallanalyse & Mediatoren | medipact",
+  name: "Online-Mediation: Konflikt lösen mit zertifizierten Mediatoren | medipact",
   inLanguage: "de",
   isPartOf: { "@id": "https://medipact.de/#organization" },
   // Der entscheidende Satz fuer die Einordnung: Hauptgegenstand dieser Seite
