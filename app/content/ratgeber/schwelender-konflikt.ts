@@ -8,9 +8,13 @@ export const article: RatgeberArticle = {
   slug: "schwelender-konflikt",
   category: "Mediation",
   title: "Schwelender Konflikt: Beobachten, bevor es eskaliert",
-  metaTitle: "Schwelender Konflikt: Beobachten statt abwarten | medipact",
+  // 07.09.2026: Position 4,5 bei 2,6 % CTR – auf Platz 4 sind 8–10 % normal.
+  // "Beobachten statt abwarten" beschreibt eine Haltung und verspricht kein
+  // Ergebnis; Title und Description nennen jetzt beides: das Signal, nach dem
+  // gesucht wird, und das kostenlose Werkzeug dahinter.
+  metaTitle: "Schwelender Konflikt: Warnsignale erkennen | medipact",
   description:
-    "Noch kein offener Streit, aber es knirscht: Wie Sie einen schwelenden Konflikt beobachten, Eskalationssignale erkennen und rechtzeitig handeln.",
+    "Noch kein offener Streit, aber es knirscht: Eskalationssignale früh erkennen und den Verlauf festhalten – mit dem kostenlosen Konflikt-Logbuch.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-07-21",
   readingMinutes: 8,

@@ -6,20 +6,63 @@ import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
+import { JsonLd } from "@/app/components/JsonLd";
 import { pageMetadata } from "@/lib/seo";
 
+// Intent-Umstellung 07.09.2026 (Fortsetzung der Startseiten-Entscheidung vom
+// 05.09.): Diese Seite ist mit 281 Impressionen — 17 % der gesamten Domain —
+// das lauteste Signal dafür, als was Google medipact einordnet. Sie sagte mit
+// "Konfliktarten: die 6 Arten im Überblick" und einem reinen FAQPage-Schema:
+// Nachschlagewerk. Title und Description tragen jetzt das Verfahren, das
+// Service-Schema unten macht daraus auch strukturell ein Angebot.
+//
+// Bewusst NICHT geändert: die H1. Sie trägt "Konfliktarten" wörtlich und ist
+// der stärkste Impressionen-Lieferant der Seite. Der Term steht auf Position
+// 68 — dort ist ohnehin nichts zu gewinnen, und die Einordnung dreht sich
+// über Title und strukturierte Daten, nicht über die Überschrift.
 export const metadata: Metadata = pageMetadata({
-  title: "Konfliktarten: die 6 Arten im Überblick | medipact",
+  title: "Konflikt lösen: das passende Verfahren finden | medipact",
   description:
-    "Die 6 Konfliktarten: Sach-, Interessen-, Beziehungs-, Werte-, Rollen- und Machtkonflikt – mit Beispiel, Lösungsweg und Eskalationsstufen. Jetzt einordnen.",
+    "Wählen Sie Ihre Konfliktart und starten Sie ein strukturiertes Mediationsverfahren mit zertifizierten Mediatoren – online, zum Festpreis ab 49 €.",
   path: "/konflikte",
 });
+
+// Kein HowTo-Schema (gleiche Begründung wie auf der Startseite): HowTo
+// signalisiert eine Anleitung zum Selbermachen — also das Gegenteil eines
+// begleiteten Verfahrens. Der Offer-Knoten ist hier der eigentliche
+// Unterschied zum Ratgeber: Ein Lexikon hat keinen Preis.
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": "https://medipact.de/#service",
+  name: "Online-Mediation",
+  provider: {
+    "@type": "Organization",
+    name: "medipact",
+    url: "https://medipact.de",
+  },
+  serviceType: "Mediation",
+  description:
+    "Strukturierte Online-Mediation bei privaten und geschäftlichen Konflikten – Trennung, Nachbarschaft, Mietverhältnis, Verbraucher, Arbeitsplatz, Erbe und Business – begleitet von zertifizierten Mediatorinnen und Mediatoren.",
+  areaServed: { "@type": "Country", name: "Germany" },
+  availableLanguage: "German",
+  url: "https://medipact.de/konflikte",
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "49",
+    description:
+      "Einstiegstarif pro Partei; Verfahrenspreis je nach Konfliktart",
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
+};
 
 const conflictTypes = [
   {
     title: "Scheidung & Trennung",
     text: "Wenn Beziehung endet und Fragen zu Unterhalt, Betreuung, Verantwortung und Kommunikation offen bleiben.",
-    href: "/konflikte/trennung",
+    href: "/scheidungsmediation",
   },
   {
     title: "Nachbarschaft",
@@ -174,6 +217,7 @@ const problemPoints = [
 export default function KonfliktePage() {
   return (
     <>
+      <JsonLd data={serviceSchema} />
       <ImagePinHero
         image={konFormenPhoto}
         imageAlt="Verschiedene Formen privater Konflikte"
@@ -449,7 +493,7 @@ export default function KonfliktePage() {
             <p className="mt-3 leading-7 text-neutral-300">
               Im privaten Umfeld hilft Mediation bei{" "}
               <Link
-                href="/konflikte/trennung"
+                href="/scheidungsmediation"
                 className="font-semibold text-accent-300 underline-offset-4 hover:underline"
               >
                 Trennung

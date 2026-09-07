@@ -15,9 +15,11 @@ import { pageMetadata } from "@/lib/seo";
 // Lärmprotokoll, Gedächtnisprotokoll, Vorfälle festhalten.
 
 export const metadata: Metadata = pageMetadata({
-  title: "Konflikt-Logbuch: Streit kostenlos dokumentieren | medipact",
+  // 07.09.2026: Position 6,7 bei 3,4 % CTR. "dokumentieren" beschreibt Arbeit,
+  // die der Suchende leisten soll – der Title nennt jetzt das Ergebnis.
+  title: "Konflikt-Logbuch: Ihre Chronologie, kostenlos | medipact",
   description:
-    "Vorkommnisse, Gespräche und Nachrichten festhalten – dauerhaft kostenlos. Ihre Chronologie als Basis fürs klärende Gespräch, für Mediation oder Gericht.",
+    "Wer wann was gesagt hat – lückenlos festgehalten, dauerhaft kostenlos. Ihre Chronologie als Basis fürs klärende Gespräch, für Mediation oder Gericht.",
   path: "/konflikt-logbuch",
 });
 

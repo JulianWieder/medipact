@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
+import { JsonLd } from "@/app/components/JsonLd";
 import Icon from "@/app/components/ui/Icon";
 
 export const metadata: Metadata = pageMetadata({
@@ -11,9 +12,88 @@ export const metadata: Metadata = pageMetadata({
   path: "/preise",
 });
 
+// 07.09.2026: Ausgezeichnete Preise sind das stärkste kommerzielle Signal in
+// strukturierten Daten — ein Mediations-Blog hat keinen OfferCatalog. Die
+// @id ist dieselbe wie auf der Startseite und auf /konflikte: alle drei
+// Seiten beschreiben dieselbe Entität, Google führt sie zusammen, statt drei
+// lose Service-Objekte zu sehen.
+//
+// Die Zahlen müssen mit dem sichtbaren Text unten übereinstimmen — bei jeder
+// Preisänderung hier mitziehen, sonst steht in den Daten etwas anderes als
+// auf der Seite.
+const offerCatalogSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": "https://medipact.de/#service",
+  name: "Online-Mediation",
+  provider: {
+    "@type": "Organization",
+    name: "medipact",
+    url: "https://medipact.de",
+  },
+  areaServed: { "@type": "Country", name: "Germany" },
+  url: "https://medipact.de/preise",
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Mediationstarife",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        name: "Konflikt-Logbuch",
+        description: "Konflikt dokumentieren – dauerhaft kostenlos",
+        priceCurrency: "EUR",
+        price: "0",
+        url: "https://medipact.de/konflikt-logbuch",
+      },
+      {
+        "@type": "Offer",
+        name: "Einstiegstarif",
+        description:
+          "Nachbarschaft, Verbraucher und Handwerker, Mietverhältnis – pro Partei",
+        priceCurrency: "EUR",
+        price: "49",
+        url: "https://medipact.de/konflikte",
+      },
+      {
+        "@type": "Offer",
+        name: "Trennung und Scheidung",
+        description: "Scheidungsmediation ab 399 € pro Partei",
+        priceCurrency: "EUR",
+        price: "399",
+        url: "https://medipact.de/scheidungsmediation",
+      },
+      {
+        "@type": "Offer",
+        name: "Online-Schlichtung und E-Commerce",
+        description: "Verbraucherstreit und Online-Handel als Einzelfall",
+        priceCurrency: "EUR",
+        price: "399",
+        url: "https://medipact.de/konflikte/odr",
+      },
+      {
+        "@type": "Offer",
+        name: "B2B-Vertragsstreit",
+        description: "Wirtschaftsmediation zwischen Unternehmen als Einzelfall",
+        priceCurrency: "EUR",
+        price: "1200",
+        url: "https://medipact.de/konflikte/odr",
+      },
+      {
+        "@type": "Offer",
+        name: "Gesellschafter, Nachfolge und Team",
+        description: "Interne Unternehmenskonflikte als Einzelfall",
+        priceCurrency: "EUR",
+        price: "1900",
+        url: "https://medipact.de/konflikte/odr",
+      },
+    ],
+  },
+};
+
 export default function Preise() {
   return (
     <>
+      <JsonLd data={offerCatalogSchema} />
       <main className="app-shell pt-[73px]">
         {/* HERO */}
         <ImagePinHero

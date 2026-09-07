@@ -48,6 +48,19 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de/scheidungsmediation",
+  // 07.09.2026: Der Service-Knoten stand hier ohne Preis — und ein Angebot
+  // ohne Preis liest sich strukturell wie ein Themenartikel. Die drei Stufen
+  // entsprechen /preise: 399 € Basis, 499 € inkl. 2 Std. Mediation,
+  // 899 € Vollservice — jeweils pro Partei.
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "EUR",
+    lowPrice: "399",
+    highPrice: "899",
+    offerCount: 3,
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
 };
 
 export default async function TrennungPage({

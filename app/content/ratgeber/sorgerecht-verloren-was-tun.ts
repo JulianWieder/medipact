@@ -31,7 +31,11 @@ export const article: RatgeberArticle = {
   category: "Trennung & Scheidung",
   title:
     "Der Verlauf: Warum der jahrelange Rechtsweg aussichtslos sein kann – und am Ende nur § 1696 BGB bleibt",
-  metaTitle: "Sorgerecht verloren – was tun? | medipact",
+  // 07.09.2026: Position 4,8 bei 8 Impressionen und null Klicks. Der alte
+  // Title wiederholte nur die Suchanfrage. Der Paragraf im Title ist in einem
+  // SERP voller vager Ratgeber das einzige konkrete Versprechen – und es ist
+  // eines, das der Artikel auch einlöst, ohne Hoffnung zu verkaufen.
+  metaTitle: "Sorgerecht verloren: was nach § 1696 BGB bleibt | medipact",
   description:
     "Zwei Instanzen, zwei Jahre, kein Erfolg: Wie ein Sorgerechtsverfahren sich selbst bestätigt, warum Zeit gegen dich arbeitet und was nach § 1696 BGB bleibt.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
@@ -239,7 +243,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Elternvereinbarung ohne neues Verfahren – Online-Mediation ab 399 € pro Partei",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -284,7 +288,7 @@ export const article: RatgeberArticle = {
     { label: "Sorgerecht und Umgang: Wer bekommt was?", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Gericht oder Mediation – was ist sinnvoller?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Konflikt dokumentieren: Worauf es ankommt", href: "/ratgeber/konflikt-dokumentieren" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Ich will mich trennen – was jetzt?", href: "/ratgeber/ich-will-mich-trennen" },
   ],
