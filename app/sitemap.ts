@@ -47,6 +47,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Nur fuer die vier Seiten des Intent-Umbaus vom 07.09.2026.
   const lastModifiedIntent = new Date("2026-09-07");
 
+  // 13.09.2026: /methode umgebaut (neuer Abschnitt "Der Termin ist nicht das
+  // Verfahren", Varianten hochgezogen, Phasen nach unten, neuer Title und
+  // neue Description, neues Service-Schema). /preise und
+  // /einigung/ohne-mediator haben denselben Sprachumbau im Fliesstext:
+  // "persoenlich" raus, Stundenkontingente werden zu Sitzungen, und das
+  // sachlich falsche "auch vor Ort" ist weg. Nur diese drei tragen das neue
+  // Datum -- siehe die Begruendung ganz oben, warum ALLE anderen bewusst
+  // stehen bleiben.
+  // Die beiden Ratgeber (was-ist-mediation, scheidung-mediator-kosten) haben
+  // je einen Satz bekommen, keinen neuen Text: ihr `updated`-Feld bleibt
+  // unangetastet, es steht sichtbar als "zuletzt aktualisiert" auf der Seite.
+  const lastModifiedVerfahren = new Date("2026-09-13");
+
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -62,7 +75,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/preise`,
-      lastModified: lastModifiedIntent,
+      lastModified: lastModifiedVerfahren,
       changeFrequency: "monthly",
       priority: 0.9,
     },
@@ -77,7 +90,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/methode`,
-      lastModified,
+      lastModified: lastModifiedVerfahren,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -93,7 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/einigung/ohne-mediator`,
-      lastModified,
+      lastModified: lastModifiedVerfahren,
       changeFrequency: "monthly",
       priority: 0.8,
     },

@@ -242,19 +242,57 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
           </section>
         )}
 
-        {/* CTA */}
-        <section className="section section-strong text-center">
-          <div className="container max-w-3xl">
+        {/* WORUM ES HIER GEHT + CTA
+            Steht bewusst am Ende JEDES Ratgeber-Artikels und ist deshalb
+            absichtlich identisch (Boilerplate wie ein Footer, kein Duplicate
+            Content im problematischen Sinn). Grund: Die Artikel erklaeren
+            Mediation, und wer sie liest, nimmt an, medipact sei ein
+            Mediationstermin — im Raum oder per Zoom. Genau das ist es nicht.
+            Der Text muss fuer ALLE Konfliktarten stimmen, deshalb steht hier
+            "einzelne Videositzungen" und keine feste Zahl: die zwei Sitzungen
+            gibt es nur im Hybrid-Paket und nur bei Trennung und Scheidung,
+            im Einstiegstarif ist die Videositzung zubuchbar. Wer das aendert,
+            gleicht es mit backend/app/pricing.py und /preise ab. */}
+        <section className="section section-strong">
+          <div className="container max-w-3xl text-center">
+            <div className="eyebrow mb-4 justify-center text-accent-300">
+              Worum es hier geht
+            </div>
             <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl leading-tight">
-              Eigenen Konflikt lösen – strukturiert und fair
+              Kein Termin im Raum. Und kein Zoom-Call.
             </h2>
-            <p className="mt-5 text-lg leading-8 text-neutral-300">
-              medipact führt beide Seiten durch die bewährten Phasen der Mediation – online,
-              vertraulich und im eigenen Tempo.
-            </p>
-            <Link href="/auth/register" className="btn btn-primary mt-8">
-              Mediation starten
-            </Link>
+
+            <div className="mx-auto mt-6 max-w-2xl space-y-5 text-left text-lg leading-8 text-neutral-300">
+              <p>
+                medipact ist ein geführtes Verfahren. Beide Seiten gehen
+                getrennt voneinander durch dieselben Schritte – Fragen,
+                Auswahlmöglichkeiten, Prioritäten. Sie müssen sich nicht
+                gegenübersitzen, nichts vorbereiten und nichts formulieren:
+                Wer mitten im Streit steckt, schreibt keine guten Texte.
+              </p>
+              <p>
+                Ein zertifizierter Mediator kommt dort dazu, wo es einen
+                Menschen braucht – in einzelnen Videositzungen, an den
+                strittigen Punkten. Nicht in sechs Terminen, in denen erst
+                einmal sortiert wird.
+              </p>
+              <p className="font-semibold text-white">
+                Die Struktur ersetzt nicht den Mediator. Sie ersetzt die
+                Stunden, in denen er zugehört hat, statt zu vermitteln.
+              </p>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Link href="/auth/register" className="btn btn-primary">
+                Verfahren starten
+              </Link>
+              <Link
+                href="/methode"
+                className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+              >
+                So läuft das Verfahren
+              </Link>
+            </div>
           </div>
         </section>
       </main>
