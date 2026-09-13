@@ -97,7 +97,7 @@ export const einigungOhneMediatorPageContent = {
       "Eine Seite hält sich nicht an Zusagen, die im Verfahren getroffen wurden.",
     ],
     note:
-      "Menschliche Begleitung ist bei medipact keine Notlösung, sondern eine Stufe: Der reine Online-Prozess ist der Einstieg, Hybrid und Vollservice ergänzen persönlich begleitete Gespräche. Diese beiden Pakete gibt es derzeit ausschließlich bei Trennung und Scheidung — bei allen anderen Konfliktarten ist der Online-Prozess das Angebot.",
+      "Menschliche Begleitung ist bei medipact keine Notlösung, sondern eine Stufe: Das Verfahren ohne Sitzung ist der Einstieg, Hybrid und Vollservice ergänzen Sitzungen mit einem Mediator. Diese beiden Pakete gibt es derzeit ausschließlich bei Trennung und Scheidung — bei allen anderen Konfliktarten ist das Verfahren ohne Sitzung das Angebot.",
     links: [
       { label: "Preise und Pakete", href: "/preise" },
       { label: "Der gewichtete Abgleich", href: "/einigung/abgleich" },
@@ -110,12 +110,12 @@ export const einigungOhneMediatorPageContent = {
   processTitle: "Drei Stufen, eine Entscheidung",
   process: [
     {
-      title: "Online-Prozess",
+      title: "Verfahren ohne Sitzung",
       text: "Der geführte Ablauf ohne festen Mediator. Für Konflikte, in denen beide Seiten grundsätzlich verhandlungsfähig sind und das Problem eher Struktur als Vermittlung braucht.",
     },
     {
       title: "Hybrid",
-      text: "Derselbe Prozess, plus persönlich begleitete Gespräche an den Stellen, an denen es eng wird. Derzeit bei Trennung und Scheidung buchbar.",
+      text: "Dasselbe Verfahren, plus Sitzungen an den Stellen, an denen es eng wird. Derzeit bei Trennung und Scheidung buchbar.",
     },
     {
       title: "Vollservice",

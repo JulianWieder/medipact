@@ -65,7 +65,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Mediation online mit medipact" },
     {
       type: "paragraph",
-      text: "medipact macht das Prinzip der Mediation digital zugänglich: Beide Seiten werden strukturiert durch den Prozess geführt – schriftlich, im eigenen Tempo und ohne die Hürde eines gemeinsamen Termins vor Ort. Das Verfahren orientiert sich am bewährten Ablauf einer klassischen Mediation und bleibt dabei niedrigschwellig und fair für alle Beteiligten.",
+      text: "medipact macht das Prinzip der Mediation digital zugänglich: Beide Seiten werden getrennt durch dieselben Schritte geführt – im eigenen Tempo, ohne die Hürde eines gemeinsamen Termins vor Ort und ohne dass jemand seine Position erst formulieren müsste. Das Verfahren orientiert sich am bewährten Ablauf einer klassischen Mediation und bleibt dabei niedrigschwellig und fair für alle Beteiligten.",
     },
   ],
   faq: [

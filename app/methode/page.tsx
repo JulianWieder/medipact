@@ -16,30 +16,30 @@ import step6Photo from "../../fotos/schritte/6.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Ablauf einer Mediation: 6 Schritte bis zur Einigung",
+  title: "Ablauf der Mediation: geführt statt verhandelt | medipact",
   description:
-    "Was in jedem der sechs Schritte passiert, wie sie zum Fünf-Phasen-Modell stehen und wie viel Begleitung Ihr Fall wirklich braucht. Ohne Anmeldung lesbar.",
+    "Beide Seiten werden getrennt durch das Verfahren geführt, der Mediator entscheidet die strittigen Punkte in zwei Sitzungen à 60 Minuten. Ab 49 € je Partei.",
   path: "/methode",
 });
 
 const differentiators = [
   {
     num: "01",
-    eyebrow: "Struktur statt Eskalation",
-    title: "Geführt, nicht allein gelassen.",
-    text: "Die meisten Streits scheitern nicht am Willen, sondern am Weg. Medipact gibt beiden Seiten eine klare Struktur – statt endloser, kreisender Gespräche.",
+    eyebrow: "Keine Hürde",
+    title: "Sie müssen nichts formulieren.",
+    text: "Wer mitten im Streit steckt, schreibt keine guten Texte – deshalb eskalieren E-Mails zwischen zerstrittenen Parteien so zuverlässig. Hier beantworten Sie Fragen und treffen Auswahlen. Das Verfahren macht daraus, was die andere Seite lesen kann.",
   },
   {
     num: "02",
-    eyebrow: "Bewährte Methode",
-    title: "Kein Bauchgefühl. Das Harvard-Prinzip.",
-    text: "Interessen statt Positionen, Optionen statt Schuldzuweisungen. Eine Methode, die seit Jahrzehnten in der Konfliktlösung funktioniert – jetzt digital zugänglich.",
+    eyebrow: "Getrennt statt gegenüber",
+    title: "Niemand muss sofort reagieren.",
+    text: "Sie müssen sich nicht in einen Raum setzen, um sich zu einigen. Beide Seiten gehen unabhängig voneinander durch dieselben Schritte, zu unterschiedlichen Zeiten. Niemand unterbricht, und niemand sagt etwas im Affekt.",
   },
   {
     num: "03",
-    eyebrow: "Fair für alle Seiten",
-    title: "Eine Lösung, mit der beide weiterleben können.",
-    text: "Bei Trennung, Erbe oder Nachbarschaft sehen sich Menschen oft wieder. Medipact zielt nicht auf Sieg, sondern auf eine Einigung, die trägt.",
+    eyebrow: "Nachlesbar",
+    title: "Wer was wann vorgeschlagen hat, steht fest.",
+    text: "Bei einer Vereinbarung, die Jahre halten soll – Betreuungszeiten, Zahlungen, Nutzungsregeln – ist das kein Nebeneffekt, sondern der Punkt.",
   },
 ];
 
@@ -148,7 +148,7 @@ const mediatorTasks = [
   },
   {
     title: "Persönliche Gespräche",
-    text: "In den Modellen Hybrid und Vollservice begleitet der Mediator die entscheidenden Gespräche persönlich – per Videokonferenz oder vor Ort.",
+    text: "In den Modellen Hybrid und Vollservice führt ein zertifizierter Mediator die entscheidenden Sitzungen – per Video, zu zweit oder zu dritt.",
   },
   {
     title: "Eingreifen bei Eskalation",
@@ -164,12 +164,12 @@ const mediatorTasks = [
 // beim Ergänzen neuer Preise in pricing.py hier nachziehen.
 const variants = [
   {
-    badge: "Online-Prozess",
+    badge: "Ohne Sitzung",
     title: "Schnell & günstig",
     price: "ab €49",
     priceNote: "Nachbarschaft und Verbraucher je Partei; Trennung und Erbe ab €399, Geschäftskonflikte ab €1.200",
     availability: "Für alle Konfliktarten",
-    text: "Der geführte Prozess bringt Sie Schritt für Schritt zur Lösung – rund um die Uhr, ganz in Ihrem Tempo.",
+    text: "Das komplette Verfahren geführt, in Ihrem Tempo. Für Fälle, in denen die Sache klar ist und nur die Struktur fehlt.",
     facts: ["Geführter Prozess, 24/7 verfügbar", "Dauer: meist 1–2 Wochen", "Ideal für klare bis mittelschwere Fälle"],
     highlight: false,
   },
@@ -177,17 +177,17 @@ const variants = [
     badge: "Hybrid",
     title: "Persönlich & unterstützt",
     price: "€499 / Partei",
-    priceNote: "2 Std. persönliche Mediation inklusive",
+    priceNote: "Zwei Sitzungen à 60 Minuten inklusive",
     availability: "Nur bei Trennung & Scheidung",
-    text: "Der Prozess bereitet alles vor – ein zertifizierter Mediator begleitet Sie persönlich durch die entscheidenden Gespräche.",
-    facts: ["Profi-Mediator persönlich dabei", "Dauer: 2–8 Wochen", "Spezialisten bei Bedarf zubuchbar"],
+    text: "Das Verfahren bereitet alles vor, der Mediator entscheidet mit Ihnen die strittigen Punkte – per Video, zu zweit oder zu dritt.",
+    facts: ["Zertifizierter Mediator in der Sitzung", "Dauer: 2–8 Wochen", "Spezialisten bei Bedarf zubuchbar"],
     highlight: true,
   },
   {
     badge: "Vollservice",
     title: "Komplett & begleitet",
     price: "€899 / Partei",
-    priceNote: "5 Std. Mediator + anwaltliche Ersteinschätzung inklusive",
+    priceNote: "Fünf Sitzungen plus anwaltliche Ersteinschätzung",
     availability: "Nur bei Trennung & Scheidung",
     text: "Für sehr komplexe Fälle – mit Vermögen, Firma, Kindern oder hohem Konfliktniveau. Eine feste Ansprechperson von Anfang bis Ende.",
     facts: ["Feste Ansprechperson, durchgehend", "Dauer: 4–12 Wochen", "Für stark eskalierte Verfahren"],
@@ -282,7 +282,7 @@ const faqs = [
   },
   {
     q: "Kann ich Hybrid oder Vollservice für jeden Konflikt buchen?",
-    a: "Nein. Die persönlich begleiteten Pakete bieten wir derzeit nur bei Trennung und Scheidung an. Alle übrigen Konfliktarten laufen über den Online-Prozess – Nachbarschaft und Verbraucher ab 49 Euro je Partei, Erbstreit pauschal 399 Euro pro Fall, Geschäftskonflikte 1.900 Euro (Gesellschafter, Nachfolge, Team) beziehungsweise 1.200 Euro (B2B-Vertragsstreit).",
+    a: "Nein. Die Pakete mit Sitzungen bieten wir derzeit nur bei Trennung und Scheidung an. Alle übrigen Konfliktarten laufen über das Verfahren ohne Sitzungen – Nachbarschaft und Verbraucher ab 49 Euro je Partei, Erbstreit pauschal 399 Euro pro Fall, Geschäftskonflikte 1.900 Euro (Gesellschafter, Nachfolge, Team) beziehungsweise 1.200 Euro (B2B-Vertragsstreit).",
   },
   {
     q: "Nach welcher Methode wird mediiert?",
@@ -334,7 +334,7 @@ const serviceSchema = {
   },
   serviceType: "Mediation",
   description:
-    "KI-gestützte Mediation bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft, Verbraucherstreit und Geschäftskonflikten (ODR). Nach dem Harvard-Prinzip, ergänzt um Shuttle-, transformative und evaluative Mediation.",
+    "Strukturiertes Mediationsverfahren: Beide Parteien werden getrennt und zeitversetzt durch einen geführten Ablauf gebracht, ein zertifizierter Mediator entscheidet die strittigen Punkte in ein bis zwei Videositzungen. Für Trennung und Scheidung, Nachbarschaft, Erbschaft, Verbraucher- und Geschäftskonflikte (ODR). Nach dem Harvard-Prinzip, ergänzt um Shuttle-, transformative und evaluative Mediation.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -357,17 +357,19 @@ export default function MethodePage() {
 
       <ImagePinHero image={whiteboardPhoto} imageAlt="Mediatorin erklärt den strukturierten Mediationsprozess">
         <div className="container max-w-4xl">
-          <p className="eyebrow mb-4 text-accent-300">So funktioniert es</p>
+          <p className="eyebrow mb-4 text-accent-300">Das Verfahren</p>
 
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-            Drei Gründe, warum es funktioniert.{" "}
-            <span className="text-accent-300">Sechs Schritte zur Einigung.</span>
+            Der Termin ist nicht das Verfahren.{" "}
+            <span className="text-accent-300">Die Arbeit passiert davor.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
-            Medipact ersetzt das kreisende Gespräch durch einen klaren,
-            geführten Prozess – nach dem Harvard-Prinzip, fair für alle
-            Seiten. Für private wie geschäftliche Konflikte.
+            Beide Seiten werden getrennt voneinander durch dieselben
+            Schritte geführt – Sie müssen nichts formulieren und nichts
+            vorbereiten. Der Mediator kommt für die Stellen dazu, an denen es
+            einen Menschen braucht: zwei Sitzungen à 60 Minuten statt sechs
+            Termine.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/auth/register" className="btn btn-primary">
@@ -389,7 +391,49 @@ export default function MethodePage() {
         </div>
       </ImagePinHero>
 
+      {/* WARUM DAS ANDERS LAEUFT - der Unterschied zur klassischen Mediation.
+          Steht bewusst VOR Harvard und vor den sechs Schritten: Wer das
+          Phasenmodell zuerst liest, liest einen Ratgeber. Das Preismodell
+          (#varianten) ist der Beleg und wurde deshalb nach oben gezogen. */}
       <section className="section section-base">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <div className="eyebrow mb-4">Warum das anders läuft</div>
+            <h2 className="heading-2">Der Termin ist nicht das Verfahren</h2>
+            <div className="mt-6 space-y-5 text-lg leading-8 text-neutral-700">
+              <p>
+                In der klassischen Mediation passiert alles im Termin. Beide
+                Seiten sitzen im Raum, tragen vor, hören zu, verhandeln – und
+                weil die Uhr läuft, geht ein großer Teil der Zeit für Dinge
+                drauf, die keine Verhandlung sind: Sachverhalte sortieren,
+                Positionen erklären, Zahlen zusammentragen. Das ist der Grund,
+                warum eine Mediation sechs Termine und einen vierstelligen
+                Betrag kostet.
+              </p>
+              <p>
+                Hier läuft diese Arbeit vorher – und zwar geführt. Beide Seiten
+                gehen getrennt voneinander durch dieselben Schritte: Fragen,
+                Auswahlmöglichkeiten, Prioritäten. Kein leeres Textfeld, keine
+                Stellungnahme, die man erst formulieren muss. Daraus sortiert
+                das Verfahren, worüber Einigkeit besteht und wo der Konflikt
+                tatsächlich liegt – meist an weniger Stellen als gedacht.
+              </p>
+              <p>
+                Erst dann kommt der Mediator dazu, und zwar für genau diese
+                Stellen: zwei Sitzungen à 60 Minuten, in denen entschieden
+                wird, was sich vorher nicht entscheiden lässt. So viele wie
+                nötig, so wenige wie möglich.
+              </p>
+              <p className="font-semibold text-neutral-900">
+                Die Struktur ersetzt nicht den Mediator. Sie ersetzt die
+                Stunden, in denen er zugehört hat, statt zu vermitteln.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-muted border-y border-neutral-200">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 max-w-2xl">
             <div className="eyebrow mb-4">Warum medipact anders ist</div>
@@ -413,6 +457,82 @@ export default function MethodePage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* VARIANTEN-VERGLEICH */}
+      <section id="varianten" className="section section-base">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <div className="eyebrow mb-4 justify-center">Drei Wege zur Einigung</div>
+            <h2 className="heading-2">So viel Begleitung, wie Ihr Fall braucht</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-700">
+              Dasselbe Verfahren – wahlweise ganz ohne Sitzung, mit zwei
+              Sitzungen oder durchgehend begleitet. Die Pakete mit Sitzungen
+              bieten wir derzeit nur bei Trennung und Scheidung an.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {variants.map((v) => (
+              <div
+                key={v.badge}
+                className={
+                  v.highlight
+                    ? "relative rounded-[2rem] border-2 border-accent-600 bg-gradient-to-br from-accent-50 to-white p-8"
+                    : "rounded-[2rem] border border-neutral-200 bg-white p-8"
+                }
+              >
+                {v.highlight && (
+                  <div className="absolute -top-3 right-8 rounded-full bg-accent-600 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                    Beliebt
+                  </div>
+                )}
+                <div className="inline-flex items-center rounded border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-semibold uppercase text-accent-700">
+                  {v.badge}
+                </div>
+                <h3 className="mt-5 text-2xl font-black text-neutral-900">
+                  {v.title}
+                </h3>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="text-2xl font-black text-accent-600">
+                    {v.price}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-neutral-500">{v.priceNote}</p>
+
+                {/* Verfügbarkeit gehört direkt an den Preis: Hybrid und
+                    Vollservice gibt es nur bei Trennung & Scheidung. */}
+                <p className="mt-3 inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+                  {v.availability}
+                </p>
+
+                <p className="mt-4 text-sm leading-relaxed text-neutral-600">
+                  {v.text}
+                </p>
+                <ul className="mt-5 space-y-2.5 border-t border-neutral-200 pt-5">
+                  {v.facts.map((f) => (
+                    <li key={f} className="flex gap-2.5 text-sm text-neutral-700">
+                      <span className="font-bold text-accent-600">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <ArrowLink href="/einigung">
+              Warum der Prozess zum Festpreis geht
+            </ArrowLink>
+            <ArrowLink href="/preise">
+              Alle Preise und Leistungen im Detail
+            </ArrowLink>
+            <ArrowLink href="/kostenrechner">
+              Was würde derselbe Streit vor Gericht kosten?
+            </ArrowLink>
           </div>
         </div>
       </section>
@@ -474,53 +594,6 @@ export default function MethodePage() {
                 Kostenloses Logbuch starten
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PHASEN IM DETAIL */}
-      <section id="phasen" className="section section-base">
-        <div className="mx-auto max-w-5xl px-6 lg:px-8">
-          <div className="mb-16 max-w-2xl">
-            <div className="eyebrow mb-4">Die Methode dahinter</div>
-            <h2 className="heading-2">Die Mediationsphasen im Detail</h2>
-            <p className="mt-4 text-lg text-neutral-700">
-              Hinter den sechs Schritten steht das bewährte Phasenmodell der
-              Mediation. Klassisch werden fünf Phasen unterschieden; bei
-              medipact sind Verhandlung und Abschluss getrennt, und davor steht
-              Phase 0 mit Onboarding und Einladung. Der Rahmen ist fest –
-              welche Schritte Ihr Fall in jeder Phase braucht, legt der
-              verantwortliche Mediator individuell fest.
-            </p>
-          </div>
-
-          <ol className="relative space-y-8 border-l border-neutral-200 pl-8 sm:pl-10">
-            {mediationPhases.map((phase) => (
-              <li key={phase.num} className="relative">
-                <span className="absolute -left-[45px] flex h-9 w-9 items-center justify-center rounded-full border border-accent-200 bg-accent-50 text-sm font-black text-accent-700 sm:-left-[53px]">
-                  {phase.num}
-                </span>
-                <h3 className="text-lg font-bold text-neutral-900">
-                  {phase.title}
-                </h3>
-                <p className="mt-2 leading-relaxed text-neutral-600">
-                  {phase.text}
-                </p>
-                <p className="mt-3 rounded-xl bg-accent-50/60 px-4 py-3 text-sm leading-relaxed text-accent-900">
-                  <span className="font-bold">Auf der Plattform: </span>
-                  {phase.platform}
-                </p>
-              </li>
-            ))}
-          </ol>
-
-          <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3">
-            <ArrowLink href="/ratgeber/5-phasen-der-mediation">
-              Die Phasen der Mediation ausführlich erklärt
-            </ArrowLink>
-            <ArrowLink href="/ratgeber/was-ist-mediation" tone="muted">
-              Was ist Mediation?
-            </ArrowLink>
           </div>
         </div>
       </section>
@@ -591,78 +664,49 @@ export default function MethodePage() {
         </div>
       </section>
 
-      {/* VARIANTEN-VERGLEICH */}
-      <section id="varianten" className="section section-muted border-b border-neutral-200">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <div className="eyebrow mb-4 justify-center">Drei Wege zur Einigung</div>
-            <h2 className="heading-2">So viel Begleitung, wie Ihr Fall braucht</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-700">
-              Derselbe geführte Prozess – wahlweise komplett online, mit
-              persönlicher Mediation oder rundum begleitet. Die persönlich
-              begleiteten Pakete bieten wir derzeit nur bei Trennung und
-              Scheidung an.
+      {/* PHASEN IM DETAIL */}
+      <section id="phasen" className="section section-muted border-y border-neutral-200">
+        <div className="mx-auto max-w-5xl px-6 lg:px-8">
+          <div className="mb-16 max-w-2xl">
+            <div className="eyebrow mb-4">Die Methode dahinter</div>
+            <h2 className="heading-2">Die Mediationsphasen im Detail</h2>
+            <p className="mt-4 text-lg text-neutral-700">
+              Das Verfahren erfindet die Mediation nicht neu – es verlagert
+              nur, wo ihre Arbeit stattfindet. Zugrunde liegt das klassische
+              Fünf-Phasen-Modell, ergänzt um eine Phase 0 für Onboarding und
+              Einladung, und als Methode das Harvard-Prinzip: Interessen statt
+              Positionen, Optionen statt Schuldzuweisungen. Der Rahmen ist fest
+              – welche Schritte Ihr Fall in jeder Phase braucht, legt der
+              verantwortliche Mediator individuell fest.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {variants.map((v) => (
-              <div
-                key={v.badge}
-                className={
-                  v.highlight
-                    ? "relative rounded-[2rem] border-2 border-accent-600 bg-gradient-to-br from-accent-50 to-white p-8"
-                    : "rounded-[2rem] border border-neutral-200 bg-white p-8"
-                }
-              >
-                {v.highlight && (
-                  <div className="absolute -top-3 right-8 rounded-full bg-accent-600 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
-                    Beliebt
-                  </div>
-                )}
-                <div className="inline-flex items-center rounded border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-semibold uppercase text-accent-700">
-                  {v.badge}
-                </div>
-                <h3 className="mt-5 text-2xl font-black text-neutral-900">
-                  {v.title}
+          <ol className="relative space-y-8 border-l border-neutral-200 pl-8 sm:pl-10">
+            {mediationPhases.map((phase) => (
+              <li key={phase.num} className="relative">
+                <span className="absolute -left-[45px] flex h-9 w-9 items-center justify-center rounded-full border border-accent-200 bg-accent-50 text-sm font-black text-accent-700 sm:-left-[53px]">
+                  {phase.num}
+                </span>
+                <h3 className="text-lg font-bold text-neutral-900">
+                  {phase.title}
                 </h3>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-accent-600">
-                    {v.price}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-neutral-500">{v.priceNote}</p>
-
-                {/* Verfügbarkeit gehört direkt an den Preis: Hybrid und
-                    Vollservice gibt es nur bei Trennung & Scheidung. */}
-                <p className="mt-3 inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
-                  {v.availability}
+                <p className="mt-2 leading-relaxed text-neutral-600">
+                  {phase.text}
                 </p>
-
-                <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-                  {v.text}
+                <p className="mt-3 rounded-xl bg-accent-50/60 px-4 py-3 text-sm leading-relaxed text-accent-900">
+                  <span className="font-bold">Auf der Plattform: </span>
+                  {phase.platform}
                 </p>
-                <ul className="mt-5 space-y-2.5 border-t border-neutral-200 pt-5">
-                  {v.facts.map((f) => (
-                    <li key={f} className="flex gap-2.5 text-sm text-neutral-700">
-                      <span className="font-bold text-accent-600">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
 
-          <div className="mt-10 flex flex-col items-center gap-4">
-            <ArrowLink href="/einigung">
-              Warum der Prozess zum Festpreis geht
+          <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3">
+            <ArrowLink href="/ratgeber/5-phasen-der-mediation">
+              Die Phasen der Mediation ausführlich erklärt
             </ArrowLink>
-            <ArrowLink href="/preise">
-              Alle Preise und Leistungen im Detail
-            </ArrowLink>
-            <ArrowLink href="/kostenrechner">
-              Was würde derselbe Streit vor Gericht kosten?
+            <ArrowLink href="/ratgeber/was-ist-mediation" tone="muted">
+              Was ist Mediation?
             </ArrowLink>
           </div>
         </div>

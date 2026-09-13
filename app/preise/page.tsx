@@ -190,7 +190,7 @@ export default function Preise() {
               {/* ONLINE-PROZESS */}
               <div className="rounded-2xl border-2 border-accent-200 bg-white p-8 hover:shadow-xl transition">
                 <div className="inline-flex items-center gap-2 rounded border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-semibold text-accent-700 uppercase mb-6">
-                  <Icon name="compass" color="currentColor" /> Online-Prozess
+                  <Icon name="compass" color="currentColor" /> Ohne Sitzung
                 </div>
                 <h2 className="text-3xl font-black text-neutral-900 mb-2">
                   Schnell &
@@ -366,7 +366,7 @@ export default function Preise() {
                   href="#cta"
                   className="w-full inline-flex items-center justify-center rounded-xl bg-accent-600 px-6 py-3 text-sm font-bold text-white hover:bg-accent-700 transition"
                 >
-                  Online-Prozess starten
+                  Verfahren starten
                 </a>
               </div>
 
@@ -379,12 +379,12 @@ export default function Preise() {
                   <Icon name="users" color="currentColor" /> Hybrid
                 </div>
                 <h2 className="text-3xl font-black text-neutral-900 mb-2">
-                  Persönlich &
+                  Mit Sitzungen &
                   <span className="block text-accent-600">Unterstützt</span>
                 </h2>
                 <p className="text-neutral-600 mb-8">
-                  Der geführte Prozess bereitet alles vor – ein echter Mediator
-                  begleitet Sie persönlich durch die entscheidenden Gespräche.
+                  Das Verfahren bereitet alles vor – ein zertifizierter Mediator
+                  entscheidet mit Ihnen die strittigen Punkte, per Video.
                 </p>
 
                 {/* Preise */}
@@ -398,8 +398,8 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €499 × 2 (beide Parteien) – 2 Std.
-                    persönliche Mediation bereits enthalten
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €499 × 2 (beide Parteien) – zwei Sitzungen
+                    à 60 Minuten bereits enthalten
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -433,8 +433,8 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
-                      <strong>Hybrid-Modell</strong> – Prozess + persönliche
-                      Begleitung
+                      <strong>Hybrid-Modell</strong> – Verfahren + zwei
+                      Sitzungen
                     </span>
                   </div>
                   <div className="flex gap-3">
@@ -446,8 +446,8 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
-                      <strong>2 Std. inklusive</strong> – bei Scheidung von
-                      Anfang an dabei
+                      <strong>Zwei Sitzungen inklusive</strong> – bei Scheidung
+                      von Anfang an dabei
                     </span>
                   </div>
                   <div className="flex gap-3">
@@ -500,7 +500,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €899 × 2 – 5 Std. Mediator + anwaltliche
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €899 × 2 – fünf Sitzungen + anwaltliche
                     Ersteinschätzung bereits enthalten
                   </p>
 
@@ -541,7 +541,7 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
-                      <strong>5 Std. Mediator inklusive</strong> – mehr Raum für
+                      <strong>Fünf Sitzungen inklusive</strong> – mehr Raum für
                       komplexe Themen
                     </span>
                   </div>
@@ -650,7 +650,7 @@ export default function Preise() {
                   </p>
                   <p>
                     <span className="font-bold text-accent-400">✓</span>{" "}
-                    Geführter Online-Prozess für jeden Fall, Start jederzeit
+                    Geführtes Verfahren für jeden Fall, Start jederzeit
                   </p>
                   <p>
                     <span className="font-bold text-accent-400">✓</span> Ideal
@@ -739,7 +739,7 @@ export default function Preise() {
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-                  Individuelles Fallkontingent und persönliche Rundum-Betreuung
+                  Individuelles Fallkontingent und feste Rundum-Betreuung
                   – <strong className="text-white">Preis auf Anfrage</strong>.
                 </p>
                 <div className="mt-6 flex-1 space-y-3 border-t border-white/10 pt-6 text-sm text-neutral-300">
@@ -749,7 +749,7 @@ export default function Preise() {
                   </p>
                   <p>
                     <span className="font-bold text-accent-400">✓</span>{" "}
-                    Persönliche Mediator:innen inklusive – auch vor Ort
+                    Zertifizierte Mediator:innen inklusive – live per Video
                   </p>
                   <p>
                     <span className="font-bold text-accent-400">✓</span> Feste
@@ -801,7 +801,7 @@ export default function Preise() {
                       Feature
                     </th>
                     <th className="text-center py-4 px-4 font-bold text-accent-600">
-                      Online-Prozess
+                      Ohne Sitzung
                     </th>
                     <th className="text-center py-4 px-4 font-bold text-accent-600">
                       Hybrid
@@ -828,8 +828,8 @@ export default function Preise() {
                     {
                       feature: "Mensch-Mediator",
                       pure: "—",
-                      hybrid: "✓ (2 Std. inklusive)",
-                      voll: "✓ (5 Std. inklusive)",
+                      hybrid: "✓ (2 Sitzungen)",
+                      voll: "✓ (5 Sitzungen)",
                     },
                     {
                       feature: "Feste Ansprechperson",
@@ -901,11 +901,11 @@ export default function Preise() {
                 },
                 {
                   q: "Welches Modell passt zu meinem Fall?",
-                  a: "Der Online-Prozess eignet sich für unkomplizierte bis mittelschwere Fälle – er muss nicht einvernehmlich sein. Bei sehr komplexen Scheidungen oder Trennungen, etwa mit größerem Vermögen, einer Firma oder starker Eskalation, empfehlen wir Hybrid oder Vollservice mit persönlicher Begleitung.",
+                  a: "Das Verfahren ohne Sitzungen eignet sich für unkomplizierte bis mittelschwere Fälle – er muss nicht einvernehmlich sein. Bei sehr komplexen Scheidungen oder Trennungen, etwa mit größerem Vermögen, einer Firma oder starker Eskalation, empfehlen wir Hybrid oder Vollservice mit Sitzungen.",
                 },
                 {
                   q: "Wie genau ist die Hybrid-Preisstruktur bei Scheidung?",
-                  a: "Bei Scheidung zahlt jede Partei in der Regel €499 – also insgesamt rund €499 × 2. Darin sind die Vorbereitung und bereits 2 Stunden persönliche Mediation enthalten. Weitere Mediator-Stunden kosten €150/Std. und werden auf alle Parteien aufgeteilt.",
+                  a: "Bei Scheidung zahlt jede Partei in der Regel €499 – also insgesamt rund €499 × 2. Darin sind das Verfahren und zwei Sitzungen à 60 Minuten enthalten. Weitere Mediator-Stunden kosten €150/Std. und werden auf alle Parteien aufgeteilt.",
                 },
                 {
                   q: "Was kostet es, einen Rechtsanwalt oder Gutachter hinzuzuziehen?",

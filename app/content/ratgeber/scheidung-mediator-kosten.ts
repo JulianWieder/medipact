@@ -66,7 +66,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Bei medipact läuft die Trennungs- und Scheidungsmediation als geführter Online-Prozess zum Pauschalpreis: 399 € pro Partei im reinen Online-Verfahren, 499 € pro Partei in der Hybrid-Variante mit Video-Terminen und 899 € pro Partei im Vollservice mit persönlicher Begleitung. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird.",
+      text: "Bei medipact läuft die Trennungs- und Scheidungsmediation als geführtes Verfahren zum Pauschalpreis: 399 € pro Partei im reinen Online-Verfahren, 499 € pro Partei in der Hybrid-Variante mit Video-Terminen und 899 € pro Partei im Vollservice mit fünf Sitzungen und anwaltlicher Ersteinschätzung. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird.",
     },
     {
       type: "callout",
@@ -269,7 +269,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Trennung strukturiert klären – Online-Mediation ab 399 € pro Partei",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -319,7 +319,7 @@ export const article: RatgeberArticle = {
     { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
     { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Vermögensauseinandersetzung bei Trennung", href: "/ratgeber/vermoegensauseinandersetzung" },
