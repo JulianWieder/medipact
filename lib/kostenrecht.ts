@@ -752,3 +752,119 @@ const EUR0 = new Intl.NumberFormat("de-DE", {
   maximumFractionDigits: 0,
 });
 export const euroGlatt = (n: number) => EUR0.format(n);
+
+// ── Der volle Preis: Dauer und Beziehung ────────────────────────────────────
+//
+// Bis zum 19.09.2026 zeigte dieser Rechner genau eine Achse: Geld. Das ist die
+// Achse, die man vorher kennt — aber im Rückblick entscheiden zwei andere
+// häufiger darüber, ob sich der Weg gelohnt hat: wie lange man in der Sache
+// steckt, und was danach von der Beziehung übrig ist.
+//
+// QUELLEN. Hier stehen ausschließlich belegte Werte. Keine geschätzten
+// Monatszahlen ergänzen. Wo keine amtliche Zahl existiert (Arbeitsgericht),
+// bleibt `monate: null` und der Fließtext trägt die Aussage allein.
+//   - Amtsgericht, Zivilsache bis zum streitigen Urteil: 8,8 Monate (2024)
+//   - Landgericht, Zivilsache bis zum streitigen Urteil: 17,5 Monate (2024)
+//     Justizstatistik 2024 (Destatis-Daten), ausgewertet im Anwaltsblatt.
+//   - Familiensachen vor dem Amtsgericht, alle Gegenstände: 6,1 Monate (2023)
+//   - Scheidungsverfahren: 10,6 Monate (2023)
+//     Amtliche F-Statistik 2023 (Vollerfassung), zit. n. FF 07+08/2025, S. 265.
+//
+// Alle Werte sind erste Instanz. Berufung und Beschwerde kommen obendrauf und
+// sind bewusst nicht eingerechnet — sonst stünde hier eine Zahl, die kein
+// amtlicher Durchschnitt mehr ist.
+
+export const DAUER_QUELLE_ZIVIL = "Justizstatistik 2024";
+export const DAUER_QUELLE_FAMILIE = "Amtliche F-Statistik 2023";
+
+/**
+ * Zuständigkeitsstreitwert des Amtsgerichts nach § 23 GVG. Seit dem
+ * 01.01.2026 liegt die Grenze bei 10.000 € statt bei 5.000 €; zugleich sind
+ * Nachbarschaftssachen dem Amtsgericht unabhängig vom Streitwert zugewiesen.
+ */
+export const ZUSTAENDIGKEIT_AMTSGERICHT = 10000;
+
+export type Dauer = {
+  /** Durchschnittliche Dauer bis zur Entscheidung erster Instanz, in Monaten. */
+  monate: number | null;
+  /** Gericht, auf das sich die Zahl bezieht. */
+  gericht: string;
+  /** Was die Zahl gerade nicht abbildet. */
+  hinweis: string;
+  /** Leerstring, wenn keine belegte Zahl vorliegt. */
+  quelle: string;
+};
+
+/** Durchschnittliche Verfahrensdauer erster Instanz für diese Konfliktart. */
+export function verfahrensdauer(art: Konfliktart, streitwert: number): Dauer {
+  if (art === "trennung") {
+    return {
+      monate: 10.6,
+      gericht: "Familiengericht",
+      hinweis:
+        "Gerechnet ab Zustellung des Antrags. Das Trennungsjahr davor zählt nicht mit, und der Versorgungsausgleich zieht die Sache regelmäßig weiter in die Länge.",
+      quelle: DAUER_QUELLE_FAMILIE,
+    };
+  }
+  if (art === "kindschaft") {
+    return {
+      monate: 6.1,
+      gericht: "Familiengericht",
+      hinweis:
+        "Das ist die Dauer bis zur ersten Entscheidung, nicht bis zum Ende. Sorge- und Umgangsregelungen können jederzeit abgeändert werden (§ 1696 Abs. 1 BGB) — und ein Gutachten allein kostet mehrere Monate zusätzlich.",
+      quelle: DAUER_QUELLE_FAMILIE,
+    };
+  }
+  if (art === "arbeitsplatz") {
+    return {
+      monate: null,
+      gericht: "Arbeitsgericht",
+      hinweis:
+        "Der Gütetermin kommt schnell — die Kammerverhandlung, die tatsächlich entscheidet, liegt Monate später. Bis dahin arbeiten Sie entweder weiter nebeneinander oder längst nicht mehr.",
+      quelle: "",
+    };
+  }
+  // Nachbarschaftssachen sind dem Amtsgericht seit dem 01.01.2026 unabhängig
+  // vom Streitwert zugewiesen — deshalb steht die Abfrage vor der Wertgrenze.
+  const amtsgericht =
+    art === "nachbarschaft" || streitwert <= ZUSTAENDIGKEIT_AMTSGERICHT;
+  return amtsgericht
+    ? {
+        monate: 8.8,
+        gericht: "Amtsgericht",
+        hinweis:
+          "Durchschnitt bis zum streitigen Urteil. Geht die unterlegene Seite in Berufung, beginnt die Rechnung von vorn.",
+        quelle: DAUER_QUELLE_ZIVIL,
+      }
+    : {
+        monate: 17.5,
+        gericht: "Landgericht",
+        hinweis:
+          "Durchschnitt bis zum streitigen Urteil. Vor dem Landgericht dauert dasselbe Problem doppelt so lange wie vor dem Amtsgericht — allein wegen des Streitwerts.",
+        quelle: DAUER_QUELLE_ZIVIL,
+      };
+}
+
+/**
+ * Was der Streit kostet, nachdem die Rechnung bezahlt und das Urteil
+ * gesprochen ist. Bewusst qualitativ: Es gibt dafür keine Statistik, und eine
+ * erfundene wäre schlimmer als keine.
+ */
+export const BEZIEHUNGSPREIS: Record<Konfliktart, string> = {
+  nachbarschaft:
+    "Sie wohnen danach weiter nebeneinander. Ein Urteil über die Hecke beendet den Streitpunkt — die Nachbarschaft beendet es nicht.",
+  verbraucher:
+    "Die Geschäftsbeziehung ist nach dem Urteil in aller Regel beendet, mitsamt Gewährleistung, Nacharbeit und Kulanz.",
+  mietverhaeltnis:
+    "Nach dem Urteil läuft das Mietverhältnis weiter oder es endet. Welches von beidem, entscheidet das Gericht — nicht Sie.",
+  arbeitsplatz:
+    "Wer gewinnt, kehrt in dieselbe Abteilung zurück. Ein Urteil stellt den Arbeitsplatz wieder her, nicht die Zusammenarbeit.",
+  erbschaft:
+    "Der Nachlass wird geteilt, die Familie oft auch. Geschwister, die vor Gericht waren, reden danach selten wieder miteinander.",
+  odr: "Gesellschafter, die sich gegenseitig verklagt haben, führen das Unternehmen danach nur noch selten gemeinsam.",
+  b2b: "Der Kunde oder Lieferant ist nach dem Prozess weg — und mit ihm der Umsatz, der in keinem Streitwert auftaucht.",
+  trennung:
+    "Sie bleiben Eltern, auch wenn Sie keine Partner mehr sind. Was im Verfahren übereinander gesagt wurde, steht danach zwischen Ihnen.",
+  kindschaft:
+    "Ihr Kind erlebt das Verfahren mit: durch die Anhörung, das Gutachten und die Stimmung zu Hause. Und Sie müssen sich danach weiter miteinander abstimmen.",
+};

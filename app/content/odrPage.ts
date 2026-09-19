@@ -24,7 +24,7 @@ export const odrPageContent = {
   titleHighlight:
     "Mediation bei Geschäftspartnern, Gesellschaftern und im Team.",
   intro:
-    "Online Dispute Resolution (ODR) heißt: Konflikte werden vollständig digital beigelegt – strukturiert, strikt vertraulich und deutlich schneller als ein Gerichtsverfahren. Ob Streit unter Geschäftspartnern, innerbetrieblich, im E-Commerce oder als Schlichtung mit konkretem Lösungsvorschlag: medipact bildet die passende Verfahrensart online ab.",
+    "Online Dispute Resolution (ODR) heißt: Konflikte werden vollständig digital beigelegt – strukturiert, strikt vertraulich und deutlich schneller als ein Gerichtsverfahren. Ob Streit unter Geschäftspartnern, innerbetrieblich, im E-Commerce oder als Schlichtung mit konkretem Lösungsvorschlag: medipact bildet die passende Verfahrensart online ab. Die teuerste Position in einem betrieblichen Konflikt ist dabei selten die Rechnung, sondern die gebundene Aufmerksamkeit der Geschäftsführung — Wochen, in denen entschieden statt gestritten werden müsste.",
 
   primaryCta: {
     label: "Konflikt einschätzen",

@@ -156,12 +156,14 @@ export default function KonfliktLogbuchPage() {
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
-                Noch keine Mediation – aber ein Konflikt, der Sie beschäftigt?
-                Dokumentieren Sie kostenlos, was passiert: Vorkommnisse,
-                Gespräche, E-Mails, WhatsApp, Telefonate. Vertraulich, sortiert –
-                und die Basis, um Ihren Konflikt so effizient und
-                aggressionsarm wie möglich zu lösen: im klärenden Gespräch, per
-                Mediation oder notfalls vor Gericht.
+                Noch keine Mediation – aber ein Konflikt, der Sie nicht mehr
+                loslässt? Schreiben Sie kostenlos auf, was passiert:
+                Vorkommnisse, Gespräche, E-Mails, WhatsApp, Telefonate. Dann
+                steht es fest – und Sie müssen es nicht mehr die ganze Zeit
+                mit sich herumtragen. Vertraulich, sortiert, dauerhaft
+                kostenlos. Und wenn Sie den Streit klären wollen, ist die
+                Grundlage schon da: im klärenden Gespräch, per Mediation oder
+                notfalls vor Gericht.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
@@ -180,6 +182,47 @@ export default function KonfliktLogbuchPage() {
             </div>
           </div>
         </ImagePinHero>
+
+        {/* ENTLASTUNG — der eigentliche Nutzen */}
+        {/*
+          19.09.2026: Die Seite verkaufte bis hierher Beweissicherung. Das ist
+          ein Nutzen für später — und für die meisten Besucher nicht der
+          Grund, warum sie heute hier sind. Der Nutzen für heute ist, dass der
+          Konflikt aufhört, überall gleichzeitig zu sein. Diese Sektion steht
+          bewusst VOR "Warum dokumentieren", weil sie die emotionale Frage
+          beantwortet und der Rest die funktionale.
+        */}
+        <section className="section section-strong">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8">
+            <div className="eyebrow mb-4 text-accent-300">
+              Der eigentliche Nutzen
+            </div>
+            <h2 className="heading-2 text-white">
+              Damit der Streit nicht überall ist.
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-neutral-200">
+              Ein ungelöster Konflikt hat die Angewohnheit, sich überallhin
+              auszubreiten. Er sitzt beim Abendessen mit am Tisch, er fährt im
+              Auto mit, er ist um halb vier nachts wach. Nicht, weil Sie
+              ständig an ihn denken wollen — sondern weil Ihr Kopf Angst hat,
+              etwas zu vergessen: den Satz von gestern, das Datum, den genauen
+              Wortlaut.
+            </p>
+            <p className="mt-5 text-lg leading-8 text-neutral-200">
+              Genau dafür ist das Logbuch da. Sie schreiben es einmal auf, mit
+              Datum und Wortlaut, und dann ist es festgehalten. Es geht nicht
+              verloren, es verblasst nicht, es lässt sich später nicht
+              wegdiskutieren. Sie müssen es nicht mehr im Kopf behalten. Was
+              als Beweissicherung nützlich ist, ist im Alltag vor allem eines:
+              eine Sache weniger, die Sie mit sich herumtragen.
+            </p>
+            <p className="mt-5 text-lg leading-8 text-neutral-200">
+              Wenn Sie arbeiten, arbeiten Sie. Wenn Sie abends mit Ihren
+              Kindern am Tisch sitzen, sitzen Sie mit Ihren Kindern am Tisch.
+              Der Konflikt hat jetzt einen Ort — und der ist nicht überall.
+            </p>
+          </div>
+        </section>
 
         {/* WARUM DOKUMENTIEREN */}
         <section className="section section-base">

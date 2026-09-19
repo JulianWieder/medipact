@@ -16,7 +16,7 @@ export const article: RatgeberArticle = {
   description:
     "Noch kein offener Streit, aber es knirscht: Eskalationssignale früh erkennen und den Verlauf festhalten – mit dem kostenlosen Konflikt-Logbuch.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-07-21",
+  updated: "2026-09-19",
   readingMinutes: 8,
   intro:
     "Die meisten Konflikte beginnen nicht mit einem Knall, sondern mit einem Knirschen: eine Bemerkung, die hängen bleibt, eine E-Mail im falschen Ton, ein Nachbar, der plötzlich nicht mehr grüßt. Monatelang ist unklar, ob sich das auswächst oder hochschaukelt. Genau in dieser Schwebephase machen viele den gleichen Fehler – sie tun nichts, bis es zu spät ist. Die Alternative heißt: strukturiert beobachten. So behalten Sie den Überblick, ohne den Konflikt größer zu machen, als er ist.",
@@ -34,6 +34,18 @@ export const article: RatgeberArticle = {
     {
       type: "callout",
       text: "Das medipact Konflikt-Logbuch ist genau dafür gebaut: kostenlos, privat, unbegrenzt lange nutzbar. Vorkommnisse, Gespräche, E-Mails und Fotos landen in einer Chronologie – und ein privater Journal-Bereich hält fest, was der Konflikt mit Ihnen macht. Eskaliert es doch, wandeln Sie das Logbuch mit einem Klick in eine Mediation um.",
+    },
+    {
+      type: "heading",
+      text: "Der Nebeneffekt, der sofort wirkt: Sie müssen es nicht mehr im Kopf behalten",
+    },
+    {
+      type: "paragraph",
+      text: "Ein schwelender Konflikt kostet Sie Kraft, lange bevor er Geld kostet. Er meldet sich beim Abendessen, auf der Fahrt zur Arbeit, nachts um halb vier. Das liegt selten daran, dass Sie gern darüber nachdenken – Ihr Kopf hält den Vorfall fest, weil er fürchtet, ihn zu verlieren: das Datum, den genauen Satz, die Reihenfolge. Sobald das aufgeschrieben ist, entfällt dieser Auftrag. Genau hier tritt bei vielen die erste Entlastung ein – lange vor jeder Lösung.",
+    },
+    {
+      type: "paragraph",
+      text: "Und es trennt zwei Dinge, die in einem Streit gern verschwimmen: sich mit dem Konflikt beschäftigen und im Konflikt vorankommen. Stundenlanges Grübeln fühlt sich an wie Arbeit an der Sache, verändert aber nichts. Zwei Minuten Eintrag verändern etwas – sie schaffen die Grundlage für die Entscheidung, die irgendwann ansteht. Beschäftigung ist nicht Fortschritt; das gilt vor Gericht genauso wie im eigenen Kopf.",
     },
     { type: "heading", text: "Diese Eskalationssignale sollten Sie ernst nehmen" },
     {

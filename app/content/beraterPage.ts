@@ -28,7 +28,7 @@ export const beraterPageContent = {
   title: "Wenn der Konflikt Ihr Mandat blockiert.",
   titleHighlight: "Wir übernehmen den Streit. Nicht das Mandat.",
   intro:
-    "Ein Gesellschafterstreit, eine festgefahrene Nachfolge, eine Erbengemeinschaft, die sich nicht einigt: Sie merken es zuerst — weil der Jahresabschluss liegen bleibt, die Bewertung nicht abgestimmt wird oder Beschlüsse ausbleiben. Für den Konflikt selbst sind Sie nicht zuständig, und Sie wollen es auch nicht sein. medipact führt das Klärungsverfahren, Sie behalten die Beratung.",
+    "Ein Gesellschafterstreit, eine festgefahrene Nachfolge, eine Erbengemeinschaft, die sich nicht einigt: Sie merken es zuerst — weil der Jahresabschluss liegen bleibt, die Bewertung nicht abgestimmt wird oder Beschlüsse ausbleiben. Für den Konflikt selbst sind Sie nicht zuständig, und Sie wollen es auch nicht sein — nur kostet er Sie längst Zeit, die kein Mandat trägt: Telefonate zwischen den Parteien, Termine, die verschoben werden, Erklärungen, die Sie zum dritten Mal geben. Mehr Stunden dieser Art lösen ihn nicht; es ist die falsche Sorte Arbeit. medipact führt das Klärungsverfahren, Sie behalten die Beratung.",
 
   primaryCta: {
     label: "Fall unverbindlich einschätzen",

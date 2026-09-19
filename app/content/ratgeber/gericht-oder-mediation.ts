@@ -8,7 +8,7 @@ export const article: RatgeberArticle = {
   description:
     "Recht haben heißt nicht Recht bekommen: Was vor Gericht schiefgehen kann – Kosten, Dauer, Prozessrisiko – und wann sich der Weg daran vorbei lohnt.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-07-14",
+  updated: "2026-09-19",
   readingMinutes: 8,
   intro:
     "„Wir sehen uns vor Gericht.“ Der Satz fühlt sich stark an. Nach Gerechtigkeit. Nach: Jetzt wird das endlich geklärt. Aber zwischen diesem Satz und einem Urteil liegen Monate oder Jahre, eine Rechnung, die du heute nicht kennst – und ein Ausgang, den dir niemand versprechen kann. Dieser Artikel zeigt, was vor Gericht wirklich passiert. Und welchen Weg du gehen kannst, bevor du diesen Satz aussprichst.",
@@ -39,6 +39,22 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "Klage einreichen heißt nicht, dass es losgeht. Es heißt: warten. Auf den ersten Termin, auf Schriftsatzfristen, auf das Gutachten, auf den nächsten Termin, der verschoben wird. Erstinstanzliche Verfahren ziehen sich häufig über viele Monate – und wenn eine Seite in Berufung geht, reden wir über Jahre. Jahre, in denen der Konflikt nicht gelöst ist, sondern eingefroren. Jahre, in denen du jedem Brief vom Gericht mit Herzklopfen entgegensiehst. Der Streit läuft nicht neben deinem Leben. Er läuft mittendrin.",
+    },
+    {
+      type: "heading",
+      text: "Der Denkfehler dahinter: Aktivität fühlt sich an wie Fortschritt",
+    },
+    {
+      type: "paragraph",
+      text: "In diesen Monaten passiert ununterbrochen etwas. Ein Schriftsatz geht raus, eine Frist läuft, der Anwalt ruft an, die Gegenseite antwortet, du sammelst Belege, du liest alte Nachrichten zum dritten Mal. Das kostet Zeit und Kraft, und es fühlt sich an, als kämpftest du für deine Sache. Die unangenehme Wahrheit: beschäftigt sein ist nicht dasselbe wie vorankommen. Der siebte Schriftsatz bringt dich der Lösung nicht näher als der sechste – er verlängert nur die Akte.",
+    },
+    {
+      type: "paragraph",
+      text: "Das ist keine Schwäche deines Anwalts, sondern die Bauart des Verfahrens. Ein Prozess ist dafür gebaut, Positionen auszutauschen, bis ein Dritter entscheidet. Er produziert deshalb sehr viel Vorgang und sehr wenig Annäherung. Wer aus einem Streit wieder herauskommen will, muss irgendwann die Frage wechseln: nicht mehr ‚Was kann ich als Nächstes tun?‘, sondern ‚Was davon bringt mich tatsächlich weiter?‘",
+    },
+    {
+      type: "callout",
+      text: "Ein einfacher Test: Schreib auf, was du in den letzten vier Wochen für diesen Streit getan hast. Daneben, was sich dadurch verändert hat. Bei den meisten bleibt die zweite Spalte leer.",
     },
     { type: "heading", text: "Selbst wenn du gewinnst" },
     {

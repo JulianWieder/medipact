@@ -461,6 +461,54 @@ export default function MethodePage() {
         </div>
       </section>
 
+      {/* HAUPTSACHE UND NEBENSACHE */}
+      {/*
+        19.09.2026: Der gewichtete Abgleich stand bisher nur als Mechanismus
+        auf /einigung/abgleich. Hier steht das Prinzip dahinter, weil /methode
+        die Seite ist, auf der Besucher verstehen wollen, WARUM das Verfahren
+        so gebaut ist — nicht nur, wie es abläuft.
+      */}
+      <section className="section section-base">
+        <div className="mx-auto max-w-4xl px-6 lg:px-8">
+          <div className="eyebrow mb-4">Worum es wirklich geht</div>
+          <h2 className="heading-2">
+            Zwei Punkte entscheiden. Dreißig halten auf.
+          </h2>
+          <p className="mt-6 text-lg leading-8 text-neutral-700">
+            In fast jedem Konflikt gibt es zwei oder drei Fragen, an denen
+            tatsächlich etwas hängt — und einen langen Rest, an dem sich der
+            Streit festfrisst. Der Fernseher. Der Zaunpfahl, acht Zentimeter
+            zu weit. Der Tonfall der letzten E-Mail. Diese Nebensachen sind
+            nicht belanglos; sie stehen meist stellvertretend für etwas, das
+            nie ausgesprochen wurde. Aber sie sind nicht das, worüber man sich
+            einigen muss.
+          </p>
+          <p className="mt-5 text-lg leading-8 text-neutral-700">
+            Eine freie Verhandlung kann diese Trennung nicht leisten, weil
+            keine Seite den ersten Punkt aufgeben will: Wer zuerst nachgibt,
+            verliert. Ein Gerichtsverfahren leistet sie ebenfalls nicht — es
+            behandelt alles, was in der Akte steht, mit demselben Ernst und
+            derselben Gründlichkeit. Der Mediationsprozess ist genau dafür
+            gebaut. Er sortiert zuerst, worüber ohnehin Einigkeit besteht,
+            dann die Interessen hinter den Positionen. Übrig bleibt eine kurze
+            Liste echter Gegensätze.
+          </p>
+          <p className="mt-5 text-lg leading-8 text-neutral-700">
+            Erst an dieser kurzen Liste setzt der gewichtete Abgleich an. Beide
+            Seiten haben dafür ein begrenztes Kontingent und können deshalb
+            nicht alles für unverzichtbar erklären. Das ist unbequem — und
+            der eigentliche Punkt: Es zwingt jede Seite, ihre Hauptsache zu
+            benennen. Sobald das geschehen ist, lässt sich tauschen, statt zu
+            streiten.
+          </p>
+          <div className="mt-8">
+            <ArrowLink href="/einigung/abgleich">
+              Wie der gewichtete Abgleich funktioniert
+            </ArrowLink>
+          </div>
+        </div>
+      </section>
+
       {/* VARIANTEN-VERGLEICH */}
       <section id="varianten" className="section section-base">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">

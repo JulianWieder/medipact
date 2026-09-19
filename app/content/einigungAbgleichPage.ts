@@ -35,7 +35,7 @@ export const einigungAbgleichPageContent = {
 
   featuresTitle: "Warum Verhandeln so oft schiefgeht",
   featuresIntro:
-    "Die vier Muster, an denen Einigungen scheitern — und zwar unabhängig davon, ob es um einen Zaun oder um Gesellschaftsanteile geht.",
+    "Jede Einigung scheitert am selben Punkt: Solange alles gleich wichtig ist, ist nichts verhandelbar. Wer begrenzte Mittel hat — Zeit, Geld, Geduld —, muss Wichtiges von Nebensächlichem trennen; im Streit hört genau das auf. Das sind die vier Muster, an denen es scheitert, unabhängig davon, ob es um einen Zaun oder um Gesellschaftsanteile geht.",
 
   features: [
     {

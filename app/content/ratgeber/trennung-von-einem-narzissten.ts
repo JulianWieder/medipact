@@ -8,7 +8,7 @@ export const article: RatgeberArticle = {
   description:
     "Manipulation, Provokation, Schuldumkehr: Wie du dich auf Gespräche mit einem narzisstischen Ex-Partner vorbereitest, ohne dich selbst zu verlieren.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-07-15",
+  updated: "2026-09-19",
   readingMinutes: 9,
   intro:
     "Wenn du dich von einem narzisstischen Partner trennst, endet die Beziehung - aber der Kampf beginnt oft erst richtig. Jede Verhandlung wird zur Bühne, jedes Zugeständnis zur Schwäche erklärt, jede Begegnung kostet dich Tage der Erholung. Dieser Artikel zeigt dir, warum Gespräche mit einem narzisstischen Ex-Partner so aufreibend sind, wie du dich auf Verhandlungen und Gerichtstermine vorbereitest - und warum ein schriftliches, strukturiertes Verfahren dir genau den Schutz gibt, der dir im direkten Schlagabtausch fehlt.",
@@ -34,6 +34,22 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "Das Gemeine daran: Mündliche Auseinandersetzungen sind das Heimspiel des Narzissten. Dort funktionieren Unterbrechen, Themenwechsel, Zermürben, Umdeuten. Dort verpufft alles Gesagte, und hinterher steht Aussage gegen Aussage. Deshalb lautet die wichtigste strategische Regel bei dieser Trennung: Verlagere so viel wie möglich vom mündlichen Schlagabtausch ins Schriftliche und Dokumentierte. Schriftlichkeit ist dein Verbündeter - sie nimmt der Manipulation den Raum und schafft Fakten, auf die du dich später berufen kannst.",
+    },
+    {
+      type: "heading",
+      text: "Nicht jede Forderung ist verhandelbar - und nicht jede Nachricht braucht eine Antwort",
+    },
+    {
+      type: "paragraph",
+      text: "Ein Muster, das fast alle beschreiben: Es kommen ununterbrochen neue Forderungen, neue Vorwürfe, neue Themen. Kaum ist ein Punkt geregelt, steht der nächste im Raum. Wer versucht, auf alles einzugehen, verhandelt irgendwann rund um die Uhr über Dinge, die er selbst nie zur Verhandlung gestellt hat. Das ist der Punkt, an dem die meisten Kraft verloren geht - nicht in den großen Auseinandersetzungen, sondern in den vielen kleinen.",
+    },
+    {
+      type: "paragraph",
+      text: "Die Gegenmaßnahme ist unspektakulär: Du entscheidest vorher, worüber du sprichst. Ein kurzer, schriftlich festgehaltener Rahmen - diese Themen, dieser Kanal, diese Zeiten - ist kein Affront. Er ist der einzige Weg, deine Kraft für die Punkte aufzuheben, an denen tatsächlich etwas hängt. Alles außerhalb dieses Rahmens wird dokumentiert, nicht diskutiert.",
+    },
+    {
+      type: "paragraph",
+      text: "Dasselbe gilt für das Tempo. Sofortige Antworten erzeugen sofortige Gegenfragen, und ein Schlagabtausch im Minutentakt geht immer zulasten dessen, der ihn beenden will. Eine kurze, sachliche Antwort am nächsten Tag nimmt dem Ganzen die Dynamik - und kostet dich einen Bruchteil der Energie. Fristen und Anwaltsschreiben sind davon ausgenommen: Die beantwortest du zeitnah, im Zweifel mit anwaltlicher Hilfe.",
     },
     { type: "heading", text: "Wenn es vor Gericht geht: So bereitest du dich vor" },
     {
@@ -85,7 +101,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Verhandeln ohne Machtspiele - so schützt dich das strukturierte Verfahren von medipact",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -118,7 +134,7 @@ export const article: RatgeberArticle = {
   related: [
     { label: "„Ich will mich trennen“ - warum dieser Satz so schwer ist", href: "/ratgeber/ich-will-mich-trennen" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
-    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
+    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/scheidungsmediation" },
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
   ],
 };

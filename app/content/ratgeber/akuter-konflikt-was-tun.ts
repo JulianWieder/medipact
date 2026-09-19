@@ -12,7 +12,7 @@ export const article: RatgeberArticle = {
   description:
     "Der Streit eskaliert gerade? Ruhe bewahren, nichts Unumkehrbares tun, sofort dokumentieren – und die nächsten Schritte klug wählen.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-07-21",
+  updated: "2026-09-19",
   readingMinutes: 8,
   intro:
     "Eine wütende E-Mail, ein eskaliertes Gespräch im Treppenhaus, eine Drohung mit dem Anwalt: In der akuten Konfliktlage entscheidet sich oft, ob ein Streit lösbar bleibt oder dauerhaft vergiftet wird. Die gute Nachricht: Die ersten 48 Stunden folgen einfachen Regeln. Dieser Ratgeber zeigt, was jetzt hilft – und welche verständlichen Impulse Sie teuer zu stehen kommen können.",
@@ -43,6 +43,22 @@ export const article: RatgeberArticle = {
         "Keine Öffentlichkeit: Ein wütender Social-Media-Post oder eine Rundmail fühlt sich nach Gerechtigkeit an – und ist später das größte Hindernis für jede Einigung (und manchmal ein rechtliches Risiko).",
         "Keine Nebenkriegsschauplätze: Jetzt nicht zusätzlich die Parkplatzfrage, die alte Rechnung und den Ton von vor drei Jahren aufmachen. Ein Thema, ein Konflikt.",
       ],
+    },
+    {
+      type: "heading",
+      text: "Regel 4: Sie müssen nicht auf alles antworten",
+    },
+    {
+      type: "paragraph",
+      text: "In einer akuten Lage kommt vieles gleichzeitig: Nachrichten, Vorwürfe, Forderungen, Fristen, die keine sind. Der Reflex ist, auf jeden Punkt einzugehen – schon um nichts unwidersprochen stehen zu lassen. Genau das verlängert den Streit. Jede Antwort ist die Einladung zur nächsten Nachricht, und je mehr Nebenschauplätze beantwortet werden, desto unklarer wird, worum es eigentlich ging.",
+    },
+    {
+      type: "paragraph",
+      text: "Hilfreich ist eine einfache Unterscheidung. Fristen, Kündigungen, Mahnungen und Anwaltsschreiben beantworten Sie – zeitnah und im Zweifel mit anwaltlicher Hilfe, weil an ihnen echte Rechtsfolgen hängen. Alles andere – Provokationen, Wiederholungen, Nebenschauplätze – halten Sie in Ihrem Logbuch fest, ohne darauf einzugehen. Dokumentiert, aber unbeantwortet.",
+    },
+    {
+      type: "callout",
+      text: "Eine brauchbare Faustregel: Antworten Sie einmal am Tag gesammelt statt sofort auf jede Nachricht. Das senkt das Tempo – und ein Konflikt, der langsamer wird, wird fast immer auch kleiner.",
     },
     { type: "heading", text: "Die ersten 48 Stunden: eine kleine Checkliste" },
     {

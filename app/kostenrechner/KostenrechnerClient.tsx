@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { betragsStufe, trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import {
+  BEZIEHUNGSPREIS,
   GUTACHTEN_STUNDEN_DEFAULT,
   GUTACHTEN_STUNDEN_MAX,
   GUTACHTEN_STUNDEN_MIN,
@@ -26,6 +27,7 @@ import {
   verfahrensbeistandKosten,
   verfahrenswertEhesache,
   verfahrenswertKindschaft,
+  verfahrensdauer,
   verfahrenswertVersorgungsausgleich,
   zeithonorar,
   type Kindschaftsgegenstand,
@@ -142,6 +144,11 @@ export default function KostenrechnerClient({ className, preise, start }: Props)
   ]);
 
   const anwaelte = gegenseiteAnwalt ? 2 : 1;
+
+  // Die zweite Achse des Ergebnisses. Haengt an der Konfliktart und — bei
+  // Zivilsachen — am Streitwert, weil der ueber Amts- oder Landgericht
+  // entscheidet und sich die Durchschnittsdauer damit verdoppelt.
+  const dauer = useMemo(() => verfahrensdauer(art, wert), [art, wert]);
 
   const gericht = useMemo(
     () => gerichtsSzenario(wert, info.gerichtssatz, anwaelte),
@@ -892,6 +899,87 @@ export default function KostenrechnerClient({ className, preise, start }: Props)
             {istTrennung ? ", § 150 Abs. 1 FamFG" : ""}
             {istKindschaft ? ", § 81 FamFG" : ""}
           </span>
+        </p>
+      </div>
+
+      {/* ── DER VOLLE PREIS: DREI ACHSEN ─────────────────── */}
+      {/*
+        Bis zum 19.09.2026 endete der Rechner mit einer Euro-Zahl. Das ist die
+        Achse, die man vorher kennt — und selten die, ueber die man sich
+        hinterher aergert. Die Dauer kommt aus `verfahrensdauer` (belegte
+        Werte, siehe lib/kostenrecht.ts), der Beziehungspreis ist bewusst
+        qualitativ: Dafuer gibt es keine Statistik, und eine erfundene waere
+        schlimmer als keine.
+      */}
+      <div className="mt-10 rounded-2xl border-2 border-neutral-900 p-6 sm:p-8">
+        <h2 className="font-display text-2xl font-medium text-neutral-900">
+          Was dieser Streit Sie wirklich kostet
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
+          Die Rechnung oben zeigt eine Achse: Geld. Es ist die einzige, die Sie
+          vorher kennen — und selten die, über die Sie sich hinterher ärgern.
+          Ein Verfahren verlangt drei Dinge. Wer nur das erste einplant,
+          verrechnet sich zwangsläufig.
+        </p>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+              Geld
+            </div>
+            <div className="mt-1 text-2xl font-black text-neutral-900">
+              {euro(gericht.gesamt)}
+            </div>
+            <p className="mt-2 text-xs leading-5 text-neutral-600">
+              Kostenrisiko vor Gericht, wenn Sie vollständig unterliegen. Bei
+              medipact stehen dafür {euro(mediation)} fest.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+              Zeit
+            </div>
+            <div className="mt-1 text-2xl font-black text-neutral-900">
+              {dauer.monate === null
+                ? "Monate"
+                : `${dauer.monate.toLocaleString("de-DE")} Monate`}
+            </div>
+            <p className="mt-2 text-xs leading-5 text-neutral-600">
+              Durchschnitt bis zur Entscheidung erster Instanz vor dem{" "}
+              {dauer.gericht}
+              {dauer.quelle ? ` (${dauer.quelle})` : ""}.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+              Beziehung
+            </div>
+            <div className="mt-1 text-2xl font-black text-neutral-900">
+              Nicht in Euro
+            </div>
+            <p className="mt-2 text-xs leading-5 text-neutral-600">
+              {BEZIEHUNGSPREIS[art]}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-6 max-w-3xl text-sm leading-6 text-neutral-600">
+          {dauer.hinweis}
+        </p>
+
+        <p className="mt-4 max-w-3xl rounded-xl bg-neutral-900 px-5 py-4 text-sm leading-6 text-neutral-200">
+          <strong className="text-white">
+            In diesen Monaten passiert sehr viel und sehr wenig zugleich.
+          </strong>{" "}
+          Ein Verfahren erzeugt ununterbrochen Aktivität: Schriftsätze,
+          Fristen, Termine, Rückfragen, Telefonate. Das fühlt sich an, als
+          käme die Sache voran. Aber Aktivität ist nicht Fortschritt — der
+          siebte Schriftsatz bringt Sie der Lösung nicht näher als der sechste.
+          Eine Mediation erzeugt weniger Aktivität und mehr Ergebnis: Sie
+          dauert Wochen statt Monate, kostet einen festen Betrag, und am Ende
+          steht eine Vereinbarung, die Sie beide mitgetragen haben.
         </p>
       </div>
 
