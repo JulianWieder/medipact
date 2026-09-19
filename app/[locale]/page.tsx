@@ -337,9 +337,20 @@ export default async function MedipactLanding() {
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-700">
               {t("mission.text")}
             </p>
-            <ArrowLink href="/about" className="mt-8 text-base">
-              {t("mission.link")}
-            </ArrowLink>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              <ArrowLink href="/about" className="text-base">
+                {t("mission.link")}
+              </ArrowLink>
+              {/*
+                19.09.2026: Der Kostenrechner war nur im Header verlinkt. Er
+                beziffert genau das, was die Mission behauptet (Geld, Monate,
+                Beziehung) - und ist als Werkzeug-Link ein Plattform-Signal,
+                kein Ratgeber-Signal. Siehe intent-verfahren-statt-ratgeber.
+              */}
+              <ArrowLink href="/kostenrechner" className="text-base">
+                {t("mission.linkRechner")}
+              </ArrowLink>
+            </div>
           </div>
         </section>
 

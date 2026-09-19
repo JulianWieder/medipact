@@ -243,8 +243,9 @@
     "mission": {
       "eyebrow": "Unsere Überzeugung",
       "statement": "Die meisten Konflikte brauchen kein Gericht.",
-      "text": "Sie brauchen ein Verfahren, das hält. medipact gibt dem Streit eine Struktur: klare Schritte, gleiche Rechte für beide Seiten, ausgebildete Mediatorinnen und Mediatoren – damit am Ende Sie entscheiden und nicht die Eskalation.",
-      "link": "Mehr über medipact"
+      "text": "Sie brauchen ein Verfahren, das hält. Denn ein Streit kostet nicht nur Geld: Er kostet Monate, in denen nichts entschieden ist, und er kostet die Beziehung, die danach noch tragen muss. Wer das vorher zusammenrechnet, entscheidet anders. medipact gibt dem Streit eine Struktur – klare Schritte, gleiche Rechte für beide Seiten, ausgebildete Mediatorinnen und Mediatoren – damit am Ende Sie entscheiden und nicht die Eskalation.",
+      "link": "Mehr über medipact",
+      "linkRechner": "Was ein Verfahren wirklich kostet"
     }
   },
   "newsletter": {
