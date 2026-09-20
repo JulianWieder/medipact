@@ -2,7 +2,7 @@
   "nav": {
     "promo": "Ihren Fall vertraulich schildern – der Einstieg ist kostenlos",
     "promoShort": "Fall vertraulich schildern",
-    "start": "Start",
+    "start": "Start mediation",
     "about": "Über uns",
     "konflikte": "Konflikte",
     "konflikteTrennung": "Scheidung & Trennung",
@@ -23,7 +23,7 @@
     "beispieleMatrix": "Mini-Matrix",
     "ratgeber": "Ratgeber",
     "kostenrechner": "Cost calculator",
-    "login": "Mediation starten",
+    "login": "Log in",
     "menuOpen": "Menü öffnen",
     "menuClose": "Menü schließen",
     "konflikteGruppe": "Types of conflict",
@@ -169,16 +169,24 @@
         "label": "Festpreis je Partei, kein Stundenhonorar"
       },
       {
-        "value": "100 %",
-        "label": "vertraulich, DSGVO-konform"
+        "value": "Erasable",
+        "label": "account and log book, immediately and completely",
+        "fn": 1
       }
     ],
-    "bekanntAusLabel": "Bekannt aus",
+    "bekanntAusLabel": "Verifiable",
     "bekanntAusTags": [
-      "Harvard-Methode",
-      "DSGVO-konform",
-      "Made in Germany",
-      "SSL-verschlüsselt"
+      {
+        "text": "Harvard method"
+      },
+      {
+        "text": "Hosted at Hetzner",
+        "fn": 2
+      },
+      {
+        "text": "Shared only with your consent",
+        "fn": 3
+      }
     ],
     "casesTeaser": "Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,",
     "casesTeaserLink": "wie konkrete Fälle mit Medipact gelöst wurden →",
@@ -246,7 +254,27 @@
       "text": "Sie brauchen ein Verfahren, das hält. Denn ein Streit kostet nicht nur Geld: Er kostet Monate, in denen nichts entschieden ist, und er kostet die Beziehung, die danach noch tragen muss. Wer das vorher zusammenrechnet, entscheidet anders. medipact gibt dem Streit eine Struktur – klare Schritte, gleiche Rechte für beide Seiten, ausgebildete Mediatorinnen und Mediatoren – damit am Ende Sie entscheiden und nicht die Eskalation.",
       "link": "Mehr über medipact",
       "linkRechner": "Was ein Verfahren wirklich kostet"
-    }
+    },
+    "footnotes": [
+      {
+        "n": 1,
+        "text": "Applies while no mediation is running. During an ongoing procedure your request is recorded and the account is deleted once the procedure has ended.",
+        "href": "/konto-loeschen",
+        "linkLabel": "Delete account"
+      },
+      {
+        "n": 2,
+        "text": "The platform is operated at Hetzner. Details on the service providers we use are in the privacy policy.",
+        "href": "/datenschutz",
+        "linkLabel": "Privacy policy"
+      },
+      {
+        "n": 3,
+        "text": "We do not pass on the content of a mediation to third parties, unless we are legally obliged to or you have expressly consented.",
+        "href": "/datenschutz",
+        "linkLabel": "Privacy policy, section 5"
+      }
+    ]
   },
   "newsletter": {
     "eyebrow": "Newsletter",

@@ -35,7 +35,7 @@ const baseStyles =
 
 const variants = {
   primary:
-    "bg-gradient-to-br from-accent-400 to-accent-600 text-white shadow-[0_4px_14px_-4px_rgba(13,148,136,0.5)] hover:from-accent-500 hover:to-accent-700 hover:shadow-[0_14px_30px_-6px_rgba(13,148,136,0.55)] active:shadow-inner",
+    "bg-gradient-to-br from-accent-600 to-accent-700 text-white shadow-[0_4px_14px_-4px_rgba(13,148,136,0.5)] hover:from-accent-700 hover:to-accent-800 hover:shadow-[0_14px_30px_-6px_rgba(13,148,136,0.55)] active:shadow-inner",
   secondary:
     "border border-neutral-200 bg-white text-neutral-900 hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 shadow-sm hover:shadow-md",
   ghost:

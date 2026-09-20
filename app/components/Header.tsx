@@ -16,7 +16,7 @@ import logo from "@/fotos/medi logo.png";
 
 /**
  * Most marketing routes (e.g. /methode, /cases, /about) are NOT migrated
- * into app/[locale]/ yet — only "/" and "/konflikte/trennung" are (see
+ * into app/[locale]/ yet — only "/" and "/scheidungsmediation" are (see
  * isMigratedLocalePath in i18n/routing.ts). Using the locale-aware Link for
  * an unmigrated path is what caused the "/de/en/methode" prefix-loop bug:
  * next-intl computes a locale-prefixed href for a page that has nothing to
@@ -97,7 +97,7 @@ export default function Header() {
           items: [
             {
               label: t("konflikteTrennung"),
-              href: "/konflikte/trennung",
+              href: "/scheidungsmediation",
               desc: t("konflikteTrennungDesc"),
               icon: "heartbreak",
             },
@@ -337,11 +337,20 @@ export default function Header() {
         {/* CTA */}
         <div className="hidden items-center gap-4 md:flex">
           <LanguageSwitcher />
+          {/* Ein primärer CTA (Start), Login getrennt und ruhiger — Rückkehrer
+              finden ihn, ohne dass er mit dem Einstieg konkurriert. Weiß auf
+              accent-700 = 5,5:1 (accent-600 hatte nur 3,7:1). */}
           <UnlocalizedLink
             href="/auth/login"
-            className="rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
+            className="text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
           >
             {t("login")}
+          </UnlocalizedLink>
+          <UnlocalizedLink
+            href="/auth/register"
+            className="rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
+          >
+            {t("start")}
           </UnlocalizedLink>
         </div>
 
@@ -425,8 +434,15 @@ export default function Header() {
           </div>
 
           <UnlocalizedLink
+            href="/auth/register"
+            className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
+            onClick={() => setOpen(false)}
+          >
+            {t("start")}
+          </UnlocalizedLink>
+          <UnlocalizedLink
             href="/auth/login"
-            className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700"
+            className="mt-3 block w-full py-2 text-center text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
             onClick={() => setOpen(false)}
           >
             {t("login")}

@@ -88,7 +88,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <a
                   href="/auth/register"
-                  className="inline-flex items-center justify-center rounded-lg bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-400 active:scale-[0.98] sm:px-8 sm:py-3.5"
+                  className="inline-flex items-center justify-center rounded-lg bg-accent-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-800 active:scale-[0.98] sm:px-8 sm:py-3.5"
                 >
                   {t("ctaPrimary")}
                 </a>

@@ -13,6 +13,7 @@ import LogbuchSection from "@/app/components/LogbuchSection";
 import KampagnenKarussell from "@/app/components/KampagnenKarussell";
 import ZweiWelten from "@/app/components/ZweiWelten";
 import OutcomeWand from "@/app/components/OutcomeWand";
+import { FootnoteList, FootnoteRef, type FootnoteItem } from "@/app/components/ui/Footnote";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 import { pageMetadata } from "@/lib/seo";
@@ -222,8 +223,9 @@ const webPageSchema = {
 
 export default async function MedipactLanding() {
   const t = await getTranslations("home");
-  const stats = t.raw("stats") as { value: string; label: string }[];
-  const bekanntAusTags = t.raw("bekanntAusTags") as string[];
+  const stats = t.raw("stats") as { value: string; label: string; fn?: number }[];
+  const bekanntAusTags = t.raw("bekanntAusTags") as { text: string; fn?: number }[];
+  const footnotes = t.raw("footnotes") as FootnoteItem[];
   const processSteps = t.raw("processSteps") as NumberedStep[];
 
   return (
@@ -245,8 +247,9 @@ export default async function MedipactLanding() {
                   <div className="bg-gradient-to-br from-neutral-900 to-accent-700 bg-clip-text text-xl font-black text-transparent sm:text-2xl">
                     {s.value}
                   </div>
-                  <div className="mt-1 text-xs leading-snug text-neutral-500">
+                  <div className="mt-1 text-xs leading-snug text-neutral-600">
                     {s.label}
+                    {s.fn && <FootnoteRef n={s.fn} />}
                   </div>
                 </div>
               ))}
@@ -264,21 +267,15 @@ export default async function MedipactLanding() {
               <span className="font-semibold text-neutral-700">
                 {t("bekanntAusLabel")}
               </span>
+              {/* Kontrast: neutral-400 auf neutral-50 hatte nur 2,5:1 —
+                  Vertrauensaussagen müssen lesbar sein (jetzt neutral-600). */}
               {bekanntAusTags.map((tag, index) => (
-                <span key={tag} className="flex items-center gap-x-6 sm:gap-x-10">
-                  {index === 0 && (
-                    <span className="font-semibold tracking-tight text-neutral-400">
-                      {tag}
-                    </span>
-                  )}
-                  {index > 0 && (
-                    <>
-                      <span className="text-neutral-300">·</span>
-                      <span className="font-semibold tracking-tight text-neutral-400">
-                        {tag}
-                      </span>
-                    </>
-                  )}
+                <span key={tag.text} className="flex items-center gap-x-6 sm:gap-x-10">
+                  {index > 0 && <span className="text-neutral-400">·</span>}
+                  <span className="font-semibold tracking-tight text-neutral-600">
+                    {tag.text}
+                    {tag.fn && <FootnoteRef n={tag.fn} />}
+                  </span>
                 </span>
               ))}
             </div>
@@ -376,7 +373,7 @@ export default async function MedipactLanding() {
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <a
                 href="/auth/register"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-500"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-700 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-800"
               >
                 {t("ctaButton")}
                 <svg
@@ -398,7 +395,13 @@ export default async function MedipactLanding() {
               </ArrowLink>
             </div>
 
-            <p className="mt-6 text-xs text-neutral-500">{t("ctaDisclaimer")}</p>
+            <p className="mt-6 text-xs text-neutral-400">{t("ctaDisclaimer")}</p>
+          </div>
+        </section>
+
+        <section aria-label="Fußnoten" className="border-t border-neutral-100 bg-white py-8">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <FootnoteList items={footnotes} />
           </div>
         </section>
       </main>

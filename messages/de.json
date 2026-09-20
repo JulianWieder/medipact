@@ -2,7 +2,7 @@
   "nav": {
     "promo": "Ihren Fall vertraulich schildern – der Einstieg ist kostenlos",
     "promoShort": "Fall vertraulich schildern",
-    "start": "Start",
+    "start": "Mediation starten",
     "about": "Über uns",
     "konflikte": "Konflikte",
     "konflikteTrennung": "Scheidung & Trennung",
@@ -23,7 +23,7 @@
     "beispieleMatrix": "Mini-Matrix",
     "ratgeber": "Ratgeber",
     "kostenrechner": "Kostenrechner",
-    "login": "Mediation starten",
+    "login": "Anmelden",
     "menuOpen": "Menü öffnen",
     "menuClose": "Menü schließen",
     "konflikteGruppe": "Konfliktarten",
@@ -169,16 +169,24 @@
         "label": "Festpreis je Partei, kein Stundenhonorar"
       },
       {
-        "value": "100 %",
-        "label": "vertraulich, DSGVO-konform"
+        "value": "Löschbar",
+        "label": "Konto und Logbuch, sofort und vollständig",
+        "fn": 1
       }
     ],
-    "bekanntAusLabel": "Methode",
+    "bekanntAusLabel": "Nachprüfbar",
     "bekanntAusTags": [
-      "Harvard-Methode",
-      "DSGVO-konform",
-      "Made in Germany",
-      "SSL-verschlüsselt"
+      {
+        "text": "Harvard-Methode"
+      },
+      {
+        "text": "Gehostet bei Hetzner",
+        "fn": 2
+      },
+      {
+        "text": "Weitergabe nur mit Ihrer Zustimmung",
+        "fn": 3
+      }
     ],
     "casesTeaser": "Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,",
     "casesTeaserLink": "wie konkrete Fälle mit Medipact gelöst wurden →",
@@ -246,7 +254,27 @@
       "text": "Sie brauchen ein Verfahren, das hält. Denn ein Streit kostet nicht nur Geld: Er kostet Monate, in denen nichts entschieden ist, und er kostet die Beziehung, die danach noch tragen muss. Wer das vorher zusammenrechnet, entscheidet anders. medipact gibt dem Streit eine Struktur – klare Schritte, gleiche Rechte für beide Seiten, ausgebildete Mediatorinnen und Mediatoren – damit am Ende Sie entscheiden und nicht die Eskalation.",
       "link": "Mehr über medipact",
       "linkRechner": "Was ein Verfahren wirklich kostet"
-    }
+    },
+    "footnotes": [
+      {
+        "n": 1,
+        "text": "Gilt, solange keine Mediation läuft. Bei laufendem Verfahren wird Ihr Löschwunsch vermerkt und das Konto nach Abschluss des Verfahrens gelöscht.",
+        "href": "/konto-loeschen",
+        "linkLabel": "Konto löschen"
+      },
+      {
+        "n": 2,
+        "text": "Die Plattform wird bei Hetzner betrieben. Angaben zu eingesetzten Dienstleistern finden Sie in der Datenschutzerklärung.",
+        "href": "/datenschutz",
+        "linkLabel": "Datenschutzerklärung"
+      },
+      {
+        "n": 3,
+        "text": "Inhalte einer Mediation geben wir nicht an Dritte weiter – außer wir sind gesetzlich dazu verpflichtet oder Sie haben ausdrücklich zugestimmt.",
+        "href": "/datenschutz",
+        "linkLabel": "Datenschutzerklärung, Abschnitt 5"
+      }
+    ]
   },
   "newsletter": {
     "eyebrow": "Newsletter",
