@@ -275,7 +275,7 @@ export default function Header() {
         </Link>
 
         {/* NAV */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-5 lg:gap-8 md:flex">
           {navItems.map((item) =>
             item.groups ? (
               <div key={item.href} className="group relative">
@@ -335,20 +335,24 @@ export default function Header() {
         </nav>
 
         {/* CTA */}
-        <div className="hidden items-center gap-4 md:flex">
-          <LanguageSwitcher />
+        <div className="hidden items-center md:flex">
+          {/* Sprachumschalter erscheint ohnehin nur auf 2 Seiten und macht die
+              Leiste unter xl zu voll — dort nur im Handy-Menü (<md) sichtbar. */}
+          <div className="hidden xl:block">
+            <LanguageSwitcher />
+          </div>
           {/* Ein primärer CTA (Start), Login getrennt und ruhiger — Rückkehrer
               finden ihn, ohne dass er mit dem Einstieg konkurriert. Weiß auf
               accent-700 = 5,5:1 (accent-600 hatte nur 3,7:1). */}
           <UnlocalizedLink
             href="/auth/login"
-            className="text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
+            className="ml-5 text-sm font-medium text-neutral-500 transition hover:text-accent-700"
           >
             {t("login")}
           </UnlocalizedLink>
           <UnlocalizedLink
             href="/auth/register"
-            className="rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
+            className="ml-4 whitespace-nowrap rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
           >
             {t("start")}
           </UnlocalizedLink>
