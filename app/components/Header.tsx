@@ -281,7 +281,7 @@ export default function Header() {
               <div key={item.href} className="group relative">
                 <NavLink
                   href={item.href}
-                  className="flex items-center gap-1 text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
+                  className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
                 >
                   {item.label}
                   <svg
@@ -326,7 +326,7 @@ export default function Header() {
               <NavLink
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
+                className="whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
               >
                 {item.label}
               </NavLink>
@@ -338,7 +338,7 @@ export default function Header() {
         <div className="hidden items-center md:flex">
           {/* Sprachumschalter erscheint ohnehin nur auf 2 Seiten und macht die
               Leiste unter xl zu voll — dort nur im Handy-Menü (<md) sichtbar. */}
-          <div className="hidden xl:block">
+          <div className="hidden xl:ml-6 xl:block">
             <LanguageSwitcher />
           </div>
           {/* Ein primärer CTA (Start), Login getrennt und ruhiger — Rückkehrer
@@ -354,7 +354,7 @@ export default function Header() {
             href="/auth/register"
             className="ml-4 whitespace-nowrap rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
           >
-            {t("start")}
+            {t("startCta")}
           </UnlocalizedLink>
         </div>
 
@@ -442,7 +442,7 @@ export default function Header() {
             className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
             onClick={() => setOpen(false)}
           >
-            {t("start")}
+            {t("startCta")}
           </UnlocalizedLink>
           <UnlocalizedLink
             href="/auth/login"
