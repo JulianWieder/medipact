@@ -64,7 +64,7 @@ export function ImagePinHero({
       <HeroBackdrop image={image} imageAlt={imageAlt} scale={imageScale} />
 
       {tagline !== false && (
-        <div className="pointer-events-none absolute inset-x-0 top-24 z-20">
+        <div className="pointer-events-none absolute inset-x-0 top-24 z-20 hidden sm:block">
           <HeroTagline {...(typeof tagline === "string" ? { text: tagline } : {})} />
         </div>
       )}

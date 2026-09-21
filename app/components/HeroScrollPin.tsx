@@ -46,7 +46,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
           hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben. */}
       <motion.div
         style={{ opacity: textOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-24 z-20"
+        className="pointer-events-none absolute inset-x-0 top-24 z-20 hidden sm:block"
       >
         <HeroTagline />
       </motion.div>
