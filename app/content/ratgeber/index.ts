@@ -58,6 +58,9 @@ import { article as hausBeiScheidung } from "./haus-bei-scheidung";
 import { article as scheidungsfolgenvereinbarung } from "./scheidungsfolgenvereinbarung";
 import { article as trennungsvereinbarung } from "./trennungsvereinbarung";
 import { article as scheidungOhneAnwalt } from "./scheidung-ohne-anwalt";
+// 01.10.2026 - Checkliste fuer Paare, die sich im Guten trennen; Kernargument:
+// beide starten von derselben Informationsbasis statt zwei Recherchen.
+import { article as einvernehmlicheScheidung } from "./einvernehmliche-scheidung";
 import { article as werMussAusDerWohnung } from "./wer-muss-aus-der-wohnung";
 import { article as trennungsjahrNachweisen } from "./trennungsjahr-nachweisen";
 import { article as geschwisterStreitenUmsErbe } from "./geschwister-streiten-ums-erbe";
@@ -83,6 +86,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   // sind der Einstieg für Betroffene, die den Begriff "Mediation" noch gar
   // nicht kennen. Die Verfahrens-Artikel folgen dahinter.
   wasStehtMirBeiDerScheidungZu,
+  einvernehmlicheScheidung,
   // Die drei Vertrags- und Verfahrensartikel (12.08.2026) stehen in der
   // Reihenfolge, in der Betroffene sie brauchen: erst die Trennungszeit, dann
   // die Regelung der Folgen, dann die Frage nach dem Anwalt.

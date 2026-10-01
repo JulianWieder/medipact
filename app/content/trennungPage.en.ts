@@ -164,7 +164,7 @@ export const trennungPageContent = {
     {
       question: "Was kostet eine Mediation bei Trennung und Scheidung?",
       answer:
-        "Bei medipact kostet die Trennungsmediation pauschal 399 € pro Partei im reinen Online-Verfahren, 499 € in der Hybrid-Variante mit Video-Terminen und 899 € im Vollservice. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird. Details im Kostenüberblick.",
+        "Bei medipact kostet die Trennungsmediation pauschal 299 € pro Partei bei einer einvernehmlichen Scheidung, 399 € pro Partei im reinen Online-Verfahren, 499 € in der Hybrid-Variante mit Video-Terminen und 899 € im Vollservice. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird. Details im Kostenüberblick.",
     },
     {
       question: "Ersetzt die Mediation Anwalt und Gericht?",

@@ -17,10 +17,15 @@ sobald sie feststehen – der restliche Code muss dafür nicht angefasst werden.
 from __future__ import annotations
 
 # Reihenfolge = Anzeige-Reihenfolge im Frontend.
-PACKAGES: tuple[str, ...] = ("online", "hybrid", "vollservice")
+# "einvernehmlich" (seit 01.10.2026) nur bei Trennung: Paare, die sich über die
+# Scheidung einig sind und nur noch die Folgen regeln. Gleiches Online-
+# Verfahren wie "online", günstiger Einstieg. Steht vorn, damit das
+# günstigste Paket in der Auswahl zuerst erscheint.
+PACKAGES: tuple[str, ...] = ("einvernehmlich", "online", "hybrid", "vollservice")
 DEFAULT_PACKAGE = "online"
 
 PACKAGE_LABELS = {
+    "einvernehmlich": "Einvernehmliche Scheidung",
     "online": "Online-Prozess",
     "hybrid": "Hybrid",
     "vollservice": "Vollservice",
@@ -72,18 +77,18 @@ PACKAGE_LABELS = {
 # insbesondere die digitalisierte Massen-ODR (Fluggastrechte,
 # Mietpreisbremse, E-Commerce).
 PRICE_MATRIX: dict[str, dict[str, float | None]] = {
-    "nachbarschaft": {"online": 49.0,  "hybrid": None,  "vollservice": None},
-    "verbraucher":   {"online": 49.0,  "hybrid": None,  "vollservice": None},
+    "nachbarschaft": {"einvernehmlich": None, "online": 49.0,  "hybrid": None,  "vollservice": None},
+    "verbraucher":   {"einvernehmlich": None, "online": 49.0,  "hybrid": None,  "vollservice": None},
     # Legacy, nicht mehr buchbar – siehe Kommentar oben.
-    "wg":            {"online": 49.0,  "hybrid": None,  "vollservice": None},
-    "mietverhaeltnis": {"online": 49.0, "hybrid": None, "vollservice": None},
-    "trennung":      {"online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
-    "erbschaft":     {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "arbeitsplatz":  {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "odr":           {"online": 1900.0, "hybrid": None, "vollservice": None},
-    "schlichtung":   {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "ecommerce":     {"online": 399.0, "hybrid": None,  "vollservice": None},
-    "b2b":           {"online": 1200.0, "hybrid": None, "vollservice": None},
+    "wg":            {"einvernehmlich": None, "online": 49.0,  "hybrid": None,  "vollservice": None},
+    "mietverhaeltnis": {"einvernehmlich": None, "online": 49.0, "hybrid": None, "vollservice": None},
+    "trennung":      {"einvernehmlich": 299.0, "online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
+    "erbschaft":     {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
+    "arbeitsplatz":  {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
+    "odr":           {"einvernehmlich": None, "online": 1900.0, "hybrid": None, "vollservice": None},
+    "schlichtung":   {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
+    "ecommerce":     {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
+    "b2b":           {"einvernehmlich": None, "online": 1200.0, "hybrid": None, "vollservice": None},
 }
 
 # ODR-Verfahrensfamilie – Firmenkunden dürfen genau diese Typen anlegen

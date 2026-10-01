@@ -8,7 +8,7 @@ import Icon from "@/app/components/ui/Icon";
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
   description:
-    "Einstieg ab 49 € pro Partei, Trennung 399 €, Wirtschaftsmediation ab 1.200 € oder Business-Tarife ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
+    "Einstieg ab 49 € pro Partei, Trennung ab 299 €, Wirtschaftsmediation ab 1.200 € oder Business-Tarife ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
   path: "/preise",
 });
 
@@ -57,9 +57,9 @@ const offerCatalogSchema = {
       {
         "@type": "Offer",
         name: "Trennung und Scheidung",
-        description: "Scheidungsmediation ab 399 € pro Partei",
+        description: "Scheidungsmediation ab 299 € pro Partei (einvernehmliche Scheidung)",
         priceCurrency: "EUR",
-        price: "399",
+        price: "299",
         url: "https://medipact.de/scheidungsmediation",
       },
       {
@@ -250,6 +250,21 @@ export default function Preise() {
                     Optional zubuchbar: Live-Videositzung mit Mediator:in
                     (+€79), geprüfte Abschlussvereinbarung (+€49),
                     Express-Bearbeitung (+€29).
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Einvernehmliche Scheidung
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €299
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – wenn ihr euch über die Trennung einig seid und nur noch die Folgen regeln wollt.{" "}
+                    <a href="/ratgeber/einvernehmliche-scheidung" className="underline">
+                      Was zu regeln ist
+                    </a>
                   </p>
 
                   <div className="flex justify-between items-center mt-4">

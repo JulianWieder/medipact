@@ -24,7 +24,7 @@ export async function generateMetadata({
     // anders als bei /konflikte und /konflikte/odr (Entscheidung 27.07.).
     title: "Scheidungsmediation online: fair einigen | medipact",
     description:
-      "Scheidungsmediation online ab 399 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
+      "Scheidungsmediation online ab 299 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
     path: "/scheidungsmediation",
     locale,
   });
