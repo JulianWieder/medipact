@@ -23,13 +23,15 @@ Webhooks abgelehnt - sonst könnte jeder Zahlungen frei erfinden.
 
 EINRICHTUNG
   1. PayPal-Developer-Dashboard -> App -> Webhooks -> URL eintragen:
-     https://medipact.de/backend/paypal/webhook
-     (nginx muss /backend/paypal/webhook an das Backend weiterleiten)
+     https://medipact.de/api/paypal/webhook
+     (Next.js-Route app/api/paypal/webhook/route.ts reicht den Roh-Body an
+     dieses Backend weiter - der mailcow-nginx erreicht Port 8000 nicht)
   2. Obige vier Ereignisse abonnieren
   3. Angezeigte Webhook-ID als PAYPAL_WEBHOOK_ID in backend/.env eintragen
 """
 import json
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
@@ -43,10 +45,21 @@ from app.paypal import (
     PayPalError,
     authorize_order,
     verify_webhook_signature,
+    void_authorization,
 )
 from app.services import billing
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_paypal_time(value: str | None) -> datetime | None:
+    """PayPal-Zeitstempel -> naive UTC-datetime (wie in der DB üblich)."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc).replace(tzinfo=None)
+    except ValueError:
+        return None
 
 router = APIRouter(prefix="/paypal", tags=["paypal"])
 
@@ -116,13 +129,29 @@ async def _recover_authorization(db: Session, participant: MediationParticipant)
         amount = billing.coverage_amount(db, mediation, participant)
     else:
         amount = billing.participant_final_due(db, mediation, participant)
+
+    # Gleiche Prüfung wie in capture-order: passt die Reservierung nicht zum
+    # fälligen Betrag, wird sie freigegeben statt gespeichert.
+    reserved = auth.get("amount_eur")
+    if reserved is not None and abs(float(reserved) - float(amount)) > 0.005:
+        logger.warning(
+            "Webhook: Reservierung %s (%.2f €) passt nicht zum fälligen Betrag %.2f € "
+            "von Teilnehmer %s – wird freigegeben",
+            auth["authorization_id"], reserved, amount, participant.id,
+        )
+        try:
+            await void_authorization(auth["authorization_id"])
+        except PayPalError:
+            logger.exception("Webhook: Storno von %s fehlgeschlagen", auth["authorization_id"])
+        return
+
     billing.mark_participant_authorized(
         db,
         participant,
         amount=amount,
         order_id=participant.paypal_order_id,
         authorization_id=auth["authorization_id"],
-        expires_at=None,
+        expires_at=_parse_paypal_time(auth.get("expires_at")),
     )
     logger.info(
         "Webhook: Reservierung für Teilnehmer %s nachgeholt", participant.id

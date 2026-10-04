@@ -37,8 +37,17 @@ def next_invoice_number(db: Session) -> str:
     """Erzeugt 'RE-{Jahr}-{laufende Nummer}', z.B. 'RE-2026-0042'."""
     year = datetime.now(timezone.utc).year
     prefix = f"RE-{year}-"
-    count = db.query(Invoice).filter(Invoice.invoice_number.like(f"{prefix}%")).count()
-    return f"{prefix}{count + 1:04d}"
+    # Höchste vergebene Nummer statt Anzahl: nach einer gelöschten Rechnung
+    # würde die Anzahl eine bereits vergebene Nummer liefern (unique-Verstoß).
+    highest = 0
+    for (number,) in db.query(Invoice.invoice_number).filter(
+        Invoice.invoice_number.like(f"{prefix}%")
+    ):
+        try:
+            highest = max(highest, int(number[len(prefix):]))
+        except (TypeError, ValueError):
+            continue
+    return f"{prefix}{highest + 1:04d}"
 
 
 def ensure_invoices(db: Session, mediation: Mediation) -> int:
@@ -61,8 +70,16 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
     from app.services import billing
 
     # (Anteil-Zeile, Rechnungsempfänger-Zeile, Betrag)
+    # Betrag = was tatsächlich eingezogen wurde (amount_due nach dem Einzug),
+    # nicht eine Neuberechnung: ändern sich Preise in pricing.py zwischen
+    # Reservierung und Einzug, muss die Rechnung trotzdem zum Geld passen.
+    def _charged(p, fallback: float) -> float:
+        if p.paid and p.amount_due is not None:
+            return round(float(p.amount_due), 2)
+        return fallback
+
     positions: list[tuple] = [
-        (p, p, billing.participant_final_due(db, mediation, p))
+        (p, p, _charged(p, billing.participant_final_due(db, mediation, p)))
         for p in billing.owing_participants(db, mediation)
     ]
     for p in billing.settlement_participants(db, mediation):
@@ -71,7 +88,7 @@ def ensure_invoices(db: Session, mediation: Mediation) -> int:
         coverer = billing.coverer_of(db, p)
         if coverer is None:
             continue
-        positions.append((p, coverer, billing.coverage_amount(db, mediation, p)))
+        positions.append((p, coverer, _charged(p, billing.coverage_amount(db, mediation, p))))
 
     created = 0
     for participant, billed_to, amount in positions:

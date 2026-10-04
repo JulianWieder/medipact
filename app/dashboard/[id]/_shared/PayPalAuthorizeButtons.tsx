@@ -46,6 +46,10 @@ export default function PayPalAuthorizeButtons({
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedNode = useRef<HTMLElement | null>(null);
   const [retry, setRetry] = useState(0);
+  // Fehlertext aus createOrder (z.B. "Bitte hinterlege zuerst deine
+  // Rechnungsdaten"). Das SDK verschluckt geworfene Fehler und ruft nur
+  // onError ohne verwertbare Meldung - deshalb hier zwischenspeichern.
+  const createError = useRef<string | null>(null);
 
   // In Refs spiegeln: die Buttons werden EINMAL gerendert und dürfen nicht bei
   // jedem neuen Callback-Identity neu aufgebaut werden.
@@ -88,7 +92,11 @@ export default function PayPalAuthorizeButtons({
               },
             );
             const d = await res.json().catch(() => null);
-            if (!res.ok) throw new Error(d?.detail ?? "Order konnte nicht erstellt werden");
+            if (!res.ok) {
+              createError.current = d?.detail ?? "Order konnte nicht erstellt werden";
+              throw new Error(createError.current ?? undefined);
+            }
+            createError.current = null;
             return d.order_id;
           },
           onApprove: async (data: { orderID: string }) => {
@@ -123,7 +131,11 @@ export default function PayPalAuthorizeButtons({
             }
           },
           onError: () => {
-            cb.current.onError("PayPal hat einen Fehler gemeldet. Bitte erneut versuchen.");
+            const detail = createError.current;
+            createError.current = null;
+            cb.current.onError(
+              detail ?? "PayPal hat einen Fehler gemeldet. Bitte erneut versuchen.",
+            );
             resetButtons();
           },
           onCancel: () => cb.current.onBusyChange?.(false),

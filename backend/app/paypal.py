@@ -41,13 +41,21 @@ AUTHORIZATION_EXPIRED_CODES = {
     "INVALID_RESOURCE_ID",
 }
 
+# Wiederholte Aufrufe (Doppelklick, Retry nach Timeout, Webhook und Browser
+# gleichzeitig): PayPal meldet dann diese Codes. Sie heißen "ist schon
+# passiert", nicht "Fehler" - der Client behandelt sie als Erfolg.
+ALREADY_AUTHORIZED_CODES = {"ORDER_ALREADY_AUTHORIZED"}
+ALREADY_CAPTURED_CODES = {"AUTHORIZATION_ALREADY_CAPTURED"}
+
 
 class PayPalError(Exception):
     pass
 
 
 class AuthorizationExpiredError(PayPalError):
-    """Die Reservierung ist abgelaufen/aufgehoben - die Partei muss erneut zahlen."""
+    """Die Reservierung ist abgelaufen/aufgehoben/abgelehnt - die Partei muss
+    erneut zahlen. Alle anderen PayPalErrors sind potenziell vorübergehend
+    (Netz, PayPal-Störung) und werden später erneut versucht."""
 
 
 def _api_base() -> str:
@@ -73,10 +81,38 @@ async def _get_access_token() -> str:
     return resp.json()["access_token"]
 
 
-def _json_headers(token: str) -> dict:
+def _json_headers(token: str, request_id: str | None = None) -> dict:
     # Auch Requests OHNE Body brauchen einen Content-Type - fehlt er, antwortet
     # PayPal mit UNSUPPORTED_MEDIA_TYPE.
-    return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    if request_id:
+        # Idempotenz: gleiche Request-Id -> PayPal führt den Vorgang nur
+        # EINMAL aus und liefert bei Wiederholung die ursprüngliche Antwort.
+        # Schützt vor doppeltem Einzug bei Retries und parallelen Aufrufen.
+        headers["PayPal-Request-Id"] = request_id
+    return headers
+
+
+def _error_codes(resp: httpx.Response) -> set[str]:
+    try:
+        return _issue_codes(resp.json())
+    except ValueError:
+        return set()
+
+
+def _amount_of(obj: dict) -> float | None:
+    try:
+        return round(float((obj.get("amount") or {}).get("value")), 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def _first_authorization(order: dict) -> dict | None:
+    for unit in order.get("purchase_units") or []:
+        for candidate in (unit.get("payments") or {}).get("authorizations") or []:
+            if candidate.get("id"):
+                return candidate
+    return None
 
 
 def _issue_codes(data: dict) -> set[str]:
@@ -168,13 +204,28 @@ async def capture_order(order_id: str) -> dict:
     return resp.json()
 
 
+async def get_order(order_id: str) -> dict:
+    """Liest eine Order (Status, Betrag, ggf. vorhandene Reservierungen)."""
+    token = await _get_access_token()
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        resp = await client.get(
+            f"{_api_base()}/v2/checkout/orders/{order_id}",
+            headers=_json_headers(token),
+        )
+    _raise_for_error(resp, "PayPal-Order konnte nicht gelesen werden")
+    return resp.json()
+
+
 async def authorize_order(order_id: str) -> dict:
     """Reserviert (autorisiert) den Betrag einer zuvor genehmigten Order.
 
     Es wird noch NICHTS abgebucht - der Betrag ist beim Zahler nur blockiert.
-    Gibt ``{"authorization_id": ..., "status": ..., "expires_at": ...}`` zurück;
-    ``expires_at`` ist das Ende der 3-tägigen Honor Period, sofern PayPal es
-    mitliefert.
+    Gibt ``{"authorization_id", "status", "expires_at", "amount_eur"}`` zurück.
+    ``expires_at`` ist PayPals ``expiration_time`` = endgültiger Verfall der
+    Reservierung (29 Tage), NICHT das Ende der 3-tägigen Honor Period.
+
+    Idempotent: Wurde die Order schon autorisiert (Webhook war schneller,
+    Doppelklick, Retry), wird die vorhandene Reservierung zurückgegeben.
     """
     token = await _get_access_token()
     async with httpx.AsyncClient(timeout=15.0) as client:
@@ -184,25 +235,23 @@ async def authorize_order(order_id: str) -> dict:
             # keinen Content-Type - PayPal antwortet dann mit
             # UNSUPPORTED_MEDIA_TYPE. Deshalb leerer JSON-Body + Header.
             json={},
-            headers=_json_headers(token),
+            headers=_json_headers(token, request_id=f"authz-{order_id}"),
         )
-    _raise_for_error(resp, "PayPal-Autorisierung fehlgeschlagen")
-    data = resp.json()
+    if resp.status_code not in (200, 201) and _error_codes(resp) & ALREADY_AUTHORIZED_CODES:
+        data = await get_order(order_id)
+    else:
+        _raise_for_error(resp, "PayPal-Autorisierung fehlgeschlagen")
+        data = resp.json()
 
-    auth = None
-    for unit in data.get("purchase_units") or []:
-        for candidate in (unit.get("payments") or {}).get("authorizations") or []:
-            auth = candidate
-            break
-        if auth:
-            break
-    if not auth or not auth.get("id"):
-        raise PayPalError(f"PayPal lieferte keine Autorisierung zurück: {resp.text}")
+    auth = _first_authorization(data)
+    if not auth:
+        raise PayPalError(f"PayPal lieferte keine Autorisierung zurück: {data}")
 
     return {
         "authorization_id": auth["id"],
         "status": auth.get("status"),
         "expires_at": auth.get("expiration_time"),
+        "amount_eur": _amount_of(auth),
         "raw": data,
     }
 
@@ -210,8 +259,12 @@ async def authorize_order(order_id: str) -> dict:
 async def capture_authorization(authorization_id: str, amount_eur: float | None = None) -> dict:
     """Zieht eine zuvor reservierte Autorisierung tatsächlich ein.
 
-    Erst hier fließt Geld. Wirft AuthorizationExpiredError, wenn die
-    Reservierung abgelaufen oder aufgehoben wurde.
+    Erst hier fließt Geld. Idempotent über ``PayPal-Request-Id``: ein zweiter
+    Aufruf (Retry, paralleler Einzug) bucht NICHT doppelt ab.
+
+    Wirft AuthorizationExpiredError, wenn die Reservierung abgelaufen,
+    aufgehoben oder der Einzug abgelehnt wurde (Partei muss neu zahlen), und
+    PayPalError bei allem anderen (vorübergehend, wird erneut versucht).
     """
     token = await _get_access_token()
     payload: dict = {"final_capture": True}
@@ -221,10 +274,20 @@ async def capture_authorization(authorization_id: str, amount_eur: float | None 
         resp = await client.post(
             f"{_api_base()}/v2/payments/authorizations/{authorization_id}/capture",
             json=payload,
-            headers=_json_headers(token),
+            headers=_json_headers(token, request_id=f"cap-{authorization_id}"),
         )
+    if resp.status_code not in (200, 201) and _error_codes(resp) & ALREADY_CAPTURED_CODES:
+        return {"status": "COMPLETED", "already_captured": True}
     _raise_for_error(resp, "PayPal-Capture fehlgeschlagen")
-    return resp.json()
+    data = resp.json()
+    # 201 heißt nicht automatisch "Geld da": DECLINED/FAILED = Zahlungsquelle
+    # hat abgelehnt. PENDING (z.B. Prüfung bei PayPal) wird als eingezogen
+    # gewertet; kommt später PAYMENT.CAPTURE.DENIED, setzt der Webhook zurück.
+    if (data.get("status") or "").upper() in ("DECLINED", "FAILED"):
+        raise AuthorizationExpiredError(
+            "PayPal hat den Einzug abgelehnt. Bitte erneut bezahlen."
+        )
+    return data
 
 
 async def verify_webhook_signature(headers: dict, event_body: str) -> bool:

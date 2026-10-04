@@ -1322,13 +1322,59 @@ async def capture_paypal_order(
     me = _require_participant(mediation_id, user, db)
     mediation = _get_mediation_or_404(db, mediation_id)
 
+    # Zeile, auf der die Reservierung landet (eigene oder - bei separater
+    # Übernahme - die der anderen Partei). Bei einer Wiederholung (Doppelklick,
+    # Retry nach Timeout, Webhook war schneller) ist die Übernahme schon
+    # eingetragen; dann darf _require_coverable nicht erneut greifen.
     if payload.for_participant_id:
-        target = _require_coverable(db, mediation, me, payload.for_participant_id)
-        amount = billing.coverage_amount(db, mediation, target)
+        target = (
+            db.query(MediationParticipant)
+            .filter(
+                MediationParticipant.id == payload.for_participant_id,
+                MediationParticipant.mediation_id == mediation.id,
+            )
+            .first()
+        )
+        already_mine = bool(
+            target
+            and target.covered_by_participant_id == me.id
+            and target.paypal_order_id == payload.order_id
+            and (target.authorized or target.paid)
+        )
+        if not already_mine:
+            target = _require_coverable(db, mediation, me, payload.for_participant_id)
     else:
         target = me
-        if me.paid:
-            raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+
+    # Wiederholung desselben Vorgangs -> kein Fehler, nur Status (und ggf. den
+    # noch ausstehenden Einzug anstoßen).
+    if (target.authorized or target.paid) and target.paypal_order_id == payload.order_id:
+        result = await billing.settle_and_unlock(db, mediation)
+        db.refresh(mediation)
+        db.refresh(me)
+        return _capture_response(db, mediation, me, result)
+
+    if target.paid:
+        raise HTTPException(status_code=400, detail="Dein Anteil ist bereits bezahlt.")
+    if target.authorized:
+        raise HTTPException(
+            status_code=400,
+            detail="Dein Betrag ist bereits reserviert. Er wird eingezogen, sobald die Gegenseite zugestimmt hat.",
+        )
+
+    # Die Order MUSS die sein, die create-order für genau diese Zeile angelegt
+    # hat. Sonst ließe sich mit einer billigen Order (anderer Fall, anderer
+    # Betrag) ein teurer Anteil "bezahlen" - der Einzug schlüge später fehl
+    # und der Fall hinge fest.
+    if not payload.order_id or payload.order_id != target.paypal_order_id:
+        raise HTTPException(
+            status_code=409,
+            detail="Diese PayPal-Zahlung gehört nicht zu deinem offenen Anteil. Bitte starte die Zahlung neu.",
+        )
+
+    if payload.for_participant_id:
+        amount = billing.coverage_amount(db, mediation, target)
+    else:
         amount = billing.participant_final_due(db, mediation, me)
 
     try:
@@ -1342,6 +1388,28 @@ async def capture_paypal_order(
         raise HTTPException(
             status_code=402,
             detail="PayPal hat den Betrag nicht reserviert. Bitte erneut versuchen.",
+        )
+
+    # Betrag der Reservierung gegen den aktuell fälligen Betrag prüfen. Weicht
+    # er ab (Add-ons/Rabatt zwischen Order und Bestätigung geändert), wird die
+    # Reservierung sofort freigegeben - einziehen ließe sie sich ohnehin nicht.
+    reserved = auth.get("amount_eur")
+    if reserved is not None and abs(float(reserved) - float(amount)) > 0.005:
+        try:
+            await void_authorization(auth["authorization_id"])
+        except PayPalError:
+            logger.exception("Storno der Reservierung %s fehlgeschlagen", auth["authorization_id"])
+        target.paypal_order_id = None
+        if payload.for_participant_id and not (target.authorized or target.paid):
+            target.covered_by_participant_id = None
+            target.coverage_mode = None
+        db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Der Betrag hat sich geändert (reserviert {reserved:.2f} €, fällig {amount:.2f} €). "
+                "Die Reservierung wurde freigegeben – bitte erneut bezahlen."
+            ),
         )
 
     expires_at = _parse_paypal_time(auth.get("expires_at"))
@@ -1363,12 +1431,20 @@ async def capture_paypal_order(
     result = await billing.settle_and_unlock(db, mediation)
     db.refresh(mediation)
     db.refresh(me)
+    return _capture_response(db, mediation, me, result)
 
+
+def _capture_response(db: Session, mediation: Mediation, me: MediationParticipant, result: dict) -> dict:
     payload_out = {"ok": True, **_payment_status_payload(db, mediation, me)}
-    if result["expired"]:
+    if result.get("expired"):
         payload_out["warning"] = (
             "Eine Reservierung der Gegenseite ist abgelaufen. Der Fall startet, "
             "sobald sie erneut bezahlt hat."
+        )
+    elif result.get("pending"):
+        payload_out["warning"] = (
+            "Alle Beträge sind reserviert. Der Einzug bei PayPal hat gerade nicht "
+            "geklappt und wird automatisch wiederholt – der Fall startet in Kürze."
         )
     return payload_out
 
@@ -1459,14 +1535,7 @@ async def redeem_free(
     result = await billing.settle_and_unlock(db, mediation)
     db.refresh(mediation)
     db.refresh(me)
-
-    payload_out = {"ok": True, **_payment_status_payload(db, mediation, me)}
-    if result["expired"]:
-        payload_out["warning"] = (
-            "Eine Reservierung der Gegenseite ist abgelaufen. Der Fall startet, "
-            "sobald sie erneut bezahlt hat."
-        )
-    return payload_out
+    return _capture_response(db, mediation, me, result)
 
 
 @router.get("/me")

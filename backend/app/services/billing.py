@@ -517,16 +517,39 @@ async def settle_and_unlock(db: Session, mediation: Mediation) -> dict:
     Vorher passiert bewusst nichts: solange eine Partei fehlt, bleibt das Geld
     der anderen nur reserviert und kann jederzeit wieder freigegeben werden.
 
-    Rückgabe: ``{"is_paid": bool, "expired": [participant_id, ...]}``.
+    Rückgabe: ``{"is_paid": bool, "expired": [...], "pending": bool}``.
     ``expired`` listet Parteien, deren Reservierung abgelaufen war - sie wurden
     zurückgesetzt und müssen erneut bezahlen; der Fall bleibt dann zu.
+    ``pending`` = mindestens ein Einzug ist vorübergehend gescheitert (Netz,
+    PayPal-Störung). Die Reservierung bleibt stehen; der stündliche Cron
+    (scripts/check_authorizations.py) versucht es erneut.
+
+    Nebenläufigkeit: Die Fall-Zeile wird gesperrt (SELECT ... FOR UPDATE auf
+    Postgres), damit Browser, Webhook und Cron nicht gleichzeitig einziehen.
+    Doppelte Einzüge verhindert zusätzlich die PayPal-Request-Id.
     """
     if mediation.is_paid:
-        return {"is_paid": True, "expired": []}
+        return {"is_paid": True, "expired": [], "pending": False}
+
+    locked = (
+        db.query(Mediation)
+        .filter(Mediation.id == mediation.id)
+        .with_for_update()
+        .populate_existing()
+        .first()
+    )
+    if locked is None:
+        return {"is_paid": False, "expired": [], "pending": False}
+    mediation = locked
+    if mediation.is_paid:
+        db.commit()  # Sperre lösen
+        return {"is_paid": True, "expired": [], "pending": False}
     if not all_owing_authorized(db, mediation):
-        return {"is_paid": False, "expired": []}
+        db.commit()
+        return {"is_paid": False, "expired": [], "pending": False}
 
     expired: list[int] = []
+    pending = False
     # settlement_participants statt owing_participants: separat übernommene
     # Anteile haben eine eigene Reservierung, sind aber nicht "owing".
     for p in settlement_participants(db, mediation):
@@ -546,21 +569,48 @@ async def settle_and_unlock(db: Session, mediation: Mediation) -> dict:
             await capture_authorization(p.paypal_authorization_id, p.amount_due)
         except AuthorizationExpiredError:
             logger.warning(
-                "Reservierung von Teilnehmer %s (Mediation %s) abgelaufen",
+                "Reservierung von Teilnehmer %s (Mediation %s) abgelaufen/abgelehnt",
                 p.id, mediation.id,
             )
             clear_participant_authorization(db, p)
             expired.append(p.id)
             continue
+        except PayPalError:
+            # Vorübergehend: Reservierung bleibt, Cron holt den Einzug nach.
+            # Bewusst KEIN Fehler nach außen - die Partei hat alles richtig
+            # gemacht, ihr Betrag ist reserviert.
+            logger.exception(
+                "Einzug für Teilnehmer %s (Mediation %s) vorübergehend fehlgeschlagen",
+                p.id, mediation.id,
+            )
+            pending = True
+            continue
         mark_participant_paid(db, p, amount=float(p.amount_due or 0.0))
 
-    if expired:
-        # Mindestens eine Partei muss neu zahlen -> Fall bleibt zu. Die bereits
-        # eingezogenen Beträge bleiben stehen; sie werden fällig, sobald die
-        # Nachzahlung da ist.
-        return {"is_paid": False, "expired": expired}
+    if expired or pending:
+        # Fall bleibt zu. Bereits eingezogene Beträge bleiben stehen; der Rest
+        # folgt mit der Nachzahlung bzw. dem nächsten Cron-Lauf.
+        db.commit()
+        return {"is_paid": False, "expired": expired, "pending": pending}
 
-    return {"is_paid": check_and_unlock(db, mediation), "expired": []}
+    return {"is_paid": check_and_unlock(db, mediation), "expired": [], "pending": False}
+
+
+def settle_pending_cases(db: Session) -> list[int]:
+    """IDs der Fälle, in denen alle zugesagt haben, aber noch nicht eingezogen
+    wurde (z.B. nach einer PayPal-Störung). Für den Cron."""
+    candidates = (
+        db.query(Mediation)
+        .join(MediationParticipant, MediationParticipant.mediation_id == Mediation.id)
+        .filter(
+            Mediation.is_paid.is_(False),
+            MediationParticipant.authorized.is_(True),
+            MediationParticipant.paid.is_(False),
+        )
+        .distinct()
+        .all()
+    )
+    return [m.id for m in candidates if all_owing_authorized(db, m)]
 
 
 async def release_authorizations(db: Session, mediation: Mediation) -> int:

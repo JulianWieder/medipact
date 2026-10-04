@@ -17,14 +17,18 @@ WAS DIESES SKRIPT TUT
   2. Reservierungen, die abgelaufen sind -> setzt die Partei zurück (sie
      erscheint wieder als "offen") und informiert sie per Mail, dass NICHTS
      abgebucht wurde.
+  3. Fälle, in denen ALLE zugesagt haben, der Einzug aber gescheitert ist
+     (PayPal-Störung, Netz) -> Einzug erneut versuchen und freischalten.
 
-AUFRUF (stündlich per cron auf dem Server):
-    0 * * * * cd /pfad/zu/backend && python -m scripts.check_authorizations
+AUFRUF (stündlich per cron auf dem Server, IM Container - auf dem Host
+fehlen die Python-Pakete und die Produktionsdatenbank):
+    17 * * * * docker exec medipact-api python -m scripts.check_authorizations >> /home/dev/medipact-cron.log 2>&1
 
 Optionen:
     --dry-run   nur anzeigen, nichts ändern und nichts versenden
 """
 import argparse
+import asyncio
 import logging
 import sys
 from datetime import datetime, timedelta, timezone
@@ -71,7 +75,7 @@ def run(dry_run: bool = False) -> dict:
     now = _now()
     reminder_cutoff = now + timedelta(hours=settings.PAYPAL_AUTH_REMINDER_HOURS)
 
-    stats = {"erinnert": 0, "abgelaufen": 0, "geprueft": 0}
+    stats = {"erinnert": 0, "abgelaufen": 0, "geprueft": 0, "nachgeholt": 0}
 
     try:
         offen = (
@@ -144,12 +148,26 @@ def run(dry_run: bool = False) -> dict:
                 if sent_any and not dry_run:
                     p.authorization_reminder_sent_at = now
                     db.commit()
+
+        # ── Fall C: alle haben zugesagt, Einzug hängt ────────────────────
+        for mediation_id in billing.settle_pending_cases(db):
+            logger.info("Einzug nachholen: Fall %s", mediation_id)
+            if dry_run:
+                continue
+            mediation = db.query(Mediation).filter(Mediation.id == mediation_id).first()
+            try:
+                result = asyncio.run(billing.settle_and_unlock(db, mediation))
+            except Exception:
+                logger.exception("Einzug für Fall %s erneut fehlgeschlagen", mediation_id)
+                continue
+            if result.get("is_paid"):
+                stats["nachgeholt"] += 1
     finally:
         db.close()
 
     logger.info(
-        "Fertig: %s geprüft, %s erinnert, %s abgelaufen%s",
-        stats["geprueft"], stats["erinnert"], stats["abgelaufen"],
+        "Fertig: %s geprüft, %s erinnert, %s abgelaufen, %s Einzüge nachgeholt%s",
+        stats["geprueft"], stats["erinnert"], stats["abgelaufen"], stats["nachgeholt"],
         " (dry-run)" if dry_run else "",
     )
     return stats
