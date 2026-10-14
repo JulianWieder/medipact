@@ -76,6 +76,25 @@ async function fetchOnboardingCompleted(accessToken: string): Promise<boolean> {
   }
 }
 
+/** Antwort von /auth/login bzw. /auth/google → NextAuth-User. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toSessionUser(data: any) {
+  return {
+    id: String(data.user.id),
+    email: data.user.email,
+    name: data.user.name,
+    role: data.user.role,
+    // Einmaliges Nutzer-Onboarding abgeschlossen? Liegt im JWT, damit die
+    // Middleware bei JEDEM Seitenaufruf entscheiden kann, ob sie auf
+    // /onboarding umleiten muss — ein Backend-Call pro Request wäre auf
+    // jeder Dashboard-Seite spürbar.
+    onboardingCompleted: data.user.onboarding_completed === true,
+    backendAccessToken: data.access_token,
+    backendRefreshToken: data.refresh_token,
+    backendAccessTokenExpires: getTokenExpiry(data.access_token),
+  };
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
 
@@ -117,22 +136,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const data = await res.json();
+        return toSessionUser(await res.json());
+      },
+    }),
 
-        return {
-          id: String(data.user.id),
-          email: data.user.email,
-          name: data.user.name,
-          role: data.user.role,
-          // Einmaliges Nutzer-Onboarding abgeschlossen? Liegt im JWT, damit die
-          // Middleware bei JEDEM Seitenaufruf entscheiden kann, ob sie auf
-          // /onboarding umleiten muss — ein Backend-Call pro Request wäre auf
-          // jeder Dashboard-Seite spürbar.
-          onboardingCompleted: data.user.onboarding_completed === true,
-          backendAccessToken: data.access_token,
-          backendRefreshToken: data.refresh_token,
-          backendAccessTokenExpires: getTokenExpiry(data.access_token),
-        };
+    // „Mit Google anmelden": Der Browser holt per Google Identity Services ein
+    // ID-Token (GoogleSignInButton) und übergibt es hier. Geprüft wird es erst
+    // im Backend (POST /auth/google), das dieselbe Antwort liefert wie /login.
+    Credentials({
+      id: "google-id-token",
+      credentials: {
+        id_token: {},
+      },
+
+      async authorize(credentials) {
+        const idToken = String(credentials?.id_token ?? "");
+        if (!idToken) return null;
+
+        const res = await fetch(`${API_BASE_URL}/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_token: idToken }),
+        });
+
+        if (!res.ok) {
+          console.error("google authorize: backend status", res.status);
+          return null;
+        }
+
+        return toSessionUser(await res.json());
       },
     }),
   ],

@@ -7,6 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 import { Button } from "@/app/components/ui/Button";
+import GoogleSignInButton, { OrWithEmailDivider } from "@/app/components/GoogleSignInButton";
+import { redirectAfterLogin } from "@/lib/postLoginRedirect";
 import { Card } from "@/app/components/ui/Card";
 
 function LoginForm() {
@@ -115,24 +117,7 @@ function LoginForm() {
         return;
       }
 
-      // Explizites Ziel (z.B. Einladungslink) hat Vorrang vor dem
-      // rollenbasierten Routing.
-      if (callbackUrl) {
-        window.location.href = callbackUrl;
-        return;
-      }
-
-      // Rollenbasiertes Routing: Firmen-Admin / Mediator / Admin -> Workspace,
-      // Privatpersonen (Partei) -> Dashboard.
-      let target = "/dashboard";
-      try {
-        const roleRes = await fetch("/api/auth/me/role", { cache: "no-store" });
-        if (roleRes.ok) {
-          const info = await roleRes.json();
-          if (["firm_admin", "mediator", "admin"].includes(info?.role)) target = "/workspace";
-        }
-      } catch {}
-      window.location.href = target;
+      await redirectAfterLogin(callbackUrl);
     } catch {
       setError("Server nicht erreichbar");
     } finally {
@@ -174,6 +159,9 @@ function LoginForm() {
                 {error}
               </div>
             )}
+
+            <GoogleSignInButton callbackUrl={callbackUrl} onError={setError} />
+            <OrWithEmailDivider />
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>

@@ -9,6 +9,11 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    # "Mit Google anmelden": stabile Google-Konto-ID (sub-Claim des ID-Tokens).
+    # NULL = Konto nie mit Google verknuepft. Reine Google-Konten bekommen ein
+    # zufaelliges, niemandem bekanntes Passwort (hashed_password bleibt
+    # NOT NULL) und koennen sich per "Passwort vergessen" eines setzen.
+    google_sub = Column(String, unique=True, index=True, nullable=True)
     role = Column(String, default="party")
     # Mandanten-Zuordnung (organizations.id). NULL = keinem Mandanten zugeordnet
     # (z.B. Parteien). Relevant v.a. fuer Mediatoren: Anzahl Mediatoren je

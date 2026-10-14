@@ -70,6 +70,11 @@ class Settings(BaseSettings):
     # Kalender, in dem die Termine angelegt werden ("primary" = Hauptkalender
     # des zentralen Kontos).
     GOOGLE_CALENDAR_ID: str = "primary"
+    # ── Mit Google anmelden ──────────────────────────────────────────────────
+    # Kommagetrennte OAuth-Client-IDs, deren ID-Tokens POST /auth/google
+    # akzeptiert (aud-Claim). Nur die Web-Client-ID, kein Secret noetig.
+    # Leer = Google-Login abgeschaltet, der Endpunkt antwortet mit 503.
+    GOOGLE_CLIENT_IDS: str = ""
     # Zeitzone für die erzeugten Termine (IANA-Name).
     GOOGLE_MEET_TIMEZONE: str = "Europe/Berlin"
     # ── Mediator-Zuordnung ───────────────────────────────────────────────────
@@ -77,6 +82,13 @@ class Settings(BaseSettings):
     # Nutzer existiert). Später im Workspace aus allen Nutzern mit Rolle
     # "mediator" änderbar.
     DEFAULT_MEDIATOR_EMAIL: str = "jw_mediator@medipact.de"
+    # ── Newsletter ───────────────────────────────────────────────────────────
+    # Interne Benachrichtigung bei jeder BESTÄTIGTEN Newsletter-Anmeldung.
+    # Leer lassen schaltet die Benachrichtigung ab.
+    NEWSLETTER_NOTIFY_EMAIL: str = "julian@medipact.de"
+    # Interne Benachrichtigung bei jeder NEUEN Registrierung (Privat + Firma).
+    # Leer lassen schaltet die Benachrichtigung ab.
+    SIGNUP_NOTIFY_EMAIL: str = "julian@medipact.de"
     # ── Google-Meet-AUFNAHME (Einladungs-Video-/Audio-Botschaft via Meet) ────
     # Anders als der reine Meet-LINK oben braucht die serverseitige AUFNAHME
     # (spaces.create mit auto recording+transcription + Abruf der Artefakte)

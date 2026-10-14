@@ -4,6 +4,7 @@ import Link from "next/link";
 import Icon from "@/app/components/ui/Icon";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import GoogleSignInButton, { OrWithEmailDivider } from "@/app/components/GoogleSignInButton";
 
 // Privatpersonen-Registrierung (öffentlich, ohne Domain-Beschränkung).
 function RegisterPrivateContent() {
@@ -90,6 +91,17 @@ function RegisterPrivateContent() {
         <h1 className="mb-1 text-2xl font-bold text-neutral-900">Konto erstellen</h1>
         <p className="mb-6 text-sm text-neutral-500">Für private Mediationen. Danach bestätigst du deine E-Mail-Adresse.</p>
         {errors.general && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{errors.general}</div>}
+        <GoogleSignInButton
+          callbackUrl={callbackUrl}
+          text="signup_with"
+          onError={(msg) => setErrors({ general: msg })}
+        />
+        <p className="mt-3 text-center text-xs text-neutral-500">
+          Mit Google bestätigen Sie, dass Sie die{" "}
+          <Link href="/datenschutz" className="text-accent-600 hover:underline">Datenschutzerklärung</Link>{" "}
+          gelesen haben.
+        </p>
+        <OrWithEmailDivider />
         <form onSubmit={handleSubmit} className="space-y-4">
           {F("name", "Name")}
           {F("email", "E-Mail", "email")}

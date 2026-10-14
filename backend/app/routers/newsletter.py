@@ -159,7 +159,12 @@ def _send_confirm_mail(email: str, token: str) -> None:
 
 
 @router.post("/confirm")
-def confirm(payload: TokenPayload, request: Request, db: Session = Depends(get_db)) -> dict:
+def confirm(
+    payload: TokenPayload,
+    request: Request,
+    background: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> dict:
     _token_limiter.check(request)
 
     token = (payload.token or "").strip()
@@ -190,7 +195,30 @@ def confirm(payload: TokenPayload, request: Request, db: Session = Depends(get_d
         subscriber.unsubscribe_token = secrets.token_urlsafe(32)
     db.commit()
 
+    # Interne Notiz an den Betreiber. Erst hier, nicht schon beim Absenden des
+    # Formulars: unbestätigte Einträge sind zu einem guten Teil Tippfehler und
+    # Bots. Der Versand läuft im Hintergrund – eine Bestätigung darf nicht an
+    # einer internen Mail scheitern.
+    total_confirmed = (
+        db.query(NewsletterSubscriber)
+        .filter(
+            NewsletterSubscriber.confirmed.is_(True),
+            NewsletterSubscriber.active.is_(True),
+        )
+        .count()
+    )
+    background.add_task(
+        _send_signup_notice, subscriber.email, subscriber.source, total_confirmed
+    )
+
     return {"success": True, "email": subscriber.email}
+
+
+def _send_signup_notice(email: str, source: Optional[str], total_confirmed: int) -> None:
+    try:
+        email_service.send_newsletter_signup_notice(email, source, total_confirmed)
+    except Exception as exc:  # noqa: BLE001 – interne Notiz ist nie kritisch
+        print(f"[newsletter] Info-Mail zu {email} fehlgeschlagen: {exc}")
 
 
 @router.post("/unsubscribe")

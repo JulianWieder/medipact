@@ -2,6 +2,7 @@
 E-Mail-Service für medipact.
 Versendet Bestätigungs-E-Mails via SMTP (STARTTLS oder SSL).
 """
+import html as html_mod
 import smtplib
 import ssl
 from contextlib import contextmanager
@@ -771,3 +772,63 @@ def send_on_session(server, msg: MIMEMultipart, to_email: str) -> None:
         return
     sender = settings.SMTP_USER or settings.EMAIL_FROM
     server.sendmail(sender, to_email, msg.as_string())
+
+
+def send_newsletter_signup_notice(
+    subscriber_email: str, source: str | None, total_confirmed: int
+) -> None:
+    """Interne Notiz an den Betreiber: eine Anmeldung wurde bestätigt.
+
+    Bewusst erst bei der BESTÄTIGUNG und nicht schon beim Absenden des
+    Formulars – unbestätigte Einträge sind zu einem guten Teil Tippfehler und
+    Bots, und ein Empfänger ist erst, wer geklickt hat.
+    """
+    if not settings.NEWSLETTER_NOTIFY_EMAIL:
+        return
+
+    # Escapen, obwohl die Adresse validiert ist: sie kommt von außen, und
+    # _simple_email setzt die Absätze roh ins HTML.
+    safe_email = html_mod.escape(subscriber_email)
+    herkunft = html_mod.escape(source or "unbekannt")
+    msg = _simple_email(
+        settings.NEWSLETTER_NOTIFY_EMAIL,
+        subject=f"Neue Newsletter-Anmeldung: {subscriber_email}",
+        heading="Neue Newsletter-Anmeldung",
+        paragraphs=[
+            f"<strong>{safe_email}</strong> hat die Anmeldung bestätigt.",
+            f"Herkunft: {herkunft}",
+            f"Bestätigte Empfänger insgesamt: {total_confirmed}",
+        ],
+        cta=("Verteiler öffnen", f"{settings.APP_BASE_URL}/dashboard/admin/newsletter"),
+    )
+    _send(msg, settings.NEWSLETTER_NOTIFY_EMAIL, "Newsletter-Anmeldung")
+
+
+def send_signup_notice(
+    user_email: str, user_name: str, kind: str, company: str | None = None
+) -> None:
+    """Interne Notiz an den Betreiber: jemand hat sich neu registriert.
+
+    Schon bei der Registrierung, nicht erst bei der E-Mail-Bestaetigung –
+    so sieht man auch, wer sich anmelden wollte und dann haengen blieb.
+    """
+    if not settings.SIGNUP_NOTIFY_EMAIL:
+        return
+
+    paragraphs = [
+        f"<strong>{html_mod.escape(user_name or '-')}</strong> "
+        f"({html_mod.escape(user_email)}) hat sich registriert.",
+        f"Art: {html_mod.escape(kind)}",
+    ]
+    if company:
+        paragraphs.append(f"Unternehmen: {html_mod.escape(company)}")
+    paragraphs.append("Die E-Mail-Adresse ist noch nicht bestaetigt.")
+
+    msg = _simple_email(
+        settings.SIGNUP_NOTIFY_EMAIL,
+        subject=f"Neue Registrierung: {user_email}",
+        heading="Neue Registrierung bei medipact",
+        paragraphs=paragraphs,
+        cta=("Workspace öffnen", f"{settings.APP_BASE_URL}/workspace"),
+    )
+    _send(msg, settings.SIGNUP_NOTIFY_EMAIL, "Registrierungs-Info")

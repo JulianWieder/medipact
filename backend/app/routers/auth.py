@@ -1,13 +1,16 @@
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, HTTPException, Depends, Request
+import jwt  # PyJWT – nur fuer die Pruefung der Google-ID-Tokens
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
-from app.email import send_verification_email, send_password_reset_email
+from app.email import send_verification_email, send_password_reset_email, send_signup_notice
 from app.models.organization import Organization
 from app.models.user import User
 from app.rate_limit import auth_limiter
@@ -116,8 +119,21 @@ class ResetPasswordResponse(BaseModel):
     message: str
 
 
+def _notify_signup(email: str, name: str, kind: str, company: str | None = None) -> None:
+    """Info-Mail an den Betreiber – ein Fehler darf die Registrierung nie kippen."""
+    try:
+        send_signup_notice(email, name, kind, company)
+    except Exception as exc:
+        print(f"[EMAIL ERROR] Registrierungs-Info: {exc}")
+
+
 @router.post("/register", response_model=RegisterResponse)
-def register(request: Request, payload: RegisterRequest, db: Session = Depends(get_db)):
+def register(
+    request: Request,
+    payload: RegisterRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     auth_limiter.check(request)
 
     existing_user = db.query(User).filter(User.email == str(payload.email)).first()
@@ -159,6 +175,8 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
         send_verification_email(str(payload.email), payload.name, token)
     except Exception as exc:
         print(f"[EMAIL ERROR] {exc}")
+
+    background_tasks.add_task(_notify_signup, str(payload.email), payload.name, "Privat")
 
     return RegisterResponse(
         message="Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.",
@@ -754,7 +772,10 @@ class RegisterCompanyRequest(BaseModel):
 
 @router.post("/register-company", response_model=RegisterResponse)
 def register_company(
-    request: Request, payload: RegisterCompanyRequest, db: Session = Depends(get_db)
+    request: Request,
+    payload: RegisterCompanyRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     auth_limiter.check(request)
 
@@ -791,7 +812,126 @@ def register_company(
     except Exception as exc:
         print(f"[EMAIL ERROR] {exc}")
 
+    background_tasks.add_task(
+        _notify_signup, str(payload.email), payload.name, "Unternehmen", payload.company_name
+    )
+
     return RegisterResponse(
         message="Unternehmen registriert. Bitte bestätige deine E-Mail-Adresse.",
         email=str(payload.email),
+    )
+
+
+# ── Mit Google anmelden ──────────────────────────────────────────────────────
+# Das Frontend holt per Google Identity Services (Popup) ein ID-Token und
+# reicht es ueber NextAuth hierher durch. Wir pruefen Signatur und Claims
+# selbst gegen Googles oeffentliche Schluessel – ein Client-Secret braucht es
+# dafuer nicht. Ergebnis ist dieselbe TokenResponse wie bei /login.
+#
+# Konto-Zuordnung: zuerst ueber google_sub, sonst ueber die (von Google
+# verifizierte) E-Mail-Adresse – dann wird das bestehende Konto verknuepft.
+# Gibt es keins, legen wir eine Privatperson an (role="party"), wie
+# /register, nur ohne Bestaetigungsmail: Google hat die Adresse schon geprueft.
+
+_GOOGLE_ISSUERS = {"https://accounts.google.com", "accounts.google.com"}
+_google_jwks = jwt.PyJWKClient(
+    "https://www.googleapis.com/oauth2/v3/certs", cache_keys=True, timeout=10
+)
+
+
+class GoogleLoginRequest(BaseModel):
+    id_token: str
+
+
+def _verify_google_id_token(id_token: str) -> dict:
+    client_ids = [c.strip() for c in settings.GOOGLE_CLIENT_IDS.split(",") if c.strip()]
+    if not client_ids:
+        raise HTTPException(status_code=503, detail="Google-Anmeldung ist nicht konfiguriert")
+    try:
+        key = _google_jwks.get_signing_key_from_jwt(id_token).key
+    except jwt.PyJWKClientConnectionError:
+        raise HTTPException(status_code=503, detail="Google ist gerade nicht erreichbar")
+    except (jwt.PyJWKClientError, jwt.InvalidTokenError):
+        raise HTTPException(status_code=401, detail="Ungültiges Google-Token")
+    try:
+        claims = jwt.decode(
+            id_token,
+            key,
+            algorithms=["RS256"],
+            audience=client_ids,
+            options={"require": ["sub", "exp", "iss", "aud"]},
+            leeway=30,
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Ungültiges Google-Token")
+    if claims.get("iss") not in _GOOGLE_ISSUERS:
+        raise HTTPException(status_code=401, detail="Ungültiges Google-Token")
+    # Ohne verifizierte Adresse koennten wir kein bestehendes Konto zuordnen
+    # und keins sauber anlegen.
+    if not claims.get("email") or claims.get("email_verified") is not True:
+        raise HTTPException(status_code=401, detail="Google-Konto ohne bestätigte E-Mail-Adresse")
+    return claims
+
+
+@router.post("/google", response_model=TokenResponse)
+def google_login(
+    request: Request,
+    payload: GoogleLoginRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    auth_limiter.check(request)
+    claims = _verify_google_id_token(payload.id_token)
+    sub = str(claims["sub"])
+    email = str(claims["email"]).strip()
+
+    user = db.query(User).filter(User.google_sub == sub).first()
+    if not user:
+        user = (
+            db.query(User)
+            .filter(func.lower(User.email) == email.lower())
+            .first()
+        )
+        if user:
+            if user.google_sub and user.google_sub != sub:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Dieses Konto ist bereits mit einem anderen Google-Konto verknüpft",
+                )
+            user.google_sub = sub
+            # Google hat die Adresse bestaetigt – ein offener Bestaetigungslink
+            # aus /register wird damit hinfaellig.
+            if not user.is_verified:
+                user.is_verified = True
+                user.verification_token = None
+            db.commit()
+            db.refresh(user)
+        else:
+            name = (claims.get("name") or "").strip() or email.split("@")[0]
+            user = User(
+                name=name,
+                email=email,
+                hashed_password=hash_password(secrets.token_urlsafe(32)),
+                role="party",
+                is_verified=True,
+                google_sub=sub,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            background_tasks.add_task(_notify_signup, email, name, "Privat (Google)")
+
+    access_token = create_access_token(email=user.email)
+    refresh_token = create_refresh_token(email=user.email)
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        user={
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "role": user.role,
+            "onboarding_completed": user.onboarding_completed_at is not None,
+        },
     )
