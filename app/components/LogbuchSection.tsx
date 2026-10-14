@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Icon from "@/app/components/ui/Icon";
+import { LogbuchApp } from "@/app/components/ui/LogbuchApp";
+import { LOGBUCH_WEB_URL } from "@/lib/logbuchApp";
 
 /**
  * Startseiten-Sektion: Kostenloses Konflikt-Logbuch.
@@ -33,7 +35,7 @@ export default function LogbuchSection() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a
-                href="/auth/register"
+                href={LOGBUCH_WEB_URL}
                 className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-7 py-3 text-sm font-bold text-white transition hover:bg-accent-700"
               >
                 Kostenlos starten →
@@ -70,6 +72,15 @@ export default function LogbuchSection() {
             <p className="mt-4 text-center text-[11px] text-neutral-400">
               … und wenn Sie so weit sind: „In Mediation umwandeln“.
             </p>
+          </div>
+
+          {/* Jetzt eigenständig: Web + App, per QR-Code direkt aufs Handy */}
+          <div className="lg:col-span-2">
+            <p className="mb-4 text-sm font-semibold text-neutral-800">
+              Jetzt verfügbar – im Browser und als App. QR-Code mit dem Handy
+              scannen:
+            </p>
+            <LogbuchApp />
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ import { Card } from "@/app/components/ui/Card";
 import logbuchPhoto from "../../fotos/medi_gespraech.jpg";
 import Icon from "@/app/components/ui/Icon";
 import { pageMetadata } from "@/lib/seo";
+import { LogbuchApp } from "@/app/components/ui/LogbuchApp";
+import { LOGBUCH_WEB_URL } from "@/lib/logbuchApp";
 
 // ── SEO-Landingpage: Kostenloses Konflikt-Logbuch ───────────────────────────
 //
@@ -63,7 +65,7 @@ const FAQ = [
   },
   {
     q: "Was kostet das Konflikt-Logbuch?",
-    a: "Nichts. Das Konflikt-Logbuch ist dauerhaft kostenlos – Sie brauchen nur ein medipact-Konto. Kosten entstehen erst, wenn Sie sich später entscheiden, aus dem Logbuch eine Mediation zu starten (ab 49 € pro Partei).",
+    a: "Nichts. Das Konflikt-Logbuch ist dauerhaft kostenlos – Sie brauchen nur ein kostenloses Konto auf logbuch.medipact.de. Kosten entstehen erst, wenn Sie sich später entscheiden, aus dem Logbuch eine Mediation zu starten (ab 49 € pro Partei).",
   },
   {
     q: "Warum sollte ich einen Streit dokumentieren?",
@@ -167,7 +169,7 @@ export default function KonfliktLogbuchPage() {
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
-                  href="/auth/register"
+                  href={LOGBUCH_WEB_URL}
                   className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-accent-500"
                 >
                   Kostenlos starten →
@@ -182,6 +184,27 @@ export default function KonfliktLogbuchPage() {
             </div>
           </div>
         </ImagePinHero>
+
+        {/* JETZT VERFÜGBAR — Web + App, direkt unter dem Hero */}
+        <section className="section-base border-b border-neutral-200 py-14">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8">
+            <div className="rounded-3xl border-2 border-accent-200 bg-accent-50/50 p-8 sm:p-10">
+              <span className="inline-flex items-center rounded-full bg-accent-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+                Jetzt verfügbar
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-medium text-neutral-900">
+                Das Logbuch – im Browser und als App
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-600">
+                Scannen Sie den QR-Code mit Ihrem Handy – dann haben Sie Ihr
+                Logbuch immer dabei, genau dann, wenn etwas passiert.
+              </p>
+              <div className="mt-6">
+                <LogbuchApp />
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ENTLASTUNG — der eigentliche Nutzen */}
         {/*
@@ -430,12 +453,9 @@ export default function KonfliktLogbuchPage() {
               Ihr Konflikt-Logbuch ist in zwei Minuten angelegt – und bleibt
               kostenlos.
             </p>
-            <a
-              href="/auth/register"
-              className="mt-10 inline-flex items-center justify-center rounded-xl bg-accent-600 px-10 py-4 text-base font-bold text-white transition hover:bg-accent-500"
-            >
-              Kostenlos starten →
-            </a>
+            <div className="mx-auto mt-10 max-w-3xl text-left">
+              <LogbuchApp tone="dark" />
+            </div>
           </div>
         </section>
       </main>

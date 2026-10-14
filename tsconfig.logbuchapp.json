@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true, "incremental": false },
+  "include": ["types/**/*", "next-env.d.ts", "lib/logbuchApp.ts", "app/logbuch-app/route.ts", "app/components/ui/LogbuchApp.tsx", "app/components/ui/LogbuchHinweis.tsx", "app/components/LogbuchSection.tsx", "app/konflikt-logbuch/page.tsx"]
+}
