@@ -3,7 +3,20 @@
 import { useEffect, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionValue } from "framer-motion";
-import { GradientSwirl } from "@/app/components/ui/GradientSwirl";
+import dynamic from "next/dynamic";
+
+// Nachgeladen statt statisch importiert. Der Wirbel ist ein WebGL-Shader von
+// rund 180 Zeilen, und `useDeferredDecoration` (unten) rendert ihn NIE auf dem
+// Handy und sonst erst nach `load`. Statisch importiert lag er trotzdem in dem
+// Chunk, den jede Marketing-Seite fuer ihren Hero laedt — auf dem Handy also
+// Bytes im kritischen Pfad fuer etwas, das dort nie zu sehen ist.
+// `ssr: false` ist hier korrekt und nicht bloss erlaubt: `showSwirl` startet
+// immer auf false, der Wirbel war noch nie Teil des servergerenderten Markups.
+const GradientSwirl = dynamic(
+  () =>
+    import("@/app/components/ui/GradientSwirl").then((m) => m.GradientSwirl),
+  { ssr: false },
+);
 
 /**
  * Warten, bis die Seite fertig geladen ist — und nur ab Tablet-Breite.
@@ -76,8 +89,19 @@ export function HeroBackdrop({
           `preload` statt `priority`: seit Next 16 ist `priority` deprecated,
           `preload` heisst dasselbe (Bild kommt per <link rel="preload"> in den
           <head>, wird also gefunden, bevor der Parser im <body> ankommt) und
-          sagt es klarer. Zusaetzliches `loading`/`fetchPriority` waere laut
-          Doku falsch — `preload` bringt beides schon mit.
+          sagt es klarer. `loading` braucht es dazu wirklich nicht: `preload`
+          setzt das Bild intern auf `eager`.
+
+          `fetchPriority` bringt es aber NICHT mit — der Wert wird von Next
+          nur durchgereicht (get-img-props.js schreibt ihn ans <img>,
+          image-component.js in ImagePreload an den <link rel="preload">).
+          Ohne ihn steht an beiden Stellen gar kein fetchpriority-Attribut,
+          und ein Bild-Preload ohne fetchpriority landet in Chrome in der
+          Prioritaetsklasse "Low" — also HINTER CSS, Fonts und den
+          JS-Chunks, mit denen er sich auf dem Handy die Leitung teilt.
+          Genau das meldet Lighthouse als "LCP-Anfragenlimitierung"
+          (PageSpeed Mobil 03.09.2026: LCP 4,4 s bei FCP 2,6 s — die 1,8 s
+          dazwischen war das wartende Hero-Foto).
 
           `quality={55}`: das Foto liegt hinter zwei kraeftigen Schwarz-
           Gradienten (siehe 2. und 3.). Kompressionsartefakte sind darunter
@@ -90,6 +114,7 @@ export function HeroBackdrop({
           alt={imageAlt}
           fill
           preload
+          fetchPriority="high"
           quality={55}
           sizes="100vw"
           style={{ objectFit: "cover" }}
