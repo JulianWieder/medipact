@@ -10,7 +10,7 @@ import { routing, isMigratedLocalePath } from "@/i18n/routing";
  *
  * Renders null on anything outside the [locale] segment — i.e. anywhere
  * isMigratedLocalePath() is false (currently everything except "/" and
- * "/konflikte/trennung"). This used to be checked with next-intl's own
+ * "/scheidungsmediation"). This used to be checked with next-intl's own
  * usePathname(), but that hook only correctly strips/recomputes locale
  * prefixes for routes genuinely inside next-intl's routing. On an
  * unmigrated page (e.g. /methode) it can return the raw, unstripped

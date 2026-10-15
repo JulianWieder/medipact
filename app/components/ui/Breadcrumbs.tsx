@@ -5,7 +5,7 @@ import { JsonLd } from "@/app/components/JsonLd";
 
 /**
  * Only paths actually migrated into app/[locale]/ (currently "/" and
- * "/konflikte/trennung", see i18n/routing.ts) may use the locale-aware Link
+ * "/scheidungsmediation", see i18n/routing.ts) may use the locale-aware Link
  * — using it elsewhere caused the "/de/en/methode" prefix-loop bug
  * documented in Header.tsx. Mirrors Header.tsx's NavLink helper.
  */

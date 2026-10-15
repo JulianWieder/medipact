@@ -9,7 +9,7 @@ import geschaeftPhoto from "../../fotos/medi_buiness.jpg";
 type CardKey = "trennung" | "nachbarschaft" | "erbschaft" | "geschaeft";
 
 const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
-  { key: "trennung", href: "/konflikte/trennung", image: trennungPhoto },
+  { key: "trennung", href: "/scheidungsmediation", image: trennungPhoto },
   { key: "nachbarschaft", href: "/konflikte/nachbarschaft", image: nachbarnPhoto },
   { key: "erbschaft", href: "/konflikte/erbschaft", image: erbschaftPhoto },
   { key: "geschaeft", href: "/konflikte/odr", image: geschaeftPhoto },
@@ -20,7 +20,7 @@ const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
  * text, two CTAs ("Mehr erfahren" / "Kostenlos starten"). Replaces the
  * one-line casesTeaser on the homepage.
  *
- * Only /konflikte/trennung is migrated into app/[locale]/ today (see
+ * Only /scheidungsmediation is migrated into app/[locale]/ today (see
  * isMigratedLocalePath, i18n/routing.ts) — the locale-aware vs. plain link
  * choice per href lives centrally in ArrowLink (app/components/ui/ArrowLink).
  */

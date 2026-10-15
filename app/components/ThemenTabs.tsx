@@ -40,7 +40,7 @@ const themen: Thema[] = [
   {
     key: "trennung",
     label: "Trennung",
-    href: "/konflikte/trennung",
+    href: "/scheidungsmediation",
     image: trennungPhoto,
     content: trennungPageContent,
   },
