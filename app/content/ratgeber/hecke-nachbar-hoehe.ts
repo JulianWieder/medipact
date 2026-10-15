@@ -25,7 +25,7 @@ export const article: RatgeberArticle = {
   description:
     "Es gibt keine bundesweite Höhe – das Nachbarrecht ist Landesrecht. Worauf es wirklich ankommt und warum Warten den Anspruch kosten kann.",
   eyebrow: "Ratgeber · Nachbarschaft",
-  updated: "2026-07-31",
+  updated: "2026-10-15",
   published: "2026-07-31",
   readingMinutes: 7,
   intro:
@@ -108,6 +108,20 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Wer ohne Fristsetzung zur Säge greift, macht sich schadensersatzpflichtig – gerade bei alten Gehölzen können das erhebliche Beträge sein. Und mit dem Schnitt beginnt fast immer die Phase des Konflikts, die dann Jahre dauert.",
     },
+    { type: "heading", text: "Fotos, Fristen, Gespräche: früh festhalten" },
+    {
+      type: "paragraph",
+      text: "Weil der Anspruch daran hängt, seit wann die Hecke zu hoch ist, ist eine einfache Gewohnheit viel wert: Fotografieren Sie die Bepflanzung regelmäßig von derselben Stelle aus und notieren Sie Datum und ungefähre Höhe. Dazu gehören Ihre Aufforderungen an den Nachbarn – mit Datum und gesetzter Frist – und seine Antworten.",
+    },
+    {
+      type: "paragraph",
+      text: "So können Sie später zeigen, wann Sie was verlangt haben und ob eine Frist wirklich fruchtlos verstrichen ist, bevor Sie selbst zur Schere greifen. Und Sie gehen nicht mit „seit Jahren“ ins Gespräch, sondern mit Daten.",
+    },
+    {
+      type: "cta",
+      text: "Fristen und Gespräche kostenlos festhalten",
+      href: "/konflikt-logbuch",
+    },
     {
       type: "heading",
       text: "Warum sich hier das Gespräch besonders lohnt",
@@ -167,6 +181,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenloses Konflikt-Logbuch: Fristen festhalten", href: "/konflikt-logbuch" },
     { label: "Der Nachbar ist zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
     { label: "Nachbarschaftsstreit schlichten", href: "/ratgeber/nachbarschaftsstreit-was-tun" },
     { label: "Streit in der Eigentümergemeinschaft lösen", href: "/ratgeber/weg-streit-mediation" },

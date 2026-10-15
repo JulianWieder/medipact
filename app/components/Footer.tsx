@@ -124,6 +124,11 @@ export default function Footer({
                   {t("productCalculator")}
                 </FooterLink>
               </li>
+              <li>
+                <FooterLink href="/konflikt-logbuch" className="transition hover:text-white">
+                  {t("productLogbook")}
+                </FooterLink>
+              </li>
             </ul>
           </div>
 

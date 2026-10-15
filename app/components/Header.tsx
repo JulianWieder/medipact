@@ -147,6 +147,8 @@ export default function Header() {
       footer: [
         { label: t("konflikteAlle"), href: "/konflikte" },
         { label: t("konflikteCheck"), href: "/kontakt" },
+        // 15.10.2026: Wer noch nicht bereit fuer eine Mediation ist -> erst dokumentieren.
+        { label: t("konflikteLogbuch"), href: "/konflikt-logbuch" },
       ],
     },
     {

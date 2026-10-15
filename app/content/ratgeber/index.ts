@@ -21,6 +21,9 @@ import type { RatgeberArticle } from "./types";
 import { article as mediationAlsKonfliktloesung } from "./mediation-als-konfliktloesung";
 import { article as konfliktDokumentieren } from "./konflikt-dokumentieren";
 import { article as konfliktJournal } from "./konflikt-journal";
+// 15.10.2026 - erste Anleitung der Reihe "pro Konfliktart dokumentieren + Vorlage"
+// mit Verweis aufs Konflikt-Logbuch.
+import { article as mobbingTagebuchFuehren } from "./mobbing-tagebuch-fuehren";
 import { article as akuterKonfliktWasTun } from "./akuter-konflikt-was-tun";
 import { article as schwelenderKonflikt } from "./schwelender-konflikt";
 import { article as fuenfPhasenDerMediation } from "./5-phasen-der-mediation";
@@ -75,6 +78,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   mediationAlsKonfliktloesung,
   konfliktDokumentieren,
   konfliktJournal,
+  mobbingTagebuchFuehren,
   akuterKonfliktWasTun,
   schwelenderKonflikt,
   fuenfPhasenDerMediation,

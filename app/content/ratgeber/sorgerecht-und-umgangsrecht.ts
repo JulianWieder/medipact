@@ -25,7 +25,7 @@ export const article: RatgeberArticle = {
   description:
     "Betreuung, Umgang, Wechselmodell: Wie Eltern nach der Trennung eine tragfähige Regelung finden – ohne Gutachten und Gericht. Ablauf, Kosten, Grenzen.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-07-27",
+  updated: "2026-10-15",
   readingMinutes: 9,
   intro:
     "Von allen Trennungsthemen ist die Betreuung der Kinder das einzige, das nicht abgeschlossen werden kann. Vermögen wird einmal geteilt, Unterhalt einmal berechnet – die Frage, wer das Kind wann hat und wer welche Entscheidung trifft, stellt sich in den nächsten Jahren immer wieder neu. Deshalb kommt es hier weniger auf ein Ergebnis an als auf eine Regelung, die sich anpassen lässt, ohne dass jedes Mal gestritten wird.",
@@ -111,6 +111,30 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Bei medipact läuft der Prozess online und asynchron. Für Elternkonflikte ist das ein echter Vorteil: Sie müssen sich nicht gegenübersitzen, und wer seine Position aufschreibt statt sie im Affekt zu sagen, formuliert überlegter. Die Trennungsmediation kostet 399 € pro Partei im Online-Verfahren, 499 € in der Hybrid-Variante mit Video-Terminen und 899 € im Vollservice.",
     },
+    { type: "heading", text: "Erste Stufe: den Umgang festhalten – das Umgangsprotokoll" },
+    {
+      type: "paragraph",
+      text: "Bevor eine Elternvereinbarung entsteht, gibt es fast immer einen Ist-Zustand, über den gestritten wird: Wer hat die Kinder wann abgeholt, welche Termine sind ausgefallen, welche Absprachen wurden kurzfristig geändert? Nach ein paar Monaten lässt sich das aus dem Gedächtnis nicht mehr sauber rekonstruieren – und jeder Elternteil erinnert sich anders.",
+    },
+    {
+      type: "list",
+      items: [
+        "Datum sowie geplante und tatsächliche Übergabezeit.",
+        "Ausfälle und Verschiebungen – mit dem Grund, der genannt wurde.",
+        "Absprachen per Nachricht oder Telefon, möglichst im Wortlaut.",
+        "Auffälligkeiten beim Kind vor oder nach dem Umgang – beschreibend, nicht deutend.",
+        "Was gut lief: Auch gelungene Übergaben gehören hinein.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Entscheidend ist der Ton. Ein Umgangsprotokoll ist keine Sammlung von Vorwürfen gegen den anderen Elternteil, sondern dafür da, dass später über Tatsachen gesprochen wird – im Elterngespräch, beim Jugendamt oder in einer Mediation. Ein erkennbar einseitig geführtes Protokoll schadet eher, als es nützt.",
+    },
+    {
+      type: "cta",
+      text: "Umgang kostenlos protokollieren – im Konflikt-Logbuch",
+      href: "/konflikt-logbuch",
+    },
     {
       type: "heading",
       text: "Welche Rolle spielen Jugendamt und Gericht?",
@@ -147,7 +171,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Betreuung und Umgang klären – Online-Mediation ab 399 € pro Partei",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -178,10 +202,11 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenloses Konflikt-Logbuch: Umgang protokollieren", href: "/konflikt-logbuch" },
     { label: "Kostenrechner: Sorge- und Umgangsverfahren", href: "/kostenrechner?art=kindschaft" },
     { label: "Sorgerecht verloren – was tun?", href: "/ratgeber/sorgerecht-verloren-was-tun" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Ich will mich trennen – was jetzt?", href: "/ratgeber/ich-will-mich-trennen" },

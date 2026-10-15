@@ -8,7 +8,7 @@ export const article: RatgeberArticle = {
   description:
     "Konflikte am Arbeitsplatz: Wann Mediation sinnvoll ist, wie sie zwischen Mitarbeitenden oder mit der Führungskraft abläuft und was Arbeitgeber beachten.",
   eyebrow: "Ratgeber · Wirtschaftsmediation",
-  updated: "2026-07-11",
+  updated: "2026-10-15",
   readingMinutes: 6,
   intro:
     "Ungelöste Konflikte im Team gehören zu den teuersten Problemen im Arbeitsalltag: Sie kosten Motivation, Produktivität und nicht selten gute Mitarbeitende. Mediation am Arbeitsplatz setzt an, bevor Kündigung, Krankschreibung oder Arbeitsgericht die einzigen Auswege scheinen.",
@@ -46,6 +46,16 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Oft beauftragt und bezahlt der Arbeitgeber die Mediation, ist aber nicht Partei. Damit das funktioniert, braucht es Klarheit: Die Teilnahme ist freiwillig, die Inhalte sind vertraulich, und es gibt keine Nachteile für die Beteiligten. Sinnvoll ist, vorab zu vereinbaren, was der Arbeitgeber am Ende erfährt – üblicherweise nur, ob eine Einigung erzielt wurde und was für die Umsetzung nötig ist.",
     },
+    { type: "heading", text: "Erste Stufe: Konflikte am Arbeitsplatz festhalten" },
+    {
+      type: "paragraph",
+      text: "Ob Mediation, Gespräch mit der Führungskraft oder Beschwerde beim Betriebsrat: Jeder dieser Schritte beginnt mit der Frage, was konkret passiert ist. Wer Vorfälle zeitnah mit Datum, Beteiligten, Wortlaut und Folgen notiert, kann sachlich vortragen statt pauschal – und wirkt damit glaubwürdiger. Bei systematischen Anfeindungen ist diese Dokumentation unverzichtbar; wie ein solches Mobbing-Tagebuch aussieht, zeigt ein eigener Ratgeber mit Vorlage.",
+    },
+    {
+      type: "cta",
+      text: "Mobbing-Tagebuch führen – Anleitung mit Vorlage",
+      href: "/ratgeber/mobbing-tagebuch-fuehren",
+    },
     { type: "heading", text: "Konflikte am Arbeitsplatz online klären" },
     {
       type: "paragraph",
@@ -80,6 +90,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Mobbing-Tagebuch führen (mit Vorlage)", href: "/ratgeber/mobbing-tagebuch-fuehren" },
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner?art=odr" },
     { label: "Kündigung ohne Gericht klären", href: "/ratgeber/kuendigung-ohne-gericht" },
     { label: "Mediation im Unternehmen (Arbeitgeber-Sicht)", href: "/ratgeber/mediation-im-unternehmen" },

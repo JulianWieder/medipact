@@ -48,7 +48,8 @@
     "methodeGleichbehandlungDesc": "Fairness und KI-Einsatz",
     "beispieleGruppe": "Aus der Praxis",
     "beispieleFallbeispieleDesc": "12 Fälle mit Ergebnis und Kosten",
-    "beispieleMatrixDesc": "Konfliktart und Lösung im Raster"
+    "beispieleMatrixDesc": "Konfliktart und Lösung im Raster",
+    "konflikteLogbuch": "Noch nicht so weit? Erst mal festhalten"
   },
   "footer": {
     "ctaEyebrow": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
@@ -71,7 +72,8 @@
     "legalImprint": "Impressum",
     "legalCookies": "Cookies",
     "legalCookieSettings": "Cookie-Einstellungen",
-    "copyright": "Alle Rechte vorbehalten."
+    "copyright": "Alle Rechte vorbehalten.",
+    "productLogbook": "Konflikt-Logbuch (kostenlos)"
   },
   "cookieConsent": {
     "ariaLabel": "Cookie-Einstellungen",

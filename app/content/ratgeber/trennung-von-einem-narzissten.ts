@@ -8,7 +8,7 @@ export const article: RatgeberArticle = {
   description:
     "Manipulation, Provokation, Schuldumkehr: Wie du dich auf Gespräche mit einem narzisstischen Ex-Partner vorbereitest, ohne dich selbst zu verlieren.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-09-19",
+  updated: "2026-10-15",
   readingMinutes: 9,
   intro:
     "Wenn du dich von einem narzisstischen Partner trennst, endet die Beziehung - aber der Kampf beginnt oft erst richtig. Jede Verhandlung wird zur Bühne, jedes Zugeständnis zur Schwäche erklärt, jede Begegnung kostet dich Tage der Erholung. Dieser Artikel zeigt dir, warum Gespräche mit einem narzisstischen Ex-Partner so aufreibend sind, wie du dich auf Verhandlungen und Gerichtstermine vorbereitest - und warum ein schriftliches, strukturiertes Verfahren dir genau den Schutz gibt, der dir im direkten Schlagabtausch fehlt.",
@@ -72,6 +72,20 @@ export const article: RatgeberArticle = {
       type: "callout",
       text: "Und ja: Du darfst einen Raum auch verlassen, wenn die Situation kippt. Das ist keine Niederlage. Es ist die deutlichste Grenze, die du ziehen kannst - so nicht mit mir.",
     },
+    { type: "heading", text: "Erste Stufe: Schreib es auf, bevor du reagierst" },
+    {
+      type: "paragraph",
+      text: "„Das habe ich nie gesagt.“ „Du bildest dir das ein.“ Wer sich von einem narzisstischen Partner trennt, kennt diese Sätze – und den Zweifel, den sie hinterlassen. Das wirksamste Gegenmittel ist banal: ein Protokoll. Was wurde wann gesagt, was zugesagt, was ist dann tatsächlich passiert? Möglichst im Wortlaut, möglichst am selben Tag.",
+    },
+    {
+      type: "paragraph",
+      text: "Das Protokoll ist zuerst für dich. Es holt dich aus der Schleife, in der du dich fragst, ob du überreagierst. Und es ist da, wenn du es brauchst – für deine Anwältin, fürs Jugendamt oder für eine Mediation. Gefühle, die niemand lesen soll, hältst du getrennt davon in einem privaten Journal fest.",
+    },
+    {
+      type: "cta",
+      text: "Kostenlos festhalten, was passiert – im Konflikt-Logbuch",
+      href: "/konflikt-logbuch",
+    },
     { type: "heading", text: "Warum Mediation mit medipact dem Narzissten seine stärksten Waffen nimmt" },
     {
       type: "paragraph",
@@ -132,6 +146,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Kostenloses Konflikt-Logbuch: Absprachen festhalten", href: "/konflikt-logbuch" },
     { label: "„Ich will mich trennen“ - warum dieser Satz so schwer ist", href: "/ratgeber/ich-will-mich-trennen" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
     { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/scheidungsmediation" },

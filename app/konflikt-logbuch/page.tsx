@@ -432,6 +432,16 @@ export default function KonfliktLogbuchPage() {
               <Link href="/ratgeber/schwelender-konflikt" className="font-semibold text-accent-600 hover:text-accent-700">
                 Ratgeber: Schwelenden Konflikt beobachten →
               </Link>
+              {/* 15.10.2026: Anleitungen je Konfliktart */}
+              <Link href="/ratgeber/mobbing-tagebuch-fuehren" className="font-semibold text-accent-600 hover:text-accent-700">
+                Mobbing-Tagebuch mit Vorlage →
+              </Link>
+              <Link href="/ratgeber/nachbar-laerm-was-tun" className="font-semibold text-accent-600 hover:text-accent-700">
+                Lärmprotokoll führen →
+              </Link>
+              <Link href="/ratgeber/sorgerecht-und-umgangsrecht" className="font-semibold text-accent-600 hover:text-accent-700">
+                Umgangsprotokoll nach Trennung →
+              </Link>
               <Link href="/konflikte" className="font-semibold text-accent-600 hover:text-accent-700">
                 Alle Konfliktarten →
               </Link>

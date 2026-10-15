@@ -23,7 +23,7 @@ export const article: RatgeberArticle = {
   description:
     "Ein Miterbe verweigert die Zustimmung und nichts geht voran. Die vier Auswege aus der Blockade – mit ihren echten Kosten und Folgen.",
   eyebrow: "Ratgeber · Familie & Erbe",
-  updated: "2026-07-31",
+  updated: "2026-10-15",
   published: "2026-07-31",
   readingMinutes: 8,
   intro:
@@ -127,6 +127,20 @@ export const article: RatgeberArticle = {
       text: "Kostenrisiko des Erbstreits berechnen",
       href: "/kostenrechner?art=erbschaft",
     },
+    { type: "heading", text: "Festhalten, wer wann was abgelehnt hat" },
+    {
+      type: "paragraph",
+      text: "Blockaden in Erbengemeinschaften ziehen sich über Monate, oft über Jahre. Irgendwann weiß niemand mehr genau, welcher Vorschlag wann auf dem Tisch lag, wer ihn abgelehnt hat und mit welcher Begründung. Halten Sie das fest: Angebote, Antworten, Fristen, Gutachten, Telefonate – jeweils mit Datum und möglichst im Wortlaut.",
+    },
+    {
+      type: "paragraph",
+      text: "Das hilft in zwei Richtungen. Für ein späteres Verfahren ist eine saubere Chronologie die Grundlage jeder anwaltlichen Einschätzung. Und für eine Einigung zeigt sie, worum es dem Blockierenden tatsächlich geht: Die Begründungen wiederholen sich meist – und genau dort setzt Weg 1 an.",
+    },
+    {
+      type: "cta",
+      text: "Den Verlauf kostenlos dokumentieren",
+      href: "/konflikt-logbuch",
+    },
     {
       type: "heading",
       text: "Was ein strukturiertes Verfahren hier leistet",
@@ -177,6 +191,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Erbstreit dokumentieren: kostenloses Konflikt-Logbuch", href: "/konflikt-logbuch" },
     { label: "Geschwister streiten ums Erbe – was tun?", href: "/ratgeber/geschwister-streiten-ums-erbe" },
     { label: "Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
     { label: "Pflichtteil einfordern", href: "/ratgeber/pflichtteil-einfordern" },

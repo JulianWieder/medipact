@@ -293,6 +293,18 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
                 So läuft das Verfahren
               </Link>
             </div>
+
+            {/* 15.10.2026: Wer noch nicht bereit fuer ein Verfahren ist, bekommt
+                die kostenlose Vorstufe angeboten (Funnel Logbuch -> Mediation). */}
+            <p className="mt-6 text-sm text-neutral-400">
+              Noch nicht so weit?{" "}
+              <Link
+                href="/konflikt-logbuch"
+                className="font-semibold text-accent-300 underline-offset-4 hover:text-white hover:underline"
+              >
+                Erst mal festhalten, was passiert ist – kostenlos im Konflikt-Logbuch →
+              </Link>
+            </p>
           </div>
         </section>
       </main>

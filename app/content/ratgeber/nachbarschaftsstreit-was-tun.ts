@@ -23,7 +23,7 @@ export const article: RatgeberArticle = {
   description:
     "Lärm, Hecke, Grenze, Parkplatz: Nachbarschaftsstreit außergerichtlich lösen – Kosten, wer zahlt, Rechtsschutz und ein Muster-Anschreiben zum Anpassen.",
   eyebrow: "Ratgeber · Nachbarschaft",
-  updated: "2026-07-27",
+  updated: "2026-10-15",
   readingMinutes: 9,
   intro:
     "Nachbarschaftsstreitigkeiten haben eine unangenehme Eigenschaft: Man kann ihnen nicht ausweichen. Anders als bei einem Geschäftspartner oder einem Handwerker sehen Sie die Gegenseite jeden Tag – und ein gewonnener Prozess ändert daran nichts. Dieser Artikel zeigt, wie sich ein Nachbarschaftsstreit außergerichtlich klären lässt, was das kostet, wer zahlt und wie Sie das Thema ansprechen, ohne die Lage zu verschärfen.",
@@ -114,6 +114,20 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "In mehreren Bundesländern ist bei bestimmten Nachbarschaftsstreitigkeiten ein außergerichtlicher Einigungsversuch Voraussetzung für eine Klage – die Regelungen unterscheiden sich je nach Land und Streitgegenstand erheblich. Unabhängig davon gilt in der Praxis: Wer vorher nachweislich eine Einigung versucht hat, steht besser da, auch was die spätere Kostenverteilung angeht. Klären Sie die genauen Anforderungen im Zweifel anwaltlich oder bei Ihrem Amtsgericht.",
+    },
+    { type: "heading", text: "Bevor Sie ihn ansprechen: festhalten, was passiert ist" },
+    {
+      type: "paragraph",
+      text: "Das Gespräch mit dem Nachbarn scheitert oft an einem einzigen Satz: „Das ist doch nur einmal vorgekommen.“ Wer dann nur „ständig“ und „immer wieder“ sagen kann, steht mit leeren Händen da. Halten Sie deshalb einige Wochen lang fest, was Sie stört: Datum, Uhrzeit, Dauer, was genau passiert ist und was es für Sie bedeutet hat. Bei Lärm ist das das klassische Lärmprotokoll, bei Grenz- oder Parkstreit sind es Fotos mit Datum.",
+    },
+    {
+      type: "paragraph",
+      text: "Die Dokumentation hat einen zweiten Effekt, der oft unterschätzt wird: Sie sortiert den eigenen Ärger. Viele merken beim Aufschreiben, dass es um zwei konkrete Dinge geht und nicht um „alles“ – und über genau diese zwei Punkte lässt sich ein Gespräch führen.",
+    },
+    {
+      type: "cta",
+      text: "Vorfälle kostenlos festhalten – im Konflikt-Logbuch",
+      href: "/konflikt-logbuch",
     },
     {
       type: "heading",
@@ -213,6 +227,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Lärmprotokoll & Vorfälle: kostenloses Konflikt-Logbuch", href: "/konflikt-logbuch" },
     { label: "Der Nachbar ist zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
     { label: "Wie hoch darf die Hecke des Nachbarn sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },

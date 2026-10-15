@@ -21,7 +21,7 @@ export const article: RatgeberArticle = {
   description:
     "Es gibt keine Behörde, bei der man sich trennt. Wann das Trennungsjahr beginnt, wie es sich belegen lässt und warum das Datum bares Geld wert ist.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-07-31",
+  updated: "2026-10-15",
   published: "2026-07-31",
   readingMinutes: 7,
   intro:
@@ -101,6 +101,20 @@ export const article: RatgeberArticle = {
       type: "callout",
       text: "Der beste Beleg ist der billigste: zwei Sätze, von beiden unterschrieben, mit Datum. „Wir leben seit dem [Datum] getrennt und führen keinen gemeinsamen Haushalt mehr.“ Das kostet nichts und beendet die Diskussion, bevor sie entsteht.",
     },
+    { type: "heading", text: "Wenn es keine gemeinsame Erklärung gibt: selbst festhalten" },
+    {
+      type: "paragraph",
+      text: "Nicht jedes Paar unterschreibt gemeinsam einen Satz zum Trennungsdatum – gerade dann nicht, wenn einer die Trennung noch nicht akzeptiert. Dann hilft eine eigene, fortlaufende Dokumentation: das Gespräch, in dem die Trennung ausgesprochen wurde, der Umzug ins Gästezimmer, getrennte Kassen und Einkäufe, Nachrichten, in denen die Trennung erwähnt wird. Jeweils mit Datum und zeitnah notiert.",
+    },
+    {
+      type: "paragraph",
+      text: "Eine solche Chronologie ist kein Beweis an sich, macht Ihre Darstellung aber konkret: Statt „irgendwann im Frühjahr“ steht dort ein Datum mit Anlass. Das ist für das Gespräch mit dem Anwalt genauso wertvoll wie für eine spätere Einigung.",
+    },
+    {
+      type: "cta",
+      text: "Trennungsverlauf kostenlos dokumentieren",
+      href: "/konflikt-logbuch",
+    },
     {
       type: "heading",
       text: "Warum das Datum bares Geld wert ist",
@@ -146,7 +160,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Das Trennungsjahr nutzen statt abwarten",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -177,11 +191,12 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Trennungsverlauf kostenlos dokumentieren", href: "/konflikt-logbuch" },
     { label: "Trennungsvereinbarung: was hineingehört", href: "/ratgeber/trennungsvereinbarung" },
     { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

@@ -111,6 +111,7 @@ export const article: RatgeberArticle = {
   ],
   related: [
     { label: "Zum kostenlosen Konflikt-Logbuch", href: "/konflikt-logbuch" },
+    { label: "Mobbing-Tagebuch führen (mit Vorlage)", href: "/ratgeber/mobbing-tagebuch-fuehren" },
     { label: "Konflikt-Journal: Gefühle privat sortieren", href: "/ratgeber/konflikt-journal" },
     { label: "Schwelender Konflikt: beobachten statt abwarten", href: "/ratgeber/schwelender-konflikt" },
     { label: "Was ist Mediation? Einfach erklärt", href: "/ratgeber/was-ist-mediation" },
