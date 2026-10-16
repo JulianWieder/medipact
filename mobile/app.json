@@ -6,13 +6,62 @@
     "newArchEnabled": true,
     "backgroundColor": "#fafaf9",
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "de.medipact.kalender",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Damit du Belege oder Fotos an einen Eintrag in deinem Logbuch anhängen kannst.",
+        "NSCameraUsageDescription": "Damit du ein Foto direkt aufnehmen und an einen Eintrag anhängen kannst.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
+          }
+        ],
+        "NSPrivacyTracking": false
+      }
     },
     "android": {
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "de.medipact.kalender",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-kalender.png",
+        "backgroundColor": "#011018"
+      }
     },
     "extra": {
-      "apiUrl": "https://medipact.de/backend"
+      "apiUrl": "https://medipact.de/backend",
+      "variante": "kalender",
+      "eas": {
+        "projectId": "14ef0da4-391e-45cd-bbba-aa3c3da0a036"
+      }
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/14ef0da4-391e-45cd-bbba-aa3c3da0a036"
     }
   }
 }

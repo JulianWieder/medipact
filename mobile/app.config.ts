@@ -52,11 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // Der Splash ist für beide gleich: eine Wortmarke auf weißem Grund. Zwei
   // Startbilder wären Pflege ohne Gegenwert – sichtbar ist er unter zwei
   // Sekunden.
-  splash: {
-    image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#ffffff",
-  },
+
   ios: {
     ...config.ios,
     bundleIdentifier: profile.paket,
