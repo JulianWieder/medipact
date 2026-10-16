@@ -73,3 +73,6 @@ backend/migrate_now.py
 # der Sandbox heraus gelöscht werden sollen, landen deshalb hier und werden in
 # PowerShell entfernt — sie gehören nie ins Repo.
 /_to_delete/
+
+# Eigenes Repo, liegt nur hier im Ordner
+tennis-medenspiel-app/
