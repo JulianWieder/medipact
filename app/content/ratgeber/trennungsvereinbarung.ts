@@ -143,7 +143,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Trennung strukturiert und fair regeln",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
     {
       type: "callout",
@@ -185,6 +185,6 @@ export const article: RatgeberArticle = {
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Sorgerecht und Umgangsrecht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Ich will mich trennen – die ersten Schritte", href: "/ratgeber/ich-will-mich-trennen" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

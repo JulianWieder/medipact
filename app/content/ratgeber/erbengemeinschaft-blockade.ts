@@ -191,6 +191,7 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Haus verkaufen, aber einer will nicht – was tun?", href: "/ratgeber/haus-verkaufen-einer-will-nicht" },
     { label: "Erbstreit dokumentieren: kostenloses Konflikt-Logbuch", href: "/konflikt-logbuch" },
     { label: "Geschwister streiten ums Erbe – was tun?", href: "/ratgeber/geschwister-streiten-ums-erbe" },
     { label: "Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },

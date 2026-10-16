@@ -33,7 +33,7 @@ export const aboutPageContent = {
   title: "Eine Klärung sollte nicht daran scheitern,",
   titleHighlight: "dass sie zu teuer ist.",
   intro:
-    "Die meisten Konflikte, die Menschen jahrelang mit sich herumtragen, sind für einen Anwalt zu klein und für den Küchentisch zu groß. Mediation wäre der richtige Weg — sie kostet aber Stundensätze, weil jede Sitzung von Hand neu aufgebaut wird. medipact ist der Versuch, genau diese Arbeit zu standardisieren: derselbe Ablauf für jeden Fall, dafür ein Preis, der vorher feststeht.",
+    "Die meisten Konflikte, die Menschen jahrelang mit sich herumtragen, sind für einen Anwalt zu klein und für den Küchentisch zu groß. Mediation wäre der richtige Weg — sie kostet aber Stundensätze, weil jede Sitzung von Hand neu aufgebaut wird. medipact ist der Versuch, genau diese Arbeit zu standardisieren: derselbe Ablauf für jeden Fall, dafür ein Preis, der vorher feststeht. Dieser Preis ist allerdings nur der sichtbarste. Ein ungelöster Streit kostet außerdem Monate, in denen nichts entschieden ist, und die Beziehung, die danach noch tragen muss — beides taucht in keiner Rechnung auf und entscheidet trotzdem mit darüber, ob sich der Weg gelohnt hat.",
 
   primaryCta: {
     label: "Kostenlos starten",
@@ -104,7 +104,7 @@ export const aboutPageContent = {
       },
       {
         title: "Der Prozesskostenrechner",
-        text: "Was ein Gerichtsverfahren bei Ihrem Streitwert nach GKG und RVG realistisch kostet, gegen den Festpreis gestellt — inklusive Sorge- und Umgangsverfahren, bei denen der Verfahrenswert gedeckelt ist, die Kosten aber nicht. Ohne Anmeldung und ohne Kontaktformular.",
+        text: "Was ein Gerichtsverfahren bei Ihrem Streitwert nach GKG und RVG realistisch kostet, gegen den Festpreis gestellt — inklusive Sorge- und Umgangsverfahren, bei denen der Verfahrenswert gedeckelt ist, die Kosten aber nicht. Neben der Geldrechnung steht die durchschnittliche Verfahrensdauer nach der amtlichen Justizstatistik — und, weil sich das nicht beziffern lässt, in Worten: was von der Beziehung danach übrig ist. Ohne Anmeldung und ohne Kontaktformular.",
       },
     ],
     bulletsTitle: "Was das kostet",

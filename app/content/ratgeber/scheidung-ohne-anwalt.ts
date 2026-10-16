@@ -162,7 +162,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Trennung strukturiert und fair regeln",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -204,6 +204,6 @@ export const article: RatgeberArticle = {
     { label: "Was kostet ein Mediator bei der Scheidung?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
     { label: "Scheidung ohne Rosenkrieg", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

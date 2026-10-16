@@ -94,7 +94,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Den ersten Schritt nicht allein gehen - so begleitet medipact deine Trennung",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -134,7 +134,7 @@ export const article: RatgeberArticle = {
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Scheidung ohne Rosenkrieg: Mediation statt Gerichtsstreit", href: "/ratgeber/scheidung-ohne-rosenkrieg" },
-    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
+    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/scheidungsmediation" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },

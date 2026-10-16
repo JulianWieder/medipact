@@ -1,6 +1,10 @@
-// Ziel-Suchbegriffe: "nachbarschaftsstreit mediation", "wer zahlt
-// nachbarschaftsmediation", "nachbarschaftsstreit schlichten", "mediation
-// nachbarn kosten".
+// Ziel-Suchbegriffe: "nachbarschaftsstreit", "nachbarschaftsstreit was tun",
+// "nachbarschaftsstreit schlichten", "mediation bei nachbarschaftsstreitigkeiten".
+//
+// 16.10.2026 Zuschnitt gegen /konflikte/nachbarschaft: Die Verfahrensfragen
+// (wer zahlt, ist das Ergebnis bindend, Dauer) gehoeren der Landingpage und
+// stehen hier nicht mehr als FAQ – beide Seiten hatten fast dieselben sechs
+// FAQs und haben sich in GSC gegenseitig gedrueckt.
 //
 // Pillar des Nachbarschafts-Clusters. Das Muster-Anschreiben ist bewusst
 // Teil dieses Artikels (starker Klick- und Verweildauer-Treiber, und die
@@ -23,7 +27,7 @@ export const article: RatgeberArticle = {
   description:
     "Lärm, Hecke, Grenze, Parkplatz: Nachbarschaftsstreit außergerichtlich lösen – Kosten, wer zahlt, Rechtsschutz und ein Muster-Anschreiben zum Anpassen.",
   eyebrow: "Ratgeber · Nachbarschaft",
-  updated: "2026-10-15",
+  updated: "2026-10-16",
   readingMinutes: 9,
   intro:
     "Nachbarschaftsstreitigkeiten haben eine unangenehme Eigenschaft: Man kann ihnen nicht ausweichen. Anders als bei einem Geschäftspartner oder einem Handwerker sehen Sie die Gegenseite jeden Tag – und ein gewonnener Prozess ändert daran nichts. Dieser Artikel zeigt, wie sich ein Nachbarschaftsstreit außergerichtlich klären lässt, was das kostet, wer zahlt und wie Sie das Thema ansprechen, ohne die Lage zu verschärfen.",
@@ -190,20 +194,20 @@ export const article: RatgeberArticle = {
     },
     {
       type: "cta",
-      text: "Nachbarschaftsstreit klären – Online-Mediation für 49 € pro Partei",
+      text: "Nachbarschaftsmediation: geführtes Verfahren für 49 € pro Partei",
       href: "/konflikte/nachbarschaft",
     },
   ],
   faq: [
     {
+      question: "Was tun bei einem Nachbarschaftsstreit?",
+      answer:
+        "Zuerst festhalten, was passiert ist – Datum, Uhrzeit, was genau gestört hat. Dann den Nachbarn sachlich und schriftlich ansprechen, ohne Vorwürfe und ohne Hinweis auf die Rechtslage. Hilft das nicht, ist eine Mediation oder die örtliche Schiedsperson der nächste Schritt; Anwalt und Gericht erst danach, weil ein Urteil das Zusammenleben selten verbessert.",
+    },
+    {
       question: "Was kostet eine Mediation bei einem Nachbarschaftsstreit?",
       answer:
         "Bei medipact kostet die Nachbarschaftsmediation 49 € pro Partei – eine einmalige Pauschale für den kompletten Online-Prozess ohne Stundenabrechnung. Frei tätige Mediatorinnen rechnen meist stündlich ab und teilen die Kosten zwischen den Nachbarn. Viele Gemeinden bieten zusätzlich Schiedspersonen zu sehr geringen Gebühren an.",
-    },
-    {
-      question: "Wer zahlt die Nachbarschaftsmediation?",
-      answer:
-        "Üblich ist die hälftige Teilung – das hält das Verfahren neutral, weil keine Seite über die Rechnung Einfluss nehmen kann. Bei medipact zahlt jede Partei ihren Anteil direkt und erhält eine eigene Rechnung. Viele Rechtsschutzversicherungen beteiligen sich zusätzlich an Mediationskosten; melden Sie den Fall aber vor dem Start, sonst entfällt die Leistung häufig.",
     },
     {
       question: "Übernimmt die Rechtsschutzversicherung die Mediation?",
@@ -220,18 +224,13 @@ export const article: RatgeberArticle = {
       answer:
         "Mediation ist freiwillig, ohne die Gegenseite geht es nicht. Ein sachlicher schriftlicher Vorschlag ohne Vorwürfe und ohne Hinweis auf die Rechtslage wirkt erfahrungsgemäß besser als ein Gespräch über den Zaun, weil er Zeit zum Nachdenken lässt. Lehnt der Nachbar ab, haben Sie den Einigungsversuch dokumentiert und können den formalen Weg gehen.",
     },
-    {
-      question: "Ist das Ergebnis rechtlich bindend?",
-      answer:
-        "Ja. Die Abschlussvereinbarung ist ein Vertrag zwischen den Beteiligten und kann bei Bedarf notariell beurkundet oder als Anwaltsvergleich vollstreckbar gemacht werden. Für typische Nachbarschaftsthemen wie Ruhezeiten, Heckenhöhe oder Parkregelungen genügt in der Praxis die schriftliche Vereinbarung – sie hält, weil beide Seiten sie selbst entwickelt haben.",
-    },
   ],
   related: [
     { label: "Lärmprotokoll & Vorfälle: kostenloses Konflikt-Logbuch", href: "/konflikt-logbuch" },
     { label: "Der Nachbar ist zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
     { label: "Wie hoch darf die Hecke des Nachbarn sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
-    { label: "Nachbarschaft: Mediation im Überblick", href: "/konflikte/nachbarschaft" },
+    { label: "Nachbarschaftsmediation: Ablauf und Kosten", href: "/konflikte/nachbarschaft" },
     { label: "Streit in der Eigentümergemeinschaft (WEG)", href: "/ratgeber/weg-streit-mediation" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Akuter Konflikt: was jetzt zu tun ist", href: "/ratgeber/akuter-konflikt-was-tun" },

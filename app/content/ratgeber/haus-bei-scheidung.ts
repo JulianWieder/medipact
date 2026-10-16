@@ -175,7 +175,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Immobilie und Trennung gemeinsam regeln",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -216,10 +216,11 @@ export const article: RatgeberArticle = {
     },
   ],
   related: [
+    { label: "Haus verkaufen, aber einer will nicht – was tun?", href: "/ratgeber/haus-verkaufen-einer-will-nicht" },
     { label: "Scheidungsfolgenvereinbarung: Inhalt und Kosten", href: "/ratgeber/scheidungsfolgenvereinbarung" },
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Wer muss bei einer Trennung aus der Wohnung?", href: "/ratgeber/wer-muss-aus-der-wohnung" },
     { label: "Vermögen aufteilen bei Scheidung", href: "/ratgeber/vermoegensauseinandersetzung" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

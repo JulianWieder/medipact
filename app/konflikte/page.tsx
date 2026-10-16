@@ -16,10 +16,10 @@ import { pageMetadata } from "@/lib/seo";
 // Nachschlagewerk. Title und Description tragen jetzt das Verfahren, das
 // Service-Schema unten macht daraus auch strukturell ein Angebot.
 //
-// Bewusst NICHT geändert: die H1. Sie trägt "Konfliktarten" wörtlich und ist
-// der stärkste Impressionen-Lieferant der Seite. Der Term steht auf Position
-// 68 — dort ist ohnehin nichts zu gewinnen, und die Einordnung dreht sich
-// über Title und strukturierte Daten, nicht über die Überschrift.
+// Stufe 2 am 16.10.2026: Lexikon-Teil nach /ratgeber/konfliktarten
+// ausgelagert, H1 und FAQPage-Schema gleich mit. Die Seite ist jetzt nur noch
+// Verfahrenseinstieg. (Bis dahin blieb die H1 mit "Konfliktarten" bewusst
+// stehen, Pos 63 auf dem Term – dort war nichts zu verlieren.)
 export const metadata: Metadata = pageMetadata({
   title: "Konflikt lösen: das passende Verfahren finden | medipact",
   description:
@@ -96,101 +96,8 @@ const conflictTypes = [
   },
 ];
 
-const konfliktarten = [
-  {
-    title: "Sachkonflikt",
-    frage: "Worum geht es wirklich?",
-    text: "Zwei Seiten bewerten dieselbe Sachlage unterschiedlich – oft, weil Informationen fehlen, unklar oder widersprüchlich sind. Beispiel: Uneinigkeit über den Wert einer Immobilie im Nachlass.",
-    loesung: "Fakten gemeinsam klären, neutrale Informationsbasis schaffen.",
-    beispiel: "Streit über den Verkehrswert des Elternhauses",
-  },
-  {
-    title: "Interessenkonflikt",
-    frage: "Wer bekommt was?",
-    text: "Beide Seiten wollen dasselbe knappe Gut: Geld, Zeit, Raum oder Zuständigkeit. Der Klassiker unter den Konfliktarten – von der Erbverteilung bis zum Budgetstreit zwischen Abteilungen.",
-    loesung: "Interessen hinter den Positionen herausarbeiten, Optionen entwickeln.",
-    beispiel: "Zwei Abteilungen beanspruchen dasselbe Budget",
-  },
-  {
-    title: "Beziehungskonflikt",
-    frage: "Wie gehen wir miteinander um?",
-    text: "Verletzungen, Misstrauen oder Kränkungen überlagern die Sachebene. Häufig bei Trennung, in Familien – und zwischen langjährigen Kollegen oder Gesellschaftern.",
-    loesung: "Kommunikation strukturieren, Wahrnehmungen aussprechen, Vertrauen schrittweise aufbauen.",
-    beispiel: "Ex-Partner können nicht mehr sachlich über die Kinderbetreuung sprechen",
-  },
-  {
-    title: "Wertekonflikt",
-    frage: "Was ist richtig?",
-    text: "Unterschiedliche Überzeugungen, Kulturen oder Prinzipien prallen aufeinander. Werte lassen sich nicht wegverhandeln – wohl aber ein respektvoller Umgang damit.",
-    loesung: "Nicht überzeugen wollen, sondern Koexistenz und konkrete Verhaltensregeln vereinbaren.",
-    beispiel: "Generationenwechsel im Familienbetrieb: Tradition gegen Modernisierung",
-  },
-  {
-    title: "Rollenkonflikt",
-    frage: "Wer ist wofür zuständig?",
-    text: "Unklare Zuständigkeiten, widersprüchliche Erwartungen oder doppelte Rollen erzeugen Dauerreibung – typisch im Unternehmen und in Familien, die zusammen wirtschaften.",
-    loesung: "Rollen und Erwartungen explizit machen, Verantwortlichkeiten neu vereinbaren.",
-    beispiel: "Teamleiterin ist zugleich Kollegin und Vorgesetzte",
-  },
-  {
-    title: "Machtkonflikt",
-    frage: "Wer entscheidet?",
-    text: "Es geht um Einfluss, Kontrolle und Augenhöhe. Oft versteckt er sich hinter Sachthemen – erkennbar daran, dass jede Lösung der Gegenseite abgelehnt wird.",
-    loesung: "Faire Verfahrensregeln vereinbaren, Entscheidungswege transparent machen.",
-    beispiel: "Zwei Gesellschafter blockieren gegenseitig jede Entscheidung",
-  },
-];
-
-// Zweite Achse neben der Konfliktart: Wie weit ist der Konflikt eskaliert?
-// Modell der neun Eskalationsstufen nach Friedrich Glasl, gruppiert in die
-// drei bekannten Zonen. Dieselbe Logik nutzt die Fall-Diagnose im Produkt.
-const eskalationsZonen = [
-  {
-    zone: "Win-Win",
-    stufen: "Stufe 1–3",
-    text: "Verhärtung, Debatte, Taten statt Worte. Die Beteiligten sind noch lösungsorientiert, auch wenn es unangenehm wird. Eine Lösung, mit der beide Seiten gut leben können, ist realistisch.",
-    weg: "Klärendes Gespräch, Moderation – oder eine Mediation, die schnell zum Ergebnis führt.",
-  },
-  {
-    zone: "Win-Lose",
-    stufen: "Stufe 4–6",
-    text: "Koalitionen, Gesichtsverlust, Drohstrategien. Es geht nicht mehr um die Sache, sondern ums Gewinnen. Ohne Dritte von außen dreht sich die Spirale weiter.",
-    weg: "Externe, allparteiliche Mediation – häufig zunächst getrennt (Shuttle-Verfahren).",
-  },
-  {
-    zone: "Lose-Lose",
-    stufen: "Stufe 7–9",
-    text: "Begrenzte Vernichtung, Zersplitterung, gemeinsam in den Abgrund. Der eigene Schaden wird in Kauf genommen, wenn er nur die Gegenseite härter trifft.",
-    weg: "Hier stößt Mediation an ihre Grenzen: Es braucht Machtentscheidungen, rechtliche Schritte oder Schutz.",
-  },
-];
-
-const konfliktartenFaq = [
-  {
-    q: "Welche Arten von Konflikten gibt es?",
-    a: "Die Konfliktforschung unterscheidet sechs wichtige Konfliktarten: Sachkonflikte, Interessenkonflikte, Beziehungskonflikte, Wertekonflikte, Rollenkonflikte und Machtkonflikte. In der Praxis treten sie meist gemischt auf – hinter einem Sachthema steckt oft ein Beziehungs- oder Machtkonflikt.",
-  },
-  {
-    q: "Welche Konfliktarten gibt es im Unternehmen?",
-    a: "Im Unternehmen dominieren Rollenkonflikte (unklare Zuständigkeiten), Interessenkonflikte (Budget, Ressourcen), Beziehungskonflikte im Team und Machtkonflikte zwischen Führungskräften oder Gesellschaftern. Ungelöst kosten sie Produktivität, Fluktuation und Krankheitstage – eine Wirtschaftsmediation setzt genau hier an.",
-  },
-  {
-    q: "Wie löst man die verschiedenen Konfliktarten?",
-    a: "Jede Konfliktart braucht einen anderen Hebel: Sachkonflikte eine gemeinsame Faktenbasis, Interessenkonflikte eine Verhandlung über die dahinterliegenden Bedürfnisse, Beziehungskonflikte strukturierte Kommunikation. Mediation kombiniert diese Ansätze in einem geordneten Verfahren mit neutraler Begleitung.",
-  },
-  {
-    q: "Wie erkenne ich, welche Konfliktart vorliegt?",
-    a: "Achten Sie darauf, woran das Gespräch scheitert. Streiten Sie über Zahlen und Fakten, ist es ein Sachkonflikt. Geht es darum, wer wie viel bekommt, ein Interessenkonflikt. Wird es persönlich, steckt ein Beziehungskonflikt dahinter. Werden alle Vorschläge der Gegenseite abgelehnt – auch gute – ist es meist ein Machtkonflikt. In der Praxis mischen sich mehrere Arten; entscheidend ist, welche das Gespräch blockiert.",
-  },
-  {
-    q: "Welche Konfliktarten gibt es in Familie und Partnerschaft?",
-    a: "Privat dominieren Beziehungskonflikte (Verletzungen, Misstrauen), Wertekonflikte (unterschiedliche Vorstellungen von Erziehung, Geld oder Lebensführung) und Interessenkonflikte bei Trennung und Erbe – etwa um Unterhalt, Betreuungszeiten oder die Aufteilung des Nachlasses. Rollenkonflikte kommen dazu, wenn Familie und Geschäft zusammenfallen, zum Beispiel im Familienunternehmen.",
-  },
-  {
-    q: "Was sind die neun Eskalationsstufen nach Glasl?",
-    a: "Friedrich Glasl beschreibt neun Stufen in drei Zonen: Win-Win (Stufe 1–3: Verhärtung, Debatte, Taten statt Worte), Win-Lose (Stufe 4–6: Koalitionen, Gesichtsverlust, Drohstrategien) und Lose-Lose (Stufe 7–9: begrenzte Vernichtung, Zersplitterung, gemeinsam in den Abgrund). Die Stufe entscheidet über den passenden Weg: Bis Stufe 3 genügt oft Moderation, ab Stufe 4 braucht es externe Mediation, ab Stufe 7 rechtliche Schritte oder Schutz.",
-  },
-];
+// Die Lexikon-Daten (6 Konfliktarten, Glasl-Zonen, Konfliktarten-FAQ) liegen
+// seit 16.10.2026 in app/content/ratgeber/konfliktarten.ts.
 
 const suitablePoints = [
   "Beide Seiten sind grundsätzlich bereit zu sprechen.",
@@ -223,14 +130,14 @@ export default function KonfliktePage() {
         imageAlt="Verschiedene Formen privater Konflikte"
       >
         <div className="container max-w-4xl">
-          <Breadcrumbs items={[{ label: "Konfliktarten" }]} variant="dark" />
+          <Breadcrumbs items={[{ label: "Konflikte" }]} variant="dark" />
           <p className="eyebrow mb-4 text-accent-300">Konflikte</p>
 
-          {/* H1 trägt die Ziel-Suchphrase "Konfliktarten" wörtlich – sie ist
-              der stärkste Impressionen-Lieferant der Seite. */}
+          {/* 16.10.2026: H1 traegt das Verfahren, nicht mehr "Konfliktarten" –
+              der Begriff liegt jetzt bei /ratgeber/konfliktarten. */}
           <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-            Konfliktarten erkennen.{" "}
-            <span className="text-accent-300">Mediation schafft Klarheit.</span>
+            Konflikt lösen.{" "}
+            <span className="text-accent-300">Mit dem passenden Verfahren.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
@@ -344,144 +251,30 @@ export default function KonfliktePage() {
 
       <section className="section section-muted">
         <div className="container">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: konfliktartenFaq.map((f) => ({
-                  "@type": "Question",
-                  name: f.q,
-                  acceptedAnswer: { "@type": "Answer", text: f.a },
-                })),
-              }),
-            }}
-          />
+          {/* 16.10.2026: Lexikon (6 Arten, Tabelle, Glasl, FAQ) nach
+              /ratgeber/konfliktarten ausgelagert. Diese Seite ist der
+              Verfahrenseinstieg; der Begriff "Konfliktarten" gehoert dem
+              Ratgeber. Hier bleibt nur der Verweis. */}
           <div className="max-w-3xl">
             <p className="eyebrow mb-4">Wissen</p>
 
             <h2 className="heading-2 text-neutral-900">
-              Welche Arten von Konflikten gibt es? Die 6 wichtigsten
-              Konfliktarten
+              Welche Konfliktart steckt dahinter?
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-neutral-600">
-              Konflikte wirken oft chaotisch – dahinter stecken aber
-              wiederkehrende Muster. Die Konfliktforschung unterscheidet sechs
-              zentrale Konfliktarten. Wer sie erkennt, versteht, warum ein
-              Streit festgefahren ist und welcher Lösungsweg passt.
+              Ob Sach-, Interessen- oder Beziehungskonflikt: Die Art des
+              Konflikts entscheidet, welcher Hebel wirkt – und die
+              Eskalationsstufe, was noch möglich ist. Die sechs Konfliktarten
+              mit Beispielen und den Stufen nach Glasl erklärt der Ratgeber{" "}
+              <Link
+                href="/ratgeber/konfliktarten"
+                className="font-semibold text-accent-700 underline-offset-4 hover:underline"
+              >
+                Konfliktarten: die 6 Arten im Überblick
+              </Link>
+              .
             </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {konfliktarten.map((art, i) => (
-              <div key={art.title} className="card">
-                <div className="mb-3 text-sm font-semibold text-accent-700">
-                  {String(i + 1).padStart(2, "0")} · {art.frage}
-                </div>
-                <h3 className="heading-3 text-neutral-900">{art.title}</h3>
-                <p className="mt-4 leading-7 text-neutral-600">{art.text}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <caption className="sr-only">
-                Die 6 Konfliktarten im Überblick: Kernfrage, typisches Beispiel
-                und Lösungsansatz
-              </caption>
-              <thead>
-                <tr className="border-b border-neutral-200 bg-neutral-50 text-neutral-900">
-                  <th scope="col" className="px-5 py-4 font-semibold">
-                    Konfliktart
-                  </th>
-                  <th scope="col" className="px-5 py-4 font-semibold">
-                    Kernfrage
-                  </th>
-                  <th scope="col" className="px-5 py-4 font-semibold">
-                    Typisches Beispiel
-                  </th>
-                  <th scope="col" className="px-5 py-4 font-semibold">
-                    Lösungsansatz
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {konfliktarten.map((art) => (
-                  <tr
-                    key={art.title}
-                    className="border-b border-neutral-100 last:border-0"
-                  >
-                    <th
-                      scope="row"
-                      className="px-5 py-4 font-semibold text-neutral-900"
-                    >
-                      {art.title}
-                    </th>
-                    <td className="px-5 py-4 text-neutral-600">{art.frage}</td>
-                    <td className="px-5 py-4 text-neutral-600">
-                      {art.beispiel}
-                    </td>
-                    <td className="px-5 py-4 text-neutral-600">
-                      {art.loesung}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-16 max-w-3xl">
-            <p className="eyebrow mb-4">Zweite Achse</p>
-
-            <h2 className="heading-2 text-neutral-900">
-              Konfliktarten und Eskalationsstufen: Wie weit ist es schon?
-            </h2>
-
-            <p className="mt-5 text-lg leading-8 text-neutral-600">
-              Die Konfliktart sagt, worum es geht. Die Eskalationsstufe sagt,
-              was jetzt noch möglich ist. Das bekannteste Modell dafür stammt
-              von Friedrich Glasl und unterscheidet neun Stufen in drei Zonen –
-              genau diese Einordnung nimmt auch die medipact-Diagnose vor,
-              bevor über Lösungen gesprochen wird.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            {eskalationsZonen.map((z) => (
-              <div key={z.zone} className="card">
-                <div className="mb-3 text-sm font-semibold text-accent-700">
-                  {z.stufen}
-                </div>
-                <h3 className="heading-3 text-neutral-900">{z.zone}</h3>
-                <p className="mt-4 leading-7 text-neutral-600">{z.text}</p>
-                <p className="mt-4 border-t border-neutral-100 pt-4 text-sm leading-6 text-neutral-500">
-                  <span className="font-semibold text-neutral-700">
-                    Passender Weg:
-                  </span>{" "}
-                  {z.weg}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-16 max-w-3xl">
-            <p className="eyebrow mb-4">Häufige Fragen</p>
-
-            <h2 className="heading-2 text-neutral-900">
-              Fragen zu den Konfliktarten
-            </h2>
-          </div>
-
-          <div className="mt-10 grid gap-6">
-            {konfliktartenFaq.map((f) => (
-              <div key={f.q} className="card">
-                <h3 className="heading-3 text-neutral-900">{f.q}</h3>
-                <p className="mt-3 leading-7 text-neutral-600">{f.a}</p>
-              </div>
-            ))}
           </div>
 
           <div className="mt-8 rounded-2xl bg-neutral-900 p-6 text-white">

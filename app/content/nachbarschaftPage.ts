@@ -3,11 +3,11 @@
 import { nachbarschaftFacts } from "@/app/components/ui/DidYouKnowSection";
 
 export const nachbarschaftPageContent = {
-  eyebrow: "Nachbarschafts-Streit",
+  eyebrow: "Nachbarschaftsmediation",
   title: "Wenn der Alltag zum Konflikt wird.",
   titleHighlight: "Finde zurück zu einem normalen Miteinander.",
   intro:
-    "Nachbarschaftskonflikte beginnen oft klein: Lärm, Grenzen, Parkplätze, Garten oder Hausordnung. Schwierig wird es, weil man sich nicht einfach aus dem Weg gehen kann.",
+    "Nachbarschaftsmediation ist ein geführtes Verfahren, in dem Nachbarn mit einer Mediatorin oder einem Mediator verbindliche Absprachen erarbeiten. Nachbarschaftskonflikte beginnen oft klein: Lärm, Grenzen, Parkplätze, Garten oder Hausordnung. Schwierig wird es, weil man sich nicht einfach aus dem Weg gehen kann.",
 
   primaryCta: {
     label: "Nachbarschaftskonflikt einschätzen",

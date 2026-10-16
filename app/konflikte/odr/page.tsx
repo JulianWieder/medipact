@@ -16,15 +16,18 @@ export const metadata: Metadata = pageMetadata({
   path: "/konflikte/odr",
 });
 
+// Eigene @id je Konfliktart (nicht #service: das ist die Dachleistung auf
+// Startseite, /konflikte und /preise – sechs verschiedene Leistungen unter
+// einer @id wuerde Google zu einer Entitaet mit widerspruechlichen Namen
+// verschmelzen). Verknuepft ueber isRelatedTo. Preis aus backend/app/pricing.py –
+// bei Preisaenderung hier mitziehen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": "https://medipact.de/konflikte/odr#service",
   name: "Online Dispute Resolution (ODR)",
-  provider: {
-    "@type": "Organization",
-    name: "medipact",
-    url: "https://medipact.de",
-  },
+  provider: { "@id": "https://medipact.de/#organization" },
+  isRelatedTo: { "@id": "https://medipact.de/#service" },
   serviceType:
     "Online Dispute Resolution (Wirtschaftsmediation, Online-Schlichtung, E-Commerce- und B2B-Streitbeilegung)",
   description:
@@ -35,6 +38,16 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de/konflikte/odr",
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "EUR",
+    lowPrice: "399",
+    highPrice: "1900",
+    offerCount: 4,
+    description: "Festpreis pro Verfahren je nach Verfahrensart (Schlichtung, E-Commerce, B2B, Wirtschaftsmediation)",
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
 };
 
 // Die FAQs werden auf der Seite sichtbar gerendert – hier zusätzlich als
@@ -66,7 +79,7 @@ export default function OdrPage() {
           alt: "Hitzige Diskussion zwischen mehreren Beteiligten",
         }}
         breadcrumbs={[
-          { label: "Konfliktarten", href: "/konflikte" },
+          { label: "Konflikte", href: "/konflikte" },
           { label: "Online Dispute Resolution (ODR)" },
         ]}
         kostenrechnerArt="odr"

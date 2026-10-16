@@ -26,16 +26,18 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "scheidungsfolgenvereinbarung",
   category: "Trennung & Scheidung",
-  title: "Scheidungsfolgenvereinbarung: Inhalt, Kosten und wann der Notar muss",
-  metaTitle: "Scheidungsfolgenvereinbarung: Inhalt & Kosten | medipact",
+  title: "Scheidungsfolgenvereinbarung (Scheidungsvertrag): Inhalt, Kosten, Notar",
+  // 16.10.2026: gesucht wird der Alltagsbegriff – "scheidungsvertrag" (13 Impr, Pos 76),
+  // "scheidungsvertrag notar" (9, Pos 94). Begriff jetzt in Title, H1, Intro und erster FAQ.
+  metaTitle: "Scheidungsfolgenvereinbarung: Scheidungsvertrag beim Notar",
   description:
-    "Was in eine Scheidungsfolgenvereinbarung gehört, wann sie notariell beurkundet werden muss und was sie kostet – und warum der teure Teil davor liegt.",
+    "Scheidungsvertrag, juristisch Scheidungsfolgenvereinbarung: was hineingehört, wann der Notar beurkunden muss, was es kostet – und wo der teure Teil liegt.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-08-12",
+  updated: "2026-10-16",
   published: "2026-08-12",
   readingMinutes: 11,
   intro:
-    "Eine Scheidungsfolgenvereinbarung ist der Vertrag, in dem Sie beide regeln, was nach der Ehe gelten soll: Vermögen, Unterhalt, Versorgungsausgleich, Immobilie, Kinder. Sie ist der Grund, warum manche Scheidungen in drei Monaten erledigt sind und andere über Jahre laufen. Dieser Artikel zeigt, was hineingehört, wann Sie zwingend zum Notar müssen, was das kostet – und an welcher Stelle die eigentlichen Kosten entstehen.",
+    "Eine Scheidungsfolgenvereinbarung – umgangssprachlich Scheidungsvertrag – ist der Vertrag, in dem Sie beide regeln, was nach der Ehe gelten soll: Vermögen, Unterhalt, Versorgungsausgleich, Immobilie, Kinder. Sie ist der Grund, warum manche Scheidungen in drei Monaten erledigt sind und andere über Jahre laufen. Dieser Artikel zeigt, was hineingehört, wann Sie zwingend zum Notar müssen, was das kostet – und an welcher Stelle die eigentlichen Kosten entstehen.",
   blocks: [
     {
       type: "paragraph",
@@ -238,10 +240,15 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Trennung strukturiert und fair regeln",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
+    {
+      question: "Was ist ein Scheidungsvertrag?",
+      answer:
+        "Scheidungsvertrag ist der Alltagsbegriff für die Scheidungsfolgenvereinbarung: den Vertrag, in dem Ehepartner regeln, was nach der Ehe gelten soll – Vermögen, Unterhalt, Versorgungsausgleich, Immobilie und Kinder. Viele dieser Punkte müssen notariell beurkundet werden, deshalb wird oft vom Scheidungsvertrag beim Notar gesprochen.",
+    },
     {
       question: "Was kostet eine Scheidungsfolgenvereinbarung?",
       answer:
@@ -284,6 +291,6 @@ export const article: RatgeberArticle = {
     { label: "Sorgerecht und Umgangsrecht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Was kostet ein Mediator bei der Scheidung?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Kostenrechner: Gericht oder Einigung?", href: "/kostenrechner" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

@@ -121,7 +121,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Wohnung und Trennung strukturiert regeln",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
     {
       type: "callout",
@@ -161,6 +161,6 @@ export const article: RatgeberArticle = {
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Muss ich bei der Scheidung das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },
     { label: "„Ich will mich trennen“ aussprechen", href: "/ratgeber/ich-will-mich-trennen" },
-    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/konflikte/trennung" },
+    { label: "Trennung & Scheidung: Mediation im Überblick", href: "/scheidungsmediation" },
   ],
 };

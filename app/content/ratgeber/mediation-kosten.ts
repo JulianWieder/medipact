@@ -20,19 +20,48 @@ export const article: RatgeberArticle = {
   slug: "mediation-kosten",
   category: "Mediation",
   title: "Was kostet ein Mediator? Kosten und Stundensätze im Überblick",
-  metaTitle: "Mediation Kosten: Was kostet ein Mediator? | medipact",
+  // 16.10.2026: GSC 14.10. – "was kostet eine mediation" (Pos 75), "mediation
+  // kosten" (83), "mediator kosten" (63) hatten keine passende Seite. Diese Seite
+  // steht auf Pos 30 und uebernimmt die Kostenantwort; metaTitle traegt jetzt die
+  // Mediation-Frage, die H1 bleibt bei der Mediator-Frage (beste Query der Seite).
+  metaTitle: "Was kostet eine Mediation? Kosten & Stundensätze | medipact",
   // Die Description trägt bewusst konkrete Zahlen: Wer "was kostet ein
   // mediator pro stunde" googelt, sucht einen Betrag. Ein Snippet ohne Zahl
   // verliert den Klick an Wettbewerber, die eine nennen — bei 32
   // Impressionen und 1 Klick war genau das der Fall.
   description:
-    "Was kostet ein Mediator pro Stunde? Übliche Stundensätze von 150–250 €, Pauschalen und Gesamtkosten – online bei medipact ab 49 € pro Partei.",
+    "Was kostet eine Mediation? Gesamtkosten, übliche Stundensätze von 150–250 € und Pauschalen im Überblick – online bei medipact ab 49 € pro Partei.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-08-05",
+  updated: "2026-10-16",
   readingMinutes: 8,
   intro:
     "Ein Mediator kostet bei privaten Konflikten üblicherweise 150 bis 250 Euro pro Stunde, in der Wirtschaftsmediation deutlich mehr. Was am Ende zusammenkommt, hängt aber weniger am Stundensatz als an der Zahl der Sitzungen. Dieser Artikel zeigt die üblichen Stundensätze und Preismodelle, womit Sie insgesamt rechnen müssen, wer die Kosten trägt und wie Mediation im Vergleich zum Gericht abschneidet.",
   blocks: [
+    // Kurzantwort zuerst: wer "was kostet eine mediation" sucht, will eine
+    // Spanne, nicht die Herleitung. medipact-Preise aus backend/app/pricing.py –
+    // bei Preisaenderung hier, in der FAQ unten und auf /preise nachziehen.
+    { type: "heading", text: "Was kostet eine Mediation? Die kurze Antwort" },
+    {
+      type: "paragraph",
+      text: "Eine private Mediation mit Stundenabrechnung kostet in Deutschland meist zwischen 2.000 und knapp 5.000 Euro für beide Parteien zusammen – je nachdem, wie viele Sitzungen nötig sind. Der Stundensatz liegt bei etwa 150 bis 250 Euro, in der Wirtschaftsmediation höher. Mit einem Festpreis-Verfahren steht der Betrag dagegen vorab fest: Bei medipact beginnt er bei 49 € pro Partei.",
+    },
+    {
+      type: "table",
+      caption: "Festpreise der Online-Mediation bei medipact nach Konfliktart",
+      headers: ["Konfliktart", "Festpreis", "Abrechnung"],
+      rows: [
+        ["Nachbarschaft, Verbraucher, Mietverhältnis", "49 €", "pro Partei"],
+        ["Trennung & Scheidung", "299–899 €", "pro Partei, je nach Paket"],
+        ["Erbschaft", "399 €", "pro Verfahren"],
+        ["Konflikt am Arbeitsplatz", "399 €", "pro Verfahren, trägt der Arbeitgeber"],
+        ["Wirtschaft und B2B (ODR)", "399–1.900 €", "pro Verfahren, je nach Verfahrensart"],
+      ],
+    },
+    {
+      type: "cta",
+      text: "Prozesskosten und Mediation für Ihren Fall vergleichen",
+      href: "/kostenrechner",
+    },
     { type: "heading", text: "Was kostet ein Mediator pro Stunde?" },
     {
       type: "paragraph",
@@ -178,7 +207,12 @@ export const article: RatgeberArticle = {
     },
   ],
   faq: [
-    // Erste beide Fragen wörtlich die stärksten Queries der Seite
+    {
+      question: "Was kostet eine Mediation?",
+      answer:
+        "Mit Stundenabrechnung meist 2.000 bis knapp 5.000 Euro für beide Parteien zusammen, abhängig von der Zahl der Sitzungen. Festpreis-Verfahren sind planbarer: Bei medipact kostet eine Mediation je nach Konfliktart ab 49 € pro Partei, eine Trennungsmediation 299 bis 899 € pro Partei.",
+    },
+    // Danach die beiden Fragen wörtlich die stärksten Queries der Seite
     // ("was kostet ein mediator pro stunde" Pos. 34,5, "mediator
     // stundensatz" 58,0). Erster Satz jeweils mit Zahl – das ist das
     // Format, das Google für Featured Snippets übernimmt.
@@ -219,8 +253,8 @@ export const article: RatgeberArticle = {
     { label: "Scheidung mit Mediator: Kosten im Detail", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Wirtschaftsmediation: Kosten im Unternehmen", href: "/ratgeber/wirtschaftsmediation" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
-    { label: "Konfliktarten: die 6 Arten im Überblick", href: "/konflikte" },
-    { label: "Mediation bei Trennung & Scheidung", href: "/konflikte/trennung" },
+    { label: "Konfliktarten: die 6 Arten im Überblick", href: "/ratgeber/konfliktarten" },
+    { label: "Mediation bei Trennung & Scheidung", href: "/scheidungsmediation" },
     { label: "Mediation bei Erbstreit", href: "/konflikte/erbschaft" },
     { label: "Preise ansehen", href: "/preise" },
   ],

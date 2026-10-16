@@ -72,7 +72,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Trennung fair regeln - so hilft medipact bei Trennung und Scheidung",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -111,7 +111,7 @@ export const article: RatgeberArticle = {
     { label: "Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
     { label: "Trennungsjahr: Wie weist man es nach?", href: "/ratgeber/trennungsjahr-nachweisen" },
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
-    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
+    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/scheidungsmediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Sorgerecht und Umgang ohne Gericht regeln", href: "/ratgeber/sorgerecht-und-umgangsrecht" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },

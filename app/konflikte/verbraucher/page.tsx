@@ -12,15 +12,18 @@ export const metadata: Metadata = pageMetadata({
   path: "/konflikte/verbraucher",
 });
 
+// Eigene @id je Konfliktart (nicht #service: das ist die Dachleistung auf
+// Startseite, /konflikte und /preise – sechs verschiedene Leistungen unter
+// einer @id wuerde Google zu einer Entitaet mit widerspruechlichen Namen
+// verschmelzen). Verknuepft ueber isRelatedTo. Preis aus backend/app/pricing.py –
+// bei Preisaenderung hier mitziehen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": "https://medipact.de/konflikte/verbraucher#service",
   name: "Verbraucher-Mediation",
-  provider: {
-    "@type": "Organization",
-    name: "medipact",
-    url: "https://medipact.de",
-  },
+  provider: { "@id": "https://medipact.de/#organization" },
+  isRelatedTo: { "@id": "https://medipact.de/#service" },
   serviceType: "Mediation bei Verbraucher- und Handwerkerstreitigkeiten",
   description:
     "Strukturierte Online-Mediation bei Streit um Rechnungen, Mängel oder Handwerkerleistungen – außergerichtlich, ab 49 € pro Partei.",
@@ -30,6 +33,14 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de/konflikte/verbraucher",
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "49",
+    description: "Festpreis pro Partei",
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
 };
 
 
@@ -58,7 +69,7 @@ export default function VerbraucherPage() {
           alt: "Kunde prüft eine strittige Handwerker-Rechnung",
         }}
         breadcrumbs={[
-          { label: "Konfliktarten", href: "/konflikte" },
+          { label: "Konflikte", href: "/konflikte" },
           { label: "Verbraucher & Handwerker" },
         ]}
         kostenrechnerArt="verbraucher"

@@ -55,9 +55,10 @@ const serviceSchema = {
   offers: {
     "@type": "AggregateOffer",
     priceCurrency: "EUR",
-    lowPrice: "399",
+    // 299 € = Paket "Einvernehmliche Scheidung" seit 01.10.2026
+    lowPrice: "299",
     highPrice: "899",
-    offerCount: 3,
+    offerCount: 4,
     url: "https://medipact.de/preise",
     availability: "https://schema.org/InStock",
   },
@@ -97,7 +98,7 @@ export default async function TrennungPage({
         breadcrumbs={[
           // Die Seite liegt nicht mehr unter /konflikte, bleibt inhaltlich
           // aber dessen Kind. Breadcrumbs dürfen vom URL-Pfad abweichen.
-          { label: "Konfliktarten", href: "/konflikte" },
+          { label: "Konflikte", href: "/konflikte" },
           { label: "Scheidungsmediation" },
         ]}
         kostenrechnerArt="trennung"

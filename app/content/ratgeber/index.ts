@@ -26,6 +26,8 @@ import { article as konfliktJournal } from "./konflikt-journal";
 import { article as mobbingTagebuchFuehren } from "./mobbing-tagebuch-fuehren";
 import { article as akuterKonfliktWasTun } from "./akuter-konflikt-was-tun";
 import { article as schwelenderKonflikt } from "./schwelender-konflikt";
+// 16.10.2026 – Lexikon-Teil von /konflikte, siehe Kopf der Datei.
+import { article as konfliktarten } from "./konfliktarten";
 import { article as fuenfPhasenDerMediation } from "./5-phasen-der-mediation";
 import { article as wasIstMediation } from "./was-ist-mediation";
 import { article as wasIstEinMediator } from "./was-ist-ein-mediator";
@@ -56,6 +58,8 @@ import { article as wegStreitMediation } from "./weg-streit-mediation";
 // das Wort nicht. Hintergrund in docs/ratgeber-suchsprache.md.
 import { article as wasStehtMirBeiDerScheidungZu } from "./was-steht-mir-bei-der-scheidung-zu";
 import { article as hausBeiScheidung } from "./haus-bei-scheidung";
+// 16.10.2026 – Blockade-Fall "einer will verkaufen, der andere nicht" (Trennung + Erbe).
+import { article as hausVerkaufenEinerWillNicht } from "./haus-verkaufen-einer-will-nicht";
 // 12.08.2026 – der Vertrag, den der medipact-Prozess inhaltlich produziert.
 // Transaktionale Suchintention, siehe docs/kaufabsicht-scheidung.md.
 import { article as scheidungsfolgenvereinbarung } from "./scheidungsfolgenvereinbarung";
@@ -81,6 +85,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   mobbingTagebuchFuehren,
   akuterKonfliktWasTun,
   schwelenderKonflikt,
+  konfliktarten,
   fuenfPhasenDerMediation,
   wasIstMediation,
   wasIstEinMediator,
@@ -98,6 +103,7 @@ export const ratgeberArticles: RatgeberArticle[] = [
   scheidungsfolgenvereinbarung,
   scheidungOhneAnwalt,
   hausBeiScheidung,
+  hausVerkaufenEinerWillNicht,
   werMussAusDerWohnung,
   trennungsjahrNachweisen,
   trennungInWuerde,

@@ -12,15 +12,18 @@ export const metadata: Metadata = pageMetadata({
   path: "/konflikte/mietverhaeltnis",
 });
 
+// Eigene @id je Konfliktart (nicht #service: das ist die Dachleistung auf
+// Startseite, /konflikte und /preise – sechs verschiedene Leistungen unter
+// einer @id wuerde Google zu einer Entitaet mit widerspruechlichen Namen
+// verschmelzen). Verknuepft ueber isRelatedTo. Preis aus backend/app/pricing.py –
+// bei Preisaenderung hier mitziehen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": "https://medipact.de/konflikte/mietverhaeltnis#service",
   name: "Mediation im Mietverhältnis",
-  provider: {
-    "@type": "Organization",
-    name: "medipact",
-    url: "https://medipact.de",
-  },
+  provider: { "@id": "https://medipact.de/#organization" },
+  isRelatedTo: { "@id": "https://medipact.de/#service" },
   serviceType: "Mediation bei Streitigkeiten zwischen Mieter und Vermieter",
   description:
     "Strukturierte Online-Mediation bei Mietstreit – Nebenkostenabrechnung, Mängel und Minderung, Kaution, Mieterhöhung, Kündigung und Auszug – als Alternative zum Amtsgericht.",
@@ -30,6 +33,14 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de/konflikte/mietverhaeltnis",
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "49",
+    description: "Festpreis pro Partei",
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
 };
 
 // Die FAQs werden auf der Seite sichtbar gerendert - hier zusätzlich als
@@ -57,7 +68,7 @@ export default function MietverhaeltnisPage() {
           alt: "Mieterin und Vermieter im Gespräch über eine Abrechnung",
         }}
         breadcrumbs={[
-          { label: "Konfliktarten", href: "/konflikte" },
+          { label: "Konflikte", href: "/konflikte" },
           { label: "Mietverhältnis" },
         ]}
         kostenrechnerArt="mietverhaeltnis"

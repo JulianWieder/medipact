@@ -7,19 +7,22 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "schwelender-konflikt",
   category: "Mediation",
-  title: "Schwelender Konflikt: Beobachten, bevor es eskaliert",
+  title: "Schwelender Konflikt: Bedeutung, Anzeichen und was Sie tun können",
   // 07.09.2026: Position 4,5 bei 2,6 % CTR – auf Platz 4 sind 8–10 % normal.
   // "Beobachten statt abwarten" beschreibt eine Haltung und verspricht kein
   // Ergebnis; Title und Description nennen jetzt beides: das Signal, nach dem
   // gesucht wird, und das kostenlose Werkzeug dahinter.
-  metaTitle: "Schwelender Konflikt: Warnsignale erkennen | medipact",
+  // 16.10.2026: Pos 7,7 / 160 Impr / 1,25 % CTR – "Warnsignale + Logbuch" hat nicht
+  // gezogen. Gesucht wird die Definition ("schwelender konflikt bedeutung", Pos 2,6,
+  // 0 Klicks). Title und Description beginnen jetzt mit der Antwort.
+  metaTitle: "Schwelender Konflikt: Bedeutung & Anzeichen | medipact",
   description:
-    "Noch kein offener Streit, aber es knirscht: Eskalationssignale früh erkennen und den Verlauf festhalten – mit dem kostenlosen Konflikt-Logbuch.",
+    "Ein schwelender Konflikt ist ein Streit, der noch nicht offen ausgebrochen ist, aber unter der Oberfläche weiterwirkt. Anzeichen und was Sie tun können.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-09-19",
+  updated: "2026-10-16",
   readingMinutes: 8,
   intro:
-    "Die meisten Konflikte beginnen nicht mit einem Knall, sondern mit einem Knirschen: eine Bemerkung, die hängen bleibt, eine E-Mail im falschen Ton, ein Nachbar, der plötzlich nicht mehr grüßt. Monatelang ist unklar, ob sich das auswächst oder hochschaukelt. Genau in dieser Schwebephase machen viele den gleichen Fehler – sie tun nichts, bis es zu spät ist. Die Alternative heißt: strukturiert beobachten. So behalten Sie den Überblick, ohne den Konflikt größer zu machen, als er ist.",
+    "Ein schwelender Konflikt ist ein Streit, der noch nicht offen ausgebrochen ist, aber unter der Oberfläche weiterwirkt. Die meisten Konflikte beginnen nicht mit einem Knall, sondern mit einem Knirschen: eine Bemerkung, die hängen bleibt, eine E-Mail im falschen Ton, ein Nachbar, der plötzlich nicht mehr grüßt. Monatelang ist unklar, ob sich das auswächst oder hochschaukelt. Genau in dieser Schwebephase machen viele den gleichen Fehler – sie tun nichts, bis es zu spät ist. Die Alternative heißt: strukturiert beobachten. So behalten Sie den Überblick, ohne den Konflikt größer zu machen, als er ist.",
   blocks: [
     { type: "heading", text: "Warum „einfach abwarten“ meistens schiefgeht" },
     {

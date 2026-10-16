@@ -104,6 +104,6 @@ export const article: RatgeberArticle = {
     { label: "Mediation als Konfliktlösung – der Leitfaden", href: "/ratgeber/mediation-als-konfliktloesung" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
     { label: "Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
-    { label: "Konfliktarten: die 6 Arten im Überblick", href: "/konflikte" },
+    { label: "Konfliktarten: die 6 Arten im Überblick", href: "/ratgeber/konfliktarten" },
   ],
 };

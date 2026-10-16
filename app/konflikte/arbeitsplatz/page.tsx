@@ -12,15 +12,18 @@ export const metadata: Metadata = pageMetadata({
   path: "/konflikte/arbeitsplatz",
 });
 
+// Eigene @id je Konfliktart (nicht #service: das ist die Dachleistung auf
+// Startseite, /konflikte und /preise – sechs verschiedene Leistungen unter
+// einer @id wuerde Google zu einer Entitaet mit widerspruechlichen Namen
+// verschmelzen). Verknuepft ueber isRelatedTo. Preis aus backend/app/pricing.py –
+// bei Preisaenderung hier mitziehen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": "https://medipact.de/konflikte/arbeitsplatz#service",
   name: "Mediation am Arbeitsplatz",
-  provider: {
-    "@type": "Organization",
-    name: "medipact",
-    url: "https://medipact.de",
-  },
+  provider: { "@id": "https://medipact.de/#organization" },
+  isRelatedTo: { "@id": "https://medipact.de/#service" },
   serviceType: "Mediation bei Konflikten im Arbeitsverhältnis",
   description:
     "Strukturierte Online-Mediation bei Konflikten am Arbeitsplatz – Führung, Team, Rollen, Rückkehr nach Abwesenheit und einvernehmliche Beendigung – als Klärung vor Kündigung und Arbeitsgericht.",
@@ -30,6 +33,14 @@ const serviceSchema = {
   },
   availableLanguage: "German",
   url: "https://medipact.de/konflikte/arbeitsplatz",
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "EUR",
+    price: "399",
+    description: "Festpreis pro Verfahren, trägt der Arbeitgeber",
+    url: "https://medipact.de/preise",
+    availability: "https://schema.org/InStock",
+  },
 };
 
 // Die FAQs werden auf der Seite sichtbar gerendert - hier zusätzlich als
@@ -57,7 +68,7 @@ export default function ArbeitsplatzPage() {
           alt: "Zwei Personen im klärenden Gespräch am Arbeitsplatz",
         }}
         breadcrumbs={[
-          { label: "Konfliktarten", href: "/konflikte" },
+          { label: "Konflikte", href: "/konflikte" },
           { label: "Arbeitsplatz" },
         ]}
         kostenrechnerArt="arbeitsplatz"

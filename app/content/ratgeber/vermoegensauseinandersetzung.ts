@@ -109,7 +109,7 @@ export const article: RatgeberArticle = {
     {
       type: "cta",
       text: "Vermögen fair aufteilen - so begleitet euch medipact durch die Trennung",
-      href: "/konflikte/trennung",
+      href: "/scheidungsmediation",
     },
   ],
   faq: [
@@ -148,6 +148,6 @@ export const article: RatgeberArticle = {
     { label: "Gericht oder Mediation? Warum Prozesse oft schiefgehen", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Scheidung mit Mediator: Was kostet das?", href: "/ratgeber/scheidung-mediator-kosten" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
-    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/konflikte/trennung" },
+    { label: "Mediation bei Trennung und Scheidung mit medipact", href: "/scheidungsmediation" },
   ],
 };
