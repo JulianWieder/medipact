@@ -158,14 +158,12 @@ export default function KonfliktLogbuchPage() {
                 </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-neutral-200">
-                Noch keine Mediation – aber ein Konflikt, der Sie nicht mehr
-                loslässt? Schreiben Sie kostenlos auf, was passiert:
-                Vorkommnisse, Gespräche, E-Mails, WhatsApp, Telefonate. Dann
-                steht es fest – und Sie müssen es nicht mehr die ganze Zeit
-                mit sich herumtragen. Vertraulich, sortiert, dauerhaft
-                kostenlos. Und wenn Sie den Streit klären wollen, ist die
-                Grundlage schon da: im klärenden Gespräch, per Mediation oder
-                notfalls vor Gericht.
+                Erinnern Sie sich noch, was Ihnen beim letzten Streit wirklich geholfen
+                hat? Vielen geht es so: Die Idee war da, dann war sie weg. Genau dafür
+                gibt es das medipact Logbuch. Sie halten Konflikte und Ihre Gedanken
+                dazu fest, sortiert nach Zeit und Bereich, und finden später in Ruhe
+                zurück zu dem, was funktioniert hat. Ein Buch, das Ihnen hilft, sich
+                selbst besser zu verstehen und Gutes nicht zu verlieren.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
