@@ -22,9 +22,9 @@ import { HeroTagline } from "@/app/components/ui/HeroTagline";
  *
  * Die laufende Tagline (HeroTagline) wird hier zentral gerendert, damit sie
  * auf allen Unterseiten identisch sitzt — die Seiten selbst müssen nichts
- * tun. Sie liegt bewusst über dem zentrierten Content (top-24, also unter
- * dem fixierten Header) und ist pointer-events-none, damit sie keine Klicks
- * abfängt. Ausschalten mit `tagline={false}`, eigener Text mit
+ * tun. Sie steht im Fluss ÜBER dem Content (nicht absolut), damit eine
+ * hohe H1 sie auf kleinen Laptop-Screens nicht überlagert, und ist
+ * pointer-events-none, damit sie keine Klicks abfängt. Ausschalten mit `tagline={false}`, eigener Text mit
  * `tagline="…"` — Letzteres nur in gut begründeten Ausnahmen: der Satz
  * wirkt gerade dadurch, dass er überall derselbe ist.
  */
@@ -64,12 +64,12 @@ export function ImagePinHero({
       <HeroBackdrop image={image} imageAlt={imageAlt} scale={imageScale} />
 
       {tagline !== false && (
-        <div className="pointer-events-none absolute inset-x-0 top-24 z-20 hidden sm:block">
+        <div className="pointer-events-none relative z-20 hidden shrink-0 pt-10 sm:block">
           <HeroTagline {...(typeof tagline === "string" ? { text: tagline } : {})} />
         </div>
       )}
 
-      <div className={`relative z-20 flex h-full items-center ${contentClassName}`}>
+      <div className={`relative z-20 flex flex-1 items-center py-12 sm:py-8 ${contentClassName}`}>
         {children}
       </div>
     </ScrollPinFrame>

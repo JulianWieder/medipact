@@ -6,6 +6,7 @@ import { type StaticImageData } from "next/image";
 import { motion, useTransform } from "framer-motion";
 import {
   ScrollPinFrame,
+  usePinActive,
   useScrollPin,
 } from "@/app/components/ui/ScrollPinSection";
 import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
@@ -26,6 +27,9 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
   const textY = useTransform(scrollYProgress, [0, 0.4], [0, -20]);
   const ctaOpacity = useTransform(scrollYProgress, [0.1, 0.5], [1, 0]);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  // Auf dem Handy pinnt der Hero nicht (siehe ScrollPinFrame) — dort darf
+  // nichts wegfaden, sonst verschwindet der Text beim Lesen.
+  const pinned = usePinActive();
 
   return (
     <ScrollPinFrame
@@ -43,20 +47,22 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
 
       {/* Laufschrift wie auf allen Unterseiten (ImagePinHero rendert sie dort
           zentral). Hier haendisch, weil dieser Hero eigene Scroll-Transforms
-          hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben. */}
+          hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben.
+          Im Fluss ueber dem Content, nicht absolut — sonst laeuft sie auf
+          niedrigen Screens durch die H1. */}
       <motion.div
         style={{ opacity: textOpacity }}
-        className="pointer-events-none absolute inset-x-0 top-24 z-20 hidden sm:block"
+        className="pointer-events-none relative z-20 hidden shrink-0 pt-10 sm:block"
       >
         <HeroTagline />
       </motion.div>
 
       {/* Content */}
-      <div className="relative flex h-full items-center z-20">
+      <div className="relative z-20 flex flex-1 items-center pt-10 pb-12 sm:py-8">
         <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Text-Spalte (links) */}
           <div className="max-w-2xl lg:col-span-8">
-            <motion.div style={{ opacity: textOpacity, y: textY }}>
+            <motion.div style={pinned ? { opacity: textOpacity, y: textY } : undefined}>
               {/* Puristischer Micro-Badge - Akzentfarbe leicht verstärkt für Lesbarkeit */}
               <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-accent-400">
                 <span className="text-neutral-500">//</span> {t("badge")}
@@ -83,7 +89,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
               </p>
             </motion.div>
 
-            <motion.div style={{ opacity: ctaOpacity }}>
+            <motion.div style={pinned ? { opacity: ctaOpacity } : undefined}>
               {/* Buttons mit geschärften Kontrasten */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <a
@@ -120,7 +126,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       {/* Scroll-Cue unten (Palantir-Stil: „Scroll to Explore") */}
       <motion.div
         style={{ opacity: ctaOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-6 z-20 flex items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
+        className="pointer-events-none absolute inset-x-0 bottom-6 z-20 hidden items-center sm:flex justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
       >
         <span>{t("scrollCue")}</span>
         <svg
