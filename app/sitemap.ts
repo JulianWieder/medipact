@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
+import { KARRIERE_ONLINE } from "@/app/karriere/status";
 
 const BASE_URL = "https://medipact.de";
 
@@ -146,12 +147,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    {
-      url: `${BASE_URL}/karriere`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
+    // Nur solange die Stellenanzeige online ist (siehe app/karriere/status.ts).
+    ...(KARRIERE_ONLINE
+      ? [
+          {
+            url: `${BASE_URL}/karriere`,
+            lastModified,
+            changeFrequency: "monthly" as const,
+            priority: 0.5,
+          },
+        ]
+      : []),
     {
       url: `${BASE_URL}/konflikte/nachbarschaft`,
       lastModified,

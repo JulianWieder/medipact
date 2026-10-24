@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import karrierePhoto from "@/fotos/medi_karriere.jpg";
 import { pageMetadata } from "@/lib/seo";
+import { KARRIERE_ONLINE } from "./status";
 
 export const metadata: Metadata = pageMetadata({
   title: "Karriere bei medipact – Mitgestalten statt verwalten",
@@ -55,6 +57,8 @@ const weOffer = [
 ];
 
 export default function KarrierePage() {
+  if (!KARRIERE_ONLINE) notFound();
+
   return (
     <main className="app-shell pt-[73px]">
 

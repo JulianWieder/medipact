@@ -8,6 +8,7 @@ import { isMigratedLocalePath } from "@/i18n/routing";
 import { resetCookieConsent } from "@/app/components/CookieConsent";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import { socialProfiles } from "@/app/content/social";
+import { KARRIERE_ONLINE } from "@/app/karriere/status";
 
 /**
  * Gleiches Problem wie im Header, gleiche Lösung: Der lokalisierte Link aus
@@ -143,11 +144,13 @@ export default function Footer({
                   {t("companyAbout")}
                 </FooterLink>
               </li>
-              <li>
-                <FooterLink href="/karriere" className="transition hover:text-white">
-                  {t("companyCareers")}
-                </FooterLink>
-              </li>
+              {KARRIERE_ONLINE && (
+                <li>
+                  <FooterLink href="/karriere" className="transition hover:text-white">
+                    {t("companyCareers")}
+                  </FooterLink>
+                </li>
+              )}
               <li>
                 <FooterLink href="/kontakt" className="transition hover:text-white">
                   {t("companyContact")}
