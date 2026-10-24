@@ -29,6 +29,28 @@ from app.security import (
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+def _email(roh) -> str:
+    """So wird eine Adresse gespeichert: ohne Leerraum, klein geschrieben."""
+    return str(roh).strip().lower()
+
+
+def _user_fuer_email(db: Session, email) -> User | None:
+    """Das Konto zu einer Adresse, unabhaengig von der Schreibweise.
+
+    Gespeichert wurden Adressen frueher so, wie sie eingetippt waren, und
+    `users.email` ist case-sensitiv eindeutig. Login und Registrierung
+    verglichen exakt, `forgot-password` ohne Gross/klein - "Max@x.de" fand
+    beim Login kein Konto und bekam trotzdem einen Reset-Link. Der exakte
+    Treffer geht vor, damit zwei Altkonten, die sich nur in der Schreibweise
+    unterscheiden, weiter so aufgeloest werden wie bisher.
+    """
+    roh = str(email).strip()
+    return (
+        db.query(User).filter(User.email == roh).first()
+        or db.query(User).filter(func.lower(User.email) == roh.lower()).first()
+    )
+
+
 @router.get("/plans")
 def public_business_plans():
     """Öffentliche Liste der Business-Abo-Pläne inkl. Konditionen – für die
@@ -136,7 +158,7 @@ def register(
 ):
     auth_limiter.check(request)
 
-    existing_user = db.query(User).filter(User.email == str(payload.email)).first()
+    existing_user = _user_fuer_email(db, payload.email)
 
     if existing_user:
         if existing_user.is_verified:
@@ -159,7 +181,7 @@ def register(
 
     user = User(
         name=payload.name,
-        email=str(payload.email),
+        email=_email(payload.email),
         hashed_password=hash_password(payload.password),
         role="party",
         is_verified=False,
@@ -223,7 +245,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     auth_limiter.check(request)
 
-    user = db.query(User).filter(User.email == str(payload.email)).first()
+    user = _user_fuer_email(db, payload.email)
 
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Ungültige Zugangsdaten")
@@ -281,13 +303,7 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Sessio
     """
     auth_limiter.check(request)
 
-    # Case-insensitiv matchen — E-Mails werden bei der Registrierung wie
-    # eingetippt gespeichert (gleicher Fix wie bei /invites/me)
-    user = (
-        db.query(User)
-        .filter(func.lower(User.email) == str(payload.email).lower())
-        .first()
-    )
+    user = _user_fuer_email(db, payload.email)
 
     # Wir antworten gleich, egal ob der Account existiert oder nicht (Sicherheit!)
     if not user:
@@ -691,7 +707,7 @@ def create_org_member(
         if not org:
             raise HTTPException(status_code=404, detail="Unternehmen nicht gefunden")
 
-    existing = db.query(User).filter(User.email == str(payload.email)).first()
+    existing = _user_fuer_email(db, payload.email)
     if existing:
         if existing.organization_id not in (None, org_id) and not tenancy.is_global_admin(manager):
             raise HTTPException(status_code=409, detail="Nutzer gehört bereits zu einem anderen Unternehmen.")
@@ -710,7 +726,7 @@ def create_org_member(
     reset_token = secrets.token_urlsafe(32)
     user = User(
         name=payload.name,
-        email=str(payload.email),
+        email=_email(payload.email),
         hashed_password=hash_password(secrets.token_urlsafe(24)),
         role=payload.role,
         organization_id=org_id,
@@ -779,7 +795,7 @@ def register_company(
 ):
     auth_limiter.check(request)
 
-    if db.query(User).filter(User.email == str(payload.email)).first():
+    if _user_fuer_email(db, payload.email):
         raise HTTPException(status_code=400, detail="Email ist bereits registriert")
     if db.query(Organization).filter(Organization.name == payload.company_name).first():
         raise HTTPException(status_code=409, detail="Ein Unternehmen mit diesem Namen existiert bereits.")
@@ -796,7 +812,7 @@ def register_company(
     token = secrets.token_urlsafe(32)
     user = User(
         name=payload.name,
-        email=str(payload.email),
+        email=_email(payload.email),
         hashed_password=hash_password(payload.password),
         role="firm_admin",
         organization_id=org.id,

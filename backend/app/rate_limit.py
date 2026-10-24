@@ -4,6 +4,7 @@ No external dependencies required.
 
 Default: 10 requests per minute per IP for auth endpoints.
 """
+import ipaddress
 import time
 from collections import defaultdict
 from threading import Lock
@@ -19,15 +20,27 @@ class RateLimiter:
         self._lock = Lock()
 
     def _get_client_ip(self, request: Request) -> str:
-        # Only trust X-Forwarded-For if the direct connection comes from localhost
-        # (i.e. a trusted reverse proxy like nginx running on the same machine).
-        # Otherwise use the real socket IP to prevent header spoofing.
+        # Die API laeuft im Docker-Container und ist nur ueber 127.0.0.1:8000
+        # erreichbar (backend/docker-compose.yml). Jede Verbindung kommt also
+        # aus dem Next.js auf demselben Server - im Container sichtbar als
+        # Gateway des Docker-Netzes (172.x), nicht als 127.0.0.1. Vorher galt
+        # nur 127.0.0.1 als vertrauenswuerdig, damit zaehlten ALLE Logins der
+        # Plattform in einen einzigen Topf.
+        #
+        # X-Real-IP statt X-Forwarded-For: nginx setzt X-Real-IP auf
+        # $remote_addr und ueberschreibt damit, was der Browser mitschickt.
+        # Den linken Eintrag von X-Forwarded-For dagegen kann jeder Client
+        # selbst setzen. Fehlt der Header, bleibt es bei der direkten IP.
         direct_ip = request.client.host if request.client else "unknown"
-        if direct_ip in ("127.0.0.1", "::1"):
-            forwarded_for = request.headers.get("X-Forwarded-For")
-            if forwarded_for:
-                # The leftmost IP is the original client set by the proxy
-                return forwarded_for.split(",")[0].strip()
+        try:
+            vertraut = ipaddress.ip_address(direct_ip)
+            vertraut = vertraut.is_loopback or vertraut.is_private
+        except ValueError:
+            vertraut = False
+        if vertraut:
+            real_ip = (request.headers.get("X-Real-IP") or "").strip()
+            if real_ip:
+                return real_ip
         return direct_ip
 
     def check(self, request: Request) -> None:
