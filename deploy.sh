@@ -16,12 +16,21 @@ echo "==> Frontend bauen..."
 npm run build
 pm2 restart medipact --update-env
 
-echo "==> Backend (Docker) bauen..."
-cd ~/medipact/backend
-docker compose up -d --build
+# Seit dem Umzug des Nutzerbereichs nach kerno (app.medipact.de) sind
+# medipact-api und medipact-db stillgelegt. Ein "docker compose up" hier
+# wuerde sie wieder starten - und Daten in eine Datenbank schreiben lassen,
+# die niemand mehr liest. Die Marke setzt das Runbook beim Umschalten
+# (mandexis-Repo, docs/runbook-medipact-cutover.md); Rueckweg: Datei loeschen.
+if [ -f ~/medipact/backend/STILLGELEGT ]; then
+  echo "==> Backend uebersprungen: ~/medipact/backend/STILLGELEGT existiert"
+else
+  echo "==> Backend (Docker) bauen..."
+  cd ~/medipact/backend
+  docker compose up -d --build
 
-echo "==> Datenbank-Migrationen..."
-sleep 2
-docker exec medipact-api alembic upgrade heads
+  echo "==> Datenbank-Migrationen..."
+  sleep 2
+  docker exec medipact-api alembic upgrade heads
+fi
 
 echo "==> Fertig!"

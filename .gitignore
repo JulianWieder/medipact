@@ -76,3 +76,6 @@ backend/migrate_now.py
 
 # Eigenes Repo, liegt nur hier im Ordner
 tennis-medenspiel-app/
+
+# Marke fuer das stillgelegte Backend (deploy.sh), nur auf dem Server
+backend/STILLGELEGT
