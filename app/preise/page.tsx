@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
 import { JsonLd } from "@/app/components/JsonLd";
 import Icon from "@/app/components/ui/Icon";
+import { ERSTGESPRAECH_PREIS, MEDIATOR_ANFRAGE_URL } from "@/lib/mediatorVermittlung";
 
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
@@ -594,6 +596,75 @@ export default function Preise() {
           </div>
         </section>
 
+        {/* PERSÖNLICHE MEDIATION (Zusatzbaustein, lib/mediatorVermittlung.ts).
+            Bewusst nach den Verfahrens-Tarifen und heller als Business: Das
+            Online-Verfahren bleibt das Hauptangebot, das hier ist der
+            Zusatzweg für alle, die ein persönliches Gegenüber wollen. */}
+        <section className="section section-muted border-y border-neutral-200">
+          <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8">
+            <div className="max-w-2xl">
+              <div className="eyebrow mb-4">Zusätzlich</div>
+              <h2 className="text-3xl font-black text-neutral-900 sm:text-4xl leading-[1.15]">
+                Persönliche Mediation, vermittelt über medipact.
+              </h2>
+              <p className="mt-5 text-lg leading-8 text-neutral-700">
+                Sie wollen keine geführte Online-Mediation, sondern eine
+                klassische Mediation mit einer Mediatorin am Tisch, vor Ort
+                oder per Video? Dann vermitteln wir Ihnen eine passende
+                Mediatorin aus unserem Pool. Sie bezahlen nur das Erstgespräch
+                über medipact, alles Weitere vereinbaren Sie direkt mit ihr.
+              </p>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
+                <a
+                  href={MEDIATOR_ANFRAGE_URL}
+                  className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-accent-700"
+                >
+                  Mediatorin anfragen
+                </a>
+                <Link
+                  href="/mediator-finden"
+                  className="text-sm font-semibold text-accent-700 transition hover:text-accent-800"
+                >
+                  So funktioniert die Vermittlung →
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+                Erstgespräch
+              </div>
+              <div className="mt-4 text-4xl font-black tracking-tight text-neutral-900">
+                {ERSTGESPRAECH_PREIS ?? "Festpreis"}
+              </div>
+              <p className="mt-2 text-sm text-neutral-500">
+                {ERSTGESPRAECH_PREIS
+                  ? "Einmalig, vorab online bezahlt"
+                  : "Vor der Buchung sichtbar, vorab online bezahlt"}
+              </p>
+              <div className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
+                <p>
+                  <span className="font-bold text-accent-600">✓</span> Passende
+                  Mediatorin, vom medipact-Team zugeordnet
+                </p>
+                <p>
+                  <span className="font-bold text-accent-600">✓</span> Termin
+                  aus ihren freien Zeiten buchen, mit Erinnerung
+                </p>
+                <p>
+                  <span className="font-bold text-accent-600">✓</span>{" "}
+                  Unterlagen vorab teilen, nur für Ihre Mediatorin sichtbar
+                </p>
+              </div>
+              <div className="mt-6 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
+                <strong className="text-neutral-900">Weitere Sitzungen:</strong>{" "}
+                Honorar nach den Sätzen Ihrer Mediatorin, direkt mit ihr
+                vereinbart und abgerechnet.
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* BUSINESS-TARIFE */}
         <section className="section section-strong">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -933,6 +1004,10 @@ export default function Preise() {
                 {
                   q: "Gibt es ein kostenloses Angebot?",
                   a: "Ja: das Konflikt-Logbuch. Sie dokumentieren Ihren Streit kostenlos – Vorkommnisse, Gespräche, E-Mails, WhatsApp, Telefonate – und wandeln das Logbuch erst dann in eine Mediation um, wenn Sie so weit sind. Erst ab diesem Schritt fallen die regulären Preise an.",
+                },
+                {
+                  q: "Kann ich auch eine klassische Mediation mit einer Mediatorin vor Ort buchen?",
+                  a: "Ja, zusätzlich zum Online-Verfahren. Wir vermitteln Ihnen eine passende Mediatorin für Sitzungen vor Ort oder per Video. Über medipact bezahlen Sie nur das Erstgespräch zum Festpreis, die weiteren Sitzungen rechnen Sie direkt mit Ihrer Mediatorin ab. Details auf der Seite „Mediator finden“.",
                 },
                 {
                   q: "Gibt es versteckte Kosten?",

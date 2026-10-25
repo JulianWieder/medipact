@@ -78,6 +78,7 @@ export default function NachbarschaftPage() {
         { label: "Nachbarschaftsmediation" },
       ]}
       kostenrechnerArt="nachbarschaft"
+      mediatorHinweis
       relatedCases={[
         { label: "Ratgeber: Nachbar zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
         { label: "Ratgeber: Wie hoch darf die Hecke sein?", href: "/ratgeber/hecke-nachbar-hoehe" },

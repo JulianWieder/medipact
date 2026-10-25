@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
 import kostenPhoto from "@/fotos/kosten.jpg";
 import { JsonLd } from "@/app/components/JsonLd";
+import { MediatorVermittlungHinweis } from "@/app/components/ui/MediatorVermittlungHinweis";
 import { pageMetadata } from "@/lib/seo";
 
 // Intent-Umstellung 07.09.2026 (Fortsetzung der Startseiten-Entscheidung vom
@@ -474,6 +475,8 @@ export default function KonfliktePage() {
           </div>
         </div>
       </section>
+
+      <MediatorVermittlungHinweis />
 
       <section className="section section-strong">
         <div className="container max-w-3xl text-center">

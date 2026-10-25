@@ -83,6 +83,7 @@ export default function OdrPage() {
           { label: "Online Dispute Resolution (ODR)" },
         ]}
         kostenrechnerArt="odr"
+        mediatorHinweis
         relatedCases={[
           { label: "Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
           { label: "Teamkonflikt im Mittelstand", href: "/cases/team-konflikt" },

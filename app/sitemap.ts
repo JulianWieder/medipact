@@ -46,6 +46,8 @@ const STAND = {
   // Sprachumbau ("persoenlich" raus, Sitzungen statt Stundenkontingente,
   // kein falsches "auch vor Ort").
   verfahren: new Date("2026-09-13"),
+  // /mediator-finden + /fuer-mediatoren neu, /preise mit eigener Section dazu.
+  vermittlung: new Date("2026-10-25"),
 };
 
 // Freigabedatum je Sprachfassung (Pfad -> Datum), gilt NUR fuer die
@@ -75,7 +77,7 @@ const ROUTES: Route[] = [
   { path: "", lastModified: STAND.basis, changeFrequency: "weekly", priority: 1.0 },
 
   // Verfahren & Angebot
-  m("/preise", 0.9, STAND.verfahren),
+  m("/preise", 0.9, STAND.vermittlung),
   m("/methode", 0.8, STAND.verfahren),
   m("/kostenrechner", 0.9),
   m("/konflikt-logbuch", 0.9, STAND.intent),
@@ -84,6 +86,9 @@ const ROUTES: Route[] = [
   // Vertriebs-Asset fuer beratende Berufe, eigene Suchsprache — Prioritaet
   // moderat, die Seite lebt von Direktlinks aus Mails und Gespraechen.
   m("/fuer-berater", 0.7),
+  // Zusatzbaustein „Mediator:in vermitteln" (lib/mediatorVermittlung.ts).
+  m("/mediator-finden", 0.7, STAND.vermittlung),
+  m("/fuer-mediatoren", 0.5, STAND.vermittlung),
   // Nur solange die Stellenanzeige online ist (app/karriere/status.ts).
   ...(KARRIERE_ONLINE ? [m("/karriere", 0.5)] : []),
 

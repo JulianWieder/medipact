@@ -130,6 +130,11 @@ export default function Footer({
                   {t("productLogbook")}
                 </FooterLink>
               </li>
+              <li>
+                <FooterLink href="/mediator-finden" className="transition hover:text-white">
+                  {t("productFindMediator")}
+                </FooterLink>
+              </li>
             </ul>
           </div>
 
@@ -159,6 +164,11 @@ export default function Footer({
               <li>
                 <FooterLink href="/fuer-berater" className="transition hover:text-white">
                   {t("companyForAdvisors")}
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/fuer-mediatoren" className="transition hover:text-white">
+                  {t("companyForMediators")}
                 </FooterLink>
               </li>
             </ul>

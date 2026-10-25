@@ -72,6 +72,7 @@ export default function ArbeitsplatzPage() {
           { label: "Arbeitsplatz" },
         ]}
         kostenrechnerArt="arbeitsplatz"
+        mediatorHinweis
         relatedCases={[
           { label: "Ratgeber: Mediation am Arbeitsplatz", href: "/ratgeber/mediation-am-arbeitsplatz" },
           { label: "Ratgeber: Kündigung – wie es ohne Gericht weitergeht", href: "/ratgeber/kuendigung-ohne-gericht" },

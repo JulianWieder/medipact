@@ -13,6 +13,7 @@ import {
 import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
 import { LogbuchHinweis } from "@/app/components/ui/LogbuchHinweis";
 import { KostenrechnerHinweis } from "@/app/components/ui/KostenrechnerHinweis";
+import { MediatorVermittlungHinweis } from "@/app/components/ui/MediatorVermittlungHinweis";
 import type { Konfliktart } from "@/lib/kostenrecht";
 
 type PageImage = {
@@ -123,6 +124,19 @@ type MarketingPageTemplateProps = {
     label: string;
     href: string;
   };
+  /** Primärer Button im Schluss-CTA. Standard ist „Mediation starten"
+   * (Online-Verfahren). Seiten mit einem anderen Hauptweg — /mediator-finden,
+   * /fuer-mediatoren — setzen hier ihren eigenen. */
+  finalPrimaryCta?: {
+    label: string;
+    href: string;
+  };
+  /** Logbuch-Teaser vor dem Schluss-CTA. Standard an; aus auf Seiten, die
+   * nicht die Streitpartei ansprechen oder einen anderen Einstieg verkaufen. */
+  showLogbuchHinweis?: boolean;
+  /** Hinweis auf die Vermittlung einer persönlichen Mediatorin
+   * (/mediator-finden). Nur auf den Konflikt-Seiten; Standard aus. */
+  mediatorHinweis?: boolean;
 };
 
 function SectionLead({
@@ -176,6 +190,9 @@ export function MarketingPageTemplate({
   finalCtaTitle,
   finalCtaText,
   finalCta,
+  finalPrimaryCta = { label: "Mediation starten", href: "/auth/register" },
+  showLogbuchHinweis = true,
+  mediatorHinweis = false,
 }: MarketingPageTemplateProps) {
   return (
     <>
@@ -542,7 +559,11 @@ export function MarketingPageTemplate({
         {kostenrechnerArt && <KostenrechnerHinweis art={kostenrechnerArt} />}
 
         {/* Kostenloses Konflikt-Logbuch: sanfter Einstieg vor dem harten CTA */}
-        <LogbuchHinweis />
+        {showLogbuchHinweis && <LogbuchHinweis />}
+
+        {/* Nach Logbuch, vor dem Schluss-CTA: der Ausgang für alle, die
+            statt des Online-Verfahrens ein persönliches Gegenüber wollen. */}
+        {mediatorHinweis && <MediatorVermittlungHinweis />}
 
         <section
           id="cta"
@@ -564,8 +585,8 @@ export function MarketingPageTemplate({
                 warten. Der bisherige CTA bleibt als zweite Option für alle,
                 die vorher noch eine Frage haben. */}
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button href="/auth/register" size="lg">
-                Mediation starten
+              <Button href={finalPrimaryCta.href} size="lg">
+                {finalPrimaryCta.label}
               </Button>
 
               <NextLink

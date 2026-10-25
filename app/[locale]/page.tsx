@@ -343,6 +343,11 @@ export default async function MedipactLanding({
               <ArrowLink href="/einigung" className="text-base">
                 {t("processLinkEinigung")}
               </ArrowLink>
+              {/* Zusatzbaustein: wer statt des Online-Verfahrens ein
+                  persönliches Gegenüber will (lib/mediatorVermittlung.ts). */}
+              <ArrowLink href="/mediator-finden" tone="muted" className="text-base">
+                {t("processLinkPersoenlich")}
+              </ArrowLink>
             </div>
           </div>
         </section>

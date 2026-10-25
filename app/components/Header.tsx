@@ -175,6 +175,13 @@ export default function Header() {
               desc: t("methodeBegleitungDesc"),
               icon: "users",
             },
+            {
+              // Zusatzbaustein neben dem Online-Verfahren (lib/mediatorVermittlung.ts).
+              label: t("methodePersoenlich"),
+              href: "/mediator-finden",
+              desc: t("methodePersoenlichDesc"),
+              icon: "speech",
+            },
           ],
         },
         {

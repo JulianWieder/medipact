@@ -102,6 +102,8 @@ export default async function TrennungPage({
           { label: "Scheidungsmediation" },
         ]}
         kostenrechnerArt="trennung"
+        // /mediator-finden gibt es nur auf Deutsch.
+        mediatorHinweis={locale === "de"}
         relatedCases={[
           { label: "Ratgeber: Was steht mir bei der Scheidung zu?", href: "/ratgeber/was-steht-mir-bei-der-scheidung-zu" },
           { label: "Ratgeber: Muss ich das Haus verkaufen?", href: "/ratgeber/haus-bei-scheidung" },

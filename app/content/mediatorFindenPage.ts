@@ -1,0 +1,187 @@
+// app/content/mediatorFindenPage.ts
+//
+// Landingpage für den Zusatzbaustein „Mediator:in vermitteln" (/mediator-finden).
+//
+// ZUSÄTZLICH, NICHT STATTDESSEN — bitte vor Änderungen lesen:
+// Das Online-Verfahren bleibt das Hauptangebot, Startseite und Konflikt-Seiten
+// verkaufen weiter nur das. Diese Seite ist für Menschen, die ausdrücklich
+// eine klassische Mediation mit einer persönlichen Mediatorin wollen. Sie
+// stellt deshalb beide Wege ehrlich nebeneinander (Vergleich) und schickt
+// zurück ins Online-Verfahren, wo das besser passt — sie soll dem
+// Kernprodukt keine Fälle abziehen, die dort gut aufgehoben wären.
+//
+// Bewusst NICHT im Text:
+//   - „zertifiziert": geschützte Bezeichnung (ZMediatAusbV). Erst verwenden,
+//     wenn der Pool ausschließlich aus zertifizierten Mediator:innen besteht.
+//   - Ein Preis für das Erstgespräch und ein festes Zeitversprechen: beides
+//     ist noch nicht entschieden. Sobald es steht, in Hero/Trust/FAQ
+//     nachziehen (Suche nach „Erstgespräch").
+//   - Honorare der Mediator:innen: die vereinbart jede Mediatorin selbst.
+
+import { MEDIATOR_ANFRAGE_URL } from "@/lib/mediatorVermittlung";
+
+export const mediatorFindenPageContent = {
+  eyebrow: "Persönliche Mediation",
+  title: "Lieber mit einem Menschen am Tisch?",
+  titleHighlight: "Wir vermitteln Ihnen eine Mediatorin.",
+  intro:
+    "Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür vermitteln wir Ihnen eine ausgebildete Mediatorin oder einen Mediator, die zu Ihrem Konflikt passen. Sie schildern kurz, worum es geht, wir ordnen zu, Sie buchen das Erstgespräch.",
+
+  primaryCta: {
+    label: "Mediatorin anfragen",
+    href: MEDIATOR_ANFRAGE_URL,
+  },
+
+  secondaryCta: {
+    label: "Oder lieber online klären",
+    href: "/methode",
+  },
+
+  featuresTitle: "Für welche Konflikte wir vermitteln",
+  featuresIntro:
+    "Dieselben vier Bereiche wie im Online-Verfahren. Wir ordnen Ihnen eine Mediatorin zu, die in genau diesem Bereich arbeitet — nicht die, die gerade frei ist.",
+
+  features: [
+    {
+      title: "Trennung und Scheidung",
+      text: "Kinder, Unterhalt, Wohnung, Vermögen: Gerade wenn viel Gefühl im Raum ist, wollen viele Paare ein Gegenüber, das das Gespräch hält. Die Vereinbarung, die dabei entsteht, kann später Grundlage für die Scheidung sein.",
+    },
+    {
+      title: "Erbschaft und Erbengemeinschaft",
+      text: "Geschwister, die sich über das Elternhaus nicht einigen, ein Testament, das als ungerecht empfunden wird, ein Betrieb im Nachlass. Oft sitzen mehrere Generationen am Tisch.",
+    },
+    {
+      title: "Nachbarschaft",
+      text: "Lärm, Grenzen, Bäume, Parken. Wenn man sich weiter begegnet, hilft ein Gespräch vor Ort häufig mehr als jeder Brief — auch weil die Mediatorin sich die Lage ansehen kann.",
+    },
+    {
+      title: "Team und Organisation",
+      text: "Gesellschafter im Patt, ein Team, das nicht mehr zusammenarbeitet, eine festgefahrene Nachfolge. Hier sind Präsenztermine mit allen Beteiligten oft der schnellste Weg.",
+    },
+  ],
+
+  processTitle: "So kommen Sie zu Ihrer Mediatorin",
+  process: [
+    {
+      title: "Kurz schildern, worum es geht",
+      text: "Konfliktart, wer beteiligt ist, ob vor Ort oder per Video, und wann es Ihnen passt. Keine langen Formulare, keine Vorgeschichte in allen Details — das klären Sie im Erstgespräch.",
+    },
+    {
+      title: "Wir ordnen eine Mediatorin zu",
+      text: "Das medipact-Team sucht aus dem Pool die Mediatorin, die fachlich und räumlich passt, und meldet sich mit dem Vorschlag bei Ihnen. Sie müssen nicht selbst Verzeichnisse durchsuchen und einzeln anfragen.",
+    },
+    {
+      title: "Erstgespräch buchen",
+      text: "Sie wählen einen der freien Termine Ihrer Mediatorin. Bestätigung und Erinnerung kommen automatisch.",
+    },
+    {
+      title: "Unterlagen vorab teilen — wenn Sie möchten",
+      text: "Testament, Vereinbarungsentwurf, Schriftwechsel: Was Sie hochladen, sieht nur Ihre Mediatorin. Es hilft bei der Vorbereitung, ist aber keine Voraussetzung.",
+    },
+    {
+      title: "Erstgespräch, dann geht es direkt weiter",
+      text: "Das Erstgespräch bezahlen Sie vorab online zum Festpreis. Ob und wie es weitergeht, vereinbaren Sie danach direkt mit Ihrer Mediatorin — auch das Honorar für die weiteren Sitzungen.",
+    },
+  ],
+
+  comparisonTitle: "Persönlich oder online — was passt zu Ihnen?",
+  comparisonIntro:
+    "Beides ist Mediation, beides ist vertraulich. Der Unterschied liegt darin, wie das Gespräch geführt wird. Wenn Ihr Fall online besser aufgehoben ist, sagen wir Ihnen das.",
+  comparisonPlans: [
+    {
+      title: "Persönliche Mediation",
+      status: "Vermittelt über medipact",
+      features: [
+        "Gemeinsame Sitzungen vor Ort oder per Video",
+        "Mediatorin führt das Gespräch von Anfang an",
+        "Erstgespräch zum Festpreis, online gebucht",
+        "Weitere Sitzungen direkt mit der Mediatorin vereinbart",
+        "Passt, wenn Sie ein Gegenüber im Raum wollen",
+      ],
+      featured: true,
+    },
+    {
+      title: "Online-Verfahren",
+      status: "Das medipact-Verfahren",
+      features: [
+        "Beide Seiten arbeiten getrennt und zeitversetzt",
+        "Geführter Ablauf in klaren Phasen",
+        "Mediator entscheidet die strittigen Punkte per Video",
+        "Festpreis für das ganze Verfahren",
+        "Passt, wenn gemeinsame Termine schwierig sind",
+      ],
+    },
+    {
+      title: "Selbst suchen",
+      status: "Verzeichnisse und Einzelanfragen",
+      features: [
+        "Profile vergleichen, ohne zu wissen, wer passt",
+        "Mehrere Mediatorinnen einzeln anschreiben",
+        "Auf Rückmeldung und freie Termine warten",
+        "Kosten des Erstgesprächs oft erst auf Nachfrage",
+      ],
+    },
+  ],
+
+  trustTitle: "Worauf Sie sich verlassen können",
+  trustPoints: [
+    {
+      title: "Ausgebildete Mediatorinnen und Mediatoren",
+      text: "Jede Mediatorin im Pool hat eine Mediationsausbildung abgeschlossen und arbeitet selbstständig. Wir lernen alle persönlich kennen, bevor wir sie vermitteln.",
+    },
+    {
+      title: "Ihre Unterlagen sieht nur Ihre Mediatorin",
+      text: "Was Sie zur Vorbereitung hochladen, ist ausschließlich für die Ihnen zugeordnete Mediatorin sichtbar. Mediatorinnen und Mediatoren sind gesetzlich zur Verschwiegenheit verpflichtet (§ 4 Mediationsgesetz).",
+    },
+    {
+      title: "Ehrliche Einordnung",
+      text: "Lässt sich Ihr Konflikt im Online-Verfahren schneller oder günstiger klären, sagen wir Ihnen das, bevor Sie etwas buchen. Und wenn Mediation gerade nicht der richtige Weg ist, auch.",
+    },
+  ],
+
+  faqTitle: "Häufige Fragen zur persönlichen Mediation",
+  faqs: [
+    {
+      question: "Was kostet das?",
+      answer:
+        "Das Erstgespräch hat einen Festpreis, den Sie vor der Buchung sehen, und wird online bezahlt. Das Honorar für die weiteren Sitzungen vereinbaren Sie direkt mit Ihrer Mediatorin; es richtet sich nach ihren eigenen Sätzen und danach, wie viele Sitzungen Sie brauchen.",
+    },
+    {
+      question: "Kann ich mir die Mediatorin selbst aussuchen?",
+      answer:
+        "Im Moment ordnet das medipact-Team zu, damit Sie nicht selbst vergleichen müssen. Wenn es nach dem Erstgespräch nicht passt, sagen Sie es uns — wir schlagen Ihnen dann eine andere Mediatorin vor.",
+    },
+    {
+      question: "Vor Ort oder per Video?",
+      answer:
+        "Beides ist möglich. Geben Sie in der Anfrage an, was Sie bevorzugen und wo Sie wohnen. Für Termine vor Ort suchen wir eine Mediatorin in Ihrer Region.",
+    },
+    {
+      question: "Muss die andere Seite schon zugestimmt haben?",
+      answer:
+        "Nein. Viele melden sich zuerst allein. Wie die andere Seite eingeladen wird und ob das Erstgespräch zu zweit oder zunächst einzeln stattfindet, besprechen Sie mit Ihrer Mediatorin. Mediation bleibt für alle Beteiligten freiwillig.",
+    },
+    {
+      question: "Was ist der Unterschied zum Online-Verfahren von medipact?",
+      answer:
+        "Im Online-Verfahren arbeiten beide Seiten getrennt und zeitversetzt durch einen geführten Ablauf, ein Mediator kommt für die strittigen Punkte per Video dazu. Bei der persönlichen Mediation führt die Mediatorin das Gespräch von Anfang an in gemeinsamen Sitzungen. Das Online-Verfahren hat einen Festpreis für den ganzen Fall, die persönliche Mediation wird nach Sitzungen abgerechnet.",
+    },
+    {
+      question: "Ersetzt die Mediation eine anwaltliche Beratung?",
+      answer:
+        "Nein. Die Mediatorin berät keine Seite rechtlich. Eine Vereinbarung, die in der Mediation entsteht, können beide Seiten vor der Unterschrift anwaltlich prüfen lassen — bei Trennung und Erbschaft ist das meist sinnvoll.",
+    },
+  ],
+
+  finalCtaTitle: "Schildern Sie kurz, worum es geht.",
+  finalCtaText:
+    "Konfliktart, Beteiligte, vor Ort oder per Video — mehr brauchen wir für den ersten Vorschlag nicht. Die Anfrage ist unverbindlich.",
+  finalPrimaryCta: {
+    label: "Mediatorin anfragen",
+    href: MEDIATOR_ANFRAGE_URL,
+  },
+  finalCta: {
+    label: "Online-Verfahren ansehen",
+    href: "/methode",
+  },
+};
