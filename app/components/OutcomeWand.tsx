@@ -5,25 +5,20 @@ import { caseStudies } from "@/app/content/caseStudies";
 // gespeist aus den bestehenden Fallbeispielen (app/content/caseStudies.tsx).
 // Wichtig: Als anonymisierte, exemplarische Fälle gekennzeichnet – keine
 // echten Kundenzitate, bis welche vorliegen (dann hier ersetzen).
-
-const WALL: { slug: string; label: string }[] = [
-  { slug: "trennung-mit-kindern", label: "Trennung mit Kindern" },
-  { slug: "nachbarschaft-laerm", label: "Nachbarschaft · Lärm" },
-  { slug: "gesellschafter-streit", label: "Gesellschafterstreit" },
-  { slug: "erbstreit-haus-geschwister", label: "Erbschaft" },
-  { slug: "trennung-vermoegen-aufteilen", label: "Trennung · Vermögen" },
-  { slug: "team-konflikt", label: "Teamkonflikt" },
-  { slug: "nachbarschaft-zaun", label: "Nachbarschaft · Grundstück" },
-  { slug: "unternehmen-geerbt", label: "Erbschaft · Familie" },
-  { slug: "b2b-projektstreit", label: "B2B-Projektstreit" },
-];
+//
+// Auswahl + Labels stehen in messages/*.json unter home.outcomes.wall. Das
+// Zitat kommt auf Deutsch aus caseStudies (eine Quelle); eine Sprache ohne
+// eigene Fallbeispiele (en) gibt quote/author im Wall-Eintrag mit.
+type WallEntry = { slug: string; label: string; quote?: string; author?: string };
 
 export default async function OutcomeWand() {
   const t = await getTranslations("home.outcomes");
+  const wall = t.raw("wall") as WallEntry[];
 
-  const cards = WALL.flatMap(({ slug, label }) => {
+  const cards = wall.flatMap(({ slug, label, quote: text, author }) => {
     const cs = caseStudies[slug];
-    const quote = cs?.quotes?.[0];
+    const fallback = cs?.quotes?.[0];
+    const quote = text && author ? { text, author } : fallback;
     return cs && quote ? [{ slug, label, quote }] : [];
   });
 
@@ -52,7 +47,7 @@ export default async function OutcomeWand() {
                   {label}
                 </div>
                 <blockquote className="mt-4 text-sm leading-6 text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6] overflow-hidden">
-                  „{quote.text}“
+                  {t("quote", { text: quote.text })}
                 </blockquote>
               </div>
               <footer className="mt-5 flex items-center justify-between text-xs">
@@ -60,7 +55,7 @@ export default async function OutcomeWand() {
                   {quote.author}
                 </span>
                 <span className="text-accent-400 opacity-0 transition group-hover:opacity-100">
-                  Zum Fall →
+                  {t("toCase")} →
                 </span>
               </footer>
             </a>

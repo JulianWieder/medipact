@@ -41,7 +41,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       {/* Hintergrund (Foto + Gradients + Wirbel) kommt zentral aus HeroBackdrop */}
       <HeroBackdrop
         image={heroPhoto}
-        imageAlt="Mediationssitzung: zwei Konfliktparteien im Gespräch mit einer Mediatorin"
+        imageAlt={t("imageAlt")}
         scale={imageScale}
       />
 
@@ -54,7 +54,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
         style={{ opacity: textOpacity }}
         className="pointer-events-none relative z-20 hidden shrink-0 pt-10 sm:block"
       >
-        <HeroTagline />
+        <HeroTagline text={t("tagline")} />
       </motion.div>
 
       {/* Content */}

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   LOGBUCH_APP_STORE_URL,
   LOGBUCH_WEB_URL,
@@ -12,6 +13,7 @@ import {
  * tone="dark" für dunkle Sektionen (section-strong).
  */
 export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
+  const t = useTranslations("logbuchApp");
   const dark = tone === "dark";
   const appLive = Boolean(LOGBUCH_APP_STORE_URL);
   const tile = dark
@@ -27,21 +29,21 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logbuch/qr-web.svg"
-          alt="QR-Code zu logbuch.medipact.de"
+          alt={t("qrWebAlt")}
           width={112}
           height={112}
           className="hidden h-28 w-28 shrink-0 rounded-lg bg-white p-1.5 sm:block"
         />
         <div className="min-w-0">
           <p className={`text-xs font-bold uppercase tracking-wide ${muted}`}>
-            Im Browser
+            {t("web")}
           </p>
           <p className={`mt-1 font-semibold ${title}`}>logbuch.medipact.de</p>
           <a
             href={LOGBUCH_WEB_URL}
             className="mt-3 inline-flex items-center justify-center rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-accent-700"
           >
-            Logbuch öffnen →
+            {t("open")} →
           </a>
         </div>
       </div>
@@ -52,7 +54,7 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src="/logbuch/qr-app.svg"
-            alt="QR-Code zur Logbuch-App im App Store"
+            alt={t("qrAppAlt")}
             width={112}
             height={112}
             className="hidden h-28 w-28 shrink-0 rounded-lg bg-white p-1.5 sm:block"
@@ -60,7 +62,7 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
         )}
         <div className="min-w-0">
           <p className={`text-xs font-bold uppercase tracking-wide ${muted}`}>
-            Als App fürs iPhone
+            {t("app")}
           </p>
           <p className={`mt-1 font-semibold ${title}`}>medipact Logbuch</p>
           {appLive ? (
@@ -72,10 +74,10 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
                   : "bg-neutral-900 text-white hover:bg-neutral-700"
               }`}
             >
-              Im App Store laden →
+              {t("appStore")} →
             </a>
           ) : (
-            <p className={`mt-3 text-sm ${muted}`}>Bald im App Store.</p>
+            <p className={`mt-3 text-sm ${muted}`}>{t("soon")}</p>
           )}
         </div>
       </div>

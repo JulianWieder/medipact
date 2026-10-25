@@ -42,7 +42,7 @@ export default function KampagnenKarussell() {
             <button
               type="button"
               onClick={() => scrollBy(-1)}
-              aria-label="Zurück"
+              aria-label={t("prev")}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition hover:border-accent-300 hover:text-accent-700"
             >
               ←
@@ -50,7 +50,7 @@ export default function KampagnenKarussell() {
             <button
               type="button"
               onClick={() => scrollBy(1)}
-              aria-label="Weiter"
+              aria-label={t("next")}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition hover:border-accent-300 hover:text-accent-700"
             >
               →

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // ── Erste-Hilfe-Box ─────────────────────────────────────────────────────────
 //
@@ -8,51 +9,23 @@ import Link from "next/link";
 // einem Satz. Die Fragen sind als W-Fragen-Überschriften (h3) formuliert, weil
 // Google genau solche Kurzantworten in "Nutzer fragen auch" und KI-Antworten
 // zieht.
-const steps = [
-  {
-    num: "1",
-    title: "Fall online anlegen",
-    text: "Sie beschreiben Ihren Konflikt in wenigen Minuten – anonym und unverbindlich. Ohne Anwalt, ohne Termin vor Ort.",
-  },
-  {
-    num: "2",
-    title: "Andere Seite einladen und Interessen erarbeiten",
-    text: "Die andere Seite wird neutral eingeladen. Gemeinsam legen Sie einen Termin für das erste Gespräch fest.",
-  },
-  {
-    num: "3",
-    title: "Gemeinsame Lösung finden",
-    text: "Strukturiert und fair arbeiten Sie eine Lösung aus, mit der beide Seiten leben können – schriftlich festgehalten.",
-  },
-];
-
-const atomicFaq = [
-  {
-    q: "Muss die Gegenseite sofort zustimmen?",
-    a: "Nein. Sie legen Ihren Fall zuerst allein an. Die andere Seite wird erst danach neutral und ohne Vorwürfe eingeladen.",
-  },
-  {
-    q: "Was kostet der erste Schritt?",
-    a: "Nichts. Account und das Anlegen Ihres Falls sind kostenlos und unverbindlich – die eigentliche Mediation beginnt beim Einstiegstarif ab 49 € pro Partei.",
-  },
-  {
-    q: "Ist das Ergebnis rechtlich bindend?",
-    a: "Die Abschlussvereinbarung ist ein bindender Vertrag. Bei rechtlich komplexen Themen sollte sie zusätzlich anwaltlich oder notariell geprüft werden.",
-  },
-];
+// Texte liegen in messages/*.json unter home.ersteHilfe.
+type Step = { title: string; text: string };
+type FaqItem = { q: string; a: string };
 
 export function ErsteHilfeBox() {
+  const t = useTranslations("home.ersteHilfe");
+  const steps = t.raw("steps") as Step[];
+  const atomicFaq = t.raw("faq") as FaqItem[];
+
   return (
     <section className="section section-base scroll-mt-20" id="so-gehts">
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <div className="eyebrow mb-4 justify-center">
-            In 3 Schritten starten
-          </div>
-          <h2 className="heading-2">So starten Sie Ihre Mediation</h2>
+          <div className="eyebrow mb-4 justify-center">{t("eyebrow")}</div>
+          <h2 className="heading-2">{t("title")}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-neutral-600">
-            Kein kompliziertes Verfahren – ein klarer, geführter Weg vom ersten
-            Klick bis zur Einigung.
+            {t("text")}
           </p>
         </div>
 
@@ -60,11 +33,11 @@ export function ErsteHilfeBox() {
         <ol className="grid gap-6 sm:grid-cols-3">
           {steps.map((step, i) => (
             <li
-              key={step.num}
+              key={step.title}
               className="relative rounded-3xl border border-neutral-100 bg-white p-7 shadow-sm"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-600 text-lg font-black text-white shadow-md">
-                {step.num}
+                {i + 1}
               </div>
               <h3 className="mt-5 text-lg font-bold text-neutral-900">
                 {step.title}
@@ -101,7 +74,7 @@ export function ErsteHilfeBox() {
 
         <div className="mt-10 text-center">
           <Link href="/auth/register" className="btn btn-primary">
-            Fall kostenlos anlegen
+            {t("cta")}
           </Link>
         </div>
       </div>

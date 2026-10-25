@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 
 /**
@@ -259,13 +260,14 @@ function FactCounter({ index, total }: { index: number; total: number }) {
 
 export function DidYouKnowSection({
   facts = mediationFacts,
-  heading = "Wussten Sie schon?",
-  eyebrow = "Hintergrundwissen",
+  heading,
+  eyebrow,
 }: {
   facts?: DidYouKnowFact[];
   heading?: string;
   eyebrow?: string;
 }) {
+  const t = useTranslations("didYouKnow");
   const [active, setActive] = useState(0);
   const fact = facts[active];
 
@@ -276,9 +278,9 @@ export function DidYouKnowSection({
   return (
     <section className="section section-strong">
       <div className="container max-w-4xl">
-        <div className="eyebrow text-accent-300">{eyebrow}</div>
+        <div className="eyebrow text-accent-300">{eyebrow ?? t("eyebrow")}</div>
         <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          {heading}
+          {heading ?? t("heading")}
         </h2>
 
         <div className="mt-12 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start">
@@ -288,7 +290,7 @@ export function DidYouKnowSection({
               <button
                 type="button"
                 onClick={() => go(-1)}
-                aria-label="Vorheriger Fakt"
+                aria-label={t("prev")}
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-accent-400 hover:text-accent-300"
               >
                 ←
@@ -296,7 +298,7 @@ export function DidYouKnowSection({
               <button
                 type="button"
                 onClick={() => go(1)}
-                aria-label="Nächster Fakt"
+                aria-label={t("next")}
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-accent-400 hover:text-accent-300"
               >
                 →
@@ -320,7 +322,7 @@ export function DidYouKnowSection({
               key={f.eyebrow}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`Fakt ${i + 1} anzeigen`}
+              aria-label={t("show", { n: i + 1 })}
               aria-current={i === active}
               className={`h-1.5 rounded-full transition-all ${
                 i === active ? "w-8 bg-accent-400" : "w-4 bg-white/20 hover:bg-white/40"

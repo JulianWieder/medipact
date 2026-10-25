@@ -5,7 +5,7 @@ import { NumberedSteps, type NumberedStep } from "@/app/components/ui/NumberedSt
 import { HeroScrollPin } from "@/app/components/HeroScrollPin";
 import { ThemenTabs } from "@/app/components/ThemenTabs";
 import { EmpfehlungenGrid } from "@/app/components/EmpfehlungenGrid";
-import { DidYouKnowSection } from "@/app/components/ui/DidYouKnowSection";
+import { DidYouKnowSection, type DidYouKnowFact } from "@/app/components/ui/DidYouKnowSection";
 import { ErsteHilfeBox } from "@/app/components/ErsteHilfeBox";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import QuickCheck from "@/app/components/QuickCheck";
@@ -35,13 +35,15 @@ const HERO_IMAGE = "https://medipact.de/startseite-mediation.jpg";
 // Muss `generateMetadata` sein und darf kein statisches Objekt bleiben: Diese
 // Seite liegt unter app/[locale]/ und wird fuer JEDE Sprache ausgeliefert.
 // Ob sie indexiert werden darf, haengt genau daran (siehe lib/seo.ts) — /en
-// zeigt heute deutschen Text und hat im Index nichts verloren.
+// ist uebersetzt, bleibt aber vorerst noindex, solange die verlinkten
+// Unterseiten nur deutsch existieren.
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: AppLocale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home.meta" });
   return pageMetadata({
     // Title und Description tragen den Prozess-Intent, nicht die H1.
     //
@@ -63,9 +65,10 @@ export async function generateMetadata({
     // menschliche Begleitung ("zertifizierte Mediatoren") den Intent. Die
     // KI-Faehigkeit bleibt im WebApplication-Schema (featureList) stehen, wo
     // sie als Produktmerkmal gelesen wird und nicht als Themenschwerpunkt.
-    title: "Online-Mediation: Konflikt lösen mit zertifizierten Mediatoren | medipact",
-    description:
-      "Lösen Sie Ihren Konflikt online: strukturiertes Mediationsverfahren in sechs Schritten, begleitet von zertifizierten Mediatorinnen und Mediatoren. Fall kostenlos anlegen.",
+    //
+    // Text in messages/*.json unter home.meta.
+    title: t("title"),
+    description: t("description"),
     path: "",
     image: HERO_IMAGE,
     imageWidth: 1600,
@@ -227,6 +230,10 @@ export default async function MedipactLanding() {
   const bekanntAusTags = t.raw("bekanntAusTags") as { text: string; fn?: number }[];
   const footnotes = t.raw("footnotes") as FootnoteItem[];
   const processSteps = t.raw("processSteps") as NumberedStep[];
+  // Nur en hat eigene Fakten; Deutsch nutzt die Standard-Fakten der Komponente.
+  const didYouKnowFacts = t.has("didYouKnowFacts")
+    ? (t.raw("didYouKnowFacts") as DidYouKnowFact[])
+    : undefined;
 
   return (
     <>
@@ -249,7 +256,7 @@ export default async function MedipactLanding() {
                   </div>
                   <div className="mt-1 text-xs leading-snug text-neutral-600">
                     {s.label}
-                    {s.fn && <FootnoteRef n={s.fn} />}
+                    {s.fn && <FootnoteRef n={s.fn} label={t("footnoteRef")} />}
                   </div>
                 </div>
               ))}
@@ -274,7 +281,7 @@ export default async function MedipactLanding() {
                   {index > 0 && <span className="text-neutral-400">·</span>}
                   <span className="font-semibold tracking-tight text-neutral-600">
                     {tag.text}
-                    {tag.fn && <FootnoteRef n={tag.fn} />}
+                    {tag.fn && <FootnoteRef n={tag.fn} label={t("footnoteRef")} />}
                   </span>
                 </span>
               ))}
@@ -351,7 +358,7 @@ export default async function MedipactLanding() {
           </div>
         </section>
 
-        <DidYouKnowSection />
+        <DidYouKnowSection facts={didYouKnowFacts} />
 
         <NewsletterSignup variant="section" source="landing" />
 
@@ -399,9 +406,9 @@ export default async function MedipactLanding() {
           </div>
         </section>
 
-        <section aria-label="Fußnoten" className="border-t border-neutral-100 bg-white py-8">
+        <section aria-label={t("footnotesLabel")} className="border-t border-neutral-100 bg-white py-8">
           <div className="mx-auto max-w-5xl px-6 lg:px-8">
-            <FootnoteList items={footnotes} />
+            <FootnoteList items={footnotes} backLabel={t("footnoteBack")} />
           </div>
         </section>
       </main>

@@ -41,7 +41,13 @@ export function FootnoteRef({
   );
 }
 
-export function FootnoteList({ items }: { items: FootnoteItem[] }) {
+export function FootnoteList({
+  items,
+  backLabel = "Zurück zum Text",
+}: {
+  items: FootnoteItem[];
+  backLabel?: string;
+}) {
   if (!items?.length) return null;
   return (
     <ol className="space-y-2 text-xs leading-relaxed text-neutral-600">
@@ -66,7 +72,7 @@ export function FootnoteList({ items }: { items: FootnoteItem[] }) {
             )}{" "}
             <a
               href={`#fnref-${f.n}`}
-              aria-label="Zurück zum Text"
+              aria-label={backLabel}
               className="text-accent-700 no-underline hover:underline"
             >
               ↩

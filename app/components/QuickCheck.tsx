@@ -2,53 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 type Answer = "yes" | "maybe" | "no";
 
 type Question = {
   text: string;
   hint?: string;
-  /** Bei Red-Flag-Fragen ist "Ja" das negative Signal – wird intern umgedreht. */
-  invert?: boolean;
 };
 
-const questions: Question[] = [
-  {
-    // Foot-in-the-door: konkretes Verhalten statt abstrakter Bereitschaft.
-    text: "Wenn die andere Seite Sie heute anrufen würde, um über eine Lösung zu sprechen – würden Sie abheben?",
-  },
-  {
-    // Perspective-Taking: prüft Empathie- statt Schuldfrage.
-    text: "Können Sie sich vorstellen, dass die andere Seite die Lage ganz anders schildern würde – und trotzdem einen nachvollziehbaren Punkt hätte?",
-  },
-  {
-    // Miracle Question (lösungsfokussierte Mediation): macht Motivation konkret spürbar.
-    text: "Stellen Sie sich vor, der Konflikt wäre in vier Wochen gelöst. Würde sich Ihr Alltag dadurch spürbar leichter anfühlen?",
-  },
-  {
-    // Psychologische Sicherheit statt reiner Gefühlsfrage.
-    text: "Können Sie der anderen Seite sagen, was Sie wirklich denken, ohne dass es später gegen Sie verwendet wird?",
-  },
-  {
-    // Sunk-Cost / Konsistenz: macht investierte Energie bewusst.
-    text: "Haben Sie bereits eigene Zeit, Nerven oder Geld investiert, die Sie nicht einfach verloren geben wollen?",
-  },
-  {
-    // Red-Flag-Frage, direkt gestellt statt verharmlost.
-    text: "Gibt es aktuell Drohungen, massiven Druck oder Angst, die ein offenes Gespräch unmöglich machen?",
-    hint: "Falls ja: Mediation ersetzt keinen Schutz – sprechen Sie zuerst mit einer Fachstelle oder Anwalt.",
-    invert: true,
-  },
-];
+// Fragentexte liegen in messages/*.json unter quickCheck.questions (die
+// psychologische Begründung je Frage steht dort nicht, nur hier):
+//   1. Foot-in-the-door: konkretes Verhalten statt abstrakter Bereitschaft.
+//   2. Perspective-Taking: prüft Empathie- statt Schuldfrage.
+//   3. Miracle Question (lösungsfokussierte Mediation): macht Motivation spürbar.
+//   4. Psychologische Sicherheit statt reiner Gefühlsfrage.
+//   5. Sunk-Cost / Konsistenz: macht investierte Energie bewusst.
+//   6. Red-Flag-Frage, direkt gestellt statt verharmlost.
+//
+// Bei Red-Flag-Fragen ist "Ja" das negative Signal – wird intern umgedreht.
+const INVERTED_QUESTIONS = new Set([5]);
 
 export default function QuickCheck() {
+  const t = useTranslations("quickCheck");
+  const questions = t.raw("questions") as Question[];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
 
   function answer(value: Answer) {
-    const question = questions[step];
     const normalized: Answer =
-      question.invert && value !== "maybe" ? (value === "yes" ? "no" : "yes") : value;
+      INVERTED_QUESTIONS.has(step) && value !== "maybe" ? (value === "yes" ? "no" : "yes") : value;
     setAnswers([...answers, normalized]);
     setStep(step + 1);
   }
@@ -68,11 +51,9 @@ export default function QuickCheck() {
   return (
     <section id="schnellcheck" className="section section-base">
       <div className="container max-w-2xl text-center">
-        <p className="eyebrow mb-4">Schnell-Check</p>
+        <p className="eyebrow mb-4">{t("eyebrow")}</p>
 
-        <h2 className="heading-2">
-          Ist Mediation für Ihre Situation geeignet?
-        </h2>
+        <h2 className="heading-2">{t("title")}</h2>
 
         {step < questions.length ? (
           <div className="mt-10">
@@ -103,21 +84,21 @@ export default function QuickCheck() {
 
             <div className="mt-6 flex justify-center gap-4">
               <button onClick={() => answer("yes")} className="btn btn-primary">
-                Ja
+                {t("yes")}
               </button>
 
               <button
                 onClick={() => answer("maybe")}
                 className="btn btn-secondary"
               >
-                Unsicher
+                {t("maybe")}
               </button>
 
               <button
                 onClick={() => answer("no")}
                 className="btn btn-secondary"
               >
-                Nein
+                {t("no")}
               </button>
             </div>
           </div>
@@ -126,10 +107,10 @@ export default function QuickCheck() {
             {result === "suitable" && (
               <>
                 <p className="text-lg text-accent-700 font-medium">
-                  Mediation ist wahrscheinlich sinnvoll.
+                  {t("suitable.text")}
                 </p>
                 <Link href="/kontakt" className="btn btn-primary mt-6">
-                  Gespräch starten
+                  {t("suitable.cta")}
                 </Link>
               </>
             )}
@@ -137,10 +118,10 @@ export default function QuickCheck() {
             {result === "unclear" && (
               <>
                 <p className="text-lg text-neutral-700">
-                  Ihre Situation ist noch nicht klar einzuordnen.
+                  {t("unclear.text")}
                 </p>
                 <Link href="/kontakt" className="btn btn-primary mt-6">
-                  Situation klären
+                  {t("unclear.cta")}
                 </Link>
               </>
             )}
@@ -148,10 +129,10 @@ export default function QuickCheck() {
             {result === "not_suitable" && (
               <>
                 <p className="text-lg text-red-600">
-                  Mediation ist aktuell wahrscheinlich nicht geeignet.
+                  {t("notSuitable.text")}
                 </p>
                 <Link href="/kontakt" className="btn btn-secondary mt-6">
-                  Alternative Schritte prüfen
+                  {t("notSuitable.cta")}
                 </Link>
               </>
             )}

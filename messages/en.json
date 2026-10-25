@@ -1,32 +1,32 @@
 {
   "nav": {
-    "promo": "Ihren Fall vertraulich schildern – der Einstieg ist kostenlos",
-    "promoShort": "Fall vertraulich schildern",
-    "start": "Start",
+    "promo": "Describe your case confidentially – getting started is free",
+    "promoShort": "Describe your case confidentially",
+    "start": "Home",
     "startCta": "Start mediation",
-    "about": "Über uns",
-    "konflikte": "Konflikte",
-    "konflikteTrennung": "Scheidung & Trennung",
-    "konflikteNachbarschaft": "Nachbarschaft",
-    "konflikteVerbraucher": "Verbraucher & Handwerker",
-    "konflikteMietverhaeltnis": "Mietverhältnis",
-    "konflikteArbeitsplatz": "Arbeitsplatz",
-    "konflikteErbschaft": "Erbe & Familie",
+    "about": "About us",
+    "konflikte": "Conflicts",
+    "konflikteTrennung": "Divorce & separation",
+    "konflikteNachbarschaft": "Neighbours",
+    "konflikteVerbraucher": "Consumers & tradespeople",
+    "konflikteMietverhaeltnis": "Tenancy",
+    "konflikteArbeitsplatz": "Workplace",
+    "konflikteErbschaft": "Inheritance & family",
     "konflikteGeschaeft": "Business & ODR",
-    "methode": "So funktioniert es",
+    "methode": "How it works",
     "methodeAblauf": "Process & method",
     "methodeEinigung": "The settlement process",
     "methodeOhneMediator": "Without a mediator",
     "methodeAbgleich": "Weighted trade-off",
     "methodeGleichbehandlung": "Equal treatment",
-    "beispiele": "Beispiele",
-    "beispieleFallbeispiele": "Fallbeispiele",
-    "beispieleMatrix": "Mini-Matrix",
-    "ratgeber": "Ratgeber",
+    "beispiele": "Examples",
+    "beispieleFallbeispiele": "Case studies",
+    "beispieleMatrix": "Mini matrix",
+    "ratgeber": "Guides",
     "kostenrechner": "Cost calculator",
     "login": "Log in",
-    "menuOpen": "Menü öffnen",
-    "menuClose": "Menü schließen",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
     "konflikteGruppe": "Types of conflict",
     "konflikteTrennungDesc": "Custody, support, assets",
     "konflikteNachbarschaftDesc": "Noise, boundaries, parking",
@@ -52,128 +52,324 @@
     "konflikteLogbuch": "Not ready yet? Write it down first"
   },
   "footer": {
-    "ctaEyebrow": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
-    "ctaTitle": "Bereit, den Streit hinter sich zu lassen?",
-    "ctaButton": "Fall kostenlos anlegen",
-    "tagline": "Konflikte lösen, nicht eskalieren.",
-    "productHeading": "Produkt",
-    "productPricing": "Preise",
-    "productMethod": "Wie es funktioniert",
-    "productCases": "Fallbeispiele",
+    "ctaEyebrow": "You decide. Not the court. Not the escalation.",
+    "ctaTitle": "Ready to put the dispute behind you?",
+    "ctaButton": "Open your case for free",
+    "tagline": "Resolve conflicts, don't escalate them.",
+    "productHeading": "Product",
+    "productPricing": "Pricing",
+    "productMethod": "How it works",
+    "productCases": "Case studies",
     "productCalculator": "Cost calculator",
-    "companyHeading": "Unternehmen",
-    "companyAbout": "Über uns",
-    "companyCareers": "Karriere",
-    "companyContact": "Kontakt",
+    "companyHeading": "Company",
+    "companyAbout": "About us",
+    "companyCareers": "Careers",
+    "companyContact": "Contact",
     "companyForAdvisors": "For advisors",
-    "legalHeading": "Rechtlich",
-    "legalPrivacy": "Datenschutz",
-    "legalTerms": "AGB",
-    "legalImprint": "Impressum",
+    "legalHeading": "Legal",
+    "legalPrivacy": "Privacy policy",
+    "legalTerms": "Terms and conditions",
+    "legalImprint": "Legal notice",
     "legalCookies": "Cookies",
-    "legalCookieSettings": "Cookie-Einstellungen",
-    "copyright": "Alle Rechte vorbehalten.",
+    "legalCookieSettings": "Cookie settings",
+    "copyright": "All rights reserved.",
     "productLogbook": "Conflict log (free)"
   },
   "cookieConsent": {
-    "ariaLabel": "Cookie-Einstellungen",
-    "text": "Wir verwenden technisch notwendige Cookies, um medipact.de bereitzustellen. Mit Ihrer Einwilligung nutzen wir zusätzlich Analyse-Cookies, um die Nutzung der Plattform zu verstehen und zu verbessern. Details und Widerruf jederzeit in unserer <cookiePolicyLink>Cookie-Richtlinie</cookiePolicyLink>.",
-    "declineButton": "Nur notwendige",
-    "acceptButton": "Alle akzeptieren"
+    "ariaLabel": "Cookie settings",
+    "text": "We use technically necessary cookies to provide medipact.de. With your consent, we also use analytics cookies to understand and improve how the platform is used. Details and withdrawal of consent at any time in our <cookiePolicyLink>cookie policy</cookiePolicyLink>.",
+    "declineButton": "Necessary only",
+    "acceptButton": "Accept all"
   },
   "home": {
+    "meta": {
+      "title": "Online mediation: resolve your conflict with certified mediators | medipact",
+      "description": "Resolve your conflict online: a structured six-step mediation process, supported by certified mediators. Open your case for free."
+    },
     "hero": {
-      "badge": "Geführte Online-Mediation – Verfahren, KI-Fallanalyse, zertifizierte Mediatoren",
-      "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
-      "titleLine1": "Jeder Konflikt",
-      "titleLine2": "hat einen Ausgang.",
-      "subline": "Geführte Online-Mediation: strukturiertes Verfahren, KI-gestützte Fallanalyse, zertifizierte Mediatoren.",
-      "intro": "Lösen Sie Ihren Konflikt strukturiert im digitalen Workspace: medipact verbindet KI-gestützte Fallanalyse mit der Begleitung durch erfahrene, zertifizierte Mediatorinnen und Mediatoren – sechs klare Schritte, direkt online, am Ende eine Vereinbarung, die beide Seiten tragen und die rechtsverbindlich dokumentiert wird. Bei Trennung, Nachbarschaft, Erbe und im Unternehmen.",
-      "ctaPrimary": "Fall kostenlos anlegen",
-      "ctaSecondary": "So funktioniert es",
-      "badgeVertraulich": "Vertraulich",
-      "badgeBezahlbar": "Festpreis statt Stundensatz",
-      "badgeLoesungsorientiert": "Ergebnisorientiert",
-      "scrollCue": "Weiter nach unten"
+      "badge": "Guided online mediation – process, AI case analysis, certified mediators",
+      "tagline": "You decide. Not the court. Not the escalation.",
+      "titleLine1": "Every conflict",
+      "titleLine2": "has a way out.",
+      "subline": "Guided online mediation: a structured process, AI-supported case analysis, certified mediators.",
+      "intro": "Resolve your conflict step by step in a digital workspace: medipact combines AI-supported case analysis with support from experienced, certified mediators – six clear steps, entirely online, ending in an agreement that both sides can stand behind and that is documented in a legally binding form. For separation, neighbour disputes, inheritance and conflicts at work.",
+      "ctaPrimary": "Open your case for free",
+      "ctaSecondary": "How it works",
+      "badgeVertraulich": "Confidential",
+      "badgeBezahlbar": "Fixed price, not hourly rates",
+      "badgeLoesungsorientiert": "Outcome-focused",
+      "scrollCue": "Scroll down",
+      "imageAlt": "Mediation session: two parties in conversation with a mediator"
     },
     "kampagnen": {
-      "eyebrow": "Aktuell bei medipact",
-      "title": "Ein Weg für jeden Konflikt.",
-      "startCta": "Mediation starten",
-      "learnCta": "Mehr erfahren",
+      "eyebrow": "Now at medipact",
+      "title": "A way forward for every conflict.",
+      "startCta": "Start mediation",
+      "learnCta": "Learn more",
       "cards": [
         {
-          "tag": "Trennung",
-          "title": "Fair auseinandergehen, ohne Rosenkrieg.",
-          "text": "Sorgerecht, Wohnung, Finanzen – geregelt in Wochen statt Jahren vor Gericht.",
+          "tag": "Separation",
+          "title": "Part ways fairly, without a war.",
+          "text": "Custody, the home, finances – settled in weeks instead of years in court.",
           "href": "/scheidungsmediation",
-          "cta": "Mehr erfahren"
+          "cta": "Learn more"
         },
         {
-          "tag": "Nachbarschaft",
-          "title": "Wieder grüßen können.",
-          "text": "Lärm, Zaun, Parken – Lösungen, mit denen man Tür an Tür weiterleben kann. Ab 49 € pro Partei.",
+          "tag": "Neighbours",
+          "title": "Back on speaking terms.",
+          "text": "Noise, fences, parking – solutions you can live with next door. From €49 per party.",
           "href": "/konflikte/nachbarschaft",
-          "cta": "Mehr erfahren"
+          "cta": "Learn more"
         },
         {
-          "tag": "Erbe",
-          "title": "Das Erbe regeln, die Familie behalten.",
-          "text": "Erbstreitigkeiten lösen, bevor sie Geschwister zu Gegnern machen.",
+          "tag": "Inheritance",
+          "title": "Settle the estate, keep the family.",
+          "text": "Resolve inheritance disputes before they turn siblings into opponents.",
           "href": "/konflikte/erbschaft",
-          "cta": "Mehr erfahren"
+          "cta": "Learn more"
         },
         {
-          "tag": "Wirtschaft",
-          "title": "Konflikte lösen, bevor sie das Geschäft kosten.",
-          "text": "Gesellschafterstreit, Teamkonflikte, B2B – Wirtschaftsmediation für Unternehmen.",
+          "tag": "Business",
+          "title": "Resolve conflicts before they cost you business.",
+          "text": "Shareholder disputes, team conflicts, B2B – commercial mediation for companies.",
           "href": "/konflikte/geschaeft",
-          "cta": "Mehr erfahren"
+          "cta": "Learn more"
         },
         {
           "tag": "ODR",
-          "title": "Streitbeilegung im Volumen.",
-          "text": "Viele Kundenkonflikte, ein System: Online Dispute Resolution über das Firmen-Abo.",
+          "title": "Dispute resolution at scale.",
+          "text": "Many customer disputes, one system: online dispute resolution with a company subscription.",
           "href": "/konflikte/odr",
-          "cta": "Mehr erfahren"
+          "cta": "Learn more"
         }
-      ]
+      ],
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "ersteHilfe": {
+      "eyebrow": "Get started in 3 steps",
+      "title": "How to start your mediation",
+      "text": "No complicated procedure – a clear, guided path from the first click to an agreement.",
+      "steps": [
+        {
+          "title": "Open your case online",
+          "text": "Describe your conflict in a few minutes – anonymously and without obligation. No lawyer, no in-person appointment."
+        },
+        {
+          "title": "Invite the other side and work out interests",
+          "text": "The other side is invited in a neutral way. Together you set a date for the first conversation."
+        },
+        {
+          "title": "Find a joint solution",
+          "text": "In a structured and fair way, you work out a solution both sides can live with – put down in writing."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does the other side have to agree right away?",
+          "a": "No. You first open your case on your own. Only afterwards is the other side invited – neutrally and without accusations."
+        },
+        {
+          "q": "What does the first step cost?",
+          "a": "Nothing. Your account and opening your case are free and non-binding – the actual mediation starts with the entry plan from €49 per party."
+        },
+        {
+          "q": "Is the outcome legally binding?",
+          "a": "The final agreement is a binding contract. For legally complex matters, it should also be reviewed by a lawyer or notary."
+        }
+      ],
+      "cta": "Open your case for free"
     },
     "zweiWelten": {
-      "eyebrow": "Für wen ist medipact?",
-      "title": "Zwei Welten. Ein Prinzip.",
-      "intro": "Ob am Küchentisch oder im Konferenzraum: Konflikte folgen denselben Mustern – und lassen sich mit derselben Methode lösen.",
+      "eyebrow": "Who is medipact for?",
+      "title": "Two worlds. One principle.",
+      "intro": "At the kitchen table or in the boardroom: conflicts follow the same patterns – and can be resolved with the same method.",
       "privat": {
-        "kicker": "Privat",
-        "title": "Konflikte, die zu Hause wohnen.",
-        "text": "Trennung, Erbe, Nachbarschaft: Der Streit sitzt jeden Abend mit am Tisch und zermürbt die Beziehung, die danach noch tragen muss. Wir geben ihm einen Rahmen, in dem beide Seiten gehört werden – zum Festpreis, nicht nach Stunden.",
-        "ctaLabel": "Für Privatpersonen",
+        "kicker": "Private",
+        "title": "Conflicts that live at home.",
+        "text": "Separation, inheritance, neighbours: the dispute sits at the table every evening and wears down the relationship that still has to work afterwards. We give it a framework in which both sides are heard – at a fixed price, not by the hour.",
+        "ctaLabel": "For individuals",
         "ctaHref": "/konflikte"
       },
       "business": {
-        "kicker": "Unternehmen",
-        "title": "Konflikte, die jeden Tag Geld kosten.",
-        "text": "Gesellschafterstreit, Teamkonflikte, B2B: Der Streit blockiert Entscheidungen, bindet Führungszeit und beschädigt die Geschäftsbeziehung, die danach noch tragen muss. Ein Gerichtsverfahren dauert Jahre – unser Verfahren sechs Schritte.",
-        "ctaLabel": "Für Unternehmen",
+        "kicker": "Business",
+        "title": "Conflicts that cost money every day.",
+        "text": "Shareholder disputes, team conflicts, B2B: the dispute blocks decisions, ties up management time and damages the business relationship that still has to work afterwards. Court proceedings take years – our process takes six steps.",
+        "ctaLabel": "For companies",
         "ctaHref": "/konflikte/geschaeft"
       }
     },
+    "themen": {
+      "eyebrow": "Your topic",
+      "title": "What medipact is made for.",
+      "ariaLabel": "Conflict topics",
+      "moreLink": "More on {label}",
+      "tabs": [
+        {
+          "key": "trennung",
+          "label": "Separation",
+          "eyebrow": "Separation & support",
+          "title": "Divorce mediation online.",
+          "intro": "Separation and divorce don't just mean emotional strain – they also mean concrete decisions: support, childcare, finances. That is exactly what divorce mediation is for – a structured process that leads both sides to a workable arrangement, even when their ideas are far apart.",
+          "features": [
+            {
+              "title": "Different expectations",
+              "text": "Both sides have clear expectations – but no common ground on what a fair solution could look like."
+            },
+            {
+              "title": "Emotions block conversations",
+              "text": "Hurt and disappointment make it hard to talk calmly about support or childcare."
+            },
+            {
+              "title": "Pressure from time and money",
+              "text": "Financial uncertainty and the need for quick decisions add further pressure to the conflict."
+            }
+          ]
+        },
+        {
+          "key": "nachbarschaft",
+          "label": "Neighbours",
+          "eyebrow": "Neighbourhood mediation",
+          "title": "When everyday life becomes a conflict.",
+          "intro": "Neighbourhood mediation is a guided process in which neighbours work out binding arrangements with a mediator. Neighbour disputes often start small: noise, boundaries, parking, gardens or house rules. They become difficult because you can't simply avoid each other.",
+          "features": [
+            {
+              "title": "Recurring annoyance",
+              "text": "Noise, rubbish, parking or boundaries keep coming up and weigh on everyday life."
+            },
+            {
+              "title": "Communication has broken down",
+              "text": "Conversations are avoided, turn aggressive or only happen through complaints."
+            },
+            {
+              "title": "Permanent proximity",
+              "text": "The conflict doesn't go away on its own, because the people involved run into each other regularly."
+            }
+          ]
+        },
+        {
+          "key": "erbschaft",
+          "label": "Inheritance",
+          "eyebrow": "Inheritance conflict",
+          "title": "When an estate becomes a test of endurance.",
+          "intro": "Inheritances are rarely just a question of money. Grief, expectations, old roles and different ideas of fairness often collide.",
+          "features": [
+            {
+              "title": "Different expectations",
+              "text": "Some want to sell, others want to keep. Some feel disadvantaged, others feel passed over."
+            },
+            {
+              "title": "Old family patterns",
+              "text": "Conflicts from the past resurface and block objective decisions."
+            },
+            {
+              "title": "Property or businesses",
+              "text": "It gets particularly difficult when assets can't simply be divided or come with responsibility."
+            }
+          ]
+        },
+        {
+          "key": "odr",
+          "label": "Business & ODR",
+          "eyebrow": "Online dispute resolution (ODR)",
+          "title": "When conflicts paralyse the company.",
+          "intro": "Online dispute resolution (ODR) means conflicts are settled entirely digitally – structured, strictly confidential and much faster than court proceedings. Whether it's a dispute between business partners, within the company, in e-commerce or a conciliation with a concrete proposal: medipact maps the right type of procedure online. The most expensive item in a business conflict is rarely the invoice – it's management's tied-up attention: weeks in which decisions should be made instead of arguments.",
+          "features": [
+            {
+              "title": "Team & department mediation",
+              "text": "The classic: friction in project teams, entrenched fronts between departments (e.g. IT vs. business units) or conflicts after restructuring."
+            },
+            {
+              "title": "Leadership mediation",
+              "text": "Conflicts at management level, between levels of hierarchy – and the classic tension between management and the works council."
+            },
+            {
+              "title": "Shareholders & succession",
+              "text": "Disputes within the founding team or among shareholders over direction, shares or exit – and the emotional handover to the next generation in a family business."
+            }
+          ]
+        },
+        {
+          "key": "verbraucher",
+          "label": "Consumers",
+          "eyebrow": "Consumer & tradesperson disputes",
+          "title": "When the invoice and the work don't match.",
+          "intro": "Disputed invoices, defects or services not delivered: with small amounts at stake, going to court rarely pays off – but the annoyance remains unresolved.",
+          "features": [
+            {
+              "title": "Disputed invoice",
+              "text": "The final price is well above the estimate – and nobody wants to give in."
+            },
+            {
+              "title": "Defects & remedial work",
+              "text": "The work has defects, but deadlines, warranty and responsibility are disputed."
+            },
+            {
+              "title": "Blocked communication",
+              "text": "Complaints go unanswered – or are only met with pressure through payment reminders."
+            }
+          ]
+        },
+        {
+          "key": "mietverhaeltnis",
+          "label": "Tenancy",
+          "eyebrow": "Tenancy disputes",
+          "title": "The dispute ends, the tenancy continues.",
+          "intro": "Service charges, defects, deposits, owner's own use: tenancy disputes are rarely a purely legal matter. Usually it's about a statement nobody explained, defects left unaddressed for too long – and two sides who still have to deal with each other afterwards.",
+          "features": [
+            {
+              "title": "The statement doesn't explain itself",
+              "text": "A four-figure back payment arrives without explanation. A large part of the dispute resolves itself simply through access to receipts and a comprehensible calculation."
+            },
+            {
+              "title": "Withholding payment escalates things",
+              "text": "Anyone who reduces or withholds rent often has good reasons – but at the same time risks termination for late payment. A defect thus turns into a dispute about whether the tenancy continues at all."
+            },
+            {
+              "title": "Deadlines run in the background",
+              "text": "Billing deadline, objection deadline, objection to termination, eviction deadline: in tenancy law it's often not the better argument that wins, but whoever responded in time."
+            }
+          ]
+        },
+        {
+          "key": "arbeitsplatz",
+          "label": "Workplace",
+          "eyebrow": "Conflict at work",
+          "title": "Before the conflict turns into a resignation.",
+          "intro": "Workplace conflicts are rarely fought out in the open. They show up as sick days, as emails with four people in CC, as a team taking sides – and eventually as a resignation. Until then, nobody has talked to the other side.",
+          "features": [
+            {
+              "title": "Communication moves to writing",
+              "text": "Conversations are replaced by emails, people are copied in, agreements are confirmed \"just to be safe\". That's not a need for order, it's gathering evidence – and therefore a step towards escalation."
+            },
+            {
+              "title": "Absences pile up",
+              "text": "An unresolved conflict measurably makes people ill. When someone's sick days correlate with a particular constellation, the conflict is already a cost factor."
+            },
+            {
+              "title": "The team takes sides",
+              "text": "What starts as a dispute between two people ties up half the department within a few weeks. By then, the original parties are far from the only ones affected."
+            }
+          ]
+        }
+      ]
+    },
     "stats": [
       {
-        "value": "6 Schritte",
-        "label": "strukturiertes Verfahren"
+        "value": "6 steps",
+        "label": "structured process"
       },
       {
-        "value": "< 4 Monate",
-        "label": "typische Dauer bis zur Vereinbarung"
+        "value": "< 4 months",
+        "label": "typical time to agreement"
       },
       {
-        "value": "ab 49 €",
-        "label": "Festpreis je Partei, kein Stundenhonorar"
+        "value": "from €49",
+        "label": "fixed price per party, no hourly fees"
       },
       {
         "value": "Erasable",
-        "label": "account and log book, immediately and completely",
+        "label": "account and log, immediately and completely",
         "fn": 1
       }
     ],
@@ -191,108 +387,295 @@
         "fn": 3
       }
     ],
-    "casesTeaser": "Trennung, Nachbarschaft oder Erbe – sehen Sie sich an,",
-    "casesTeaserLink": "wie konkrete Fälle mit Medipact gelöst wurden →",
+    "casesTeaser": "Separation, neighbours or inheritance – see",
+    "casesTeaserLink": "how real cases were resolved with medipact →",
     "empfehlungen": {
-      "eyebrow": "Unsere Empfehlungen",
-      "title": "Für welchen Konflikt brauchen Sie Klarheit?",
-      "ctaPrimary": "Mehr erfahren",
-      "ctaSecondary": "Kostenlos starten",
+      "eyebrow": "Our recommendations",
+      "title": "Which conflict do you need clarity on?",
+      "ctaPrimary": "Learn more",
+      "ctaSecondary": "Start for free",
       "cards": {
         "trennung": {
-          "title": "Trennung & Scheidung",
-          "text": "Sorgerecht, Unterhalt und die Aufteilung des gemeinsamen Lebens – fair geregelt, ohne dass beide Seiten vor Gericht ziehen müssen."
+          "title": "Separation & divorce",
+          "text": "Custody, support and dividing a shared life – settled fairly, without both sides having to go to court."
         },
         "nachbarschaft": {
-          "title": "Nachbarschaftsstreit",
-          "text": "Lärm, Grenzen oder Stellplätze: bevor aus Ärger eine jahrelange Fehde wird, moderiert medipact die Klärung."
+          "title": "Neighbour disputes",
+          "text": "Noise, boundaries or parking spaces: medipact moderates the conversation before annoyance turns into a years-long feud."
         },
         "erbschaft": {
-          "title": "Erbe & Familie",
-          "text": "Erbstreitigkeiten belasten Familien oft länger als das Erbe selbst wert ist. Medipact hilft, eine Lösung zu finden, mit der alle weiterleben können."
+          "title": "Inheritance & family",
+          "text": "Inheritance disputes often weigh on families longer than the estate itself is worth. medipact helps find a solution everyone can live with."
         },
         "geschaeft": {
           "title": "Business & ODR",
-          "text": "Conflicts within teams, among shareholders, with partners or customers? Online dispute resolution (ODR) settles business disputes digitally, confidentially and faster than any court."
+          "text": "Conflicts within teams, among shareholders, with partners or customers? Online dispute resolution (ODR) settles business disputes digitally, confidentially and with far less strain than any court case."
         }
       }
     },
-    "processEyebrow": "So funktioniert es",
-    "processTitle": "In 6 klaren Schritten zur möglichen Einigung.",
-    "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
+    "logbuch": {
+      "badge": "New & free forever",
+      "titleLine1": "Not ready for mediation yet?",
+      "titleLine2": "Then start by writing things down.",
+      "text": "With the <strong>conflict log</strong> you record what happens in your dispute – like a dispute diary: incidents, conversations, emails, WhatsApp messages, phone calls and your own thoughts. Confidential, sorted chronologically and convertible into a mediation with one click at any time.",
+      "ctaStart": "Start for free",
+      "ctaMore": "More about the conflict log",
+      "previewLabel": "Your timeline",
+      "previewEntries": [
+        {
+          "icon": "📞",
+          "label": "Phone call",
+          "text": "Argued about the hedge again – no result."
+        },
+        {
+          "icon": "✉️",
+          "label": "Email",
+          "text": "Neighbour demands the hedge be cut back by the end of the month."
+        },
+        {
+          "icon": "📌",
+          "label": "Incident",
+          "text": "Loud music until 1:30 am, third time this week."
+        }
+      ],
+      "previewFooter": "… and when you're ready: \"Convert to mediation\".",
+      "availability": "Available now – in the browser and as an app. Scan the QR code with your phone:"
+    },
+    "processEyebrow": "How it works",
+    "processTitle": "6 clear steps towards a possible agreement.",
+    "processText": "Guided rather than left on your own, based on the Harvard principle – fair to all sides.",
     "processSteps": [
       {
-        "title": "Konflikt schildern",
-        "text": "Sie beschreiben die Situation aus Ihrer Sicht – vertraulich und in Ihrem Tempo. Die Gegenseite wird fair eingeladen."
+        "title": "Describe the conflict",
+        "text": "You describe the situation from your point of view – confidentially and at your own pace. The other side is invited fairly."
       },
       {
-        "title": "Geführter Prozess",
-        "text": "Sechs strukturierte Phasen nach dem Harvard-Prinzip: von der Themensammlung über Interessen bis zu fairen Optionen."
+        "title": "Guided process",
+        "text": "Six structured phases based on the Harvard principle: from collecting topics through interests to fair options."
       },
       {
-        "title": "Verbindliche Vereinbarung",
-        "text": "Am Ende steht eine konkrete Vereinbarung: wer macht was bis wann – festgehalten und von beiden Seiten bestätigt."
+        "title": "Binding agreement",
+        "text": "At the end there is a concrete agreement: who does what by when – recorded and confirmed by both sides."
       }
     ],
-    "processLink": "So funktioniert medipact",
+    "processLink": "How medipact works",
     "processLinkEinigung": "Why this works at a fixed price",
-    "trustText": "Vertraulich, DSGVO-konform und mit menschlicher Mediation als Rückfalloption –",
-    "trustLink": "mehr über medipact erfahren",
-    "ctaBadge": "Der erste Schritt",
-    "ctaTitle": "Der Streit muss nicht größer werden.",
-    "ctaText": "Sie legen den Fall an, schildern die Situation aus Ihrer Sicht und sehen, wie das Verfahren aussieht. Nichts davon ist verbindlich – und der erste Schritt ist nicht die Einigung, sondern Klarheit.",
-    "ctaButton": "Fall kostenlos anlegen",
-    "ctaSecondaryLabel": "Preise & Pakete ansehen",
-    "ctaDisclaimer": "Kostenloser Einstieg · Keine Zahlungsdaten nötig · Jederzeit beendbar",
+    "trustText": "Confidential, GDPR-compliant and with human mediation as a fallback –",
+    "trustLink": "learn more about medipact",
+    "ctaBadge": "The first step",
+    "ctaTitle": "The dispute doesn't have to get bigger.",
+    "ctaText": "You open the case, describe the situation from your point of view and see what the process looks like. None of it is binding – and the first step isn't agreement, it's clarity.",
+    "ctaButton": "Open your case for free",
+    "ctaSecondaryLabel": "View pricing & plans",
+    "ctaDisclaimer": "Free to start · No payment details required · Cancel anytime",
     "outcomes": {
-      "eyebrow": "Ergebnisse",
-      "title": "So klingt ein Ausgang.",
-      "intro": "Stimmen aus unseren Fallbeispielen – von der Trennung bis zum Gesellschafterstreit.",
-      "disclaimer": "Anonymisierte, exemplarische Fallbeispiele auf Basis typischer Mediationsverläufe.",
-      "link": "Alle Fallbeispiele ansehen"
+      "eyebrow": "Outcomes",
+      "title": "This is what a way out sounds like.",
+      "intro": "Voices from our case studies – from separation to shareholder disputes.",
+      "disclaimer": "Anonymised, illustrative case studies based on typical mediation processes.",
+      "link": "View all case studies",
+      "toCase": "View case",
+      "quote": "“{text}”",
+      "wall": [
+        {
+          "slug": "trennung-mit-kindern",
+          "label": "Separation with children",
+          "quote": "I never thought Thomas and I would find a solution without a war. The mediator didn't give us advice – he asked us questions that made us think for ourselves. And the children – Emma and Felix are so relaxed. They see their dad regularly, they know we both love them.",
+          "author": "Maria"
+        },
+        {
+          "slug": "nachbarschaft-laerm",
+          "label": "Neighbours · Noise",
+          "quote": "We just wanted to sleep peacefully again. Now there are clear rules – and finally peace again.",
+          "author": "The Schneider family"
+        },
+        {
+          "slug": "gesellschafter-streit",
+          "label": "Shareholder dispute",
+          "quote": "A judge would have decided who was right. The mediation made sure the company will still exist in five years. That's not the same thing.",
+          "author": "Stefan & Tobias"
+        },
+        {
+          "slug": "erbstreit-haus-geschwister",
+          "label": "Inheritance",
+          "quote": "I thought Klaus and I would now spend two years fighting in court. Mediation showed us: we both want to be treated fairly. Anna keeps our parents' house, Klaus gets his money. And we're siblings again instead of enemies.",
+          "author": "Anna & Klaus"
+        },
+        {
+          "slug": "trennung-vermoegen-aufteilen",
+          "label": "Separation · Assets",
+          "quote": "We're both intelligent people. Court would have been an insult to our intelligence. Mediation was professional, fair and saved us enormous costs. Looking back, it was the only sensible decision.",
+          "author": "Peter & Sarah"
+        },
+        {
+          "slug": "team-konflikt",
+          "label": "Team conflict",
+          "quote": "The mediation didn't make us friends. It achieved something better: we can work together professionally again – and now we argue about the issues instead of about each other.",
+          "author": "Head of Sales & Head of Development"
+        },
+        {
+          "slug": "nachbarschaft-zaun",
+          "label": "Neighbours · Property",
+          "quote": "In the end it wasn't about the fence at all – it was about being heard.",
+          "author": "The Hoffmann family"
+        },
+        {
+          "slug": "unternehmen-geerbt",
+          "label": "Inheritance · Family",
+          "quote": "We thought one of us would win and the others would lose. In the end we found a solution we can all live with – and the business carries on.",
+          "author": "The Weber family"
+        },
+        {
+          "slug": "b2b-projektstreit",
+          "label": "B2B project dispute",
+          "quote": "The settlement hurt – on both sides. But it saved two companies that will keep doing business together for another ten years.",
+          "author": "Both managing directors, joint statement"
+        }
+      ]
     },
     "mission": {
-      "eyebrow": "Unsere Überzeugung",
-      "statement": "Die meisten Konflikte brauchen kein Gericht.",
-      "text": "Sie brauchen ein Verfahren, das hält. Denn ein Streit kostet nicht nur Geld: Er kostet Monate, in denen nichts entschieden ist, und er kostet die Beziehung, die danach noch tragen muss. Wer das vorher zusammenrechnet, entscheidet anders. medipact gibt dem Streit eine Struktur – klare Schritte, gleiche Rechte für beide Seiten, ausgebildete Mediatorinnen und Mediatoren – damit am Ende Sie entscheiden und nicht die Eskalation.",
-      "link": "Mehr über medipact",
-      "linkRechner": "Was ein Verfahren wirklich kostet"
+      "eyebrow": "What we believe",
+      "statement": "Most conflicts don't need a court.",
+      "text": "They need a process that holds. Because a dispute doesn't just cost money: it costs months in which nothing is decided, and it costs the relationship that still has to work afterwards. Anyone who adds that up beforehand decides differently. medipact gives the dispute a structure – clear steps, equal rights for both sides, trained mediators – so that in the end, you decide, not the escalation.",
+      "link": "More about medipact",
+      "linkRechner": "What a procedure really costs"
     },
+    "didYouKnowFacts": [
+      {
+        "eyebrow": "Origins of the method",
+        "text": "The Harvard Negotiation Project was founded in 1979. It produced the 1981 worldwide bestseller \"Getting to Yes\" by Roger Fisher and William Ury – the basis of the principle medipact implements digitally today: interests, not positions."
+      },
+      {
+        "eyebrow": "Enshrined in law",
+        "text": "Since 26 July 2012, the German Mediation Act has governed mediation as an independent, legally recognised procedure – based on an EU directive intended to strengthen out-of-court dispute resolution throughout Europe."
+      },
+      {
+        "eyebrow": "Confidentiality is mandatory",
+        "text": "Section 4 of the German Mediation Act legally obliges the mediator to keep confidential everything discussed during the mediation – with only a few, clearly defined exceptions."
+      },
+      {
+        "eyebrow": "Nobody decides over your head",
+        "text": "Section 1 of the German Mediation Act defines the mediator as an independent, neutral person without any decision-making authority. Unlike a court judgment, only the parties themselves determine the outcome."
+      },
+      {
+        "eyebrow": "An agreement becomes a binding document",
+        "text": "A mediation agreement is initially a private-law contract – but it can be made legally binding and enforceable, for example through notarisation or a settlement concluded by lawyers."
+      },
+      {
+        "eyebrow": "Courts rely on mediation too",
+        "text": "Since the Mediation Act reformed Section 278 (5) of the German Code of Civil Procedure, courts can refer parties to a specially trained \"conciliation judge\" – a further sign that an out-of-court agreement is often the better first route."
+      },
+      {
+        "eyebrow": "Costs must be clear up front",
+        "text": "Section 2 (4) of the German Mediation Act requires the mediator to inform the parties of the expected costs of the procedure at the outset – so transparency is not a courtesy but a legal duty."
+      },
+      {
+        "eyebrow": "Four principles instead of negotiating tactics",
+        "text": "The Harvard concept rests on four principles: separate the people from the problem, focus on interests rather than positions, invent options for mutual gain and insist on objective criteria. medipact structures digital mediation along exactly these four steps."
+      },
+      {
+        "eyebrow": "Know your best alternative",
+        "text": "\"Getting to Yes\" coined the term BATNA (Best Alternative To a Negotiated Agreement) – the best alternative if no agreement is reached. Knowing your BATNA lets you negotiate with more confidence and keeps you from being pushed into a worse outcome."
+      },
+      {
+        "eyebrow": "A bestseller with global impact",
+        "text": "Since 1981, \"Getting to Yes\" has been translated into more than 35 languages and sold over 15 million copies. Principled negotiation still shapes business, diplomacy and – via the Mediation Act – German law today."
+      }
+    ],
     "footnotes": [
       {
         "n": 1,
-        "text": "Applies while no mediation is running. During an ongoing procedure your request is recorded and the account is deleted once the procedure has ended.",
+        "text": "Applies as long as no mediation is in progress. During an ongoing procedure, your deletion request is recorded and the account is deleted once the procedure has ended.",
         "href": "/konto-loeschen",
         "linkLabel": "Delete account"
       },
       {
         "n": 2,
-        "text": "The platform is operated at Hetzner. Details on the service providers we use are in the privacy policy.",
+        "text": "The platform is operated at Hetzner. Details on the service providers we use can be found in the privacy policy.",
         "href": "/datenschutz",
         "linkLabel": "Privacy policy"
       },
       {
         "n": 3,
-        "text": "We do not pass on the content of a mediation to third parties, unless we are legally obliged to or you have expressly consented.",
+        "text": "We do not pass on the content of a mediation to third parties – unless we are legally obliged to or you have expressly consented.",
         "href": "/datenschutz",
         "linkLabel": "Privacy policy, section 5"
       }
-    ]
+    ],
+    "footnotesLabel": "Footnotes",
+    "footnoteRef": "Footnote",
+    "footnoteBack": "Back to text"
   },
   "newsletter": {
     "eyebrow": "Newsletter",
     "title": "Insights that resolve conflict – straight to your inbox",
-    "text": "Practical impulses on fair communication, mediation and conflict resolution. Once or twice a month, free and unsubscribe anytime.",
+    "text": "Practical ideas on fair communication, mediation and conflict resolution. Once or twice a month, free and you can unsubscribe at any time.",
     "placeholder": "Your email address",
     "button": "Subscribe",
     "footerHeading": "Newsletter",
-    "footerText": "Impulses on fair conflict resolution – once or twice a month.",
+    "footerText": "Ideas on fair conflict resolution – once or twice a month.",
     "footerButton": "Subscribe",
     "submitting": "Sending …",
-    "success": "Almost done: we have sent you a confirmation email. Please click the link inside – your subscription starts only after that.",
+    "success": "Almost done: we have sent you a confirmation email. Please click the link in it – your subscription only becomes active after that.",
     "error": "Sign-up failed. Please try again later.",
     "invalid": "Please enter a valid email address.",
-    "consent": "You will receive a confirmation email; the newsletter starts only once you click the link in it. You can unsubscribe at any time via the link in every issue. Details in our",
+    "consent": "You will receive a confirmation email; the newsletter only starts once you click the link in it. You can unsubscribe at any time via the link in every issue. Details in our",
     "privacyLink": "privacy policy."
+  },
+  "quickCheck": {
+    "eyebrow": "Quick check",
+    "title": "Is mediation right for your situation?",
+    "questions": [
+      {
+        "text": "If the other side called you today to talk about a solution – would you pick up?"
+      },
+      {
+        "text": "Can you imagine that the other side would describe the situation very differently – and still have an understandable point?"
+      },
+      {
+        "text": "Imagine the conflict were resolved in four weeks. Would your everyday life feel noticeably easier?"
+      },
+      {
+        "text": "Can you tell the other side what you really think without it being used against you later?"
+      },
+      {
+        "text": "Have you already invested your own time, energy or money that you don't want to simply write off?"
+      },
+      {
+        "text": "Are there currently threats, massive pressure or fear that make an open conversation impossible?",
+        "hint": "If so: mediation is no substitute for protection – please talk to a counselling service or a lawyer first."
+      }
+    ],
+    "yes": "Yes",
+    "maybe": "Not sure",
+    "no": "No",
+    "suitable": {
+      "text": "Mediation is probably a good fit.",
+      "cta": "Start a conversation"
+    },
+    "unclear": {
+      "text": "Your situation can't be clearly assessed yet.",
+      "cta": "Clarify your situation"
+    },
+    "notSuitable": {
+      "text": "Mediation is probably not suitable at the moment.",
+      "cta": "Explore alternative steps"
+    }
+  },
+  "logbuchApp": {
+    "qrWebAlt": "QR code for logbuch.medipact.de",
+    "web": "In the browser",
+    "open": "Open the log",
+    "qrAppAlt": "QR code for the log app in the App Store",
+    "app": "As an iPhone app",
+    "appStore": "Download on the App Store",
+    "soon": "Coming soon to the App Store."
+  },
+  "didYouKnow": {
+    "eyebrow": "Background",
+    "heading": "Did you know?",
+    "prev": "Previous fact",
+    "next": "Next fact",
+    "show": "Show fact {n}"
   }
 }

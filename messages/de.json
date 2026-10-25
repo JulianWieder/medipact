@@ -82,6 +82,10 @@
     "acceptButton": "Alle akzeptieren"
   },
   "home": {
+    "meta": {
+      "title": "Online-Mediation: Konflikt lösen mit zertifizierten Mediatoren | medipact",
+      "description": "Lösen Sie Ihren Konflikt online: strukturiertes Mediationsverfahren in sechs Schritten, begleitet von zertifizierten Mediatorinnen und Mediatoren. Fall kostenlos anlegen."
+    },
     "hero": {
       "badge": "Geführte Online-Mediation – Verfahren, KI-Fallanalyse, zertifizierte Mediatoren",
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
@@ -94,7 +98,8 @@
       "badgeVertraulich": "Vertraulich",
       "badgeBezahlbar": "Festpreis statt Stundensatz",
       "badgeLoesungsorientiert": "Ergebnisorientiert",
-      "scrollCue": "Weiter nach unten"
+      "scrollCue": "Weiter nach unten",
+      "imageAlt": "Mediationssitzung: zwei Konfliktparteien im Gespräch mit einer Mediatorin"
     },
     "kampagnen": {
       "eyebrow": "Aktuell bei medipact",
@@ -137,7 +142,43 @@
           "href": "/konflikte/odr",
           "cta": "Mehr erfahren"
         }
-      ]
+      ],
+      "prev": "Zurück",
+      "next": "Weiter"
+    },
+    "ersteHilfe": {
+      "eyebrow": "In 3 Schritten starten",
+      "title": "So starten Sie Ihre Mediation",
+      "text": "Kein kompliziertes Verfahren – ein klarer, geführter Weg vom ersten Klick bis zur Einigung.",
+      "steps": [
+        {
+          "title": "Fall online anlegen",
+          "text": "Sie beschreiben Ihren Konflikt in wenigen Minuten – anonym und unverbindlich. Ohne Anwalt, ohne Termin vor Ort."
+        },
+        {
+          "title": "Andere Seite einladen und Interessen erarbeiten",
+          "text": "Die andere Seite wird neutral eingeladen. Gemeinsam legen Sie einen Termin für das erste Gespräch fest."
+        },
+        {
+          "title": "Gemeinsame Lösung finden",
+          "text": "Strukturiert und fair arbeiten Sie eine Lösung aus, mit der beide Seiten leben können – schriftlich festgehalten."
+        }
+      ],
+      "faq": [
+        {
+          "q": "Muss die Gegenseite sofort zustimmen?",
+          "a": "Nein. Sie legen Ihren Fall zuerst allein an. Die andere Seite wird erst danach neutral und ohne Vorwürfe eingeladen."
+        },
+        {
+          "q": "Was kostet der erste Schritt?",
+          "a": "Nichts. Account und das Anlegen Ihres Falls sind kostenlos und unverbindlich – die eigentliche Mediation beginnt beim Einstiegstarif ab 49 € pro Partei."
+        },
+        {
+          "q": "Ist das Ergebnis rechtlich bindend?",
+          "a": "Die Abschlussvereinbarung ist ein bindender Vertrag. Bei rechtlich komplexen Themen sollte sie zusätzlich anwaltlich oder notariell geprüft werden."
+        }
+      ],
+      "cta": "Fall kostenlos anlegen"
     },
     "zweiWelten": {
       "eyebrow": "Für wen ist medipact?",
@@ -157,6 +198,42 @@
         "ctaLabel": "Für Unternehmen",
         "ctaHref": "/konflikte/geschaeft"
       }
+    },
+    "themen": {
+      "eyebrow": "Ihr Thema",
+      "title": "Wofür medipact gemacht ist.",
+      "ariaLabel": "Konfliktthemen",
+      "moreLink": "Mehr zu {label}",
+      "tabs": [
+        {
+          "key": "trennung",
+          "label": "Trennung"
+        },
+        {
+          "key": "nachbarschaft",
+          "label": "Nachbarschaft"
+        },
+        {
+          "key": "erbschaft",
+          "label": "Erbschaft"
+        },
+        {
+          "key": "odr",
+          "label": "Geschäft & ODR"
+        },
+        {
+          "key": "verbraucher",
+          "label": "Verbraucher"
+        },
+        {
+          "key": "mietverhaeltnis",
+          "label": "Mietverhältnis"
+        },
+        {
+          "key": "arbeitsplatz",
+          "label": "Arbeitsplatz"
+        }
+      ]
     },
     "stats": [
       {
@@ -217,6 +294,34 @@
         }
       }
     },
+    "logbuch": {
+      "badge": "Neu & dauerhaft kostenlos",
+      "titleLine1": "Noch nicht bereit für eine Mediation?",
+      "titleLine2": "Dann dokumentieren Sie erst einmal.",
+      "text": "Mit dem <strong>Konflikt-Logbuch</strong> halten Sie fest, was in Ihrem Streit passiert – wie in einem Streit-Tagebuch: Vorkommnisse, Gespräche, E-Mails, WhatsApp-Nachrichten, Telefonate und Ihre Gedanken. Vertraulich, chronologisch sortiert und jederzeit mit einem Klick in eine Mediation umwandelbar.",
+      "ctaStart": "Kostenlos starten",
+      "ctaMore": "Mehr zum Konflikt-Logbuch",
+      "previewLabel": "Ihre Chronologie",
+      "previewEntries": [
+        {
+          "icon": "📞",
+          "label": "Telefonat",
+          "text": "Erneut über die Hecke gestritten – kein Ergebnis."
+        },
+        {
+          "icon": "✉️",
+          "label": "E-Mail",
+          "text": "Nachbar fordert Rückschnitt bis Ende des Monats."
+        },
+        {
+          "icon": "📌",
+          "label": "Vorkommnis",
+          "text": "Laute Musik bis 1:30 Uhr, drittes Mal diese Woche."
+        }
+      ],
+      "previewFooter": "… und wenn Sie so weit sind: „In Mediation umwandeln“.",
+      "availability": "Jetzt verfügbar – im Browser und als App. QR-Code mit dem Handy scannen:"
+    },
     "processEyebrow": "So funktioniert es",
     "processTitle": "In 6 klaren Schritten zur möglichen Einigung.",
     "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
@@ -249,7 +354,47 @@
       "title": "So klingt ein Ausgang.",
       "intro": "Stimmen aus unseren Fallbeispielen – von der Trennung bis zum Gesellschafterstreit.",
       "disclaimer": "Anonymisierte, exemplarische Fallbeispiele auf Basis typischer Mediationsverläufe.",
-      "link": "Alle Fallbeispiele ansehen"
+      "link": "Alle Fallbeispiele ansehen",
+      "toCase": "Zum Fall",
+      "quote": "„{text}“",
+      "wall": [
+        {
+          "slug": "trennung-mit-kindern",
+          "label": "Trennung mit Kindern"
+        },
+        {
+          "slug": "nachbarschaft-laerm",
+          "label": "Nachbarschaft · Lärm"
+        },
+        {
+          "slug": "gesellschafter-streit",
+          "label": "Gesellschafterstreit"
+        },
+        {
+          "slug": "erbstreit-haus-geschwister",
+          "label": "Erbschaft"
+        },
+        {
+          "slug": "trennung-vermoegen-aufteilen",
+          "label": "Trennung · Vermögen"
+        },
+        {
+          "slug": "team-konflikt",
+          "label": "Teamkonflikt"
+        },
+        {
+          "slug": "nachbarschaft-zaun",
+          "label": "Nachbarschaft · Grundstück"
+        },
+        {
+          "slug": "unternehmen-geerbt",
+          "label": "Erbschaft · Familie"
+        },
+        {
+          "slug": "b2b-projektstreit",
+          "label": "B2B-Projektstreit"
+        }
+      ]
     },
     "mission": {
       "eyebrow": "Unsere Überzeugung",
@@ -277,7 +422,10 @@
         "href": "/datenschutz",
         "linkLabel": "Datenschutzerklärung, Abschnitt 5"
       }
-    ]
+    ],
+    "footnotesLabel": "Fußnoten",
+    "footnoteRef": "Fußnote",
+    "footnoteBack": "Zurück zum Text"
   },
   "newsletter": {
     "eyebrow": "Newsletter",
@@ -294,5 +442,61 @@
     "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "consent": "Sie erhalten eine Bestätigungsmail; erst mit dem Klick darauf beginnt der Versand. Abmeldung jederzeit über den Link in jeder Ausgabe. Details in der",
     "privacyLink": "Datenschutzerklärung."
+  },
+  "quickCheck": {
+    "eyebrow": "Schnell-Check",
+    "title": "Ist Mediation für Ihre Situation geeignet?",
+    "questions": [
+      {
+        "text": "Wenn die andere Seite Sie heute anrufen würde, um über eine Lösung zu sprechen – würden Sie abheben?"
+      },
+      {
+        "text": "Können Sie sich vorstellen, dass die andere Seite die Lage ganz anders schildern würde – und trotzdem einen nachvollziehbaren Punkt hätte?"
+      },
+      {
+        "text": "Stellen Sie sich vor, der Konflikt wäre in vier Wochen gelöst. Würde sich Ihr Alltag dadurch spürbar leichter anfühlen?"
+      },
+      {
+        "text": "Können Sie der anderen Seite sagen, was Sie wirklich denken, ohne dass es später gegen Sie verwendet wird?"
+      },
+      {
+        "text": "Haben Sie bereits eigene Zeit, Nerven oder Geld investiert, die Sie nicht einfach verloren geben wollen?"
+      },
+      {
+        "text": "Gibt es aktuell Drohungen, massiven Druck oder Angst, die ein offenes Gespräch unmöglich machen?",
+        "hint": "Falls ja: Mediation ersetzt keinen Schutz – sprechen Sie zuerst mit einer Fachstelle oder Anwalt."
+      }
+    ],
+    "yes": "Ja",
+    "maybe": "Unsicher",
+    "no": "Nein",
+    "suitable": {
+      "text": "Mediation ist wahrscheinlich sinnvoll.",
+      "cta": "Gespräch starten"
+    },
+    "unclear": {
+      "text": "Ihre Situation ist noch nicht klar einzuordnen.",
+      "cta": "Situation klären"
+    },
+    "notSuitable": {
+      "text": "Mediation ist aktuell wahrscheinlich nicht geeignet.",
+      "cta": "Alternative Schritte prüfen"
+    }
+  },
+  "logbuchApp": {
+    "qrWebAlt": "QR-Code zu logbuch.medipact.de",
+    "web": "Im Browser",
+    "open": "Logbuch öffnen",
+    "qrAppAlt": "QR-Code zur Logbuch-App im App Store",
+    "app": "Als App fürs iPhone",
+    "appStore": "Im App Store laden",
+    "soon": "Bald im App Store."
+  },
+  "didYouKnow": {
+    "eyebrow": "Hintergrundwissen",
+    "heading": "Wussten Sie schon?",
+    "prev": "Vorheriger Fakt",
+    "next": "Nächster Fakt",
+    "show": "Fakt {n} anzeigen"
   }
 }

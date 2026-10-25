@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { TabSwitcher, CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import { FeatureCard } from "@/app/components/ui/FeatureCard";
 import { trennungPageContent } from "@/app/content/trennungPage";
@@ -30,58 +31,56 @@ type ThemaContent = {
 
 type Thema = {
   key: string;
-  label: string;
   href: string;
   image: StaticImageData;
   content: ThemaContent;
 };
 
+// Tab-Labels stehen in messages/*.json unter home.themen.tabs. Die
+// Tab-Inhalte kommen auf Deutsch aus den Content-Dateien der Detailseiten
+// (eine Quelle); eine Sprache ohne eigene Detailseiten-Inhalte (en) legt
+// eyebrow/title/intro/features direkt im Tab-Eintrag ab und überschreibt so.
+type ThemaMessages = { key: string; label: string } & Partial<ThemaContent>;
+
 const themen: Thema[] = [
   {
     key: "trennung",
-    label: "Trennung",
     href: "/scheidungsmediation",
     image: trennungPhoto,
     content: trennungPageContent,
   },
   {
     key: "nachbarschaft",
-    label: "Nachbarschaft",
     href: "/konflikte/nachbarschaft",
     image: nachbarnPhoto,
     content: nachbarschaftPageContent,
   },
   {
     key: "erbschaft",
-    label: "Erbschaft",
     href: "/konflikte/erbschaft",
     image: erbschaftPhoto,
     content: erbschaftPageContent,
   },
   {
     key: "odr",
-    label: "Geschäft & ODR",
     href: "/konflikte/odr",
     image: geschaeftPhoto,
     content: odrPageContent,
   },
   {
     key: "verbraucher",
-    label: "Verbraucher",
     href: "/konflikte/verbraucher",
     image: verbraucherPhoto,
     content: verbraucherPageContent,
   },
   {
     key: "mietverhaeltnis",
-    label: "Mietverhältnis",
     href: "/konflikte/mietverhaeltnis",
     image: mietPhoto,
     content: mietverhaeltnisPageContent,
   },
   {
     key: "arbeitsplatz",
-    label: "Arbeitsplatz",
     href: "/konflikte/arbeitsplatz",
     image: arbeitsplatzPhoto,
     content: arbeitsplatzPageContent,
@@ -95,20 +94,35 @@ const themen: Thema[] = [
  * (image + text) layout.
  */
 export function ThemenTabs() {
+  const t = useTranslations("home.themen");
+  const tabMessages = t.raw("tabs") as ThemaMessages[];
   const [active, setActive] = useState(0);
-  const thema = themen[active];
+  const tabs = themen.map((thema) => {
+    const m = tabMessages.find((tab) => tab.key === thema.key);
+    return {
+      ...thema,
+      label: m?.label ?? thema.key,
+      content: {
+        eyebrow: m?.eyebrow ?? thema.content.eyebrow,
+        title: m?.title ?? thema.content.title,
+        intro: m?.intro ?? thema.content.intro,
+        features: m?.features ?? thema.content.features,
+      },
+    };
+  });
+  const thema = tabs[active];
 
   return (
     <section className="section section-muted border-y border-neutral-200">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mb-12 max-w-2xl">
-          <div className="eyebrow mb-4">Ihr Thema</div>
-          <h2 className="heading-2">Wofür medipact gemacht ist.</h2>
+          <div className="eyebrow mb-4">{t("eyebrow")}</div>
+          <h2 className="heading-2">{t("title")}</h2>
         </div>
 
         <TabSwitcher
-          ariaLabel="Konfliktthemen"
-          tabs={themen.map((t) => ({ key: t.key, label: t.label }))}
+          ariaLabel={t("ariaLabel")}
+          tabs={tabs.map((tab) => ({ key: tab.key, label: tab.label }))}
           activeIndex={active}
           onChange={setActive}
         />
@@ -161,7 +175,7 @@ export function ThemenTabs() {
                 href={thema.href}
                 className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent-700 hover:underline"
               >
-                Mehr zu {thema.label} →
+                {t("moreLink", { label: thema.label })} →
               </Link>
             </CrossfadePanel>
           </div>
