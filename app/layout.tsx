@@ -3,7 +3,11 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ConditionalHeader, ConditionalFooter } from "@/app/components/ConditionalHeader";
+import {
+  AusserhalbEinbettung,
+  ConditionalHeader,
+  ConditionalFooter,
+} from "@/app/components/ConditionalHeader";
 import { JsonLd } from "@/app/components/JsonLd";
 import Analytics from "@/app/components/Analytics";
 import CookieConsent from "@/app/components/CookieConsent";
@@ -173,11 +177,15 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <JsonLd data={organizationSchema} />
           <JsonLd data={websiteSchema} />
-          <Analytics />
+          <AusserhalbEinbettung>
+            <Analytics />
+          </AusserhalbEinbettung>
           <ConditionalHeader />
           {children}
           <ConditionalFooter />
-          <CookieConsent />
+          <AusserhalbEinbettung>
+            <CookieConsent />
+          </AusserhalbEinbettung>
         </NextIntlClientProvider>
       </body>
     </html>

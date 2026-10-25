@@ -5,6 +5,7 @@ import { JsonLd } from "@/app/components/JsonLd";
 import gespraechPhoto from "@/fotos/medi_gespraech.jpg";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
+import KostenrechnerEinbetten from "./KostenrechnerEinbetten";
 
 // Zielgruppe ist NICHT die Streitpartei, sondern der Berater daneben. Deshalb
 // zielt der Title bewusst auf "Mandant"/"Mandat"-Sprache statt auf die
@@ -64,6 +65,7 @@ export default function FuerBeraterPage() {
           alt: "Unterlagen werden gemeinsam durchgesehen und eingeordnet",
         }}
         breadcrumbs={[{ label: "Für Berater" }]}
+        beforeCta={<KostenrechnerEinbetten />}
         relatedCases={[
           { label: "Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
           { label: "Unternehmen geerbt", href: "/cases/unternehmen-geerbt" },

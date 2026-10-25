@@ -145,22 +145,43 @@ const nextConfig: NextConfig = {
   },
 
   // Security headers
+  //
+  // Einbettbar ist NUR das Kostenrechner-Widget (/kostenrechner/embed, mit
+  // ?art= als Query, die der Pfadabgleich nicht sieht). Darum zwei Eintraege
+  // statt einem: alle anderen Pfade behalten X-Frame-Options SAMEORIGIN, das
+  // Widget bekommt stattdessen frame-ancestors *. Ueberschreiben ginge nicht:
+  // passen zwei Eintraege, sendet Next beide Header, und ein X-Frame-Options
+  // laesst sich nicht "leer" setzen. nginx (nginx/mailcow/medipact.conf)
+  // setzt keinen dieser Header.
   async headers() {
+    const basis = [
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block',
+      },
+    ];
     return [
       {
-        source: '/:path*',
+        source: '/:path((?!kostenrechner/embed$).*)',
         headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
+          ...basis,
           {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN',
           },
+        ],
+      },
+      {
+        source: '/kostenrechner/embed',
+        headers: [
+          ...basis,
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors *',
           },
         ],
       },

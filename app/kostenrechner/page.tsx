@@ -3,13 +3,10 @@ import Link from "next/link";
 import { JsonLd } from "@/app/components/JsonLd";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { pageMetadata, SITE_URL } from "@/lib/seo";
-import {
-  KONFLIKTARTEN,
-  KOSTENRECHT_STAND,
-  type Konfliktart,
-} from "@/lib/kostenrecht";
+import { KOSTENRECHT_STAND } from "@/lib/kostenrecht";
 import { ladePreisOverlay } from "@/lib/pricing-matrix";
 import KostenrechnerClient from "./KostenrechnerClient";
+import { artParsen, einstieg } from "./art";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 
@@ -24,19 +21,26 @@ import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 // darauf zielen Titel, H1 und die Longtail-Keywords ab.
 //
 // Zweck ist Verlinkung, nicht Conversion: Die nachvollziehbare Herleitung mit
-// Fundstelle je Position ist der eigentliche Linkbait.
+// Fundstelle je Position ist der eigentliche Linkbait. Dazu gehört das
+// Widget unter /kostenrechner/embed (Einbettungscode auf /fuer-berater).
+//
+// Title/H1 seit 25.10.2026 auf den Vergleich statt auf "Prozesskosten":
+// Laut GSC (Aug.–Okt.) kommen die Impressionen über Kosten-Fragen ("was
+// kostet eine mediation", "mediation versus gerichtsverfahren kosten"),
+// und keine Seite beantwortete die direkt — dafür der Antwortblock unter
+// der H1.
 
 export const metadata: Metadata = pageMetadata({
-  title: "Prozesskosten-Rechner: Gericht oder Mediation? | medipact",
+  title: "Mediation oder Gericht? Kosten im Vergleich | medipact",
   description:
-    "Was kostet Ihr Streit vor Gericht — und was ohne? Gerichts-, Anwalts- und Gutachterkosten berechnen, auch für Sorgerecht und Umgang. Ohne Anmeldung.",
+    "Was kostet Ihr Streit vor Gericht, mit freier Mediation oder zum Festpreis? Der Rechner zeigt alle drei nach gesetzlichen Tabellen. Ohne Anmeldung.",
   path: "/kostenrechner",
 });
 
 const appSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Prozesskosten-Rechner: Gericht oder Mediation",
+  name: "Kostenrechner: Mediation oder Gericht",
   url: `${SITE_URL}/kostenrechner`,
   applicationCategory: "FinanceApplication",
   operatingSystem: "Web",
@@ -82,7 +86,7 @@ const FAQ = [
   {
     question: "Was kostet eine Mediation insgesamt?",
     answer:
-      "Bei stundenweiser Abrechnung sind für eine Familienmediation üblicherweise drei bis acht Sitzungen anzusetzen; die Gesamtkosten liegen dann grob zwischen 800 und 3.000 Euro pro Partei, je nach Stundensatz und Zahl der Termine. Das ist deutlich weniger als ein streitiges Verfahren, aber ein offener Betrag: Wie viele Sitzungen es werden, entscheidet sich erst im Verlauf.",
+      "Bei stundenweiser Abrechnung sind für eine Familienmediation üblicherweise drei bis acht Sitzungen anzusetzen; die Gesamtkosten liegen dann grob zwischen 800 und 3.000 Euro pro Partei, je nach Stundensatz und Zahl der Termine. Das ist deutlich weniger als ein streitiges Verfahren, aber ein offener Betrag: Wie viele Sitzungen es werden, entscheidet sich erst im Verlauf. Eine Online-Mediation zum Festpreis legt den Betrag dagegen vorher fest; was das je Konfliktart ausmacht, zeigt der Rechner oben.",
   },
   {
     question: "Was kostet ein Sorgerechts- oder Umgangsverfahren?",
@@ -122,23 +126,6 @@ const faqSchema = {
   })),
 };
 
-/**
- * ?art= belegt die Konfliktart vor. Gesetzt wird der Parameter von den
- * Konfliktarten-Seiten (KostenrechnerHinweis) – ein unbekannter oder
- * fehlender Wert fällt still auf die Voreinstellung zurück, damit sich über
- * die URL keine kaputten Zustände erzeugen lassen.
- *
- * Kein Einfluss auf Indexierung: pageMetadata setzt das Canonical fest auf
- * /kostenrechner, die Parameter-Varianten kanonisieren also auf die
- * Hauptseite und verwässern sie nicht.
- */
-function artParsen(wert?: string | string[]): Konfliktart | undefined {
-  const eins = Array.isArray(wert) ? wert[0] : wert;
-  return KONFLIKTARTEN.some((k) => k.key === eins)
-    ? (eins as Konfliktart)
-    : undefined;
-}
-
 export default async function Kostenrechner({
   searchParams,
 }: {
@@ -149,6 +136,7 @@ export default async function Kostenrechner({
   // lib/kostenrecht.ts – siehe lib/pricing-matrix.ts.
   const preise = await ladePreisOverlay();
   const start = artParsen((await searchParams).art);
+  const ab = einstieg(preise);
 
   return (
     <>
@@ -163,28 +151,51 @@ export default async function Kostenrechner({
           <div className="mx-auto w-full max-w-5xl px-6 lg:px-8">
             <Breadcrumbs
               variant="dark"
-              items={[{ label: "Prozesskosten-Rechner" }]}
+              items={[{ label: "Kostenrechner" }]}
             />
             <p className="eyebrow mb-4 mt-6 text-accent-300">
-              Prozesskosten-Rechner
+              Kostenrechner
             </p>
 
             <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-              Was kostet der Streit?{" "}
-              <span className="text-accent-300">Vor Gericht — und ohne.</span>
+              Was kostet Ihr Streit?{" "}
+              <span className="text-accent-300">
+                Kosten von Mediation und Gericht im Vergleich.
+              </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-200">
+
+            {/* Direkte Antwort auf "Was kostet eine Mediation?" (unter 70
+                Wörtern). Server-gerendert; der Einstiegspreis kommt live aus
+                pricing.py bzw. dem Fallback in KONFLIKTARTEN. Nur
+                Größenordnungen und Tabellen, keine Einschätzung zum
+                Einzelfall (RDG). Die FAQ "Was kostet eine Mediation
+                insgesamt?" weiter unten sagt dasselbe ausführlicher. */}
+            <div className="mt-6 max-w-2xl rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+              <p className="text-sm font-semibold uppercase tracking-wider text-accent-300">
+                Was kostet eine Mediation?
+              </p>
+              <p className="mt-2 text-base leading-7 text-neutral-100">
+                Frei tätige Mediatorinnen und Mediatoren rechnen meist 150 bis
+                300 € pro Stunde ab; bei drei bis acht Sitzungen kommen grob 800
+                bis 3.000 € pro Partei zusammen. Bei medipact gilt ein Festpreis
+                je Konfliktart, ab {ab.preis.toLocaleString("de-DE")} €
+                {ab.proPartei ? " pro Partei" : ""}. Ein Gerichtsverfahren hat
+                keinen festen Preis: Gerichts- und Anwaltskosten richten sich
+                nach dem Streitwert.
+              </p>
+            </div>
+          </div>
+        </ImagePinHero>
+
+        <section className="section-base pt-10">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <p className="mb-8 max-w-3xl leading-7 text-neutral-700">
               Gerichts- und Anwaltskosten richten sich nach festen gesetzlichen
               Tabellen. Der Rechner wendet sie an, zeigt jede Position mit
               Fundstelle und stellt daneben, was dieselbe Sache in einer
               Mediation kostet. Kostenlos, ohne Anmeldung, Stand{" "}
               {KOSTENRECHT_STAND}.
             </p>
-          </div>
-        </ImagePinHero>
-
-        <section className="section-base pt-10">
-          <div className="mx-auto max-w-5xl px-6 lg:px-8">
             <KostenrechnerClient preise={preise} start={start} />
           </div>
         </section>

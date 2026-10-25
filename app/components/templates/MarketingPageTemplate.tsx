@@ -114,6 +114,9 @@ type MarketingPageTemplateProps = {
    * die meiste Kraft haben und auf denen der Preis-Einwand entsteht.
    */
   kostenrechnerArt?: Konfliktart;
+  /** Seiteneigener Abschnitt vor den Teasern und dem Schluss-CTA, z. B. der
+   * Einbettungscode für den Kostenrechner auf /fuer-berater. */
+  beforeCta?: ReactNode;
   finalCtaTitle: string;
   finalCtaText: string;
   finalCta: {
@@ -169,6 +172,7 @@ export function MarketingPageTemplate({
   breadcrumbs,
   relatedCases,
   kostenrechnerArt,
+  beforeCta,
   finalCtaTitle,
   finalCtaText,
   finalCta,
@@ -529,6 +533,8 @@ export function MarketingPageTemplate({
             </div>
           </section>
         )}
+
+        {beforeCta}
 
         {/* Erst die Kostenfrage beantworten, dann der sanfte Einstieg:
             Wer die Gerichtszahl gesehen hat, liest das Logbuch-Angebot
