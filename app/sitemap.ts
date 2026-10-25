@@ -1,327 +1,171 @@
 import { MetadataRoute } from "next";
 import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
 import { KARRIERE_ONLINE } from "@/app/karriere/status";
+import { routing, isIndexedLocalePath } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/seo";
 
-const BASE_URL = "https://medipact.de";
+// ── Was hier hineingehoert ──────────────────────────────────────────────────
+//
+// Jede indexierbare Seite mit ihrer kanonischen URL — exakt der `path`, den
+// die Seite an pageMetadata() (lib/seo.ts) gibt. Bewusst NICHT hinein:
+//   - noindex-Seiten: /impressum, /agb, /datenschutz, /cookies,
+//     /konto-loeschen, /kostenrechner/embed, /onboarding, /dashboard/*
+//   - Redirects: /konflikte/geschaeft (-> /odr), /konflikte/wg (-> /konflikte),
+//     /cases/nachbarschaft (-> /cases), /konflikte/trennung
+//     (-> /scheidungsmediation) und die Alt-Slugs in next.config.ts.
+//     Eine Sitemap listet Ziele, keine Weiterleitungen.
+//   - /auth, /workspace, /invite, /newsletter (robots.ts sperrt sie ohnehin).
+//
+// Sprachfassungen entstehen automatisch: Jeder Pfad in INDEXED_LOCALE_ROUTES
+// (i18n/routing.ts) bekommt pro Sprache einen Eintrag, alle mit denselben
+// hreflang-Alternates wie im <head>. Eine /en-Seite freigeben heisst also:
+// dort eintragen, hier nichts aendern.
+
+// ── lastModified ────────────────────────────────────────────────────────────
+//
+// KEIN `new Date()`. Die Route wird dynamisch gerendert; ein frischer
+// Zeitstempel bei jedem Abruf meldet Google, jede Seite habe sich gerade
+// geaendert — das Signal wird wertlos und kostet Crawl-Budget.
+//
+// Stattdessen feste Staende, und beim naechsten inhaltlichen Update nur die
+// Seiten hochsetzen, die sich WIRKLICH geaendert haben. Wer ein Datum global
+// hochsetzt, meldet Google auch die unveraenderten Seiten als neu.
+//
+// Ein lastmod darf auch nie VOR der Entstehung einer URL liegen (so war es
+// bis 17.08. bei /konflikte/arbeitsplatz und /mietverhaeltnis): neue Seiten
+// bekommen ihr eigenes Datum.
+const STAND = {
+  // Grundstand. Zuletzt: /konflikte/arbeitsplatz + /mietverhaeltnis neu,
+  // Landing-Texte auf Respekt-Wording. Davor: /fuer-berater (10.08.),
+  // /einigung-Cluster (06.08.), Case-Slugs umbenannt (01.08.).
+  basis: new Date("2026-08-17"),
+  // Intent-Umbau (Verfahren statt Ratgeber): Titles, Descriptions,
+  // Service-/Offer-Knoten.
+  intent: new Date("2026-09-07"),
+  // /methode umgebaut; /preise und /einigung/ohne-mediator mit demselben
+  // Sprachumbau ("persoenlich" raus, Sitzungen statt Stundenkontingente,
+  // kein falsches "auch vor Ort").
+  verfahren: new Date("2026-09-13"),
+};
+
+// Freigabedatum je Sprachfassung (Pfad -> Datum), gilt NUR fuer die
+// nicht-deutschen Eintraege: die deutsche Fassung hat sich durch die
+// Freigabe nicht geaendert. Wer in INDEXED_LOCALE_ROUTES einen Pfad
+// ergaenzt, traegt hier dessen Freigabetag ein — sonst faellt der Eintrag
+// auf das deutsche Datum zurueck, das VOR der Existenz der /en-URL liegt.
+const SPRACHFREIGABE: Record<string, Date> = {
+  "": new Date("2026-10-25"),
+};
+
+type Route = {
+  path: string;
+  lastModified: Date;
+  changeFrequency: "weekly" | "monthly";
+  priority: number;
+};
+
+const m = (path: string, priority: number, lastModified = STAND.basis): Route => ({
+  path,
+  lastModified,
+  changeFrequency: "monthly",
+  priority,
+});
+
+const ROUTES: Route[] = [
+  { path: "", lastModified: STAND.basis, changeFrequency: "weekly", priority: 1.0 },
+
+  // Verfahren & Angebot
+  m("/preise", 0.9, STAND.verfahren),
+  m("/methode", 0.8, STAND.verfahren),
+  m("/kostenrechner", 0.9),
+  m("/konflikt-logbuch", 0.9, STAND.intent),
+  m("/about", 0.8),
+  m("/kontakt", 0.8),
+  // Vertriebs-Asset fuer beratende Berufe, eigene Suchsprache — Prioritaet
+  // moderat, die Seite lebt von Direktlinks aus Mails und Gespraechen.
+  m("/fuer-berater", 0.7),
+  // Nur solange die Stellenanzeige online ist (app/karriere/status.ts).
+  ...(KARRIERE_ONLINE ? [m("/karriere", 0.5)] : []),
+
+  // /einigung-Cluster (docs/einigung-cluster-konzept.md). Hoch priorisiert:
+  // /ohne-mediator bedient eine Suchintention, die sonst keine Seite traegt.
+  m("/einigung", 0.9),
+  m("/einigung/ohne-mediator", 0.8, STAND.verfahren),
+  m("/einigung/abgleich", 0.8),
+  m("/einigung/gleichbehandlung", 0.7),
+
+  // Konfliktarten
+  m("/konflikte", 0.8, STAND.intent),
+  // Bis 15.08.2026 /konflikte/trennung (301 in next.config.ts).
+  m("/scheidungsmediation", 0.7, STAND.intent),
+  m("/konflikte/nachbarschaft", 0.7),
+  m("/konflikte/erbschaft", 0.7),
+  m("/konflikte/odr", 0.7),
+  m("/konflikte/verbraucher", 0.7),
+  m("/konflikte/mietverhaeltnis", 0.7),
+  m("/konflikte/arbeitsplatz", 0.7),
+
+  // Uebersichten
+  m("/cases", 0.7),
+  m("/ratgeber", 0.7),
+
+  // Fallbeispiele
+  ...[
+    "nachbarschaft-laerm",
+    "nachbarschaft-parken",
+    "nachbarschaft-zaun",
+    "trennung-mit-kindern",
+    "streit-ums-testament",
+    "trennung-vermoegen-aufteilen",
+    "erbstreit-haus-geschwister",
+    "trennung-patchwork-familie",
+    "trennung-gemeinsame-firma",
+    "unternehmen-geerbt",
+    "internationale-trennung",
+    "trennung-nach-langer-ehe",
+    "gesellschafter-streit",
+    "team-konflikt",
+    "b2b-projektstreit",
+  ].map((slug) => m(`/cases/${slug}`, 0.6)),
+
+  // Ratgeber-Artikel kommen direkt aus dem Content — neue Artikel landen
+  // ohne Zutun hier. Jeder traegt sein echtes `updated`-Datum (das auch
+  // sichtbar als "zuletzt aktualisiert" auf der Seite steht). Nur neue
+  // Snippets (Title/Description) sind KEIN Grund, es hochzusetzen — dann in
+  // der Search Console die Indexierung anfordern.
+  ...ratgeberArticles.map((a) =>
+    m(`/ratgeber/${a.slug}`, 0.7, new Date(a.updated)),
+  ),
+];
+
+const urlFor = (locale: string, path: string) =>
+  `${SITE_URL}${locale === routing.defaultLocale ? "" : `/${locale}`}${path}`;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Wichtig: KEIN `new Date()` hier. Diese Route wird von Next.js dynamisch
-  // gerendert, d.h. bei jedem Aufruf (auch durch den Googlebot) würde ein
-  // frischer Zeitstempel entstehen — für Google sieht es dann so aus, als
-  // wäre jede einzelne Seite bei jedem Crawl "gerade eben geändert" worden.
-  // Das macht das lastModified-Signal wertlos (Google kann es nicht mehr
-  // nutzen, um echte Änderungen zu priorisieren) und verschwendet
-  // Crawl-Budget. Stattdessen: ein fester Stand, der nur beim nächsten
-  // inhaltlichen Update dieser Datei manuell hochgesetzt werden sollte.
-  // Stand 2026-09-07: Der Intent-Umbau (Verfahren statt Ratgeber) hat
-  // /konflikte, /preise, /konflikt-logbuch und /scheidungsmediation
-  // veraendert — Titles, Descriptions und neue Service-/Offer-Knoten. Diese
-  // vier tragen unten `lastModifiedIntent`, ALLE anderen bleiben bewusst auf
-  // dem 17.08. stehen: Wer das Datum global hochsetzt, meldet Google, dass
-  // sich auch die 30 unveraenderten Seiten geaendert haben — dasselbe
-  // wertlose Signal, das der Absatz ganz oben verhindern soll.
-  // Die beiden Ratgeber-Artikel (schwelender-konflikt,
-  // sorgerecht-verloren-was-tun) haben nur neue Snippets bekommen, keinen
-  // neuen Text. Ihr `updated`-Feld bleibt deshalb unangetastet — es steht
-  // sichtbar als "zuletzt aktualisiert" auf der Seite. Fuer diese beiden
-  // stattdessen in der Search Console die Indexierung anfordern.
-  // Stand 2026-08-17: /konflikte/arbeitsplatz und /konflikte/mietverhaeltnis
-  // neu aufgenommen, dazu die Landing-Texte auf das Respekt-Wording
-  // umgestellt. Das Hochsetzen ist hier Pflicht und keine Kosmetik: die
-  // beiden neuen Seiten haetten sonst ein lastmod von VOR ihrer eigenen
-  // Entstehung gemeldet — dasselbe falsche Signal, das weiter unten fuer
-  // die Ratgeber-Artikel bereits behoben wurde.
-  // Stand 2026-08-12: Kostenrechner um die dritte Spalte (Stundensatz frei
-  // taetiger Mediation) und zwei FAQ-Eintraege erweitert. Die drei neuen
-  // Ratgeber-Artikel brauchen hier nichts — die tragen ihr eigenes
-  // `updated`-Datum weiter unten.
-  // Stand 2026-08-10: /fuer-berater aufgenommen — Landingpage fuer
-  // Multiplikatoren (Steuerberater, Notare, Nachfolgeberater). Bewusst
-  // KEINE Konflikt-Suchphrasen, damit /konflikte/odr "Mediation bei
-  // Geschaeftspartnern" allein traegt.
-  // Stand 2026-08-06: neues /einigung-Cluster (4 URLs) aufgenommen, siehe
-  // docs/einigung-cluster-konzept.md. Davor 2026-08-01: 9 Case-URLs auf
-  // Problem-Slugs umbenannt (neue URLs!), interne Links auf /cases, /methode,
-  // /konflikte/erbschaft angepasst.
-  const lastModified = new Date("2026-08-17");
+  return ROUTES.flatMap(({ path, lastModified, changeFrequency, priority }) => {
+    if (!isIndexedLocalePath(path)) {
+      return [{ url: urlFor(routing.defaultLocale, path), lastModified, changeFrequency, priority }];
+    }
 
-  // Nur fuer die vier Seiten des Intent-Umbaus vom 07.09.2026.
-  const lastModifiedIntent = new Date("2026-09-07");
+    // Freigegebene Sprachfassungen: ein Eintrag pro Sprache, alle mit
+    // identischen Alternates (hreflang zaehlt nur gegenseitig).
+    const languages = {
+      ...Object.fromEntries(routing.locales.map((l) => [l, urlFor(l, path)])),
+      "x-default": urlFor(routing.defaultLocale, path),
+    };
 
-  // 13.09.2026: /methode umgebaut (neuer Abschnitt "Der Termin ist nicht das
-  // Verfahren", Varianten hochgezogen, Phasen nach unten, neuer Title und
-  // neue Description, neues Service-Schema). /preise und
-  // /einigung/ohne-mediator haben denselben Sprachumbau im Fliesstext:
-  // "persoenlich" raus, Stundenkontingente werden zu Sitzungen, und das
-  // sachlich falsche "auch vor Ort" ist weg. Nur diese drei tragen das neue
-  // Datum -- siehe die Begruendung ganz oben, warum ALLE anderen bewusst
-  // stehen bleiben.
-  // Die beiden Ratgeber (was-ist-mediation, scheidung-mediator-kosten) haben
-  // je einen Satz bekommen, keinen neuen Text: ihr `updated`-Feld bleibt
-  // unangetastet, es steht sichtbar als "zuletzt aktualisiert" auf der Seite.
-  const lastModifiedVerfahren = new Date("2026-09-13");
-
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/preise`,
-      lastModified: lastModifiedVerfahren,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    // Vertriebs-Asset, kein SEO-Duplikat: eigene Zielgruppe (beratende
-    // Berufe), eigene Suchsprache. Prioritaet bewusst moderat — die Seite
-    // soll ueber Direktlinks aus Mails und Gespraechen erreicht werden.
-    {
-      url: `${BASE_URL}/fuer-berater`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/methode`,
-      lastModified: lastModifiedVerfahren,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    // /einigung-Cluster. Bewusst mit hoher Prioritaet: Die Parent-Seite
-    // traegt das Preis-/Standardisierungs-Argument, /ohne-mediator bedient
-    // eine Suchintention ("Mediation ohne Mediator", "Streit klaeren ohne
-    // Anwalt"), die bisher auf keiner Seite beantwortet war.
-    {
-      url: `${BASE_URL}/einigung`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/einigung/ohne-mediator`,
-      lastModified: lastModifiedVerfahren,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/einigung/abgleich`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/einigung/gleichbehandlung`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/kostenrechner`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/konflikt-logbuch`,
-      lastModified: lastModifiedIntent,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/konflikte`,
-      lastModified: lastModifiedIntent,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/kontakt`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    // Nur solange die Stellenanzeige online ist (siehe app/karriere/status.ts).
-    ...(KARRIERE_ONLINE
-      ? [
-          {
-            url: `${BASE_URL}/karriere`,
-            lastModified,
-            changeFrequency: "monthly" as const,
-            priority: 0.5,
+    return routing.locales.map((locale) =>
+      locale === routing.defaultLocale
+        ? { url: urlFor(locale, path), lastModified, changeFrequency, priority, alternates: { languages } }
+        : {
+            url: urlFor(locale, path),
+            lastModified: SPRACHFREIGABE[path] ?? lastModified,
+            changeFrequency,
+            // Eine Stufe unter der deutschen Fassung: Deutsch bleibt der
+            // Hauptmarkt, /en ist das Zusatzangebot.
+            priority: Math.round((priority - 0.2) * 10) / 10,
+            alternates: { languages },
           },
-        ]
-      : []),
-    {
-      url: `${BASE_URL}/konflikte/nachbarschaft`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/konflikte/verbraucher`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/konflikte/mietverhaeltnis`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/konflikte/arbeitsplatz`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/scheidungsmediation`,
-      // Bis 15.08.2026 stand hier /konflikte/trennung (301 in next.config.ts).
-      // Die alte URL steht bewusst NICHT mehr in der Sitemap: eine Sitemap
-      // listet Ziele, keine Weiterleitungen.
-      lastModified: lastModifiedIntent,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/konflikte/erbschaft`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/konflikte/odr`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/cases`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/ratgeber`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    // /cases/nachbarschaft ist nur noch ein Redirect auf /cases —
-    // Redirects gehören nicht in die Sitemap.
-    {
-      url: `${BASE_URL}/cases/nachbarschaft-laerm`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/nachbarschaft-parken`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/nachbarschaft-zaun`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/trennung-mit-kindern`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/streit-ums-testament`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/trennung-vermoegen-aufteilen`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/erbstreit-haus-geschwister`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/trennung-patchwork-familie`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/trennung-gemeinsame-firma`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/unternehmen-geerbt`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/internationale-trennung`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/trennung-nach-langer-ehe`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/gesellschafter-streit`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/team-konflikt`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cases/b2b-projektstreit`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-  ];
-
-  // Ratgeber-Artikel automatisch aus dem Content generieren —
-  // neue Artikel in app/content/ratgeber/ landen ohne Zutun in der Sitemap.
-  // Artikel tragen ihr echtes Datum aus dem `updated`-Feld. Vorher bekamen
-  // alle den festen Stand oben — die am 27.07. veröffentlichten Artikel
-  // meldeten damit ein lastmod von 2026-07-21, also ÄLTER als ihre eigene
-  // Veröffentlichung. Genau das Signal, mit dem Google entscheidet, was neu
-  // gecrawlt wird, zeigte für die neuesten Seiten in die falsche Richtung.
-  const ratgeberRoutes: MetadataRoute.Sitemap = ratgeberArticles.map((a) => ({
-    url: `${BASE_URL}/ratgeber/${a.slug}`,
-    lastModified: new Date(a.updated),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
-
-  return [...staticRoutes, ...ratgeberRoutes];
+    );
+  });
 }
