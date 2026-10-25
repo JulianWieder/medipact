@@ -22,6 +22,7 @@
 //   });
 
 import type { Metadata } from "next";
+import { routing, isIndexedLocalePath } from "@/i18n/routing";
 
 // 07.09.2026: Stand bis heute "https://www.medipact.de" — und damit als
 // einziger Ort im Projekt. Sitemap (app/sitemap.ts), robots.ts und saemtliche
@@ -68,16 +69,18 @@ type PageMetadataInput = {
    * noetig — unpraefixierte Seiten lassen den Wert weg und verhalten sich
    * unveraendert.
    *
-   * Alles ausser "de" bekommt zwei Dinge: ein Canonical auf SICH SELBST
-   * (/en/...) und `noindex`. Beides gehoert zusammen. Das Canonical zeigte
-   * vorher auf die deutsche Fassung — bei identischem Inhalt ist das aber nur
-   * ein Hinweis, den Google ignorieren darf. Und ein `noindex` mit einem
-   * Canonical auf eine ANDERE URL ist die eine Kombination, die man nicht
-   * bauen darf: Google kann das noindex dann auf das Canonical-Ziel
-   * uebertragen — also ausgerechnet auf die deutsche Seite, die ranken soll.
+   * Jede Sprachfassung bekommt ein Canonical auf SICH SELBST (/en/...).
+   * Ob sie indexiert wird, entscheidet INDEXED_LOCALE_ROUTES
+   * (i18n/routing.ts), pro Pfad:
    *
-   * Faellt weg, sobald /en wirklich uebersetzt ist (dann: Canonical auf sich
-   * selbst, kein noindex, dazu hreflang-Alternates).
+   * - Freigegeben: `index`, dazu hreflang-Alternates (de, en, x-default ->
+   *   de) — auf ALLEN Sprachfassungen des Pfads, auch der deutschen, denn
+   *   hreflang zaehlt fuer Google nur, wenn beide Seiten aufeinander zeigen.
+   * - Nicht freigegeben (Inhalt noch deutscher Platzhalter): /en bleibt
+   *   `noindex`, kein hreflang. Self-Canonical und noindex gehoeren dabei
+   *   zusammen: Ein `noindex` mit Canonical auf eine ANDERE URL darf man
+   *   nicht bauen — Google kann das noindex sonst auf das Canonical-Ziel
+   *   uebertragen, also ausgerechnet auf die deutsche Seite, die ranken soll.
    */
   locale?: string;
 };
@@ -92,9 +95,24 @@ export function pageMetadata({
   imageHeight = 630,
   locale,
 }: PageMetadataInput): Metadata {
-  const istStandardsprache = !locale || locale === "de";
+  const istStandardsprache = !locale || locale === routing.defaultLocale;
   const praefix = istStandardsprache ? "" : `/${locale}`;
   const url = `${SITE_URL}${praefix}${path}`;
+
+  // Unpraefixierte Seiten (ohne `locale`) haben keine /en-Fassung — dort
+  // waere ein hreflang="en" ein Link auf eine 404.
+  const freigegeben = locale !== undefined && isIndexedLocalePath(path);
+  const sprachfassungen = freigegeben
+    ? {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [
+            l,
+            `${SITE_URL}${l === routing.defaultLocale ? "" : `/${l}`}${path}`,
+          ]),
+        ),
+        "x-default": `${SITE_URL}${path}`,
+      }
+    : undefined;
 
   // og:url pro Seite ist hier unproblematisch: Der Wert wird aus `path`
   // abgeleitet und stimmt damit immer mit dem Canonical überein. Der alte
@@ -123,10 +141,14 @@ export function pageMetadata({
   return {
     title,
     description,
-    alternates: { canonical: url },
-    // Sprachvarianten bleiben erreichbar und verlinkt, aber draussen aus dem
-    // Index (Begruendung oben bei `locale`).
-    ...(istStandardsprache
+    alternates: {
+      canonical: url,
+      ...(sprachfassungen && { languages: sprachfassungen }),
+    },
+    // Noch nicht freigegebene Sprachvarianten bleiben erreichbar und
+    // verlinkt, aber draussen aus dem Index (Begruendung oben bei `locale`).
+    // Freigegebene erben `index, follow` aus dem Root-Layout.
+    ...(istStandardsprache || freigegeben
       ? {}
       : { robots: { index: false, follow: true } }),
     openGraph,

@@ -17,7 +17,7 @@ import { FootnoteList, FootnoteRef, type FootnoteItem } from "@/app/components/u
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
 import { pageMetadata } from "@/lib/seo";
-import type { AppLocale } from "@/i18n/routing";
+import { routing, type AppLocale } from "@/i18n/routing";
 
 // Body copy lives in messages/*.json under "home" (see migration-notes.md
 // for the lift-into-translations pattern used here and in HeroScrollPin).
@@ -34,9 +34,9 @@ const HERO_IMAGE = "https://medipact.de/startseite-mediation.jpg";
 
 // Muss `generateMetadata` sein und darf kein statisches Objekt bleiben: Diese
 // Seite liegt unter app/[locale]/ und wird fuer JEDE Sprache ausgeliefert.
-// Ob sie indexiert werden darf, haengt genau daran (siehe lib/seo.ts) — /en
-// ist uebersetzt, bleibt aber vorerst noindex, solange die verlinkten
-// Unterseiten nur deutsch existieren.
+// Canonical und hreflang haengen genau daran (siehe lib/seo.ts). Seit dem
+// 25.10.2026 ist /en freigegeben (INDEXED_LOCALE_ROUTES in i18n/routing.ts):
+// Self-Canonical, index, hreflang de/en/x-default.
 export async function generateMetadata({
   params,
 }: {
@@ -224,8 +224,28 @@ const webPageSchema = {
   },
 };
 
-export default async function MedipactLanding() {
+export default async function MedipactLanding({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}) {
+  const { locale } = await params;
   const t = await getTranslations("home");
+
+  // Der WebPage-Knoten oben beschreibt die deutsche Startseite. Auf /en
+  // wuerde er sonst behaupten, die englische Seite SEI https://medipact.de
+  // (gleiche @id, gleiche url, inLanguage "de") — widerspricht dem
+  // Self-Canonical. Service-/App-Knoten bleiben geteilt: es ist derselbe Dienst.
+  const webPage =
+    locale === routing.defaultLocale
+      ? webPageSchema
+      : {
+          ...webPageSchema,
+          "@id": `https://medipact.de/${locale}#webpage`,
+          url: `https://medipact.de/${locale}`,
+          name: t("meta.title"),
+          inLanguage: locale,
+        };
   const stats = t.raw("stats") as { value: string; label: string; fn?: number }[];
   const bekanntAusTags = t.raw("bekanntAusTags") as { text: string; fn?: number }[];
   const footnotes = t.raw("footnotes") as FootnoteItem[];
@@ -237,7 +257,7 @@ export default async function MedipactLanding() {
 
   return (
     <>
-      <JsonLd data={webPageSchema} />
+      <JsonLd data={webPage} />
       <JsonLd data={serviceSchema} />
       <JsonLd data={webApplicationSchema} />
       <main className="app-shell pt-0">

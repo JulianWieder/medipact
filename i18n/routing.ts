@@ -38,3 +38,24 @@ export function isMigratedLocalePath(pathname: string): boolean {
   const withoutLocalePrefix = pathname.replace(/^\/en(?=\/|$)/, "") || "/";
   return MIGRATED_LOCALE_ROUTES.includes(withoutLocalePrefix);
 }
+
+/**
+ * Welche der MIGRATED_LOCALE_ROUTES in ALLEN Sprachen fuer Google
+ * freigegeben sind. Fuer diese Pfade liefert lib/seo.ts jede Sprachfassung
+ * mit Self-Canonical, `index` und hreflang-Alternates (de, en, x-default) aus,
+ * und app/sitemap.ts listet die /en-URL mit.
+ *
+ * Bewusst getrennt von MIGRATED_LOCALE_ROUTES: "liegt unter app/[locale]/"
+ * heisst noch nicht "ist uebersetzt". /scheidungsmediation ist migriert,
+ * aber trennungPage.en.ts ist noch der deutsche Platzhaltertext — eine
+ * indexierte /en-Fassung davon waere deutsches Duplicate Content mit
+ * hreflang="en". Einen Pfad hier erst eintragen, wenn Inhalt UND Metadaten
+ * (Title/Description in generateMetadata) wirklich uebersetzt sind.
+ *
+ * 25.10.2026: Startseite freigegeben (messages/en.json "home" uebersetzt).
+ */
+export const INDEXED_LOCALE_ROUTES = ["/"];
+
+export function isIndexedLocalePath(path: string): boolean {
+  return INDEXED_LOCALE_ROUTES.includes(path || "/");
+}
