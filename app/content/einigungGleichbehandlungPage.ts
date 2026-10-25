@@ -9,6 +9,8 @@
 // Mechanismus beschrieben, nicht die Technologie; hier gehört die Technologie
 // hin, weil Transparenz darüber Teil des Vertrauens ist.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
+
 export const einigungGleichbehandlungPageContent = {
   eyebrow: "Fairness by design",
   title: "Neutralität,",
@@ -18,7 +20,7 @@ export const einigungGleichbehandlungPageContent = {
 
   primaryCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 
   secondaryCta: {
@@ -165,6 +167,6 @@ export const einigungGleichbehandlungPageContent = {
     "Legen Sie einen Fall an und sehen Sie sich an, wie das Verfahren mit Ihren Angaben umgeht. Bis zum Start des bezahlten Prozesses kostet das nichts.",
   finalCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 };

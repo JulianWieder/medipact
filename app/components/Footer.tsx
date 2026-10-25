@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import type { ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import { useTranslations } from "next-intl";
@@ -77,7 +78,7 @@ export default function Footer({
             {t("ctaTitle")}
           </h2>
           <UnlocalizedLink
-            href="/auth/register"
+            href={REGISTRIEREN_URL}
             className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent-600 px-7 py-3.5 text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-accent-500"
           >
             {t("ctaButton")}

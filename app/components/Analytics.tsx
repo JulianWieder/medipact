@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Script from "next/script";
 import { getCookieConsent } from "@/app/components/CookieConsent";
 import { trackEvent } from "@/lib/analytics";
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 
 /**
  * Mess-ID aus der Umgebung, mit dem bisherigen Wert als Rueckfallebene: So
@@ -77,7 +78,7 @@ export default function Analytics() {
         });
       } else if (href.startsWith("tel:")) {
         trackEvent("kontaktaufnahme", { weg: "telefon", seite, text });
-      } else if (href.startsWith("/auth/register")) {
+      } else if (href.startsWith(REGISTRIEREN_URL)) {
         trackEvent("registrierung_gestartet", { seite, text });
       }
     }

@@ -12,6 +12,8 @@
 // Mediator", "Konflikt selbst lösen" — Suchphrasen ohne starke Konkurrenz,
 // die bisher auf keiner medipact-Seite bedient wurden.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
+
 export const einigungOhneMediatorPageContent = {
   eyebrow: "Reichweite und Grenzen",
   title: "Wie weit kommt man ohne Mediator?",
@@ -21,7 +23,7 @@ export const einigungOhneMediatorPageContent = {
 
   primaryCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 
   secondaryCta: {
@@ -173,6 +175,6 @@ export const einigungOhneMediatorPageContent = {
     "Fall anlegen und schildern kostet nichts. Wenn sich dabei zeigt, dass Sie Begleitung brauchen, sehen Sie das früher als in jedem Erstgespräch.",
   finalCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 };

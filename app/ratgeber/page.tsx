@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
@@ -96,7 +97,7 @@ export default function RatgeberUebersichtPage() {
               Sie haben einen konkreten Konflikt? Starten Sie Ihren Fall strukturiert und fair –
               online mit medipact.
             </p>
-            <Link href="/auth/register" className="btn btn-primary mt-8">
+            <Link href={REGISTRIEREN_URL} className="btn btn-primary mt-8">
               Mediation starten
             </Link>
           </div>

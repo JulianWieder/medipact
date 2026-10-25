@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { getTranslations } from "next-intl/server";
 import { JsonLd } from "@/app/components/JsonLd";
 import { ArrowLink } from "@/app/components/ui/ArrowLink";
@@ -133,7 +134,7 @@ const serviceSchema = {
   availableChannel: {
     "@type": "ServiceChannel",
     name: "medipact Online-Workspace",
-    serviceUrl: "https://medipact.de/auth/register",
+    serviceUrl: REGISTRIEREN_URL,
     availableLanguage: "German",
   },
   offers: {
@@ -182,7 +183,7 @@ const webApplicationSchema = {
     name: "Fall kostenlos anlegen",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://medipact.de/auth/register",
+      urlTemplate: REGISTRIEREN_URL,
       actionPlatform: [
         "https://schema.org/DesktopWebPlatform",
         "https://schema.org/MobileWebPlatform",
@@ -404,7 +405,7 @@ export default async function MedipactLanding({
 
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <a
-                href="/auth/register"
+                href={REGISTRIEREN_URL}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-700 px-10 py-4 text-base font-bold text-white shadow-lg shadow-accent-900/40 transition hover:scale-[1.02] hover:bg-accent-800"
               >
                 {t("ctaButton")}

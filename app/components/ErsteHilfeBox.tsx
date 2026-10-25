@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -73,7 +74,7 @@ export function ErsteHilfeBox() {
         </div>
 
         <div className="mt-10 text-center">
-          <Link href="/auth/register" className="btn btn-primary">
+          <Link href={REGISTRIEREN_URL} className="btn btn-primary">
             {t("cta")}
           </Link>
         </div>

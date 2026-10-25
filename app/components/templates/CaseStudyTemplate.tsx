@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
@@ -500,7 +501,7 @@ export function CaseStudyTemplate({
                 der höchsten Kaufabsicht auf der ganzen Seite — vorher führte
                 von hier trotzdem kein direkter Weg in die Anmeldung. */}
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button href="/auth/register" size="lg">
+              <Button href={REGISTRIEREN_URL} size="lg">
                 Mediation starten
               </Button>
 

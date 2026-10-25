@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import Link from "next/link";
 import {
   euro,
@@ -176,7 +177,7 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
             {/* Zweiter Weg für alle, die die Zahl oben schon überzeugt hat und
                 die nicht erst noch rechnen wollen. */}
             <Link
-              href="/auth/register"
+              href={REGISTRIEREN_URL}
               className="shrink-0 rounded-xl border border-neutral-300 px-6 py-3 text-center text-sm font-bold text-neutral-800 transition hover:border-accent-400 hover:text-accent-700"
             >
               Mediation starten

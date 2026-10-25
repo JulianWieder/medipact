@@ -11,9 +11,9 @@ const intlMiddleware = createMiddleware(routing);
  * in der Node-Laufzeit - deshalb wird NUTZERBEREICH_URL zur Laufzeit gelesen
  * und nicht beim Build eingebacken).
  *
- * 0. Umzug: Ist NUTZERBEREICH_URL gesetzt, gehoert der Nutzerbereich kerno
- *    (app.medipact.de) und wird dorthin umgeleitet - vor allem anderen.
- *    Siehe lib/nutzerbereich.ts.
+ * 0. Der Nutzerbereich gehoert kerno (app.medipact.de) und wird dorthin
+ *    umgeleitet - vor allem anderen. Nur mit NUTZERBEREICH_URL= (leer)
+ *    antworten die alten Routen wieder selbst. Siehe lib/nutzerbereich.ts.
  *
  * Danach zwei Aufgaben in dieser einen Datei, weil Next.js nur einen Proxy
  * erlaubt:

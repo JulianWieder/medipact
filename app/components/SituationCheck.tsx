@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useState } from "react";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
@@ -204,7 +205,7 @@ export default function SituationCheck() {
             ein guter Ausgangspunkt.
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
-            <Button href="/auth/register">Mediation jetzt starten</Button>
+            <Button href={REGISTRIEREN_URL}>Mediation jetzt starten</Button>
             <Button href="mailto:hallo@medipact.de?subject=Frage%20vor%20dem%20Start" variant="secondary">
               Erst noch eine Frage klären
             </Button>

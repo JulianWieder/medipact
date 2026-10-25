@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { ReactNode } from "react";
@@ -190,7 +191,7 @@ export function MarketingPageTemplate({
   finalCtaTitle,
   finalCtaText,
   finalCta,
-  finalPrimaryCta = { label: "Mediation starten", href: "/auth/register" },
+  finalPrimaryCta = { label: "Mediation starten", href: REGISTRIEREN_URL },
   showLogbuchHinweis = true,
   mediatorHinweis = false,
 }: MarketingPageTemplateProps) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -94,7 +95,7 @@ export function EinladungsAssistent() {
               </li>
             </ul>
             <div className="mt-auto pt-6">
-              <Link href="/auth/register" className="btn btn-primary">
+              <Link href={REGISTRIEREN_URL} className="btn btn-primary">
                 Fall anlegen &amp; einladen
               </Link>
             </div>

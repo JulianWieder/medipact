@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import Link from "next/link";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
@@ -283,7 +284,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link href="/auth/register" className="btn btn-primary">
+              <Link href={REGISTRIEREN_URL} className="btn btn-primary">
                 Verfahren starten
               </Link>
               <Link

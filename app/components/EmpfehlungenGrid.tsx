@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { getTranslations } from "next-intl/server";
 import Image, { type StaticImageData } from "next/image";
 import { ArrowLink } from "@/app/components/ui/ArrowLink";
@@ -62,7 +63,7 @@ export async function EmpfehlungenGrid() {
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
                   <ArrowLink href={href}>{t("ctaPrimary")}</ArrowLink>
-                  <a href="/auth/register" className="text-neutral-500 transition hover:text-neutral-800">
+                  <a href={REGISTRIEREN_URL} className="text-neutral-500 transition hover:text-neutral-800">
                     {t("ctaSecondary")}
                   </a>
                 </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { type StaticImageData } from "next/image";
@@ -93,7 +94,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
               {/* Buttons mit geschärften Kontrasten */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <a
-                  href="/auth/register"
+                  href={REGISTRIEREN_URL}
                   className="inline-flex items-center justify-center rounded-lg bg-accent-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-800 active:scale-[0.98] sm:px-8 sm:py-3.5"
                 >
                   {t("ctaPrimary")}

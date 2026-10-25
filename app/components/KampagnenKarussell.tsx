@@ -4,6 +4,7 @@
 // Karten + Copy liegen in messages/*.json unter home.kampagnen.
 // Neue Angebote werden als weitere Karte im JSON ergänzt – kein Code-Umbau nötig.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
 
@@ -87,7 +88,7 @@ export default function KampagnenKarussell() {
             </div>
             <div className="mt-6 flex flex-col gap-3">
               <a
-                href={`/auth/register?anlass=${card.href.split("/").pop()}`}
+                href={`${REGISTRIEREN_URL}?anlass=${card.href.split("/").pop()}`}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500 active:scale-[0.98]"
               >
                 {startCta} →

@@ -1,5 +1,6 @@
 "use client";
 
+import { ANMELDEN_URL, REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import Image from "next/image";
@@ -247,7 +248,7 @@ export default function Header() {
           Handy die ~36px wieder frei, die vorher dauerhaft klebten. */}
       <div className="w-full bg-neutral-900 text-white">
         <UnlocalizedLink
-          href="/auth/register"
+          href={REGISTRIEREN_URL}
           className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-semibold tracking-wide text-neutral-100 transition hover:text-accent-300 sm:px-6 sm:text-sm"
         >
           <span className="sm:hidden">{t("promoShort")}</span>
@@ -354,13 +355,13 @@ export default function Header() {
               finden ihn, ohne dass er mit dem Einstieg konkurriert. Weiß auf
               accent-700 = 5,5:1 (accent-600 hatte nur 3,7:1). */}
           <UnlocalizedLink
-            href="/auth/login"
+            href={ANMELDEN_URL}
             className="ml-5 text-sm font-medium text-neutral-500 transition hover:text-accent-700"
           >
             {t("login")}
           </UnlocalizedLink>
           <UnlocalizedLink
-            href="/auth/register"
+            href={REGISTRIEREN_URL}
             className="ml-4 whitespace-nowrap rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
           >
             {t("startCta")}
@@ -447,14 +448,14 @@ export default function Header() {
           </div>
 
           <UnlocalizedLink
-            href="/auth/register"
+            href={REGISTRIEREN_URL}
             className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
             onClick={() => setOpen(false)}
           >
             {t("startCta")}
           </UnlocalizedLink>
           <UnlocalizedLink
-            href="/auth/login"
+            href={ANMELDEN_URL}
             className="mt-3 block w-full py-2 text-center text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
             onClick={() => setOpen(false)}
           >

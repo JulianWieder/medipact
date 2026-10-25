@@ -1,24 +1,28 @@
 /**
- * Der Nutzerbereich zieht nach kerno (app.medipact.de) - die Website bleibt.
+ * Der Nutzerbereich laeuft auf kerno (app.medipact.de) - die Website bleibt.
  *
- * Zwei Schalter in der .env der Website, beide erst beim Umschalten setzen
- * (docs/runbook-medipact-cutover.md im mandexis-Repo):
+ * Seit 25.10.2026 fest umgestellt: Die Links der Website zeigen direkt auf
+ * NUTZERBEREICH (REGISTRIEREN_URL, ANMELDEN_URL), und proxy.ts leitet alte
+ * Adressen (/auth, /dashboard, Einladungen ...) mit Pfad und Query dorthin
+ * um - Links aus alten Mails (?token=...) funktionieren weiter.
  *
- *   NUTZERBEREICH_URL=https://app.medipact.de
- *       Login, Registrierung, Dashboard, Einladungen ... leiten dorthin um
- *       (proxy.ts), mit Pfad und Query - Links aus alten Mails
- *       (?token=...) funktionieren weiter.
+ * Schalter in der .env der Website:
+ *
+ *   NUTZERBEREICH_URL=<andere Adresse>   Ziel der Umleitung aendern.
+ *   NUTZERBEREICH_URL=                   (leer) Umleitung aus, die alten
+ *       Nutzer-Routen der Website antworten wieder selbst. Die Links zeigen
+ *       trotzdem auf app.medipact.de.
  *
  *   KERNO_API_URL=http://127.0.0.1:8001
  *       Newsletter-Anmeldung, -Bestaetigung und -Abmeldung laufen gegen
  *       kerno. Der Mandant ist der Host aus NUTZERBEREICH_URL: kerno
  *       erkennt Marken am Host (X-Mandant-Host), medipact.de selbst steht
- *       dort nicht.
- *
- * Ohne beide Variablen bleibt alles wie vorher (medipact-api). Damit kann
- * dieser Code vor dem Umschalten live gehen, und der Rueckweg ist: Variablen
- * entfernen, pm2 neu starten.
+ *       dort nicht. Ohne die Variable: medipact-api wie bisher.
  */
+
+export const NUTZERBEREICH = "https://app.medipact.de";
+export const REGISTRIEREN_URL = `${NUTZERBEREICH}/auth/register`;
+export const ANMELDEN_URL = `${NUTZERBEREICH}/auth/login`;
 
 /** Pfade, die zum Nutzerbereich gehoeren. Alles andere ist Website. */
 export const NUTZERBEREICH_PFADE = [
@@ -36,9 +40,9 @@ export function istNutzerbereich(pathname: string): boolean {
   );
 }
 
-/** Ziel der Umleitung, oder null, solange nicht umgeschaltet ist. */
+/** Ziel der Umleitung, oder null, wenn sie per leerer Variable aus ist. */
 export function nutzerbereichUrl(): URL | null {
-  const roh = process.env.NUTZERBEREICH_URL?.trim();
+  const roh = (process.env.NUTZERBEREICH_URL ?? NUTZERBEREICH).trim();
   if (!roh) return null;
   try {
     return new URL(roh);

@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -492,7 +493,7 @@ export default function KonfliktePage() {
           {/* Die Übersichtsseite endete bisher nur auf /kontakt. Wer bereits
               weiß, worum es geht, soll direkt starten können. */}
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/auth/register" className="btn btn-primary">
+            <Link href={REGISTRIEREN_URL} className="btn btn-primary">
               Mediation starten
             </Link>
 

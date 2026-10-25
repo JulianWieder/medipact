@@ -26,6 +26,7 @@
 //   ecommerce je 399 € (alle once) · Add-ons 79/49/29 € · Logbuch-Premium
 //   14,95 €.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { mediationsgesetzFacts } from "@/app/components/ui/DidYouKnowSection";
 
 export const aboutPageContent = {
@@ -37,7 +38,7 @@ export const aboutPageContent = {
 
   primaryCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 
   secondaryCta: {

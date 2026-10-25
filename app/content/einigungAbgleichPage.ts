@@ -16,6 +16,8 @@
 // Signatur an Punkten UND Gewichtungen hängt. Ändert sich der Mechanismus,
 // ändert sich diese Seite mit.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
+
 export const einigungAbgleichPageContent = {
   eyebrow: "Abgleich & Tausch",
   title: "Wo sonst verhandelt wird,",
@@ -25,7 +27,7 @@ export const einigungAbgleichPageContent = {
 
   primaryCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 
   secondaryCta: {
@@ -169,6 +171,6 @@ export const einigungAbgleichPageContent = {
     "Fall anlegen, Konflikt schildern, Gegenseite einladen — bis dahin zahlen Sie nichts. Erst danach beginnt der bezahlte Prozess, zum Festpreis.",
   finalCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 };

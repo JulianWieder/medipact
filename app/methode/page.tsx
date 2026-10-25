@@ -1,3 +1,4 @@
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
@@ -372,7 +373,7 @@ export default function MethodePage() {
             Termine.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/auth/register" className="btn btn-primary">
+            <Link href={REGISTRIEREN_URL} className="btn btn-primary">
               Mediation starten
             </Link>
             <Link
@@ -938,7 +939,7 @@ export default function MethodePage() {
           <p className="mt-5 text-lg leading-8 text-neutral-300">
             Starten Sie ruhig, vertraulich und unverbindlich.
           </p>
-          <Link href="/auth/register" className="btn btn-primary mt-8">
+          <Link href={REGISTRIEREN_URL} className="btn btn-primary mt-8">
             Mediation starten
           </Link>
         </div>

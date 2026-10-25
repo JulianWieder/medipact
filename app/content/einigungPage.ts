@@ -17,6 +17,7 @@
 // Mechanismus hervorgehen, nicht aus dem Adjektiv — dieselbe Entscheidung
 // wie beim Palantir-Umbau der Landing am 25.07.2026.
 
+import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { mediationsgesetzFacts } from "@/app/components/ui/DidYouKnowSection";
 
 export const einigungPageContent = {
@@ -28,7 +29,7 @@ export const einigungPageContent = {
 
   primaryCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 
   secondaryCta: {
@@ -184,6 +185,6 @@ export const einigungPageContent = {
     "Account anlegen und Fall beschreiben kostet nichts. Sie sehen die Struktur, bevor Sie sich für ein Paket entscheiden.",
   finalCta: {
     label: "Kostenlos starten",
-    href: "/auth/register",
+    href: REGISTRIEREN_URL,
   },
 };
