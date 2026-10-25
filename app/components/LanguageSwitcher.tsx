@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { usePathname as useRawPathname } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { getPathname, usePathname } from "@/i18n/navigation";
 import { routing, isMigratedLocalePath } from "@/i18n/routing";
 
 /**
@@ -20,12 +20,35 @@ import { routing, isMigratedLocalePath } from "@/i18n/routing";
  * pathname (next/navigation's usePathname) against the same allow-list
  * middleware.ts uses avoids that entirely: the switcher simply doesn't
  * render on pages it can't safely operate on.
+ *
+ * Switching does a full page load on purpose, not router.replace():
+ * NextIntlClientProvider lives in the ROOT layout (app/layout.tsx, above
+ * the [locale] segment), and Next.js keeps shared layouts mounted on
+ * client-side navigation. A soft navigation therefore only swapped the page
+ * body — Header, Footer and every client component kept the old locale and
+ * messages until a manual reload. Locale changes are rare; a hard load is
+ * the cheap, reliable fix. The cookie is written first so next-intl's
+ * middleware doesn't redirect "/" straight back to "/en" from a stale
+ * NEXT_LOCALE.
  */
+function setLocaleCookie(locale: string) {
+  document.cookie = `NEXT_LOCALE=${locale}; path=/; SameSite=Lax`;
+}
+
 export function LanguageSwitcher() {
   const locale = useLocale();
   const rawPathname = useRawPathname();
   const pathname = usePathname();
-  const router = useRouter();
+
+  function switchTo(nextLocale: string) {
+    if (nextLocale === locale) return;
+    setLocaleCookie(nextLocale);
+    window.location.assign(
+      getPathname({ href: pathname, locale: nextLocale }) +
+        window.location.search +
+        window.location.hash,
+    );
+  }
 
   if (!isMigratedLocalePath(rawPathname)) {
     return null;
@@ -38,7 +61,7 @@ export function LanguageSwitcher() {
           {index > 0 && <span className="mx-1 text-neutral-300">/</span>}
           <button
             type="button"
-            onClick={() => router.replace(pathname, { locale: nextLocale })}
+            onClick={() => switchTo(nextLocale)}
             aria-current={nextLocale === locale ? "true" : undefined}
             className={
               nextLocale === locale
