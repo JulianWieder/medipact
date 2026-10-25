@@ -152,7 +152,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Resolved by middleware.ts for marketing routes (/, /de/..., /en/...).
+  // Resolved by proxy.ts for marketing routes (/, /de/..., /en/...).
   // For /dashboard, /workspace, /auth/* — which sit outside the [locale]
   // segment on purpose, see migration-notes.md — this falls back to the
   // default locale ("de"), matching today's German-only behavior.

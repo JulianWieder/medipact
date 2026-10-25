@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
+import { newsletterBackend } from "@/lib/nutzerbereich";
 
 // Bestätigung des Double-Opt-in (kein Login) – schlanker Proxy auf das Backend.
 export async function POST(request: NextRequest) {
@@ -15,16 +14,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const forwardedFor =
-      request.headers.get("x-forwarded-for") ??
-      request.headers.get("x-real-ip") ??
-      "";
+    // medipact-api oder kerno, je nach KERNO_API_URL (lib/nutzerbereich.ts).
+    const backend = newsletterBackend(request);
 
-    const res = await fetch(`${API_BASE_URL}/newsletter/confirm`, {
+    const res = await fetch(`${backend.basis}/newsletter/confirm`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(forwardedFor ? { "X-Forwarded-For": forwardedFor } : {}),
+        ...backend.headers,
       },
       body: JSON.stringify({ token }),
     });

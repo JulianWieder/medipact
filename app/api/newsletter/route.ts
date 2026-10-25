@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const API_BASE_URL = process.env.BACKEND_API_URL ?? "http://127.0.0.1:8000";
+import { newsletterBackend } from "@/lib/nutzerbereich";
 
 // Öffentliche Anmeldung (kein Login) – schlanker Proxy auf das Backend, damit
 // die Backend-URL nicht im Client landet. Die eigentliche Validierung und das
@@ -19,18 +18,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // X-Forwarded-For durchreichen, damit das Backend-Rate-Limit die echte
-    // Client-IP sieht (Next.js läuft hinter nginx als lokaler Proxy).
-    const forwardedFor =
-      request.headers.get("x-forwarded-for") ??
-      request.headers.get("x-real-ip") ??
-      "";
+    // medipact-api oder kerno, je nach KERNO_API_URL (lib/nutzerbereich.ts).
+    const backend = newsletterBackend(request);
 
-    const res = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
+    const res = await fetch(`${backend.basis}/newsletter/subscribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(forwardedFor ? { "X-Forwarded-For": forwardedFor } : {}),
+        ...backend.headers,
       },
       body: JSON.stringify({ email, source }),
     });

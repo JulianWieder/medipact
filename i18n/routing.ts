@@ -20,7 +20,7 @@ export type AppLocale = (typeof routing.locales)[number];
 
 /**
  * Single source of truth for which marketing paths actually live under
- * app/[locale]/ today. Used by middleware.ts (to decide whether to run
+ * app/[locale]/ today. Used by proxy.ts (to decide whether to run
  * next-intl's locale-rewriting) AND by any component choosing between the
  * locale-aware Link/router (@/i18n/navigation) and plain next/link.
  *

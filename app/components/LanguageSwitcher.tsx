@@ -18,7 +18,7 @@ import { routing, isMigratedLocalePath } from "@/i18n/routing";
  * "internal" path and router.replace(..., {locale:"de"}) just prepended
  * "de" on top, producing "/de/en/methode". Checking the RAW browser
  * pathname (next/navigation's usePathname) against the same allow-list
- * middleware.ts uses avoids that entirely: the switcher simply doesn't
+ * proxy.ts uses avoids that entirely: the switcher simply doesn't
  * render on pages it can't safely operate on.
  *
  * Switching does a full page load on purpose, not router.replace():

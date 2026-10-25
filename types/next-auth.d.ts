@@ -9,7 +9,7 @@ declare module "next-auth" {
       role?: string;
       /**
        * Einmaliges Nutzer-Onboarding abgeschlossen? Steht im JWT, damit die
-       * Middleware ohne Backend-Call entscheiden kann (siehe middleware.ts).
+       * Middleware ohne Backend-Call entscheiden kann (siehe proxy.ts).
        * Nach dem Abschluss aktualisiert der Client die Session per update().
        */
       onboardingCompleted?: boolean;

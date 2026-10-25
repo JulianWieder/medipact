@@ -2,12 +2,21 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing, isMigratedLocalePath } from "@/i18n/routing";
+import { istNutzerbereich, nutzerbereichUrl } from "@/lib/nutzerbereich";
 
 const intlMiddleware = createMiddleware(routing);
 
 /**
- * Two concerns live in this one middleware because Next.js only allows a
- * single middleware file:
+ * Proxy (bis Next 15 "middleware.ts"; seit Next 16 umbenannt, laeuft jetzt
+ * in der Node-Laufzeit - deshalb wird NUTZERBEREICH_URL zur Laufzeit gelesen
+ * und nicht beim Build eingebacken).
+ *
+ * 0. Umzug: Ist NUTZERBEREICH_URL gesetzt, gehoert der Nutzerbereich kerno
+ *    (app.medipact.de) und wird dorthin umgeleitet - vor allem anderen.
+ *    Siehe lib/nutzerbereich.ts.
+ *
+ * Danach zwei Aufgaben in dieser einen Datei, weil Next.js nur einen Proxy
+ * erlaubt:
  *
  * 1. Auth guarding for /dashboard, /workspace, /auth/* — unchanged from
  *    before, and deliberately untouched by i18n. These routes stay
@@ -44,6 +53,17 @@ function onboardingRequired(
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+
+  // ── Umzug des Nutzerbereichs ────────────────────────────────────────────
+  // 302 statt 301, solange die Beobachtungsphase laeuft: ein 301 cachen
+  // Browser dauerhaft, und der Rueckweg (Variable entfernen) kaeme bei
+  // Besuchern nicht mehr an. Pfad UND Query wandern mit - Einladungs-,
+  // Bestaetigungs- und Reset-Links aus alten Mails tragen ihr ?token= darin.
+  const nutzerbereich = nutzerbereichUrl();
+  if (nutzerbereich && istNutzerbereich(pathname)) {
+    const ziel = new URL(pathname + req.nextUrl.search, nutzerbereich);
+    return NextResponse.redirect(ziel, 302);
+  }
   const isAuthenticated = !!req.auth;
   const isAppRoute =
     pathname.startsWith("/dashboard") ||
@@ -83,7 +103,7 @@ export default auth((req) => {
     //
     // Das ist nur die BEQUEME Hälfte der Sperre: die verbindliche sitzt im
     // Backend (services/onboarding.ensure_onboarded), denn wer die API direkt
-    // anspricht, kommt an dieser Middleware vorbei.
+    // anspricht, kommt an diesem Proxy vorbei.
     if (isAuthenticated && onboardingRequired(pathname, req.auth)) {
       const url = new URL("/onboarding", req.url);
       // Ziel mitnehmen — inklusive Query. Einladungslinks tragen ihren ?token=
