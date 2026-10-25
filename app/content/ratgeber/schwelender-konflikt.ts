@@ -15,9 +15,12 @@ export const article: RatgeberArticle = {
   // 16.10.2026: Pos 7,7 / 160 Impr / 1,25 % CTR – "Warnsignale + Logbuch" hat nicht
   // gezogen. Gesucht wird die Definition ("schwelender konflikt bedeutung", Pos 2,6,
   // 0 Klicks). Title und Description beginnen jetzt mit der Antwort.
-  metaTitle: "Schwelender Konflikt: Bedeutung & Anzeichen | medipact",
+  // 25.10.2026: Pos 6,4 / 228 Impr / 1,75 % CTR (GSC 3 Monate bis 23.10.). Die
+  // Definition zeigt Google oft selbst an – wer sie in der Description wiederholt,
+  // gibt keinen Grund zum Klick. Neu: Erkennen (5 Signale) + was man tun kann.
+  metaTitle: "Schwelender Konflikt: Bedeutung, Anzeichen & was hilft",
   description:
-    "Ein schwelender Konflikt ist ein Streit, der noch nicht offen ausgebrochen ist, aber unter der Oberfläche weiterwirkt. Anzeichen und was Sie tun können.",
+    "Woran Sie einen schwelenden Konflikt erkennen, welche 5 Signale eine Eskalation ankündigen und was Sie tun können, bevor der Streit offen ausbricht.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-10-16",
   readingMinutes: 8,

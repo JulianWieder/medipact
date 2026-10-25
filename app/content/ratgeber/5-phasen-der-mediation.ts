@@ -11,9 +11,12 @@ export const article: RatgeberArticle = {
   // es gehört nur nicht an die Stelle, an der Google die Übereinstimmung
   // mit der Suchanfrage prüft.
   title: "Die 5 Phasen der Mediation – Ablauf und 7-Phasen-Modell",
-  metaTitle: "Die 5 Phasen der Mediation: Ablauf erklärt | medipact",
+  // 25.10.2026: Pos 7,7 / 58 Impr / 1,7 % CTR (GSC 3 Monate bis 23.10.). Title
+  // und Description versprechen jetzt die drei Dinge, die der Artikel zusätzlich
+  // zur Aufzählung liefert: Ziel je Phase, Beispiel, 7-Phasen-Modell.
+  metaTitle: "Die 5 Phasen der Mediation: Ablauf, Ziele & Beispiel",
   description:
-    "Die 5 Phasen der Mediation im Überblick: von der Themensammlung bis zur Abschlussvereinbarung – mit Ablauf-Tabelle und was in jeder Phase passiert.",
+    "Die 5 Phasen der Mediation auf einen Blick: was in jeder Phase passiert und welches Ziel sie hat – mit Tabelle, Praxisbeispiel und 7-Phasen-Modell.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-08-05",
   readingMinutes: 8,

@@ -26,9 +26,12 @@ export const article: RatgeberArticle = {
   slug: "scheidung-mediator-kosten",
   category: "Trennung & Scheidung",
   title: "Scheidung mit Mediator: Was kostet das?",
-  metaTitle: "Scheidung Mediator Kosten: Preise im Überblick | medipact",
+  // 25.10.2026: Pos 9,3 / 56 Impr / 1,8 % CTR (GSC 3 Monate bis 23.10.). Kein
+  // Eurobetrag mehr in der Description – Preise kommen aus backend/app/pricing.py
+  // und veralten im Snippet unbemerkt. "Festpreis" trägt den Vorteil allgemein.
+  metaTitle: "Scheidung mit Mediator: Kosten, Preismodelle & wer zahlt",
   description:
-    "Was kostet ein Mediator bei der Scheidung? Preismodelle, wer zahlt, Vergleich zum Anwalt – und warum Online-Mediation ab 399 € pro Partei so oft gelingt.",
+    "Was kostet ein Mediator bei der Scheidung? Stundensatz oder Festpreis, wer die Kosten trägt, der Vergleich mit zwei Anwälten – plus Unterlagen-Checkliste.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-07-27",
   readingMinutes: 10,

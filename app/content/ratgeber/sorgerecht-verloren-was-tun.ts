@@ -35,9 +35,12 @@ export const article: RatgeberArticle = {
   // Title wiederholte nur die Suchanfrage. Der Paragraf im Title ist in einem
   // SERP voller vager Ratgeber das einzige konkrete Versprechen – und es ist
   // eines, das der Artikel auch einlöst, ohne Hoffnung zu verkaufen.
-  metaTitle: "Sorgerecht verloren: was nach § 1696 BGB bleibt | medipact",
+  // 25.10.2026: Pos 6,1 / 63 Impr / 1,6 % CTR (GSC 3 Monate bis 23.10.). Title
+  // fragt jetzt nach dem nächsten Schritt, die Description nennt die konkreten
+  // Wege (alle im Artikel eingeordnet) – ohne eine Erfolgsaussicht zu versprechen.
+  metaTitle: "Sorgerecht verloren: Welche Wege jetzt noch bleiben",
   description:
-    "Zwei Instanzen, zwei Jahre, kein Erfolg: Wie ein Sorgerechtsverfahren sich selbst bestätigt, warum Zeit gegen dich arbeitet und was nach § 1696 BGB bleibt.",
+    "Sorgerechtsverfahren verloren? Wir ordnen ehrlich ein, was Ihnen jetzt noch bleibt: Anhörungsrüge, Verfassungsbeschwerde und Abänderung nach § 1696 BGB.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-08-01",
   published: "2026-08-01",
