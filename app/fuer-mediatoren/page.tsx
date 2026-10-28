@@ -12,7 +12,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Für Mediatoren: Anfragen ohne Akquise | medipact",
   description:
-    "Vorsortierte Anfragen, Erstgespräch gebucht und bezahlt, Sie bleiben selbstständig. Werden Sie Teil des medipact-Mediatorenpools.",
+    "Eigenes Profil im Verzeichnis, Kennenlernen gebucht und bezahlt, Abrechnung über medipact. Werden Sie Teil des medipact-Mediatorenpools.",
   path: "/fuer-mediatoren",
 });
 

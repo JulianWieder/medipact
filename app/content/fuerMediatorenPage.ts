@@ -7,18 +7,21 @@
 // sind: „Bekomme ich darüber Anfragen?", „Was kostet mich das?" und „Bleibe
 // ich selbstständig?". Genau die beantwortet die Seite.
 //
-// Bewusst offen gelassen, bis entschieden: Konditionen (Vermittlungsgebühr,
-// Anteil am Erstgespräch) und Aufnahmekriterien über die Ausbildung hinaus.
-// Nichts davon hier ausschreiben, bevor es feststeht.
+// Das Kundenmodell (Startpaket, Kennenlerngespräche, Abrechnung über
+// medipact) steht in lib/mediatorVermittlung.ts.
+//
+// Bewusst offen gelassen, bis entschieden: Konditionen (Anteil von medipact,
+// Vergütung der Kennenlerngespräche, Auszahlung) und Aufnahmekriterien über
+// die Ausbildung hinaus. Nichts davon hier ausschreiben, bevor es feststeht.
 
-import { MEDIATOREN_POOL_URL } from "@/lib/mediatorVermittlung";
+import { KENNENLERN_MINUTEN, MEDIATOREN_POOL_URL } from "@/lib/mediatorVermittlung";
 
 export const fuerMediatorenPageContent = {
   eyebrow: "Für Mediatorinnen und Mediatoren",
   title: "Mediieren statt akquirieren.",
   titleHighlight: "Anfragen, die zu Ihnen passen.",
   intro:
-    "Über medipact melden sich Menschen, die eine klassische Mediation mit einer persönlichen Mediatorin suchen — vor Ort oder per Video. Wir sortieren die Anfragen vor und ordnen sie Mediatorinnen und Mediatoren zu, deren Schwerpunkt und Region passen. Sie bekommen den Fall mit gebuchtem Erstgespräch und führen die Mediation wie gewohnt in eigener Verantwortung.",
+    "Über medipact finden Menschen, die eine klassische Mediation suchen, Ihr Profil — vor Ort oder per Video. Sie haben bereits bezahlt und eine geführte Einleitung hinter sich, wenn sie Sie zum Kennenlernen buchen. Entscheiden sie sich für Sie, führen Sie die Mediation wie gewohnt in eigener Verantwortung.",
 
   primaryCta: {
     label: "Interesse melden",
@@ -37,15 +40,15 @@ export const fuerMediatorenPageContent = {
   features: [
     {
       title: "Ihr Profil im Verzeichnis",
-      text: "Mit Foto, Schwerpunkten, Region und Honorar auf medipact.de/mediator-finden. Kund:innen wählen Sie dort direkt – oder wir ordnen Ihnen Anfragen zu, die zu Ihrem Schwerpunkt passen.",
+      text: "Mit Schwerpunkten, Region und Honorar auf medipact.de/mediator-finden – unter Vorname und Initial, mit vollem Namen nur, wenn Sie es möchten. Kund:innen wählen Sie dort direkt, oder wir schlagen Sie passenden Anfragen vor.",
     },
     {
-      title: "Erstgespräch schon gebucht und bezahlt",
-      text: "Kund:innen buchen das Erstgespräch aus Ihren freien Terminen und zahlen es vorab online. Bestätigung und Erinnerung verschickt das System, nicht Sie.",
+      title: "Kennenlernen gebucht und bezahlt",
+      text: `Kund:innen buchen ein Kennenlerngespräch von ${KENNENLERN_MINUTEN} Minuten aus Ihren freien Terminen – bezahlt ist es mit dem Startpaket. Bestätigung und Erinnerung verschickt das System, nicht Sie.`,
     },
     {
       title: "Sie bleiben selbstständig",
-      text: "Die Mediation führen Sie in eigener Verantwortung, nach Ihrer Methode. Ob und wie es nach dem Erstgespräch weitergeht und zu welchem Honorar, vereinbaren Sie direkt mit Ihren Kund:innen.",
+      text: "Die Mediation führen Sie in eigener Verantwortung, nach Ihrer Methode und zu Ihrem Stundensatz aus dem Profil. Die Abrechnung mit den Kund:innen übernimmt medipact.",
     },
     {
       title: "Ein eigener Zugang, nur für Ihre Fälle",
@@ -65,7 +68,7 @@ export const fuerMediatorenPageContent = {
     },
     {
       title: "Zugang, Profil und Termine",
-      text: "Das medipact-Team legt Ihren Zugang an. Sie pflegen Ihr Profil und hinterlegen freie Termine für Vorgespräche — so viele oder so wenige, wie Sie möchten. Nach unserer Prüfung erscheint das Profil im Verzeichnis.",
+      text: "Das medipact-Team legt Ihren Zugang an. Sie pflegen Ihr Profil und hinterlegen freie Termine für Kennenlerngespräche — so viele oder so wenige, wie Sie möchten. Nach unserer Prüfung erscheint das Profil im Verzeichnis.",
     },
     {
       title: "Anfragen erhalten",
@@ -104,7 +107,7 @@ export const fuerMediatorenPageContent = {
     {
       question: "Wie viele Anfragen bekomme ich?",
       answer:
-        "Das hängt von Ihrer Region, Ihren Schwerpunkten und davon ab, wie viele Termine Sie anbieten. Eine Mindestzahl können und wollen wir nicht versprechen — Sie entscheiden, wie viele Erstgespräche Sie freigeben.",
+        "Das hängt von Ihrer Region, Ihren Schwerpunkten und davon ab, wie viele Termine Sie anbieten. Eine Mindestzahl können und wollen wir nicht versprechen — Sie entscheiden, wie viele Kennenlerngespräche Sie freigeben.",
     },
     {
       question: "Kann ich eine Anfrage ablehnen?",

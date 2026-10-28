@@ -16,12 +16,12 @@ import { MediatorenVerzeichnis } from "./MediatorenVerzeichnis";
 export const metadata: Metadata = pageMetadata({
   title: "Mediator finden: persönliche Mediation vermittelt | medipact",
   description:
-    "Mediation vor Ort oder per Video: Wir vermitteln eine passende Mediatorin für Trennung, Erbschaft, Nachbarschaft oder Team. Erstgespräch online buchen.",
+    "Geprüfte Mediator:innen für Trennung, Erbe, Nachbarschaft und Team, vor Ort oder per Video. Bis zu 3 kennenlernen, dann entscheiden.",
   path: "/mediator-finden",
 });
 
-// Kein Offer mit Preis: Der Festpreis fürs Erstgespräch ist noch nicht
-// entschieden. Sobald er steht, hier ein Offer ergänzen.
+// Kein Offer mit Preis: Der Festpreis des Startpakets ist noch nicht
+// entschieden (STARTPAKET_PREIS). Sobald er steht, hier ein Offer ergänzen.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",

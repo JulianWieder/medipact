@@ -5,6 +5,7 @@ import { Button } from "@/app/components/ui/Button";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
 import { pageMetadata } from "@/lib/seo";
+import { KENNENLERN_ANZAHL, KENNENLERN_MINUTEN } from "@/lib/mediatorVermittlung";
 import {
   bereichLabel,
   fotoUrl,
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${m.anzeigename}, Mediation${ort} | medipact`.slice(0, 60),
     description: (
       m.kurzvita ??
-      `${m.anzeigename}${m.titel ? `, ${m.titel}` : ""}: Mediation ${m.vor_ort ? "vor Ort" : ""}${m.vor_ort && m.online ? " und " : ""}${m.online ? "per Video" : ""}. Vorgespräch über medipact anfragen.`
+      `${m.anzeigename}${m.titel ? `, ${m.titel}` : ""}: Mediation ${m.vor_ort ? "vor Ort" : ""}${m.vor_ort && m.online ? " und " : ""}${m.online ? "per Video" : ""}. Kennenlernen über medipact.`
     ).slice(0, 155),
     path: `/mediator-finden/${m.slug}`,
   });
@@ -80,13 +81,13 @@ export default async function MediatorProfil({ params }: Props) {
                   </Zeile>
                   {m.sprachen.length > 0 && <Zeile label="Sprachen">{m.sprachen.join(", ")}</Zeile>}
                   {satz && <Zeile label="Honorar">{satz}</Zeile>}
-                  {m.vorgespraech_kostenlos && <Zeile label="Vorgespräch">kostenlos, bis 30 Minuten</Zeile>}
+                  <Zeile label="Kennenlernen">{KENNENLERN_MINUTEN} Min., im Startpaket</Zeile>
                 </dl>
                 <Button href={vorgespraechUrl(m.slug)} className="mt-6 w-full">
-                  Vorgespräch anfragen
+                  Kennenlernen buchen
                 </Button>
                 <p className="mt-3 text-xs leading-5 text-neutral-500">
-                  Sie legen ein Konto an, schildern kurz Ihr Anliegen und buchen einen Termin.
+                  {`Mit dem Startpaket: Einleitung und bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche – auch mit weiteren Mediator:innen aus dem Verzeichnis.`}
                 </p>
               </div>
             </div>
@@ -119,9 +120,9 @@ export default async function MediatorProfil({ params }: Props) {
               <div className="mt-12 rounded-3xl bg-neutral-50 p-6 text-neutral-700">
                 <h2 className="heading-3">So geht es weiter</h2>
                 <ol className="mt-4 list-decimal space-y-2 pl-5">
-                  <li>Vorgespräch anfragen und kurz schildern, worum es geht.</li>
-                  <li>Termin für das Vorgespräch wählen – per Video oder Telefon.</li>
-                  <li>Passt es, laden Sie die andere Seite ein und es geht mit der Mediation weiter.</li>
+                  <li>Startpaket buchen und in der Einleitung kurz schildern, worum es geht.</li>
+                  <li>{`${KENNENLERN_MINUTEN} Minuten kennenlernen – mit ${m.anzeigename} und bis zu ${KENNENLERN_ANZAHL - 1} weiteren, wenn Sie vergleichen möchten.`}</li>
+                  <li>Entscheiden, die andere Seite einladen, und die Mediation beginnt.</li>
                 </ol>
                 <p className="mt-4 text-sm">
                   Lieber online ohne feste Termine?{" "}

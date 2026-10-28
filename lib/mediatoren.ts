@@ -26,7 +26,6 @@ export interface Mediator {
   vor_ort: boolean;
   online: boolean;
   stundensatz_cent: number | null;
-  vorgespraech_kostenlos: boolean;
 }
 
 // Schlüssel wortgleich in kerno: app/workspace/verzeichnis.ts (BEREICHE).
@@ -57,7 +56,7 @@ export function fotoUrl(m: Mediator): string | null {
 }
 
 /**
- * Vorgespräch mit genau dieser Person anfragen. Registrierung bzw. Login,
+ * Kennenlernen mit genau dieser Person buchen (Startpaket). Registrierung bzw. Login,
  * dann die Anfrage in kerno – `wunsch` trägt die Wahl dorthin.
  */
 export function vorgespraechUrl(slug: string): string {

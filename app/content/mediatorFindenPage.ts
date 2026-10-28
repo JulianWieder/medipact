@@ -10,26 +10,32 @@
 // zurück ins Online-Verfahren, wo das besser passt — sie soll dem
 // Kernprodukt keine Fälle abziehen, die dort gut aufgehoben wären.
 //
+// Das Modell (Startpaket, Kennenlerngespräche, Abrechnung) steht EINMAL in
+// lib/mediatorVermittlung.ts – Zahlen hier nur aus den Konstanten dort.
+//
 // Bewusst NICHT im Text:
 //   - „zertifiziert": geschützte Bezeichnung (ZMediatAusbV). Erst verwenden,
 //     wenn der Pool ausschließlich aus zertifizierten Mediator:innen besteht.
-//   - Ein Preis für das Erstgespräch und ein festes Zeitversprechen: beides
-//     ist noch nicht entschieden. Sobald es steht, in Hero/Trust/FAQ
-//     nachziehen (Suche nach „Erstgespräch").
-//   - Honorare der Mediator:innen: die vereinbart jede Mediatorin selbst.
+//     Im Profil steht es nur, wenn die Mediatorin es selbst angibt und wir
+//     es vor der Freigabe geprüft haben.
+//   - Ein Preis für das Startpaket, solange STARTPAKET_PREIS null ist.
 
-import { MEDIATOR_ANFRAGE_URL } from "@/lib/mediatorVermittlung";
+import {
+  KENNENLERN_ANZAHL,
+  KENNENLERN_MINUTEN,
+  MEDIATOR_ANFRAGE_URL,
+} from "@/lib/mediatorVermittlung";
 
 export const mediatorFindenPageContent = {
   eyebrow: "Persönliche Mediation",
   title: "Lieber mit einem Menschen am Tisch?",
   titleHighlight: "Wir vermitteln Ihnen eine Mediatorin.",
   intro:
-    "Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Wählen Sie selbst – oder schildern Sie kurz, worum es geht, und wir ordnen Ihnen jemanden zu.",
+    `Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Sie lernen bis zu ${KENNENLERN_ANZAHL} von ihnen in kurzen Gesprächen kennen und entscheiden dann, mit wem Sie die Mediation führen.`,
 
   primaryCta: {
-    label: "Mediatorin anfragen",
-    href: MEDIATOR_ANFRAGE_URL,
+    label: "Mediator:innen ansehen",
+    href: "#verzeichnis",
   },
 
   secondaryCta: {
@@ -63,24 +69,20 @@ export const mediatorFindenPageContent = {
   processTitle: "So kommen Sie zu Ihrer Mediatorin",
   process: [
     {
-      title: "Kurz schildern, worum es geht",
-      text: "Konfliktart, wer beteiligt ist, ob vor Ort oder per Video, und wann es Ihnen passt. Keine langen Formulare, keine Vorgeschichte in allen Details — das klären Sie im Erstgespräch.",
+      title: "Startpaket buchen",
+      text: "Ein Festpreis, vorab online bezahlt. Darin sind die geführte Einleitung und die Kennenlerngespräche enthalten – keine weiteren Kosten, bis Sie sich für eine Mediatorin entschieden haben.",
     },
     {
-      title: "Mediatorin wählen – oder zuordnen lassen",
-      text: "Im Verzeichnis sehen Sie Schwerpunkte, Ort und Honorar und fragen direkt über das Profil an. Wer nicht selbst vergleichen möchte, lässt das medipact-Team die passende Mediatorin vorschlagen.",
+      title: "Einleitung mit medipact",
+      text: "Sie schildern kurz, worum es geht, wer beteiligt ist und ob vor Ort oder per Video. Wir erklären, wie die Mediation abläuft und was vertraulich bleibt. Keine langen Formulare.",
     },
     {
-      title: "Erstgespräch buchen",
-      text: "Sie wählen einen der freien Termine Ihrer Mediatorin. Bestätigung und Erinnerung kommen automatisch.",
+      title: `Bis zu ${KENNENLERN_ANZAHL} Mediator:innen kennenlernen`,
+      text: `Wählen Sie im Verzeichnis bis zu ${KENNENLERN_ANZAHL} Personen und buchen Sie je ein Gespräch von ${KENNENLERN_MINUTEN} Minuten aus ihren freien Zeiten. Wer nicht selbst vergleichen möchte, lässt sich Vorschläge machen.`,
     },
     {
-      title: "Unterlagen vorab teilen — wenn Sie möchten",
-      text: "Testament, Vereinbarungsentwurf, Schriftwechsel: Was Sie hochladen, sieht nur Ihre Mediatorin. Es hilft bei der Vorbereitung, ist aber keine Voraussetzung.",
-    },
-    {
-      title: "Erstgespräch, dann geht es direkt weiter",
-      text: "Das Erstgespräch bezahlen Sie vorab online zum Festpreis. Ob und wie es weitergeht, vereinbaren Sie danach direkt mit Ihrer Mediatorin — auch das Honorar für die weiteren Sitzungen.",
+      title: "Entscheiden – dann beginnt die Mediation",
+      text: "Mit der Person, die zu Ihnen passt, geht es weiter: Termine, Unterlagen und Nachrichten an einem Ort. Die Sitzungen rechnen wir zu ihrem Stundensatz ab, den Sie vorher im Profil sehen.",
     },
   ],
 
@@ -94,8 +96,8 @@ export const mediatorFindenPageContent = {
       features: [
         "Gemeinsame Sitzungen vor Ort oder per Video",
         "Mediatorin führt das Gespräch von Anfang an",
-        "Erstgespräch zum Festpreis, online gebucht",
-        "Weitere Sitzungen direkt mit der Mediatorin vereinbart",
+        `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche im Startpaket`,
+        "Sitzungen zum Stundensatz aus dem Profil, über medipact abgerechnet",
         "Passt, wenn Sie ein Gegenüber im Raum wollen",
       ],
       featured: true,
@@ -118,7 +120,7 @@ export const mediatorFindenPageContent = {
         "Profile vergleichen, ohne zu wissen, wer passt",
         "Mehrere Mediatorinnen einzeln anschreiben",
         "Auf Rückmeldung und freie Termine warten",
-        "Kosten des Erstgesprächs oft erst auf Nachfrage",
+        "Kosten oft erst auf Nachfrage",
       ],
     },
   ],
@@ -144,12 +146,12 @@ export const mediatorFindenPageContent = {
     {
       question: "Was kostet das?",
       answer:
-        "Das Erstgespräch hat einen Festpreis, den Sie vor der Buchung sehen, und wird online bezahlt. Das Honorar für die weiteren Sitzungen vereinbaren Sie direkt mit Ihrer Mediatorin; es richtet sich nach ihren eigenen Sätzen und danach, wie viele Sitzungen Sie brauchen.",
+        `Zuerst das Startpaket zum Festpreis, den Sie vor der Buchung sehen: die geführte Einleitung und bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Danach die Sitzungen mit Ihrer Mediatorin zu ihrem Stundensatz, der im Profil steht. Wie viele Sitzungen es werden, hängt vom Konflikt ab.`,
     },
     {
       question: "Kann ich mir die Mediatorin selbst aussuchen?",
       answer:
-        "Ja. Im Verzeichnis oben finden Sie die Profile unserer Mediatorinnen und Mediatoren und fragen das Vorgespräch direkt an. Möchten Sie nicht selbst vergleichen, ordnet das medipact-Team zu. Passt es nach dem Vorgespräch nicht, schlagen wir Ihnen jemand anderen vor.",
+        `Ja. Im Verzeichnis oben finden Sie die Profile unserer Mediatorinnen und Mediatoren. Sie lernen bis zu ${KENNENLERN_ANZAHL} von ihnen kennen und entscheiden dann. Möchten Sie nicht selbst vergleichen, schlägt Ihnen das medipact-Team passende Personen vor.`,
     },
     {
       question: "Vor Ort oder per Video?",
@@ -159,7 +161,7 @@ export const mediatorFindenPageContent = {
     {
       question: "Muss die andere Seite schon zugestimmt haben?",
       answer:
-        "Nein. Viele melden sich zuerst allein. Wie die andere Seite eingeladen wird und ob das Erstgespräch zu zweit oder zunächst einzeln stattfindet, besprechen Sie mit Ihrer Mediatorin. Mediation bleibt für alle Beteiligten freiwillig.",
+        "Nein. Viele melden sich zuerst allein. Wie die andere Seite eingeladen wird und ob die ersten Sitzungen gemeinsam oder zunächst einzeln stattfinden, besprechen Sie mit Ihrer Mediatorin. Mediation bleibt für alle Beteiligten freiwillig.",
     },
     {
       question: "Was ist der Unterschied zum Online-Verfahren von medipact?",
@@ -173,11 +175,10 @@ export const mediatorFindenPageContent = {
     },
   ],
 
-  finalCtaTitle: "Schildern Sie kurz, worum es geht.",
-  finalCtaText:
-    "Konfliktart, Beteiligte, vor Ort oder per Video — mehr brauchen wir für den ersten Vorschlag nicht. Die Anfrage ist unverbindlich.",
+  finalCtaTitle: "Finden Sie die Mediatorin, die zu Ihnen passt.",
+  finalCtaText: `Bis zu ${KENNENLERN_ANZAHL} kurze Kennenlerngespräche, dann entscheiden Sie. Wer nicht selbst suchen möchte, bekommt von uns Vorschläge.`,
   finalPrimaryCta: {
-    label: "Mediatorin anfragen",
+    label: "Startpaket buchen",
     href: MEDIATOR_ANFRAGE_URL,
   },
   finalCta: {

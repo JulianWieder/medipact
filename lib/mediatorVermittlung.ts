@@ -16,11 +16,37 @@
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 
 /**
- * Festpreis des Erstgesprächs, z. B. "149 €". Noch nicht entschieden: Solange
- * hier null steht, zeigt /preise „Festpreis, vor der Buchung sichtbar" statt
- * einer Zahl. Beim Festlegen auch die FAQ in mediatorFindenPage.ts nachziehen.
+ * Das Modell der persönlichen Mediation – EINE Quelle für alle Seiten
+ * (/mediator-finden, Profilseiten, /preise, /fuer-mediatoren, Hinweis auf
+ * den Konflikt-Seiten). Entschieden am 29.10.2026:
+ *
+ * 1. Bezahlt wird am Anfang: das Startpaket.
+ * 2. Darin: die geführte Einleitung bei medipact und bis zu
+ *    KENNENLERN_ANZAHL Kennenlerngespräche à KENNENLERN_MINUTEN Minuten mit
+ *    Mediator:innen eigener Wahl.
+ * 3. Danach Mediation mit der gewählten Person, abgerechnet über medipact
+ *    zu ihrem Stundensatz.
+ *
+ * Wer etwas davon ändert, ändert es hier – die Texte lesen diese Werte.
  */
-export const ERSTGESPRAECH_PREIS: string | null = null;
+export const KENNENLERN_ANZAHL = 3;
+export const KENNENLERN_MINUTEN = 15;
+
+/**
+ * Festpreis des Startpakets, z. B. "99 €". Noch nicht entschieden: Solange
+ * hier null steht, zeigen die Seiten „Festpreis, vor der Buchung sichtbar".
+ */
+export const STARTPAKET_PREIS: string | null = null;
+
+export const STARTPAKET_PUNKTE = [
+  "Geführte Einleitung: Anliegen, Ablauf und Vertraulichkeit klären",
+  `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten mit Mediator:innen Ihrer Wahl`,
+  "Termine aus den freien Zeiten buchen, mit Erinnerung",
+  "Unterlagen vorab teilen, nur für Ihre Mediatorin sichtbar",
+];
+
+/** Ein Satz für Teaser und Meta-Beschreibungen. */
+export const STARTPAKET_KURZ = `Startpaket mit Einleitung und bis zu ${KENNENLERN_ANZAHL} Kennenlerngesprächen à ${KENNENLERN_MINUTEN} Minuten`;
 
 /**
  * Kund:innen: Anfrage für eine persönliche Mediation. Die Registrierung

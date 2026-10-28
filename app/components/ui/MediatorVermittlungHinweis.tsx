@@ -23,13 +23,13 @@ export function MediatorVermittlungHinweis() {
               Lieber mit einer Mediatorin am Tisch?
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-600">
-              Wir vermitteln Ihnen auch eine Mediatorin oder einen Mediator für
-              eine klassische Mediation, vor Ort oder per Video. Erstgespräch
-              online buchen.
+              Wählen Sie aus unseren geprüften Mediator:innen für eine
+              klassische Mediation, vor Ort oder per Video – mit bis zu drei
+              Kennenlerngesprächen vorab.
             </p>
           </div>
           <ArrowLink href="/mediator-finden" className="shrink-0 text-sm">
-            Mediatorin vermitteln lassen
+            Mediator:innen ansehen
           </ArrowLink>
         </div>
       </div>

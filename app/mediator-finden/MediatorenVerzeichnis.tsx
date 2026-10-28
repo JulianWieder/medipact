@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import NextLink from "next/link";
 import clsx from "clsx";
 import { Button } from "@/app/components/ui/Button";
-import { MEDIATOR_ANFRAGE_URL } from "@/lib/mediatorVermittlung";
+import { KENNENLERN_ANZAHL, KENNENLERN_MINUTEN, MEDIATOR_ANFRAGE_URL } from "@/lib/mediatorVermittlung";
 import {
   BEREICHE,
   bereichLabel,
@@ -48,8 +48,8 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
           <div className="eyebrow mb-4">Unsere Mediator:innen</div>
           <h2 className="heading-2">Wählen Sie selbst, mit wem Sie sprechen</h2>
           <p className="mt-5 text-lg leading-8 text-neutral-600">
-            Jedes Profil haben wir vor der Veröffentlichung geprüft. Das Vorgespräch fragen Sie direkt über das
-            Profil an.
+            Jedes Profil haben wir vor der Veröffentlichung geprüft. Im Startpaket lernen Sie bis zu{" "}
+            {KENNENLERN_ANZAHL} von ihnen je {KENNENLERN_MINUTEN} Minuten kennen.
           </p>
         </div>
 
@@ -57,10 +57,10 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
           <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-8 text-neutral-700">
             <p className="text-lg font-semibold text-neutral-900">Das Verzeichnis wächst gerade.</p>
             <p className="mt-2 max-w-2xl">
-              Bis die ersten Profile online sind, ordnen wir Ihnen eine passende Mediatorin persönlich zu.
+              Bis die ersten Profile online sind, schlagen wir Ihnen passende Mediator:innen persönlich vor.
             </p>
             <Button href={MEDIATOR_ANFRAGE_URL} className="mt-6">
-              Mediatorin anfragen
+              Startpaket buchen
             </Button>
           </div>
         ) : (
@@ -101,7 +101,7 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
               <p className="text-neutral-600">
                 Für diese Auswahl gibt es noch kein Profil.{" "}
                 <NextLink href={MEDIATOR_ANFRAGE_URL} className="font-semibold text-accent-700 hover:underline">
-                  Lassen Sie sich eine Mediatorin zuordnen
+                  Lassen Sie sich Mediator:innen vorschlagen
                 </NextLink>
                 .
               </p>
@@ -181,7 +181,7 @@ function Karte({ m }: { m: Mediator }) {
         )}
         <div className="mt-auto flex items-center justify-between gap-3 pt-6 text-sm">
           <span className="text-neutral-700">
-            {m.vorgespraech_kostenlos ? "Vorgespräch kostenlos" : satz ?? ""}
+            {satz ?? ""}
           </span>
           <span className="font-semibold text-accent-700">
             Profil ansehen <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
