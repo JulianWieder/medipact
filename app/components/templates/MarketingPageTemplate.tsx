@@ -116,6 +116,9 @@ type MarketingPageTemplateProps = {
    * die meiste Kraft haben und auf denen der Preis-Einwand entsteht.
    */
   kostenrechnerArt?: Konfliktart;
+  /** Seiteneigener Abschnitt direkt unter dem Hero, vor den Leistungen –
+   * z. B. das Verzeichnis der Mediator:innen auf /mediator-finden. */
+  afterHero?: ReactNode;
   /** Seiteneigener Abschnitt vor den Teasern und dem Schluss-CTA, z. B. der
    * Einbettungscode für den Kostenrechner auf /fuer-berater. */
   beforeCta?: ReactNode;
@@ -187,6 +190,7 @@ export function MarketingPageTemplate({
   breadcrumbs,
   relatedCases,
   kostenrechnerArt,
+  afterHero,
   beforeCta,
   finalCtaTitle,
   finalCtaText,
@@ -292,6 +296,8 @@ export function MarketingPageTemplate({
             </div>
           </section>
         )}
+
+        {afterHero}
 
         <section className="section section-muted pt-10 lg:pt-14">
           <div className="container">

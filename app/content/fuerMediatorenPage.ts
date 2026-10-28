@@ -36,8 +36,8 @@ export const fuerMediatorenPageContent = {
 
   features: [
     {
-      title: "Vorsortierte Anfragen",
-      text: "Jede Anfrage kommt mit Konfliktart, Beteiligten, Ort oder Video und Wunschzeitraum. Wir ordnen nur zu, was zu Ihrem Schwerpunkt passt.",
+      title: "Ihr Profil im Verzeichnis",
+      text: "Mit Foto, Schwerpunkten, Region und Honorar auf medipact.de/mediator-finden. Kund:innen wählen Sie dort direkt – oder wir ordnen Ihnen Anfragen zu, die zu Ihrem Schwerpunkt passen.",
     },
     {
       title: "Erstgespräch schon gebucht und bezahlt",
@@ -64,12 +64,12 @@ export const fuerMediatorenPageContent = {
       text: "Wir sprechen über Ihre Arbeitsweise, die Konfliktarten, in denen Sie zu Hause sind, und die Konditionen der Vermittlung.",
     },
     {
-      title: "Zugang und Termine",
-      text: "Das medipact-Team legt Ihren Zugang an. Sie hinterlegen freie Termine für Erstgespräche — so viele oder so wenige, wie Sie möchten.",
+      title: "Zugang, Profil und Termine",
+      text: "Das medipact-Team legt Ihren Zugang an. Sie pflegen Ihr Profil und hinterlegen freie Termine für Vorgespräche — so viele oder so wenige, wie Sie möchten. Nach unserer Prüfung erscheint das Profil im Verzeichnis.",
     },
     {
       title: "Anfragen erhalten",
-      text: "Passt eine Anfrage zu Ihnen, ordnen wir sie Ihnen zu. Die Kundin bucht einen Ihrer Termine, und Sie sehen Anfrage und Unterlagen vorab.",
+      text: "Kund:innen fragen Sie über Ihr Profil an, oder wir ordnen Ihnen eine passende Anfrage zu. Sie sehen Anfrage und Unterlagen vor dem ersten Termin.",
     },
   ],
 

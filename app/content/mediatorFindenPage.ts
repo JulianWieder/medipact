@@ -25,7 +25,7 @@ export const mediatorFindenPageContent = {
   title: "Lieber mit einem Menschen am Tisch?",
   titleHighlight: "Wir vermitteln Ihnen eine Mediatorin.",
   intro:
-    "Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür vermitteln wir Ihnen eine ausgebildete Mediatorin oder einen Mediator, die zu Ihrem Konflikt passen. Sie schildern kurz, worum es geht, wir ordnen zu, Sie buchen das Erstgespräch.",
+    "Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Wählen Sie selbst – oder schildern Sie kurz, worum es geht, und wir ordnen Ihnen jemanden zu.",
 
   primaryCta: {
     label: "Mediatorin anfragen",
@@ -67,8 +67,8 @@ export const mediatorFindenPageContent = {
       text: "Konfliktart, wer beteiligt ist, ob vor Ort oder per Video, und wann es Ihnen passt. Keine langen Formulare, keine Vorgeschichte in allen Details — das klären Sie im Erstgespräch.",
     },
     {
-      title: "Wir ordnen eine Mediatorin zu",
-      text: "Das medipact-Team sucht aus dem Pool die Mediatorin, die fachlich und räumlich passt, und meldet sich mit dem Vorschlag bei Ihnen. Sie müssen nicht selbst Verzeichnisse durchsuchen und einzeln anfragen.",
+      title: "Mediatorin wählen – oder zuordnen lassen",
+      text: "Im Verzeichnis sehen Sie Schwerpunkte, Ort und Honorar und fragen direkt über das Profil an. Wer nicht selbst vergleichen möchte, lässt das medipact-Team die passende Mediatorin vorschlagen.",
     },
     {
       title: "Erstgespräch buchen",
@@ -149,7 +149,7 @@ export const mediatorFindenPageContent = {
     {
       question: "Kann ich mir die Mediatorin selbst aussuchen?",
       answer:
-        "Im Moment ordnet das medipact-Team zu, damit Sie nicht selbst vergleichen müssen. Wenn es nach dem Erstgespräch nicht passt, sagen Sie es uns — wir schlagen Ihnen dann eine andere Mediatorin vor.",
+        "Ja. Im Verzeichnis oben finden Sie die Profile unserer Mediatorinnen und Mediatoren und fragen das Vorgespräch direkt an. Möchten Sie nicht selbst vergleichen, ordnet das medipact-Team zu. Passt es nach dem Vorgespräch nicht, schlagen wir Ihnen jemand anderen vor.",
     },
     {
       question: "Vor Ort oder per Video?",

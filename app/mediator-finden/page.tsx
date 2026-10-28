@@ -5,6 +5,8 @@ import { JsonLd } from "@/app/components/JsonLd";
 import gespraechPhoto from "@/fotos/medi_gespraech.jpg";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
+import { ladeMediatoren } from "@/lib/mediatoren";
+import { MediatorenVerzeichnis } from "./MediatorenVerzeichnis";
 
 // Zusatzbaustein neben dem Online-Verfahren (siehe Kopf von
 // mediatorFindenPage.ts). Zielphrase ist „Mediator finden": Wer so sucht,
@@ -45,7 +47,10 @@ const faqSchema = {
   })),
 };
 
-export default function MediatorFindenPage() {
+export default async function MediatorFindenPage() {
+  // Aus kerno, alle fünf Minuten frisch (lib/mediatoren.ts). Leer, solange
+  // noch niemand freigegeben ist – die Seite zeigt dann den Weg über die Anfrage.
+  const mediatoren = await ladeMediatoren();
   return (
     <>
       <JsonLd data={serviceSchema} />
@@ -61,6 +66,7 @@ export default function MediatorFindenPage() {
           alt: "Unterlagen werden gemeinsam durchgesehen und eingeordnet",
         }}
         breadcrumbs={[{ label: "Mediator finden" }]}
+        afterHero={<MediatorenVerzeichnis mediatoren={mediatoren} />}
         showLogbuchHinweis={false}
         relatedCases={[
           { label: "Scheidungsmediation", href: "/scheidungsmediation" },

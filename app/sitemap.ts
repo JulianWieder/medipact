@@ -3,6 +3,7 @@ import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
 import { KARRIERE_ONLINE } from "@/app/karriere/status";
 import { routing, isIndexedLocalePath } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/seo";
+import { ladeMediatoren } from "@/lib/mediatoren";
 
 // ── Was hier hineingehoert ──────────────────────────────────────────────────
 //
@@ -146,7 +147,18 @@ const ROUTES: Route[] = [
 const urlFor = (locale: string, path: string) =>
   `${SITE_URL}${locale === routing.defaultLocale ? "" : `/${locale}`}${path}`;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Profile aus dem Verzeichnis (kerno) - nur freigegebene, nur Deutsch.
+  const profile = (await ladeMediatoren()).map((p) => ({
+    url: urlFor(routing.defaultLocale, `/mediator-finden/${p.slug}`),
+    lastModified: STAND.vermittlung,
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
+  return [...seiten(), ...profile];
+}
+
+function seiten(): MetadataRoute.Sitemap {
   return ROUTES.flatMap(({ path, lastModified, changeFrequency, priority }) => {
     if (!isIndexedLocalePath(path)) {
       return [{ url: urlFor(routing.defaultLocale, path), lastModified, changeFrequency, priority }];
