@@ -7,10 +7,10 @@ import { STARTERPAKET_URL } from "@/lib/mediatorVermittlung";
  * Das digitale Starterpaket als eigener Weg neben dem Online-Verfahren
  * (Modell: lib/mediatorVermittlung.ts). Startseite und /preise.
  *
- * Steht bewusst NACH dem Online-Verfahren: Das bleibt der Hauptweg, das
- * Starterpaket ist der zweite Einstieg für alle, die am Ende eine
- * Mediatorin am Tisch wollen. Deshalb hell (section-muted) und ohne
- * Hero-Gewicht, aber mit Preis und eigenem CTA – keine Fußnote.
+ * Auf der Startseite seit 29.10.2026 direkt unter dem Hero: Das Paket ist
+ * der Einstieg für alle, die erst verstehen wollen, wie Mediation arbeitet,
+ * und mehrere Mediator:innen kennenlernen möchten. Die zwei `zweck`-Karten
+ * sagen genau das, bevor Phasen und Preis kommen.
  */
 export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) {
   return (
@@ -26,6 +26,21 @@ export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) 
             <span className="block text-accent-700">{inhalt.titleHighlight}</span>
           </h2>
           <p className="mt-5 text-lg leading-8 text-neutral-700">{inhalt.text}</p>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
+          {inhalt.zweck.map((z, i) => (
+            <div
+              key={z.title}
+              className="rounded-3xl border border-accent-200 bg-white p-7 shadow-sm"
+            >
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <h3 className="mt-2 text-xl font-bold tracking-tight text-neutral-900">{z.title}</h3>
+              <p className="mt-3 text-base leading-7 text-neutral-700">{z.text}</p>
+            </div>
+          ))}
         </div>
 
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">

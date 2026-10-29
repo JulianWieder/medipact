@@ -107,6 +107,16 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
                   {t("ctaSecondary")}
                 </a>
               </div>
+              {/* Dritter Einstieg: Starterpaket (Sektion direkt unter dem Hero). */}
+              <a
+                href="#starterpaket"
+                className="group mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-300 transition hover:text-accent-200"
+              >
+                {t("ctaStarter")}
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </a>
 
               {/* Footer-Labels: Trennlinie und Text deutlich sichtbarer gemacht */}
               <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-400 border-t border-white/10 pt-6">

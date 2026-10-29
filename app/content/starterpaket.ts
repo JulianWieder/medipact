@@ -8,6 +8,8 @@
 // liegt in messages/en.json unter home.starter (gleiche Form).
 
 import {
+  KENNENLERN_ANZAHL,
+  KENNENLERN_MINUTEN,
   STARTPAKET_ANTEIL,
   STARTPAKET_DANACH,
   STARTPAKET_NAME,
@@ -21,6 +23,8 @@ export type StarterpaketInhalt = {
   title: string;
   titleHighlight: string;
   text: string;
+  /** Wozu das Paket dient – zwei Karten über den Phasen. */
+  zweck: { title: string; text: string }[];
   phasen: { title: string; text: string }[];
   name: string;
   preis: string;
@@ -32,10 +36,20 @@ export type StarterpaketInhalt = {
 };
 
 export const starterpaketInhaltDe: StarterpaketInhalt = {
-  eyebrow: "Digital starten, persönlich weiter",
-  title: "Erst gemeinsam sortieren.",
-  titleHighlight: "Dann mit der Mediatorin Ihrer Wahl weiter.",
-  text: "Sie und die andere Seite klären digital, worum es geht und was Ihnen wirklich wichtig ist – jede Seite in ihrem Tempo, ohne Termin. Danach lernen Sie Mediator:innen kennen und übergeben an die Person, die zu Ihnen passt. Sie fängt nicht bei null an.",
+  eyebrow: `${STARTPAKET_NAME} · ${STARTPAKET_PREIS} pro Fall`,
+  title: "Erst verstehen, wie Mediation arbeitet.",
+  titleHighlight: "Dann die Mediatorin wählen, die zu Ihnen passt.",
+  text: "Sie wissen noch nicht, welcher Weg zu Ihrem Konflikt passt – oder mit wem Sie ihn gehen wollen? Das Starterpaket ist genau dafür da: Sie erleben die ersten Schritte einer Mediation digital mit der anderen Seite und lernen danach mehrere Mediator:innen persönlich kennen, bevor Sie sich festlegen.",
+  zweck: [
+    {
+      title: "Die Methoden verstehen",
+      text: "Einleitung, Themen, Interessen: Sie gehen die ersten Phasen selbst durch und sehen, wie Mediation funktioniert. In den Gesprächen fragen Sie nach, wie die Mediatorin arbeitet – eher strukturierend oder lösungsorientiert, gemeinsam oder in Einzelgesprächen, vor Ort oder per Video.",
+    },
+    {
+      title: "Verschiedene Mediator:innen kennenlernen",
+      text: `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten – mit Profilen, die Sie vorgemerkt haben, oder Mediator:innen, die sich auf Ihren Fall melden. Sie vergleichen und entscheiden erst dann, mit wem Sie weitermachen.`,
+    },
+  ],
   phasen: STARTPAKET_PHASEN,
   name: STARTPAKET_NAME,
   preis: STARTPAKET_PREIS,

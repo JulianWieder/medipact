@@ -99,6 +99,7 @@
       "intro": "Resolve your conflict step by step in a digital workspace: medipact combines AI-supported case analysis with support from experienced, certified mediators – six clear steps, entirely online, ending in an agreement that both sides can stand behind and that is documented in a legally binding form. For separation, neighbour disputes, inheritance and conflicts at work.",
       "ctaPrimary": "Open your case for free",
       "ctaSecondary": "How it works",
+      "ctaStarter": "Not sure yet? Meet mediators first – starter package",
       "badgeVertraulich": "Confidential",
       "badgeBezahlbar": "Fixed price, not hourly rates",
       "badgeLoesungsorientiert": "Outcome-focused",
@@ -466,10 +467,20 @@
     "processLinkEinigung": "Why this works at a fixed price",
     "processLinkPersoenlich": "Prefer a mediator? Start digitally, continue in person",
     "starter": {
-      "eyebrow": "Start digitally, continue in person",
-      "title": "Sort things out together first.",
-      "titleHighlight": "Then continue with the mediator you choose.",
-      "text": "You and the other side work out digitally what the conflict is about and what really matters to you – each at your own pace, no appointment needed. Then you meet mediators and hand over to the one who suits you. They don't start from scratch.",
+      "eyebrow": "Digital starter package · €189 per case",
+      "title": "First understand how mediation works.",
+      "titleHighlight": "Then choose the mediator who suits you.",
+      "text": "Not sure yet which approach fits your conflict – or who you want to work with? That is exactly what the starter package is for: you go through the first steps of a mediation digitally with the other side, then meet several mediators in person before you commit.",
+      "zweck": [
+        {
+          "title": "Understand the methods",
+          "text": "Introduction, issues, interests: you work through the first phases yourself and see how mediation works. In the calls you ask how each mediator works – more structuring or more solution-focused, joint sessions or separate talks, in person or by video."
+        },
+        {
+          "title": "Meet different mediators",
+          "text": "Up to 3 introductory calls of 20 minutes each – with profiles you shortlisted or mediators who respond to your case. You compare, and only then decide who to continue with."
+        }
+      ],
       "phasen": [
         {
           "title": "Invite and introduction",

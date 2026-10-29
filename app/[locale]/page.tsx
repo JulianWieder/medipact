@@ -293,6 +293,12 @@ export default async function MedipactLanding({
           </div>
         </section>
 
+        {/* Starterpaket direkt unter dem Hero (29.10.2026): der Einstieg für
+            alle, die erst verstehen wollen, wie Mediation arbeitet, und
+            mehrere Mediator:innen kennenlernen möchten, bevor sie sich
+            festlegen (lib/mediatorVermittlung.ts). Hero verlinkt hierher. */}
+        <StarterpaketSection inhalt={starterpaket} />
+
         <KampagnenKarussell />
 
         <ErsteHilfeBox />
@@ -352,18 +358,13 @@ export default async function MedipactLanding({
               <ArrowLink href="/einigung" className="text-base">
                 {t("processLinkEinigung")}
               </ArrowLink>
-              {/* Zweiter Weg: das Starterpaket direkt darunter. */}
+              {/* Zweiter Weg: das Starterpaket (Sektion unter dem Hero). */}
               <ArrowLink href="#starterpaket" tone="muted" className="text-base">
                 {t("processLinkPersoenlich")}
               </ArrowLink>
             </div>
           </div>
         </section>
-
-        {/* Zweiter Weg neben dem Online-Verfahren: digital vorbereiten,
-            persönlich weiter (lib/mediatorVermittlung.ts). Bewusst nach dem
-            Verfahren, nicht davor - das Online-Verfahren bleibt der Hauptweg. */}
-        <StarterpaketSection inhalt={starterpaket} />
 
         <OutcomeWand />
 
