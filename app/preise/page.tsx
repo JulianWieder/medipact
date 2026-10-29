@@ -12,8 +12,8 @@ import {
   STARTERPAKET_URL,
   STARTPAKET_DANACH,
   STARTPAKET_NAME,
-  STARTPAKET_PREIS,
   STARTPAKET_PREIS_EUR,
+  STARTPAKET_ZAHLUNG,
 } from "@/lib/mediatorVermittlung";
 
 export const metadata: Metadata = pageMetadata({
@@ -59,7 +59,7 @@ const offerCatalogSchema = {
       {
         "@type": "Offer",
         name: STARTPAKET_NAME,
-        description: `Einleitung, Themen und Interessen digital mit beiden Seiten, dann bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten und Übergabe an eine Mediatorin – einmal pro Fall`,
+        description: `Einleitung, Themen und Interessen digital mit beiden Seiten, dann bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten und Übergabe an eine Mediatorin – pro Fall, geteilt zwischen den Seiten`,
         priceCurrency: "EUR",
         price: STARTPAKET_PREIS_EUR,
         url: "https://medipact.de/preise#starterpaket",
@@ -960,11 +960,11 @@ export default function Preise() {
                 },
                 {
                   q: `Was ist das ${STARTPAKET_NAME}?`,
-                  a: `Der Einstieg für alle, die am Ende mit einer Mediatorin am Tisch sitzen wollen. Für ${STARTPAKET_PREIS} einmal pro Fall machen Sie und die andere Seite die Einleitung, die Themensammlung und die Interessenphase digital. Danach lernen Sie bis zu ${KENNENLERN_ANZAHL} Mediator:innen je ${KENNENLERN_MINUTEN} Minuten kennen – aus Ihrer Vorauswahl im Verzeichnis und aus Angeboten, die Mediator:innen zu Ihrem Fall abgeben – und übergeben an die Person Ihrer Wahl. ${STARTPAKET_DANACH}`,
+                  a: `Der Einstieg für alle, die am Ende mit einer Mediatorin am Tisch sitzen wollen. ${STARTPAKET_ZAHLUNG} Darin machen Sie und die andere Seite die Einleitung, die Themensammlung und die Interessenphase digital. Danach lernen Sie bis zu ${KENNENLERN_ANZAHL} Mediator:innen je ${KENNENLERN_MINUTEN} Minuten kennen – aus Ihrer Vorauswahl im Verzeichnis und aus Angeboten, die Mediator:innen zu Ihrem Fall abgeben – und übergeben an die Person Ihrer Wahl. ${STARTPAKET_DANACH}`,
                 },
                 {
                   q: "Muss die andere Seite beim Starterpaket mitmachen?",
-                  a: "Ja. Mediation braucht beide Seiten, und die Interessenphase lebt davon, dass beide ihre Sicht eintragen. Sie laden die andere Seite in der Einleitung ein; für sie fallen im Starterpaket keine Kosten an.",
+                  a: "Ja. Mediation braucht beide Seiten, und die Interessenphase lebt davon, dass beide ihre Sicht eintragen. Sie laden die andere Seite ein; sagt sie zu, teilen Sie sich den Preis. Vorher zahlt niemand.",
                 },
                 {
                   q: "Kann ich auch eine klassische Mediation mit einer Mediatorin vor Ort buchen?",

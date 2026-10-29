@@ -111,6 +111,11 @@ export const fuerMediatorenPageContent = {
         "Das hängt von Ihrer Region, Ihren Schwerpunkten und davon ab, wie viele Termine Sie anbieten. Eine Mindestzahl können und wollen wir nicht versprechen — Sie entscheiden, wie viele Kennenlerngespräche Sie freigeben.",
     },
     {
+      question: "Wie wird nach der Übergabe abgerechnet?",
+      answer:
+        "Das entscheiden die Parteien nach dem Mandat. Entweder über medipact: Sie erfassen Ihre Sitzungen, die Parteien zahlen ihre Anteile zu Ihrem Stundensatz. Oder direkt: Sie bekommen die Ergebnisse aus Einleitung, Themen und Interessen und rechnen selbst mit den Parteien ab. Beides nur, wenn beide Seiten der Übergabe zugestimmt haben.",
+    },
+    {
       question: "Kann ich eine Anfrage ablehnen?",
       answer:
         "Ja. Wenn ein Fall nicht zu Ihnen passt, etwa wegen Befangenheit oder Vorbefassung, sagen Sie es uns, und wir ordnen neu zu.",

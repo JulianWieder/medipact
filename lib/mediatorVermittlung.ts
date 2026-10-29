@@ -21,15 +21,19 @@ import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
  * /preise, /mediator-finden, Profilseiten, /fuer-mediatoren, Hinweis auf den
  * Konflikt-Seiten). Entschieden am 29.10.2026:
  *
- * 1. Bezahlt wird ganz vorab: STARTPAKET_PREIS einmal pro Fall.
+ * 1. Bezahlt wird wie im Online-Verfahren: STARTPAKET_PREIS pro Fall,
+ *    GETEILT zwischen den Seiten (korrigiert am 29.10.2026), und erst wenn
+ *    die andere Seite der Einladung zugestimmt hat.
  * 2. Digital mit beiden Seiten: Einleitung, Themensammlung, Interessen
  *    (STARTPAKET_PHASEN). Ohne die Gegenseite gibt es keine Interessenphase.
  * 3. Übergabe: bis zu KENNENLERN_ANZAHL Kennenlerngespräche à
  *    KENNENLERN_MINUTEN Minuten. Zur Wahl stehen die auf der Website
  *    vorgemerkten Profile und die Angebote, die Mediator:innen nach der
  *    Interessenphase abgeben.
- * 4. Danach entscheiden die Parteien: mit der gewählten Person über
- *    medipact weiter (zu ihrem Stundensatz) oder an dieser Stelle pausieren.
+ * 4. Vor der Übergabe stimmen beide Seiten zu (Datenschutz). Danach
+ *    entscheiden sie: über medipact weiter (Sitzungen zum Stundensatz, über
+ *    medipact abgerechnet), direkt mit der Mediatorin (sie rechnet selbst
+ *    ab, medipact übergibt nur die Ergebnisse) oder pausieren.
  *
  * Das Online-Verfahren bleibt das Hauptangebot, das Starterpaket steht
  * daneben. In kerno heißt das Paket "starter" (app/pricing.py) – Preis und
@@ -40,15 +44,19 @@ export const KENNENLERN_MINUTEN = 20;
 
 export const STARTPAKET_NAME = "Digitales Starterpaket";
 
-/** Festpreis des Starterpakets, einmal pro Fall. */
+/** Festpreis des Starterpakets pro Fall – geteilt zwischen den Seiten. */
 export const STARTPAKET_PREIS = "189 €";
+/** Anteil je Seite bei zwei Beteiligten. */
+export const STARTPAKET_ANTEIL = "94,50 €";
+/** Wie der Preis fällig wird – ein Satz für alle Seiten. */
+export const STARTPAKET_ZAHLUNG = `${STARTPAKET_PREIS} pro Fall, geteilt: ${STARTPAKET_ANTEIL} je Seite. Gezahlt wird erst, wenn die andere Seite Ihrer Einladung zugestimmt hat.`;
 /** Für JSON-LD (Offer.price). */
 export const STARTPAKET_PREIS_EUR = "189";
 
 export const STARTPAKET_PHASEN = [
   {
-    title: "Einleitung",
-    text: "Anliegen, Ablauf und Vertraulichkeit klären. Sie laden die andere Seite ein – sie ist von Anfang an dabei.",
+    title: "Einladen und Einleitung",
+    text: "Sie laden die andere Seite ein. Sagt sie zu, teilen Sie sich den Preis – dann klären Sie gemeinsam Anliegen, Ablauf und Vertraulichkeit.",
   },
   {
     title: "Themen sammeln",
@@ -60,7 +68,7 @@ export const STARTPAKET_PHASEN = [
   },
   {
     title: "Übergabe an Ihre Mediatorin",
-    text: `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Die Person Ihrer Wahl übernimmt mit allem, was Sie erarbeitet haben.`,
+    text: `Beide Seiten stimmen der Übergabe zu. Dann bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten – die Person Ihrer Wahl übernimmt mit allem, was Sie erarbeitet haben.`,
   },
 ];
 
@@ -68,12 +76,12 @@ export const STARTPAKET_PUNKTE = [
   "Einleitung, Themensammlung und Interessen digital – mit beiden Seiten",
   `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten mit Mediator:innen Ihrer Wahl`,
   "Vorauswahl aus geprüften Profilen und Angebote passender Mediator:innen",
-  "Übergabe der Ergebnisse an die Mediatorin, die Sie wählen",
+  "Übergabe der Ergebnisse an die Mediatorin, die Sie wählen – nur mit Zustimmung beider Seiten",
 ];
 
 /** Was nach der Übergabe passiert – ein Satz für alle Seiten. */
 export const STARTPAKET_DANACH =
-  "Danach entscheiden Sie: Sie machen mit Ihrer Mediatorin über medipact weiter, zu ihrem Stundensatz aus dem Profil – oder Sie pausieren an dieser Stelle. Weitere Kosten entstehen erst, wenn Sie weitermachen.";
+  "Danach entscheiden Sie: über medipact weiter, die Sitzungen zum Stundensatz aus dem Profil geteilt abgerechnet – oder direkt mit Ihrer Mediatorin, die selbst abrechnet und von uns nur Ihre Ergebnisse bekommt. Oder Sie pausieren. Weitere Kosten entstehen erst, wenn Sie weitermachen.";
 
 /** Ein Satz für Teaser und Meta-Beschreibungen. */
 export const STARTPAKET_KURZ = `${STARTPAKET_NAME} für ${STARTPAKET_PREIS}: Themen und Interessen digital klären, dann bis zu ${KENNENLERN_ANZAHL} Mediator:innen kennenlernen`;

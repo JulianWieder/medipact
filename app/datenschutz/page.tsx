@@ -28,7 +28,7 @@ export default function DatenschutzPage() {
     <main className="app-shell pt-[73px]">
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-8">
         <h1 className="heading-1 mb-2">Datenschutzerklärung</h1>
-        <p className="mb-12 text-sm text-neutral-500">Stand: September 2026</p>
+        <p className="mb-12 text-sm text-neutral-500">Stand: Oktober 2026</p>
 
         <div className="space-y-10">
 
@@ -114,6 +114,57 @@ export default function DatenschutzPage() {
               zur Vertragserfüllung notwendig ist (z. B. an eingebundene
               menschliche Mediatoren oder Zahlungsdienstleister), gesetzlich
               vorgeschrieben ist oder Sie eingewilligt haben.
+            </p>
+          </Section>
+
+          {/* 29.10.2026: Starterpaket / Vermittlung. Entwurf – vor der
+              Veröffentlichung datenschutzrechtlich prüfen lassen. Technik
+              dazu: kerno backend/app/services/starter.py (Einwilligung). */}
+          <Section title="6a. Digitales Starterpaket und Vermittlung an Mediator:innen">
+            <p>
+              <strong className="text-neutral-800">Merkliste.</strong> Profile, die Sie auf
+              „Mediator finden“ vormerken, speichern wir nur in Ihrem Browser (Local Storage).
+              Sie werden erst übertragen, wenn Sie das Starterpaket buchen. Das ist für die
+              von Ihnen gewünschte Funktion erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG); Sie
+              können die Liste jederzeit leeren.
+            </p>
+            <p>
+              <strong className="text-neutral-800">Übergabe nur mit Zustimmung beider Seiten.</strong>{" "}
+              Nach der Interessenphase stimmt jede Partei selbst zu, bevor Daten an
+              Mediator:innen gehen (Art. 6 Abs. 1 lit. a DSGVO; soweit Ihre Angaben
+              besondere Kategorien wie Gesundheitsdaten enthalten, Art. 9 Abs. 2 lit. a
+              DSGVO). Weitergegeben wird gestuft:
+            </p>
+            <ul className="ml-5 list-disc space-y-1">
+              <li>
+                eine anonyme Kurzfassung (Konfliktart, Region, Kurzbeschreibung ohne Namen)
+                an die Mediator:innen der Plattform, damit sie ein Angebot abgeben können;
+              </li>
+              <li>
+                Ihr Name und der der anderen Seite nur an die bis zu drei Mediator:innen,
+                die Sie auswählen – zur Prüfung, ob sie befangen sind;
+              </li>
+              <li>
+                Einleitung, Themen und Interessen beider Seiten (ohne vertrauliche Notizen)
+                an die Mediatorin, die Sie mandatieren.
+              </li>
+            </ul>
+            <p>
+              Die mandatierte Mediatorin ist für die weitere Verarbeitung selbst
+              verantwortlich und nach § 4 Mediationsgesetz zur Verschwiegenheit verpflichtet.
+              Ihre Zustimmung können Sie bis zum Mandat in der Übergabe widerrufen, danach
+              über{" "}
+              <a href="mailto:hallo@medipact.de" className="text-accent-700 hover:underline">
+                hallo@medipact.de
+              </a>
+              ; der Widerruf wirkt für die Zukunft.
+            </p>
+            <p>
+              <strong className="text-neutral-800">Abrechnung nach der Übergabe.</strong> Machen
+              Sie über medipact weiter, verarbeiten wir zu jeder Sitzung Datum, Dauer und
+              Betrag sowie Ihre Zahlung über PayPal (Art. 6 Abs. 1 lit. b DSGVO). Rechnen
+              Sie direkt mit der Mediatorin ab, erhält sie Ihre Ergebnisse; Abrechnungsdaten
+              zu den Sitzungen liegen dann nicht bei uns.
             </p>
           </Section>
 

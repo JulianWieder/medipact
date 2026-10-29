@@ -472,8 +472,8 @@
       "text": "You and the other side work out digitally what the conflict is about and what really matters to you – each at your own pace, no appointment needed. Then you meet mediators and hand over to the one who suits you. They don't start from scratch.",
       "phasen": [
         {
-          "title": "Introduction",
-          "text": "Clarify your concern, the process and confidentiality. You invite the other side – they are involved from the start."
+          "title": "Invite and introduction",
+          "text": "You invite the other side. Once they accept, you split the price – then you clarify your concern, the process and confidentiality together."
         },
         {
           "title": "Collect the issues",
@@ -485,19 +485,19 @@
         },
         {
           "title": "Handover to your mediator",
-          "text": "Up to 3 introductory calls of 20 minutes each. The person you choose takes over with everything you have prepared."
+          "text": "Both sides agree to the handover. Then up to 3 introductory calls of 20 minutes each – the person you choose takes over with everything you have prepared."
         }
       ],
       "name": "Digital starter package",
       "preis": "€189",
-      "preisHinweis": "Once per case, paid online in advance",
+      "preisHinweis": "Per case, split: €94.50 per side – due once the other side accepts",
       "punkte": [
         "Introduction, issues and interests online – with both sides",
         "Up to 3 introductory calls of 20 minutes with mediators of your choice",
         "Shortlist from vetted profiles plus offers from suitable mediators",
-        "Handover of your results to the mediator you choose"
+        "Handover of your results to the mediator you choose – only with both sides' consent"
       ],
-      "danach": "Afterwards you decide: continue with your mediator via medipact at the hourly rate shown in their profile – or pause at this point. Further costs only arise if you continue.",
+      "danach": "Afterwards you decide: continue via medipact, with sessions at the hourly rate shown in the profile split between you – or directly with your mediator, who bills you directly and receives only your results from us. Or you pause. Further costs only arise if you continue.",
       "cta": "Book the starter package",
       "ctaProfile": "Browse and shortlist mediators"
     },

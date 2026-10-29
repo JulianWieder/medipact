@@ -8,6 +8,7 @@
 // liegt in messages/en.json unter home.starter (gleiche Form).
 
 import {
+  STARTPAKET_ANTEIL,
   STARTPAKET_DANACH,
   STARTPAKET_NAME,
   STARTPAKET_PHASEN,
@@ -38,7 +39,7 @@ export const starterpaketInhaltDe: StarterpaketInhalt = {
   phasen: STARTPAKET_PHASEN,
   name: STARTPAKET_NAME,
   preis: STARTPAKET_PREIS,
-  preisHinweis: "Einmal pro Fall, vorab online bezahlt",
+  preisHinweis: `Pro Fall, geteilt: ${STARTPAKET_ANTEIL} je Seite – fällig, wenn die andere Seite zusagt`,
   punkte: STARTPAKET_PUNKTE,
   danach: STARTPAKET_DANACH,
   cta: "Starterpaket buchen",

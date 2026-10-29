@@ -46,7 +46,7 @@ const serviceSchema = {
     name: STARTPAKET_NAME,
     priceCurrency: "EUR",
     price: STARTPAKET_PREIS_EUR,
-    description: `Fall digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten, Übergabe an die gewählte Mediatorin – einmal pro Fall`,
+    description: `Fall digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten, Übergabe an die gewählte Mediatorin – pro Fall, geteilt zwischen den Seiten`,
     url: "https://medipact.de/preise#starterpaket",
   },
 };

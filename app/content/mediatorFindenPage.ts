@@ -27,6 +27,7 @@ import {
   STARTPAKET_DANACH,
   STARTPAKET_NAME,
   STARTPAKET_PREIS,
+  STARTPAKET_ZAHLUNG,
 } from "@/lib/mediatorVermittlung";
 
 export const mediatorFindenPageContent = {
@@ -73,11 +74,11 @@ export const mediatorFindenPageContent = {
   process: [
     {
       title: "Vormerken und Starterpaket buchen",
-      text: `Bis zu ${MERKLISTE_MAX} Profile vormerken – oder ohne Vorauswahl starten. ${STARTPAKET_PREIS} einmal pro Fall, vorab online bezahlt. Keine weiteren Kosten, bis Sie sich für eine Mediatorin entschieden haben.`,
+      text: `Bis zu ${MERKLISTE_MAX} Profile vormerken – oder ohne Vorauswahl starten. ${STARTPAKET_ZAHLUNG} Keine weiteren Kosten, bis Sie sich für eine Mediatorin entschieden haben.`,
     },
     {
       title: "Digital vorbereiten, mit beiden Seiten",
-      text: "Einleitung, Themensammlung und Interessen: Sie laden die andere Seite ein, beide arbeiten getrennt und in ihrem Tempo. Am Ende liegt gegenübergestellt vor, worum es beiden wirklich geht.",
+      text: "Einleitung, Themensammlung und Interessen: beide arbeiten getrennt und in ihrem Tempo. Am Ende liegt gegenübergestellt vor, worum es beiden wirklich geht. Bevor etwas an Mediator:innen geht, stimmen Sie beide zu.",
     },
     {
       title: `Bis zu ${KENNENLERN_ANZAHL} Mediator:innen kennenlernen`,
@@ -150,7 +151,7 @@ export const mediatorFindenPageContent = {
     {
       question: "Was kostet das?",
       answer:
-        `Zuerst das ${STARTPAKET_NAME} für ${STARTPAKET_PREIS} einmal pro Fall: Einleitung, Themensammlung und Interessen digital mit beiden Seiten, dazu bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Machen Sie danach mit Ihrer Mediatorin weiter, zahlen Sie die Sitzungen zu ihrem Stundensatz, der im Profil steht. Wie viele Sitzungen es werden, hängt vom Konflikt ab.`,
+        `Zuerst das ${STARTPAKET_NAME}: ${STARTPAKET_ZAHLUNG} Darin: Einleitung, Themensammlung und Interessen digital mit beiden Seiten, dazu bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Machen Sie danach mit Ihrer Mediatorin weiter, zahlen Sie die Sitzungen zu ihrem Stundensatz, der im Profil steht – geteilt über medipact oder direkt an sie, wie Sie es wählen. Wie viele Sitzungen es werden, hängt vom Konflikt ab.`,
     },
     {
       question: "Kann ich mir die Mediatorin selbst aussuchen?",
@@ -165,7 +166,7 @@ export const mediatorFindenPageContent = {
     {
       question: "Muss die andere Seite mitmachen?",
       answer:
-        "Ja. Sie buchen allein, laden die andere Seite aber in der Einleitung ein – Themen und Interessen tragen beide Seiten selbst ein, sonst hätte Ihre Mediatorin nur eine Sicht. Für die andere Seite kostet das Starterpaket nichts. Mediation bleibt für alle Beteiligten freiwillig.",
+        "Ja. Sie buchen allein, laden die andere Seite aber in der Einleitung ein – Themen und Interessen tragen beide Seiten selbst ein, sonst hätte Ihre Mediatorin nur eine Sicht. Den Preis teilen Sie sich; gezahlt wird erst, wenn sie zugesagt hat. Mediation bleibt für alle Beteiligten freiwillig.",
     },
     {
       question: "Was ist der Unterschied zum Online-Verfahren von medipact?",
@@ -180,7 +181,7 @@ export const mediatorFindenPageContent = {
   ],
 
   finalCtaTitle: "Finden Sie die Mediatorin, die zu Ihnen passt.",
-  finalCtaText: `Digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} kurze Kennenlerngespräche, dann entscheiden Sie. ${STARTPAKET_PREIS} einmal pro Fall.`,
+  finalCtaText: `Digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} kurze Kennenlerngespräche, dann entscheiden Sie. ${STARTPAKET_PREIS} pro Fall, geteilt.`,
   finalPrimaryCta: {
     label: "Starterpaket buchen",
     href: STARTERPAKET_URL,
