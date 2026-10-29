@@ -10,7 +10,7 @@
 // zurück ins Online-Verfahren, wo das besser passt — sie soll dem
 // Kernprodukt keine Fälle abziehen, die dort gut aufgehoben wären.
 //
-// Das Modell (Startpaket, Kennenlerngespräche, Abrechnung) steht EINMAL in
+// Das Modell (Starterpaket, Kennenlerngespräche, Abrechnung) steht EINMAL in
 // lib/mediatorVermittlung.ts – Zahlen hier nur aus den Konstanten dort.
 //
 // Bewusst NICHT im Text:
@@ -18,12 +18,15 @@
 //     wenn der Pool ausschließlich aus zertifizierten Mediator:innen besteht.
 //     Im Profil steht es nur, wenn die Mediatorin es selbst angibt und wir
 //     es vor der Freigabe geprüft haben.
-//   - Ein Preis für das Startpaket, solange STARTPAKET_PREIS null ist.
 
 import {
   KENNENLERN_ANZAHL,
   KENNENLERN_MINUTEN,
-  MEDIATOR_ANFRAGE_URL,
+  MERKLISTE_MAX,
+  STARTERPAKET_URL,
+  STARTPAKET_DANACH,
+  STARTPAKET_NAME,
+  STARTPAKET_PREIS,
 } from "@/lib/mediatorVermittlung";
 
 export const mediatorFindenPageContent = {
@@ -31,10 +34,10 @@ export const mediatorFindenPageContent = {
   title: "Lieber mit einem Menschen am Tisch?",
   titleHighlight: "Wir vermitteln Ihnen eine Mediatorin.",
   intro:
-    `Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Sie lernen bis zu ${KENNENLERN_ANZAHL} von ihnen in kurzen Gesprächen kennen und entscheiden dann, mit wem Sie die Mediation führen.`,
+    `Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Merken Sie sich bis zu ${MERKLISTE_MAX} vor. Mit dem ${STARTPAKET_NAME} bereiten Sie und die andere Seite den Fall digital vor, dann lernen Sie Ihre Favoriten kennen und entscheiden, mit wem Sie weitermachen.`,
 
   primaryCta: {
-    label: "Mediator:innen ansehen",
+    label: "Mediator:innen ansehen und vormerken",
     href: "#verzeichnis",
   },
 
@@ -69,20 +72,20 @@ export const mediatorFindenPageContent = {
   processTitle: "So kommen Sie zu Ihrer Mediatorin",
   process: [
     {
-      title: "Startpaket buchen",
-      text: "Ein Festpreis, vorab online bezahlt. Darin sind die geführte Einleitung und die Kennenlerngespräche enthalten – keine weiteren Kosten, bis Sie sich für eine Mediatorin entschieden haben.",
+      title: "Vormerken und Starterpaket buchen",
+      text: `Bis zu ${MERKLISTE_MAX} Profile vormerken – oder ohne Vorauswahl starten. ${STARTPAKET_PREIS} einmal pro Fall, vorab online bezahlt. Keine weiteren Kosten, bis Sie sich für eine Mediatorin entschieden haben.`,
     },
     {
-      title: "Einleitung mit medipact",
-      text: "Sie schildern kurz, worum es geht, wer beteiligt ist und ob vor Ort oder per Video. Wir erklären, wie die Mediation abläuft und was vertraulich bleibt. Keine langen Formulare.",
+      title: "Digital vorbereiten, mit beiden Seiten",
+      text: "Einleitung, Themensammlung und Interessen: Sie laden die andere Seite ein, beide arbeiten getrennt und in ihrem Tempo. Am Ende liegt gegenübergestellt vor, worum es beiden wirklich geht.",
     },
     {
       title: `Bis zu ${KENNENLERN_ANZAHL} Mediator:innen kennenlernen`,
-      text: `Wählen Sie im Verzeichnis bis zu ${KENNENLERN_ANZAHL} Personen und buchen Sie je ein Gespräch von ${KENNENLERN_MINUTEN} Minuten aus ihren freien Zeiten. Wer nicht selbst vergleichen möchte, lässt sich Vorschläge machen.`,
+      text: `Zur Wahl stehen Ihre vorgemerkten Profile und Angebote von Mediator:innen, die zu Ihrem Fall passen. Je ein Gespräch von ${KENNENLERN_MINUTEN} Minuten aus ihren freien Zeiten.`,
     },
     {
-      title: "Entscheiden – dann beginnt die Mediation",
-      text: "Mit der Person, die zu Ihnen passt, geht es weiter: Termine, Unterlagen und Nachrichten an einem Ort. Die Sitzungen rechnen wir zu ihrem Stundensatz ab, den Sie vorher im Profil sehen.",
+      title: "Übergabe – dann entscheiden Sie",
+      text: `Die Person Ihrer Wahl übernimmt mit allem, was Sie erarbeitet haben. ${STARTPAKET_DANACH}`,
     },
   ],
 
@@ -96,7 +99,8 @@ export const mediatorFindenPageContent = {
       features: [
         "Gemeinsame Sitzungen vor Ort oder per Video",
         "Mediatorin führt das Gespräch von Anfang an",
-        `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche im Startpaket`,
+        `${STARTPAKET_NAME}: Themen und Interessen digital vorbereitet`,
+        `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche inklusive`,
         "Sitzungen zum Stundensatz aus dem Profil, über medipact abgerechnet",
         "Passt, wenn Sie ein Gegenüber im Raum wollen",
       ],
@@ -146,12 +150,12 @@ export const mediatorFindenPageContent = {
     {
       question: "Was kostet das?",
       answer:
-        `Zuerst das Startpaket zum Festpreis, den Sie vor der Buchung sehen: die geführte Einleitung und bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Danach die Sitzungen mit Ihrer Mediatorin zu ihrem Stundensatz, der im Profil steht. Wie viele Sitzungen es werden, hängt vom Konflikt ab.`,
+        `Zuerst das ${STARTPAKET_NAME} für ${STARTPAKET_PREIS} einmal pro Fall: Einleitung, Themensammlung und Interessen digital mit beiden Seiten, dazu bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten. Machen Sie danach mit Ihrer Mediatorin weiter, zahlen Sie die Sitzungen zu ihrem Stundensatz, der im Profil steht. Wie viele Sitzungen es werden, hängt vom Konflikt ab.`,
     },
     {
       question: "Kann ich mir die Mediatorin selbst aussuchen?",
       answer:
-        `Ja. Im Verzeichnis oben finden Sie die Profile unserer Mediatorinnen und Mediatoren. Sie lernen bis zu ${KENNENLERN_ANZAHL} von ihnen kennen und entscheiden dann. Möchten Sie nicht selbst vergleichen, schlägt Ihnen das medipact-Team passende Personen vor.`,
+        `Ja. Im Verzeichnis oben merken Sie sich bis zu ${MERKLISTE_MAX} Profile vor, ohne Konto. Nach der Interessenphase kommen Angebote von Mediator:innen dazu, die Ihren anonymisierten Fall gesehen haben. Aus beidem wählen Sie bis zu ${KENNENLERN_ANZAHL} für die Kennenlerngespräche.`,
     },
     {
       question: "Vor Ort oder per Video?",
@@ -159,9 +163,9 @@ export const mediatorFindenPageContent = {
         "Beides ist möglich. Geben Sie in der Anfrage an, was Sie bevorzugen und wo Sie wohnen. Für Termine vor Ort suchen wir eine Mediatorin in Ihrer Region.",
     },
     {
-      question: "Muss die andere Seite schon zugestimmt haben?",
+      question: "Muss die andere Seite mitmachen?",
       answer:
-        "Nein. Viele melden sich zuerst allein. Wie die andere Seite eingeladen wird und ob die ersten Sitzungen gemeinsam oder zunächst einzeln stattfinden, besprechen Sie mit Ihrer Mediatorin. Mediation bleibt für alle Beteiligten freiwillig.",
+        "Ja. Sie buchen allein, laden die andere Seite aber in der Einleitung ein – Themen und Interessen tragen beide Seiten selbst ein, sonst hätte Ihre Mediatorin nur eine Sicht. Für die andere Seite kostet das Starterpaket nichts. Mediation bleibt für alle Beteiligten freiwillig.",
     },
     {
       question: "Was ist der Unterschied zum Online-Verfahren von medipact?",
@@ -176,10 +180,10 @@ export const mediatorFindenPageContent = {
   ],
 
   finalCtaTitle: "Finden Sie die Mediatorin, die zu Ihnen passt.",
-  finalCtaText: `Bis zu ${KENNENLERN_ANZAHL} kurze Kennenlerngespräche, dann entscheiden Sie. Wer nicht selbst suchen möchte, bekommt von uns Vorschläge.`,
+  finalCtaText: `Digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} kurze Kennenlerngespräche, dann entscheiden Sie. ${STARTPAKET_PREIS} einmal pro Fall.`,
   finalPrimaryCta: {
-    label: "Startpaket buchen",
-    href: MEDIATOR_ANFRAGE_URL,
+    label: "Starterpaket buchen",
+    href: STARTERPAKET_URL,
   },
   finalCta: {
     label: "Online-Verfahren ansehen",

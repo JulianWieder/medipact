@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
 import { JsonLd } from "@/app/components/JsonLd";
 import Icon from "@/app/components/ui/Icon";
+import { StarterpaketSection } from "@/app/components/StarterpaketSection";
+import { starterpaketInhaltDe } from "@/app/content/starterpaket";
 import {
   KENNENLERN_ANZAHL,
   KENNENLERN_MINUTEN,
-  MEDIATOR_ANFRAGE_URL,
+  STARTERPAKET_URL,
+  STARTPAKET_DANACH,
+  STARTPAKET_NAME,
   STARTPAKET_PREIS,
-  STARTPAKET_PUNKTE,
+  STARTPAKET_PREIS_EUR,
 } from "@/lib/mediatorVermittlung";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Preise: Mediation ab 49 €, Business ab 1.000 € | medipact",
+  title: "Preise: Mediation ab 49 €, Starterpaket 189 € | medipact",
   description:
-    "Einstieg ab 49 € pro Partei, Trennung ab 299 €, Wirtschaftsmediation ab 1.200 € oder Business-Tarife ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
+    "Online ab 49 € pro Partei, Trennung ab 299 €, Starterpaket mit Mediator:in 189 €, Business ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
   path: "/preise",
 });
 
@@ -52,6 +55,14 @@ const offerCatalogSchema = {
         priceCurrency: "EUR",
         price: "0",
         url: "https://medipact.de/konflikt-logbuch",
+      },
+      {
+        "@type": "Offer",
+        name: STARTPAKET_NAME,
+        description: `Einleitung, Themen und Interessen digital mit beiden Seiten, dann bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten und Übergabe an eine Mediatorin – einmal pro Fall`,
+        priceCurrency: "EUR",
+        price: STARTPAKET_PREIS_EUR,
+        url: "https://medipact.de/preise#starterpaket",
       },
       {
         "@type": "Offer",
@@ -602,68 +613,10 @@ export default function Preise() {
           </div>
         </section>
 
-        {/* PERSÖNLICHE MEDIATION (Zusatzbaustein, lib/mediatorVermittlung.ts).
-            Bewusst nach den Verfahrens-Tarifen und heller als Business: Das
-            Online-Verfahren bleibt das Hauptangebot, das hier ist der
-            Zusatzweg für alle, die ein persönliches Gegenüber wollen. */}
-        <section className="section section-muted border-y border-neutral-200">
-          <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8">
-            <div className="max-w-2xl">
-              <div className="eyebrow mb-4">Zusätzlich</div>
-              <h2 className="text-3xl font-black text-neutral-900 sm:text-4xl leading-[1.15]">
-                Persönliche Mediation, vermittelt über medipact.
-              </h2>
-              <p className="mt-5 text-lg leading-8 text-neutral-700">
-                Sie wollen keine geführte Online-Mediation, sondern eine
-                klassische Mediation mit einer Mediatorin am Tisch, vor Ort
-                oder per Video? Dann wählen Sie aus unseren geprüften
-                Mediator:innen. Mit dem Startpaket lernen Sie bis zu{" "}
-                {KENNENLERN_ANZAHL} von ihnen je {KENNENLERN_MINUTEN} Minuten
-                kennen und entscheiden dann, mit wem Sie weitermachen.
-              </p>
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
-                <a
-                  href={MEDIATOR_ANFRAGE_URL}
-                  className="inline-flex items-center justify-center rounded-xl bg-accent-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-accent-700"
-                >
-                  Startpaket buchen
-                </a>
-                <Link
-                  href="/mediator-finden#verzeichnis"
-                  className="text-sm font-semibold text-accent-700 transition hover:text-accent-800"
-                >
-                  Mediator:innen ansehen →
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
-                Startpaket
-              </div>
-              <div className="mt-4 text-4xl font-black tracking-tight text-neutral-900">
-                {STARTPAKET_PREIS ?? "Festpreis"}
-              </div>
-              <p className="mt-2 text-sm text-neutral-500">
-                {STARTPAKET_PREIS
-                  ? "Einmalig, vorab online bezahlt"
-                  : "Vor der Buchung sichtbar, vorab online bezahlt"}
-              </p>
-              <div className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
-                {STARTPAKET_PUNKTE.map((punkt) => (
-                  <p key={punkt}>
-                    <span className="font-bold text-accent-600">✓</span> {punkt}
-                  </p>
-                ))}
-              </div>
-              <div className="mt-6 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
-                <strong className="text-neutral-900">Danach:</strong>{" "}
-                Mediation mit der Person, die Sie gewählt haben, zu ihrem
-                Stundensatz – abgerechnet über medipact.
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* DIGITALES STARTERPAKET (lib/mediatorVermittlung.ts). Direkt nach
+            den Verfahrens-Tarifen: Die bleiben vorn, das Starterpaket ist der
+            zweite Weg für alle, die am Ende eine Mediatorin am Tisch wollen. */}
+        <StarterpaketSection inhalt={starterpaketInhaltDe} />
 
         {/* BUSINESS-TARIFE */}
         <section className="section section-strong">
@@ -1006,8 +959,16 @@ export default function Preise() {
                   a: "Ja: das Konflikt-Logbuch. Sie dokumentieren Ihren Streit kostenlos – Vorkommnisse, Gespräche, E-Mails, WhatsApp, Telefonate – und wandeln das Logbuch erst dann in eine Mediation um, wenn Sie so weit sind. Erst ab diesem Schritt fallen die regulären Preise an.",
                 },
                 {
+                  q: `Was ist das ${STARTPAKET_NAME}?`,
+                  a: `Der Einstieg für alle, die am Ende mit einer Mediatorin am Tisch sitzen wollen. Für ${STARTPAKET_PREIS} einmal pro Fall machen Sie und die andere Seite die Einleitung, die Themensammlung und die Interessenphase digital. Danach lernen Sie bis zu ${KENNENLERN_ANZAHL} Mediator:innen je ${KENNENLERN_MINUTEN} Minuten kennen – aus Ihrer Vorauswahl im Verzeichnis und aus Angeboten, die Mediator:innen zu Ihrem Fall abgeben – und übergeben an die Person Ihrer Wahl. ${STARTPAKET_DANACH}`,
+                },
+                {
+                  q: "Muss die andere Seite beim Starterpaket mitmachen?",
+                  a: "Ja. Mediation braucht beide Seiten, und die Interessenphase lebt davon, dass beide ihre Sicht eintragen. Sie laden die andere Seite in der Einleitung ein; für sie fallen im Starterpaket keine Kosten an.",
+                },
+                {
                   q: "Kann ich auch eine klassische Mediation mit einer Mediatorin vor Ort buchen?",
-                  a: "Ja, zusätzlich zum Online-Verfahren. Sie wählen aus unseren geprüften Mediator:innen für Sitzungen vor Ort oder per Video. Das Startpaket zum Festpreis enthält die geführte Einleitung und bis zu drei Kennenlerngespräche à 15 Minuten; die Sitzungen danach rechnen wir zum Stundensatz Ihrer Mediatorin ab. Details auf der Seite „Mediator finden“.",
+                  a: "Ja, über das Starterpaket. Sie bereiten den Fall digital vor und wählen dann aus unseren geprüften Mediator:innen für Sitzungen vor Ort oder per Video. Die Sitzungen danach rechnen wir zum Stundensatz Ihrer Mediatorin ab, der im Profil steht.",
                 },
                 {
                   q: "Gibt es versteckte Kosten?",
@@ -1043,7 +1004,7 @@ export default function Preise() {
               Wählen Sie Ihren Weg und starten Sie noch heute – ruhig,
               vertraulich und fair für alle Seiten.
             </p>
-            <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row sm:flex-wrap">
               <a
                 href="mailto:hallo@medipact.de?subject=Online-Prozess%20starten"
                 className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-sm font-bold text-accent-600 hover:bg-accent-50 transition"
@@ -1055,6 +1016,12 @@ export default function Preise() {
                 className="inline-flex items-center justify-center rounded-xl border-2 border-white bg-transparent px-8 py-4 text-sm font-bold text-white hover:bg-white/10 transition"
               >
                 Hybrid starten
+              </a>
+              <a
+                href={STARTERPAKET_URL}
+                className="inline-flex items-center justify-center rounded-xl border-2 border-white bg-transparent px-8 py-4 text-sm font-bold text-white hover:bg-white/10 transition"
+              >
+                Starterpaket buchen
               </a>
               <a
                 href="mailto:hallo@medipact.de?subject=Vollservice%20starten"

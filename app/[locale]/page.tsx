@@ -14,6 +14,8 @@ import LogbuchSection from "@/app/components/LogbuchSection";
 import KampagnenKarussell from "@/app/components/KampagnenKarussell";
 import ZweiWelten from "@/app/components/ZweiWelten";
 import OutcomeWand from "@/app/components/OutcomeWand";
+import { StarterpaketSection } from "@/app/components/StarterpaketSection";
+import { starterpaketInhaltDe, type StarterpaketInhalt } from "@/app/content/starterpaket";
 import { FootnoteList, FootnoteRef, type FootnoteItem } from "@/app/components/ui/Footnote";
 import type { Metadata } from "next";
 import heroPhoto from "../../fotos/medi_main.jpg";
@@ -252,6 +254,12 @@ export default async function MedipactLanding({
   const footnotes = t.raw("footnotes") as FootnoteItem[];
   const processSteps = t.raw("processSteps") as NumberedStep[];
   // Nur en hat eigene Fakten; Deutsch nutzt die Standard-Fakten der Komponente.
+  // Deutsch aus den Konstanten (app/content/starterpaket.ts), damit Preis und
+  // Minuten nur an einer Stelle stehen; andere Sprachen aus messages.
+  const starterpaket =
+    locale === routing.defaultLocale
+      ? starterpaketInhaltDe
+      : (t.raw("starter") as StarterpaketInhalt);
   const didYouKnowFacts = t.has("didYouKnowFacts")
     ? (t.raw("didYouKnowFacts") as DidYouKnowFact[])
     : undefined;
@@ -344,14 +352,18 @@ export default async function MedipactLanding({
               <ArrowLink href="/einigung" className="text-base">
                 {t("processLinkEinigung")}
               </ArrowLink>
-              {/* Zusatzbaustein: wer statt des Online-Verfahrens ein
-                  persönliches Gegenüber will (lib/mediatorVermittlung.ts). */}
-              <ArrowLink href="/mediator-finden" tone="muted" className="text-base">
+              {/* Zweiter Weg: das Starterpaket direkt darunter. */}
+              <ArrowLink href="#starterpaket" tone="muted" className="text-base">
                 {t("processLinkPersoenlich")}
               </ArrowLink>
             </div>
           </div>
         </section>
+
+        {/* Zweiter Weg neben dem Online-Verfahren: digital vorbereiten,
+            persönlich weiter (lib/mediatorVermittlung.ts). Bewusst nach dem
+            Verfahren, nicht davor - das Online-Verfahren bleibt der Hauptweg. */}
+        <StarterpaketSection inhalt={starterpaket} />
 
         <OutcomeWand />
 

@@ -1,4 +1,5 @@
 import { ArrowLink } from "@/app/components/ui/ArrowLink";
+import { KENNENLERN_ANZAHL, STARTPAKET_NAME, STARTPAKET_PREIS } from "@/lib/mediatorVermittlung";
 
 /**
  * Schmaler Hinweis auf den Zusatzbaustein „Mediator:in vermitteln"
@@ -23,9 +24,7 @@ export function MediatorVermittlungHinweis() {
               Lieber mit einer Mediatorin am Tisch?
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-600">
-              Wählen Sie aus unseren geprüften Mediator:innen für eine
-              klassische Mediation, vor Ort oder per Video – mit bis zu drei
-              Kennenlerngesprächen vorab.
+              {`${STARTPAKET_NAME} für ${STARTPAKET_PREIS}: Themen und Interessen digital mit beiden Seiten klären, dann bis zu ${KENNENLERN_ANZAHL} geprüfte Mediator:innen kennenlernen und an die Person Ihrer Wahl übergeben – vor Ort oder per Video.`}
             </p>
           </div>
           <ArrowLink href="/mediator-finden" className="shrink-0 text-sm">

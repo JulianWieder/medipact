@@ -7,8 +7,9 @@
 // sind: „Bekomme ich darüber Anfragen?", „Was kostet mich das?" und „Bleibe
 // ich selbstständig?". Genau die beantwortet die Seite.
 //
-// Das Kundenmodell (Startpaket, Kennenlerngespräche, Abrechnung über
-// medipact) steht in lib/mediatorVermittlung.ts.
+// Das Kundenmodell (Starterpaket, Kennenlerngespräche, Abrechnung über
+// medipact) steht in lib/mediatorVermittlung.ts. Profile legt das
+// medipact-Team an (Entscheidung 29.10.2026), keine Selbstregistrierung.
 //
 // Bewusst offen gelassen, bis entschieden: Konditionen (Anteil von medipact,
 // Vergütung der Kennenlerngespräche, Auszahlung) und Aufnahmekriterien über
@@ -21,7 +22,7 @@ export const fuerMediatorenPageContent = {
   title: "Mediieren statt akquirieren.",
   titleHighlight: "Anfragen, die zu Ihnen passen.",
   intro:
-    "Über medipact finden Menschen, die eine klassische Mediation suchen, Ihr Profil — vor Ort oder per Video. Sie haben bereits bezahlt und eine geführte Einleitung hinter sich, wenn sie Sie zum Kennenlernen buchen. Entscheiden sie sich für Sie, führen Sie die Mediation wie gewohnt in eigener Verantwortung.",
+    "Über medipact finden Menschen, die eine Mediation suchen, Ihr Profil — vor Ort oder per Video. Wenn sie Sie zum Kennenlernen buchen, haben sie bezahlt und mit der Gegenseite Einleitung, Themen und Interessen bereits digital erarbeitet. Entscheiden sie sich für Sie, übernehmen Sie den vorbereiteten Fall und führen die Mediation in eigener Verantwortung weiter.",
 
   primaryCta: {
     label: "Interesse melden",
@@ -40,11 +41,11 @@ export const fuerMediatorenPageContent = {
   features: [
     {
       title: "Ihr Profil im Verzeichnis",
-      text: "Mit Schwerpunkten, Region und Honorar auf medipact.de/mediator-finden – unter Vorname und Initial, mit vollem Namen nur, wenn Sie es möchten. Kund:innen wählen Sie dort direkt, oder wir schlagen Sie passenden Anfragen vor.",
+      text: "Mit Foto, Schwerpunkten, Region und Honorar auf medipact.de/mediator-finden – unter Vorname und Initial, mit vollem Namen nur, wenn Sie es möchten. Das Profil legen wir nach dem Kennenlernen mit Ihnen gemeinsam an. Kund:innen merken Sie dort vor, oder Sie geben auf passende Fälle ein Angebot ab.",
     },
     {
-      title: "Kennenlernen gebucht und bezahlt",
-      text: `Kund:innen buchen ein Kennenlerngespräch von ${KENNENLERN_MINUTEN} Minuten aus Ihren freien Terminen – bezahlt ist es mit dem Startpaket. Bestätigung und Erinnerung verschickt das System, nicht Sie.`,
+      title: "Vorbereitete Fälle statt Erstgespräch bei null",
+      text: `Kund:innen buchen ein Kennenlerngespräch von ${KENNENLERN_MINUTEN} Minuten aus Ihren freien Terminen. Vorher sehen Sie den anonymisierten Fall; nach der Wahl übernehmen Sie Themen und Interessen beider Seiten. Bestätigung und Erinnerung verschickt das System, nicht Sie.`,
     },
     {
       title: "Sie bleiben selbstständig",
@@ -68,11 +69,11 @@ export const fuerMediatorenPageContent = {
     },
     {
       title: "Zugang, Profil und Termine",
-      text: "Das medipact-Team legt Ihren Zugang an. Sie pflegen Ihr Profil und hinterlegen freie Termine für Kennenlerngespräche — so viele oder so wenige, wie Sie möchten. Nach unserer Prüfung erscheint das Profil im Verzeichnis.",
+      text: "Das medipact-Team legt Ihren Zugang und Ihr Profil an. Sie hinterlegen freie Termine für Kennenlerngespräche — so viele oder so wenige, wie Sie möchten — und geben das Profil frei. Dann erscheint es im Verzeichnis.",
     },
     {
       title: "Anfragen erhalten",
-      text: "Kund:innen fragen Sie über Ihr Profil an, oder wir ordnen Ihnen eine passende Anfrage zu. Sie sehen Anfrage und Unterlagen vor dem ersten Termin.",
+      text: "Kund:innen merken Sie über Ihr Profil vor, oder Sie geben auf einen anonymisierten Fall ein Angebot ab. Vor dem Kennenlernen prüfen Sie, ob eine Kollision besteht.",
     },
   ],
 
@@ -117,7 +118,7 @@ export const fuerMediatorenPageContent = {
     {
       question: "Muss ich das Online-Verfahren von medipact nutzen?",
       answer:
-        "Nein. Die Vermittlung ist ein eigener Weg ohne den Phasenablauf des Online-Verfahrens. Sie führen die Mediation in Ihrer Praxis oder per Video, wie Sie es gewohnt sind.",
+        "Nein. Einleitung, Themen und Interessen haben die Parteien vorher digital erarbeitet – das übernehmen Sie als Vorbereitung. Ab dann führen Sie die Mediation in Ihrer Praxis oder per Video, wie Sie es gewohnt sind. Die Ergebnisse können Sie im medipact-Workspace weiterführen, müssen es aber nicht.",
     },
   ],
 

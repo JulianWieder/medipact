@@ -1,0 +1,89 @@
+import { ArrowLink } from "@/app/components/ui/ArrowLink";
+import { Button } from "@/app/components/ui/Button";
+import type { StarterpaketInhalt } from "@/app/content/starterpaket";
+import { STARTERPAKET_URL } from "@/lib/mediatorVermittlung";
+
+/**
+ * Das digitale Starterpaket als eigener Weg neben dem Online-Verfahren
+ * (Modell: lib/mediatorVermittlung.ts). Startseite und /preise.
+ *
+ * Steht bewusst NACH dem Online-Verfahren: Das bleibt der Hauptweg, das
+ * Starterpaket ist der zweite Einstieg für alle, die am Ende eine
+ * Mediatorin am Tisch wollen. Deshalb hell (section-muted) und ohne
+ * Hero-Gewicht, aber mit Preis und eigenem CTA – keine Fußnote.
+ */
+export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) {
+  return (
+    <section
+      id="starterpaket"
+      className="section section-muted scroll-mt-20 border-y border-neutral-200"
+    >
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <div className="eyebrow mb-4">{inhalt.eyebrow}</div>
+          <h2 className="text-3xl font-black leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl">
+            {inhalt.title}
+            <span className="block text-accent-700">{inhalt.titleHighlight}</span>
+          </h2>
+          <p className="mt-5 text-lg leading-8 text-neutral-700">{inhalt.text}</p>
+        </div>
+
+        <div className="mt-12 grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
+          <ol className="grid gap-4 sm:grid-cols-2">
+            {inhalt.phasen.map((phase, i) => {
+              const uebergabe = i === inhalt.phasen.length - 1;
+              return (
+                <li
+                  key={phase.title}
+                  className={
+                    "rounded-3xl border p-6 " +
+                    (uebergabe
+                      ? "border-accent-300 bg-accent-50/60"
+                      : "border-neutral-200 bg-white")
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-600 text-sm font-bold text-white">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className="text-base font-semibold text-neutral-900">{phase.title}</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-neutral-600">{phase.text}</p>
+                </li>
+              );
+            })}
+          </ol>
+
+          <div className="rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+              {inhalt.name}
+            </div>
+            <div className="mt-4 text-5xl font-black tracking-tight text-neutral-900">
+              {inhalt.preis}
+            </div>
+            <p className="mt-2 text-sm text-neutral-500">{inhalt.preisHinweis}</p>
+            <ul className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
+              {inhalt.punkte.map((punkt) => (
+                <li key={punkt} className="flex gap-2">
+                  <span className="font-bold text-accent-600">✓</span>
+                  <span>{punkt}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
+              {inhalt.danach}
+            </p>
+            <Button href={STARTERPAKET_URL} className="mt-6 w-full">
+              {inhalt.cta}
+            </Button>
+            <div className="mt-4 text-center">
+              <ArrowLink href="/mediator-finden#verzeichnis" className="text-sm">
+                {inhalt.ctaProfile}
+              </ArrowLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

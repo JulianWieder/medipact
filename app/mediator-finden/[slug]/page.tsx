@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NextLink from "next/link";
-import { Button } from "@/app/components/ui/Button";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
 import { pageMetadata } from "@/lib/seo";
-import { KENNENLERN_ANZAHL, KENNENLERN_MINUTEN } from "@/lib/mediatorVermittlung";
+import { KENNENLERN_ANZAHL, KENNENLERN_MINUTEN, STARTPAKET_DANACH, STARTPAKET_NAME } from "@/lib/mediatorVermittlung";
+import { ProfilAuswahl } from "../MerkenButton";
 import {
   bereichLabel,
   fotoUrl,
   ladeMediator,
   stundensatzLabel,
-  vorgespraechUrl,
 } from "@/lib/mediatoren";
 
 // Profilseite einer Mediatorin aus dem Verzeichnis (lib/mediatoren.ts).
@@ -81,13 +80,11 @@ export default async function MediatorProfil({ params }: Props) {
                   </Zeile>
                   {m.sprachen.length > 0 && <Zeile label="Sprachen">{m.sprachen.join(", ")}</Zeile>}
                   {satz && <Zeile label="Honorar">{satz}</Zeile>}
-                  <Zeile label="Kennenlernen">{KENNENLERN_MINUTEN} Min., im Startpaket</Zeile>
+                  <Zeile label="Kennenlernen">{KENNENLERN_MINUTEN} Min., im Starterpaket</Zeile>
                 </dl>
-                <Button href={vorgespraechUrl(m.slug)} className="mt-6 w-full">
-                  Kennenlernen buchen
-                </Button>
+                <ProfilAuswahl slug={m.slug} />
                 <p className="mt-3 text-xs leading-5 text-neutral-500">
-                  {`Mit dem Startpaket: Einleitung und bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche – auch mit weiteren Mediator:innen aus dem Verzeichnis.`}
+                  {`${STARTPAKET_NAME}: Themen und Interessen digital mit beiden Seiten, dann bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche – auch mit weiteren Mediator:innen.`}
                 </p>
               </div>
             </div>
@@ -120,10 +117,12 @@ export default async function MediatorProfil({ params }: Props) {
               <div className="mt-12 rounded-3xl bg-neutral-50 p-6 text-neutral-700">
                 <h2 className="heading-3">So geht es weiter</h2>
                 <ol className="mt-4 list-decimal space-y-2 pl-5">
-                  <li>Startpaket buchen und in der Einleitung kurz schildern, worum es geht.</li>
+                  <li>Starterpaket buchen, die andere Seite einladen und gemeinsam die Einleitung machen.</li>
+                  <li>Themen und Interessen digital herausarbeiten – jede Seite in ihrem Tempo.</li>
                   <li>{`${KENNENLERN_MINUTEN} Minuten kennenlernen – mit ${m.anzeigename} und bis zu ${KENNENLERN_ANZAHL - 1} weiteren, wenn Sie vergleichen möchten.`}</li>
-                  <li>Entscheiden, die andere Seite einladen, und die Mediation beginnt.</li>
+                  <li>Übergabe an die Person Ihrer Wahl.</li>
                 </ol>
+                <p className="mt-4 text-sm">{STARTPAKET_DANACH}</p>
                 <p className="mt-4 text-sm">
                   Lieber online ohne feste Termine?{" "}
                   <NextLink href="/methode" className="font-semibold text-accent-700 hover:underline">

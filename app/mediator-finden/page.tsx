@@ -6,6 +6,12 @@ import gespraechPhoto from "@/fotos/medi_gespraech.jpg";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
 import { ladeMediatoren } from "@/lib/mediatoren";
+import {
+  KENNENLERN_ANZAHL,
+  KENNENLERN_MINUTEN,
+  STARTPAKET_NAME,
+  STARTPAKET_PREIS_EUR,
+} from "@/lib/mediatorVermittlung";
 import { MediatorenVerzeichnis } from "./MediatorenVerzeichnis";
 
 // Zusatzbaustein neben dem Online-Verfahren (siehe Kopf von
@@ -16,12 +22,12 @@ import { MediatorenVerzeichnis } from "./MediatorenVerzeichnis";
 export const metadata: Metadata = pageMetadata({
   title: "Mediator finden: persönliche Mediation vermittelt | medipact",
   description:
-    "Geprüfte Mediator:innen für Trennung, Erbe, Nachbarschaft und Team, vor Ort oder per Video. Bis zu 3 kennenlernen, dann entscheiden.",
+    "Geprüfte Mediator:innen für Trennung, Erbe, Nachbarschaft und Team. Vormerken, Fall digital vorbereiten, bis zu 3 kennenlernen. 189 € pro Fall.",
   path: "/mediator-finden",
 });
 
-// Kein Offer mit Preis: Der Festpreis des Startpakets ist noch nicht
-// entschieden (STARTPAKET_PREIS). Sobald er steht, hier ein Offer ergänzen.
+// Offer = das Starterpaket; Preis aus lib/mediatorVermittlung.ts, dieselbe
+// Zahl wie auf /preise.
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
@@ -35,6 +41,14 @@ const serviceSchema = {
   areaServed: { "@type": "Country", name: "Germany" },
   availableLanguage: "German",
   url: "https://medipact.de/mediator-finden",
+  offers: {
+    "@type": "Offer",
+    name: STARTPAKET_NAME,
+    priceCurrency: "EUR",
+    price: STARTPAKET_PREIS_EUR,
+    description: `Fall digital vorbereiten, bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten, Übergabe an die gewählte Mediatorin – einmal pro Fall`,
+    url: "https://medipact.de/preise#starterpaket",
+  },
 };
 
 const faqSchema = {

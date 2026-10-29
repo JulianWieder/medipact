@@ -464,7 +464,43 @@
     ],
     "processLink": "How medipact works",
     "processLinkEinigung": "Why this works at a fixed price",
-    "processLinkPersoenlich": "Prefer in person? Get matched with a mediator",
+    "processLinkPersoenlich": "Prefer a mediator? Start digitally, continue in person",
+    "starter": {
+      "eyebrow": "Start digitally, continue in person",
+      "title": "Sort things out together first.",
+      "titleHighlight": "Then continue with the mediator you choose.",
+      "text": "You and the other side work out digitally what the conflict is about and what really matters to you – each at your own pace, no appointment needed. Then you meet mediators and hand over to the one who suits you. They don't start from scratch.",
+      "phasen": [
+        {
+          "title": "Introduction",
+          "text": "Clarify your concern, the process and confidentiality. You invite the other side – they are involved from the start."
+        },
+        {
+          "title": "Collect the issues",
+          "text": "Both sides note separately what needs to be resolved. Clear questions guide you, each at your own pace."
+        },
+        {
+          "title": "Work out interests",
+          "text": "What lies behind the positions? Needs, worries and what really counts – set side by side for both parties."
+        },
+        {
+          "title": "Handover to your mediator",
+          "text": "Up to 3 introductory calls of 20 minutes each. The person you choose takes over with everything you have prepared."
+        }
+      ],
+      "name": "Digital starter package",
+      "preis": "€189",
+      "preisHinweis": "Once per case, paid online in advance",
+      "punkte": [
+        "Introduction, issues and interests online – with both sides",
+        "Up to 3 introductory calls of 20 minutes with mediators of your choice",
+        "Shortlist from vetted profiles plus offers from suitable mediators",
+        "Handover of your results to the mediator you choose"
+      ],
+      "danach": "Afterwards you decide: continue with your mediator via medipact at the hourly rate shown in their profile – or pause at this point. Further costs only arise if you continue.",
+      "cta": "Book the starter package",
+      "ctaProfile": "Browse and shortlist mediators"
+    },
     "trustText": "Confidential, GDPR-compliant and with human mediation as a fallback –",
     "trustLink": "learn more about medipact",
     "ctaBadge": "The first step",

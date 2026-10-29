@@ -11,7 +11,7 @@
  * die Seiten bleiben erreichbar und zeigen den Weg über die Anfrage.
  */
 
-import { REGISTRIEREN_URL, nutzerbereichUrl } from "@/lib/nutzerbereich";
+import { nutzerbereichUrl } from "@/lib/nutzerbereich";
 
 export interface Mediator {
   slug: string;
@@ -53,15 +53,6 @@ export function stundensatzLabel(cent: number | null): string | null {
 /** Bild über den eigenen Proxy (app/api/mediatoren/foto) – kerno ist von außen nicht erreichbar. */
 export function fotoUrl(m: Mediator): string | null {
   return m.hat_foto ? `/api/mediatoren/foto/${encodeURIComponent(m.slug)}` : null;
-}
-
-/**
- * Kennenlernen mit genau dieser Person buchen (Startpaket). Registrierung bzw. Login,
- * dann die Anfrage in kerno – `wunsch` trägt die Wahl dorthin.
- */
-export function vorgespraechUrl(slug: string): string {
-  const ziel = `/dashboard/anfragen?wunsch=${encodeURIComponent(slug)}`;
-  return `${REGISTRIEREN_URL}?callbackUrl=${encodeURIComponent(ziel)}`;
 }
 
 export function kernoZugang(): { basis: string; headers: Record<string, string> } | null {
