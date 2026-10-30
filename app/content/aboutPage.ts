@@ -56,6 +56,40 @@ export const aboutVision = {
   ],
 };
 
+// Grundhaltung V-A-N-K (Text von Julian, 30.10.2026). Die Begriffe decken
+// sich mit dem Mediationsgesetz: Verschwiegenheit § 4, Allparteilichkeit
+// § 2 Abs. 3 ("allen Parteien gleichermaßen verpflichtet"), Neutralität und
+// fehlende Entscheidungsbefugnis § 1, Ausbildung § 5. Wer hier etwas
+// ändert, prüft die Aussage gegen das Gesetz.
+export const aboutGrundsaetze = {
+  eyebrow: "Unsere Grundhaltung",
+  title: "V-A-N-K: vier Prinzipien,",
+  titleHighlight: "auf denen jede Mediation steht.",
+  text: "Das Akronym fasst die wichtigsten Grundhaltungen der Mediation zusammen. Sie gelten bei medipact für jeden Fall, online wie persönlich.",
+  items: [
+    {
+      letter: "V",
+      title: "Verschwiegenheit",
+      text: "Die Mediatorin oder der Mediator ist zur Verschwiegenheit über alles verpflichtet, was im Rahmen der Mediation anvertraut wird. Das schafft den geschützten Raum, den beide Seiten für eine offene und konstruktive Lösungsfindung brauchen.",
+    },
+    {
+      letter: "A",
+      title: "Allparteilichkeit",
+      text: "Anders als bei einer einseitigen Interessenvertretung unterstützt die vermittelnde Person alle Beteiligten gleichermaßen. Sie ergreift für keine Seite Partei, bringt aber jeder Seite dieselbe Empathie, Aufmerksamkeit und Unterstützung entgegen.",
+    },
+    {
+      letter: "N",
+      title: "Neutralität",
+      text: "Die Moderation ist ergebnisoffen und frei von eigenen Interessen, Wertungen oder Vorurteilen zu Inhalt und Ausgang des Konflikts. Die Verantwortung für die inhaltliche Lösung liegt allein bei den Beteiligten.",
+    },
+    {
+      letter: "K",
+      title: "Kompetenz",
+      text: "Wer die Mediation leitet, verfügt über das fachliche, methodische und kommunikative Handwerkszeug, um den strukturierten Prozess professionell und zielgerichtet zu führen.",
+    },
+  ],
+};
+
 export const aboutPageContent = {
   eyebrow: "Über medipact",
   title: "Eine Klärung sollte nicht daran scheitern,",

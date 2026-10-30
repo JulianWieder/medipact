@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
-import { aboutPageContent, aboutVision } from "@/app/content/aboutPage";
+import { aboutGrundsaetze, aboutPageContent, aboutVision } from "@/app/content/aboutPage";
 import { AboutVisionSection } from "@/app/components/AboutVisionSection";
+import { AboutGrundsaetzeSection } from "@/app/components/AboutGrundsaetzeSection";
 import { FounderSection } from "@/app/components/FounderSection";
 import { JsonLd } from "@/app/components/JsonLd";
 import aboutPhoto from "@/fotos/medi_about.jpg";
@@ -67,7 +68,12 @@ export default function AboutPage() {
           alt: "medipact – strukturierte Online-Mediation für private und geschäftliche Konflikte",
         }}
         breadcrumbs={[{ label: "Über medipact" }]}
-        afterHero={<AboutVisionSection vision={aboutVision} />}
+        afterHero={
+          <>
+            <AboutVisionSection vision={aboutVision} />
+            <AboutGrundsaetzeSection grundsaetze={aboutGrundsaetze} />
+          </>
+        }
       />
       <FounderSection />
     </>
