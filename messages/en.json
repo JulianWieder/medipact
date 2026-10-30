@@ -91,12 +91,12 @@
       "description": "Resolve your conflict online: a structured six-step mediation process, supported by certified mediators. Open your case for free."
     },
     "hero": {
-      "badge": "Guided online mediation – process, AI case analysis, certified mediators",
+      "badge": "Guided online mediation – process, case analysis, certified mediators",
       "tagline": "You decide. Not the court. Not the escalation.",
       "titleLine1": "Every conflict",
       "titleLine2": "has a way out.",
-      "subline": "Guided online mediation: a structured process, AI-supported case analysis, certified mediators.",
-      "intro": "Resolve your conflict step by step in a digital workspace: medipact combines AI-supported case analysis with support from experienced, certified mediators – six clear steps, entirely online, ending in an agreement that both sides can stand behind and that is documented in a legally binding form. For separation, neighbour disputes, inheritance and conflicts at work.",
+      "subline": "Guided online mediation: a structured process, an initial case analysis, certified mediators.",
+      "intro": "Resolve your conflict step by step in a digital workspace: medipact combines a structured case analysis with support from experienced, certified mediators – six clear steps, entirely online, ending in an agreement that both sides can stand behind and that is documented in a legally binding form. For separation, neighbour disputes, inheritance and conflicts at work.",
       "ctaPrimary": "Open your case for free",
       "ctaSecondary": "How it works",
       "ctaStarter": "Not sure yet? Meet mediators first – starter package",
@@ -449,6 +449,27 @@
     "processEyebrow": "How it works",
     "processTitle": "6 clear steps towards a possible agreement.",
     "processText": "Guided rather than left on your own, based on the Harvard principle – fair to all sides.",
+    "einstieg": {
+      "eyebrow": "How to start",
+      "title": "First understand the case, then choose the path.",
+      "text": "Every case starts the same way: with an initial case analysis. If you first want to experience how mediation works and find the right mediator, take the starter package. Afterwards you decide how to continue.",
+      "steps": [
+        {
+          "title": "Initial case analysis",
+          "text": "Your case is prepared using the same framework as every other. The analysis is included in the price, in the online process as well as in the starter package, and goes to your mediator if you hand over."
+        },
+        {
+          "title": "Starter package (optional)",
+          "text": "Understand mediation, meet several mediators and assess whether a solution is possible. No agreement is reached at this stage."
+        },
+        {
+          "title": "Choose your path",
+          "text": "The online process at a fixed price, personal mediation through medipact or directly with your mediator – or you pause. Further costs only arise if you continue."
+        }
+      ],
+      "linkStarter": "To the starter package",
+      "linkPreise": "See all prices"
+    },
     "processSteps": [
       {
         "title": "Describe the conflict",
@@ -479,6 +500,10 @@
         {
           "title": "Meet different mediators",
           "text": "Up to 3 introductory calls of 20 minutes each – with profiles you shortlisted or mediators who respond to your case. You compare, and only then decide who to continue with."
+        },
+        {
+          "title": "Assess whether a solution is possible",
+          "text": "The facts you clarify together and the first exercises on issues and interests show whether a solution is within reach between you. No agreement is reached within the starter package – you work that out afterwards, on the path you choose."
         }
       ],
       "phasen": [
@@ -506,7 +531,8 @@
         "Introduction, issues and interests online – with both sides",
         "Up to 3 introductory calls of 20 minutes with mediators of your choice",
         "Shortlist from vetted profiles plus offers from suitable mediators",
-        "Handover of your results to the mediator you choose – only with both sides' consent"
+        "Handover of your results to the mediator you choose – only with both sides' consent",
+        "An assessment of whether a solution is within reach – reaching an agreement is not part of the package"
       ],
       "danach": "Afterwards you decide: continue via medipact, with sessions at the hourly rate shown in the profile split between you – or directly with your mediator, who bills you directly and receives only your results from us. Or you pause. Further costs only arise if you continue.",
       "cta": "Book the starter package",

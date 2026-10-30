@@ -1,204 +1,195 @@
 // app/content/trennungPage.en.ts
 //
-// TODO(translation): this is a structural placeholder, not a translation.
-// All strings still mirror trennungPage.de.ts word-for-word. Swap the
-// German text for English copy whenever translation work is scheduled —
-// the shape must stay identical to trennungPage.de.ts.
+// English content for /en/scheidungsmediation (translated 30.10.2026 from
+// trennungPage.de.ts). The shape must stay identical to trennungPage.de.ts
+// so MarketingPageTemplate never needs to change. When the German copy
+// changes, update this file in the same commit.
+//
+// Ratgeber articles and the cost calculator exist in German only — links to
+// them say so in the label instead of pretending to be English pages.
+// German legal terms (Familiengericht, § 114 FamFG, Versorgungsausgleich)
+// are translated but keep the statute reference, because the service only
+// covers divorces under German law.
 
-import { trennungFacts } from "@/app/components/ui/DidYouKnowSection";
+import { trennungFactsEn } from "@/app/components/ui/DidYouKnowSection";
 
 export const trennungPageContent = {
-  eyebrow: "Trennung & Unterhalt",
+  eyebrow: "Separation & maintenance",
 
-  // Parallel zu trennungPage.de.ts gehalten (siehe Kommentar dort). Die
-  // EN-Variante wird bewusst nicht indexiert, die Struktur muss aber
-  // identisch bleiben, damit MarketingPageTemplate unverändert bleibt.
-  title: "Scheidungsmediation online.",
+  title: "Divorce mediation online.",
   titleHighlight:
-    "Wenn die Beziehung endet, beginnen die offenen Fragen. Klärt sie fair – statt vor Gericht.",
+    "When a relationship ends, the open questions begin. Settle them fairly – instead of in court.",
 
   intro:
-    "Trennung und Scheidung bedeuten nicht nur emotionale Belastung, sondern auch konkrete Entscheidungen: Unterhalt, Betreuung, Finanzen. Genau dafür ist Scheidungsmediation da – ein strukturiertes Verfahren, das beide Seiten zu einer tragfähigen Regelung führt, auch wenn die Vorstellungen weit auseinanderliegen.",
+    "Separation and divorce are not only emotionally draining, they also call for concrete decisions: maintenance, childcare, finances. That is exactly what divorce mediation is for – a structured process that leads both sides to a workable arrangement, even when their ideas are far apart.",
 
   primaryCta: {
-    label: "Konflikt einschätzen",
+    label: "Assess your conflict",
     href: "#cta",
   },
 
   secondaryCta: {
-    label: "Zur Übersicht",
+    label: "Back to overview",
     href: "/konflikte",
   },
 
-  featuresTitle: "Typische Herausforderungen",
+  featuresTitle: "Typical challenges",
   featuresIntro:
-    "Diese Punkte führen häufig dazu, dass Konflikte eskalieren oder festfahren.",
+    "These are the points that most often make conflicts escalate or get stuck.",
 
   features: [
     {
-      title: "Unterschiedliche Vorstellungen",
-      text: "Beide Seiten haben klare Erwartungen – aber keine gemeinsame Basis, wie eine faire Lösung aussehen kann.",
+      title: "Different expectations",
+      text: "Both sides have clear expectations – but no shared basis for what a fair solution could look like.",
     },
     {
-      title: "Emotionen blockieren Gespräche",
-      text: "Verletzungen und Enttäuschung machen es schwer, sachlich über Unterhalt oder Betreuung zu sprechen.",
+      title: "Emotions block the conversation",
+      text: "Hurt and disappointment make it hard to talk calmly about maintenance or childcare.",
     },
     {
-      title: "Druck durch Zeit und Geld",
-      text: "Finanzielle Unsicherheit und schnelle Entscheidungen erhöhen den Konfliktdruck zusätzlich.",
+      title: "Pressure from time and money",
+      text: "Financial uncertainty and decisions made in a hurry add even more pressure to the conflict.",
     },
     {
-      title: "Die Kinder geraten zwischen die Fronten",
-      text: "Betreuungszeiten werden zum Verhandlungspfand, Absprachen kippen kurzfristig. Kinder merken das sofort – und richten ihr Verhalten danach aus, was gerade weniger Ärger macht.",
+      title: "The children end up in the middle",
+      text: "Childcare time becomes a bargaining chip, arrangements fall through at short notice. Children notice immediately – and adapt their behaviour to whatever causes the least trouble.",
     },
     {
-      title: "Niemand hat den vollständigen Überblick",
-      text: "Konten, Versicherungen, Altersvorsorge, Kredite: Oft hat sich eine Seite jahrelang darum gekümmert. Ohne gemeinsame Zahlenbasis wird jede Diskussion über Fairness zum Misstrauensgespräch.",
+      title: "Nobody has the full picture",
+      text: "Accounts, insurance, pensions, loans: often one side has handled all of it for years. Without a shared set of figures, every discussion about fairness turns into a conversation about mistrust.",
     },
     {
-      title: "Jeder Schritt schafft Fakten",
-      text: "Wer auszieht, wer das Konto trennt, wer zuerst zum Anwalt geht – vieles davon lässt sich später nur schwer korrigieren. Genau deshalb lohnt eine Klärung, bevor die ersten Entscheidungen fallen.",
+      title: "Every step creates facts",
+      text: "Who moves out, who splits the account, who goes to a lawyer first – much of this is hard to undo later. That is exactly why it pays to settle things before the first decisions are made.",
     },
   ],
 
-  // Vertiefungs-Abschnitt zur Ziel-Suchphrase "Scheidungsmediation".
-  //
-  // Grund: Die Seite hatte rund 530 Wörter eigenen Text — praktisch nur das
-  // Template-Skelett, das wortgleich auch auf erbschaft, nachbarschaft und
-  // verbraucher steht. Sie rankte deshalb unterhalb der Sichtbarkeit (0
-  // Impressionen in GSC über 3 Monate), obwohl technisch alles stimmte.
-  //
-  // Bewusst KEINE eigene URL: /scheidungsmediation soll die Verfahrensspur
-  // besitzen ("was ist Scheidungsmediation, was wird darin geregelt"). Die
-  // inhaltlichen Einzelfragen — Haus, Unterhaltshöhe, Trennungsjahr,
-  // Sorgerecht — gehören weiter den Ratgeber-Artikeln und werden hier nur
-  // verlinkt, nicht wiederholt. Sonst kannibalisieren sich die neun
-  // Trennungs-Artikel und diese Seite gegenseitig.
   deepDive: {
-    eyebrow: "Scheidungsmediation im Detail",
-    title: "Scheidungsmediation: Was darin geregelt wird – und was nicht",
+    eyebrow: "Divorce mediation in detail",
+    title: "Divorce mediation: what it settles – and what it doesn't",
     intro:
-      "Scheidungsmediation ist kein Paartherapie-Ersatz und keine Rechtsberatung. Sie ist das Verfahren, in dem Sie die Folgen einer Trennung selbst regeln, statt sie regeln zu lassen. Am Ende steht eine Scheidungsfolgenvereinbarung – ein Dokument, das beim Familiengericht die Arbeit macht, die sonst zwei Anwälte streitig verhandeln. Diese sechs Themen kommen dabei fast immer auf den Tisch.",
+      "Divorce mediation is not a substitute for couples therapy and not legal advice. It is the process in which you settle the consequences of a separation yourselves instead of having them settled for you. The result is a divorce settlement agreement – a document that does the work at the family court that two lawyers would otherwise negotiate in dispute. These six topics come up almost every time.",
     items: [
       {
-        title: "Kindes- und Ehegattenunterhalt",
-        text: "Die Höhe folgt Tabellen und Einkommen – darüber lässt sich wenig verhandeln. Verhandelbar ist alles drumherum: Wie wird mit Sonderbedarf umgegangen, was passiert bei Jobwechsel oder Krankheit, wann wird neu gerechnet. Genau diese Punkte fehlen in gerichtlichen Titeln meistens und führen später zurück vor Gericht.",
+        title: "Child and spousal maintenance",
+        text: "The amount follows tables and income – there is little to negotiate there. Everything around it is negotiable: how special needs are handled, what happens after a job change or illness, when the figures are recalculated. These are exactly the points court orders usually leave out, and they lead back to court later.",
       },
       {
-        title: "Betreuung und Umgang",
-        text: "Residenz-, Wechsel- oder Nestmodell ist keine Rechtsfrage, sondern eine Alltagsfrage: Arbeitszeiten, Schulweg, Ferien, Krankheitstage. In der Mediation entsteht ein konkreter Betreuungsplan statt einer abstrakten Umgangsregelung – inklusive der Frage, wie Sie künftig miteinander kommunizieren.",
+        title: "Childcare and contact",
+        text: "Residence, alternating or nest model is not a legal question but an everyday one: working hours, the way to school, holidays, sick days. Mediation produces a concrete parenting plan instead of an abstract contact arrangement – including how you will communicate with each other in future.",
       },
       {
-        title: "Die gemeinsame Immobilie",
-        text: "Verkaufen, übernehmen, vermieten oder halten bis die Kinder aus dem Haus sind: Jede Variante hat steuerliche und finanzielle Folgen, die sich rechnen lassen. Die Mediation legt die Optionen nebeneinander, statt dass jede Seite nur ihre eigene durchsetzen will.",
+        title: "The shared home",
+        text: "Sell, take over, rent out or keep it until the children have left: each option has tax and financial consequences that can be calculated. Mediation puts the options side by side instead of each side pushing only its own.",
       },
       {
-        title: "Zugewinn und Altersvorsorge",
-        text: "Der Versorgungsausgleich läuft grundsätzlich über das Gericht, der Zugewinn nicht. Beides hängt an einer vollständigen Vermögensaufstellung – und genau daran scheitern streitige Verfahren am häufigsten, weil Auskunft erzwungen statt gegeben wird.",
+        title: "Accrued gains and pensions",
+        text: "The pension rights adjustment (Versorgungsausgleich) generally goes through the court; the equalisation of accrued gains does not. Both depend on a complete statement of assets – and that is exactly where contested proceedings fail most often, because disclosure is forced rather than given.",
       },
       {
-        title: "Schulden und laufende Verträge",
-        text: "Gemeinsame Kredite, Leasing, Versicherungen, Handyverträge: Die Bank interessiert die Trennung nicht, beide bleiben in der Haftung. Wer welche Verbindlichkeit übernimmt und wie die andere Seite abgesichert wird, gehört in die Vereinbarung – nicht in eine mündliche Absprache.",
+        title: "Debts and ongoing contracts",
+        text: "Joint loans, leasing, insurance, phone contracts: the bank does not care about the separation, both remain liable. Who takes over which liability and how the other side is protected belongs in the agreement – not in a verbal arrangement.",
       },
       {
-        title: "Wie Sie künftig miteinander umgehen",
-        text: "Der am meisten unterschätzte Punkt. Wenn Kinder da sind, endet die Beziehung nicht mit der Scheidung, sie ändert nur ihre Form. Vereinbarungen darüber, wie und worüber kommuniziert wird, verhindern mehr Folgestreit als jede Unterhaltsklausel.",
+        title: "How you will deal with each other in future",
+        text: "The most underestimated point. When there are children, the relationship does not end with the divorce, it only changes its form. Agreements on how and about what you communicate prevent more follow-up disputes than any maintenance clause.",
       },
     ],
-    bulletsTitle: "Wann Scheidungsmediation der bessere erste Schritt ist",
+    bulletsTitle: "When divorce mediation is the better first step",
     bullets: [
-      "Sie wollen sich trennen, aber nicht jahrelang streiten – und beide wissen das.",
-      "Es gibt Kinder, und Sie werden sich zwangsläufig weiter begegnen.",
-      "Eine Immobilie, ein Unternehmen oder Altersvorsorge steht im Raum.",
-      "Sie wollen wissen, was Sie das kostet, bevor Sie loslaufen.",
-      "Beide Seiten sind bereit, ihre Zahlen offenzulegen.",
-      "Sie suchen eine Regelung, die auch in fünf Jahren noch trägt.",
+      "You want to separate, but not to fight for years – and you both know it.",
+      "There are children, and you will inevitably keep meeting.",
+      "A property, a business or pension savings are at stake.",
+      "You want to know what it will cost before you start.",
+      "Both sides are willing to disclose their figures.",
+      "You are looking for an arrangement that will still work in five years.",
     ],
     note:
-      "Wichtig und oft missverstanden: Mediation ersetzt die Scheidung nicht. Eine Ehe wird in Deutschland ausschließlich durch das Familiengericht geschieden, und für den Antrag ist mindestens ein Anwalt zwingend (§ 114 FamFG). Was die Mediation ersetzt, ist der Streit über die Folgen – und damit den zweiten Anwalt und die Verfahrensdauer. Gespart wird also nicht das Gericht, sondern die Eskalation. Was das konkret bedeutet, rechnet der Kostenrechner weiter unten für Ihre Zahlen aus.",
+      "Important and often misunderstood: mediation does not replace the divorce. In Germany, a marriage can only be dissolved by the family court, and at least one lawyer is mandatory for the petition (§ 114 FamFG). What mediation replaces is the dispute over the consequences – and with it the second lawyer and the length of the proceedings. What you save is not the court, but the escalation. The cost calculator below works out what that means for your figures.",
     links: [
-      { label: "Ratgeber: Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
-      { label: "Ratgeber: Scheidung mit Mediator – Kosten", href: "/ratgeber/scheidung-mediator-kosten" },
-      { label: "Ratgeber: Trennungsjahr nachweisen", href: "/ratgeber/trennungsjahr-nachweisen" },
-      { label: "Ratgeber: Vermögen aufteilen bei Scheidung", href: "/ratgeber/vermoegensauseinandersetzung" },
-      { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner?art=trennung" },
+      { label: "Guide: The 5 phases of mediation (in German)", href: "/ratgeber/5-phasen-der-mediation" },
+      { label: "Guide: Divorce with a mediator – costs (in German)", href: "/ratgeber/scheidung-mediator-kosten" },
+      { label: "Guide: Proving the separation year (in German)", href: "/ratgeber/trennungsjahr-nachweisen" },
+      { label: "Guide: Dividing assets in a divorce (in German)", href: "/ratgeber/vermoegensauseinandersetzung" },
+      { label: "Guide: Separating from a narcissist (in German)", href: "/ratgeber/trennung-von-einem-narzissten" },
+      { label: "Cost calculator: court or mediation? (in German)", href: "/kostenrechner?art=trennung" },
     ],
   },
 
-  processTitle: "Wie medipact unterstützt",
+  processTitle: "How medipact helps",
   process: [
     {
-      title: "Situation klären",
-      text: "Du strukturierst gemeinsam, welche Themen wirklich geklärt werden müssen – sachlich und emotional.",
+      title: "Clarify the situation",
+      text: "Together you work out which topics really need to be settled – factually and emotionally.",
     },
     {
-      title: "Gespräch ermöglichen",
-      text: "Ein klarer Rahmen hilft, wieder miteinander zu sprechen – ohne Eskalation.",
+      title: "Make conversation possible",
+      text: "A clear framework helps you talk to each other again – without escalation.",
     },
     {
-      title: "Lösung entwickeln",
-      text: "Am Ende steht eine faire, tragfähige Grundlage für Vereinbarungen.",
+      title: "Develop a solution",
+      text: "The result is a fair, workable basis for your agreements.",
     },
   ],
 
-  trustTitle: "Warum dieser Weg sinnvoll ist",
+  trustTitle: "Why this path makes sense",
   trustPoints: [
     {
-      title: "Außergerichtlich",
-      text: "Konflikte können oft schneller und kostengünstiger gelöst werden als vor Gericht.",
+      title: "Out of court",
+      text: "Conflicts can often be resolved faster and at lower cost than in court.",
     },
     {
-      title: "Selbstbestimmt",
-      text: "Die Lösung wird nicht vorgegeben, sondern gemeinsam entwickelt.",
+      title: "Self-determined",
+      text: "The solution is not imposed, it is developed together.",
     },
     {
-      title: "Nachhaltig",
-      text: "Vereinbarungen halten besser, weil beide Seiten dahinterstehen.",
+      title: "Lasting",
+      text: "Agreements hold better because both sides stand behind them.",
     },
   ],
 
-  didYouKnowFacts: trennungFacts,
+  didYouKnowFacts: trennungFactsEn,
 
-  faqTitle: "Häufige Fragen zur Trennungs- und Scheidungsmediation",
+  faqTitle: "Frequently asked questions about separation and divorce mediation",
   faqs: [
     {
-      question: "Was kostet eine Mediation bei Trennung und Scheidung?",
+      question: "What does mediation for separation and divorce cost?",
       answer:
-        "Bei medipact kostet die Trennungsmediation pauschal 299 € pro Partei bei einer einvernehmlichen Scheidung, 399 € pro Partei im reinen Online-Verfahren, 499 € in der Hybrid-Variante mit Video-Terminen und 899 € im Vollservice. Der Preis ist unabhängig davon, wie viele Themen Sie klären – es gibt keine Stundenabrechnung, die mit jeder Eskalation teurer wird. Details im Kostenüberblick.",
+        "At medipact, separation mediation costs a flat €299 per party for an uncontested divorce, €399 per party for the purely online process, €499 for the hybrid option with video sessions and €899 for the full service. The price does not depend on how many topics you settle – there is no hourly billing that gets more expensive with every escalation. Details in the price overview.",
     },
     {
-      question: "Ersetzt die Mediation Anwalt und Gericht?",
+      question: "Does mediation replace lawyers and the court?",
       answer:
-        "Nein. Geschieden wird in Deutschland ausschließlich durch das Familiengericht, und dafür ist anwaltliche Vertretung erforderlich. Die Mediation klärt die Folgen – Unterhalt, Betreuung, Vermögen, Wohnung – und hält sie in einer Vereinbarung fest, die notariell beurkundet werden kann. Das Gerichtsverfahren wird dadurch deutlich kürzer und günstiger, entfällt aber nicht.",
+        "No. In Germany, divorces are granted exclusively by the family court, and legal representation is required for that. Mediation settles the consequences – maintenance, childcare, assets, the home – and records them in an agreement that can be notarised. The court proceedings become much shorter and cheaper as a result, but they do not disappear.",
     },
     {
-      question: "Ist die Vereinbarung rechtlich bindend?",
+      question: "Is the agreement legally binding?",
       answer:
-        "Die Abschlussvereinbarung ist ein bindender Vertrag. Für bestimmte Regelungen – etwa zum Versorgungsausgleich, zu Immobilien oder zum nachehelichen Unterhalt – ist zusätzlich eine notarielle Beurkundung erforderlich, damit sie wirksam ist. Lassen Sie die Vereinbarung vor der Unterschrift anwaltlich prüfen.",
+        "The final agreement is a binding contract. For certain arrangements – for example on the pension rights adjustment, on property or on post-marital maintenance – notarisation is also required for them to take effect. Have the agreement reviewed by a lawyer before you sign.",
     },
     {
-      question: "Funktioniert Mediation, wenn wir kaum noch miteinander reden können?",
+      question: "Does mediation work if we can hardly talk to each other any more?",
       answer:
-        "Genau dafür ist das Online-Verfahren gemacht. Jede Seite bearbeitet die strukturierte Fallaufnahme zunächst getrennt und schriftlich – Sie müssen sich nicht gegenübersitzen, solange das noch nicht geht. Wer aufschreibt statt im Affekt zu antworten, formuliert überlegter. Erst danach wird zusammengeführt.",
+        "That is exactly what the online process is designed for. Each side first works through the structured case intake separately and in writing – you do not have to sit across from each other as long as that is not possible yet. Writing things down instead of reacting in the heat of the moment leads to more considered wording. Only then are the answers brought together.",
     },
     {
-      question: "Wie gut sind die Erfolgsaussichten?",
+      question: "How good are the chances of success?",
       answer:
-        "Erhebungen von Mediationsverbänden berichten für Familien- und Scheidungsmediation regelmäßig Einigungsquoten um die 80 Prozent. Entscheidend ist die Freiwilligkeit: Wer sich auf eine Mediation einlässt, sucht bereits eine Lösung statt eines Urteils. Selbst entwickelte Regelungen werden zudem seltener nachverhandelt als gerichtlich verfügte.",
+        "Surveys by mediation associations regularly report agreement rates of around 80 percent for family and divorce mediation. What matters is that it is voluntary: anyone who engages in mediation is already looking for a solution rather than a ruling. Arrangements people develop themselves are also renegotiated less often than those imposed by a court.",
     },
     {
-      question: "Wann ist Mediation bei einer Trennung nicht der richtige Weg?",
+      question: "When is mediation not the right path in a separation?",
       answer:
-        "Wenn Gewalt, Drohung oder Stalking Teil der Beziehungsgeschichte sind, wenn eine Seite Angst hat, offen zu sprechen, oder wenn der begründete Verdacht besteht, dass Vermögen verschwiegen wird. In diesen Fällen braucht es einen geschützten rechtlichen Rahmen, keinen gemeinsamen Verhandlungstisch.",
+        "When violence, threats or stalking are part of the relationship's history, when one side is afraid to speak openly, or when there is well-founded suspicion that assets are being concealed. In those cases you need a protected legal framework, not a shared negotiating table.",
     },
   ],
 
-  finalCtaTitle: "Klär die wichtigsten Fragen, bevor es eskaliert.",
+  finalCtaTitle: "Settle the most important questions before things escalate.",
   finalCtaText:
-    "Beschreibe kurz deine Situation und erhalte eine erste Einschätzung, wie du vorgehen kannst.",
+    "Briefly describe your situation and get a first assessment of how you can proceed.",
 
   finalCta: {
-    label: "Jetzt starten",
+    label: "Get started",
     href: "/kontakt",
   },
 };

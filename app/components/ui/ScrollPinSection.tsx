@@ -29,10 +29,12 @@ import { useScroll, type MotionValue } from "framer-motion";
  * future "image/section pins, content fades on scroll" effect (ai.gov-style)
  * instead of re-implementing the useScroll/sticky wiring from scratch.
  *
- * Auf dem Handy (< sm) pinnt der Frame NICHT: der Hero-Text ist dort oft
+ * Auf dem Handy (< sm) und auf niedrigen Fenstern (< 720px Höhe, z.B.
+ * 1366×768-Laptops) pinnt der Frame NICHT: der Hero-Text ist dort oft
  * hoeher als der Viewport, und ein gepinnter Frame mit overflow-hidden
- * schneidet ihn oben/unten ab, ohne dass man hinscrollen kann. Unter `sm`
- * ist die Section deshalb normaler Fluss (min. 100dvh hoch). Scroll-
+ * schneidet ihn oben/unten ab, ohne dass man hinscrollen kann. Dort ist die
+ * Section deshalb normaler Fluss (min. 100dvh hoch). Die Bedingung steckt in
+ * der Tailwind-Variante `pin:` (app/globals.css) und in PIN_MEDIA_QUERY. Scroll-
  * gebundene Fades mit `usePinActive()` an den Pin koppeln, sonst faden
  * auf dem Handy Inhalte weg, waehrend man sie noch liest.
  *
@@ -62,11 +64,14 @@ export function useScrollPin<T extends HTMLElement = HTMLDivElement>(
   return scrollYProgress;
 }
 
-/** true, sobald ScrollPinFrame wirklich pinnt (ab `sm`). SSR/erster Render: false. */
+/** Wann ScrollPinFrame pinnt – identisch mit `@custom-variant pin` in globals.css. */
+export const PIN_MEDIA_QUERY = "(min-width: 640px) and (min-height: 720px)";
+
+/** true, sobald ScrollPinFrame wirklich pinnt (`pin:`). SSR/erster Render: false. */
 export function usePinActive(): boolean {
   const [active, setActive] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 640px)");
+    const mq = window.matchMedia(PIN_MEDIA_QUERY);
     const update = () => setActive(mq.matches);
     update();
     mq.addEventListener("change", update);
@@ -93,10 +98,10 @@ export const ScrollPinFrame = forwardRef<
       // und die Rest-Höhe (heightVh − 100vh) liegt als leerer Streifen unter
       // dem Frame (sichtbar, sobald die Section eine bg-Farbe hat). Das
       // innere sticky-div clippt selbst (overflow-hidden), z.B. den Zoom.
-      className={`relative isolate sm:h-[var(--pin-h)] ${className}`}
+      className={`relative isolate pin:h-[var(--pin-h)] ${className}`}
       style={{ "--pin-h": `${heightVh}vh` } as CSSProperties}
     >
-      <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden sm:sticky sm:top-0 sm:h-screen sm:h-[100dvh] sm:min-h-0">
+      <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden pin:sticky pin:top-0 pin:h-screen pin:h-[100dvh] pin:min-h-0">
         {children}
       </div>
     </section>

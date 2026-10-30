@@ -125,6 +125,30 @@ export const trennungFacts: DidYouKnowFact[] = [
   },
 ];
 
+/** Englische Fassung von `trennungFacts` für /en/scheidungsmediation – gleiche Fakten, gleiche Quellen. */
+export const trennungFactsEn: DidYouKnowFact[] = [
+  {
+    eyebrow: "The separation year is mandatory",
+    text: "For an uncontested divorce, § 1566(1) of the German Civil Code (BGB) requires a full year of separation. That year is the right time to settle maintenance, childcare and finances in a structured way rather than in a dispute.",
+  },
+  {
+    eyebrow: "Most couples agree",
+    text: "According to the Federal Statistical Office, around 129,300 marriages were divorced in Germany in 2024 – in 90% of them, the spouse consented to the divorce petition. Agreement is the rule, not the exception.",
+  },
+  {
+    eyebrow: "Children are often affected",
+    text: "More than half (50.8%) of the marriages divorced in 2024 involved minor children. A factual agreement on childcare and maintenance directly shapes their everyday life.",
+  },
+  {
+    eyebrow: "Long marriages, many open questions",
+    text: "Couples divorced in 2024 had been married for 14 years and 8 months on average – so finances, pension rights and joint property are usually closely intertwined.",
+  },
+  {
+    eyebrow: "Pension rights are split automatically",
+    text: "Under § 1 VersAusglG, the family court divides pension entitlements acquired during the marriage equally between the spouses of its own motion – neither party has to apply for it. Only for marriages of less than three years is it carried out on application alone.",
+  },
+];
+
 export const nachbarschaftFacts: DidYouKnowFact[] = [
   {
     eyebrow: "Lärm ist der Streitgrund Nr. 1",

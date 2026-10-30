@@ -77,6 +77,7 @@ export const STARTPAKET_PUNKTE = [
   `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten mit Mediator:innen Ihrer Wahl`,
   "Vorauswahl aus geprüften Profilen und Angebote passender Mediator:innen",
   "Übergabe der Ergebnisse an die Mediatorin, die Sie wählen – nur mit Zustimmung beider Seiten",
+  "Einschätzung, ob eine Lösung erreichbar ist – eine Einigung gehört noch nicht zum Paket",
 ];
 
 /** Was nach der Übergabe passiert – ein Satz für alle Seiten. */

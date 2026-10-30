@@ -18,23 +18,50 @@
 // des Vertrauens ist. Wer im Streit steckt, will nicht von einem Algorithmus
 // beurteilt werden; die Intelligenz muss aus dem Mechanismus hervorgehen.
 //
-// Alle Preise unten stammen aus backend/app/pricing.py (Stand 10.08.2026) und
-// müssen bei einer Preisänderung dort UND hier nachgezogen werden:
-//   nachbarschaft/verbraucher 49 € per_party · trennung 399 € per_party
-//   (Hybrid 499 €, Vollservice 899 € — nur trennung) · erbschaft 399 € once
-//   · ODR-Familie gestaffelt: odr 1.900 €, b2b 1.200 €, schlichtung und
-//   ecommerce je 399 € (alle once) · Add-ons 79/49/29 € · Logbuch-Premium
-//   14,95 €.
+// Preise (30.10.2026): Die volle Preisliste steht nicht mehr hier, sondern
+// nur auf /preise. Die Kopie vom 10.08.2026 kannte das Starterpaket nicht und
+// war damit schon veraltet. Hier steht nur noch der Einstiegspreis "ab 49 €"
+// (nachbarschaft/verbraucher/mietverhaeltnis in backend/app/pricing.py), das
+// Starterpaket kommt aus lib/mediatorVermittlung.ts.
+//
+// Konfliktarten: sieben, wie auf /konflikte und in MEDIATION_TYPE_LABELS
+// (backend/app/pricing.py) — ohne die Legacy-Typen wg/geschaeft.
 
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { mediationsgesetzFacts } from "@/app/components/ui/DidYouKnowSection";
+import { STARTPAKET_NAME, STARTPAKET_PREIS } from "@/lib/mediatorVermittlung";
+
+// Vision (Julian, 30.10.2026). Bewusst OHNE Zahlen: Eine Einigungsquote
+// steht hier erst, wenn sie aus echten abgeschlossenen Fällen kommt — eine
+// geschätzte Quote auf der Seite über Vertrauen wäre genau das Versprechen
+// ohne Beleg, das der Rest der Seite vermeidet.
+export const aboutVision = {
+  eyebrow: "Unsere Vision",
+  title: "Weniger Gerichtsverfahren.",
+  titleHighlight: "Mehr Einigungen, die halten.",
+  text: "medipact gibt es, damit Konflikte nicht vor Gericht enden müssen. Das Ziel ist eine gute Einigung, mit der beide Seiten weiterleben können, statt eines Urteils, bei dem eine Seite verliert.",
+  points: [
+    {
+      title: "Gerichtsverfahren vermeiden",
+      text: "Ein Gerichtsverfahren dauert meist Monate, kostet viel und belastet die Beziehung zusätzlich. Der erste Schritt in einem Konflikt soll eine Mediation sein, nicht eine Klage.",
+    },
+    {
+      title: "Mediation effizient machen",
+      text: "Was in jedem Fall gleich abläuft, ist standardisiert. So bleibt Mediation bezahlbar und schnell, und die Zeit der Mediatorin fließt in die Punkte, die wirklich Urteilsvermögen brauchen.",
+    },
+    {
+      title: "So viele außergerichtliche Einigungen wie möglich",
+      text: "Wir messen uns an erfolgreichen Fällen: Unser Anspruch ist eine sehr hohe Quote an Einigungen ohne Gericht. Dazu gehört, dass diese Einigungen auch im Alltag halten.",
+    },
+  ],
+};
 
 export const aboutPageContent = {
   eyebrow: "Über medipact",
   title: "Eine Klärung sollte nicht daran scheitern,",
   titleHighlight: "dass sie zu teuer ist.",
   intro:
-    "Die meisten Konflikte, die Menschen jahrelang mit sich herumtragen, sind für einen Anwalt zu klein und für den Küchentisch zu groß. Mediation wäre der richtige Weg — sie kostet aber Stundensätze, weil jede Sitzung von Hand neu aufgebaut wird. medipact ist der Versuch, genau diese Arbeit zu standardisieren: derselbe Ablauf für jeden Fall, dafür ein Preis, der vorher feststeht. Dieser Preis ist allerdings nur der sichtbarste. Ein ungelöster Streit kostet außerdem Monate, in denen nichts entschieden ist, und die Beziehung, die danach noch tragen muss — beides taucht in keiner Rechnung auf und entscheidet trotzdem mit darüber, ob sich der Weg gelohnt hat.",
+    "Die meisten Konflikte, die Menschen jahrelang mit sich herumtragen, sind für einen Anwalt zu klein und für den Küchentisch zu groß. Mediation wäre der richtige Weg — sie kostet aber Stundensätze, weil jede Sitzung von Hand neu aufgebaut wird. medipact standardisiert genau diese Arbeit: derselbe Ablauf für jeden Fall, dafür ein Preis, der vorher feststeht. Wer lieber klassisch mit einer Mediatorin am Tisch sitzt, kann das weiterhin — die persönliche Mediation bleibt offen.",
 
   primaryCta: {
     label: "Kostenlos starten",
@@ -73,7 +100,7 @@ export const aboutPageContent = {
     },
     {
       title: "Der Rechtsweg bleibt offen",
-      text: "Eine Mediation schließt nichts aus und ersetzt nichts, was ein Gericht tun muss: Eine Scheidung bleibt ein gerichtliches Verfahren. Kommt keine Einigung zustande, steht Ihnen jeder andere Weg unverändert offen — dann mit einem dokumentierten Einigungsversuch in der Hand.",
+      text: "Eine Mediation schließt nichts aus und ersetzt nichts, was ein Gericht tun muss: Eine Scheidung bleibt ein gerichtliches Verfahren. Kommt keine Einigung zustande, steht Ihnen jeder andere Weg unverändert offen — eine persönliche Mediation ebenso wie das Gericht, dann mit einem dokumentierten Einigungsversuch in der Hand.",
     },
   ],
 
@@ -84,8 +111,8 @@ export const aboutPageContent = {
       "Angefangen hat es mit einem Ablauf für private Trennungskonflikte. Heute reicht die Plattform vom kostenlosen Mitschreiben eines Streits bis zur Streitbeilegung im Volumen für Unternehmen — mit demselben Verfahren dahinter, weil Konflikte am Küchentisch und im Konferenzraum denselben Mustern folgen.",
     items: [
       {
-        title: "Fünf Konfliktarten",
-        text: "Trennung und Scheidung, Nachbarschaft, Verbraucher- und Handwerkerstreit, Erbe und Familie, Unternehmen und ODR. Jede Art hat eigene Einstiegsfragen und eigene Themenlisten, weil ein Zaunstreit und eine Vermögensaufteilung nicht dieselben ersten Fragen brauchen.",
+        title: "Sieben Konfliktarten",
+        text: "Trennung und Scheidung, Nachbarschaft, Mietverhältnis, Verbraucher- und Handwerkerstreit, Arbeitsplatz, Erbe und Familie, Unternehmen und ODR. Jede Art hat eigene Einstiegsfragen und eigene Themenlisten, weil ein Zaunstreit und eine Vermögensaufteilung nicht dieselben ersten Fragen brauchen.",
       },
       {
         title: "Das Konflikt-Logbuch — kostenlos",
@@ -110,13 +137,10 @@ export const aboutPageContent = {
     ],
     bulletsTitle: "Was das kostet",
     bullets: [
-      "Nachbarschaft sowie Verbraucher- und Handwerkerstreit: 49 € pro Partei.",
-      "Trennung und Scheidung: 399 € pro Partei, mit Begleitung 499 € (Hybrid) oder 899 € (Vollservice).",
-      "Erbstreit: 399 € einmalig für den Fall, nicht pro Kopf.",
-      "Unternehmenskonflikte: 1.900 € bei Gesellschaftern, Nachfolge und Team, 1.200 € beim B2B-Vertragsstreit, 399 € bei Schlichtung und E-Commerce — jeweils einmalig für den Fall.",
-      "Zu den Einstiegstarifen zubuchbar: Videositzung 79 €, geprüfte Abschlussvereinbarung 49 €, Express-Bearbeitung 29 €.",
-      "Konflikt-Logbuch: kostenlos, Premium-Funktionen 14,95 €.",
-      "Fall anlegen und Situation schildern kostet nichts — bezahlt wird erst, wenn das Verfahren startet.",
+      "Online-Verfahren zum Festpreis ab 49 €, je nach Konfliktart. Der Preis steht fest, bevor das Verfahren startet.",
+      `${STARTPAKET_NAME}: ${STARTPAKET_PREIS} pro Fall, geteilt zwischen beiden Seiten.`,
+      "Konflikt-Logbuch, Fall anlegen und Situation schildern: kostenlos.",
+      "Alle Pakete und Preise im Einzelnen stehen auf der Preisseite.",
     ],
     note:
       "medipact ist keine Rechtsberatung und ersetzt keine. Bei rechtlich komplexen Themen — Grundbesitz, Pflichtteil, Gesellschaftsanteilen — sollte eine Vereinbarung zusätzlich anwaltlich oder notariell geprüft werden. Wo das Verfahren an seine Grenze kommt, steht ausdrücklich auf einer eigenen Seite.",

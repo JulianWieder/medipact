@@ -91,12 +91,12 @@
       "description": "Lösen Sie Ihren Konflikt online: strukturiertes Mediationsverfahren in sechs Schritten, begleitet von zertifizierten Mediatorinnen und Mediatoren. Fall kostenlos anlegen."
     },
     "hero": {
-      "badge": "Geführte Online-Mediation – Verfahren, KI-Fallanalyse, zertifizierte Mediatoren",
+      "badge": "Geführte Online-Mediation – Verfahren, Fallanalyse, zertifizierte Mediatoren",
       "tagline": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",
       "titleLine1": "Jeder Konflikt",
       "titleLine2": "hat einen Ausgang.",
-      "subline": "Geführte Online-Mediation: strukturiertes Verfahren, KI-gestützte Fallanalyse, zertifizierte Mediatoren.",
-      "intro": "Lösen Sie Ihren Konflikt strukturiert im digitalen Workspace: medipact verbindet KI-gestützte Fallanalyse mit der Begleitung durch erfahrene, zertifizierte Mediatorinnen und Mediatoren – sechs klare Schritte, direkt online, am Ende eine Vereinbarung, die beide Seiten tragen und die rechtsverbindlich dokumentiert wird. Bei Trennung, Nachbarschaft, Erbe und im Unternehmen.",
+      "subline": "Geführte Online-Mediation: strukturiertes Verfahren, erste Fallanalyse, zertifizierte Mediatoren.",
+      "intro": "Lösen Sie Ihren Konflikt strukturiert im digitalen Workspace: medipact verbindet eine strukturierte Fallanalyse mit der Begleitung durch erfahrene, zertifizierte Mediatorinnen und Mediatoren – sechs klare Schritte, direkt online, am Ende eine Vereinbarung, die beide Seiten tragen und die rechtsverbindlich dokumentiert wird. Bei Trennung, Nachbarschaft, Erbe und im Unternehmen.",
       "ctaPrimary": "Fall kostenlos anlegen",
       "ctaSecondary": "So funktioniert es",
       "ctaStarter": "Noch unsicher? Erst Mediator:innen kennenlernen – Starterpaket",
@@ -330,6 +330,27 @@
     "processEyebrow": "So funktioniert es",
     "processTitle": "In 6 klaren Schritten zur möglichen Einigung.",
     "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
+    "einstieg": {
+      "eyebrow": "So starten Sie",
+      "title": "Erst den Fall verstehen, dann den Weg wählen.",
+      "text": "Jeder Fall beginnt gleich: mit einer ersten Fallanalyse. Wer zuerst erleben will, wie Mediation arbeitet, und die passende Mediatorin sucht, nimmt das Starterpaket. Danach entscheiden Sie, wie es weitergeht.",
+      "steps": [
+        {
+          "title": "Erste Fallanalyse",
+          "text": "Ihr Fall wird nach demselben Schema aufbereitet wie jeder andere. Die Analyse ist im Preis enthalten, im Online-Verfahren wie im Starterpaket, und geht bei einer Übergabe an Ihre Mediatorin mit."
+        },
+        {
+          "title": "Starterpaket (optional)",
+          "text": "Mediation verstehen, mehrere Mediator:innen kennenlernen und einschätzen, ob eine Lösung möglich ist. Eine Einigung entsteht hier noch nicht."
+        },
+        {
+          "title": "Weg wählen",
+          "text": "Online-Verfahren zum Festpreis, persönliche Mediation über medipact oder direkt mit Ihrer Mediatorin – oder Sie pausieren. Weitere Kosten entstehen erst, wenn Sie weitermachen."
+        }
+      ],
+      "linkStarter": "Zum Starterpaket",
+      "linkPreise": "Alle Preise ansehen"
+    },
     "processSteps": [
       {
         "title": "Konflikt schildern",

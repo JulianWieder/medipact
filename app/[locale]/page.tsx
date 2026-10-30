@@ -61,13 +61,16 @@ export async function generateMetadata({
     // den die Seite heute rankt; verloren geht nur "ohne Gericht", das im
     // Ratgeber-Cluster ohnehin mehrfach abgedeckt ist.
     //
-    // Bewusst NICHT im Title/Description: "KI-Fallanalyse". Der Begriff ist ein
+    // Bewusst NICHT im Title/Description: "Fallanalyse". Der Begriff ist ein
     // Analyse-Wort und zieht die Seite genau in die Ecke, aus der wir sie
     // herausholen wollen — Wissen ueber Mediation statt Mediation selbst.
     // Stattdessen tragen ein Handlungsverb ("Konflikt loesen") und die
-    // menschliche Begleitung ("zertifizierte Mediatoren") den Intent. Die
-    // KI-Faehigkeit bleibt im WebApplication-Schema (featureList) stehen, wo
-    // sie als Produktmerkmal gelesen wird und nicht als Themenschwerpunkt.
+    // menschliche Begleitung ("zertifizierte Mediatoren") den Intent.
+    //
+    // Das Wort "KI" faellt seit 30.10.2026 auf der Startseite gar nicht mehr
+    // (Entscheidung Julian, gleiche Linie wie /about): Wer im Streit steckt,
+    // will nicht von einem Algorithmus beurteilt werden. Transparenz ueber die
+    // Technik steht auf /einigung/gleichbehandlung.
     //
     // Text in messages/*.json unter home.meta.
     title: t("title"),
@@ -111,7 +114,7 @@ const serviceSchema = {
   serviceType: "Online-Mediation",
   provider: { "@id": "https://medipact.de/#organization" },
   description:
-    "Strukturiertes Mediationsverfahren in sechs Schritten, das vollständig online durchgeführt wird: KI-gestützte Fallanalyse, gemeinsamer Fall-Workspace und Begleitung durch zertifizierte Mediatorinnen und Mediatoren — bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten.",
+    "Strukturiertes Mediationsverfahren in sechs Schritten, das vollständig online durchgeführt wird: strukturierte Fallanalyse, gemeinsamer Fall-Workspace und Begleitung durch zertifizierte Mediatorinnen und Mediatoren — bei Trennung, Scheidung, Nachbarschaftsstreit, Erbschaft sowie Team- und Organisationskonflikten.",
   areaServed: {
     "@type": "Country",
     name: "Germany",
@@ -161,10 +164,10 @@ const webApplicationSchema = {
   inLanguage: "de",
   provider: { "@id": "https://medipact.de/#organization" },
   description:
-    "Digitaler Workspace für geführte Online-Mediation: KI-gestützte Fallanalyse, strukturiertes Verfahren in sechs Schritten und Begleitung durch zertifizierte Mediatorinnen und Mediatoren.",
+    "Digitaler Workspace für geführte Online-Mediation: strukturierte Fallanalyse, strukturiertes Verfahren in sechs Schritten und Begleitung durch zertifizierte Mediatorinnen und Mediatoren.",
   // Nur Funktionen, die es wirklich gibt — jede Zeile ist im Produkt belegbar.
   featureList: [
-    "KI-gestützte Fallanalyse",
+    "Strukturierte Fallanalyse",
     "Strukturiertes Mediationsverfahren in sechs Schritten",
     "Gemeinsamer Fall-Workspace für beide Parteien",
     "Begleitung durch zertifizierte Mediatorinnen und Mediatoren",
@@ -253,6 +256,7 @@ export default async function MedipactLanding({
   const bekanntAusTags = t.raw("bekanntAusTags") as { text: string; fn?: number }[];
   const footnotes = t.raw("footnotes") as FootnoteItem[];
   const processSteps = t.raw("processSteps") as NumberedStep[];
+  const einstiegSteps = t.raw("einstieg.steps") as NumberedStep[];
   // Nur en hat eigene Fakten; Deutsch nutzt die Standard-Fakten der Komponente.
   // Deutsch aus den Konstanten (app/content/starterpaket.ts), damit Preis und
   // Minuten nur an einer Stelle stehen; andere Sprachen aus messages.
@@ -289,6 +293,29 @@ export default async function MedipactLanding({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Einstieg in drei Schritten (30.10.2026): Fallanalyse (im Preis
+            enthalten, für jeden Fall gleich) → Starterpaket (optional) → Weg
+            wählen. Ordnet die beiden Wege ein, bevor das Starterpaket im
+            Detail kommt. Texte unter home.einstieg in messages/*.json. */}
+        <section className="section section-base text-center">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl">
+              <div className="eyebrow mb-4 justify-center">{t("einstieg.eyebrow")}</div>
+              <h2 className="heading-2">{t("einstieg.title")}</h2>
+              <p className="mt-5 text-lg leading-8 text-neutral-700">{t("einstieg.text")}</p>
+            </div>
+            <NumberedSteps steps={einstiegSteps} className="mt-12" />
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-10">
+              <ArrowLink href="#starterpaket" className="text-base">
+                {t("einstieg.linkStarter")}
+              </ArrowLink>
+              <ArrowLink href="/preise" tone="muted" className="text-base">
+                {t("einstieg.linkPreise")}
+              </ArrowLink>
             </div>
           </div>
         </section>

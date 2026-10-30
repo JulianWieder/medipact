@@ -9,8 +9,10 @@ import { STARTERPAKET_URL } from "@/lib/mediatorVermittlung";
  *
  * Auf der Startseite seit 29.10.2026 direkt unter dem Hero: Das Paket ist
  * der Einstieg für alle, die erst verstehen wollen, wie Mediation arbeitet,
- * und mehrere Mediator:innen kennenlernen möchten. Die zwei `zweck`-Karten
- * sagen genau das, bevor Phasen und Preis kommen.
+ * und mehrere Mediator:innen kennenlernen möchten. Die drei `zweck`-Karten
+ * sagen genau das, bevor Phasen und Preis kommen – inklusive der Grenze:
+ * Das Paket klärt, ob eine Lösung erreichbar ist, eine Einigung entsteht
+ * darin noch nicht.
  */
 export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) {
   return (
@@ -28,7 +30,7 @@ export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) 
           <p className="mt-5 text-lg leading-8 text-neutral-700">{inhalt.text}</p>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
           {inhalt.zweck.map((z, i) => (
             <div
               key={z.title}

@@ -6,6 +6,12 @@
 
 @import "tailwindcss";
 
+/* Scroll-Pin der Heros (ScrollPinFrame): erst ab sm UND ausreichender
+   Fensterhöhe. Darunter wäre der auf 100dvh fixierte Frame niedriger als
+   der Hero-Text und schnitte ihn ab (z.B. 1366×768-Laptops). Gleiche Werte
+   wie PIN_MEDIA_QUERY in app/components/ui/ScrollPinSection.tsx. */
+@custom-variant pin (@media (min-width: 640px) and (min-height: 720px));
+
 /* ------------------------------------------------------------
    Theme tokens
    ------------------------------------------------------------ */

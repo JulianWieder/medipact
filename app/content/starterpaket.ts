@@ -23,7 +23,7 @@ export type StarterpaketInhalt = {
   title: string;
   titleHighlight: string;
   text: string;
-  /** Wozu das Paket dient – zwei Karten über den Phasen. */
+  /** Wozu das Paket dient – drei Karten über den Phasen. */
   zweck: { title: string; text: string }[];
   phasen: { title: string; text: string }[];
   name: string;
@@ -48,6 +48,10 @@ export const starterpaketInhaltDe: StarterpaketInhalt = {
     {
       title: "Verschiedene Mediator:innen kennenlernen",
       text: `Bis zu ${KENNENLERN_ANZAHL} Kennenlerngespräche à ${KENNENLERN_MINUTEN} Minuten – mit Profilen, die Sie vorgemerkt haben, oder Mediator:innen, die sich auf Ihren Fall melden. Sie vergleichen und entscheiden erst dann, mit wem Sie weitermachen.`,
+    },
+    {
+      title: "Einschätzen, ob eine Lösung möglich ist",
+      text: "Der gemeinsam geklärte Sachverhalt und die ersten Übungen zu Themen und Interessen zeigen, ob zwischen Ihnen eine Lösung erreichbar ist. Eine Einigung entsteht im Starterpaket noch nicht – die erarbeiten Sie danach, auf dem Weg, den Sie wählen.",
     },
   ],
   phasen: STARTPAKET_PHASEN,
