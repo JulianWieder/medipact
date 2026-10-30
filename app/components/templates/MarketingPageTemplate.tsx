@@ -148,17 +148,31 @@ function SectionLead({
   title,
   text,
   center = false,
+  tone = "light",
 }: {
   eyebrow?: string;
   title: string;
   text?: string;
   center?: boolean;
+  /** "dark" in section-strong. Überschrift und Eyebrow färbt dort
+   * globals.css (.section-strong …), hier nur der Fließtext. */
+  tone?: "light" | "dark";
 }) {
   return (
     <div className={center ? "mb-14 text-center" : "mb-14 max-w-3xl"}>
-      {eyebrow && <div className="eyebrow mb-4">{eyebrow}</div>}
+      {eyebrow && (
+        <div className={`eyebrow mb-4 ${center ? "justify-center" : ""}`}>{eyebrow}</div>
+      )}
       <h2 className="heading-2">{title}</h2>
-      {text && <p className="mt-5 text-lg leading-8 text-neutral-600">{text}</p>}
+      {text && (
+        <p
+          className={`mt-5 text-lg leading-8 ${
+            tone === "dark" ? "mx-auto max-w-3xl text-neutral-300" : "text-neutral-600"
+          }`}
+        >
+          {text}
+        </p>
+      )}
     </div>
   );
 }
@@ -411,6 +425,7 @@ export function MarketingPageTemplate({
                 title={comparisonTitle ?? "Der bessere erste Schritt vor der Eskalation"}
                 text={comparisonIntro}
                 center
+                tone="dark"
               />
 
               <div className="grid gap-6 md:grid-cols-3">

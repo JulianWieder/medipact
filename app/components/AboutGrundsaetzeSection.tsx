@@ -11,7 +11,7 @@ export function AboutGrundsaetzeSection({
   grundsaetze: typeof aboutGrundsaetze;
 }) {
   return (
-    <section className="section section-muted border-y border-neutral-200">
+    <section className="section section-base border-y border-neutral-200">
       <div className="container">
         <div className="max-w-3xl">
           <div className="eyebrow mb-4">{grundsaetze.eyebrow}</div>
@@ -33,9 +33,7 @@ export function AboutGrundsaetzeSection({
               >
                 {item.letter}
               </div>
-              <dt className="mt-4 text-xl font-bold tracking-tight text-neutral-900">
-                {item.title}
-              </dt>
+              <dt className="heading-3 mt-4">{item.title}</dt>
               <dd className="mt-3 text-base leading-7 text-neutral-700">{item.text}</dd>
             </div>
           ))}

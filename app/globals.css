@@ -344,6 +344,21 @@
   opacity: 0.6;
 }
 
+/* Dunkle Abschnitte: .heading-2 und .eyebrow stehen oben AUSSERHALB von
+   @layer und schlagen deshalb jede Tailwind-Utility – ein `text-white` am
+   Element wirkt nicht. Ohne diese Regel stand z.B. "Der bessere erste
+   Schritt vor der Eskalation" (MarketingPageTemplate) dunkel auf dunkel.
+   Gilt für jede section-strong; dort gibt es keine hellen Karten. */
+.section-strong .heading-2 {
+  color: #f8fafc;
+}
+.section-strong .eyebrow {
+  color: var(--color-accent-300);
+}
+.section-strong .eyebrow::before {
+  background-color: var(--color-accent-300);
+}
+
 /* ------------------------------------------------------------
    Utility layer
    ------------------------------------------------------------ */
