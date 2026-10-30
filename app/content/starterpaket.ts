@@ -26,6 +26,8 @@ export type StarterpaketInhalt = {
   /** Wozu das Paket dient – drei Karten über den Phasen. */
   zweck: { title: string; text: string }[];
   phasen: { title: string; text: string }[];
+  /** Leitfaden der Kennenlerngespräche (Checkliste Telefonat, 30.10.2026). */
+  gespraech: { title: string; intro: string; punkte: string[] };
   name: string;
   preis: string;
   preisHinweis: string;
@@ -55,6 +57,20 @@ export const starterpaketInhaltDe: StarterpaketInhalt = {
     },
   ],
   phasen: STARTPAKET_PHASEN,
+  gespraech: {
+    title: "Was in einem Kennenlerngespräch passiert",
+    intro: `In ${KENNENLERN_MINUTEN} Minuten klären Sie mit der Mediatorin, was Sie für Ihre Entscheidung brauchen. Die Gespräche folgen einem gemeinsamen Leitfaden – so können Sie die Mediator:innen gut miteinander vergleichen.`,
+    punkte: [
+      "Kurze Vorstellung: wer Sie sind, wozu das Gespräch dient und wie viel Zeit Sie haben",
+      "Wie die Mediation abläuft und welche Rolle die Mediatorin darin hat",
+      "Die Grundsätze des Verfahrens: Verschwiegenheit, Allparteilichkeit, Neutralität",
+      "Was der aktuelle Anlass ist – und was Sie bisher versucht haben, um den Konflikt zu lösen",
+      "Wer an der Mediation teilnimmt und ob weitere Personen einbezogen werden sollten",
+      "Der Rahmen: online oder vor Ort, Termine und Dauer der Sitzungen",
+      "Was die weitere Mediation kostet",
+      "Wie es weitergeht, wenn Sie sich für diese Mediatorin entscheiden",
+    ],
+  },
   name: STARTPAKET_NAME,
   preis: STARTPAKET_PREIS,
   preisHinweis: `Pro Fall, geteilt: ${STARTPAKET_ANTEIL} je Seite – fällig, wenn die andere Seite zusagt`,

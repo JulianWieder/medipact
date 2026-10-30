@@ -100,6 +100,25 @@ export function StarterpaketSection({ inhalt }: { inhalt: StarterpaketInhalt }) 
             </div>
           </div>
         </div>
+
+        {/* Leitfaden der Kennenlerngespräche: zeigt, was in den 20 Minuten
+            konkret passiert – die Gespräche sind der Kern des Pakets. */}
+        <div className="mt-12 rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm lg:grid lg:grid-cols-[0.8fr_1.2fr] lg:gap-12">
+          <div>
+            <h3 className="text-2xl font-bold tracking-tight text-neutral-900">
+              {inhalt.gespraech.title}
+            </h3>
+            <p className="mt-3 text-base leading-7 text-neutral-700">{inhalt.gespraech.intro}</p>
+          </div>
+          <ul className="mt-6 grid gap-x-8 gap-y-3 text-sm leading-6 text-neutral-700 sm:grid-cols-2 lg:mt-0">
+            {inhalt.gespraech.punkte.map((punkt) => (
+              <li key={punkt} className="flex gap-2">
+                <span className="font-bold text-accent-600">✓</span>
+                <span>{punkt}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

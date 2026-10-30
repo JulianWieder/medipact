@@ -524,6 +524,20 @@
           "text": "Both sides agree to the handover. Then up to 3 introductory calls of 20 minutes each – the person you choose takes over with everything you have prepared."
         }
       ],
+      "gespraech": {
+        "title": "What happens in an introductory call",
+        "intro": "In 20 minutes you clarify with the mediator what you need for your decision. The calls follow a shared guideline – so you can compare the mediators with each other.",
+        "punkte": [
+          "A short introduction: who you are, what the call is for and how much time you have",
+          "How the mediation works and what role the mediator plays in it",
+          "The principles of the process: confidentiality, impartiality, neutrality",
+          "What brought you to mediation now – and what you have already tried to resolve the conflict",
+          "Who takes part in the mediation and whether other people should be involved",
+          "The setting: online or in person, dates and length of the sessions",
+          "What the further mediation costs",
+          "What happens next if you choose this mediator"
+        ]
+      },
       "name": "Digital starter package",
       "preis": "€189",
       "preisHinweis": "Per case, split: €94.50 per side – due once the other side accepts",
