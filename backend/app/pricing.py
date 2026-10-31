@@ -82,7 +82,7 @@ PRICE_MATRIX: dict[str, dict[str, float | None]] = {
     # Legacy, nicht mehr buchbar – siehe Kommentar oben.
     "wg":            {"einvernehmlich": None, "online": 49.0,  "hybrid": None,  "vollservice": None},
     "mietverhaeltnis": {"einvernehmlich": None, "online": 49.0, "hybrid": None, "vollservice": None},
-    "trennung":      {"einvernehmlich": 299.0, "online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
+    "trennung":      {"einvernehmlich": 99.0, "online": 399.0, "hybrid": 499.0, "vollservice": 899.0},
     "erbschaft":     {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
     "arbeitsplatz":  {"einvernehmlich": None, "online": 399.0, "hybrid": None,  "vollservice": None},
     "odr":           {"einvernehmlich": None, "online": 1900.0, "hybrid": None, "vollservice": None},

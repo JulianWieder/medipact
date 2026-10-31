@@ -29,8 +29,8 @@ export async function generateMetadata({
         : "Scheidungsmediation online: fair einigen | medipact",
     description:
       locale === "en"
-        ? "Online divorce mediation from €299 per party: settle maintenance, childcare and finances in a structured way – confidential and without a court battle."
-        : "Scheidungsmediation online ab 299 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
+        ? "Online divorce mediation from €99 per party: settle maintenance, childcare and finances in a structured way – confidential and without a court battle."
+        : "Scheidungsmediation online ab 99 € pro Partei: Unterhalt, Betreuung und Finanzen strukturiert klären – vertraulich und ohne Rosenkrieg vor Gericht.",
     path: "/scheidungsmediation",
     locale,
   });
@@ -61,8 +61,8 @@ const serviceSchemaDe = {
   offers: {
     "@type": "AggregateOffer",
     priceCurrency: "EUR",
-    // 299 € = Paket "Einvernehmliche Scheidung" seit 01.10.2026
-    lowPrice: "299",
+    // 99 € = Paket "Einvernehmliche Scheidung" (seit 31.10.2026, vorher 299 €)
+    lowPrice: "99",
     highPrice: "899",
     offerCount: 4,
     url: "https://medipact.de/preise",

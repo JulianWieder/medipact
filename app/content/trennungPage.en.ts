@@ -155,7 +155,7 @@ export const trennungPageContent = {
     {
       question: "What does mediation for separation and divorce cost?",
       answer:
-        "At medipact, separation mediation costs a flat €299 per party for an uncontested divorce, €399 per party for the purely online process, €499 for the hybrid option with video sessions and €899 for the full service. The price does not depend on how many topics you settle – there is no hourly billing that gets more expensive with every escalation. Details in the price overview.",
+        "At medipact, separation mediation costs a flat €99 per party for an uncontested divorce, €399 per party for the purely online process, €499 for the hybrid option with video sessions and €899 for the full service. The price does not depend on how many topics you settle – there is no hourly billing that gets more expensive with every escalation. Details in the price overview.",
     },
     {
       question: "Does mediation replace lawyers and the court?",

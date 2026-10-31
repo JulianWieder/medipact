@@ -51,7 +51,7 @@ export const article: RatgeberArticle = {
       headers: ["Konfliktart", "Festpreis", "Abrechnung"],
       rows: [
         ["Nachbarschaft, Verbraucher, Mietverhältnis", "49 €", "pro Partei"],
-        ["Trennung & Scheidung", "299–899 €", "pro Partei, je nach Paket"],
+        ["Trennung & Scheidung", "99–899 €", "pro Partei, je nach Paket"],
         ["Erbschaft", "399 €", "pro Verfahren"],
         ["Konflikt am Arbeitsplatz", "399 €", "pro Verfahren, trägt der Arbeitgeber"],
         ["Wirtschaft und B2B (ODR)", "399–1.900 €", "pro Verfahren, je nach Verfahrensart"],
@@ -210,7 +210,7 @@ export const article: RatgeberArticle = {
     {
       question: "Was kostet eine Mediation?",
       answer:
-        "Mit Stundenabrechnung meist 2.000 bis knapp 5.000 Euro für beide Parteien zusammen, abhängig von der Zahl der Sitzungen. Festpreis-Verfahren sind planbarer: Bei medipact kostet eine Mediation je nach Konfliktart ab 49 € pro Partei, eine Trennungsmediation 299 bis 899 € pro Partei.",
+        "Mit Stundenabrechnung meist 2.000 bis knapp 5.000 Euro für beide Parteien zusammen, abhängig von der Zahl der Sitzungen. Festpreis-Verfahren sind planbarer: Bei medipact kostet eine Mediation je nach Konfliktart ab 49 € pro Partei, eine Trennungsmediation 99 bis 899 € pro Partei.",
     },
     // Danach die beiden Fragen wörtlich die stärksten Queries der Seite
     // ("was kostet ein mediator pro stunde" Pos. 34,5, "mediator

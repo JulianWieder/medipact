@@ -19,7 +19,7 @@ import {
 export const metadata: Metadata = pageMetadata({
   title: "Preise: Mediation ab 49 €, Starterpaket 189 € | medipact",
   description:
-    "Online ab 49 € pro Partei, Trennung ab 299 €, Starterpaket mit Mediator:in 189 €, Business ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
+    "Online ab 49 € pro Partei, Scheidung ab 99 €, Starterpaket mit Mediator:in 189 €, Business ab 1.000 €/Monat. Transparent, ohne versteckte Kosten.",
   path: "/preise",
 });
 
@@ -76,9 +76,9 @@ const offerCatalogSchema = {
       {
         "@type": "Offer",
         name: "Trennung und Scheidung",
-        description: "Scheidungsmediation ab 299 € pro Partei (einvernehmliche Scheidung)",
+        description: "Scheidungsmediation ab 99 € pro Partei (einvernehmliche Scheidung)",
         priceCurrency: "EUR",
-        price: "299",
+        price: "99",
         url: "https://medipact.de/scheidungsmediation",
       },
       {
@@ -276,7 +276,7 @@ export default function Preise() {
                       Einvernehmliche Scheidung
                     </span>
                     <span className="text-lg font-bold text-accent-600">
-                      €299
+                      €99
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
@@ -416,9 +416,15 @@ export default function Preise() {
                   Mit Sitzungen &
                   <span className="block text-accent-600">Unterstützt</span>
                 </h2>
-                <p className="text-neutral-600 mb-8">
+                <p className="text-neutral-600 mb-4">
                   Das Verfahren bereitet alles vor – ein zertifizierter Mediator
                   entscheidet mit Ihnen die strittigen Punkte, per Video.
+                </p>
+                <p className="text-xs text-neutral-500 mb-8 italic">
+                  Passt, wenn Sie vieles schon selbst klären können, aber zwei,
+                  drei Themen – etwa Unterhalt, Betreuung oder die Wohnung –
+                  gemeinsam mit einem Menschen am Tisch lösen wollen. Derzeit
+                  für Scheidung & Trennung buchbar.
                 </p>
 
                 {/* Preise */}
@@ -432,8 +438,33 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €499 × 2 (beide Parteien) – zwei Sitzungen
-                    à 60 Minuten bereits enthalten
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €499 × 2 (beide Parteien) – Festpreis, keine
+                    Stundenabrechnung für das Paket
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Geführtes Online-Verfahren
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Alle Themen strukturiert vorbereitet, bevor die erste
+                    Sitzung beginnt
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      2 Sitzungen à 60 Min. per Video
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Mit zertifiziertem Mediator, Termine Mo–Fr
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -448,16 +479,38 @@ export default function Preise() {
                     <Icon name="arrow-right" size={12} color="currentColor" /> Nur falls benötigt, aufgeteilt auf alle Parteien
                   </p>
 
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Rechtsanwalt
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      ab €190 / Std.
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Optional – wenn es rechtlich komplex wird
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Psychologe oder Gutachter
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      ab €170 / Std.
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Optional – nur wenn Sie es wirklich brauchen
+                  </p>
+
                   <div className="bg-neutral-50 rounded-lg p-4 mt-4 border border-neutral-200">
                     <p className="text-sm font-semibold text-neutral-900 mb-2">
-                      Zusätzliche Spezialisten (optional)
+                      Rechenbeispiel
                     </p>
                     <p className="text-xs text-neutral-700">
-                      Wird es rechtlich oder emotional komplex, buchen Sie bei
-                      Bedarf gezielt dazu: Rechtsanwalt ab{" "}
-                      <strong>€190 / Std.</strong>, Psychologe oder Gutachter ab{" "}
-                      <strong>€170 / Std.</strong> – nur wenn Sie es wirklich
-                      brauchen, transparent abgerechnet.
+                      Zwei Parteien, eine zusätzliche Mediator-Stunde:{" "}
+                      <strong>2 × €499 + €150 = €1.148</strong> gesamt – also{" "}
+                      <strong>€574 pro Partei</strong>.
                     </p>
                   </div>
                 </div>
@@ -487,8 +540,27 @@ export default function Preise() {
                   <div className="flex gap-3">
                     <span className="text-accent-600 font-bold">✓</span>
                     <span className="text-sm text-neutral-700">
+                      <strong>Per Video</strong> – kein Anfahrtsweg, kein
+                      Wartezimmer
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
+                      <strong>Überschaubar</strong> – in der Regel 2–8 Wochen
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
                       <strong>Spezialisten zubuchbar</strong> – Rechtsanwalt
                       oder Gutachter bei Bedarf, gegen Aufpreis
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
+                      <strong>Fair</strong> – Alle zahlen anteilig
                     </span>
                   </div>
                   <div className="flex gap-3">
@@ -517,10 +589,16 @@ export default function Preise() {
                   Komplett &
                   <span className="block text-accent-600">Begleitet</span>
                 </h2>
-                <p className="text-neutral-600 mb-8">
+                <p className="text-neutral-600 mb-4">
                   Für sehr komplexe Scheidungen und Trennungen – mit Vermögen,
                   Firma, Kindern oder hohem Konfliktniveau. Eine feste
                   Ansprechperson begleitet Sie durchgehend, von Anfang bis Ende.
+                </p>
+                <p className="text-xs text-neutral-500 mb-8 italic">
+                  Passt, wenn viel auf dem Spiel steht oder die Gespräche
+                  schnell eskalieren – und Sie nicht jeden Schritt selbst
+                  organisieren wollen. Derzeit für Scheidung & Trennung
+                  buchbar.
                 </p>
 
                 {/* Preise */}
@@ -534,8 +612,45 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €899 × 2 – fünf Sitzungen + anwaltliche
-                    Ersteinschätzung bereits enthalten
+                    <Icon name="arrow-right" size={12} color="currentColor" /> In der Regel €899 × 2 – Festpreis für das gesamte Paket
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Feste Ansprechperson
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Dieselbe Begleitung vom ersten Schritt bis zur
+                    Vereinbarung
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      5 Mediationssitzungen
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Mehr Raum für Vermögen, Firma und Kinder – mit
+                    bevorzugter Terminvergabe
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Anwaltliche Ersteinschätzung
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Rechtliche Orientierung, bevor Sie sich festlegen
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -550,15 +665,39 @@ export default function Preise() {
                     <Icon name="arrow-right" size={12} color="currentColor" /> Aufgeteilt auf alle Parteien
                   </p>
 
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Rechtsanwalt (über die Ersteinschätzung hinaus)
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      ab €190 / Std.
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Optional, nach Bedarf
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Psychologe oder Gutachter
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      ab €170 / Std.
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Optional, transparent abgerechnet
+                  </p>
+
                   <div className="bg-neutral-50 rounded-lg p-4 mt-4 border border-neutral-200">
                     <p className="text-sm font-semibold text-neutral-900 mb-2">
-                      Weitere Spezialisten (optional)
+                      Rechenbeispiel
                     </p>
                     <p className="text-xs text-neutral-700">
-                      Über die inkludierte Ersteinschätzung hinaus: Rechtsanwalt
-                      ab <strong>€190 / Std.</strong>, Psychologe oder Gutachter
-                      ab <strong>€170 / Std.</strong> – nach Bedarf, transparent
-                      abgerechnet.
+                      Zwei Parteien, alles im Paket:{" "}
+                      <strong>2 × €899 = €1.798</strong> gesamt – fünf
+                      Sitzungen und die anwaltliche Ersteinschätzung sind
+                      darin schon enthalten.
                     </p>
                   </div>
                 </div>
@@ -591,6 +730,25 @@ export default function Preise() {
                     <span className="text-sm text-neutral-700">
                       <strong>Bevorzugte Terminvergabe</strong> – kurze
                       Wartezeiten
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
+                      <strong>Für komplexe Fälle</strong> – Vermögen, Firma,
+                      Kinder
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
+                      <strong>Planbar</strong> – in der Regel 4–12 Wochen
+                    </span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-accent-600 font-bold">✓</span>
+                    <span className="text-sm text-neutral-700">
+                      <strong>Fair</strong> – Alle zahlen anteilig
                     </span>
                   </div>
                   <div className="flex gap-3">

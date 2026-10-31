@@ -126,7 +126,7 @@ export const article: RatgeberArticle = {
         "Schreiben in eurem Tempo: Ihr antwortet, wenn ihr ruhig seid, nicht spätabends im Affekt.",
         "Neutrale Begleitung: Ein Mediator achtet darauf, dass beide gehört werden - und greift ein, wenn ein Thema von Grün auf Gelb kippt.",
         "Ein Ergebnis, das trägt: eine schriftliche Vereinbarung, mit der ihr zum Notar und ins einvernehmliche Scheidungsverfahren gehen könnt.",
-        "Planbare Kosten: Für einvernehmliche Scheidungen 299 € pro Partei - ihr kennt den Preis, bevor ihr startet.",
+        "Planbare Kosten: Für einvernehmliche Scheidungen 99 € pro Partei - ihr kennt den Preis, bevor ihr startet.",
       ],
     },
     {

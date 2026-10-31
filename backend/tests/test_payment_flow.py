@@ -258,7 +258,7 @@ def t_einvernehmlich_package():
     pay(db, m, a)
     r = pay(db, m, b)
     assert r["is_paid"]
-    assert sorted(i.amount for i in invoices(db, m)) == [299.0, 299.0]
+    assert sorted(i.amount for i in invoices(db, m)) == [99.0, 99.0]
     db.close()
 
 
