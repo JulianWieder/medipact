@@ -45,7 +45,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Zusätzlich kann der Bebauungsplan oder eine örtliche Satzung eigene Vorgaben machen, und in Reihenhaussiedlungen steht manchmal etwas im Kaufvertrag oder in der Gemeinschaftsordnung. Diese Regeln gehen dem allgemeinen Nachbarrecht vor – schauen Sie dort zuerst.",
+      text: "Zusätzlich kann der Bebauungsplan oder eine örtliche Satzung eigene Vorgaben machen, und in Reihenhaussiedlungen steht manchmal etwas im Kaufvertrag oder in der Gemeinschaftsordnung. Diese Regeln gehen dem allgemeinen Nachbarrecht vor – schauen Sie dort zuerst. Streiten Sie innerhalb einer Eigentümergemeinschaft um Garten- oder Sondernutzungsflächen, hilft der Ratgeber [WEG-Streit per Mediation lösen](/ratgeber/weg-streit-mediation).",
     },
     {
       type: "heading",
@@ -128,7 +128,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Heckenstreitigkeiten haben einen niedrigen Streitwert und eine hohe emotionale Aufladung. Das ist die schlechteste Kombination für ein Gerichtsverfahren: Die Kosten stehen in keinem Verhältnis zum Gegenstand, und am Ende wohnen Sie weiter nebeneinander, mit einem Urteil zwischen sich.",
+      text: "Heckenstreitigkeiten haben einen niedrigen Streitwert und eine hohe emotionale Aufladung. Das ist die schlechteste Kombination für ein Gerichtsverfahren: Die Kosten stehen in keinem Verhältnis zum Gegenstand, und am Ende wohnen Sie weiter nebeneinander, mit einem Urteil zwischen sich. Dasselbe gilt, wenn der [Nachbar zu laut](/ratgeber/nachbar-laerm-was-tun) ist.",
     },
     {
       type: "paragraph",

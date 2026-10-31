@@ -44,7 +44,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Mediatorinnen und Mediatoren rechnen bei Trennung und Scheidung meist nach Stundensatz ab. Die Höhe hängt von Qualifikation, Region und Komplexität ab – in Großstädten liegt sie spürbar über dem Niveau ländlicher Regionen. Bezahlt wird die gemeinsame Sitzung, nicht jede Partei einzeln: Anders als beim Anwalt teilen sich die beiden Seiten in der Regel eine Rechnung.",
+      text: "Mediatorinnen und Mediatoren rechnen bei Trennung und Scheidung meist nach Stundensatz ab. Die Höhe hängt von Qualifikation, Region und Komplexität ab – in Großstädten liegt sie spürbar über dem Niveau ländlicher Regionen. Bezahlt wird die gemeinsame Sitzung, nicht jede Partei einzeln: Anders als beim Anwalt teilen sich die beiden Seiten in der Regel eine Rechnung. Wer sich persönlich begleiten lassen möchte, kann über medipact einen [Mediator finden](/mediator-finden).",
     },
     {
       type: "paragraph",
@@ -267,7 +267,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "In allen anderen Fällen gilt: Je früher Sie beginnen, desto günstiger wird es. Kosten entstehen in der Trennung vor allem durch Eskalation – jede zusätzliche Runde Anwaltsschriftsätze kostet Geld, das am Ende beiden Seiten fehlt.",
+      text: "In allen anderen Fällen gilt: Je früher Sie beginnen, desto günstiger wird es. Kosten entstehen in der Trennung vor allem durch Eskalation – jede zusätzliche Runde Anwaltsschriftsätze kostet Geld, das am Ende beiden Seiten fehlt. Früh Klarheit braucht auch das Datum der Trennung: Wie Sie das [Trennungsjahr nachweisen](/ratgeber/trennungsjahr-nachweisen), lesen Sie im eigenen Ratgeber.",
     },
     {
       type: "cta",

@@ -71,7 +71,7 @@ export const article: RatgeberArticle = {
         "Bezugsberechtigte in Lebens- und Risikoversicherungen: Steht dort noch die Ex-Partnerin oder der Ex-Partner, zahlt die Versicherung im Ernstfall genau dorthin.",
         "Gemeinsame Verträge mit beiden Namen: Strom, Internet, Handyverträge, Mitgliedschaften. Wer kündigt, wer übernimmt?",
         "Familienversicherung in der gesetzlichen Krankenkasse: Sie endet mit der Rechtskraft der Scheidung - wer bisher mitversichert war, muss sich rechtzeitig selbst versichern.",
-        "Steuer im Trennungsjahr: Im Jahr der Trennung ist die gemeinsame Veranlagung meist noch möglich, ab dem Folgejahr nicht mehr. Das verändert das Netto - und damit auch die Unterhaltsberechnung.",
+        "Steuer im Trennungsjahr: Im Jahr der Trennung ist die gemeinsame Veranlagung meist noch möglich, ab dem Folgejahr nicht mehr. Das verändert das Netto - und damit auch die Unterhaltsberechnung. Wann genau es beginnt, erklärt der Ratgeber [Trennungsjahr nachweisen](/ratgeber/trennungsjahr-nachweisen).",
         "Digitale Konten und Vollmachten: Online-Banking, Cloud-Fotos der Kinder, Passwörter, Vorsorgevollmachten.",
       ],
     },

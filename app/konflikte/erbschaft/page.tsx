@@ -83,7 +83,7 @@ export default function ErbschaftPage() {
           { label: "Ratgeber: Geschwister streiten ums Erbe", href: "/ratgeber/geschwister-streiten-ums-erbe" },
           { label: "Ratgeber: Erbengemeinschaft blockiert", href: "/ratgeber/erbengemeinschaft-blockade" },
           { label: "Ratgeber: Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
-          { label: "Ratgeber: Pflichtteil verhandeln", href: "/ratgeber/pflichtteil-einfordern" },
+          { label: "Ratgeber: Pflichtteil per Mediation einfordern", href: "/ratgeber/pflichtteil-einfordern" },
           { label: "Geschwister-Streit ums Haus", href: "/cases/erbstreit-haus-geschwister" },
           { label: "Testament-Konflikt", href: "/cases/streit-ums-testament" },
           { label: "Unternehmen erben", href: "/cases/unternehmen-geerbt" },

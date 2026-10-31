@@ -44,7 +44,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Verbreitetes Missverständnis: Dieser eine Anwalt ist nicht „der Anwalt für beide\". Er vertritt ausschließlich die Seite, die ihn beauftragt hat, und darf die andere Seite nicht beraten – auch nicht wohlwollend. Das ist keine Unfreundlichkeit, sondern Berufsrecht.",
+      text: "Verbreitetes Missverständnis: Dieser eine Anwalt ist nicht „der Anwalt für beide“. Er vertritt ausschließlich die Seite, die ihn beauftragt hat, und darf die andere Seite nicht beraten – auch nicht wohlwollend. Das ist keine Unfreundlichkeit, sondern Berufsrecht.",
     },
     {
       type: "heading",
@@ -85,7 +85,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Umgekehrt gilt: Sind Sie sich einig, kann das Gericht den Verfahrenswert bei einvernehmlicher Scheidung herabsetzen. Einigkeit senkt die Kosten also doppelt – über den Wert und über die Zahl der beteiligten Anwälte.",
+      text: "Umgekehrt gilt: Sind Sie sich einig, kann das Gericht den Verfahrenswert bei einvernehmlicher Scheidung herabsetzen. Einigkeit senkt die Kosten also doppelt – über den Wert und über die Zahl der beteiligten Anwälte. Einig sein sollten Sie sich auch über den Zeitpunkt der Trennung – wie Sie das [Trennungsjahr nachweisen](/ratgeber/trennungsjahr-nachweisen), erklärt ein eigener Ratgeber.",
     },
     {
       type: "table",
@@ -144,7 +144,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Die Frage „Brauche ich einen Anwalt?\" ist die falsche Frage. Die richtige lautet: Worüber sind wir uns noch nicht einig – und wie klären wir das, bevor es ins Verfahren geht? Denn jeder Punkt, den Sie vorher klären, verschwindet aus dem Verfahrenswert und damit aus allen Gebührenrechnungen.",
+      text: "Die Frage „Brauche ich einen Anwalt?“ ist die falsche Frage. Die richtige lautet: Worüber sind wir uns noch nicht einig – und wie klären wir das, bevor es ins Verfahren geht? Denn jeder Punkt, den Sie vorher klären, verschwindet aus dem Verfahrenswert und damit aus allen Gebührenrechnungen.",
     },
     {
       type: "paragraph",

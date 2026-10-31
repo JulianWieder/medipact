@@ -24,7 +24,7 @@ export const article: RatgeberArticle = {
   title: "Der Nachbar ist zu laut – was kann ich tun?",
   metaTitle: "Nachbar zu laut: Was kann ich tun? | medipact",
   description:
-    "Vom Gespräch bis zur Klage: die sinnvolle Reihenfolge bei Lärm vom Nachbarn – und warum das Lärmprotokoll der wichtigste Schritt ist.",
+    "Nachbar zu laut? Vom Gespräch bis zur Klage: die sinnvolle Reihenfolge bei Lärm – und warum das Lärmprotokoll der wichtigste Schritt ist.",
   eyebrow: "Ratgeber · Nachbarschaft",
   updated: "2026-07-31",
   published: "2026-07-31",
@@ -134,7 +134,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Melden Sie den Mangel schriftlich und legen Sie Ihr Protokoll bei. Eine Minderung sollten Sie allerdings erst nach Beratung vornehmen: Wer zu viel mindert, riskiert Zahlungsverzug und im schlimmsten Fall die eigene Kündigung.",
+      text: "Melden Sie den Mangel schriftlich und legen Sie Ihr Protokoll bei. Eine Minderung sollten Sie allerdings erst nach Beratung vornehmen: Wer zu viel mindert, riskiert Zahlungsverzug und im schlimmsten Fall die eigene Kündigung. Gehört Ihnen die Wohnung selbst und spielt der Streit innerhalb der Eigentümergemeinschaft, lesen Sie weiter unter [WEG-Streit per Mediation lösen](/ratgeber/weg-streit-mediation).",
     },
     {
       type: "heading",

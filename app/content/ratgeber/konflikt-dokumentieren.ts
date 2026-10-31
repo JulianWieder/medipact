@@ -24,7 +24,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Dazu kommt der praktische Nutzen: Ob Sie später ein klärendes Gespräch führen, eine Mediation starten oder anwaltlichen Rat einholen – überall ist die erste Frage dieselbe: Was ist wann passiert? Wer dann nur „ständig“ und „schon oft“ sagen kann, wirkt schwächer als jemand, der eine saubere Chronologie vorlegt.",
+      text: "Dazu kommt der praktische Nutzen: Ob Sie später ein klärendes Gespräch führen, eine Mediation starten oder anwaltlichen Rat einholen – überall ist die erste Frage dieselbe: Was ist wann passiert? Wer dann nur „ständig“ und „schon oft“ sagen kann, wirkt schwächer als jemand, der eine saubere Chronologie vorlegt. Eskaliert der Streit gerade, lesen Sie zuerst [Akuter Konflikt – was tun?](/ratgeber/akuter-konflikt-was-tun).",
     },
     { type: "heading", text: "Was in ein Streit-Tagebuch gehört" },
     {

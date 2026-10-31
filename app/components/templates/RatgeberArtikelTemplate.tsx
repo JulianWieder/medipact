@@ -1,10 +1,39 @@
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
 import type { RatgeberArticle } from "@/app/content/ratgeberArtikel";
 
 const BASE_URL = "https://medipact.de";
+
+// Interne Links im Fließtext: `[Ankertext](/pfad)` in paragraph, list und
+// callout wird zu <Link>. Nur interne Pfade (beginnen mit "/") — alles
+// andere bleibt Text. Ankertext = Suchphrase der Zielseite, nie "mehr
+// erfahren".
+const INLINE_LINK = /\[([^\]]+)\]\((\/[^)\s]*)\)/g;
+
+function renderInline(text: string) {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(INLINE_LINK)) {
+    const start = m.index ?? 0;
+    if (start > last) parts.push(text.slice(last, start));
+    parts.push(
+      <Link
+        key={start}
+        href={m[2]}
+        className="font-medium text-accent-700 underline decoration-accent-300 underline-offset-4 hover:decoration-accent-600"
+      >
+        {m[1]}
+      </Link>,
+    );
+    last = start + m[0].length;
+  }
+  if (parts.length === 0) return text;
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
 
 /**
  * Rendert einen Ratgeber-Artikel inkl. Article- + FAQPage-JSON-LD und
@@ -116,7 +145,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
               if (block.type === "paragraph") {
                 return (
                   <p key={i} className="mt-5 leading-8 text-neutral-700">
-                    {block.text}
+                    {renderInline(block.text)}
                   </p>
                 );
               }
@@ -126,7 +155,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
                     {block.items.map((item, j) => (
                       <li key={j} className="flex gap-3 leading-7">
                         <span className="mt-0.5 font-bold text-accent-600">•</span>
-                        <span>{item}</span>
+                        <span>{renderInline(item)}</span>
                       </li>
                     ))}
                   </ul>
@@ -138,7 +167,7 @@ export function RatgeberArtikelTemplate({ article }: { article: RatgeberArticle 
                     key={i}
                     className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 px-6 py-5 text-neutral-700 leading-7"
                   >
-                    {block.text}
+                    {renderInline(block.text)}
                   </div>
                 );
               }

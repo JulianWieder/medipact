@@ -32,7 +32,7 @@ import {
 
 export const mediatorFindenPageContent = {
   eyebrow: "Persönliche Mediation",
-  title: "Lieber mit einem Menschen am Tisch?",
+  title: "Mediator finden: lieber mit einem Menschen am Tisch?",
   titleHighlight: "Wir vermitteln Ihnen eine Mediatorin.",
   intro:
     `Nicht jeder Konflikt soll schriftlich und Schritt für Schritt am Bildschirm geklärt werden. Manche Menschen wollen von Anfang an jemanden, der zuhört, nachfragt und das Gespräch führt — im Büro oder per Video. Dafür finden Sie hier ausgebildete Mediatorinnen und Mediatoren, deren Profile wir geprüft haben. Merken Sie sich bis zu ${MERKLISTE_MAX} vor. Mit dem ${STARTPAKET_NAME} bereiten Sie und die andere Seite den Fall digital vor, dann lernen Sie Ihre Favoriten kennen und entscheiden, mit wem Sie weitermachen.`,

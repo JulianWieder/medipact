@@ -75,7 +75,7 @@ export const article: RatgeberArticle = {
       items: [
         "Getrennte Fallaufnahme: Jede Seite schildert ihre Sicht zunächst allein und schriftlich – niemand muss dem anderen gegenübersitzen.",
         "Bestandsaufnahme: Was gehört zum Nachlass, welche Werte sind unstrittig, wo gehen die Einschätzungen auseinander?",
-        "Interessen statt Positionen: Nicht „ich will das Haus\", sondern warum – Sicherheit, Erinnerung, Altersvorsorge, Anerkennung.",
+        "Interessen statt Positionen: Nicht „ich will das Haus“, sondern warum – Sicherheit, Erinnerung, Altersvorsorge, Anerkennung.",
         "Optionen entwickeln: Übernahme mit Ausgleichszahlung, Verkauf mit Vorkaufsrecht, Vermietung auf Zeit, Ratenlösung.",
         "Vereinbarung: Wer übernimmt was, wer zahlt wann, was passiert mit dem Hausrat – schriftlich und konkret.",
       ],
@@ -139,7 +139,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "In allen anderen Fällen gilt: Je früher Sie ansetzen, desto größer der Spielraum. Erbstreitigkeiten werden mit der Zeit nicht klarer, sondern härter – und jede zusätzliche Runde Anwaltsschriftsätze verkleinert genau den Nachlass, um den gestritten wird.",
+      text: "In allen anderen Fällen gilt: Je früher Sie ansetzen, desto größer der Spielraum. Erbstreitigkeiten werden mit der Zeit nicht klarer, sondern härter – und jede zusätzliche Runde Anwaltsschriftsätze verkleinert genau den Nachlass, um den gestritten wird. Geht es allein um den Pflichtteil, lesen Sie [Pflichtteil per Mediation einfordern](/ratgeber/pflichtteil-einfordern).",
     },
     {
       type: "cta",

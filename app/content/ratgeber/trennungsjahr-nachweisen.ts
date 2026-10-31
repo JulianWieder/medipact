@@ -16,12 +16,12 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "trennungsjahr-nachweisen",
   category: "Trennung & Scheidung",
-  title: "Trennungsjahr: Wann beginnt es – und wie weist man es nach?",
+  title: "Trennungsjahr nachweisen: Wann es beginnt und wie es geht",
   metaTitle: "Trennungsjahr nachweisen: So geht es | medipact",
   description:
-    "Es gibt keine Behörde, bei der man sich trennt. Wann das Trennungsjahr beginnt, wie es sich belegen lässt und warum das Datum bares Geld wert ist.",
+    "Trennungsjahr nachweisen ohne Behörde: wann es beginnt, wie Sie es belegen und warum das Datum bares Geld wert ist.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-10-15",
+  updated: "2026-10-31",
   published: "2026-07-31",
   readingMinutes: 7,
   intro:
@@ -164,6 +164,11 @@ export const article: RatgeberArticle = {
     },
   ],
   faq: [
+    {
+      question: "Wie kann man das Trennungsjahr nachweisen?",
+      answer:
+        "Es gibt keine Behörde und kein Formular dafür: Das Trennungsdatum wird im Scheidungsantrag angegeben und von der anderen Seite bestätigt. Am aussagekräftigsten ist eine gemeinsame schriftliche Erklärung mit dem Datum. Zusätzlich helfen belegbare Änderungen wie eigene Konten und geänderte Daueraufträge.",
+    },
     {
       question: "Wann beginnt das Trennungsjahr?",
       answer:

@@ -104,7 +104,7 @@ export const erbschaftPageContent = {
     links: [
       { label: "Ratgeber: Erbstreit lösen ohne Gericht", href: "/ratgeber/erbstreit-loesen-ohne-gericht" },
       { label: "Ratgeber: Erbengemeinschaft blockiert – was tun?", href: "/ratgeber/erbengemeinschaft-blockade" },
-      { label: "Ratgeber: Pflichtteil einfordern", href: "/ratgeber/pflichtteil-einfordern" },
+      { label: "Ratgeber: Pflichtteil per Mediation einfordern", href: "/ratgeber/pflichtteil-einfordern" },
       { label: "Ratgeber: Die 5 Phasen der Mediation", href: "/ratgeber/5-phasen-der-mediation" },
       { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     ],

@@ -109,7 +109,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Wichtig bei der Rechtsschutzversicherung: Melden Sie den Fall, bevor Sie handeln. Bei vielen Tarifen entfällt die Leistung, wenn erst nachträglich gemeldet wird – und die Bedingungen unterscheiden sich stark. Fragen Sie konkret nach „Mediation\" und nicht nach „Nachbarschaftsrecht\".",
+      text: "Wichtig bei der Rechtsschutzversicherung: Melden Sie den Fall, bevor Sie handeln. Bei vielen Tarifen entfällt die Leistung, wenn erst nachträglich gemeldet wird – und die Bedingungen unterscheiden sich stark. Fragen Sie konkret nach „Mediation“ und nicht nach „Nachbarschaftsrecht“.",
     },
     {
       type: "heading",
@@ -126,7 +126,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Die Dokumentation hat einen zweiten Effekt, der oft unterschätzt wird: Sie sortiert den eigenen Ärger. Viele merken beim Aufschreiben, dass es um zwei konkrete Dinge geht und nicht um „alles“ – und über genau diese zwei Punkte lässt sich ein Gespräch führen.",
+      text: "Die Dokumentation hat einen zweiten Effekt, der oft unterschätzt wird: Sie sortiert den eigenen Ärger. Viele merken beim Aufschreiben, dass es um zwei konkrete Dinge geht und nicht um „alles“ – und über genau diese zwei Punkte lässt sich ein Gespräch führen. Wie ein solches Protokoll bei Lärm konkret aussieht, zeigt der Ratgeber [Nachbar zu laut – was tun?](/ratgeber/nachbar-laerm-was-tun).",
     },
     {
       type: "cta",
@@ -144,14 +144,14 @@ export const article: RatgeberArticle = {
     {
       type: "list",
       items: [
-        "Keine Vorwürfe und keine Rechtslage. Sobald ein Paragraf oder das Wort „Anwalt\" fällt, geht es nur noch um Gewinnen.",
-        "Eigene Wahrnehmung statt Bewertung: „Ich werde wach\" statt „Sie sind rücksichtslos\".",
+        "Keine Vorwürfe und keine Rechtslage. Sobald ein Paragraf oder das Wort „Anwalt“ fällt, geht es nur noch um Gewinnen.",
+        "Eigene Wahrnehmung statt Bewertung: „Ich werde wach“ statt „Sie sind rücksichtslos“.",
         "Ein konkreter, kleiner nächster Schritt – nicht die Lösung, nur das Gespräch darüber.",
       ],
     },
     {
       type: "paragraph",
-      text: "Ein Muster, das Sie anpassen können: „Guten Tag Herr/Frau ..., ich schreibe Ihnen, weil mich das Thema ... seit einiger Zeit beschäftigt und ich es nicht zwischen Tür und Angel ansprechen wollte. Mir geht es nicht darum, wer recht hat – ich hätte nur gern eine Regelung, mit der wir beide gut leben können. Ich habe von einem Online-Verfahren gelesen, bei dem beide Seiten ihre Sicht getrennt schildern und daraus eine gemeinsame Vereinbarung entsteht; es kostet 49 € pro Person und man muss sich dafür nicht gegenübersitzen. Hätten Sie Interesse, das zu versuchen? Wenn Ihnen etwas anderes lieber ist, bin ich auch dafür offen. Viele Grüße, ...\"",
+      text: "Ein Muster, das Sie anpassen können: „Guten Tag Herr/Frau ..., ich schreibe Ihnen, weil mich das Thema ... seit einiger Zeit beschäftigt und ich es nicht zwischen Tür und Angel ansprechen wollte. Mir geht es nicht darum, wer recht hat – ich hätte nur gern eine Regelung, mit der wir beide gut leben können. Ich habe von einem Online-Verfahren gelesen, bei dem beide Seiten ihre Sicht getrennt schildern und daraus eine gemeinsame Vereinbarung entsteht; es kostet 49 € pro Person und man muss sich dafür nicht gegenübersitzen. Hätten Sie Interesse, das zu versuchen? Wenn Ihnen etwas anderes lieber ist, bin ich auch dafür offen. Viele Grüße, ...“",
     },
     {
       type: "callout",
@@ -166,7 +166,7 @@ export const article: RatgeberArticle = {
       items: [
         "Getrennte Fallaufnahme: Beide Seiten schildern ihre Sicht schriftlich und einzeln – kein gemeinsamer Termin nötig.",
         "Themen sortieren: Was ist der Kern, was ist über die Jahre dazugekommen?",
-        "Interessen klären: Nicht „die Hecke muss weg\", sondern warum – Licht, Sicht, Pflegeaufwand, Privatsphäre.",
+        "Interessen klären: Nicht „die Hecke muss weg“, sondern warum – Licht, Sicht, Pflegeaufwand, Privatsphäre.",
         "Optionen entwickeln: Ruhezeiten, Rückschnitt-Termine, Parkregelung, Kostenteilung für einen Sichtschutz.",
         "Vereinbarung: Wer macht was bis wann – schriftlich, konkret, mit einem Termin zur Überprüfung.",
       ],
@@ -190,7 +190,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "In allen anderen Fällen gilt: Je früher, desto einfacher. Nachbarschaftskonflikte wachsen nicht linear, sondern sammeln an – nach zwei Jahren geht es nicht mehr um die Hecke, sondern um alles, was seitdem dazugekommen ist.",
+      text: "In allen anderen Fällen gilt: Je früher, desto einfacher. Nachbarschaftskonflikte wachsen nicht linear, sondern sammeln an – nach zwei Jahren geht es nicht mehr um die Hecke, sondern um alles, was seitdem dazugekommen ist. Leben Sie in einer Eigentümergemeinschaft, kommen Beschlüsse und Verwalter hinzu – dazu mehr unter [WEG-Streit per Mediation lösen](/ratgeber/weg-streit-mediation).",
     },
     {
       type: "cta",
@@ -212,7 +212,7 @@ export const article: RatgeberArticle = {
     {
       question: "Übernimmt die Rechtsschutzversicherung die Mediation?",
       answer:
-        "Viele Tarife enthalten inzwischen eine Mediationsleistung, teils mit gedeckelten Beträgen, teils nur über von der Versicherung vermittelte Mediatoren – einzelne Anbieter stellen die Mediation sogar vor die Kostenübernahme für ein Gerichtsverfahren. Fragen Sie ausdrücklich nach „Mediation\" und melden Sie den Fall, bevor Sie handeln.",
+        "Viele Tarife enthalten inzwischen eine Mediationsleistung, teils mit gedeckelten Beträgen, teils nur über von der Versicherung vermittelte Mediatoren – einzelne Anbieter stellen die Mediation sogar vor die Kostenübernahme für ein Gerichtsverfahren. Fragen Sie ausdrücklich nach „Mediation“ und melden Sie den Fall, bevor Sie handeln.",
     },
     {
       question: "Muss ich vor einer Klage erst einen Schlichtungsversuch machen?",

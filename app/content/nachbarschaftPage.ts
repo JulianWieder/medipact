@@ -101,9 +101,9 @@ export const nachbarschaftPageContent = {
       "In einigen Bundesländern ist ein außergerichtlicher Einigungsversuch bei Nachbarschaftsstreitigkeiten sogar Voraussetzung, bevor Klage erhoben werden kann. Unabhängig davon gilt: Ein Verfahren, das den Streitwert übersteigt, ist auch dann ein schlechtes Geschäft, wenn Sie es gewinnen. Bei medipact liegt die Nachbarschaftsmediation deshalb im Einstiegstarif von 49 € pro Partei.",
     links: [
       { label: "Ratgeber: Nachbarschaftsstreit – was tun?", href: "/ratgeber/nachbarschaftsstreit-was-tun" },
-      { label: "Ratgeber: Nachbar macht Lärm – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
+      { label: "Ratgeber: Nachbar zu laut – was tun?", href: "/ratgeber/nachbar-laerm-was-tun" },
       { label: "Ratgeber: Wie hoch darf die Hecke sein?", href: "/ratgeber/hecke-nachbar-hoehe" },
-      { label: "Ratgeber: WEG-Streit und Mediation", href: "/ratgeber/weg-streit-mediation" },
+      { label: "Ratgeber: WEG-Streit per Mediation lösen", href: "/ratgeber/weg-streit-mediation" },
       { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     ],
   },

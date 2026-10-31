@@ -10,9 +10,9 @@ export const article: RatgeberArticle = {
   title: "Akuter Konflikt: Was Sie jetzt tun sollten – und was nicht",
   metaTitle: "Akuter Konflikt: Was tun, wenn es eskaliert? | medipact",
   description:
-    "Der Streit eskaliert gerade? Ruhe bewahren, nichts Unumkehrbares tun, sofort dokumentieren – und die nächsten Schritte klug wählen.",
+    "Akuter Konflikt, der Streit eskaliert gerade? Ruhe bewahren, nichts Unumkehrbares tun, sofort dokumentieren – und die nächsten Schritte klug wählen.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-09-19",
+  updated: "2026-10-31",
   readingMinutes: 8,
   intro:
     "Eine wütende E-Mail, ein eskaliertes Gespräch im Treppenhaus, eine Drohung mit dem Anwalt: In der akuten Konfliktlage entscheidet sich oft, ob ein Streit lösbar bleibt oder dauerhaft vergiftet wird. Die gute Nachricht: Die ersten 48 Stunden folgen einfachen Regeln. Dieser Ratgeber zeigt, was jetzt hilft – und welche verständlichen Impulse Sie teuer zu stehen kommen können.",
@@ -88,7 +88,7 @@ export const article: RatgeberArticle = {
   ],
   faq: [
     {
-      question: "Was sollte ich als Erstes tun, wenn ein Streit eskaliert?",
+      question: "Akuter Konflikt: Was sollte ich als Erstes tun?",
       answer:
         "Nicht sofort reagieren: 24 Stunden Abstand verhindern die Fehler, die Konflikte unlösbar machen. Dokumentieren Sie stattdessen zeitnah den Vorfall mit Datum, Beteiligten und Zitaten und sichern Sie Belege wie Screenshots.",
     },

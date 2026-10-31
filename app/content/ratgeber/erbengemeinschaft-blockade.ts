@@ -147,7 +147,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Die meisten Blockaden lösen sich, wenn drei Dinge passieren: vollständige Transparenz über den Nachlass, eine von allen akzeptierte Bewertung und ein Verteilungsvorschlag, der die Interessen jedes Beteiligten aufnimmt statt nur Quoten zu rechnen.",
+      text: "Die meisten Blockaden lösen sich, wenn drei Dinge passieren: vollständige Transparenz über den Nachlass, eine von allen akzeptierte Bewertung und ein Verteilungsvorschlag, der die Interessen jedes Beteiligten aufnimmt statt nur Quoten zu rechnen. Wie dieser Ablauf im Einzelnen aussieht, steht unter [Erbstreit ohne Gericht lösen](/ratgeber/erbstreit-loesen-ohne-gericht).",
     },
     {
       type: "paragraph",

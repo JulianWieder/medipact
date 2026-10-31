@@ -64,7 +64,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Ja, es wird Tränen geben. Vielleicht Wut, vielleicht Angst. Aber eine Trennung muss kein Krieg werden - wie sie verläuft, hängt weniger vom Ob ab als vom Wie.",
+      text: "Ja, es wird Tränen geben. Vielleicht Wut, vielleicht Angst. Aber eine Trennung muss kein Krieg werden - wie sie verläuft, hängt weniger vom Ob ab als vom Wie. Halte dabei von Anfang an fest, wann ihr euch getrennt habt – wie du das [Trennungsjahr nachweisen](/ratgeber/trennungsjahr-nachweisen) kannst, steht in einem eigenen Ratgeber.",
     },
     { type: "heading", text: "Wie medipact dir den schwersten Teil leichter macht" },
     {

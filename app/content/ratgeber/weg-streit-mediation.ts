@@ -20,12 +20,12 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "weg-streit-mediation",
   category: "Nachbarschaft",
-  title: "Streit in der Eigentümergemeinschaft lösen",
-  metaTitle: "WEG-Streit: Was tun bei Beschluss & Verwalter? | medipact",
+  title: "WEG-Streit: Konflikt in der Eigentümergemeinschaft lösen",
+  metaTitle: "WEG-Streit lösen: Beschluss, Kosten, Verwalter | medipact",
   description:
-    "Konflikt in der Eigentümergemeinschaft: Beschlüsse, Kosten, Verwalter, Sondernutzung. Wie Mediation Anfechtungsklagen vermeidet – Ablauf, Kosten, Grenzen.",
+    "WEG-Streit um Beschlüsse, Kosten, Verwalter oder Sondernutzung? Wie Mediation Anfechtungsklagen vermeidet – Ablauf, Kosten, Grenzen.",
   eyebrow: "Ratgeber · Nachbarschaft",
-  updated: "2026-07-27",
+  updated: "2026-10-31",
   readingMinutes: 8,
   intro:
     "Ein Streit in der Eigentümergemeinschaft hat eine Besonderheit: Er endet nicht, wenn er entschieden ist. Wer eine Beschlussanfechtung gewinnt, wohnt danach weiter im selben Haus wie die überstimmte Mehrheit – und die nächste Eigentümerversammlung kommt bestimmt. Dieser Artikel zeigt, wie sich WEG-Konflikte klären lassen, bevor sie zur Klage werden.",
@@ -40,7 +40,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Typisch ist deshalb, dass ein einzelner Sachpunkt zum Stellvertreterkonflikt wird. Es geht formal um den Kostenverteilungsschlüssel für eine Sanierung, tatsächlich um ein Lager, das sich seit Jahren gebildet hat – Selbstnutzer gegen Vermieter, Erdgeschoss gegen Dachgeschoss, alteingesessen gegen neu eingezogen.",
+      text: "Typisch ist deshalb, dass ein einzelner Sachpunkt zum Stellvertreterkonflikt wird. Es geht formal um den Kostenverteilungsschlüssel für eine Sanierung, tatsächlich um ein Lager, das sich seit Jahren gebildet hat – Selbstnutzer gegen Vermieter, Erdgeschoss gegen Dachgeschoss, alteingesessen gegen neu eingezogen. Oft beginnt es mit Alltagsärger im Haus – ist der [Nachbar zu laut](/ratgeber/nachbar-laerm-was-tun), helfen zuerst Protokoll und Gespräch.",
     },
     {
       type: "list",
@@ -142,7 +142,7 @@ export const article: RatgeberArticle = {
   ],
   faq: [
     {
-      question: "Kann man einen Streit in der Eigentümergemeinschaft ohne Gericht lösen?",
+      question: "Kann man einen WEG-Streit ohne Gericht lösen?",
       answer:
         "In den meisten Fällen ja. Eine Mediation klärt vor der Eigentümerversammlung, was die Lager tatsächlich brauchen, und erarbeitet daraus eine abgestimmte Beschlussvorlage. Der formale Beschluss bleibt notwendig – aber er wird beschlussfähig, statt in einer Konfrontation zu enden, die anschließend angefochten wird.",
     },

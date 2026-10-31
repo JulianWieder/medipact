@@ -78,7 +78,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Phase 1: Vorbereitung und Arbeitsbündnis" },
     {
       type: "paragraph",
-      text: "Noch vor dem eigentlichen Gespräch steht die Vorbereitung. Es wird geklärt, ob Mediation für den Konflikt überhaupt geeignet ist und ob alle Beteiligten freiwillig mitmachen. Der Mediator nimmt Kontakt zu beiden Seiten auf und schafft den organisatorischen Rahmen – erst wenn alle an Bord sind, kann die Mediation beginnen.",
+      text: "Noch vor dem eigentlichen Gespräch steht die Vorbereitung. Es wird geklärt, ob Mediation für den Konflikt überhaupt geeignet ist und ob alle Beteiligten freiwillig mitmachen. Der Mediator nimmt Kontakt zu beiden Seiten auf und schafft den organisatorischen Rahmen – erst wenn alle an Bord sind, kann die Mediation beginnen. Wer dafür eine neutrale Begleitung sucht, kann über medipact einen [Mediator finden](/mediator-finden).",
     },
     { type: "heading", text: "Phase 2: Einleitung und Auftragsklärung" },
     {

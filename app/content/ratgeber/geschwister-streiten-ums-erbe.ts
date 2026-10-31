@@ -72,7 +72,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Was ein Urteil nicht kann: die Frage beantworten, warum es so verfügt wurde. Ob die Pflegeleistung gesehen wurde. Ob man bei der nächsten Beerdigung noch nebeneinander sitzen kann. Diese Fragen bleiben offen, und sie sind bei Geschwistern der eigentliche Streitgegenstand.",
+      text: "Was ein Urteil nicht kann: die Frage beantworten, warum es so verfügt wurde. Ob die Pflegeleistung gesehen wurde. Ob man bei der nächsten Beerdigung noch nebeneinander sitzen kann. Diese Fragen bleiben offen, und sie sind bei Geschwistern der eigentliche Streitgegenstand. Wie Sie einen [Erbstreit ohne Gericht lösen](/ratgeber/erbstreit-loesen-ohne-gericht), beschreibt ein eigener Ratgeber.",
     },
     {
       type: "heading",
@@ -140,7 +140,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Mediation ersetzt keine Rechtsberatung. Lassen Sie Ihre Ansprüche vorab prüfen und die Vereinbarung vor der Unterschrift anwaltlich kontrollieren. Wird Grundeigentum übertragen, ist zusätzlich eine notarielle Beurkundung erforderlich.",
+      text: "Mediation ersetzt keine Rechtsberatung. Lassen Sie Ihre Ansprüche vorab prüfen und die Vereinbarung vor der Unterschrift anwaltlich kontrollieren. Wird Grundeigentum übertragen, ist zusätzlich eine notarielle Beurkundung erforderlich. Fordert ein enterbtes Geschwister den Pflichtteil, hilft der Ratgeber [Pflichtteil per Mediation einfordern](/ratgeber/pflichtteil-einfordern).",
     },
     {
       type: "cta",

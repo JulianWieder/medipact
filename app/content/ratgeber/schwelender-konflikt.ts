@@ -18,9 +18,9 @@ export const article: RatgeberArticle = {
   // 25.10.2026: Pos 6,4 / 228 Impr / 1,75 % CTR (GSC 3 Monate bis 23.10.). Die
   // Definition zeigt Google oft selbst an – wer sie in der Description wiederholt,
   // gibt keinen Grund zum Klick. Neu: Erkennen (5 Signale) + was man tun kann.
-  metaTitle: "Schwelender Konflikt: Bedeutung, Anzeichen & was hilft",
+  metaTitle: "Schwelender Konflikt: Bedeutung, Warnzeichen & was hilft",
   description:
-    "Woran Sie einen schwelenden Konflikt erkennen, welche 5 Signale eine Eskalation ankündigen und was Sie tun können, bevor der Streit offen ausbricht.",
+    "Was bedeutet schwelender Konflikt? Woran Sie ihn erkennen, welche 5 Signale eine Eskalation ankündigen – und wie Sie handeln, bevor er ausbricht.",
   eyebrow: "Ratgeber · Mediation",
   updated: "2026-10-16",
   readingMinutes: 8,
@@ -66,7 +66,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Einzeln ist keines dieser Signale ein Alarm. Entscheidend ist der Trend über Wochen – und genau den macht Ihr Logbuch sichtbar. Als Faustregel gilt: Treffen zwei oder mehr Signale gleichzeitig zu und zeigt die Kurve nach oben, ist die Zeit des reinen Beobachtens vorbei.",
+      text: "Einzeln ist keines dieser Signale ein Alarm. Entscheidend ist der Trend über Wochen – und genau den macht Ihr Logbuch sichtbar. Als Faustregel gilt: Treffen zwei oder mehr Signale gleichzeitig zu und zeigt die Kurve nach oben, ist die Zeit des reinen Beobachtens vorbei. Ist der Streit bereits offen ausgebrochen, hilft der Ratgeber [Akuter Konflikt – was tun?](/ratgeber/akuter-konflikt-was-tun).",
     },
     { type: "heading", text: "Handeln, solange es leicht ist" },
     {

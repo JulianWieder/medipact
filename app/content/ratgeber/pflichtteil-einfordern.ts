@@ -18,12 +18,12 @@ import type { RatgeberArticle } from "./types";
 export const article: RatgeberArticle = {
   slug: "pflichtteil-einfordern",
   category: "Familie & Erbe",
-  title: "Pflichtteil: einfordern, ohne die Familie zu verlieren",
-  metaTitle: "Pflichtteil einfordern: Wie viel steht mir zu? | medipact",
+  title: "Pflichtteil einfordern, ohne die Familie zu verlieren",
+  metaTitle: "Pflichtteil einfordern ohne Klage: per Mediation | medipact",
   description:
-    "Pflichtteil geltend machen, ohne dass die Familie zerbricht: warum Mediation hier oft besser wirkt als eine Klage – Ablauf, Auszahlung, Kosten und Grenzen.",
+    "Pflichtteil einfordern, ohne dass die Familie zerbricht: warum Mediation hier oft besser wirkt als eine Klage – Ablauf, Auszahlung, Kosten, Grenzen.",
   eyebrow: "Ratgeber · Familie & Erbe",
-  updated: "2026-07-27",
+  updated: "2026-10-31",
   readingMinutes: 8,
   intro:
     "Beim Pflichtteil geht es formal um einen Geldanspruch. Tatsächlich geht es fast immer um etwas anderes: um die Frage, warum jemand enterbt oder übergangen wurde, und was das über die Beziehung sagt. Ein Prozess klärt nur den Betrag – und macht den Riss endgültig. Dieser Artikel zeigt, wie sich ein Pflichtteil verhandeln lässt, ohne dass am Ende niemand mehr miteinander spricht.",
@@ -130,7 +130,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "In allen anderen Fällen lohnt der Versuch, bevor die Fronten endgültig sind. Ein Pflichtteilsstreit lässt sich rechtlich gewinnen und familiär trotzdem verlieren – und diese zweite Rechnung wird erst Jahre später präsentiert.",
+      text: "In allen anderen Fällen lohnt der Versuch, bevor die Fronten endgültig sind. Ein Pflichtteilsstreit lässt sich rechtlich gewinnen und familiär trotzdem verlieren – und diese zweite Rechnung wird erst Jahre später präsentiert. Streiten mehrere Erben über den ganzen Nachlass, hilft der Ratgeber [Erbstreit ohne Gericht lösen](/ratgeber/erbstreit-loesen-ohne-gericht).",
     },
     {
       type: "cta",
@@ -140,7 +140,7 @@ export const article: RatgeberArticle = {
   ],
   faq: [
     {
-      question: "Kann man den Pflichtteil ohne Gericht klären?",
+      question: "Kann man den Pflichtteil ohne Gericht einfordern?",
       answer:
         "Ja, in den meisten Fällen. In einer Mediation werden Auskunft, Bewertung und Zahlungsmodalitäten gemeinsam geregelt statt gegeneinander erstritten – oft mit Ratenzahlung oder Sachwerten statt einer Sofortzahlung, die den Verkauf einer Immobilie erzwingen würde. Das Ergebnis wird schriftlich festgehalten und bei Bedarf notariell beurkundet.",
     },

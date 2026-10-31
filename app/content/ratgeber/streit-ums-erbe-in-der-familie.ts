@@ -20,7 +20,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Der Unterschied zum Erbprozess: Vor Gericht wird über Quoten und Paragrafen gestritten. In der Mediation kommt auf den Tisch, worum es wirklich geht – Anerkennung für geleistete Pflege, das Gefühl, benachteiligt worden zu sein, oder die Angst, den Kontakt zur Familie zu verlieren. Erst wenn das ausgesprochen ist, werden Vermögensfragen lösbar.",
+      text: "Der Unterschied zum Erbprozess: Vor Gericht wird über Quoten und Paragrafen gestritten. In der Mediation kommt auf den Tisch, worum es wirklich geht – Anerkennung für geleistete Pflege, das Gefühl, benachteiligt worden zu sein, oder die Angst, den Kontakt zur Familie zu verlieren. Erst wenn das ausgesprochen ist, werden Vermögensfragen lösbar. Wie das Schritt für Schritt abläuft, zeigt der Ratgeber [Erbstreit ohne Gericht lösen](/ratgeber/erbstreit-loesen-ohne-gericht).",
     },
     { type: "heading", text: "Typische Konflikte in Familie und Erbengemeinschaft" },
     {
@@ -36,7 +36,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "callout",
-      text: "Erbmediation wirkt auch präventiv: Wer Nachlass oder Übergabe zu Lebzeiten gemeinsam mit allen Beteiligten regelt, erspart der Familie den Streit im Trauerfall.",
+      text: "Erbmediation wirkt auch präventiv: Wer Nachlass oder Übergabe zu Lebzeiten gemeinsam mit allen Beteiligten regelt, erspart der Familie den Streit im Trauerfall. Ist der Erbfall schon eingetreten und geht es um den Pflichtteil, lesen Sie weiter unter [Pflichtteil per Mediation einfordern](/ratgeber/pflichtteil-einfordern).",
     },
     { type: "heading", text: "Warum Mediation statt Erbprozess?" },
     {

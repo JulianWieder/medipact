@@ -75,7 +75,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Konfliktarten und Eskalationsstufen nach Glasl" },
     {
       type: "paragraph",
-      text: "Die Konfliktart sagt, worum es geht. Die Eskalationsstufe sagt, was jetzt noch möglich ist. Das bekannteste Modell dafür stammt von Friedrich Glasl und unterscheidet neun Stufen in drei Zonen – genau diese Einordnung nimmt auch die medipact-Diagnose vor, bevor über Lösungen gesprochen wird.",
+      text: "Die Konfliktart sagt, worum es geht. Die Eskalationsstufe sagt, was jetzt noch möglich ist. Das bekannteste Modell dafür stammt von Friedrich Glasl und unterscheidet neun Stufen in drei Zonen – genau diese Einordnung nimmt auch die medipact-Diagnose vor, bevor über Lösungen gesprochen wird. Wer gerade mitten in einer Eskalation steckt, findet erste Schritte unter [Akuter Konflikt – was tun?](/ratgeber/akuter-konflikt-was-tun).",
     },
     {
       type: "table",

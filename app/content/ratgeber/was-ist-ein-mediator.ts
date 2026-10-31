@@ -46,7 +46,7 @@ export const article: RatgeberArticle = {
     { type: "heading", text: "Ausbildung: Wer darf sich Mediator nennen?" },
     {
       type: "paragraph",
-      text: "Die Berufsbezeichnung „Mediator“ ist in Deutschland nicht streng geschützt. Es gibt jedoch den gesetzlich geregelten „zertifizierten Mediator“, der eine Ausbildung nach den Vorgaben des Mediationsgesetzes und der zugehörigen Verordnung absolviert und sich regelmäßig fortbildet. Achten Sie deshalb auf Qualifikation und Erfahrung.",
+      text: "Die Berufsbezeichnung „Mediator“ ist in Deutschland nicht streng geschützt. Es gibt jedoch den gesetzlich geregelten „zertifizierten Mediator“, der eine Ausbildung nach den Vorgaben des Mediationsgesetzes und der zugehörigen Verordnung absolviert und sich regelmäßig fortbildet. Achten Sie deshalb auf Qualifikation und Erfahrung. Wenn Sie einen [Mediator finden](/mediator-finden) möchten, der zu Ihrem Konflikt passt, hilft das Verzeichnis von medipact.",
     },
     { type: "heading", text: "Woran erkennt man einen guten Mediator?" },
     {
