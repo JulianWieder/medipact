@@ -6,7 +6,7 @@ import UnlocalizedLink from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
+import { isMigratedLocalePath, type AppPathname } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import {
   NavMegaPanel,
@@ -36,7 +36,7 @@ function NavLink({
 }) {
   if (isMigratedLocalePath(href.split("#")[0])) {
     return (
-      <Link href={href} className={className} onClick={onClick}>
+      <Link href={href as AppPathname} className={className} onClick={onClick}>
         {children}
       </Link>
     );

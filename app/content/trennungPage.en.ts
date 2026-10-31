@@ -1,6 +1,6 @@
 // app/content/trennungPage.en.ts
 //
-// English content for /en/scheidungsmediation (translated 30.10.2026 from
+// English content for /en/divorce-mediation (translated 30.10.2026 from
 // trennungPage.de.ts). The shape must stay identical to trennungPage.de.ts
 // so MarketingPageTemplate never needs to change. When the German copy
 // changes, update this file in the same commit.

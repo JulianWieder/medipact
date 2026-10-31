@@ -1,6 +1,6 @@
 import UnlocalizedLink from "next/link";
 import { Link as LocalizedLink } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
+import { isMigratedLocalePath, type AppPathname } from "@/i18n/routing";
 import clsx from "clsx";
 import { ReactNode, ButtonHTMLAttributes } from "react";
 
@@ -75,7 +75,7 @@ export function Button(props: ButtonProps) {
     // nothing in app/[locale]/ to strip it back off again.
     if (isMigratedLocalePath(props.href.split("#")[0])) {
       return (
-        <LocalizedLink href={props.href} className={classes}>
+        <LocalizedLink href={props.href as AppPathname} className={classes}>
           {children}
         </LocalizedLink>
       );

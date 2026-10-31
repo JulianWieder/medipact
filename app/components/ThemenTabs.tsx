@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image, { type StaticImageData } from "next/image";
-import Link from "next/link";
+import { LocaleLink } from "@/app/components/ui/LocaleLink";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { TabSwitcher, CrossfadePanel } from "@/app/components/ui/TabSwitcher";
@@ -171,12 +171,12 @@ export function ThemenTabs() {
                 ))}
               </div>
 
-              <Link
+              <LocaleLink
                 href={thema.href}
                 className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent-700 hover:underline"
               >
                 {t("moreLink", { label: thema.label })} →
-              </Link>
+              </LocaleLink>
             </CrossfadePanel>
           </div>
         </div>

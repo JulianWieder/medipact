@@ -1,6 +1,6 @@
 import UnlocalizedLink from "next/link";
 import { Link as LocalizedLink } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
+import { isMigratedLocalePath, type AppPathname } from "@/i18n/routing";
 import clsx from "clsx";
 import { ReactNode } from "react";
 
@@ -46,7 +46,7 @@ export function ArrowLink({ href, children, tone = "accent", className }: ArrowL
     </>
   );
   return isMigratedLocalePath(href) ? (
-    <LocalizedLink href={href} className={classes}>
+    <LocalizedLink href={href as AppPathname} className={classes}>
       {inner}
     </LocalizedLink>
   ) : (

@@ -125,7 +125,7 @@ export const trennungFacts: DidYouKnowFact[] = [
   },
 ];
 
-/** Englische Fassung von `trennungFacts` für /en/scheidungsmediation – gleiche Fakten, gleiche Quellen. */
+/** Englische Fassung von `trennungFacts` für /en/divorce-mediation – gleiche Fakten, gleiche Quellen. */
 export const trennungFactsEn: DidYouKnowFact[] = [
   {
     eyebrow: "The separation year is mandatory",

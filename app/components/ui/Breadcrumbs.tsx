@@ -1,7 +1,7 @@
 import UnlocalizedLink from "next/link";
 import { useTranslations } from "next-intl";
 import { Link as LocalizedLink } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
+import { isMigratedLocalePath, type AppPathname } from "@/i18n/routing";
 import { JsonLd } from "@/app/components/JsonLd";
 
 /**
@@ -21,7 +21,7 @@ function BreadcrumbLink({
 }) {
   if (isMigratedLocalePath(href)) {
     return (
-      <LocalizedLink href={href} className={className}>
+      <LocalizedLink href={href as AppPathname} className={className}>
         {children}
       </LocalizedLink>
     );

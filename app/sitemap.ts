@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { ratgeberArticles } from "@/app/content/ratgeberArtikel";
 import { KARRIERE_ONLINE } from "@/app/karriere/status";
-import { routing, isIndexedLocalePath } from "@/i18n/routing";
+import { routing, isIndexedLocalePath, localizedPath } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/seo";
 import { ladeMediatoren } from "@/lib/mediatoren";
 
@@ -146,7 +146,7 @@ const ROUTES: Route[] = [
 ];
 
 const urlFor = (locale: string, path: string) =>
-  `${SITE_URL}${locale === routing.defaultLocale ? "" : `/${locale}`}${path}`;
+  `${SITE_URL}${locale === routing.defaultLocale ? "" : `/${locale}`}${localizedPath(path, locale)}`;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Profile aus dem Verzeichnis (kerno) - nur freigegebene, nur Deutsch.

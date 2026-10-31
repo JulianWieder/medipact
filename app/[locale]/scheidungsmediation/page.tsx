@@ -78,7 +78,7 @@ const serviceSchemaEn = {
   serviceType: "Mediation for separation and divorce",
   description:
     "Structured online mediation for separation and divorce – maintenance, childcare, division of assets – as a structured alternative to a dispute between lawyers.",
-  url: "https://medipact.de/en/scheidungsmediation",
+  url: "https://medipact.de/en/divorce-mediation",
 };
 
 // Die Ratgeber und Fallbeispiele gibt es nur auf Deutsch. Auf /en sagt das

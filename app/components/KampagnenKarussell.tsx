@@ -6,6 +6,7 @@
 
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { useRef } from "react";
+import { LocaleLink } from "@/app/components/ui/LocaleLink";
 import { useTranslations } from "next-intl";
 
 type KampagnenCard = {
@@ -93,12 +94,12 @@ export default function KampagnenKarussell() {
               >
                 {startCta} →
               </a>
-              <a
+              <LocaleLink
                 href={card.href}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 transition hover:gap-2.5"
               >
                 {learnCta} →
-              </a>
+              </LocaleLink>
             </div>
           </div>
         ))}

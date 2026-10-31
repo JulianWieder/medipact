@@ -138,7 +138,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/en/konflikte/trennung',
-        destination: '/en/scheidungsmediation',
+        destination: '/en/divorce-mediation',
+        permanent: true,
+      },
+      // 31.10.2026 – /en traegt eine englische URL (routing.pathnames in
+      // i18n/routing.ts). next-intl selbst leitet nur mit 307 um; fuer
+      // Google soll der Umzug dauerhaft sein.
+      {
+        source: '/en/scheidungsmediation',
+        destination: '/en/divorce-mediation',
         permanent: true,
       },
     ];

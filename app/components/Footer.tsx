@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import UnlocalizedLink from "next/link";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { isMigratedLocalePath } from "@/i18n/routing";
+import { isMigratedLocalePath, type AppPathname } from "@/i18n/routing";
 import { resetCookieConsent } from "@/app/components/CookieConsent";
 import NewsletterSignup from "@/app/components/NewsletterSignup";
 import { socialProfiles } from "@/app/content/social";
@@ -33,7 +33,7 @@ function FooterLink({
 }) {
   if (isMigratedLocalePath(href.split("#")[0])) {
     return (
-      <Link href={href} className={className}>
+      <Link href={href as AppPathname} className={className}>
         {children}
       </Link>
     );

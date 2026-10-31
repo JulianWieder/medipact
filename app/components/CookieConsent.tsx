@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+// /cookies und /datenschutz liegen nicht unter app/[locale]/ – deshalb
+// next/link, nicht der sprachabhängige Link (sonst /en/cookies = 404).
+import Link from "next/link";
 
 const STORAGE_KEY = "medipact-cookie-consent";
 

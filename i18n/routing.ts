@@ -14,9 +14,38 @@ export const routing = defineRouting({
   locales: ["de", "en"],
   defaultLocale: "de",
   localePrefix: "as-needed",
+  // Sprechende URLs je Sprache. Schlüssel = interner Pfad (Ordner unter
+  // app/[locale]/), Wert = was im Browser steht. Die Middleware schreibt
+  // /en/divorce-mediation intern auf den Ordner um und leitet das alte
+  // /en/scheidungsmediation per 301 dorthin; Link, getPathname, Canonical,
+  // hreflang und Sitemap (localizedPath unten) ziehen dieselbe Tabelle.
+  // Jeder Pfad aus MIGRATED_LOCALE_ROUTES muss hier stehen.
+  pathnames: {
+    "/": "/",
+    "/scheidungsmediation": {
+      de: "/scheidungsmediation",
+      en: "/divorce-mediation",
+    },
+  },
 });
 
 export type AppLocale = (typeof routing.locales)[number];
+export type AppPathname = keyof typeof routing.pathnames;
+
+/** Sichtbarer Pfad (ohne Sprachpräfix) eines internen Pfads in `locale`. */
+export function localizedPath(path: string, locale: string): string {
+  const config = (routing.pathnames as Record<string, string | Record<string, string>>)[path];
+  if (!config) return path;
+  return typeof config === "string" ? config : (config[locale] ?? path);
+}
+
+/** Umkehrung von localizedPath: sichtbarer Pfad -> interner Pfad. */
+function internalPath(path: string, locale: string): string {
+  for (const internal of Object.keys(routing.pathnames)) {
+    if (localizedPath(internal, locale) === path) return internal;
+  }
+  return path;
+}
 
 /**
  * Single source of truth for which marketing paths actually live under
@@ -35,8 +64,11 @@ export type AppLocale = (typeof routing.locales)[number];
 export const MIGRATED_LOCALE_ROUTES = ["/", "/scheidungsmediation"];
 
 export function isMigratedLocalePath(pathname: string): boolean {
+  const istEn = /^\/en(?=\/|$)/.test(pathname);
   const withoutLocalePrefix = pathname.replace(/^\/en(?=\/|$)/, "") || "/";
-  return MIGRATED_LOCALE_ROUTES.includes(withoutLocalePrefix);
+  // Auf /en zählt auch die übersetzte URL (/en/divorce-mediation).
+  const intern = istEn ? internalPath(withoutLocalePrefix, "en") : withoutLocalePrefix;
+  return MIGRATED_LOCALE_ROUTES.includes(intern);
 }
 
 /**

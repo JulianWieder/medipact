@@ -22,7 +22,7 @@
 //   });
 
 import type { Metadata } from "next";
-import { routing, isIndexedLocalePath } from "@/i18n/routing";
+import { routing, isIndexedLocalePath, localizedPath } from "@/i18n/routing";
 
 // 07.09.2026: Stand bis heute "https://www.medipact.de" — und damit als
 // einziger Ort im Projekt. Sitemap (app/sitemap.ts), robots.ts und saemtliche
@@ -97,7 +97,9 @@ export function pageMetadata({
 }: PageMetadataInput): Metadata {
   const istStandardsprache = !locale || locale === routing.defaultLocale;
   const praefix = istStandardsprache ? "" : `/${locale}`;
-  const url = `${SITE_URL}${praefix}${path}`;
+  // `path` ist der interne Pfad; sichtbar ist je Sprache ggf. ein anderer
+  // (/en/divorce-mediation, siehe routing.pathnames).
+  const url = `${SITE_URL}${praefix}${localizedPath(path, locale ?? routing.defaultLocale)}`;
 
   // Unpraefixierte Seiten (ohne `locale`) haben keine /en-Fassung — dort
   // waere ein hreflang="en" ein Link auf eine 404.
@@ -107,7 +109,7 @@ export function pageMetadata({
         ...Object.fromEntries(
           routing.locales.map((l) => [
             l,
-            `${SITE_URL}${l === routing.defaultLocale ? "" : `/${l}`}${path}`,
+            `${SITE_URL}${l === routing.defaultLocale ? "" : `/${l}`}${localizedPath(path, l)}`,
           ]),
         ),
         "x-default": `${SITE_URL}${path}`,
