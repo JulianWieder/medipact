@@ -1,4 +1,5 @@
 import UnlocalizedLink from "next/link";
+import { useTranslations } from "next-intl";
 import { Link as LocalizedLink } from "@/i18n/navigation";
 import { isMigratedLocalePath } from "@/i18n/routing";
 import { JsonLd } from "@/app/components/JsonLd";
@@ -58,7 +59,8 @@ export function Breadcrumbs({
   items: BreadcrumbItem[];
   variant?: "dark" | "light";
 }) {
-  const fullTrail: BreadcrumbItem[] = [{ label: "Start", href: "/" }, ...items];
+  const t = useTranslations("breadcrumbs");
+  const fullTrail: BreadcrumbItem[] = [{ label: t("home"), href: "/" }, ...items];
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",

@@ -525,5 +525,49 @@
     "prev": "Vorheriger Fakt",
     "next": "Nächster Fakt",
     "show": "Fakt {n} anzeigen"
+  },
+  "marketingTemplate": {
+    "process": "So funktioniert es",
+    "processEyebrow": "Ablauf",
+    "features": "Leistungen",
+    "deepDive": "Im Detail",
+    "bullets": "Typische Anlässe",
+    "comparisonEyebrow": "Vergleich",
+    "comparison": "Der bessere erste Schritt vor der Eskalation",
+    "recommended": "Empfohlen",
+    "trustEyebrow": "Vertrauen",
+    "trust": "Warum medipact",
+    "faq": "Häufige Fragen",
+    "relatedEyebrow": "Weiterlesen",
+    "related": "Passend zum Thema",
+    "start": "Mediation starten"
+  },
+  "breadcrumbs": {
+    "home": "Start"
+  },
+  "logbuchHinweis": {
+    "badge": "Kostenlos",
+    "heading": "Noch nicht bereit für eine Mediation?",
+    "text": "Dann dokumentieren Sie erst einmal: Im kostenlosen <strong>Konflikt-Logbuch</strong> halten Sie Vorkommnisse, Gespräche, E-Mails, WhatsApp-Nachrichten und Telefonate fest – wie ein Streit-Tagebuch. Vertraulich, jederzeit in eine Mediation umwandelbar.",
+    "cta": "Konflikt-Logbuch starten"
+  },
+  "kostenrechnerHinweis": {
+    "badge": "Kostenrechner",
+    "heading": "Was würde dieser Streit vor Gericht kosten?",
+    "intro": "Gerichts- und Anwaltskosten stehen in festen gesetzlichen Tabellen. Beispielrechnung für {label} bei einem Wert von {wert}{einkommen, select, ja { (aus dem Einkommen berechnet)} other {}}:",
+    "court": "Vor Gericht",
+    "courtNote": "Kostenrisiko, wenn Sie vollständig unterliegen",
+    "medipact": "Mit medipact",
+    "medipactNoteTrennung": "Mediation plus einvernehmliche Scheidung",
+    "medipactNote": "Feststehend, kein Kostenrisiko",
+    "breakdown": "Woraus sich die {gesamt} zusammensetzen",
+    "mediation": "Mediation bei medipact (2 × {preis})",
+    "courtFees": "Gerichtskosten der Scheidung",
+    "lawyer": "Anwalt für den Scheidungsantrag",
+    "unavoidable": "{betrag} davon sind gesetzlich unvermeidbar.",
+    "explanation": "Eine Ehe wird nur durch gerichtlichen Beschluss geschieden, und für den Antrag ist mindestens ein Anwalt zwingend (§ 114 FamFG) — das gilt bei jedem Anbieter und auch ohne Mediation. Gespart wird deshalb nicht das Gericht, sondern der zweite Anwalt: {ersparnis}. Und das ist die gesetzliche Untergrenze — bei einer streitigen Scheidung wird meist nach Stunden abgerechnet, dann liegt die Differenz deutlich höher.",
+    "ownNumbers": "Eigene Zahlen einsetzen",
+    "start": "Mediation starten",
+    "footnote": "Der Rechner ist kostenlos und ohne Anmeldung nutzbar. Jede Position mit Fundstelle im Gesetz, inklusive Vergleich mit einem Anwalts-Stundenhonorar."
   }
 }

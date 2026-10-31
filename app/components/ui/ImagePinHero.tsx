@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import type { StaticImageData } from "next/image";
 import { useTransform } from "framer-motion";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { ScrollPinFrame, useScrollPin } from "@/app/components/ui/ScrollPinSection";
 import { HeroBackdrop } from "@/app/components/ui/HeroBackdrop";
@@ -26,7 +27,9 @@ import { HeroTagline } from "@/app/components/ui/HeroTagline";
  * hohe H1 sie auf kleinen Laptop-Screens nicht überlagert, und ist
  * pointer-events-none, damit sie keine Klicks abfängt. Ausschalten mit `tagline={false}`, eigener Text mit
  * `tagline="…"` — Letzteres nur in gut begründeten Ausnahmen: der Satz
- * wirkt gerade dadurch, dass er überall derselbe ist.
+ * wirkt gerade dadurch, dass er überall derselbe ist. Der Standardsatz
+ * kommt aus home.hero.tagline (messages/*.json), damit /en-Seiten ihn
+ * übersetzt zeigen.
  */
 export function ImagePinHero({
   id,
@@ -54,6 +57,7 @@ export function ImagePinHero({
   tagline?: string | false;
   children: ReactNode;
 }) {
+  const t = useTranslations("home.hero");
   const ref = useRef<HTMLDivElement>(null);
   const scrollYProgress = useScrollPin(ref);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
@@ -65,7 +69,7 @@ export function ImagePinHero({
 
       {tagline !== false && (
         <div className="pointer-events-none relative z-20 hidden shrink-0 pt-10 sm:block">
-          <HeroTagline {...(typeof tagline === "string" ? { text: tagline } : {})} />
+          <HeroTagline text={typeof tagline === "string" ? tagline : t("tagline")} />
         </div>
       )}
 

@@ -46,15 +46,16 @@ export function isMigratedLocalePath(pathname: string): boolean {
  * und app/sitemap.ts listet die /en-URL mit.
  *
  * Bewusst getrennt von MIGRATED_LOCALE_ROUTES: "liegt unter app/[locale]/"
- * heisst noch nicht "ist uebersetzt". /scheidungsmediation ist migriert,
- * aber trennungPage.en.ts ist noch der deutsche Platzhaltertext — eine
- * indexierte /en-Fassung davon waere deutsches Duplicate Content mit
+ * heisst noch nicht "ist uebersetzt". Eine indexierte /en-Fassung mit
+ * deutschem Platzhaltertext waere deutsches Duplicate Content mit
  * hreflang="en". Einen Pfad hier erst eintragen, wenn Inhalt UND Metadaten
  * (Title/Description in generateMetadata) wirklich uebersetzt sind.
  *
  * 25.10.2026: Startseite freigegeben (messages/en.json "home" uebersetzt).
+ * 31.10.2026: /scheidungsmediation freigegeben (trennungPage.en.ts und das
+ * Template-Chrome in MarketingPageTemplate uebersetzt).
  */
-export const INDEXED_LOCALE_ROUTES = ["/"];
+export const INDEXED_LOCALE_ROUTES = ["/", "/scheidungsmediation"];
 
 export function isIndexedLocalePath(path: string): boolean {
   return INDEXED_LOCALE_ROUTES.includes(path || "/");

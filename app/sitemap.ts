@@ -58,6 +58,7 @@ const STAND = {
 // auf das deutsche Datum zurueck, das VOR der Existenz der /en-URL liegt.
 const SPRACHFREIGABE: Record<string, Date> = {
   "": new Date("2026-10-25"),
+  "/scheidungsmediation": new Date("2026-10-31"),
 };
 
 type Route = {

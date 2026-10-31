@@ -769,5 +769,53 @@
     "prev": "Previous fact",
     "next": "Next fact",
     "show": "Show fact {n}"
+  },
+  "marketingTemplate": {
+    "process": "How it works",
+    "processEyebrow": "Process",
+    "features": "Services",
+    "deepDive": "In detail",
+    "bullets": "Typical situations",
+    "comparisonEyebrow": "Comparison",
+    "comparison": "The better first step before things escalate",
+    "recommended": "Recommended",
+    "trustEyebrow": "Trust",
+    "trust": "Why medipact",
+    "faq": "Frequently asked questions",
+    "relatedEyebrow": "Further reading",
+    "related": "Related topics",
+    "start": "Start mediation"
+  },
+  "breadcrumbs": {
+    "home": "Home"
+  },
+  "logbuchHinweis": {
+    "badge": "Free",
+    "heading": "Not ready for mediation yet?",
+    "text": "Then start by documenting: in the free <strong>conflict log</strong> you record incidents, conversations, emails, WhatsApp messages and phone calls – like a dispute diary. Confidential, and you can turn it into a mediation at any time.",
+    "cta": "Start the conflict log"
+  },
+  "kostenrechnerHinweis": {
+    "badge": "Cost calculator",
+    "heading": "What would this dispute cost in court?",
+    "intro": "Court and lawyer fees are set out in fixed statutory tables. Example calculation for {label} at a value of {wert}{einkommen, select, ja { (calculated from income)} other {}}:",
+    "court": "In court",
+    "courtNote": "Cost risk if you lose completely",
+    "medipact": "With medipact",
+    "medipactNoteTrennung": "Mediation plus uncontested divorce",
+    "medipactNote": "Fixed, no cost risk",
+    "breakdown": "How the {gesamt} breaks down",
+    "mediation": "Mediation with medipact (2 × {preis})",
+    "courtFees": "Court fees for the divorce",
+    "lawyer": "Lawyer for the divorce petition",
+    "unavoidable": "{betrag} of this is unavoidable by law.",
+    "explanation": "In Germany a marriage can only be dissolved by court order, and at least one lawyer is mandatory for the petition (§ 114 FamFG) — this applies with every provider and even without mediation. What you save is therefore not the court, but the second lawyer: {ersparnis}. And that is the statutory minimum — in a contested divorce lawyers usually bill by the hour, and the difference is then considerably higher.",
+    "ownNumbers": "Enter your own figures (in German)",
+    "start": "Start mediation",
+    "footnote": "The calculator is free and needs no sign-up. Every item cites its legal source, including a comparison with a lawyer's hourly fee.",
+    "art": {
+      "trennung": "separation & divorce",
+      "kindschaft": "custody & contact disputes"
+    }
   }
 }

@@ -7,9 +7,9 @@ import trennungPhoto from "@/fotos/medi_trennung.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 // generateMetadata statt statischem Objekt, weil Titel und Beschreibung
-// je Sprache wechseln. /en ist seit 30.10.2026 übersetzt, aber noch NICHT
-// in INDEXED_LOCALE_ROUTES (i18n/routing.ts) – die Freigabe für Google ist
-// ein eigener Schritt (siehe lib/seo.ts und app/sitemap.ts).
+// je Sprache wechseln. /en ist seit 30.10.2026 übersetzt und seit
+// 31.10.2026 in INDEXED_LOCALE_ROUTES (i18n/routing.ts) für Google
+// freigegeben (siehe lib/seo.ts und app/sitemap.ts).
 export async function generateMetadata({
   params,
 }: {

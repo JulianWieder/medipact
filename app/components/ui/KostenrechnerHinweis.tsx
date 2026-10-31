@@ -1,5 +1,6 @@
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   euro,
   euroGlatt,
@@ -38,7 +39,13 @@ const FALLBACK_MONATSNETTO = 4500;
 const FALLBACK_ANRECHTE = 2;
 
 export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
+  const t = useTranslations("kostenrechnerHinweis");
   const info = konfliktart(art);
+  // Englische Labels gibt es nur für die Arten, die eine /en-Seite haben;
+  // sonst bleibt es beim deutschen Label aus lib/kostenrecht.ts.
+  const label = t.has(`art.${info.key}`)
+    ? t(`art.${info.key}`)
+    : info.label.toLowerCase();
   const istTrennung = art === "trennung";
 
   // Bei Trennung ist der Verfahrenswert kein freier Streitwert, sondern folgt
@@ -75,44 +82,43 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
       <div className="container max-w-4xl">
         <div className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm sm:p-10">
           <span className="inline-flex items-center rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
-            Kostenrechner
+            {t("badge")}
           </span>
 
           <h2 className="mt-3 font-display text-2xl font-medium text-neutral-900">
-            Was würde dieser Streit vor Gericht kosten?
+            {t("heading")}
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
-            Gerichts- und Anwaltskosten stehen in festen gesetzlichen Tabellen.
-            Beispielrechnung für {info.label.toLowerCase()} bei einem Wert von{" "}
-            {euroGlatt(wert)}
-            {istTrennung ? " (aus dem Einkommen berechnet)" : ""}:
+            {t("intro", {
+              label,
+              wert: euroGlatt(wert),
+              einkommen: istTrennung ? "ja" : "nein",
+            })}
           </p>
 
           <dl className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl bg-neutral-50 p-5">
               <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Vor Gericht
+                {t("court")}
               </dt>
               <dd className="mt-1 text-2xl font-black text-neutral-900">
                 {euroGlatt(gericht.gesamt)}
               </dd>
               <dd className="mt-1 text-xs leading-5 text-neutral-500">
-                Kostenrisiko, wenn Sie vollständig unterliegen
+                {t("courtNote")}
               </dd>
             </div>
 
             <div className="rounded-2xl border-2 border-accent-200 bg-accent-50/50 p-5">
               <dt className="text-xs font-semibold uppercase tracking-wide text-accent-700">
-                Mit medipact
+                {t("medipact")}
               </dt>
               <dd className="mt-1 text-2xl font-black text-neutral-900">
                 {euroGlatt(gesamt)}
               </dd>
               <dd className="mt-1 text-xs leading-5 text-neutral-500">
-                {istTrennung
-                  ? "Mediation plus einvernehmliche Scheidung"
-                  : "Feststehend, kein Kostenrisiko"}
+                {istTrennung ? t("medipactNoteTrennung") : t("medipactNote")}
               </dd>
             </div>
           </dl>
@@ -120,13 +126,13 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
           {einvernehmlich && (
             <div className="mt-4 rounded-2xl bg-neutral-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Woraus sich die {euroGlatt(gesamt)} zusammensetzen
+                {t("breakdown", { gesamt: euroGlatt(gesamt) })}
               </p>
 
               <dl className="mt-3 space-y-1.5 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-neutral-700">
-                    Mediation bei medipact (2 × {euroGlatt(info.preis)})
+                    {t("mediation", { preis: euroGlatt(info.preis) })}
                   </dt>
                   <dd className="shrink-0 font-semibold text-accent-700">
                     {euro(mediation)}
@@ -134,7 +140,7 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-neutral-700">
-                    Gerichtskosten der Scheidung
+                    {t("courtFees")}
                   </dt>
                   <dd className="shrink-0 text-neutral-700">
                     {euro(einvernehmlich.gerichtskosten)}
@@ -142,7 +148,7 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-neutral-700">
-                    Anwalt für den Scheidungsantrag
+                    {t("lawyer")}
                   </dt>
                   <dd className="shrink-0 text-neutral-700">
                     {euro(einvernehmlich.anwalt.brutto)}
@@ -152,16 +158,9 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
 
               <p className="mt-4 border-t border-neutral-200 pt-3 text-xs leading-6 text-neutral-600">
                 <strong className="text-neutral-900">
-                  {euro(einvernehmlich.gesamt)} davon sind gesetzlich
-                  unvermeidbar.
+                  {t("unavoidable", { betrag: euro(einvernehmlich.gesamt) })}
                 </strong>{" "}
-                Eine Ehe wird nur durch gerichtlichen Beschluss geschieden, und
-                für den Antrag ist mindestens ein Anwalt zwingend
-                (§ 114 FamFG) — das gilt bei jedem Anbieter und auch ohne
-                Mediation. Gespart wird deshalb nicht das Gericht, sondern der
-                zweite Anwalt: {euro(ersparnis)}. Und das ist die gesetzliche
-                Untergrenze — bei einer streitigen Scheidung wird meist nach
-                Stunden abgerechnet, dann liegt die Differenz deutlich höher.
+                {t("explanation", { ersparnis: euro(ersparnis) })}
               </p>
             </div>
           )}
@@ -171,7 +170,7 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
               href={`/kostenrechner?art=${info.key}`}
               className="shrink-0 rounded-xl bg-accent-600 px-6 py-3 text-center text-sm font-bold text-white transition hover:bg-accent-700"
             >
-              Eigene Zahlen einsetzen →
+              {t("ownNumbers")} →
             </Link>
 
             {/* Zweiter Weg für alle, die die Zahl oben schon überzeugt hat und
@@ -180,14 +179,12 @@ export function KostenrechnerHinweis({ art }: { art: Konfliktart }) {
               href={REGISTRIEREN_URL}
               className="shrink-0 rounded-xl border border-neutral-300 px-6 py-3 text-center text-sm font-bold text-neutral-800 transition hover:border-accent-400 hover:text-accent-700"
             >
-              Mediation starten
+              {t("start")}
             </Link>
           </div>
 
           <p className="mt-4 text-xs leading-5 text-neutral-500">
-            Der Rechner ist kostenlos und ohne Anmeldung nutzbar. Jede Position
-            mit Fundstelle im Gesetz, inklusive Vergleich mit einem
-            Anwalts-Stundenhonorar.
+            {t("footnote")}
           </p>
         </div>
       </div>

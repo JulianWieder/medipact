@@ -4,6 +4,7 @@ import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Image, { type StaticImageData } from "next/image";
 import NextLink from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
@@ -190,15 +191,15 @@ export function MarketingPageTemplate({
   featuresIntro,
   features,
   deepDive,
-  processTitle = "So funktioniert es",
+  processTitle,
   process,
   comparisonTitle,
   comparisonIntro,
   comparisonPlans = [],
-  trustTitle = "Warum medipact",
+  trustTitle,
   trustPoints = [],
   trustImage,
-  faqTitle = "Häufige Fragen",
+  faqTitle,
   faqs = [],
   didYouKnowFacts,
   breadcrumbs,
@@ -209,10 +210,13 @@ export function MarketingPageTemplate({
   finalCtaTitle,
   finalCtaText,
   finalCta,
-  finalPrimaryCta = { label: "Mediation starten", href: REGISTRIEREN_URL },
+  finalPrimaryCta,
   showLogbuchHinweis = true,
   mediatorHinweis = false,
 }: MarketingPageTemplateProps) {
+  const t = useTranslations("marketingTemplate");
+  const primaryFinalCta = finalPrimaryCta ?? { label: t("start"), href: REGISTRIEREN_URL };
+
   return (
     <>
       <main className="app-shell pt-0">
@@ -316,7 +320,7 @@ export function MarketingPageTemplate({
         <section className="section section-muted pt-10 lg:pt-14">
           <div className="container">
             <SectionLead
-              eyebrow="Leistungen"
+              eyebrow={t("features")}
               title={featuresTitle}
               text={featuresIntro}
             />
@@ -338,7 +342,7 @@ export function MarketingPageTemplate({
           <section className="section section-base">
             <div className="container">
               <SectionLead
-                eyebrow={deepDive.eyebrow ?? "Im Detail"}
+                eyebrow={deepDive.eyebrow ?? t("deepDive")}
                 title={deepDive.title}
                 text={deepDive.intro}
               />
@@ -355,7 +359,7 @@ export function MarketingPageTemplate({
               {deepDive.bullets && deepDive.bullets.length > 0 && (
                 <div className="mt-12 grid gap-8 rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
                   <h3 className="heading-3 text-neutral-900">
-                    {deepDive.bulletsTitle ?? "Typische Anlässe"}
+                    {deepDive.bulletsTitle ?? t("bullets")}
                   </h3>
 
                   <ul className="space-y-4 text-neutral-700">
@@ -394,7 +398,7 @@ export function MarketingPageTemplate({
 
         <section className="section section-base">
           <div className="container max-w-5xl">
-            <SectionLead eyebrow="Ablauf" title={processTitle} center />
+            <SectionLead eyebrow={t("processEyebrow")} title={processTitle ?? t("process")} center />
 
             <div className="space-y-5">
               {process.map((step, index) => (
@@ -421,8 +425,8 @@ export function MarketingPageTemplate({
           <section className="section section-strong">
             <div className="container">
               <SectionLead
-                eyebrow="Vergleich"
-                title={comparisonTitle ?? "Der bessere erste Schritt vor der Eskalation"}
+                eyebrow={t("comparisonEyebrow")}
+                title={comparisonTitle ?? t("comparison")}
                 text={comparisonIntro}
                 center
                 tone="dark"
@@ -440,7 +444,7 @@ export function MarketingPageTemplate({
                   >
                     {plan.featured && (
                       <div className="mb-4 inline-block rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-300">
-                        Empfohlen
+                        {t("recommended")}
                       </div>
                     )}
                     <h3 className="text-xl font-bold text-white">{plan.title}</h3>
@@ -482,8 +486,8 @@ export function MarketingPageTemplate({
           <section className="section section-accent">
             <div className="container">
               <SectionLead
-                eyebrow="Vertrauen"
-                title={trustTitle}
+                eyebrow={t("trustEyebrow")}
+                title={trustTitle ?? t("trust")}
                 center={!trustImage}
               />
 
@@ -532,7 +536,7 @@ export function MarketingPageTemplate({
         {faqs.length > 0 && (
           <section className="section section-base">
             <div className="container max-w-4xl">
-              <SectionLead title={faqTitle} center />
+              <SectionLead title={faqTitle ?? t("faq")} center />
 
               <div className="space-y-4">
                 {faqs.map((faq) => (
@@ -557,7 +561,7 @@ export function MarketingPageTemplate({
                   Fallbeispiele, sondern auch Ratgeber-Artikel und die
                   Preisseite. "Passende Fallbeispiele" war dafür schon vorher
                   zu eng. */}
-              <SectionLead eyebrow="Weiterlesen" title="Passend zum Thema" center />
+              <SectionLead eyebrow={t("relatedEyebrow")} title={t("related")} center />
               <div className="flex flex-wrap justify-center gap-4">
                 {relatedCases.map((item) => (
                   <NextLink
@@ -607,8 +611,8 @@ export function MarketingPageTemplate({
                 warten. Der bisherige CTA bleibt als zweite Option für alle,
                 die vorher noch eine Frage haben. */}
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button href={finalPrimaryCta.href} size="lg">
-                {finalPrimaryCta.label}
+              <Button href={primaryFinalCta.href} size="lg">
+                {primaryFinalCta.label}
               </Button>
 
               <NextLink
