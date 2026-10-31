@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NextLink from "next/link";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
-import { JsonLd } from "@/app/components/JsonLd";
 import { pageMetadata } from "@/lib/seo";
 import { KENNENLERN_ANZAHL, KENNENLERN_MINUTEN, STARTPAKET_DANACH, STARTPAKET_NAME } from "@/lib/mediatorVermittlung";
 import { ProfilAuswahl } from "../MerkenButton";
@@ -10,11 +9,19 @@ import {
   bereichLabel,
   fotoUrl,
   ladeMediator,
+  ladeMediatoren,
   stundensatzLabel,
 } from "@/lib/mediatoren";
+import { mitPunkten, ortsseiteZu } from "@/lib/ortsseiten";
 
 // Profilseite einer Mediatorin aus dem Verzeichnis (lib/mediatoren.ts).
 // Nur freigegebene Profile – kerno antwortet sonst 404, dann auch hier.
+//
+// NOINDEX, nicht in der Sitemap, kein Person-Schema: Gebucht wird nur über
+// medipact (Starterpaket). Ein Profil, das bei Google unter dem Namen der
+// Mediatorin rankt, ist eine Visitenkarte für den Direktkontakt an uns
+// vorbei. Gefunden wird über /mediator-finden und die Ortsseiten; dort
+// stehen nur Vorname und Initial, keine Kontaktdaten.
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -23,14 +30,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const m = await ladeMediator(slug);
   if (!m) return { title: "Profil nicht gefunden | medipact", robots: { index: false } };
   const ort = m.orte[0] ? ` in ${m.orte[0]}` : "";
-  return pageMetadata({
-    title: `${m.anzeigename}, Mediation${ort} | medipact`.slice(0, 60),
-    description: (
-      m.kurzvita ??
-      `${m.anzeigename}${m.titel ? `, ${m.titel}` : ""}: Mediation ${m.vor_ort ? "vor Ort" : ""}${m.vor_ort && m.online ? " und " : ""}${m.online ? "per Video" : ""}. Kennenlernen über medipact.`
-    ).slice(0, 155),
-    path: `/mediator-finden/${m.slug}`,
-  });
+  return {
+    ...pageMetadata({
+      title: `${m.anzeigename}, Mediation${ort} | medipact`.slice(0, 60),
+      description: (
+        m.kurzvita ??
+        `${m.anzeigename}${m.titel ? `, ${m.titel}` : ""}: Mediation ${m.vor_ort ? "vor Ort" : ""}${m.vor_ort && m.online ? " und " : ""}${m.online ? "per Video" : ""}. Kennenlernen über medipact.`
+      ).slice(0, 155),
+      path: `/mediator-finden/${m.slug}`,
+    }),
+    robots: { index: false, follow: true },
+  };
 }
 
 export default async function MediatorProfil({ params }: Props) {
@@ -40,21 +50,13 @@ export default async function MediatorProfil({ params }: Props) {
 
   const foto = fotoUrl(m);
   const satz = stundensatzLabel(m.stundensatz_cent);
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: m.anzeigename,
-    jobTitle: m.titel ?? "Mediator:in",
-    url: `https://medipact.de/mediator-finden/${m.slug}`,
-    ...(foto ? { image: `https://medipact.de${foto}` } : {}),
-    knowsLanguage: m.sprachen,
-    ...(m.orte.length ? { workLocation: m.orte.map((o) => ({ "@type": "Place", name: o })) } : {}),
-    memberOf: { "@id": "https://medipact.de/#organization" },
-  };
+  // Ort verlinkt auf die Ortsseite (lib/ortsseiten.ts), aber nur, wenn dort
+  // mehr steht als dieses eine Profil.
+  const alle = mitPunkten(await ladeMediatoren());
+  const orte = m.orte.map((o) => ({ name: o, seite: m.vor_ort ? ortsseiteZu(alle, o) : null }));
 
   return (
     <main>
-      <JsonLd data={personSchema} />
       <section className="section section-base pt-28 lg:pt-32">
         <div className="container">
           <Breadcrumbs
@@ -74,7 +76,26 @@ export default async function MediatorProfil({ params }: Props) {
               </div>
               <div className="mt-6 rounded-3xl border border-neutral-200 bg-white p-6">
                 <dl className="space-y-3 text-sm">
-                  {m.orte.length > 0 && <Zeile label="Ort">{m.orte.join(", ")}</Zeile>}
+                  {orte.length > 0 && (
+                    <Zeile label="Ort">
+                      {orte.map((o, i) => (
+                        <span key={o.name}>
+                          {i > 0 && ", "}
+                          {o.seite && o.seite.treffer.length > 1 ? (
+                            <NextLink
+                              href={`/mediator-finden/ort/${o.seite.slug}`}
+                              className="text-accent-700 hover:underline"
+                              title={`Weitere Mediator:innen in ${o.seite.ort.name}`}
+                            >
+                              {o.name}
+                            </NextLink>
+                          ) : (
+                            o.name
+                          )}
+                        </span>
+                      ))}
+                    </Zeile>
+                  )}
                   <Zeile label="Form">
                     {[m.vor_ort && "Vor Ort", m.online && "Per Video"].filter(Boolean).join(" und ")}
                   </Zeile>

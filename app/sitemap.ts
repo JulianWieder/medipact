@@ -4,6 +4,7 @@ import { KARRIERE_ONLINE } from "@/app/karriere/status";
 import { routing, isIndexedLocalePath, localizedPath } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/seo";
 import { ladeMediatoren } from "@/lib/mediatoren";
+import { mitPunkten, ortsseiten } from "@/lib/ortsseiten";
 
 // ── Was hier hineingehoert ──────────────────────────────────────────────────
 //
@@ -49,6 +50,8 @@ const STAND = {
   verfahren: new Date("2026-09-13"),
   // /mediator-finden + /fuer-mediatoren neu, /preise mit eigener Section dazu.
   vermittlung: new Date("2026-10-25"),
+  // Ortsseiten /mediator-finden/ort/… (lib/ortsseiten.ts) neu.
+  ortsseiten: new Date("2026-10-31"),
 };
 
 // Freigabedatum je Sprachfassung (Pfad -> Datum), gilt NUR fuer die
@@ -149,14 +152,20 @@ const urlFor = (locale: string, path: string) =>
   `${SITE_URL}${locale === routing.defaultLocale ? "" : `/${locale}`}${localizedPath(path, locale)}`;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Profile aus dem Verzeichnis (kerno) - nur freigegebene, nur Deutsch.
-  const profile = (await ladeMediatoren()).map((p) => ({
-    url: urlFor(routing.defaultLocale, `/mediator-finden/${p.slug}`),
-    lastModified: STAND.vermittlung,
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  }));
-  return [...seiten(), ...profile];
+  // Profile selbst stehen NICHT hier: noindex, gebucht wird nur über
+  // medipact (Kopf von app/mediator-finden/[slug]/page.tsx).
+  const mediatoren = await ladeMediatoren();
+  // Ortsseiten nur, wenn indexiert (ab INDEX_AB Profilen, lib/ortsseiten.ts)
+  // - dieselbe Bedingung wie das noindex auf der Seite.
+  const orte = ortsseiten(mitPunkten(mediatoren))
+    .filter((o) => o.indexiert)
+    .map((o) => ({
+      url: urlFor(routing.defaultLocale, `/mediator-finden/ort/${o.slug}`),
+      lastModified: STAND.ortsseiten,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    }));
+  return [...seiten(), ...orte];
 }
 
 function seiten(): MetadataRoute.Sitemap {

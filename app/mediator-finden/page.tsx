@@ -6,6 +6,7 @@ import gespraechPhoto from "@/fotos/medi_gespraech.jpg";
 import einordnenPhoto from "@/fotos/medi_einordnen.jpg";
 import { pageMetadata } from "@/lib/seo";
 import { ladeMediatoren } from "@/lib/mediatoren";
+import { mitPunkten, ortsseiten } from "@/lib/ortsseiten";
 import {
   KENNENLERN_ANZAHL,
   KENNENLERN_MINUTEN,
@@ -64,7 +65,10 @@ const faqSchema = {
 export default async function MediatorFindenPage() {
   // Aus kerno, alle fünf Minuten frisch (lib/mediatoren.ts). Leer, solange
   // noch niemand freigegeben ist – die Seite zeigt dann den Weg über die Anfrage.
-  const mediatoren = await ladeMediatoren();
+  const mediatoren = mitPunkten(await ladeMediatoren());
+  const orte = ortsseiten(mediatoren)
+    .filter((o) => o.indexiert)
+    .map((o) => ({ slug: o.slug, name: o.ort.name }));
   return (
     <>
       <JsonLd data={serviceSchema} />
@@ -80,7 +84,7 @@ export default async function MediatorFindenPage() {
           alt: "Unterlagen werden gemeinsam durchgesehen und eingeordnet",
         }}
         breadcrumbs={[{ label: "Mediator finden" }]}
-        afterHero={<MediatorenVerzeichnis mediatoren={mediatoren} />}
+        afterHero={<MediatorenVerzeichnis mediatoren={mediatoren} ortsseiten={orte} />}
         showLogbuchHinweis={false}
         relatedCases={[
           { label: "Scheidungsmediation", href: "/scheidungsmediation" },

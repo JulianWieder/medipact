@@ -4,11 +4,20 @@
 // vor Ort / per Video. Die Liste kommt serverseitig aus kerno
 // (lib/mediatoren.ts) – hier wird nur noch gefiltert und vorgemerkt.
 //
+// Ort: PLZ oder Ortsname, aufgelöst über /api/orte (lib/geo.ts), dann
+// Umkreis in km. Die Profile kommen mit fertigen Koordinaten (punkte).
+// Lässt sich die Eingabe nicht auflösen, wird wie früher nach Text
+// gefiltert. Video-Profile außerhalb des Umkreises stehen in einer eigenen
+// Gruppe darunter – sie passen zu jedem Ort, aber nicht „in der Nähe".
+//
+// Die Ortsseiten (/mediator-finden/ort/…) nutzen dieselbe Komponente mit
+// `start` (Ort und ggf. Schwerpunkt vorbelegt) und eigenem `kopf`.
+//
 // Vormerken ist die erste Auswahl für das Starterpaket: bis zu
 // MERKLISTE_MAX Profile, ohne Konto (lib/merkliste.ts). Die Leiste unten
 // bucht das Starterpaket mit genau dieser Vorauswahl.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import clsx from "clsx";
 import { Button } from "@/app/components/ui/Button";
@@ -22,21 +31,57 @@ import {
 } from "@/lib/mediatorVermittlung";
 import { useMerkliste } from "@/lib/merkliste";
 import { MerkenButton } from "./MerkenButton";
+import { BEREICHE, bereichLabel, fotoUrl, stundensatzLabel } from "@/lib/mediatoren";
 import {
-  BEREICHE,
-  bereichLabel,
-  fotoUrl,
-  stundensatzLabel,
-  type Mediator,
-} from "@/lib/mediatoren";
+  UMKREISE,
+  UMKREIS_STANDARD,
+  kmLabel,
+  naechsteKm,
+  type Punkt,
+  type VerzeichnisMediator,
+} from "@/lib/umkreis";
 
 type Form = "alle" | "vor_ort" | "online";
+type Ort = Punkt & { label: string };
 
-export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }) {
-  const [bereich, setBereich] = useState<string | null>(null);
-  const [ort, setOrt] = useState("");
+export function MediatorenVerzeichnis({
+  mediatoren,
+  start,
+  kopf,
+  ortsseiten = [],
+}: {
+  mediatoren: VerzeichnisMediator[];
+  start?: { ort?: Ort; umkreis?: number; bereich?: string };
+  kopf?: { eyebrow: string; titel: string; intro: React.ReactNode };
+  /** Links „Mediator:innen nach Ort" – nur indexierte Ortsseiten. */
+  ortsseiten?: { slug: string; name: string }[];
+}) {
+  const [bereich, setBereich] = useState<string | null>(start?.bereich ?? null);
+  const [ortText, setOrtText] = useState(start?.ort?.label ?? "");
+  const [ort, setOrt] = useState<Ort | null>(start?.ort ?? null);
+  const [umkreis, setUmkreis] = useState<number>(start?.umkreis ?? UMKREIS_STANDARD);
   const [form, setForm] = useState<Form>("alle");
   const merkliste = useMerkliste();
+
+  // Eingabe nach kurzer Pause auflösen; ältere Antworten verwerfen.
+  useEffect(() => {
+    const text = ortText.trim();
+    // Unter drei Zeichen leert onChange den Ort, hier wird nichts gefragt.
+    if (text.length < 3 || text === ort?.label) return;
+    const abbruch = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/orte?q=${encodeURIComponent(text)}`, { signal: abbruch.signal });
+        setOrt(res.ok ? ((await res.json()) as Ort) : null);
+      } catch {
+        if (!abbruch.signal.aborted) setOrt(null);
+      }
+    }, 300);
+    return () => {
+      clearTimeout(t);
+      abbruch.abort();
+    };
+  }, [ortText, ort?.label]);
 
   // Nur Schwerpunkte anbieten, die jemand im Verzeichnis auch hat.
   const angeboten = useMemo(
@@ -44,16 +89,34 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
     [mediatoren],
   );
 
-  const treffer = useMemo(() => {
-    const o = ort.trim().toLowerCase();
-    return mediatoren.filter(
+  // nahe: im Umkreis, nächste zuerst. perVideo: weiter weg, aber per Video.
+  const { nahe, perVideo } = useMemo(() => {
+    const basis = mediatoren.filter(
       (m) =>
         (!bereich || m.bereiche.includes(bereich)) &&
-        (form === "alle" || (form === "online" ? m.online : m.vor_ort)) &&
-        // Wer per Video arbeitet, passt zu jedem Ort.
-        (!o || m.online || m.orte.some((x) => x.toLowerCase().includes(o))),
+        (form === "alle" || (form === "online" ? m.online : m.vor_ort)),
     );
-  }, [mediatoren, bereich, ort, form]);
+    if (ort) {
+      const mitKm = basis.map((m) => ({ m, km: naechsteKm(m, ort) }));
+      return {
+        nahe: mitKm
+          .filter((t): t is { m: VerzeichnisMediator; km: number } => t.km !== null && t.km <= umkreis)
+          .sort((a, b) => a.km - b.km),
+        perVideo: mitKm
+          .filter((t) => (t.km === null || t.km > umkreis) && t.m.online)
+          .map((t) => ({ m: t.m, km: null })),
+      };
+    }
+    // Nicht auflösbar (Tippfehler, Ortsteil ohne eigenen Eintrag): Textsuche.
+    // Wer per Video arbeitet, passt zu jedem Ort.
+    const o = ortText.trim().toLowerCase();
+    return {
+      nahe: basis
+        .filter((m) => !o || m.online || m.orte.some((x) => x.toLowerCase().includes(o)))
+        .map((m) => ({ m, km: null })),
+      perVideo: [],
+    };
+  }, [mediatoren, bereich, form, ort, ortText, umkreis]);
 
   // Nur Slugs, die es im Verzeichnis noch gibt – ein zurückgezogenes Profil
   // soll nicht still mitgebucht werden.
@@ -63,12 +126,17 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
     <section id="verzeichnis" className="section section-base">
       <div className="container">
         <div className="mb-10 max-w-3xl">
-          <div className="eyebrow mb-4">Unsere Mediator:innen</div>
-          <h2 className="heading-2">Wählen Sie selbst, mit wem Sie sprechen</h2>
+          <div className="eyebrow mb-4">{kopf?.eyebrow ?? "Unsere Mediator:innen"}</div>
+          <h2 className="heading-2">{kopf?.titel ?? "Wählen Sie selbst, mit wem Sie sprechen"}</h2>
           <p className="mt-5 text-lg leading-8 text-neutral-600">
-            Jedes Profil haben wir vor der Veröffentlichung geprüft. Merken Sie sich bis zu {MERKLISTE_MAX}{" "}
-            Personen vor – im Starterpaket lernen Sie bis zu {KENNENLERN_ANZAHL} von ihnen je {KENNENLERN_MINUTEN}{" "}
-            Minuten kennen. Dazu kommen Angebote von Mediator:innen, die zu Ihrem Fall passen.
+            {kopf?.intro ?? (
+              <>
+                Jedes Profil haben wir vor der Veröffentlichung geprüft. Merken Sie sich bis zu {MERKLISTE_MAX}{" "}
+                Personen vor – im Starterpaket lernen Sie bis zu {KENNENLERN_ANZAHL} von ihnen je{" "}
+                {KENNENLERN_MINUTEN} Minuten kennen. Dazu kommen Angebote von Mediator:innen, die zu Ihrem Fall
+                passen.
+              </>
+            )}
           </p>
         </div>
 
@@ -98,12 +166,29 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
               </div>
               <div className="flex flex-wrap gap-2">
                 <input
-                  value={ort}
-                  onChange={(e) => setOrt(e.target.value)}
-                  placeholder="Ort, z. B. Frankfurt"
-                  aria-label="Ort"
-                  className="w-48 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100"
+                  value={ortText}
+                  onChange={(e) => {
+                    setOrtText(e.target.value);
+                    if (e.target.value.trim().length < 3) setOrt(null);
+                  }}
+                  placeholder="PLZ oder Ort"
+                  aria-label="PLZ oder Ort"
+                  inputMode="search"
+                  className="w-44 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100"
                 />
+                <select
+                  value={umkreis}
+                  onChange={(e) => setUmkreis(Number(e.target.value))}
+                  aria-label="Umkreis"
+                  disabled={!ort}
+                  className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm outline-none focus:border-accent-400 disabled:text-neutral-400"
+                >
+                  {UMKREISE.map((km) => (
+                    <option key={km} value={km}>
+                      {`bis ${km} km`}
+                    </option>
+                  ))}
+                </select>
                 <select
                   value={form}
                   onChange={(e) => setForm(e.target.value as Form)}
@@ -117,7 +202,15 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
               </div>
             </div>
 
-            {treffer.length === 0 ? (
+            {ort && (
+              <p className="-mt-4 mb-6 text-sm text-neutral-500">
+                {nahe.length === 0
+                  ? `Im Umkreis von ${umkreis} km um ${ort.label} gibt es noch kein Profil.`
+                  : `${nahe.length === 1 ? "1 Profil" : `${nahe.length} Profile`} im Umkreis von ${umkreis} km um ${ort.label}, nächste zuerst.`}
+              </p>
+            )}
+
+            {nahe.length === 0 && perVideo.length === 0 ? (
               <p className="text-neutral-600">
                 Für diese Auswahl gibt es noch kein Profil.{" "}
                 <NextLink href={STARTERPAKET_URL} className="font-semibold text-accent-700 hover:underline">
@@ -126,20 +219,56 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
                 .
               </p>
             ) : (
-              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {treffer.map((m) => (
-                  <li key={m.slug}>
-                    <Karte
-                      m={m}
-                      vorgemerkt={merkliste.vorgemerkt(m.slug)}
-                      gesperrt={merkliste.voll && !merkliste.vorgemerkt(m.slug)}
-                      onMerken={() => merkliste.umschalten(m.slug)}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <>
+                {nahe.length > 0 && <Raster liste={nahe} merkliste={merkliste} />}
+                {perVideo.length > 0 && (
+                  <div className={nahe.length > 0 ? "mt-14" : undefined}>
+                    <h3 className="heading-3">Per Video, unabhängig vom Ort</h3>
+                    <p className="mb-6 mt-2 text-neutral-600">
+                      Diese Mediator:innen arbeiten weiter entfernt, führen die Mediation aber auch per Video.
+                    </p>
+                    <Raster liste={perVideo} merkliste={merkliste} />
+                  </div>
+                )}
+              </>
+            )}
+
+            {ort && (
+              <p className="mt-8 text-xs text-neutral-400">
+                Entfernung in Luftlinie. Ortsdaten:{" "}
+                <a href="https://www.geonames.org" className="underline" rel="noopener" target="_blank">
+                  GeoNames
+                </a>
+                ,{" "}
+                <a
+                  href="https://creativecommons.org/licenses/by/4.0/deed.de"
+                  className="underline"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  CC BY 4.0
+                </a>
+              </p>
             )}
           </>
+        )}
+
+        {ortsseiten.length > 0 && (
+          <nav aria-label="Mediator:innen nach Ort" className="mt-16 border-t border-neutral-200 pt-10">
+            <h3 className="heading-3">Mediator:innen nach Ort</h3>
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {ortsseiten.map((o) => (
+                <li key={o.slug}>
+                  <NextLink
+                    href={`/mediator-finden/ort/${o.slug}`}
+                    className="inline-block rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-accent-300 hover:text-accent-800"
+                  >
+                    {`Mediation in ${o.name}`}
+                  </NextLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
         )}
       </div>
       {vorgemerkt.length > 0 && (
@@ -150,6 +279,30 @@ export function MediatorenVerzeichnis({ mediatoren }: { mediatoren: Mediator[] }
         />
       )}
     </section>
+  );
+}
+
+function Raster({
+  liste,
+  merkliste,
+}: {
+  liste: { m: VerzeichnisMediator; km: number | null }[];
+  merkliste: ReturnType<typeof useMerkliste>;
+}) {
+  return (
+    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {liste.map(({ m, km }) => (
+        <li key={m.slug}>
+          <Karte
+            m={m}
+            km={km}
+            vorgemerkt={merkliste.vorgemerkt(m.slug)}
+            gesperrt={merkliste.voll && !merkliste.vorgemerkt(m.slug)}
+            onMerken={() => merkliste.umschalten(m.slug)}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -208,11 +361,13 @@ function Chip({ an, onClick, children }: { an: boolean; onClick: () => void; chi
 
 function Karte({
   m,
+  km,
   vorgemerkt,
   gesperrt,
   onMerken,
 }: {
-  m: Mediator;
+  m: VerzeichnisMediator;
+  km: number | null;
   vorgemerkt: boolean;
   gesperrt: boolean;
   onMerken: () => void;
@@ -264,7 +419,9 @@ function Karte({
         </NextLink>
         {m.titel && <p className="mt-1 text-sm text-neutral-600">{m.titel}</p>}
         <p className="mt-3 text-sm text-neutral-500">
-          {[m.orte.join(", "), m.vor_ort && "vor Ort", m.online && "per Video"].filter(Boolean).join(" · ")}
+          {[m.orte.join(", "), km !== null && kmLabel(km), m.vor_ort && "vor Ort", m.online && "per Video"]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
         {m.bereiche.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
