@@ -168,6 +168,11 @@ export default function Footer({
                 </FooterLink>
               </li>
               <li>
+                <FooterLink href="/eingeladen" className="transition hover:text-white">
+                  {t("companyInvited")}
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/fuer-mediatoren" className="transition hover:text-white">
                   {t("companyForMediators")}
                 </FooterLink>

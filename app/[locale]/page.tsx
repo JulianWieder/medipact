@@ -330,6 +330,17 @@ export default async function MedipactLanding({
 
         <ErsteHilfeBox />
 
+        {/* Für die eingeladene Seite (01.11.2026): ohne ihr Ja kein Fall, und
+            sie landet oft hier statt auf dem Link aus der Mail. */}
+        <section className="border-t border-neutral-100 bg-white py-4">
+          <p className="mx-auto max-w-7xl px-6 text-center text-sm text-neutral-600 lg:px-8">
+            {t("eingeladenText")}{" "}
+            <ArrowLink href="/eingeladen" className="text-sm">
+              {t("eingeladenLink")}
+            </ArrowLink>
+          </p>
+        </section>
+
         <section className="border-y border-neutral-100 bg-neutral-50 py-5">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-neutral-500 sm:gap-x-10">

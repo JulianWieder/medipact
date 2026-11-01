@@ -88,6 +88,9 @@ const ROUTES: Route[] = [
   m("/konflikt-logbuch", 0.9, STAND.intent),
   m("/about", 0.8),
   m("/kontakt", 0.8),
+  // Für die eingeladene Seite: Link aus der Einladung, Suche "zur Mediation
+  // eingeladen".
+  m("/eingeladen", 0.7),
   // Vertriebs-Asset fuer beratende Berufe, eigene Suchsprache — Prioritaet
   // moderat, die Seite lebt von Direktlinks aus Mails und Gespraechen.
   m("/fuer-berater", 0.7),

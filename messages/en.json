@@ -68,6 +68,7 @@
     "companyCareers": "Careers",
     "companyContact": "Contact",
     "companyForAdvisors": "For advisors",
+    "companyInvited": "Invited to a mediation?",
     "companyForMediators": "For mediators",
     "productFindMediator": "Find a mediator",
     "legalHeading": "Legal",
@@ -379,6 +380,8 @@
       }
     ],
     "bekanntAusLabel": "Verifiable",
+    "eingeladenText": "Have you been invited to a mediation?",
+    "eingeladenLink": "What it means and what it costs (in German)",
     "bekanntAusTags": [
       {
         "text": "Harvard method"

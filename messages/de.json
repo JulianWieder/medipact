@@ -68,6 +68,7 @@
     "companyCareers": "Karriere",
     "companyContact": "Kontakt",
     "companyForAdvisors": "Für Berater",
+    "companyInvited": "Zur Mediation eingeladen?",
     "companyForMediators": "Für Mediatoren",
     "productFindMediator": "Mediator finden",
     "legalHeading": "Rechtlich",
@@ -260,6 +261,8 @@
       }
     ],
     "bekanntAusLabel": "Nachprüfbar",
+    "eingeladenText": "Sie wurden zu einer Mediation eingeladen?",
+    "eingeladenLink": "Was das bedeutet und was es kostet",
     "bekanntAusTags": [
       {
         "text": "Harvard-Methode"
