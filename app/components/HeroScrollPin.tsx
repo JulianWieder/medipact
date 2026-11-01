@@ -51,15 +51,25 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
           hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben.
           Im Fluss ueber dem Content, nicht absolut — sonst laeuft sie auf
           niedrigen Screens durch die H1. */}
+      {/* Auf niedrigen Laptop-Bildschirmen (gepinnt, unter 820px Hoehe) faellt
+          die Laufschrift weg: der Frame ist genau eine Bildschirmhoehe hoch
+          und clippt, und die Buttons sind wichtiger. Eigene innere div, damit
+          das Ausblenden nicht mit `sm:block` um die Reihenfolge streitet. */}
       <motion.div
         style={{ opacity: textOpacity }}
-        className="pointer-events-none relative z-20 hidden shrink-0 pt-10 sm:block"
+        className="pointer-events-none relative z-20 hidden shrink-0 sm:block"
       >
-        <HeroTagline text={t("tagline")} />
+        <div className="pt-10 pineng:hidden">
+          <HeroTagline text={t("tagline")} />
+        </div>
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-20 flex flex-1 items-center pt-10 pb-12 sm:py-8">
+      {/* sm:pb-24: Die Kennzahlen-Karte unter dem Hero ragt mit -mt-14/-mt-16
+          hinein (app/[locale]/page.tsx). Ohne diesen Abstand lag sie ueber den
+          Buttons. items-center-safe: Reicht die Hoehe doch nicht, wird unten
+          abgeschnitten statt oben unter dem Header. */}
+      <div className="relative z-20 flex flex-1 items-center-safe pt-10 pb-12 sm:pt-8 sm:pb-24">
         <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Text-Spalte (links) */}
           <div className="max-w-2xl lg:col-span-8">
@@ -119,7 +129,8 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
               </a>
 
               {/* Footer-Labels: Trennlinie und Text deutlich sichtbarer gemacht */}
-              <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-400 border-t border-white/10 pt-6">
+              {/* Unter 900px Hoehe (gepinnt) ausgeblendet, siehe Laufschrift und globals.css. */}
+              <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-neutral-400 border-t border-white/10 pt-6 pinknapp:hidden">
                 {badges.map(({ label }) => (
                   <span
                     key={label}
@@ -137,7 +148,7 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
       {/* Scroll-Cue unten (Palantir-Stil: „Scroll to Explore") */}
       <motion.div
         style={{ opacity: ctaOpacity }}
-        className="pointer-events-none absolute inset-x-0 bottom-6 z-20 hidden items-center sm:flex justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
+        className="pointer-events-none absolute inset-x-0 bottom-6 z-20 hidden items-center sm:bottom-[4.5rem] sm:flex lg:bottom-20 justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
       >
         <span>{t("scrollCue")}</span>
         <svg

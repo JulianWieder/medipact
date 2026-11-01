@@ -12,6 +12,14 @@
    wie PIN_MEDIA_QUERY in app/components/ui/ScrollPinSection.tsx. */
 @custom-variant pin (@media (min-width: 640px) and (min-height: 720px));
 
+/* Gepinnt, aber knapp: der Frame ist genau eine Bildschirmhöhe hoch. Hier
+   blendet der Startseiten-Hero (HeroScrollPin) Nebensachen aus, damit die
+   Buttons nicht unter der Kennzahlen-Karte landen. Eigene Varianten, weil
+   Tailwind `pin:[@media(...)]` nicht erzeugt; ohne Bindestrich, weil
+   `pin-…` als Wert der Variante `pin` gelesen wird. */
+@custom-variant pinknapp (@media (min-width: 640px) and (min-height: 720px) and (max-height: 899px));
+@custom-variant pineng (@media (min-width: 640px) and (min-height: 720px) and (max-height: 819px));
+
 /* ------------------------------------------------------------
    Theme tokens
    ------------------------------------------------------------ */
