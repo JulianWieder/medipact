@@ -63,6 +63,7 @@ export default function MietverhaeltnisPage() {
       <JsonLd data={faqSchema} />
       <MarketingPageTemplate
         {...mietverhaeltnisPageContent}
+        einordnung
         heroImage={{
           src: mietPhoto,
           alt: "Mieterin und Vermieter im Gespräch über eine Abrechnung",

@@ -150,6 +150,7 @@ export default async function TrennungPage({
         kostenrechnerArt="trennung"
         // /mediator-finden gibt es nur auf Deutsch.
         mediatorHinweis={locale === "de"}
+        einordnung={locale === "de"}
         relatedCases={en ? relatedCasesEn : relatedCasesDe}
       />
     </>

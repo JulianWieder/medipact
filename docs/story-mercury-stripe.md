@@ -25,6 +25,13 @@ gibt, stehen Fall- und Erfolgszahlen nirgends (siehe AGENTS.md zu
 - [x] **Offene Kosten** für Eingeladene (Muster Stripe: „2,9 % + 30 ¢“):
   Konto kostenlos, Kosten erst bei Freischaltung durch beide, Festpreis je
   Partei, Anteil kann übernommen werden.
+- [x] **Auf die Konflikt-Seiten ausgeweitet** über `EinordnungHinweis`
+  (`MarketingPageTemplate`, Prop `einordnung`, vor den FAQ): „Was medipact
+  nicht ist", Kosten in einem Satz mit Link auf `/preise`, „Sie wurden
+  eingeladen?" mit Link auf `/eingeladen`. An auf Trennung (nur deutsch),
+  Nachbarschaft, Erbschaft, Arbeitsplatz, Mietverhältnis, Verbraucher. Nicht
+  auf ODR (andere Abrechnung). Die Kosten-Zeile nennt keinen Betrag und kein
+  „je Partei", weil Arbeitsplatz pauschal pro Fall kostet.
 
 ## Als Nächstes, ohne neue Daten möglich
 

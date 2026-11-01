@@ -102,8 +102,10 @@ Zwei Regeln beim Einsatz:
 ## Konflikt-Typen auf den Marketing-Seiten
 
 There are FOUR conflict types (matching the backend `mediation_type`s):
-trennung, nachbarschaft, erbschaft, geschaeft ("Team & Organisation",
-`/konflikte/geschaeft`, content in `app/content/geschaeftPage.ts`). When a
+trennung, nachbarschaft, erbschaft, geschaeft ("Wirtschaft"; the URL
+`/konflikte/geschaeft` is a 308 redirect to `/konflikte/odr`, which carries
+the content — keep linking `geschaeft` where the `anlass` for registration
+is derived from the href, e.g. `KampagnenKarussell`). When a
 page lists conflict types (ThemenTabs, EmpfehlungenGrid, Header dropdown,
 `/konflikte` overview, sitemap, metadata descriptions), include all four —
 geschaeft was added last and is easy to forget.

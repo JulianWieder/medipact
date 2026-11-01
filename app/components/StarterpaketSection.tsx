@@ -129,7 +129,18 @@ export function StarterpaketSection({
                 </li>
               ))}
             </ul>
-            <p className="mt-6 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
+            {/* Fallanalyse als Teil des Pakets, nicht als eigener Schritt
+                daneben (Einstieg-Sektion der Startseite nennt sie nicht mehr
+                separat). */}
+            <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 p-5">
+              <div className="text-sm font-semibold text-accent-800">
+                {inhalt.fallanalyse.title}
+              </div>
+              <p className="mt-1 text-sm leading-6 text-neutral-700">
+                {inhalt.fallanalyse.text}
+              </p>
+            </div>
+            <p className="mt-4 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
               {inhalt.danach}
             </p>
             <Button href={STARTERPAKET_URL} className="mt-6 w-full">

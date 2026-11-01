@@ -16,6 +16,7 @@ import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumb
 import { LogbuchHinweis } from "@/app/components/ui/LogbuchHinweis";
 import { KostenrechnerHinweis } from "@/app/components/ui/KostenrechnerHinweis";
 import { MediatorVermittlungHinweis } from "@/app/components/ui/MediatorVermittlungHinweis";
+import { EinordnungHinweis } from "@/app/components/ui/EinordnungHinweis";
 import type { Konfliktart } from "@/lib/kostenrecht";
 
 type PageImage = {
@@ -142,6 +143,11 @@ type MarketingPageTemplateProps = {
   /** Hinweis auf die Vermittlung einer persönlichen Mediatorin
    * (/mediator-finden). Nur auf den Konflikt-Seiten; Standard aus. */
   mediatorHinweis?: boolean;
+  /** Einordnung „Was medipact nicht ist" + Kosten + Weg für Eingeladene
+   * (EinordnungHinweis), vor den FAQ. Nur auf den Konflikt-Seiten (nicht ODR),
+   * nur deutsch (/eingeladen gibt es nur auf Deutsch);
+   * Standard aus. */
+  einordnung?: boolean;
 };
 
 function SectionLead({
@@ -213,6 +219,7 @@ export function MarketingPageTemplate({
   finalPrimaryCta,
   showLogbuchHinweis = true,
   mediatorHinweis = false,
+  einordnung = false,
 }: MarketingPageTemplateProps) {
   const t = useTranslations("marketingTemplate");
   const primaryFinalCta = finalPrimaryCta ?? { label: t("start"), href: REGISTRIEREN_URL };
@@ -532,6 +539,8 @@ export function MarketingPageTemplate({
             </div>
           </section>
         )}
+
+        {einordnung && <EinordnungHinweis />}
 
         {faqs.length > 0 && (
           <section className="section section-base">

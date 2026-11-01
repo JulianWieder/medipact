@@ -64,6 +64,7 @@ export default function VerbraucherPage() {
       <JsonLd data={faqSchema} />
       <MarketingPageTemplate
         {...verbraucherPageContent}
+        einordnung
         heroImage={{
           src: verbraucherPhoto,
           alt: "Kunde prüft eine strittige Handwerker-Rechnung",

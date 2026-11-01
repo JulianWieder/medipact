@@ -79,6 +79,7 @@ export default function ErbschaftPage() {
         ]}
         kostenrechnerArt="erbschaft"
         mediatorHinweis
+        einordnung
         relatedCases={[
           { label: "Ratgeber: Geschwister streiten ums Erbe", href: "/ratgeber/geschwister-streiten-ums-erbe" },
           { label: "Ratgeber: Erbengemeinschaft blockiert", href: "/ratgeber/erbengemeinschaft-blockade" },

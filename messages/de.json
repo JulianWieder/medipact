@@ -140,17 +140,8 @@
           "text": "Gesellschafterstreit, Teamkonflikte, B2B – Wirtschaftsmediation für Unternehmen.",
           "href": "/konflikte/geschaeft",
           "cta": "Mehr erfahren"
-        },
-        {
-          "tag": "ODR",
-          "title": "Streitbeilegung im Volumen.",
-          "text": "Viele Kundenkonflikte, ein System: Online Dispute Resolution über das Firmen-Abo.",
-          "href": "/konflikte/odr",
-          "cta": "Mehr erfahren"
         }
-      ],
-      "prev": "Zurück",
-      "next": "Weiter"
+      ]
     },
     "ersteHilfe": {
       "eyebrow": "In 3 Schritten starten",
@@ -335,12 +326,12 @@
     "processText": "Geführt statt allein gelassen, nach dem Harvard-Prinzip – fair für alle Seiten.",
     "einstieg": {
       "eyebrow": "So starten Sie",
-      "title": "Erst den Fall verstehen, dann den Weg wählen.",
-      "text": "Jeder Fall beginnt gleich: mit einer ersten Fallanalyse. Wer zuerst erleben will, wie Mediation arbeitet, und die passende Mediatorin sucht, nimmt das Starterpaket. Danach entscheiden Sie, wie es weitergeht.",
+      "title": "Erst verstehen, dann den Weg wählen.",
+      "text": "Wer zuerst erleben will, wie Mediation arbeitet, und die passende Mediatorin sucht, nimmt das Starterpaket. Danach entscheiden Sie, wie es weitergeht.",
       "steps": [
         {
-          "title": "Erste Fallanalyse",
-          "text": "Ihr Fall wird nach demselben Schema aufbereitet wie jeder andere. Die Analyse ist im Preis enthalten, im Online-Verfahren wie im Starterpaket, und geht bei einer Übergabe an Ihre Mediatorin mit."
+          "title": "Fall anlegen",
+          "text": "Sie schildern den Konflikt aus Ihrer Sicht, im kostenlosen Konto. Eine erste Fallanalyse, ob Mediation grundsätzlich in Frage kommt, ist in jedem Paket enthalten."
         },
         {
           "title": "Starterpaket (optional)",

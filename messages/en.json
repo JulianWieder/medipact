@@ -140,17 +140,8 @@
           "text": "Shareholder disputes, team conflicts, B2B – commercial mediation for companies.",
           "href": "/konflikte/geschaeft",
           "cta": "Learn more"
-        },
-        {
-          "tag": "ODR",
-          "title": "Dispute resolution at scale.",
-          "text": "Many customer disputes, one system: online dispute resolution with a company subscription.",
-          "href": "/konflikte/odr",
-          "cta": "Learn more"
         }
-      ],
-      "prev": "Previous",
-      "next": "Next"
+      ]
     },
     "ersteHilfe": {
       "eyebrow": "Get started in 3 steps",
@@ -454,12 +445,12 @@
     "processText": "Guided rather than left on your own, based on the Harvard principle – fair to all sides.",
     "einstieg": {
       "eyebrow": "How to start",
-      "title": "First understand the case, then choose the path.",
-      "text": "Every case starts the same way: with an initial case analysis. If you first want to experience how mediation works and find the right mediator, take the starter package. Afterwards you decide how to continue.",
+      "title": "First understand, then choose the path.",
+      "text": "If you first want to experience how mediation works and find the right mediator, take the starter package. Afterwards you decide how to continue.",
       "steps": [
         {
-          "title": "Initial case analysis",
-          "text": "Your case is prepared using the same framework as every other. The analysis is included in the price, in the online process as well as in the starter package, and goes to your mediator if you hand over."
+          "title": "Create your case",
+          "text": "You describe the conflict from your point of view, in a free account. An initial case analysis of whether mediation is basically an option is included in every package."
         },
         {
           "title": "Starter package (optional)",
@@ -551,6 +542,10 @@
         "Handover of your results to the mediator you choose – only with both sides' consent",
         "An assessment of whether a solution is within reach – reaching an agreement is not part of the package"
       ],
+      "fallanalyse": {
+        "title": "Included: initial case analysis",
+        "text": "At the start, a brief assessment of whether mediation is basically an option in your case – using the same framework as for every case. It goes to your mediator when you hand over."
+      },
       "danach": "Afterwards you decide: continue via medipact, with sessions at the hourly rate shown in the profile split between you – or directly with your mediator, who bills you directly and receives only your results from us. Or you pause. Further costs only arise if you continue.",
       "cta": "Book the starter package",
       "ctaProfile": "Browse and shortlist mediators"

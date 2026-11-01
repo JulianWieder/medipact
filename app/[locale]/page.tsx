@@ -297,10 +297,10 @@ export default async function MedipactLanding({
           </div>
         </section>
 
-        {/* Einstieg in drei Schritten (30.10.2026): Fallanalyse (im Preis
-            enthalten, für jeden Fall gleich) → Starterpaket (optional) → Weg
-            wählen. Ordnet die beiden Wege ein, bevor das Starterpaket im
-            Detail kommt. Texte unter home.einstieg in messages/*.json. */}
+        {/* Einstieg in drei Schritten: Fall anlegen → Starterpaket (optional) →
+            Weg wählen. Die Fallanalyse ist seit 01.11.2026 kein eigener Schritt
+            mehr, sondern steht als Bestandteil in der Starterpaket-Preiskarte.
+            Texte unter home.einstieg in messages/*.json. */}
         <section className="section section-base text-center">
           <div className="mx-auto max-w-5xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl">

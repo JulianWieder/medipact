@@ -32,6 +32,10 @@ export type StarterpaketInhalt = {
   preis: string;
   preisHinweis: string;
   punkte: string[];
+  /** Erste Fallanalyse als Bestandteil des Pakets (in der Preiskarte),
+   * nicht als eigener Schritt: kurze Einschätzung, ob Mediation
+   * grundsätzlich in Frage kommt. Im Preis enthalten (Stand 30.10.2026). */
+  fallanalyse: { title: string; text: string };
   danach: string;
   cta: string;
   ctaProfile: string;
@@ -75,6 +79,10 @@ export const starterpaketInhaltDe: StarterpaketInhalt = {
   preis: STARTPAKET_PREIS,
   preisHinweis: `Pro Fall, geteilt: ${STARTPAKET_ANTEIL} je Seite – fällig, wenn die andere Seite zusagt`,
   punkte: STARTPAKET_PUNKTE,
+  fallanalyse: {
+    title: "Inklusive: erste Fallanalyse",
+    text: "Zu Beginn eine kurze Einschätzung, ob Mediation in Ihrem Fall grundsätzlich in Frage kommt – nach demselben Schema wie bei jedem Fall. Sie geht bei der Übergabe an Ihre Mediatorin mit.",
+  },
   danach: STARTPAKET_DANACH,
   cta: "Starterpaket buchen",
   ctaProfile: "Mediator:innen ansehen und vormerken",

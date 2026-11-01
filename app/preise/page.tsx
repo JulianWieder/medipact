@@ -357,6 +357,20 @@ export default function Preise() {
                   <p className="text-xs text-neutral-600 -mt-3">
                     <Icon name="arrow-right" size={12} color="currentColor" /> Einmalig für den Fall
                   </p>
+
+                  {/* Fallanalyse als Bestandteil, nicht als eigenes Angebot
+                      (wie in der Starterpaket-Preiskarte). */}
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="font-medium text-neutral-900">
+                      Erste Fallanalyse
+                    </span>
+                    <span className="text-sm font-bold text-accent-700">
+                      inklusive
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Kurze Einschätzung, ob Mediation grundsätzlich in Frage kommt – bei jedem Konflikt-Typ
+                  </p>
                 </div>
 
                 {/* Features */}
