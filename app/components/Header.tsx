@@ -210,14 +210,50 @@ export default function Header() {
         },
       ],
       footer: [
-        { label: t("methodeGleichbehandlung"), href: "/einigung/gleichbehandlung" },
+        {
+          label: t("methodeGleichbehandlung"),
+          href: "/einigung/gleichbehandlung",
+        },
         { label: t("kostenrechner"), href: "/kostenrechner" },
       ],
     },
     {
-      label: t("beispiele"),
-      href: "/cases",
+      // Ratgeber und Fallbeispiele teilen sich einen Menuepunkt, bleiben
+      // aber zwei Bereiche mit eigener Uebersicht: links Wissen, rechts
+      // Praxis. Die Anker zeigen auf die Kategorie-Abschnitte in /ratgeber.
+      label: t("wissen"),
+      href: "/ratgeber",
+      wide: true,
       groups: [
+        {
+          title: t("ratgeber"),
+          items: [
+            {
+              label: t("ratgeberUebersicht"),
+              href: "/ratgeber",
+              desc: t("ratgeberUebersichtDesc"),
+              icon: "notebook",
+            },
+            {
+              label: t("ratgeberTrennung"),
+              href: "/ratgeber#trennung-scheidung",
+              desc: t("ratgeberTrennungDesc"),
+              icon: "heartbreak",
+            },
+            {
+              label: t("ratgeberErbe"),
+              href: "/ratgeber#familie-erbe",
+              desc: t("ratgeberErbeDesc"),
+              icon: "scroll",
+            },
+            {
+              label: t("ratgeberMediation"),
+              href: "/ratgeber#mediation",
+              desc: t("ratgeberMediationDesc"),
+              icon: "compass",
+            },
+          ],
+        },
         {
           title: t("beispieleGruppe"),
           items: [
@@ -236,9 +272,11 @@ export default function Header() {
           ],
         },
       ],
-      footer: [{ label: t("ratgeber"), href: "/ratgeber" }],
+      footer: [
+        { label: t("ratgeberAlle"), href: "/ratgeber" },
+        { label: t("beispieleAlle"), href: "/cases" },
+      ],
     },
-    { label: t("ratgeber"), href: "/ratgeber" },
     { label: t("kostenrechner"), href: "/kostenrechner" },
   ];
 
@@ -262,208 +300,214 @@ export default function Header() {
           hidden && !open ? "-translate-y-full" : "translate-y-0"
         }`}
       >
-      <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 md:py-4">
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <Image
-            src={logo}
-            alt="Medipact Logo"
-            width={36}
-            height={36}
-            className="h-7 w-7 rounded-md object-cover md:h-9 md:w-9"
-            // Kein `preload`/`priority`: das Logo ist 28x28 CSS-Pixel und darf
-            // nicht mit dem Hero-Foto (dem LCP-Element) um einen Preload-Slot
-            // konkurrieren. `loading="eager"` holt es trotzdem sofort, nur ohne
-            // <link> im <head> und ohne Vorrang.
-            loading="eager"
-            fetchPriority="low"
-          />
-          <span className="text-base font-semibold tracking-tight text-neutral-900 md:text-lg">
-            Medipact
-          </span>
-        </Link>
+        <div className="w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 md:py-4">
+            {/* LOGO */}
+            <Link
+              href="/"
+              className="flex items-center gap-2"
+              onClick={() => setOpen(false)}
+            >
+              <Image
+                src={logo}
+                alt="Medipact Logo"
+                width={36}
+                height={36}
+                className="h-7 w-7 rounded-md object-cover md:h-9 md:w-9"
+                // Kein `preload`/`priority`: das Logo ist 28x28 CSS-Pixel und darf
+                // nicht mit dem Hero-Foto (dem LCP-Element) um einen Preload-Slot
+                // konkurrieren. `loading="eager"` holt es trotzdem sofort, nur ohne
+                // <link> im <head> und ohne Vorrang.
+                loading="eager"
+                fetchPriority="low"
+              />
+              <span className="text-base font-semibold tracking-tight text-neutral-900 md:text-lg">
+                Medipact
+              </span>
+            </Link>
 
-        {/* NAV */}
-        <nav className="hidden items-center gap-5 lg:gap-8 md:flex">
-          {navItems.map((item) =>
-            item.groups ? (
-              <div key={item.href} className="group relative">
-                <NavLink
-                  href={item.href}
-                  className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
-                >
-                  {item.label}
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </NavLink>
+            {/* NAV */}
+            <nav className="hidden items-center gap-5 lg:gap-8 md:flex">
+              {navItems.map((item) =>
+                item.groups ? (
+                  <div key={item.href} className="group relative">
+                    <NavLink
+                      href={item.href}
+                      className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
+                    >
+                      {item.label}
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 group-hover:-rotate-180 group-focus-within:-rotate-180"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </NavLink>
 
-                {/* Mega-Panel. `pt-3` ueberbrueckt die Luecke zwischen
+                    {/* Mega-Panel. `pt-3` ueberbrueckt die Luecke zwischen
                     Nav-Eintrag und Panel, sonst schliesst es beim Runterfahren
                     der Maus. `delay-100` auf der Basis-Klasse verzoegert nur
                     das OEFFNEN (CSS wendet die Basis-Transition beim Wechsel
                     in den Hover-Zustand an) — `group-hover:delay-0` laesst es
                     sofort wieder schliessen. */}
-                <div
-                  className={`invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all delay-100 duration-150 group-hover:visible group-hover:opacity-100 group-hover:delay-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:delay-0 ${
-                    item.wide
-                      ? "w-[min(40rem,calc(100vw-2rem))]"
-                      : "w-[min(22rem,calc(100vw-2rem))]"
-                  }`}
-                >
-                  <NavMegaPanel
-                    groups={item.groups}
-                    footer={item.footer}
-                    renderLink={(href, className, children) => (
-                      <NavLink href={href} className={className}>
-                        {children}
-                      </NavLink>
-                    )}
-                  />
-                </div>
-              </div>
-            ) : (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                className="whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
-              >
-                {item.label}
-              </NavLink>
-            ),
-          )}
-        </nav>
+                    <div
+                      className={`invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all delay-100 duration-150 group-hover:visible group-hover:opacity-100 group-hover:delay-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:delay-0 ${
+                        item.wide
+                          ? "w-[min(40rem,calc(100vw-2rem))]"
+                          : "w-[min(22rem,calc(100vw-2rem))]"
+                      }`}
+                    >
+                      <NavMegaPanel
+                        groups={item.groups}
+                        footer={item.footer}
+                        renderLink={(href, className, children) => (
+                          <NavLink href={href} className={className}>
+                            {children}
+                          </NavLink>
+                        )}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    className="whitespace-nowrap text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
+                  >
+                    {item.label}
+                  </NavLink>
+                ),
+              )}
+            </nav>
 
-        {/* CTA */}
-        <div className="hidden items-center md:flex">
-          {/* Sprachumschalter erscheint ohnehin nur auf 2 Seiten und macht die
+            {/* CTA */}
+            <div className="hidden items-center md:flex">
+              {/* Sprachumschalter erscheint ohnehin nur auf 2 Seiten und macht die
               Leiste unter xl zu voll — dort nur im Handy-Menü (<md) sichtbar. */}
-          <div className="hidden xl:ml-6 xl:block">
-            <LanguageSwitcher />
-          </div>
-          {/* Ein primärer CTA (Start), Login getrennt und ruhiger — Rückkehrer
+              <div className="hidden xl:ml-6 xl:block">
+                <LanguageSwitcher />
+              </div>
+              {/* Ein primärer CTA (Start), Login getrennt und ruhiger — Rückkehrer
               finden ihn, ohne dass er mit dem Einstieg konkurriert. Weiß auf
               accent-700 = 5,5:1 (accent-600 hatte nur 3,7:1). */}
-          <UnlocalizedLink
-            href={ANMELDEN_URL}
-            className="ml-5 text-sm font-medium text-neutral-500 transition hover:text-accent-700"
-          >
-            {t("login")}
-          </UnlocalizedLink>
-          <UnlocalizedLink
-            href={REGISTRIEREN_URL}
-            className="ml-4 whitespace-nowrap rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
-          >
-            {t("startCta")}
-          </UnlocalizedLink>
-        </div>
+              <UnlocalizedLink
+                href={ANMELDEN_URL}
+                className="ml-5 text-sm font-medium text-neutral-500 transition hover:text-accent-700"
+              >
+                {t("login")}
+              </UnlocalizedLink>
+              <UnlocalizedLink
+                href={REGISTRIEREN_URL}
+                className="ml-4 whitespace-nowrap rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
+              >
+                {t("startCta")}
+              </UnlocalizedLink>
+            </div>
 
-        {/* MOBILE TOGGLE */}
-        <button
-          type="button"
-          className="inline-flex rounded-md p-2 text-neutral-800 md:hidden"
-          aria-label={open ? t("menuClose") : t("menuOpen")}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          {open ? (
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              className="h-5 w-5"
+            {/* MOBILE TOGGLE */}
+            <button
+              type="button"
+              className="inline-flex rounded-md p-2 text-neutral-800 md:hidden"
+              aria-label={open ? t("menuClose") : t("menuOpen")}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              onClick={() => setOpen((prev) => !prev)}
             >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          ) : (
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              className="h-5 w-5"
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          )}
-        </button>
-      </div>
-
-      {/* MOBILE MENU */}
-      {open && (
-        <nav
-          id="mobile-menu"
-          className="max-h-[calc(100dvh-60px)] overflow-y-auto border-t border-neutral-200/80 bg-white px-6 py-4 md:hidden"
-        >
-          <ul className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <NavLink
-                  href={item.href}
-                  className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
-                  onClick={() => setOpen(false)}
+              {open ? (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  className="h-5 w-5"
                 >
-                  {item.label}
-                </NavLink>
-                {/* Mobil bewusst ohne Icons und ohne `desc`: die Halbsaetze
-                    verdoppeln die Menuehoehe, und auf dem Handy scrollt man
-                    ohnehin, statt zu ueberfliegen. */}
-                {item.groups && (
-                  <ul className="ml-3 flex flex-col gap-1 border-l border-neutral-200 pl-3">
-                    {item.groups.flatMap((g) => g.items).map((child) => (
-                      <li key={child.href}>
-                        <NavLink
-                          href={child.href}
-                          className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                          onClick={() => setOpen(false)}
-                        >
-                          {child.label}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-4 flex items-center justify-center">
-            <LanguageSwitcher />
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              ) : (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              )}
+            </button>
           </div>
 
-          <UnlocalizedLink
-            href={REGISTRIEREN_URL}
-            className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
-            onClick={() => setOpen(false)}
-          >
-            {t("startCta")}
-          </UnlocalizedLink>
-          <UnlocalizedLink
-            href={ANMELDEN_URL}
-            className="mt-3 block w-full py-2 text-center text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
-            onClick={() => setOpen(false)}
-          >
-            {t("login")}
-          </UnlocalizedLink>
-        </nav>
-      )}
-      </div>
+          {/* MOBILE MENU */}
+          {open && (
+            <nav
+              id="mobile-menu"
+              className="max-h-[calc(100dvh-60px)] overflow-y-auto border-t border-neutral-200/80 bg-white px-6 py-4 md:hidden"
+            >
+              <ul className="flex flex-col gap-1">
+                {navItems.map((item) => (
+                  <li key={item.href}>
+                    <NavLink
+                      href={item.href}
+                      className="block rounded-md px-2 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.label}
+                    </NavLink>
+                    {/* Mobil bewusst ohne Icons und ohne `desc`: die Halbsaetze
+                    verdoppeln die Menuehoehe, und auf dem Handy scrollt man
+                    ohnehin, statt zu ueberfliegen. */}
+                    {item.groups && (
+                      <ul className="ml-3 flex flex-col gap-1 border-l border-neutral-200 pl-3">
+                        {item.groups
+                          .flatMap((g) => g.items)
+                          .map((child) => (
+                            <li key={child.href}>
+                              <NavLink
+                                href={child.href}
+                                className="block rounded-md px-2 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                                onClick={() => setOpen(false)}
+                              >
+                                {child.label}
+                              </NavLink>
+                            </li>
+                          ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-4 flex items-center justify-center">
+                <LanguageSwitcher />
+              </div>
+
+              <UnlocalizedLink
+                href={REGISTRIEREN_URL}
+                className="mt-4 inline-flex w-full justify-center rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-800"
+                onClick={() => setOpen(false)}
+              >
+                {t("startCta")}
+              </UnlocalizedLink>
+              <UnlocalizedLink
+                href={ANMELDEN_URL}
+                className="mt-3 block w-full py-2 text-center text-sm font-semibold text-neutral-700 transition hover:text-accent-700"
+                onClick={() => setOpen(false)}
+              >
+                {t("login")}
+              </UnlocalizedLink>
+            </nav>
+          )}
+        </div>
       </header>
     </>
   );

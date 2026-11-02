@@ -49,9 +49,20 @@
     "methodeOhneMediatorDesc": "Reichweite und Grenzen",
     "methodeGleichbehandlungDesc": "Fairness und KI-Einsatz",
     "beispieleGruppe": "Aus der Praxis",
-    "beispieleFallbeispieleDesc": "12 Fälle mit Ergebnis und Kosten",
+    "beispieleFallbeispieleDesc": "15 Verläufe mit Ergebnis und Kosten",
     "beispieleMatrixDesc": "Konfliktart und Lösung im Raster",
-    "konflikteLogbuch": "Noch nicht so weit? Erst mal festhalten"
+    "konflikteLogbuch": "Noch nicht so weit? Erst mal festhalten",
+    "wissen": "Ratgeber & Fälle",
+    "ratgeberUebersicht": "Ratgeber-Übersicht",
+    "ratgeberUebersichtDesc": "Alle Artikel, sortiert nach Lebenslage",
+    "ratgeberTrennung": "Trennung & Scheidung",
+    "ratgeberTrennungDesc": "Haus, Unterhalt, Sorgerecht",
+    "ratgeberErbe": "Familie & Erbe",
+    "ratgeberErbeDesc": "Testament, Pflichtteil, Erbengemeinschaft",
+    "ratgeberMediation": "Mediation verstehen",
+    "ratgeberMediationDesc": "Ablauf, Kosten, Gericht oder Mediation",
+    "ratgeberAlle": "Zum Ratgeber",
+    "beispieleAlle": "Zu den Fallbeispielen"
   },
   "footer": {
     "ctaEyebrow": "Sie entscheiden. Nicht das Gericht. Nicht die Eskalation.",

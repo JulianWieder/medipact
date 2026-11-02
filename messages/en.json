@@ -49,9 +49,20 @@
     "methodeOhneMediatorDesc": "Reach and limits",
     "methodeGleichbehandlungDesc": "Fairness and use of AI",
     "beispieleGruppe": "From practice",
-    "beispieleFallbeispieleDesc": "12 cases with outcome and cost",
+    "beispieleFallbeispieleDesc": "15 cases with outcome and cost",
     "beispieleMatrixDesc": "Conflict type and solution in a grid",
-    "konflikteLogbuch": "Not ready yet? Write it down first"
+    "konflikteLogbuch": "Not ready yet? Write it down first",
+    "wissen": "Guides & cases",
+    "ratgeberUebersicht": "Guide overview",
+    "ratgeberUebersichtDesc": "All articles, sorted by situation",
+    "ratgeberTrennung": "Separation & divorce",
+    "ratgeberTrennungDesc": "House, maintenance, custody",
+    "ratgeberErbe": "Family & inheritance",
+    "ratgeberErbeDesc": "Will, compulsory share, joint heirs",
+    "ratgeberMediation": "Understanding mediation",
+    "ratgeberMediationDesc": "Process, cost, court or mediation",
+    "ratgeberAlle": "Go to the guides",
+    "beispieleAlle": "Go to the case studies"
   },
   "footer": {
     "ctaEyebrow": "You decide. Not the court. Not the escalation.",
