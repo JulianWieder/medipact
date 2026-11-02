@@ -16,6 +16,18 @@ export type CaseStudyChapter = {
   quote?: CaseStudyQuote;
 };
 
+export type CaseStudyRandnotiz = {
+  norm: string;
+  text: string;
+};
+
+export type CaseStudyTwist = {
+  /** Was ein Gericht entschieden hätte. */
+  gericht: string;
+  /** Was am Mediationstisch herauskam. */
+  einigung: string;
+};
+
 export type CaseStudyData = {
   slug: string;
   eyebrow?: string;
@@ -29,6 +41,11 @@ export type CaseStudyData = {
   storyTitle?: string;
   storyIntro?: string;
   chapters?: CaseStudyChapter[];
+
+  /** Augenzwinkernde, aber juristisch korrekte Einordnung — unter der Geschichte. */
+  randnotizen?: CaseStudyRandnotiz[];
+  /** Kuriose Einigungen: was ein Urteil so nie hätte regeln können. */
+  twists?: CaseStudyTwist[];
 
   perspectives: [
     {
@@ -80,11 +97,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Maria & Thomas",
     titleHighlight: "Trennung mit 2 Kindern",
     intro:
-      "Verheiratet 12 Jahre. 2 Kinder (7 & 9). Thomas wollte die Trennung, Maria wollte kämpfen. Mit Mediation: Lösung in 5 Monaten statt 3 Jahre Gericht.",
+      "Zwölf Jahre Ehe, zwei Kinder und ein Fernseher, der mitten in der Sendung ausging. Thomas wollte gehen, Maria wollte kämpfen, notfalls bis zum Oberlandesgericht. Fünf Monate später hatten die beiden keinen Beschluss, sondern einen Plan, in dem sogar der Kater vorkommt.",
 
     situationTitle: '"Ich wollte die Kinder nicht verlieren"',
     situationIntro:
-      "Eine Trennung mit Kindern wurde zum emotionalen Ausnahmezustand. Der Kernkonflikt war nicht nur die Beziehung, sondern die Angst vor dem Verlust der Kinder.",
+      "Auf dem Papier ging es um Haus, Unterhalt und Umgang. Darunter lag eine einzige Angst, und die hatten beide, ohne es voneinander zu wissen: die Kinder zu verlieren.",
 
     storyIntro:
       "Wie aus einem stummen Krieg am Küchentisch in fünf Monaten eine Lösung wurde, die beide unterschrieben haben — erzählt entlang der Momente, die den Unterschied gemacht haben.",
@@ -140,6 +157,38 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Wir sind kein Paar mehr. Aber wir sind Eltern geblieben — und zwar beide.",
           author: "Thomas",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 1684 BGB",
+        text: "Das Umgangsrecht gehört zuerst dem Kind und erst danach den Eltern. Emma und Felix haben ein Recht auf ihren Vater, und Thomas hat die Pflicht, auch zu erscheinen. Das Gesetz denkt hier erstaunlich modern. In der Praxis landet man trotzdem oft beim Klassiker „jedes zweite Wochenende“.",
+      },
+      {
+        norm: "§ 90a BGB · § 1568b BGB",
+        text: "Tiere sind keine Sachen, sagt § 90a BGB. Bei der Trennung werden sie trotzdem wie Hausrat behandelt, und ein Umgangsrecht für Haustiere kennt das Familienrecht nicht. Kater Pelle wäre juristisch in derselben Schublade gelandet wie die Mikrowelle.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Kater Pelle wird als Haushaltsgegenstand einer Seite zugewiesen, genau wie die Mikrowelle.",
+        einigung:
+          "Pelle bleibt im Haus, weil Kater Orte lieben und nicht Menschen. Damit es auch bei Papa etwas zu füttern gibt, bekommt Felix für die neue Wohnung den Goldfisch, den er sich seit drei Jahren wünscht.",
+      },
+      {
+        gericht:
+          "Umgang nach Schema: jedes zweite Wochenende, die Ferien hälftig.",
+        einigung:
+          "Umgang nach Stundenplan: Montag, Mittwoch und Freitag bei Papa. Thomas ist der Einzige in der Familie, der Emmas Mathe versteht, und freitags hat Felix Fußball, wo Papa sowieso am Rand steht.",
+      },
+      {
+        gericht:
+          "Über Geburtstage und Weihnachten entscheidet niemand, solange keiner einen Antrag stellt.",
+        einigung:
+          "Kindergeburtstage feiern beide zusammen, Weihnachten wechselt jedes Jahr. Am 24. um 17 Uhr gibt es einen Videoanruf, egal wo die Kinder sind. Im Vertrag heißt der Absatz „Bescherungsklausel“.",
       },
     ],
 
@@ -288,11 +337,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Alexa & David",
     titleHighlight: "Mit neuem Partner & Stiefkind",
     intro:
-      "Verheiratet 6 Jahre. 2 Kinder (4 & 6). Alexa hat eine neue Partnerschaft mit Stiefkind. Die Fragen: Wer macht was? Wie funktioniert das für alle? Lösung in 4 Monaten ohne Gericht.",
+      "Sechs Jahre Ehe, zwei kleine Kinder, und dann sagt Alexa den Satz „Da ist jemand“. Jemand mit einem eigenen Kind. Aus einer Trennung wurde eine Gleichung mit vier Erwachsenen und drei Kindern. Gelöst haben sie sie in vier Monaten, mit einem Absatz, den kein Gesetz vorsieht.",
 
     situationTitle: '"Ist mein neuer Partner ein Problem?"',
     situationIntro:
-      "Die Trennung ist komplizierter geworden, weil neue Beziehungen und neue Rollen dazukommen. Die eigentliche Herausforderung ist nicht nur die Trennung, sondern das neue Familiensystem.",
+      "David hatte Angst, ersetzt zu werden. Alexa hatte Angst, dass ihr neues Glück den Kindern schadet. Und Martin fürchtete vor allem eines: das erste Elterngespräch.",
 
     storyIntro:
       "Eine Trennung, ein neuer Partner, ein Stiefkind — und die Frage, wie aus vier Erwachsenen und drei Kindern eine Familie in neuer Form werden kann.",
@@ -336,6 +385,33 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Nach vier Monaten stand die Vereinbarung: Sophie und Leon leben überwiegend bei Alexa und Martin, David hat feste Zeiten unter der Woche und jedes zweite Wochenende. Unterhalt: €400 im Monat, transparent gerechnet. Und — ungewöhnlich, aber für alle zentral — ein Absatz über Rollen: Entscheidungen über Schule, Gesundheit und Erziehung treffen Alexa und David. Niemand sonst.",
           "Heute, sagt Alexa, gibt es beim Abholen manchmal sogar einen Kaffee an der Tür. Nicht aus Freundschaft. Aus Respekt. „Die Kinder sehen: Die Erwachsenen haben das im Griff. Mehr Sicherheit kann man ihnen nicht geben.“",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 1687b BGB",
+        text: "Rechtlich hat Martin bei Sophie und Leon nichts zu sagen, nicht einmal beim Zahnarzt. Ein „kleines Sorgerecht“ gibt es nur für den Ehegatten eines allein sorgeberechtigten Elternteils. Alexa und David haben das Sorgerecht gemeinsam, also bleibt Martin juristisch: der nette Mann mit dem Bobbycar.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Ein Gericht regelt Umgang und Unterhalt. Die Rolle des neuen Partners ist gar nicht Teil des Verfahrens.",
+        einigung:
+          "Ein eigener Absatz mit der Überschrift „Wer ist Martin?“. Martin ist Martin und nicht Papa. Er darf trösten, vorlesen und Pflaster kleben. Über Schule, Kita und Haarschnitt entscheidet er nicht.",
+      },
+      {
+        gericht: "Wer das Hochbett aufbaut, ist keine Rechtsfrage.",
+        einigung:
+          "Das Hochbett für das neue Kinderzimmer haben David und Martin zusammen aufgebaut. David ist Handwerker, Martin hatte den Akkuschrauber. Es war das erste Gespräch der beiden, das länger als zwei Sätze dauerte.",
+      },
+      {
+        gericht:
+          "Geburtstage finden dort statt, wo der Umgangsplan es gerade vorsieht.",
+        einigung:
+          "Kindergeburtstage feiern alle zusammen, Martins Achtjähriger eingeschlossen. Der hat sich zu seinem eigenen Geburtstag ausdrücklich „die zwei Kleinen“ als Gäste gewünscht.",
       },
     ],
 
@@ -449,11 +525,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Peter & Sarah",
     titleHighlight: "Hohes Vermögen, komplexe Aufteilung",
     intro:
-      "Verheiratet 20 Jahre. Keine Kinder. Vermögen: Haus (€800k), Ersparnisse (€300k), Rentenpunkte. Gericht kostet €45k+ und dauert Jahre. Mediation: €1.500, schneller, transparenter.",
+      "Zwanzig Jahre Ehe, keine Kinder, gut eine Million Euro, und zwei Menschen, die beruflich Verhandlungen gewinnen. Die Ansage war klar: Wir trennen uns wie Profis. Am längsten gestritten haben sie am Ende über 140 Flaschen Rotwein.",
 
     situationTitle: '"Wie teilen wir eine Million?"',
     situationIntro:
-      "Wenn Vermögen hoch und die Struktur komplex ist, wird das Verfahren oft technisch und teuer. Genau dort kann Mediation Transparenz und Rationalität herstellen.",
+      "Zwei Führungskräfte, die jeden Deal durchrechnen können, nur nicht den eigenen. Bei hohem Vermögen wird jede Frage technisch, und jede technische Frage kann man jahrelang begutachten lassen.",
 
     storyIntro:
       "Zwei Führungskräfte, zwanzig Jahre Ehe, gut eine Million Euro Vermögen — und die Entscheidung, die Trennung wie erwachsene Menschen zu regeln statt wie Prozessgegner.",
@@ -497,6 +573,38 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Die Mediation hat sich nicht nur bezahlt gemacht. Sie hat uns netto reicher gemacht als jedes Urteil es gekonnt hätte.",
           author: "Peter",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 1378 BGB",
+        text: "Der Zugewinnausgleich ist reine Mathematik. Wer in der Ehe mehr hinzugewonnen hat, gibt die Hälfte des Überschusses ab. Wer die Steuererklärungen gemacht oder den Wein ausgesucht hat, spielt dabei keine Rolle.",
+      },
+      {
+        norm: "§ 180 ZVG",
+        text: "Können sich Eheleute über ein gemeinsames Haus nicht einigen, kann jeder von beiden die Teilungsversteigerung beantragen. Das Gericht teilt dann nicht „gerecht“, es versteigert an den Meistbietenden, nicht selten unter Wert. Gerecht ist daran nur, dass beide gleich viel verlieren.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Der Weinkeller wird von einem Gutachter bewertet und als Rechenposten in den Zugewinn gesteckt.",
+        einigung:
+          "Die 140 Flaschen werden gewählt wie Mannschaften im Schulsport: abwechselnd, Sarah zieht zuerst. Die eine Magnum, um die beide gekämpft haben, wurde am Tag der Unterschrift geöffnet. Gemeinsam.",
+      },
+      {
+        gericht:
+          "Zwei Gutachten, ein Gegengutachten und die Frage, welches davon das Gericht für richtig hält.",
+        einigung:
+          "Ein einziger Gutachter, gemeinsam ausgesucht und gemeinsam bezahlt. Allein das hat mehr gespart, als die ganze Mediation gekostet hat.",
+      },
+      {
+        gericht:
+          "Die steuerlichen Folgen der Aufteilung sind nicht Sache des Familiengerichts.",
+        einigung:
+          "Ein Steuerberater rechnete am Tisch mit und fand die €20.000, die niemand auf dem Zettel hatte. Peter nennt sie „das einzige Geld, das wir in zwanzig Jahren gespart haben, ohne es zu wollen“.",
       },
     ],
 
@@ -612,11 +720,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Rolf & Helga",
     titleHighlight: "Nach 38 Jahren Ehe",
     intro:
-      "Verheiratet 38 Jahre. Beide um die 60. Rolf hat Beamten-Pension, Helga nur geringe Rentenansprüche. Mit Mediation: Klarheit in 6 Monaten statt 2+ Jahre Verfahren.",
+      "38 Jahre verheiratet, die Kinder aus dem Haus, die Silberhochzeit lange gefeiert. Und dann die Frage, die im Alter am meisten Angst macht: Reicht das Geld, wenn wir es halbieren? Sechs Monate, ein Taschenrechner und ein Tafelservice für zwölf Personen später lautete die Antwort: ja.",
 
     situationTitle: '"Im Alter noch Streit?"',
     situationIntro:
-      "Langjährige Ehen sind oft emotional weniger laut, aber wirtschaftlich umso sensibler. Besonders im Alter ist Unsicherheit über Versorgung eine massive Belastung.",
+      "Lange Ehen trennen sich selten laut. Sie trennen sich leise am Esstisch, mit einer Frage im Raum: Wovon lebe ich, wenn ich allein bin? Für Helga war das keine Rechenaufgabe, sondern ein Abgrund.",
 
     storyIntro:
       "38 Jahre Ehe enden nicht mit einem Knall, sondern mit einer leisen Erkenntnis — und mit der Frage, wie zwei Menschen um die 60 getrennt weiterleben, ohne dass einer von beiden im Alter in Not gerät.",
@@ -660,6 +768,38 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Nach sechs Monaten unterschrieben beide eine Vereinbarung, die ein Gericht in dieser Form nie angeordnet hätte: das Haus für Helga als Alterssicherung, ein fairer Versorgungsausgleich, klare Regeln für alle Was-wäre-wenn-Fälle. Kosten: €800 statt der €26.500, die zwei Anwälte und Gutachter mindestens gekostet hätten.",
           "Rolf und Helga sehen sich heute bei Familienfesten. Es ist nicht mehr die alte Vertrautheit — aber es ist auch keine Feindschaft. „Bei der Konfirmation unseres Enkels saßen wir am selben Tisch“, erzählt Rolf. „Die Alternative wäre gewesen, dass wir uns zu dem Zeitpunkt noch vor Gericht gegenübersitzen.“",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "Versorgungsausgleichsgesetz",
+        text: "Seit 2009 wird beim Versorgungsausgleich jedes Rentenanrecht einzeln geteilt: Pension, gesetzliche Rente, Betriebsrente. Das ist gerecht. Was das konkret im Monat bedeutet, verstehen ohne Rechenbeispiel allerdings selbst Juristen erst beim zweiten Kaffee.",
+      },
+      {
+        norm: "§ 1565 BGB",
+        text: "Auch nach 38 Jahren verlangt das Gesetz in der Regel ein Trennungsjahr, bevor geschieden wird. Rolf meinte dazu, auf das eine Jahr komme es jetzt auch nicht mehr an.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Der Hausrat wird nach Billigkeit verteilt, im Streitfall Teller für Teller.",
+        einigung:
+          "Das Hochzeitsservice für zwölf Personen wird geteilt, jeder bekommt sechs Gedecke. Zu Weihnachten, wenn die Enkel kommen, wird zusammengelegt, und Rolf bringt seine sechs Teller mit.",
+      },
+      {
+        gericht:
+          "Ein Gericht kann ein Grundstück bewerten, aber keinen Garten teilen.",
+        einigung:
+          "Helga behält Haus und Garten, Rolf das Wohnmobil. Dazu kommt das verbriefte Recht, jeden Herbst die Äpfel von dem Baum zu holen, den er 1991 gepflanzt hat.",
+      },
+      {
+        gericht:
+          "Was passiert, wenn einer krank wird? Das beantwortet kein Urteil.",
+        einigung:
+          "Ein Absatz für später: Wird einer von beiden pflegebedürftig, hilft der andere den Kindern bei der Organisation. „Wir sind geschieden“, sagt Helga, „aber nicht fremd.“",
       },
     ],
 
@@ -775,11 +915,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Carla & Marco",
     titleHighlight: "Mit Unternehmen",
     intro:
-      "Verheiratet 10 Jahre. Zusammen eine GmbH gegründet. Marco will raus, Carla will weitermachen. Lösung: Abfindung plus Fortbestand der Firma.",
+      "Zwei Verträge: einer vor dem Standesamt, einer beim Notar. Marco wollte aus beiden raus. Carla war bereit, den ersten aufzulösen, aber nicht den zweiten, denn der zweite war ihr Lebenswerk. Fünf Mitarbeiter warteten auf eine Antwort.",
 
     situationTitle: '"Wir bauen eine Firma auf – dann Trennung"',
     situationIntro:
-      "Wenn Ehe und Unternehmen miteinander verflochten sind, geht es nie nur um zwei Menschen. Es geht auch um Mitarbeiter, Cashflow und Zukunftsfähigkeit.",
+      "In der Kaffeeküche wurde schon gewettet, wer die Firma bekommt. Wenn Ehe und GmbH verflochten sind, trennt sich nie nur ein Paar. Es wackeln Gehälter, Kunden und die Frage, wer morgen die Rechnungen freigibt.",
 
     storyIntro:
       "Ein Ehepaar, eine GmbH, fünf Mitarbeiter — und die Frage, ob mit der Ehe auch das Lebenswerk enden muss.",
@@ -823,6 +963,33 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Sechs Monate nach Marcos Freitagabend-Satz standen beide gemeinsam vor der Belegschaft. Die Botschaft war kurz: Marco verlässt das Unternehmen, Carla führt es allein weiter, alle Arbeitsplätze bleiben. Keine Floskeln, keine Gerüchte mehr — Klarheit.",
           "Heute läuft die GmbH unter Carlas alleiniger Führung, Marco hat mit seiner Abfindung ein neues Projekt gestartet. Die Scheidung selbst war danach fast eine Formalie: Die schwierigsten Vermögensfragen waren längst gelöst.",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "GmbH-Gesetz",
+        text: "Eine Scheidung beendet die Ehe, nicht die GmbH. Wer im Gesellschaftsvertrag nichts geregelt hat, sitzt nach der Scheidung weiter mit dem Ex in der Gesellschafterversammlung. Bei 50 zu 50 heißt das: Jede Abstimmung wird zur Paartherapie, nur ohne Therapeuten.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Die Abfindung wird nach Gutachten festgesetzt und auf einen Schlag fällig, notfalls auf Kosten der Liquidität.",
+        einigung:
+          "€200.000 Abfindung, gestaffelt aus dem laufenden Geschäft, damit die Firma nicht ausblutet. Marco hat dadurch ein ganz eigenes Interesse, dass Carla Erfolg hat.",
+      },
+      {
+        gericht: "Wer geht, geht. Das Wissen in seinem Kopf geht mit.",
+        einigung:
+          "Marco bleibt zwölf Monate als externer Berater für den Code, den außer ihm niemand versteht, und rechnet nach Stunden ab. Im Team heißt das intern „das Umgangsrecht fürs Backend“.",
+      },
+      {
+        gericht:
+          "Firmenwagen, Laptop, Büroinventar: alles Rechenposten in der Bilanz.",
+        einigung:
+          "Um den Tischkicker gab es eine ernsthafte Debatte. Er bleibt in der Firma, und Marco darf zur Weihnachtsfeier kommen und eine Revanche verlangen.",
       },
     ],
 
@@ -931,11 +1098,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Jens & Katarina",
     titleHighlight: "Internationale Trennung",
     intro:
-      "Verheiratet 8 Jahre. Katarina ist Schweizerin und will zurück in die Schweiz. 1 Kind (5). Fragen: Welches Recht? Welcher Wohnort? Vermögen in 2 Ländern? Lösung in 9 Monaten.",
+      "Katarina hatte Heimweh nach den Bergen, nach ihrer Mutter, nach einer Sprache, in der sie nicht jedes Wort übersetzen muss. Nur ist Lucas fünf und hat einen Vater in Deutschland. Ein voreilig gepackter Koffer, und aus einer Mutter wäre nach internationalem Recht eine Kindesentführerin geworden.",
 
     situationTitle: '"Ich will nach Hause – mit Kind!"',
     situationIntro:
-      "Internationale Trennungen werden schnell zu einem juristischen Minenfeld. Ohne abgestimmte Lösung drohen Verfahren in mehreren Ländern.",
+      "Zwei Länder, zwei Rechtsordnungen und zwei Anwälte, die schon über die Zuständigkeit stritten, bevor es überhaupt um Lucas ging. Internationale Trennungen sind ein Minenfeld, und Kinder laufen als Erste darüber.",
 
     storyIntro:
       "Zwei Länder, zwei Rechtssysteme, ein fünfjähriger Junge — und zwei Eltern, die um Haaresbreite in ein internationales Verfahren geraten wären.",
@@ -979,6 +1146,32 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Die letzten Monate galten der Absicherung: Die Vereinbarung wurde juristisch so gefasst, dass sie in beiden Ländern anerkannt wird — Unterhalt in der richtigen Währung geregelt, das deutsche Haus und die Schweizer Ersparnisse sauber aufgeteilt, Zuständigkeiten für künftige Änderungen definiert.",
           "Lucas geht heute in Zürich zur Schule und verbringt jeden Sommer wochenlang bei seinem Vater. Als er in der Schule gefragt wurde, wo er wohnt, soll er geantwortet haben: „In Zürich und bei Papa.“ Für Jens ist dieser Satz das Ergebnis, das kein Gericht hätte anordnen können.",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "Haager Kindesentführungsübereinkommen",
+        text: "Wer bei gemeinsamem Sorgerecht ohne Zustimmung des anderen mit dem Kind ins Ausland zieht, kann eine „widerrechtliche Verbringung“ begehen, auch wenn das Ziel nur die Oma ist. Deutschland und die Schweiz sind beide Vertragsstaaten. Am Ende steht dann ein Rückführungsverfahren, das schnell gehen soll und trotzdem niemanden glücklich macht.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Ein Gericht entscheidet, wo Lucas lebt. Und damit auch, wer verliert.",
+        einigung:
+          "Lucas zieht mit Katarina in die Schweiz. Dafür verbringt er die Hälfte der Schulferien in Deutschland, und Jens kommt zwei Wochenenden im Monat. Die Bahnkosten teilen sich beide, weil beide wollen, dass er fährt.",
+      },
+      {
+        gericht: "Gutenachtgeschichten sind kein Regelungsgegenstand.",
+        einigung:
+          "Dienstags und donnerstags um 19 Uhr liest Papa per Video vor, immer kapitelweise, damit Lucas wissen will, wie es weitergeht. Jens hat jedes Buch doppelt gekauft: eins für jedes Kinderzimmer.",
+      },
+      {
+        gericht: "Sprache und Alltag stehen in keinem Aufenthaltsbeschluss.",
+        einigung:
+          "Lucas wächst mit beidem auf: Schule in der Schweiz, Wochenenden mit Papa. Ob man „Velo“ oder „Fahrrad“ sagt, darf er laut Vereinbarung selbst entscheiden.",
       },
     ],
 
@@ -1100,11 +1293,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Anna & Klaus",
     titleHighlight: "Geschwister-Streit um das Haus",
     intro:
-      "Eltern verstorben. Ein Haus, zwei Geschwister, zwei völlig unterschiedliche Vorstellungen. Ohne Mediation: Jahre Streit. Mit Mediation: Fair gelöst in 3 Monaten.",
+      "Die Beerdigung war vorbei, Papas Jacke hing noch an der Garderobe, und zwischen Anna und Klaus stand ein Haus im Wert von €300.000. Anna wollte bleiben, Klaus wollte sein Geld. Drei Monate später hatten sie beides geschafft, und dazu ein jährliches Kirschen-Grillfest.",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„Das ist auch mein Elternhaus“",
     situationIntro:
-      "Erbstreit ist selten nur finanziell. Häufig hängt an Vermögen ein emotionaler Rest der Elternbeziehung.",
+      "Erbstreit ist selten ein Streit ums Geld. Es ist ein Streit darüber, wer Papa näher war, wer öfter da war und wer sich jetzt wie der Erwachsene benimmt.",
 
     storyIntro:
       "Ein Elternhaus, zwei Geschwister, ein halbes Leben an unausgesprochenen Vorwürfen — und drei Monate, die entschieden haben, ob Anna und Klaus Familie bleiben.",
@@ -1148,6 +1341,37 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Nach drei Monaten war die Vereinbarung unterschrieben: Anna wird Alleineigentümerin, Klaus scheidet aus der Erbengemeinschaft aus und erhält seine €150.000 in planbaren Raten. Kosten der Mediation: €800 — gegenüber gut €20.000, die der Rechtsweg gekostet hätte.",
           "An Weihnachten saß Klaus mit seiner Familie wieder am Tisch im Elternhaus. Es war Annas Einladung. „Papa hätte uns beide für verrückt erklärt“, sagte sie beim Essen, „dass wir uns wegen seines Hauses fast verklagt hätten.“",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 2042 BGB · § 180 ZVG",
+        text: "Jeder Miterbe kann jederzeit die Auseinandersetzung verlangen und das Elternhaus notfalls zur Teilungsversteigerung bringen, auch gegen den Willen der Schwester. Dann ersteigert es womöglich der Nachbar, der sich seit zwanzig Jahren über den Kirschbaum beschwert.",
+      },
+      {
+        norm: "§ 94 BGB",
+        text: "Kirschen am Baum sind wesentlicher Bestandteil des Grundstücks. Sie gehören also dem, dem der Garten gehört. Juristisch hätte Klaus mit dem Haus auch jede einzelne Kirsche verloren.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Teilungsversteigerung: Wer am meisten bietet, bekommt das Haus, der Erlös wird halbiert.",
+        einigung:
+          "Anna behält das Haus und zahlt Klaus in Raten aus, so wie sie es als Krankenpflegerin stemmen kann, und nicht so, wie es eine Bank gern hätte.",
+      },
+      {
+        gericht:
+          "Die Werkstatt im Keller gehört zum Haus. Wer das Haus hat, hat auch die Hobelbank.",
+        einigung:
+          "Klaus bekommt Papas Werkzeug und die alte Hobelbank. Anna hätte damit nichts anfangen können. Klaus hat seitdem zwei Vogelhäuschen gebaut, und eins davon hängt im Garten seiner Schwester.",
+      },
+      {
+        gericht: "Die Kirschen gehören, wem der Baum gehört.",
+        einigung:
+          "Klaus darf jeden Juni ernten. Seitdem gibt es jedes Jahr ein Kirschen-Grillfest im Garten. Anna besorgt die Würstchen, Klaus bringt die Leiter mit.",
       },
     ],
 
@@ -1251,11 +1475,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Marie & Sophie",
     titleHighlight: "Testament-Konflikt",
     intro:
-      "Mutter verstorben. Testament: Sophie erhält €500k, Marie nur €50k. Marie fühlt sich betrogen. Mediation führt zu einer faireren und verständlichen Lösung – ohne jahrelangen Streit.",
+      "Zehn Minuten im Nachlassgericht, und eine Schwesternbeziehung lag in Trümmern: €500.000 für Sophie, €50.000 für Marie. Auf dem Parkplatz fiel das Wort „gefälscht“. Drei Monate später hing bei Marie ein Brief der Mutter an der Wand, und gefunden wurde er nur, weil die Schwestern wieder miteinander redeten.",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„Warum hat Mama das getan?“",
     situationIntro:
-      "Testamentskonflikte sind besonders emotional, weil sie fast immer als Liebes- oder Gerechtigkeitsfrage erlebt werden, nicht nur als Vermögensfrage.",
+      "Ein Testament ohne Erklärung ist wie ein Urteil ohne Begründung. Wer weniger bekommt, liest darin keine Zahlen, sondern eine Liebeserklärung an die andere.",
 
     storyIntro:
       "Ein Testament, das wie ein Urteil klang: €500.000 für die eine Tochter, €50.000 für die andere. Was wie Bevorzugung aussah, hatte eine Geschichte — die erst die Mediation ans Licht brachte.",
@@ -1299,6 +1523,38 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Beim Ausräumen des Hauses, Wochen nach der Einigung, fand Sophie einen Karton mit Briefen der Mutter — darunter einer an Marie, nie abgeschickt, geschrieben in den letzten Monaten. Er erklärte nichts Juristisches. Er sagte nur, dass sie stolz auf ihre „kleine Künstlerin“ sei und hoffe, dass die Schwestern aufeinander aufpassen.",
           "Marie hat den Brief gerahmt. Die €25.000 Unterschied zur Testamentssumme, sagt sie, hätte kein Gericht der Welt mit diesem Brief aufwiegen können — und ohne die Mediation hätte Sophie ihn ihr womöglich nie gegeben.",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 2303 BGB",
+        text: "Kinder kann man im Testament knapp halten, aber nicht ganz übergehen: Der Pflichtteil beträgt die Hälfte des gesetzlichen Erbteils. Gerechnet wird allerdings mit dem, was nach Abzug der Schulden übrig bleibt. Wer nur die Zahl im Testament liest, rechnet mit dem falschen Nachlass.",
+      },
+      {
+        norm: "Testierfähigkeit",
+        text: "„Das hat sie nicht freiwillig geschrieben“ ist schnell gesagt und schwer bewiesen. Wer behauptet, die Erblasserin sei testierunfähig gewesen, muss es nachweisen, meist mit psychiatrischen Gutachten über eine Verstorbene. Selten gewinnt dabei jemand. Verlieren tut dabei fast immer die Familie.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Ein Gericht prüft, ob das Testament wirksam ist. Warum die Mutter so entschieden hat, steht in keinem Urteil.",
+        einigung:
+          "Die erste Sitzung bestand aus Pflegeheimrechnungen. Marie erfuhr, was ihre Schwester zwei Jahre lang getragen hatte, und Sophie verstand, dass Maries Wut nie Gier gewesen war.",
+      },
+      {
+        gericht:
+          "Marie bekommt, was ihr rechtlich zusteht. Keinen Cent mehr, keinen weniger.",
+        einigung:
+          "Sophie erhöht freiwillig auf €75.000. Kein Paragraf verlangt das. Es war ihre Art zu sagen: Du warst Mama genauso wichtig.",
+      },
+      {
+        gericht:
+          "Persönliche Gegenstände werden als Nachlass aufgelistet und bewertet.",
+        einigung:
+          "Beim gemeinsamen Ausräumen fand Sophie den Karton mit Briefen. Der an Marie hängt heute gerahmt in ihrem Atelier. Kein Gericht der Welt hätte ihn ihr zugesprochen.",
       },
     ],
 
@@ -1401,11 +1657,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Familie Weber",
     titleHighlight: "Unternehmen erben – Betrieb retten oder verkaufen?",
     intro:
-      "Der Vater stirbt plötzlich. Ein Metallbau-Betrieb mit 20 Mitarbeitern steht im Raum. Drei Kinder erben: Einer will weitermachen – die anderen wollen ausgezahlt werden. Ohne Einigung droht der Verkauf – und 20 Jobs stehen auf dem Spiel.",
+      "Dienstag, 6:40 Uhr, der Anruf aus dem Krankenhaus. Der Vater hatte seit 1987 alles im Kopf, nur keinen Nachfolgeplan. Plötzlich gehörte der Betrieb drei Geschwistern: Thomas arbeitet dort, Lisa braucht Geld für ihren Hausbau, Martin will vor allem Ruhe. Und 20 Mitarbeiter fragten: Was jetzt?",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„Papa hätte gewusst, was zu tun ist“",
     situationIntro:
-      "Bei Unternehmens-Erbschaften geht es nie nur um Geld. Es geht um Verantwortung, Existenz und oft um das Lebenswerk der Familie.",
+      "In einer Erbengemeinschaft muss man sich einigen. Bei einem Betrieb, der jeden Morgen Material bestellen und am Monatsende Löhne zahlen muss, ist „Wir einigen uns später“ keine Option.",
 
     storyIntro:
       "Ein Herzinfarkt, kein Nachfolgeplan, drei Erben mit drei Lebensentwürfen — und 20 Mitarbeiter, deren Zukunft an einer Familieneinigung hing.",
@@ -1449,6 +1705,32 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Im vierten Monat unterschrieben alle drei die Auseinandersetzungsvereinbarung beim Notar. Thomas übernahm den Betrieb als Alleininhaber, Lisa konnte ihre Baufinanzierung stemmen, Martin hatte Planungssicherheit. Kein einziger Arbeitsplatz ging verloren.",
           "Am ersten Weihnachten ohne den Vater saß die Familie wieder zusammen — angespannt, aber zusammen. Auf dem Betriebsgelände hängt heute ein Foto des Vaters in der Werkhalle. Darunter hat Thomas ein kleines Schild anbringen lassen: „Gegründet 1987. Weitergeführt von seiner Familie.“ Alle drei Namen stehen darauf.",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 2038 BGB",
+        text: "Den Nachlass verwalten die Erben gemeinschaftlich. Für einen Handwerksbetrieb heißt das im Ernstfall: Drei Geschwister müssen sich einig werden, wer den Auftrag für die neue Hallenheizung unterschreibt. Der Gesetzgeber hatte dabei eher einen Bausparvertrag im Kopf als eine Werkhalle mit 20 Leuten.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Auseinandersetzung heißt im Zweifel: verkaufen und den Erlös durch drei teilen.",
+        einigung:
+          "Thomas übernimmt den Betrieb allein und zahlt seine Geschwister nach einem Plan aus, den der Betrieb verkraftet. Lisa zuerst, weil ihre Baufinanzierung drängt.",
+      },
+      {
+        gericht: "Wer ausgezahlt ist, ist raus.",
+        einigung:
+          "Lisa und Martin bekommen ein Vorkaufsrecht, falls Thomas den Betrieb je verkaufen will. Mitreden wollten sie nicht. Sie wollten nur nicht eines Tages erfahren, dass Papas Firma einem Fremden gehört.",
+      },
+      {
+        gericht: "Ein Schild in der Werkhalle hat keinen Streitwert.",
+        einigung:
+          "Unter dem Foto des Vaters stehen alle drei Namen: „Gegründet 1987. Weitergeführt von seiner Familie.“ Darauf hat Thomas bestanden, obwohl er den Betrieb heute allein führt.",
       },
     ],
 
@@ -1556,11 +1838,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Familie Schneider",
     titleHighlight: "Nächtlicher Lärm – wie viel ist zumutbar?",
     intro:
-      "Seit Monaten laute Musik bis spät in die Nacht. Gespräche eskalieren, die Polizei war schon mehrfach da. Beide Seiten fühlen sich im Recht – die Situation droht zu kippen.",
+      "23:47 Uhr, und der Bass kommt wieder durch den Boden. Oben steht die Tochter der Schneiders zum dritten Mal in dieser Woche im Schlafanzug in der Tür. Unten sitzt Herr Becker nach der Spätschicht und versteht nicht, warum schon wieder die Polizei klingelt.",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„Wir schlafen seit Monaten nicht mehr“",
     situationIntro:
-      "Lärm ist einer der häufigsten Auslöser für Nachbarschaftskonflikte – weil er direkt den Alltag und die Erholung betrifft.",
+      "Lärm ist der Klassiker unter den Nachbarschaftskonflikten, weil er nachts kommt, wenn man am wenigsten Geduld hat. Und weil jede Seite fest davon überzeugt ist, dass die andere rücksichtslos ist.",
 
     storyIntro:
       "Ein Mehrfamilienhaus, ein Kinderzimmer über einem Wohnzimmer mit guter Anlage — und zwei Parteien, die sich nach Monaten nur noch über die Polizei verständigten.",
@@ -1596,6 +1878,33 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Ich hätte nie gedacht, dass ich das mal sage: Wir grüßen uns wieder im Treppenhaus. Manchmal reden wir sogar.",
           author: "Herr Becker",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "„Zimmerlautstärke“",
+        text: "Steht in keinem Gesetz und wird trotzdem in jedem Treppenhaus zitiert. Was als Zimmerlautstärke gilt, entscheiden im Streitfall Gerichte von Fall zu Fall, gern mit Messgerät. Die Ruhezeiten selbst stehen meist in der Hausordnung, im Mietvertrag oder im Landesrecht, nicht im BGB.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Unterlassung: Ab 22 Uhr ist Ruhe, an jedem Tag der Woche, mit Ordnungsgeld bei jedem Verstoß.",
+        einigung:
+          "An Schultagen ab 22 Uhr Ruhe, am Wochenende darf es länger werden, mit Vorankündigung. Herr Becker kündigt seine Abende inzwischen im Hausflur an, mit Uhrzeit.",
+      },
+      {
+        gericht: "Wo die Lautsprecher stehen, entscheidet kein Gericht.",
+        einigung:
+          "Die Anlage rückt einen Meter von der Wand weg. Die Schneiders haben beim Tragen geholfen. Es war das erste Mal, dass sie Herrn Beckers Wohnung von innen gesehen haben.",
+      },
+      {
+        gericht:
+          "Ob jemand klingelt oder die Polizei ruft, ist keine Rechtsfrage.",
+        einigung:
+          "Eine Klingelpflicht statt Notruf: Die Schneiders klingeln zuerst, und Herr Becker verpflichtet sich, dann auch aufzumachen. Seitdem gab es keinen einzigen Polizeieinsatz mehr.",
       },
     ],
 
@@ -1689,11 +1998,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Familien Krüger & Hoffmann",
     titleHighlight: "Zaun auf der Grenze – wem gehört das Stück Land?",
     intro:
-      "Ein neuer Zaun sorgt für Streit: Steht er auf der richtigen Grenze oder nicht? Beide Parteien sind überzeugt, im Recht zu sein.",
+      "Zehn Jahre gute Nachbarn, ausgeliehene Rasenmäher und Geburtstagsgrüße über die Hecke. Dann bauten die Hoffmanns an einem Wochenende einen Zaun, und die Krügers maßen nach: 40 Zentimeter. Danach kamen die Anwaltsbriefe, und gegrüßt wurde nicht mehr.",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„40 Zentimeter, und zehn Jahre sind vergessen“",
     situationIntro:
-      "Grundstücksgrenzen sind emotional aufgeladen – weil sie Besitz und Kontrolle betreffen.",
+      "Um 40 Zentimeter Rasen streitet niemand wegen des Rasens. Man streitet darum, ob man übergangen wurde, und darum, wer am Ende als Lügner dasteht.",
 
     storyIntro:
       "Ein neuer Zaun, 40 Zentimeter Streitfläche und zwei Familien, die zehn Jahre lang gute Nachbarn waren — bis eine Grenzfrage zur Charakterfrage wurde.",
@@ -1729,6 +2038,33 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Am Ende ging es gar nicht um den Zaun — sondern darum, gehört zu werden.",
           author: "Familie Hoffmann",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 921 BGB",
+        text: "Steht ein Zaun auf der Grenze, vermutet das Gesetz, dass beide Nachbarn ihn gemeinsam benutzen dürfen. Wie hoch und wie dicht er sein darf, regeln vielfach die Nachbarrechtsgesetze der Länder. Was in einem Bundesland erlaubt ist, kann im nächsten schon zu hoch sein.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Beseitigung: Der Zaun wird zurückversetzt, auf Kosten der Hoffmanns.",
+        einigung:
+          "Der Zaun bleibt stehen. Die Krügers bekommen einen Ausgleich für den Streifen, notariell festgehalten, und das ist für alle günstiger als Abriss und Neubau.",
+      },
+      {
+        gericht: "Die Vermessung zahlt am Ende, wer verliert.",
+        einigung:
+          "Beide bestellen die Vermessung gemeinsam und teilen sich die Rechnung. Ergebnis: Ein Teil des Fehlers steckte schon in den alten Plänen. Schuld war am Ende ein Bauzeichner, der längst in Rente ist.",
+      },
+      {
+        gericht:
+          "Künftige Bauvorhaben bleiben ungeregelt, bis zum nächsten Prozess.",
+        einigung:
+          "Eine „Grenzklausel“: Wer an der Grenze baut, pflanzt oder bohrt, sagt es vorher. Erster Anwendungsfall: Die Hoffmanns fragten, ob sie am Zaun Tomaten ziehen dürfen. Die Krügers bekommen jetzt die Hälfte der Ernte.",
       },
     ],
 
@@ -1813,11 +2149,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Herr Wagner & Frau Lehmann",
     titleHighlight: "Parkplatz blockiert – täglicher Streit vor der Haustür",
     intro:
-      "Immer wieder wird die Einfahrt blockiert. Diskussionen eskalieren, gegenseitige Vorwürfe nehmen zu. Der Konflikt ist inzwischen persönlich geworden.",
+      "Der erste Zettel war höflich, der zehnte nicht mehr. Monatelang redeten Herr Wagner und Frau Lehmann nur noch über ihre Windschutzscheiben miteinander. Gelöst hat den Streit am Ende ein Stellplatz, von dem keiner wusste, dass man ihn haben kann.",
 
-    situationTitle: "Die Situation",
+    situationTitle: "„Ich komme nicht aus meiner eigenen Einfahrt“",
     situationIntro:
-      "Parkplätze sind knapp – und schnell wird aus einem kleinen Problem ein persönlicher Konflikt.",
+      "Eine enge Straße, zu wenig Platz und zwei Dienstpläne, die nicht zusammenpassen. Aus „Sie stehen schon wieder vor meiner Einfahrt“ wird schnell „Sie sind ein rücksichtsloser Mensch“.",
 
     storyIntro:
       "Eine enge Wohnstraße, zu wenige Parkplätze, eine blockierte Einfahrt — und zwei Menschen, die sich monatelang nur noch über Zettel an der Windschutzscheibe unterhielten.",
@@ -1853,6 +2189,32 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Wir haben ein halbes Jahr Krieg geführt um ein Problem, das sich in neunzig Minuten lösen ließ.",
           author: "Frau Lehmann",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 12 StVO",
+        text: "Vor Grundstücksein- und -ausfahrten darf nicht geparkt werden, das ist eindeutig. Abschleppen lassen ist erlaubt, und die Kosten muss in der Regel der Falschparker tragen. Was die StVO nicht regelt: wie man sich am nächsten Morgen auf dem Gehweg grüßt.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Abschleppen, Anzeige, vielleicht ein Unterlassungsurteil. Vollstreckbar, aber nicht befahrbar.",
+        einigung:
+          "Frau Lehmann darf abends mit Erlaubnis vor der Einfahrt stehen, hinterlegt ihre Handynummer und parkt bis 6 Uhr um. Die Uhrzeit stammt direkt aus Herrn Wagners Dienstplan.",
+      },
+      {
+        gericht: "Einen Parkplatz kann kein Gericht herbeiurteilen.",
+        einigung:
+          "Der zweite Stellplatz im Hof, den Herr Wagner nie gebraucht hat, gehört jetzt Frau Lehmann, gegen eine kleine Monatsmiete an den Vermieter. Der Platz war die ganze Zeit da. Es hatte nur nie jemand gefragt.",
+      },
+      {
+        gericht: "Die Zettel werden als Beweismittel zur Akte genommen.",
+        einigung:
+          "Die Zettelsammlung landete gemeinsam im Altpapier. Der letzte Zettel kam von Frau Lehmann, steckte im Briefkasten und hatte nur ein Wort: „Danke.“",
       },
     ],
 
@@ -1942,11 +2304,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Stefan & Tobias",
     titleHighlight: "Gesellschafter-Patt in der Softwareagentur",
     intro:
-      "Zwei Gründer, je 50% der Anteile, zwei unvereinbare Strategien. Die Firma: 18 Mitarbeiter, profitabel — und durch das Patt komplett blockiert. Lösung in 3 Monaten statt jahrelangem Gesellschafterstreit.",
+      "Gegründet in einer WG-Küche, zwölf Jahre beste Freunde, 50 zu 50 an allem. Dann wollte Stefan in KI investieren und Tobias nicht, und plötzlich konnten sich zwei Geschäftsführer nicht einmal mehr auf ein Logo einigen. Am Ende hatte jeder seine eigene Firma und beide wieder einen Termin am Freitagmittag.",
 
     situationTitle: '"Wir konnten nicht mal mehr über das Logo entscheiden"',
     situationIntro:
-      "Ein 50/50-Patt ist die gefährlichste Konstellation im Gesellschaftsrecht: Ohne Einigung ist jede Entscheidung blockiert — bis hin zur Zahlungsunfähigkeit durch Stillstand.",
+      "Ein 50/50-Patt ist im Gesellschaftsrecht die schönste Form der Gleichberechtigung und zugleich die gefährlichste. Wer nicht entscheiden kann, entscheidet trotzdem, nämlich für den Stillstand.",
 
     storyIntro:
       "Zwölf Jahre nach der Gründung in einer WG-Küche standen sich zwei beste Freunde als Blockierer gegenüber — und die Firma, die beide liebten, drohte zwischen ihnen zerrieben zu werden.",
@@ -1990,6 +2352,36 @@ export const caseStudies: Record<string, CaseStudyData> = {
           "Drei Monate nach der ersten Sitzung waren die Verträge notariell beurkundet. Die Belegschaft erfuhr die Neuordnung in einer gemeinsamen Runde — vorgestellt von beiden Gründern nebeneinander, zum ersten Mal seit einem Jahr.",
           "Heute läuft die Agentur stabil unter Tobias, die KI-Tochter wächst unter Stefan. Freitags essen die beiden wieder zusammen zu Mittag. „Nicht jede Woche“, sagt Tobias. „Aber öfter als in den zwei Jahren davor.“",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 47 GmbHG",
+        text: "In der GmbH entscheidet die Mehrheit der Stimmen. Bei zwei Gesellschaftern mit je 50 Prozent gibt es aber keine Mehrheit, nur ein Unentschieden. Ein Elfmeterschießen hat das Gesetz dafür nicht vorgesehen. Das muss man sich selbst in den Vertrag schreiben.",
+      },
+      {
+        norm: "„Russian Roulette“ und „Texas Shoot-out“",
+        text: "Diese Klauseln heißen wirklich so: Einer nennt einen Preis, der andere muss zu diesem Preis entweder verkaufen oder kaufen. Juristisch elegant, menschlich ein Duell im Morgengrauen. Stefan und Tobias haben sich bewusst dagegen entschieden.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Auflösungsklage oder Ausschluss: Am Ende verliert einer seine Firma, oft verlieren sie beide.",
+        einigung:
+          "Stefans KI-Ideen bekommen eine eigene Tochtergesellschaft, die Agentur bleibt Tobias’ Bühne. Der Streit um die eine Strategie war in Wahrheit ein Streit um zwei Strategien für zwei Firmen.",
+      },
+      {
+        gericht: "Das Logo ist keine Frage für das Landgericht.",
+        einigung:
+          "Über das neue Logo hat das Team abgestimmt. Die beiden Gründer haben sich freiwillig enthalten, und beide sagen, das sei die beste Entscheidung des Jahres gewesen.",
+      },
+      {
+        gericht: "Eine Freundschaft lässt sich nicht einklagen.",
+        einigung:
+          "Freitags gibt es wieder Mittagessen. Das steht in keinem Vertrag, aber in beiden Kalendern, als wiederkehrender Termin ohne Enddatum.",
       },
     ],
 
@@ -2098,11 +2490,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Vertrieb gegen Entwicklung",
     titleHighlight: "Ein Teamkonflikt legt den Mittelständler lahm",
     intro:
-      "Zwei Abteilungen, die nicht mehr miteinander reden: eskalierte Meetings, Krankmeldungen, drei Kündigungen. Die Geschäftsführung griff durch — mit Mediation statt Abmahnungen. Ergebnis nach 6 Wochen: arbeitsfähige Teams und klare Schnittstellen.",
+      "Der Vertrieb sagte einem Großkunden ein Feature zu, und die Entwicklung erfuhr davon aus dem Protokoll. Danach gab es zwei Abteilungen, eine gemeinsame Kaffeemaschine und keine gemeinsamen Mittagspausen mehr, bis Krankmeldungen und Kündigungen die Geschäftsführung aufweckten.",
 
     situationTitle: '"Die reden nur noch über Ticketsysteme miteinander"',
     situationIntro:
-      "Teamkonflikte kosten selten durch den Knall — sie kosten durch Reibung: verschleppte Projekte, innere Kündigung, Krankenstand. Und sie lösen sich fast nie von selbst.",
+      "Wenn zwei Teams sich nicht mehr ausstehen können, sieht es aus wie ein Charakterproblem. Meistens ist es ein Prozessproblem mit Gesichtern.",
 
     storyIntro:
       "Wie aus einem verpatzten Produktlaunch ein Grabenkrieg zwischen zwei Abteilungen wurde — und was ihn beendet hat.",
@@ -2138,6 +2530,32 @@ export const caseStudies: Record<string, CaseStudyData> = {
           text: "Ich dachte, wir brauchen ein Teambuilding mit Kletterpark. Wir brauchten einen Prozess und zwei ehrliche Gespräche.",
           author: "Der Entwicklungsleiter",
         },
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 106 GewO",
+        text: "Der Arbeitgeber darf per Weisung bestimmen, wer was wann macht. Er kann also anordnen, dass Vertrieb und Entwicklung zusammenarbeiten. Dass sie es gern tun, kann er nicht anordnen. Dafür gibt es keinen Paragrafen, nur Gespräche.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Arbeitsgericht: Abmahnung, Kündigungsschutzklage, Vergleich mit Abfindung. Die Ursache bleibt im Haus.",
+        einigung:
+          "Ein Aufwandscheck vor jeder Kundenzusage, mit fester Antwortfrist. Der Vertrieb bekommt schnell eine Zahl, die Entwicklung bekommt keine Überraschungen mehr.",
+      },
+      {
+        gericht: "Verständnis füreinander lässt sich nicht einklagen.",
+        einigung:
+          "Ein Tag Rollentausch: Jede Entwicklerin und jeder Entwickler war einmal mit beim Kunden, jede Vertriebsperson saß einen Tag in der Sprintplanung. Der meistzitierte Satz danach: „Ach, DAS meint ihr mit Aufwand.“",
+      },
+      {
+        gericht: "Eskaliert wird über Abmahnungen und den Flurfunk.",
+        einigung:
+          "Eine Eskalationsregel: Was die beiden Teamleitungen nicht in ihrer wöchentlichen halben Stunde klären, geht an die Geschäftsführung, bevor es in der Kaffeeküche landet.",
       },
     ],
 
@@ -2244,11 +2662,11 @@ export const caseStudies: Record<string, CaseStudyData> = {
     title: "Maschinenbauer & IT-Dienstleister",
     titleHighlight: "ERP-Projekt vor dem Scherbenhaufen",
     intro:
-      "Ein ERP-Projekt, 14 Monate Verzug, €400.000 offene Forderungen — und zwei Unternehmen, die sich gegenseitig die Schuld geben. Statt Klage: Wirtschaftsmediation. Ergebnis in 10 Wochen: das Projekt wird fertig, die Geschäftsbeziehung überlebt.",
+      "€1,8 Millionen Budget, ein ERP-System, das nicht lief, €400.000 offene Nachträge und zwei Geschäftsführer, die sich einst auf einer Hausmesse per Handschlag einig geworden waren. Beide Rechtsabteilungen bereiteten die Klagen vor. Herausgekommen ist ein Go-live, ein neuer Vertrag und eine Klausel, die beide Häuser inzwischen überall verwenden.",
 
     situationTitle: '"Kündigen wir, verlieren wir beide Millionen"',
     situationIntro:
-      "IT-Großprojekte scheitern selten an der Technik allein. Sie scheitern an unklaren Anforderungen, verschobenen Verantwortlichkeiten — und daran, dass irgendwann Juristen statt Projektleiter kommunizieren.",
+      "In IT-Projekten gibt es selten einen Schuldigen, aber immer zwei Seiten, die beweisen können, dass es der andere war. Vor Gericht wird daraus ein Gutachterkrieg, den am Ende vor allem die Gutachter gewinnen.",
 
     storyIntro:
       "Die Geschichte eines Projekts, das juristisch schon tot war — und wirtschaftlich zu wertvoll, um es sterben zu lassen.",
@@ -2291,6 +2709,38 @@ export const caseStudies: Record<string, CaseStudyData> = {
         paragraphs: [
           "Das System ging mit sieben Monaten Zusatzaufwand live — begleitet vom selben Team, das den Streit durchgestanden hatte. Die beiden Geschäftsführer trafen sich zur Abnahme wieder auf der Hausmesse. Diesmal gab es keinen Handschlag ohne Vertrag: Das neue Wartungsabkommen enthält die Mediationsklausel, die inzwischen in allen Verträgen beider Häuser steht.",
         ],
+      },
+    ],
+
+    randnotizen: [
+      {
+        norm: "§ 611 · § 631 · § 640 BGB",
+        text: "Ist ein ERP-Projekt ein Werkvertrag, bei dem ein funktionierendes System geschuldet ist, oder ein Dienstvertrag, bei dem nur die Arbeit geschuldet ist? Darüber streiten Juristen gern länger, als das Projekt gedauert hat. An der Antwort hängt, wer das Risiko trägt und ob es auf die Abnahme ankommt.",
+      },
+      {
+        norm: "§ 203 BGB",
+        text: "Solange über einen Anspruch verhandelt wird, ist die Verjährung gehemmt. Profis vereinbaren trotzdem einen Verjährungsverzicht, damit niemand aus Angst vor dem Fristende klagen muss, während man eigentlich gerade miteinander redet.",
+      },
+    ],
+
+    twists: [
+      {
+        gericht:
+          "Nach Jahren ein Urteil über die Nachträge. Ein laufendes System spricht kein Gericht zu.",
+        einigung:
+          "€250.000 der Nachträge zahlt der Maschinenbauer, den Rest erlässt der Dienstleister und baut das System zum Festpreis fertig. Beide bekommen, was kein Urteil liefern kann: einen Go-live.",
+      },
+      {
+        gericht:
+          "Wer schuld war, klärt ein Sachverständiger, für eine sechsstellige Summe.",
+        einigung:
+          "Eine gemeinsame Chronologie statt der Schuldfrage: vages Lastenheft, Änderungen auf beiden Seiten per Zuruf. Als das an der Wand hing, wollte niemand mehr einen Gutachter bezahlen.",
+      },
+      {
+        gericht:
+          "Nach dem Urteil spricht man höchstens noch über den Gerichtsvollzieher miteinander.",
+        einigung:
+          "Ein neues Wartungsabkommen mit Mediationsklausel. Die Abnahme feierten die Geschäftsführer auf derselben Hausmesse, auf der alles angefangen hatte.",
       },
     ],
 

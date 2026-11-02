@@ -3,7 +3,10 @@
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
-import { Breadcrumbs, type BreadcrumbItem } from "@/app/components/ui/Breadcrumbs";
+import {
+  Breadcrumbs,
+  type BreadcrumbItem,
+} from "@/app/components/ui/Breadcrumbs";
 import { JsonLd } from "@/app/components/JsonLd";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -36,6 +39,19 @@ type ComparisonBlock = {
   items: string[];
 };
 
+/** Eine Regelung, die am Mediationstisch entstand und die ein Urteil so
+ * nie hätte treffen können — Gegenüberstellung "Vor Gericht" / "Am Tisch". */
+type Twist = {
+  gericht: string;
+  einigung: string;
+};
+
+/** Kurze, augenzwinkernde, aber juristisch korrekte Einordnung einer Norm. */
+type Randnotiz = {
+  norm: string;
+  text: string;
+};
+
 type FaqItem = {
   /** Frage exakt so formulieren, wie Nutzer sie googeln
    * (z.B. "Wer trägt die Kosten bei einer Mediation?"). */
@@ -63,6 +79,12 @@ type CaseStudyTemplateProps = {
   storyIntro?: string;
   /** Erzählkapitel — machen aus dem Fallbeispiel eine echte Geschichte. */
   chapters?: StoryChapter[];
+  /** Juristische Randnotizen — stehen direkt unter der Geschichte. */
+  randnotizen?: Randnotiz[];
+  twistsTitle?: string;
+  twistsIntro?: string;
+  /** Kuriose Einigungen, auf die ein Gericht nicht gekommen wäre. */
+  twists?: Twist[];
   factsTitle?: string;
   facts: string[];
   riskTitle?: string;
@@ -134,6 +156,10 @@ export function CaseStudyTemplate({
   storyTitle = "Die Geschichte",
   storyIntro,
   chapters,
+  randnotizen,
+  twistsTitle = "Worauf kein Gericht gekommen wäre",
+  twistsIntro = "Ein Gericht entscheidet über das, was beantragt ist, und meistens nach Schema. Am Mediationstisch darf alles auf den Tisch, was den Beteiligten wirklich wichtig ist. Manchmal kommt dabei etwas heraus, das in keinem Gesetzbuch steht.",
+  twists,
   factsTitle = "Eckdaten",
   facts = [],
   riskTitle = "Ohne Mediation",
@@ -237,7 +263,9 @@ export function CaseStudyTemplate({
 
           <div className="container relative">
             <div className="max-w-3xl">
-              {breadcrumbs && <Breadcrumbs items={breadcrumbs} variant="light" />}
+              {breadcrumbs && (
+                <Breadcrumbs items={breadcrumbs} variant="light" />
+              )}
               <div className="eyebrow">{eyebrow}</div>
 
               <h1 className="heading-1 mt-8">
@@ -330,6 +358,45 @@ export function CaseStudyTemplate({
           </section>
         )}
 
+        {randnotizen && randnotizen.length > 0 && (
+          <section className="section section-muted">
+            <div className="container max-w-4xl">
+              <SectionHeader
+                eyebrow="Juristische Randnotiz"
+                title="Was das Gesetz dazu sagt"
+              />
+
+              <div className="space-y-6">
+                {randnotizen.map((notiz) => (
+                  <aside
+                    key={notiz.norm}
+                    className="flex gap-5 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8"
+                  >
+                    <span
+                      aria-hidden
+                      className="font-display text-5xl leading-none text-accent-400"
+                    >
+                      §
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+                        {notiz.norm}
+                      </p>
+                      <p className="mt-3 leading-8 text-neutral-700">
+                        {notiz.text}
+                      </p>
+                    </div>
+                  </aside>
+                ))}
+              </div>
+
+              <p className="mt-6 text-sm text-neutral-500">
+                Allgemeine Information, keine Rechtsberatung im Einzelfall.
+              </p>
+            </div>
+          </section>
+        )}
+
         <section className="section section-base">
           <div className="container">
             <div className="grid gap-6 lg:grid-cols-2">
@@ -382,6 +449,44 @@ export function CaseStudyTemplate({
             </ol>
           </div>
         </section>
+
+        {twists && twists.length > 0 && (
+          <section className="section section-base">
+            <div className="container max-w-5xl">
+              <SectionHeader
+                eyebrow="Die Kuriositäten"
+                title={twistsTitle}
+                description={twistsIntro}
+              />
+
+              <div className="space-y-6">
+                {twists.map((twist) => (
+                  <div
+                    key={twist.einigung}
+                    className="grid overflow-hidden rounded-2xl border border-neutral-200 md:grid-cols-[2fr_3fr]"
+                  >
+                    <div className="bg-neutral-50 p-6 sm:p-8">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                        Vor Gericht
+                      </p>
+                      <p className="mt-3 leading-7 text-neutral-500">
+                        {twist.gericht}
+                      </p>
+                    </div>
+                    <div className="border-t border-neutral-200 bg-white p-6 sm:p-8 md:border-l md:border-t-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+                        Am Mediationstisch
+                      </p>
+                      <p className="mt-3 leading-7 text-neutral-800">
+                        {twist.einigung}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {positive && negative && (
           <section className="section section-accent">
