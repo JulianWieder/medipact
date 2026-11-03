@@ -89,7 +89,8 @@ type MarketingPageTemplateProps = {
    */
   deepDive?: DeepDive;
   processTitle?: string;
-  process: Step[];
+  /** Leer lassen, um die Ablauf-Sektion auszublenden (z. B. /about). */
+  process?: Step[];
   comparisonTitle?: string;
   comparisonIntro?: string;
   comparisonPlans?: ComparisonPlan[];
@@ -198,7 +199,7 @@ export function MarketingPageTemplate({
   features,
   deepDive,
   processTitle,
-  process,
+  process = [],
   comparisonTitle,
   comparisonIntro,
   comparisonPlans = [],
@@ -403,6 +404,7 @@ export function MarketingPageTemplate({
           </section>
         )}
 
+        {process.length > 0 && (
         <section className="section section-base">
           <div className="container max-w-5xl">
             <SectionLead eyebrow={t("processEyebrow")} title={processTitle ?? t("process")} center />
@@ -427,6 +429,7 @@ export function MarketingPageTemplate({
             </div>
           </div>
         </section>
+        )}
 
         {comparisonPlans.length > 0 && (
           <section className="section section-strong">

@@ -56,14 +56,16 @@ const differentiators = [
 // (workflowSteps) ist hier aufgegangen – sie erzählte dieselben Phasen ein
 // zweites Mal. `starter` markiert die Phasen, die das Starterpaket abdeckt
 // (STARTPAKET_PHASEN in lib/mediatorVermittlung.ts: Einladung, Einleitung,
-// Themen, Interessen); ändern sich die dort, hier nachziehen.
+// Themen, Interessen); ändern sich die dort, hier nachziehen. Die
+// "Auf der Plattform"-Texte zu Phase 0, 2 und 6 stammen aus dem früheren
+// Ablauf auf /about (umgezogen 03.11.2026).
 const mediationPhases = [
   {
     num: "0",
     starter: true,
     title: "Onboarding & Einladung",
     text: "Sie beschreiben kurz, worum es geht, die Gegenseite wird sachlich eingeladen – ohne öffentlichen Druck, ohne bloßstellende Konfrontation. Erst wenn beide Seiten freiwillig dabei sind, beginnt die eigentliche Mediation.",
-    platform: "Die Plattform formuliert auf Wunsch eine neutrale, professionelle Einladungsnachricht für Sie.",
+    platform: "Sie schildern die Situation zuerst allein. Die Einladung an die andere Seite ist sachlich formuliert und enthält die Vorwürfe nicht, mit denen ein solches Gespräch sonst beginnt. Fall anlegen und Situation schildern ist kostenlos.",
   },
   {
     num: "1",
@@ -77,7 +79,7 @@ const mediationPhases = [
     starter: true,
     title: "Themensammlung",
     text: "Beide Seiten schildern aus ihrer Sicht, welche Themen offen sind – zunächst ohne Bewertung. Emotionen, Forderungen und eigentliche Anliegen werden getrennt. Oft zeigt sich: Hinter einem großen Streit stecken mehrere klar benennbare Punkte.",
-    platform: "Ihre Eingaben werden strukturiert gesammelt und zu einer gemeinsamen Themenliste geordnet.",
+    platform: "Beide Seiten gehen dieselben Schritte, jeweils dann, wenn es passt. Antworten werden erst gegenübergestellt, wenn beide geliefert haben – niemand kann sich an der anderen Seite ausrichten. Daraus entsteht eine gemeinsame Themenliste.",
   },
   {
     num: "3",
@@ -102,7 +104,7 @@ const mediationPhases = [
     num: "6",
     title: "Abschluss & Vereinbarung",
     text: "Die beste Lösung wird schriftlich festgehalten und von beiden Seiten bestätigt. Bei rechtlich wichtigen Fragen empfiehlt sich eine juristische Prüfung.",
-    platform: "Am Ende steht eine klare, dokumentierte Vereinbarung – wer tut was bis wann.",
+    platform: "Wer macht was bis wann steht am Ende da, weil es während des Verfahrens entstanden ist – nicht weil es jemand hinterher gegen Honorar aufsetzt. Beide Seiten bestätigen dasselbe Dokument.",
   },
 ];
 
@@ -251,11 +253,53 @@ const exampleCases = [
   },
 ];
 
+// Vergleich Mediation / Anwalt / Gericht – bis 03.11.2026 auf /about
+// (comparisonPlans), jetzt hier, weil er erklärt, was Mediation von den
+// anderen Wegen unterscheidet.
+const vergleich = [
+  {
+    title: "medipact",
+    status: "Festpreis, ab 49 €",
+    features: [
+      "Preis steht vor dem Start fest",
+      "beide Seiten arbeiten asynchron",
+      "Ergebnis wird gemeinsam beschlossen",
+      "Vereinbarung entsteht im Verfahren",
+      "menschlicher Mediator zubuchbar",
+      "Rechtsweg bleibt offen",
+    ],
+    featured: true,
+  },
+  {
+    title: "Anwaltlicher Streit",
+    status: "Positionsgetrieben",
+    features: [
+      "Kommunikation läuft über Dritte",
+      "Kosten hängen am Streitwert",
+      "Verhandlung um Positionen, nicht Interessen",
+      "richtig und nötig bei klaren Rechtsfragen",
+    ],
+    featured: false,
+  },
+  {
+    title: "Gerichtsverfahren",
+    status: "Fremdbestimmt",
+    features: [
+      "ein Richter entscheidet, nicht Sie",
+      "dauert in der Regel Monate bis Jahre",
+      "belastet die Beziehung zusätzlich",
+      "unverzichtbar, wenn keine Einigung möglich ist",
+    ],
+    featured: false,
+  },
+];
+
 // Unternavigation (SectionNav). Reihenfolge = Reihenfolge auf der Seite;
 // "Zwei Punkte entscheiden" und Geschäftskonflikte haben bewusst keinen
 // eigenen Eintrag (gehören zu "Online-Verfahren" bzw. eigene Seite).
 const sectionNav = [
   { id: "mediation", label: "Was ist Mediation" },
+  { id: "vergleich", label: "Vergleich" },
   { id: "phasen", label: "Phasen" },
   { id: "starterpaket", label: "Starterpaket" },
   { id: "varianten", label: "Wege & Preise" },
@@ -465,6 +509,71 @@ export default function MethodePage() {
               </ArrowLink>
               <ArrowLink href="/about" tone="muted">
                 Warum es medipact gibt
+              </ArrowLink>
+            </div>
+          </div>
+        </section>
+
+        {/* VERGLEICH - von /about umgezogen (03.11.2026). */}
+        <section id="vergleich" className="section section-strong">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mb-12 max-w-2xl">
+              <div className="eyebrow mb-4 text-accent-300">Im Vergleich</div>
+              <h2 className="heading-2 text-white">
+                Der bessere erste Schritt vor der Eskalation
+              </h2>
+              <p className="mt-4 text-lg leading-8 text-neutral-300">
+                Mediation ist kein Kampfmodus und keine Rechtsdurchsetzung. Es
+                ist der Weg, der offen bleibt, solange beide Seiten noch etwas
+                voneinander wollen.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {vergleich.map((plan) => (
+                <div
+                  key={plan.title}
+                  className={`rounded-[2rem] border p-8 ${
+                    plan.featured
+                      ? "border-accent-600/40 bg-neutral-800/70"
+                      : "border-neutral-700 bg-neutral-800/50"
+                  }`}
+                >
+                  <h3 className="text-xl font-bold text-white">{plan.title}</h3>
+                  <div
+                    className={`mt-1 text-sm font-medium ${
+                      plan.featured ? "text-accent-300" : "text-neutral-400"
+                    }`}
+                  >
+                    {plan.status}
+                  </div>
+                  <div className="my-6 h-px bg-white/10" />
+                  <ul className="space-y-3">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-3 text-sm text-neutral-300"
+                      >
+                        <span
+                          className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                            plan.featured
+                              ? "bg-accent-500 text-white"
+                              : "bg-neutral-700 text-neutral-400"
+                          }`}
+                        >
+                          ✓
+                        </span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10">
+              <ArrowLink href="/kostenrechner" tone="light">
+                Was würde Ihr Streit vor Gericht kosten?
               </ArrowLink>
             </div>
           </div>

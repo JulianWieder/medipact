@@ -787,8 +787,10 @@ export default function Preise() {
 
         {/* DIGITALES STARTERPAKET (lib/mediatorVermittlung.ts). Direkt nach
             den Verfahrens-Tarifen: Die bleiben vorn, das Starterpaket ist der
-            zweite Weg für alle, die am Ende eine Mediatorin am Tisch wollen. */}
-        <StarterpaketSection inhalt={starterpaketInhaltDe} />
+            zweite Weg für alle, die am Ende eine Mediatorin am Tisch wollen.
+            Seit 03.11.2026 kompakt (Preiskarte + Link): Ablauf, Phasen und
+            Gesprächsleitfaden stehen auf /methode#starterpaket. */}
+        <StarterpaketSection inhalt={starterpaketInhaltDe} kompakt />
 
         {/* BUSINESS-TARIFE */}
         <section className="section section-strong">

@@ -13,12 +13,58 @@ import { STARTERPAKET_URL } from "@/lib/mediatorVermittlung";
  * sagen genau das, bevor Phasen und Preis kommen – inklusive der Grenze:
  * Das Paket klärt, ob eine Lösung erreichbar ist, eine Einigung entsteht
  * darin noch nicht.
+ *
+ * `kompakt` (seit 03.11.2026, /preise): nur Einleitung und Preiskarte, dazu
+ * ein Link auf /methode#starterpaket. Zweck, Phasen und Gesprächsleitfaden
+ * stehen ausführlich auf /methode und der Startseite.
  */
 export function StarterpaketSection({
   inhalt,
+  kompakt = false,
 }: {
   inhalt: StarterpaketInhalt;
+  kompakt?: boolean;
 }) {
+  if (kompakt) {
+    return (
+      <section
+        id="starterpaket"
+        className="section section-muted scroll-mt-20 border-y border-neutral-200"
+      >
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-start lg:px-8">
+          <div className="max-w-3xl">
+            <div className="eyebrow mb-4">{inhalt.eyebrow}</div>
+            <h2 className="text-3xl font-black leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl">
+              {inhalt.title}
+              <span className="block text-accent-700">
+                {inhalt.titleHighlight}
+              </span>
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-neutral-700">
+              {inhalt.text}
+            </p>
+            <ul className="mt-8 space-y-4">
+              {inhalt.zweck.map((z) => (
+                <li key={z.title} className="flex gap-3">
+                  <span className="font-bold text-accent-600">✓</span>
+                  <span className="font-semibold text-neutral-900">
+                    {z.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8">
+              <ArrowLink href="/methode#starterpaket">
+                Wie das Starterpaket abläuft
+              </ArrowLink>
+            </div>
+          </div>
+          <Preiskarte inhalt={inhalt} />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       id="starterpaket"
@@ -111,52 +157,58 @@ export function StarterpaketSection({
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
-              {inhalt.name}
-            </div>
-            <div className="mt-4 text-5xl font-black tracking-tight text-neutral-900">
-              {inhalt.preis}
-            </div>
-            <p className="mt-2 text-sm text-neutral-500">
-              {inhalt.preisHinweis}
-            </p>
-            <ul className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
-              {inhalt.punkte.map((punkt) => (
-                <li key={punkt} className="flex gap-2">
-                  <span className="font-bold text-accent-600">✓</span>
-                  <span>{punkt}</span>
-                </li>
-              ))}
-            </ul>
-            {/* Fallanalyse als Teil des Pakets, nicht als eigener Schritt
-                daneben (Einstieg-Sektion der Startseite nennt sie nicht mehr
-                separat). */}
-            <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 p-5">
-              <div className="text-sm font-semibold text-accent-800">
-                {inhalt.fallanalyse.title}
-              </div>
-              <p className="mt-1 text-sm leading-6 text-neutral-700">
-                {inhalt.fallanalyse.text}
-              </p>
-            </div>
-            <p className="mt-4 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
-              {inhalt.danach}
-            </p>
-            <Button href={STARTERPAKET_URL} className="mt-6 w-full">
-              {inhalt.cta}
-            </Button>
-            <div className="mt-4 text-center">
-              <ArrowLink
-                href="/mediator-finden#verzeichnis"
-                className="text-sm"
-              >
-                {inhalt.ctaProfile}
-              </ArrowLink>
-            </div>
-          </div>
+          <Preiskarte inhalt={inhalt} />
         </div>
       </div>
     </section>
+  );
+}
+
+function Preiskarte({ inhalt }: { inhalt: StarterpaketInhalt }) {
+  return (
+    <div className="rounded-[2rem] border border-neutral-200 bg-white p-8 shadow-sm">
+      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">
+        {inhalt.name}
+      </div>
+      <div className="mt-4 text-5xl font-black tracking-tight text-neutral-900">
+        {inhalt.preis}
+      </div>
+      <p className="mt-2 text-sm text-neutral-500">
+        {inhalt.preisHinweis}
+      </p>
+      <ul className="mt-6 space-y-3 border-t border-neutral-100 pt-6 text-sm text-neutral-700">
+        {inhalt.punkte.map((punkt) => (
+          <li key={punkt} className="flex gap-2">
+            <span className="font-bold text-accent-600">✓</span>
+            <span>{punkt}</span>
+          </li>
+        ))}
+      </ul>
+      {/* Fallanalyse als Teil des Pakets, nicht als eigener Schritt
+          daneben (Einstieg-Sektion der Startseite nennt sie nicht mehr
+          separat). */}
+      <div className="mt-6 rounded-2xl border border-accent-200 bg-accent-50/60 p-5">
+        <div className="text-sm font-semibold text-accent-800">
+          {inhalt.fallanalyse.title}
+        </div>
+        <p className="mt-1 text-sm leading-6 text-neutral-700">
+          {inhalt.fallanalyse.text}
+        </p>
+      </div>
+      <p className="mt-4 rounded-2xl bg-neutral-50 p-5 text-sm leading-6 text-neutral-600">
+        {inhalt.danach}
+      </p>
+      <Button href={STARTERPAKET_URL} className="mt-6 w-full">
+        {inhalt.cta}
+      </Button>
+      <div className="mt-4 text-center">
+        <ArrowLink
+          href="/mediator-finden#verzeichnis"
+          className="text-sm"
+        >
+          {inhalt.ctaProfile}
+        </ArrowLink>
+      </div>
+    </div>
   );
 }

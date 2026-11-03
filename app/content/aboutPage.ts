@@ -153,7 +153,7 @@ export const aboutPageContent = {
         text: "Wer noch nicht bereit für eine Mediation ist, dokumentiert erst einmal: Vorkommnisse, Gespräche, Nachrichten und Telefonate mit Datum und Belegen. Die Gegenseite sieht davon nichts; geteilt wird später nur, was Sie ausdrücklich freigeben. Es gibt Konflikte, in denen die eigene Chronologie schon der ganze nötige Schritt ist.",
       },
       {
-        title: "Der Einigungsprozess in sechs Schritten",
+        title: "Ein geführter Einigungsprozess",
         text: "Themen ordnen, Vorwürfe in Anliegen übersetzen, Forderungen von Interessen trennen, Optionen entwickeln, gegenrechnen, Vereinbarung festhalten. Beide Seiten arbeiten asynchron — kein gemeinsamer Kalender, keine bezahlte Wartezeit, keine Anfahrt.",
       },
       {
@@ -182,70 +182,18 @@ export const aboutPageContent = {
       { label: "Der Einigungsprozess", href: "/einigung" },
       { label: "Wie weit kommt man ohne Mediator?", href: "/einigung/ohne-mediator" },
       { label: "Neutralität, Daten und Technik", href: "/einigung/gleichbehandlung" },
-      { label: "Der Ablauf in sechs Schritten", href: "/methode" },
+      { label: "Wie Mediation abläuft: Phasen und Starterpaket", href: "/methode" },
+      { label: "Mediation, Anwalt oder Gericht?", href: "/methode#vergleich" },
       { label: "Preise und Pakete", href: "/preise" },
       { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     ],
   },
 
-  processTitle: "Vom ersten Eintrag bis zur Vereinbarung",
-  process: [
-    {
-      title: "Mitschreiben, solange nichts entschieden ist",
-      text: "Im kostenlosen Konflikt-Logbuch halten Sie fest, was vorfällt — ohne dass die andere Seite davon erfährt und ohne sich auf irgendetwas festzulegen. Viele Konflikte werden dadurch überhaupt erst greifbar: Aus diffusem Dauerärger werden belegbare Punkte.",
-    },
-    {
-      title: "Fall anlegen und die Gegenseite einladen",
-      text: "Sie schildern die Situation zuerst allein. Die Einladung an die andere Seite ist sachlich formuliert und enthält die Vorwürfe nicht, mit denen ein solches Gespräch sonst beginnt. Bis hierhin kostet nichts.",
-    },
-    {
-      title: "Geführt austauschen statt frei streiten",
-      text: "Beide Seiten gehen dieselben Schritte, jeweils dann, wenn es passt. Antworten und Gewichtungen werden erst gegenübergestellt, wenn beide geliefert haben — niemand kann sich an der anderen Seite ausrichten.",
-    },
-    {
-      title: "Die Vereinbarung entsteht unterwegs",
-      text: "Wer macht was bis wann steht am Ende da, weil es während des Verfahrens entstanden ist, und nicht weil es jemand hinterher gegen Honorar aufsetzt. Beide Seiten bestätigen dasselbe Dokument.",
-    },
-  ],
-
-  comparisonTitle: "Der bessere erste Schritt vor der Eskalation",
-  comparisonIntro:
-    "medipact ist kein Kampfmodus und keine Rechtsdurchsetzung. Es ist der Weg, der offen bleibt, solange beide Seiten noch etwas voneinander wollen.",
-  comparisonPlans: [
-    {
-      title: "medipact",
-      status: "Festpreis, ab 49 €",
-      features: [
-        "Preis steht vor dem Start fest",
-        "beide Seiten arbeiten asynchron",
-        "Ergebnis wird gemeinsam beschlossen",
-        "Vereinbarung entsteht im Verfahren",
-        "menschlicher Mediator zubuchbar",
-        "Rechtsweg bleibt offen",
-      ],
-      featured: true,
-    },
-    {
-      title: "Anwaltlicher Streit",
-      status: "Positionsgetrieben",
-      features: [
-        "Kommunikation läuft über Dritte",
-        "Kosten hängen am Streitwert",
-        "Verhandlung um Positionen, nicht Interessen",
-        "richtig und nötig bei klaren Rechtsfragen",
-      ],
-    },
-    {
-      title: "Gerichtsverfahren",
-      status: "Fremdbestimmt",
-      features: [
-        "ein Richter entscheidet, nicht Sie",
-        "dauert in der Regel Monate bis Jahre",
-        "belastet die Beziehung zusätzlich",
-        "unverzichtbar, wenn keine Einigung möglich ist",
-      ],
-    },
-  ],
+  // Ablauf ("Vom ersten Eintrag bis zur Vereinbarung") und der Vergleich
+  // medipact / Anwalt / Gericht sind am 03.11.2026 nach /methode umgezogen
+  // (Phasen bzw. #vergleich). Hier stehen nur noch die Links in
+  // deepDive.links – /about erklärt, warum es medipact gibt, /methode wie
+  // Mediation abläuft.
 
   trustTitle: "Warum Sie das nachprüfen können, statt es zu glauben",
   trustPoints: [
@@ -270,7 +218,7 @@ export const aboutPageContent = {
     {
       question: "Was ist medipact genau?",
       answer:
-        "Eine Plattform für strukturierte Online-Mediation. Beide Seiten gehen denselben Ablauf in sechs Schritten durch — jeweils dann, wenn es ihnen passt —, und am Ende steht eine Vereinbarung, die während des Verfahrens entstanden ist. Menschliche Mediation ist zubuchbar, nicht Voraussetzung.",
+        "Eine Plattform für strukturierte Online-Mediation. Beide Seiten gehen denselben geführten Ablauf durch — jeweils dann, wenn es ihnen passt —, und am Ende steht eine Vereinbarung, die während des Verfahrens entstanden ist. Menschliche Mediation ist zubuchbar, nicht Voraussetzung.",
     },
     {
       question: "Ersetzt das einen Mediator?",
