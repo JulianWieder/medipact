@@ -14,7 +14,7 @@
     "konflikteErbschaft": "Inheritance & family",
     "konflikteGeschaeft": "Business & ODR",
     "methode": "How it works",
-    "methodeAblauf": "Process & method",
+    "methodeAblauf": "What is mediation",
     "methodeEinigung": "The settlement process",
     "methodeOhneMediator": "Without a mediator",
     "methodeAbgleich": "Weighted trade-off",
@@ -39,8 +39,11 @@
     "konflikteCheck": "Not sure? Quick check",
     "methodeGruppeAblauf": "The process",
     "methodeGruppeEinigung": "Reaching agreement",
-    "methodeAblaufDesc": "What happens in each of the six steps",
-    "methodeBegleitung": "Choose your level of support",
+    "methodeAblaufDesc": "Principles, phases and comparison with lawyers and courts",
+    "methodeBegleitung": "Paths & prices",
+    "methodeStarter": "Starter package",
+    "methodeStarterDesc": "Understand, find a mediator, couple check included",
+    "eignungscheck": "Free suitability check",
     "methodeBegleitungDesc": "Online, hybrid or full service",
     "methodePersoenlich": "In-person mediation",
     "methodePersoenlichDesc": "We match you with a mediator, on site or by video",
@@ -561,8 +564,8 @@
         "An assessment of whether a solution is within reach – reaching an agreement is not part of the package"
       ],
       "fallanalyse": {
-        "title": "Included: initial case analysis",
-        "text": "At the start, a brief assessment of whether mediation is basically an option in your case – using the same framework as for every case. It goes to your mediator when you hand over."
+        "title": "Included: couple check and initial case analysis",
+        "text": "At the start, both sides answer the suitability check (based on Glasl) separately and then see the comparison. Plus a brief assessment of whether mediation is basically an option in your case – using the same framework as for every case. Both go to your mediator when you hand over."
       },
       "danach": "Afterwards you decide: continue via medipact, with sessions at the hourly rate shown in the profile split between you – or directly with your mediator, who bills you directly and receives only your results from us. Or you pause. Further costs only arise if you continue.",
       "cta": "Book the starter package",

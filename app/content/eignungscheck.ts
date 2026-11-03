@@ -4,6 +4,11 @@
 // angelehnt an das Eskalationsmodell nach Friedrich Glasl, als Einstieg in
 // den Paar-Check (beide Seiten, in kerno). Stand 03.11.2026.
 //
+// Der Paar-Check ist im Starterpaket enthalten (Julian 03.11.2026) und
+// einzeln für 20 € buchbar. Er führt NICHT direkt in ein Einigungs-
+// verfahren: Nach dem Check kommt das Starterpaket (verstehen, Mediator:in
+// finden, klären, ob eine Lösung möglich ist), erst danach die Einigung.
+//
 // Auswertung (app/eignungscheck/EignungsCheck.tsx): Jede Antwort trägt die
 // Glasl-Stufe, für die sie typisch ist (0 = kein Signal). Es zählt die
 // HÖCHSTE ausgelöste Stufe, nicht die Summe – ein einziges Ultimatum wiegt
@@ -16,19 +21,22 @@
 // sind eigene Worte. Preise unten mit kerno (app/pricing.py) abgleichen.
 
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
+import {
+  STARTERPAKET_URL,
+  STARTPAKET_NAME,
+  STARTPAKET_PREIS,
+} from "@/lib/mediatorVermittlung";
 
 /** Paar-Check: beide Seiten machen den Check, danach Abgleich. */
 export const PAARCHECK_PREIS = "20 €";
 export const PAARCHECK_PREIS_EUR = "20";
-/** Einstiegstarif (Nachbarschaft, Verbraucher, Mietverhältnis) je Partei. */
-export const EINSTIEGSTARIF_PREIS = "49 €";
 
 /** Start des Paar-Checks in kerno: Typ `eignungscheck` im Start-Flow. */
 export const PAARCHECK_URL = `${REGISTRIEREN_URL}?callbackUrl=${encodeURIComponent(
   "/dashboard/mediation/new/eignungscheck",
 )}`;
-/** Direkt ins Verfahren (Einstiegstarif, Eignungscheck inklusive). */
-export const MEDIATION_STARTEN_URL = REGISTRIEREN_URL;
+/** Starterpaket buchen – der Paar-Check ist darin enthalten. */
+export const STARTERPAKET_MIT_CHECK_URL = STARTERPAKET_URL;
 
 export type CheckAntwort = {
   text: string;
@@ -248,13 +256,13 @@ export const checkAngebote = [
     hervorgehoben: true,
   },
   {
-    name: "Einstiegstarif",
-    preis: `ab ${EINSTIEGSTARIF_PREIS} pro Partei`,
-    fuer: "direkt zur Einigung",
+    name: STARTPAKET_NAME,
+    preis: `${STARTPAKET_PREIS} pro Fall`,
+    fuer: "Paar-Check inklusive",
     punkte: [
-      "Eignungscheck inklusive",
-      "geführtes Online-Verfahren zum Festpreis",
-      "für Nachbarschaft, Verbraucher- und Mietstreit",
+      "Paar-Check für beide Seiten inklusive",
+      "Mediation verstehen und passende Mediator:in finden",
+      "klären, ob eine Lösung möglich ist – die Einigung kommt danach",
     ],
   },
 ];
@@ -287,7 +295,7 @@ export const eignungscheckFaqs = [
   },
   {
     frage: "Was kostet der Paar-Check, und was passiert danach?",
-    antwort: `Der Paar-Check kostet ${PAARCHECK_PREIS}. Sie laden die andere Seite ein, beide beantworten die Fragen getrennt, danach sehen beide die Ampel und den Abgleich. Ob und wie es weitergeht, entscheiden Sie danach. Wer direkt mit der Mediation beginnt, bekommt den Eignungscheck im Einstiegstarif (ab ${EINSTIEGSTARIF_PREIS} pro Partei) inklusive.`,
+    antwort: `Der Paar-Check kostet ${PAARCHECK_PREIS}. Sie laden die andere Seite ein, beide beantworten die Fragen getrennt, danach sehen beide die Ampel und den Abgleich. Ob und wie es weitergeht, entscheiden Sie danach. Im ${STARTPAKET_NAME} (${STARTPAKET_PREIS} pro Fall) ist der Paar-Check bereits enthalten.`,
   },
 ];
 

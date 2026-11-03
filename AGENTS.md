@@ -114,6 +114,10 @@ zentral in `app/content/eignungscheck.ts`; beworben wird er über
 verbraucher). Antworten bleiben im Browser — kein fetch, kein Storage,
 kein Tracking mit Inhalt; das steht so auf der Seite und in der FAQ. Bei
 Rot (und immer bei Gewalt/Angst) kein Verkaufs-CTA.
+Der Paar-Check ist im Starterpaket enthalten (auch einzeln buchbar) und
+führt nie „direkt zur Einigung“: nach dem Check kommt das Starterpaket,
+die Einigung erst danach. Auf /preise steht der Teaser direkt unter dem
+Logbuch.
 
 ## Konflikt-Typen auf den Marketing-Seiten
 

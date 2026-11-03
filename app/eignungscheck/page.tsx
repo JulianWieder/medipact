@@ -178,7 +178,7 @@ export default function EignungscheckPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-2xl">
             <div className="eyebrow mb-4">Drei Wege zur Einschätzung</div>
-            <h2 className="heading-2">Eigene Sicht, beide Sichten oder direkt los</h2>
+            <h2 className="heading-2">Eigene Sicht, beide Sichten oder gleich mit Starterpaket</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {checkAngebote.map((a) => (

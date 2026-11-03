@@ -80,8 +80,8 @@ export const starterpaketInhaltDe: StarterpaketInhalt = {
   preisHinweis: `Pro Fall, geteilt: ${STARTPAKET_ANTEIL} je Seite – fällig, wenn die andere Seite zusagt`,
   punkte: STARTPAKET_PUNKTE,
   fallanalyse: {
-    title: "Inklusive: erste Fallanalyse",
-    text: "Zu Beginn eine kurze Einschätzung, ob Mediation in Ihrem Fall grundsätzlich in Frage kommt – nach demselben Schema wie bei jedem Fall. Sie geht bei der Übergabe an Ihre Mediatorin mit.",
+    title: "Inklusive: Paar-Check und erste Fallanalyse",
+    text: "Zu Beginn beantworten beide Seiten getrennt den Eignungscheck nach Glasl und sehen danach den Abgleich. Dazu eine kurze Einschätzung, ob Mediation in Ihrem Fall grundsätzlich in Frage kommt – nach demselben Schema wie bei jedem Fall. Beides geht bei der Übergabe an Ihre Mediatorin mit.",
   },
   danach: STARTPAKET_DANACH,
   cta: "Starterpaket buchen",

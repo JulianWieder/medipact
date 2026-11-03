@@ -163,16 +163,25 @@ export default function Header() {
       groups: [
         {
           title: t("methodeGruppeAblauf"),
+          // Spalte folgt dem Aufbau von /methode (seit 03.11.2026: Mediation
+          // -> Starterpaket -> Wege), daher Anker statt der alten
+          // "sechs Schritte".
           items: [
             {
               label: t("methodeAblauf"),
-              href: "/methode",
+              href: "/methode#mediation",
               desc: t("methodeAblaufDesc"),
               icon: "compass",
             },
             {
+              label: t("methodeStarter"),
+              href: "/methode#starterpaket",
+              desc: t("methodeStarterDesc"),
+              icon: "clipboard",
+            },
+            {
               label: t("methodeBegleitung"),
-              href: "/preise",
+              href: "/methode#varianten",
               desc: t("methodeBegleitungDesc"),
               icon: "users",
             },
@@ -215,6 +224,7 @@ export default function Header() {
           href: "/einigung/gleichbehandlung",
         },
         { label: t("kostenrechner"), href: "/kostenrechner" },
+        { label: t("eignungscheck"), href: "/eignungscheck" },
       ],
     },
     {

@@ -4,10 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { CrossfadePanel } from "@/app/components/ui/TabSwitcher";
 import {
-  EINSTIEGSTARIF_PREIS,
-  MEDIATION_STARTEN_URL,
   PAARCHECK_PREIS,
   PAARCHECK_URL,
+  STARTERPAKET_MIT_CHECK_URL,
   ampelErgebnis,
   ampelFuerStufe,
   checkFragen,
@@ -16,6 +15,7 @@ import {
   type Ampel,
   type CheckAntwort,
 } from "@/app/content/eignungscheck";
+import { STARTPAKET_NAME, STARTPAKET_PREIS } from "@/lib/mediatorVermittlung";
 
 /**
  * Der Kurz-Check selbst: eine Frage pro Bildschirm, Fortschrittsanzeige,
@@ -177,14 +177,15 @@ function Ergebnis({ antworten, onNeu }: { antworten: CheckAntwort[]; onNeu: () =
               Paar-Check für {PAARCHECK_PREIS} – beide Seiten prüfen
             </Link>
             <Link
-              href={MEDIATION_STARTEN_URL}
+              href={STARTERPAKET_MIT_CHECK_URL}
               className="inline-flex justify-center rounded-full border border-neutral-200 px-6 py-3 text-sm font-semibold text-neutral-800 transition hover:border-accent-400 hover:text-accent-700"
             >
-              Direkt Mediation starten
+              Starterpaket mit Paar-Check
             </Link>
           </div>
           <p className="mt-3 text-xs text-neutral-500">
-            Direkt starten: Einstiegstarif ab {EINSTIEGSTARIF_PREIS} pro Partei, Eignungscheck inklusive.
+            Im {STARTPAKET_NAME} ({STARTPAKET_PREIS} pro Fall) ist der Paar-Check enthalten – dazu
+            Mediation verstehen, Mediator:in finden und klären, ob eine Lösung möglich ist.
           </p>
         </div>
       )}
