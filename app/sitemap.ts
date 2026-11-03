@@ -52,6 +52,8 @@ const STAND = {
   vermittlung: new Date("2026-10-25"),
   // Ortsseiten /mediator-finden/ort/… (lib/ortsseiten.ts) neu.
   ortsseiten: new Date("2026-10-31"),
+  // /eignungscheck neu (Kurz-Check nach Glasl, Paar-Check).
+  eignungscheck: new Date("2026-11-03"),
 };
 
 // Freigabedatum je Sprachfassung (Pfad -> Datum), gilt NUR fuer die
@@ -85,6 +87,7 @@ const ROUTES: Route[] = [
   m("/preise", 0.9, STAND.vermittlung),
   m("/methode", 0.8, STAND.verfahren),
   m("/kostenrechner", 0.9),
+  m("/eignungscheck", 0.8, STAND.eignungscheck),
   m("/konflikt-logbuch", 0.9, STAND.intent),
   m("/about", 0.8),
   m("/kontakt", 0.8),

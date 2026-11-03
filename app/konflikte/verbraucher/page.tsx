@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { verbraucherPageContent } from "@/app/content/verbraucherPage";
 import { JsonLd } from "@/app/components/JsonLd";
+import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
 import verbraucherPhoto from "@/fotos/kosten.jpg";
 import { pageMetadata } from "@/lib/seo";
 
@@ -74,6 +75,7 @@ export default function VerbraucherPage() {
           { label: "Verbraucher & Handwerker" },
         ]}
         kostenrechnerArt="verbraucher"
+        afterHero={<EignungscheckTeaser />}
         relatedCases={[
           { label: "B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
           { label: "Gesellschafter-Streit", href: "/cases/gesellschafter-streit" },

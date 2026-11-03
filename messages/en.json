@@ -492,6 +492,13 @@
     "processLink": "How medipact works",
     "processLinkEinigung": "Why this works at a fixed price",
     "processLinkPersoenlich": "Prefer a mediator? Start digitally, continue in person",
+    "eignungscheck": {
+      "eyebrow": "Free quick check",
+      "title": "Is mediation right for your conflict?",
+      "text": "8 questions based on Glasl's conflict escalation model. You get a traffic light showing how far your conflict has escalated and which path fits now. The check is in German.",
+      "cta": "Start the check",
+      "hinweis": "No sign-up · answers stay in your browser"
+    },
     "starter": {
       "eyebrow": "Digital starter package · €189 per case",
       "title": "First understand how mediation works.",

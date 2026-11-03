@@ -51,15 +51,16 @@ export function HeroScrollPin({ heroPhoto }: { heroPhoto: StaticImageData }) {
           hat: sie fadet mit dem uebrigen Text weg statt stehen zu bleiben.
           Im Fluss ueber dem Content, nicht absolut — sonst laeuft sie auf
           niedrigen Screens durch die H1. */}
-      {/* Auf niedrigen Laptop-Bildschirmen (gepinnt, unter 820px Hoehe) faellt
-          die Laufschrift weg: der Frame ist genau eine Bildschirmhoehe hoch
-          und clippt, und die Buttons sind wichtiger. Eigene innere div, damit
-          das Ausblenden nicht mit `sm:block` um die Reihenfolge streitet. */}
+      {/* Auf niedrigen Laptop-Bildschirmen (gepinnt, unter 820px Hoehe) war
+          die Laufschrift vom 01.11. bis 03.11.2026 ganz ausgeblendet - damit
+          fehlte sie auf den meisten Laptops (Julian: "war gut"). Jetzt bleibt
+          sie und rueckt nur naeher an den Header; Platz fuer die Buttons
+          schafft weiter das Ausblenden der Badge-Zeile (pinknapp). */}
       <motion.div
         style={{ opacity: textOpacity }}
         className="pointer-events-none relative z-20 hidden shrink-0 sm:block"
       >
-        <div className="pt-10 pineng:hidden">
+        <div className="pt-10 pineng:pt-4">
           <HeroTagline text={t("tagline")} />
         </div>
       </motion.div>

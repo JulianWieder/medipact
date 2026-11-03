@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingPageTemplate } from "@/app/components/templates/MarketingPageTemplate";
 import { nachbarschaftPageContent } from "@/app/content/nachbarschaftPage";
 import { JsonLd } from "@/app/components/JsonLd";
+import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
 import nachbarnPhoto from "@/fotos/med_nachbarn_d.jpg";
 import { pageMetadata } from "@/lib/seo";
 
@@ -78,6 +79,7 @@ export default function NachbarschaftPage() {
         { label: "Nachbarschaftsmediation" },
       ]}
       kostenrechnerArt="nachbarschaft"
+      afterHero={<EignungscheckTeaser />}
       mediatorHinweis
       einordnung
       relatedCases={[

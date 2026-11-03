@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import preisPhoto from "../../fotos/medi_preis.jpg";
 import { pageMetadata } from "@/lib/seo";
 import { JsonLd } from "@/app/components/JsonLd";
 import Icon from "@/app/components/ui/Icon";
 import { StarterpaketSection } from "@/app/components/StarterpaketSection";
+import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
+import { PAARCHECK_PREIS_EUR } from "@/app/content/eignungscheck";
 import { starterpaketInhaltDe } from "@/app/content/starterpaket";
 import {
   KENNENLERN_ANZAHL,
@@ -66,9 +69,18 @@ const offerCatalogSchema = {
       },
       {
         "@type": "Offer",
+        name: "Paar-Check",
+        description:
+          "Eignungscheck für beide Seiten: getrennte Antworten, danach Abgleich",
+        priceCurrency: "EUR",
+        price: PAARCHECK_PREIS_EUR,
+        url: "https://medipact.de/eignungscheck",
+      },
+      {
+        "@type": "Offer",
         name: "Einstiegstarif",
         description:
-          "Nachbarschaft, Verbraucher und Handwerker, Mietverhältnis – pro Partei",
+          "Nachbarschaft, Verbraucher und Handwerker, Mietverhältnis – pro Partei, inkl. Eignungscheck",
         priceCurrency: "EUR",
         price: "49",
         url: "https://medipact.de/konflikte",
@@ -229,6 +241,23 @@ export default function Preise() {
 
                 {/* Preise nach Konflikt-Typ */}
                 <div className="space-y-4 mb-8 pb-8 border-b border-neutral-200">
+                  {/* Paar-Check (03.11.2026): eigene Zeile vor den Tarifen,
+                      Preis aus app/content/eignungscheck.ts. */}
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-neutral-900">
+                      Paar-Check (Eignung, beide Seiten)
+                    </span>
+                    <span className="text-lg font-bold text-accent-600">
+                      €{PAARCHECK_PREIS_EUR}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600 -mt-3">
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Beide Seiten prüfen getrennt, danach Abgleich.{" "}
+                    <Link href="/eignungscheck" className="underline">
+                      Kurz-Check für die eigene Sicht kostenlos
+                    </Link>
+                  </p>
+
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-neutral-900">
                       Nachbarschafts-Streit
@@ -238,7 +267,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif, inkl. Eignungscheck
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -250,7 +279,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif, inkl. Eignungscheck
                   </p>
 
                   <div className="flex justify-between items-center mt-4">
@@ -262,7 +291,7 @@ export default function Preise() {
                     </span>
                   </div>
                   <p className="text-xs text-neutral-600 -mt-3">
-                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif
+                    <Icon name="arrow-right" size={12} color="currentColor" /> Pro Partei – Einstiegstarif, inkl. Eignungscheck
                   </p>
 
                   <p className="text-xs text-neutral-500 mt-1">
@@ -791,6 +820,8 @@ export default function Preise() {
             Seit 03.11.2026 kompakt (Preiskarte + Link): Ablauf, Phasen und
             Gesprächsleitfaden stehen auf /methode#starterpaket. */}
         <StarterpaketSection inhalt={starterpaketInhaltDe} kompakt />
+
+        <EignungscheckTeaser />
 
         {/* BUSINESS-TARIFE */}
         <section className="section section-strong">

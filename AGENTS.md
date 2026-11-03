@@ -105,6 +105,16 @@ Zwei Regeln beim Einsatz:
    Arbeitsbereich wird täglich benutzt, dort wird ein Fade nach dem
    dritten Mal als Verzögerung wahrgenommen, nicht als Politur.
 
+## Eignungscheck (/eignungscheck)
+
+Kostenloser Kurz-Check nach Glasl, Einstieg in den Paar-Check (kerno, Typ
+`eignungscheck`). Fragen, Ampel-Logik, Preise und Teaser-Texte stehen
+zentral in `app/content/eignungscheck.ts`; beworben wird er über
+`EignungscheckTeaser` (Startseite, /konflikte, /preise, nachbarschaft,
+verbraucher). Antworten bleiben im Browser — kein fetch, kein Storage,
+kein Tracking mit Inhalt; das steht so auf der Seite und in der FAQ. Bei
+Rot (und immer bei Gewalt/Angst) kein Verkaufs-CTA.
+
 ## Konflikt-Typen auf den Marketing-Seiten
 
 There are FOUR conflict types (matching the backend `mediation_type`s):

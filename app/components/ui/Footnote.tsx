@@ -4,6 +4,10 @@ import Link from "next/link";
  * Fußnoten für Einschränkungen (N26-Prinzip): Der Claim bleibt lesbar, die
  * Einschränkung steht als hochgestellte Ziffer mit Sprung ans Seitenende.
  *
+ * Bewusst zurückhaltend (03.11.2026): Ziffer grau statt Akzentfarbe, Liste
+ * klein und hellgrau – die Fußnote soll auffindbar sein, nicht mit dem
+ * Claim um Aufmerksamkeit konkurrieren.
+ *
  *   <FootnoteRef n={1} />                       direkt hinter dem Claim
  *   <FootnoteList items={t.raw("footnotes")} /> einmal am Ende der Seite
  *
@@ -28,12 +32,12 @@ export function FootnoteRef({
   label?: string;
 }) {
   return (
-    <sup className="ml-0.5 text-[0.7em] font-semibold leading-none">
+    <sup className="ml-0.5 text-[0.65em] font-normal leading-none">
       <a
         id={`fnref-${n}`}
         href={`#fn-${n}`}
         aria-label={`${label} ${n}`}
-        className="text-accent-700 no-underline hover:underline"
+        className="text-neutral-400 no-underline hover:text-accent-700 hover:underline"
       >
         {n}
       </a>
@@ -50,10 +54,10 @@ export function FootnoteList({
 }) {
   if (!items?.length) return null;
   return (
-    <ol className="space-y-2 text-xs leading-relaxed text-neutral-600">
+    <ol className="space-y-1.5 text-[11px] leading-relaxed text-neutral-500">
       {items.map((f) => (
         <li key={f.n} id={`fn-${f.n}`} className="flex gap-2 scroll-mt-24">
-          <span className="w-4 shrink-0 font-semibold text-neutral-700">
+          <span className="w-4 shrink-0 text-neutral-400">
             {f.n}
           </span>
           <span>
@@ -63,7 +67,7 @@ export function FootnoteList({
                 {" "}
                 <Link
                   href={f.href}
-                  className="font-medium text-accent-700 underline underline-offset-2 hover:text-accent-800"
+                  className="text-neutral-600 underline underline-offset-2 hover:text-accent-700"
                 >
                   {f.linkLabel}
                 </Link>
@@ -73,7 +77,7 @@ export function FootnoteList({
             <a
               href={`#fnref-${f.n}`}
               aria-label={backLabel}
-              className="text-accent-700 no-underline hover:underline"
+              className="text-neutral-400 no-underline hover:text-accent-700"
             >
               ↩
             </a>

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import QuickCheck from "@/app/components/QuickCheck";
+import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import { Breadcrumbs } from "@/app/components/ui/Breadcrumbs";
 import konFormenPhoto from "@/fotos/kon_formen.jpg";
@@ -163,6 +164,8 @@ export default function KonfliktePage() {
           </div>
         </div>
       </ImagePinHero>
+
+      <EignungscheckTeaser />
 
       <QuickCheck />
 

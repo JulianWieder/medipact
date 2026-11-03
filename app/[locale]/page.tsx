@@ -14,6 +14,11 @@ import LogbuchSection from "@/app/components/LogbuchSection";
 import KampagnenKarussell from "@/app/components/KampagnenKarussell";
 import ZweiWelten from "@/app/components/ZweiWelten";
 import OutcomeWand from "@/app/components/OutcomeWand";
+import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
+import {
+  eignungscheckTeaserDe,
+  type EignungscheckTeaserInhalt,
+} from "@/app/content/eignungscheck";
 import { StarterpaketSection } from "@/app/components/StarterpaketSection";
 import { starterpaketInhaltDe, type StarterpaketInhalt } from "@/app/content/starterpaket";
 import { FootnoteList, FootnoteRef, type FootnoteItem } from "@/app/components/ui/Footnote";
@@ -264,6 +269,12 @@ export default async function MedipactLanding({
     locale === routing.defaultLocale
       ? starterpaketInhaltDe
       : (t.raw("starter") as StarterpaketInhalt);
+  // Eignungscheck-Teaser: Deutsch aus app/content/eignungscheck.ts, andere
+  // Sprachen aus home.eignungscheck (wie beim Starterpaket).
+  const eignungscheck =
+    locale === routing.defaultLocale
+      ? eignungscheckTeaserDe
+      : (t.raw("eignungscheck") as EignungscheckTeaserInhalt);
   const didYouKnowFacts = t.has("didYouKnowFacts")
     ? (t.raw("didYouKnowFacts") as DidYouKnowFact[])
     : undefined;
@@ -325,6 +336,9 @@ export default async function MedipactLanding({
             mehrere Mediator:innen kennenlernen möchten, bevor sie sich
             festlegen (lib/mediatorVermittlung.ts). Hero verlinkt hierher. */}
         <StarterpaketSection inhalt={starterpaket} />
+
+        {/* Kostenloser Kurz-Check (03.11.2026), Einstieg in den Paar-Check. */}
+        <EignungscheckTeaser inhalt={eignungscheck} />
 
         <KampagnenKarussell />
 
@@ -483,7 +497,7 @@ export default async function MedipactLanding({
           </div>
         </section>
 
-        <section aria-label={t("footnotesLabel")} className="border-t border-neutral-100 bg-white py-8">
+        <section aria-label={t("footnotesLabel")} className="border-t border-neutral-100 bg-white py-6">
           <div className="mx-auto max-w-5xl px-6 lg:px-8">
             <FootnoteList items={footnotes} backLabel={t("footnoteBack")} />
           </div>
