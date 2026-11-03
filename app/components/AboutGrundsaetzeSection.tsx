@@ -1,9 +1,13 @@
 import type { aboutGrundsaetze } from "@/app/content/aboutPage";
+import { ArrowLink } from "@/app/components/ui/ArrowLink";
 
 /**
  * V-A-N-K-Grundhaltung auf /about, direkt unter der Vision. Der große
  * Buchstabe trägt das Akronym, damit es auch beim Überfliegen hängen bleibt.
  * Texte in app/content/aboutPage.ts.
+ *
+ * Seit 03.11.2026 Kurzfassung (nur Buchstabe + Begriff): Die Erklärungen
+ * (`items[].text`) stehen ausführlich auf /methode#mediation.
  */
 export function AboutGrundsaetzeSection({
   grundsaetze,
@@ -21,23 +25,27 @@ export function AboutGrundsaetzeSection({
           </h2>
           <p className="mt-5 text-lg leading-8 text-neutral-700">{grundsaetze.text}</p>
         </div>
-        <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {grundsaetze.items.map((item) => (
-            <div
+            <li
               key={item.letter}
-              className="rounded-3xl border border-neutral-200 bg-white p-7 shadow-sm"
+              className="flex items-center gap-4 rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm"
             >
-              <div
+              <span
                 aria-hidden="true"
-                className="text-5xl font-black leading-none tracking-tight text-accent-700"
+                className="text-4xl font-black leading-none tracking-tight text-accent-700"
               >
                 {item.letter}
-              </div>
-              <dt className="heading-3 mt-4">{item.title}</dt>
-              <dd className="mt-3 text-base leading-7 text-neutral-700">{item.text}</dd>
-            </div>
+              </span>
+              <span className="heading-3">{item.title}</span>
+            </li>
           ))}
-        </dl>
+        </ul>
+        <div className="mt-8">
+          <ArrowLink href="/methode#mediation">
+            Was die vier Grundsätze in der Mediation bedeuten
+          </ArrowLink>
+        </div>
       </div>
     </section>
   );

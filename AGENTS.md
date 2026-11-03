@@ -61,6 +61,12 @@ instead of hand-rolling the same markup per call-site:
   homepage process section (steps come from `home.processSteps` in
   `messages/*.json`); reuse for "So funktioniert es" sections elsewhere.
 
+- **`SectionNav.tsx`** — sticky Unternavigation für lange Seiten (Anker-
+  Chips unter dem Header, aktiver Abschnitt markiert, auf dem Handy
+  wischbar). Erste Nutzung: `/methode`. Nav + Abschnitte in ein gemeinsames
+  Wrapper-`div` legen, sonst klebt sie bis in den Footer; jeder Eintrag
+  braucht eine passende `id` auf der Seite.
+
 When adding a similar effect to another page, build a small page-specific
 component on top of these primitives (don't fork their internals) so
 the underlying animation behavior stays consistent across the site.
