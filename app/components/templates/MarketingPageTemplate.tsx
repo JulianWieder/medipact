@@ -122,8 +122,7 @@ type MarketingPageTemplateProps = {
   /** Seiteneigener Abschnitt direkt unter dem Hero, vor den Leistungen –
    * z. B. das Verzeichnis der Mediator:innen auf /mediator-finden. */
   afterHero?: ReactNode;
-  /** Seiteneigener Abschnitt vor den Teasern und dem Schluss-CTA, z. B. der
-   * Einbettungscode für den Kostenrechner auf /fuer-berater. */
+  /** Seiteneigener Abschnitt vor den Teasern und dem Schluss-CTA. */
   beforeCta?: ReactNode;
   finalCtaTitle: string;
   finalCtaText: string;
@@ -132,8 +131,8 @@ type MarketingPageTemplateProps = {
     href: string;
   };
   /** Primärer Button im Schluss-CTA. Standard ist „Mediation starten"
-   * (Online-Verfahren). Seiten mit einem anderen Hauptweg — /mediator-finden,
-   * /fuer-mediatoren — setzen hier ihren eigenen. */
+   * (Online-Verfahren). Seiten mit einem anderen Hauptweg wie /mediator-finden
+   * setzen hier ihren eigenen. */
   finalPrimaryCta?: {
     label: string;
     href: string;

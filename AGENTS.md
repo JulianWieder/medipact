@@ -117,7 +117,8 @@ Rot (und immer bei Gewalt/Angst) kein Verkaufs-CTA.
 Der Paar-Check ist im Starterpaket enthalten (auch einzeln buchbar) und
 führt nie „direkt zur Einigung“: nach dem Check kommt das Starterpaket,
 die Einigung erst danach. Auf /preise steht der Teaser direkt unter dem
-Logbuch.
+Logbuch, dort als Paar-Check-Variante (`paarcheckTeaserDe`, Button zum
+20-€-Check, der kostenlose Kurz-Check nur als kleiner Link).
 
 ## Konflikt-Typen auf den Marketing-Seiten
 

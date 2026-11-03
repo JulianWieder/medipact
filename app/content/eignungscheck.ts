@@ -315,3 +315,12 @@ export const eignungscheckTeaserDe: EignungscheckTeaserInhalt = {
   cta: "Check starten",
   hinweis: "Ohne Anmeldung · Antworten bleiben in Ihrem Browser",
 };
+
+/** /preise: Paar-Check vorne, der kostenlose Kurz-Check nur als kleiner Link. */
+export const paarcheckTeaserDe: EignungscheckTeaserInhalt = {
+  eyebrow: `Paar-Check · ${PAARCHECK_PREIS}`,
+  title: "Ist Mediation das Richtige für Ihren Konflikt?",
+  text: "Beide Seiten beantworten dieselben Fragen getrennt, in Anlehnung an die Eskalationsstufen nach Glasl. Danach sehen beide die Ampel und den Abgleich: wo Sie den Konflikt gleich einschätzen und wo nicht. Im Starterpaket ist der Paar-Check bereits enthalten.",
+  cta: `Paar-Check für ${PAARCHECK_PREIS} starten`,
+  hinweis: "Vertraulich · die andere Seite sieht nur Ampel und Abgleich",
+};

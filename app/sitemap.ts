@@ -94,12 +94,8 @@ const ROUTES: Route[] = [
   // Für die eingeladene Seite: Link aus der Einladung, Suche "zur Mediation
   // eingeladen".
   m("/eingeladen", 0.7),
-  // Vertriebs-Asset fuer beratende Berufe, eigene Suchsprache — Prioritaet
-  // moderat, die Seite lebt von Direktlinks aus Mails und Gespraechen.
-  m("/fuer-berater", 0.7),
   // Zusatzbaustein „Mediator:in vermitteln" (lib/mediatorVermittlung.ts).
   m("/mediator-finden", 0.7, STAND.vermittlung),
-  m("/fuer-mediatoren", 0.5, STAND.vermittlung),
   // Nur solange die Stellenanzeige online ist (app/karriere/status.ts).
   ...(KARRIERE_ONLINE ? [m("/karriere", 0.5)] : []),
 

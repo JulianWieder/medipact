@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-/** Nachrichtentyp, auf den das Snippet im Einbettungscode hört (/fuer-berater). */
+/** Nachrichtentyp, auf den das Snippet im Einbettungscode hört (unten auf /kostenrechner). */
 export const HOEHEN_NACHRICHT = "medipact-kostenrechner-hoehe";
 
 /**

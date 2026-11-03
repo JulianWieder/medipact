@@ -88,7 +88,6 @@ export default function OdrPage() {
           { label: "Gesellschafter-Patt", href: "/cases/gesellschafter-streit" },
           { label: "Teamkonflikt im Mittelstand", href: "/cases/team-konflikt" },
           { label: "B2B-Projektstreit", href: "/cases/b2b-projektstreit" },
-          { label: "Für Steuerberater & Notare", href: "/fuer-berater" },
           { label: "Ratgeber: Kündigung ohne Gericht", href: "/ratgeber/kuendigung-ohne-gericht" },
           { label: "Preise für Unternehmen", href: "/preise" },
         ]}

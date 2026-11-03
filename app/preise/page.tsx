@@ -8,7 +8,8 @@ import { StarterpaketSection } from "@/app/components/StarterpaketSection";
 import { EignungscheckTeaser } from "@/app/components/EignungscheckTeaser";
 import {
   PAARCHECK_PREIS_EUR,
-  eignungscheckTeaserDe,
+  PAARCHECK_URL,
+  paarcheckTeaserDe,
 } from "@/app/content/eignungscheck";
 import { starterpaketInhaltDe } from "@/app/content/starterpaket";
 import {
@@ -185,12 +186,14 @@ export default function Preise() {
           </div>
         </section>
 
-        {/* EIGNUNGSCHECK direkt nach dem Logbuch (03.11.2026): kostenloser
-            Kurz-Check, Paar-Check einzeln oder im Starterpaket enthalten. */}
+        {/* PAAR-CHECK direkt nach dem Logbuch (03.11.2026): der 20-€-Check
+            steht vorne, der kostenlose Kurz-Check nur als kleiner Link. */}
         <EignungscheckTeaser
-          inhalt={{
-            ...eignungscheckTeaserDe,
-            text: `${eignungscheckTeaserDe.text} Für beide Sichten gibt es den Paar-Check (€${PAARCHECK_PREIS_EUR}) – im Starterpaket ist er enthalten.`,
+          inhalt={paarcheckTeaserDe}
+          href={PAARCHECK_URL}
+          nebenlink={{
+            label: "Erst allein prüfen? Kostenloser Kurz-Check",
+            href: "/eignungscheck",
           }}
         />
 

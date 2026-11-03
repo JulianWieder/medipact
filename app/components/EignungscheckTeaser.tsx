@@ -11,12 +11,19 @@ import {
  * Texte: app/content/eignungscheck.ts (Deutsch), auf der Startseite für
  * andere Sprachen aus messages/*.json unter home.eignungscheck. Die
  * Ampel-Punkte sind Deko und nehmen das Ergebnis des Checks vorweg.
+ *
+ * `href`/`nebenlink`: /preise bewirbt stattdessen den Paar-Check
+ * (paarcheckTeaserDe) und nennt den kostenlosen Kurz-Check nur klein.
  */
 export function EignungscheckTeaser({
   inhalt = eignungscheckTeaserDe,
+  href = "/eignungscheck",
+  nebenlink,
   className = "",
 }: {
   inhalt?: EignungscheckTeaserInhalt;
+  href?: string;
+  nebenlink?: { label: string; href: string };
   className?: string;
 }) {
   return (
@@ -40,10 +47,18 @@ export function EignungscheckTeaser({
             <p className="mt-3 text-base leading-7 text-neutral-700">{inhalt.text}</p>
           </div>
           <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
-            <Link href="/eignungscheck" className="btn btn-primary">
+            <Link href={href} className="btn btn-primary">
               {inhalt.cta}
             </Link>
             <span className="text-xs text-neutral-500">{inhalt.hinweis}</span>
+            {nebenlink && (
+              <Link
+                href={nebenlink.href}
+                className="text-xs text-neutral-600 underline underline-offset-2 hover:text-accent-700"
+              >
+                {nebenlink.label}
+              </Link>
+            )}
           </div>
         </div>
       </div>

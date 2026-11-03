@@ -1,5 +1,5 @@
 /**
- * Zusatzbaustein „Mediator:in vermitteln" (/mediator-finden, /fuer-mediatoren).
+ * Zusatzbaustein „Mediator:in vermitteln" (/mediator-finden).
  *
  * Das Online-Verfahren bleibt das Hauptangebot. Dieser Baustein ist der
  * zusätzliche Weg für alle, die eine klassische Mediation mit einer
@@ -18,7 +18,7 @@ import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 
 /**
  * Das digitale Starterpaket – EINE Quelle für alle Seiten (Startseite,
- * /preise, /mediator-finden, Profilseiten, /fuer-mediatoren, Hinweis auf den
+ * /preise, /mediator-finden, Profilseiten, Hinweis auf den
  * Konflikt-Seiten). Entschieden am 29.10.2026:
  *
  * 1. Bezahlt wird wie im Online-Verfahren: STARTPAKET_PREIS pro Fall,
@@ -103,12 +103,3 @@ export function starterpaketUrl(wunsch: string[] = []): string {
 }
 
 export const STARTERPAKET_URL = starterpaketUrl();
-
-/** Mediator:innen: Interesse an der Aufnahme in den Pool. */
-export const MEDIATOREN_POOL_URL =
-  "mailto:hallo@medipact.de?subject=" +
-  encodeURIComponent("Aufnahme in den medipact-Mediatorenpool") +
-  "&body=" +
-  encodeURIComponent(
-    "Name:\nAusbildung / Zertifizierung:\nSchwerpunkte:\nVor Ort (Region) und/oder per Video:\nWebsite oder Profil:\n",
-  );

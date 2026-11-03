@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Icon from "@/app/components/ui/Icon";
 import { KONFLIKTARTEN, type Konfliktart } from "@/lib/kostenrecht";
 import { HOEHEN_NACHRICHT } from "@/app/kostenrechner/embed/EinbettungsRahmen";
@@ -27,19 +27,7 @@ function code(art: Konfliktart): string {
 export default function KostenrechnerEinbetten() {
   const [art, setArt] = useState<Konfliktart>("trennung");
   const [kopiert, setKopiert] = useState(false);
-  const [hoehe, setHoehe] = useState(STARTHOEHE);
   const feld = useRef<HTMLTextAreaElement>(null);
-
-  // Vorschau wie beim Einbinder: Höhe aus der Nachricht des Widgets.
-  useEffect(() => {
-    const empfangen = (e: MessageEvent) => {
-      if (e.origin === window.location.origin && e.data?.type === HOEHEN_NACHRICHT) {
-        setHoehe(e.data.hoehe);
-      }
-    };
-    window.addEventListener("message", empfangen);
-    return () => window.removeEventListener("message", empfangen);
-  }, []);
 
   async function kopieren() {
     try {
@@ -108,19 +96,6 @@ export default function KostenrechnerEinbetten() {
             Den Code an der gewünschten Stelle in Ihre Seite einfügen. Die
             letzte Zeile passt die Höhe automatisch an und kann entfallen.
           </p>
-        </div>
-
-        <div className="mt-10">
-          <p className="mb-3 text-sm font-semibold text-neutral-900">Vorschau</p>
-          <div className="overflow-hidden rounded-2xl border border-neutral-200">
-            <iframe
-              key={art}
-              src={`/kostenrechner/embed?art=${art}`}
-              title="Vorschau: Kostenrechner Mediation oder Gericht"
-              style={{ width: "100%", height: hoehe, border: 0 }}
-              loading="lazy"
-            />
-          </div>
         </div>
       </div>
     </section>

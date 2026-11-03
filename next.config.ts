@@ -52,6 +52,22 @@ const nextConfig: NextConfig = {
    */
   async redirects() {
     return [
+      // 03.11.2026 – /fuer-berater entfernt: versprach, medipact führe das
+      // Verfahren selbst, mit Festpreisen von 1.900 €. Passt nicht zum
+      // Konzept (Starterpaket + Vermittlung). Einbettungscode für den
+      // Kostenrechner steht jetzt unten auf /kostenrechner.
+      {
+        source: '/fuer-berater',
+        destination: '/methode',
+        permanent: true,
+      },
+      // 03.11.2026 – /fuer-mediatoren (Werbung für den Mediatorenpool)
+      // entfernt; Mediator:innen werden direkt angesprochen.
+      {
+        source: '/fuer-mediatoren',
+        destination: '/mediator-finden',
+        permanent: true,
+      },
       // 31.07.2026 – Umstellung auf Suchsprache. Die alten Slugs trugen den
       // Fachbegriff "Mediation", nach dem Betroffene nicht suchen.
       // Hintergrund: docs/ratgeber-suchsprache.md

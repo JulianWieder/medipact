@@ -6,6 +6,7 @@ import { pageMetadata, SITE_URL } from "@/lib/seo";
 import { KOSTENRECHT_STAND } from "@/lib/kostenrecht";
 import { ladePreisOverlay } from "@/lib/pricing-matrix";
 import KostenrechnerClient from "./KostenrechnerClient";
+import KostenrechnerEinbetten from "./KostenrechnerEinbetten";
 import { artParsen, einstieg } from "./art";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
 import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
@@ -22,7 +23,7 @@ import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 //
 // Zweck ist Verlinkung, nicht Conversion: Die nachvollziehbare Herleitung mit
 // Fundstelle je Position ist der eigentliche Linkbait. Dazu gehört das
-// Widget unter /kostenrechner/embed (Einbettungscode auf /fuer-berater).
+// Widget unter /kostenrechner/embed (Einbettungscode unten auf dieser Seite).
 //
 // Title/H1 seit 25.10.2026 auf den Vergleich statt auf "Prozesskosten":
 // Laut GSC (Aug.–Okt.) kommen die Impressionen über Kosten-Fragen ("was
@@ -431,6 +432,8 @@ export default async function Kostenrechner({
             </p>
           </div>
         </section>
+
+        <KostenrechnerEinbetten />
       </main>
     </>
   );

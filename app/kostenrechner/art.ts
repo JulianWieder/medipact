@@ -8,8 +8,8 @@ import {
 
 /**
  * ?art= belegt die Konfliktart vor. Gesetzt wird der Parameter von den
- * Konfliktarten-Seiten (KostenrechnerHinweis) und vom Einbettungscode auf
- * /fuer-berater – ein unbekannter oder fehlender Wert fällt still auf die
+ * Konfliktarten-Seiten (KostenrechnerHinweis) und vom Einbettungscode
+ * unten auf /kostenrechner – ein unbekannter oder fehlender Wert fällt still auf die
  * Voreinstellung zurück, damit sich über die URL keine kaputten Zustände
  * erzeugen lassen.
  *
