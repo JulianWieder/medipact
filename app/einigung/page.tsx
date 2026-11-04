@@ -6,9 +6,9 @@ import prozessPhoto from "@/fotos/medi_modern.jpg";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Warum Mediation bei uns Festpreis hat | medipact",
+  title: "Mediation mit System: klare Schritte zur Einigung | medipact",
   description:
-    "Nicht der Termin ist digitalisiert, sondern der Einigungsprozess standardisiert. Was das System übernimmt – und warum daran der Preis hängt.",
+    "Standardisierter Einigungsprozess mit gewichtetem Abgleich statt Termin um Termin. Jeder Schritt nachvollziehbar, jedes Ergebnis schriftlich festgehalten.",
   path: "/einigung",
 });
 
