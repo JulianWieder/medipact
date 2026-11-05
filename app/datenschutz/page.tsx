@@ -250,6 +250,19 @@ export default function DatenschutzPage() {
               die Nutzung der Plattform hat Ihre Entscheidung keinen Einfluss.
             </p>
             <p>
+              Unabhängig davon zählen wir auf unserem eigenen Server, welche
+              Seiten unserer Website aufgerufen werden. Gespeichert werden
+              dabei nur die aufgerufene Seite (ohne Parameter), der Zeitpunkt,
+              die zuvor besuchte Seite bzw. die Domain der verweisenden
+              Website und ob es sich um ein Mobilgerät handelt. Wir speichern
+              keine IP-Adresse und keine Kennung, setzen keine Cookies und
+              lesen nichts von Ihrem Gerät aus. Ein Bezug zu Ihrer Person ist
+              damit nicht möglich. Die Daten werden nicht weitergegeben und
+              nach gut einem Jahr gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1
+              lit. f DSGVO (berechtigtes Interesse daran, unser Angebot
+              verständlich zu gestalten).
+            </p>
+            <p>
               Eine Übermittlung an die Google LLC in den USA lässt sich nicht
               ausschließen. Google LLC ist unter dem EU-US Data Privacy
               Framework zertifiziert, für das ein Angemessenheitsbeschluss der

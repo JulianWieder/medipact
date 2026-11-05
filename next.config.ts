@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
+  // deploy.sh baut nach .next-build und benennt erst nach erfolgreichem Build
+  // in .next um. Vorher baute es direkt in .next: ein abgebrochener Build
+  // (OOM-Kill am 04.11.2026) hinterließ ein leeres .next, der laufende Server
+  // lieferte HTML ohne CSS/JS aus. `next start` läuft weiter auf .next.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // Image optimization: Next.js liefert Bilder automatisch als AVIF/WebP
   // und in der zur Viewport-Größe passenden Auflösung aus (die `sizes`-Props
   // in den Komponenten greifen erst dadurch). `unoptimized: true` hatte das

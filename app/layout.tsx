@@ -11,6 +11,7 @@ import {
 import { JsonLd } from "@/app/components/JsonLd";
 import Analytics from "@/app/components/Analytics";
 import CookieConsent from "@/app/components/CookieConsent";
+import Seitenaufrufe from "@/app/components/Seitenaufrufe";
 import { socialProfiles } from "@/app/content/social";
 
 // Self-hosted via next/font statt Google-Fonts-<link>: kein render-blockendes
@@ -179,6 +180,7 @@ export default async function RootLayout({
           <JsonLd data={websiteSchema} />
           <AusserhalbEinbettung>
             <Analytics />
+            <Seitenaufrufe />
           </AusserhalbEinbettung>
           <ConditionalHeader />
           {children}

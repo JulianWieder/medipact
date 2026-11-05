@@ -130,3 +130,16 @@ is derived from the href, e.g. `KampagnenKarussell`). When a
 page lists conflict types (ThemenTabs, EmpfehlungenGrid, Header dropdown,
 `/konflikte` overview, sitemap, metadata descriptions), include all four —
 geschaeft was added last and is easy to forget.
+
+## Seitenaufrufe (eigenes Log, ohne Cookies)
+
+Neben GA4 (nur mit Einwilligung, `Analytics.tsx`) zählt die Website jeden
+Seitenwechsel selbst: `Seitenaufrufe.tsx` (im Root-Layout) schickt per
+`sendBeacon` nur den Pfad und den vorherigen Pfad bzw. Referrer-Host an
+`/api/seitenaufruf`, das eine Zeile pro Aufruf in
+`~/medipact-daten/seitenaufrufe/JJJJ-MM-TT.jsonl` schreibt
+(`SEITENAUFRUFE_DIR` überschreibt das, Dateien >400 Tage werden gelöscht).
+Keine IP, kein User-Agent, keine Query-Strings, keine Kennung — nur deshalb
+läuft es ohne Banner (steht so in /datenschutz, Abschnitt 10). Wer Felder
+ergänzt, prüft das zuerst. Auswertung: `/intern/seitenaufrufe?k=<STATISTIK_SCHLUESSEL>`
+(ohne gesetzte Variable 404).
