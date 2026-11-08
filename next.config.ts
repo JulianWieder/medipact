@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
   // (OOM-Kill am 04.11.2026) hinterließ ein leeres .next, der laufende Server
   // lieferte HTML ohne CSS/JS aus. `next start` läuft weiter auf .next.
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // 08.11.2026: Build auf dem VPS erneut per SIGKILL (OOM) beendet, diesmal
+  // NACH "Compiled successfully" – also beim Typcheck/Prerendern. Dort startet
+  // Next standardmaessig (Kerne - 1) Worker-Prozesse mit je eigenem Heap.
+  // Ein Worker kostet ein paar Sekunden Build-Zeit, spart aber den Speicher
+  // der uebrigen. Lokal unerheblich.
+  experimental: {
+    cpus: 1,
+  },
   // Image optimization: Next.js liefert Bilder automatisch als AVIF/WebP
   // und in der zur Viewport-Größe passenden Auflösung aus (die `sizes`-Props
   // in den Komponenten greifen erst dadurch). `unoptimized: true` hatte das
