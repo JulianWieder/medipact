@@ -29,11 +29,15 @@ export const article: RatgeberArticle = {
   // 25.10.2026: Pos 9,3 / 56 Impr / 1,8 % CTR (GSC 3 Monate bis 23.10.). Kein
   // Eurobetrag mehr in der Description – Preise kommen aus backend/app/pricing.py
   // und veralten im Snippet unbemerkt. "Festpreis" trägt den Vorteil allgemein.
-  metaTitle: "Scheidung mit Mediator: Kosten, Preismodelle & wer zahlt",
+  // 08.11.2026: Pos 6,4 / 72 Impr (GSC 07.08.–06.11.). Die Spanne im Title ist
+  // die marktübliche Stundensatz-Spanne aus /ratgeber/mediation-kosten (Familie),
+  // nicht der medipact-Preis – sie veraltet nicht mit pricing.py. Bei Änderung
+  // dort hier mitziehen.
+  metaTitle: "Scheidung mit Mediator: Kosten (150–250 €/Std.) & wer zahlt",
   description:
-    "Was kostet ein Mediator bei der Scheidung? Stundensatz oder Festpreis, wer die Kosten trägt, der Vergleich mit zwei Anwälten – plus Unterlagen-Checkliste.",
+    "Was kostet ein Mediator bei der Scheidung? Üblich sind 150–250 € pro Stunde, meist hälftig geteilt. Dazu: Festpreis, Vergleich mit Anwälten, Checkliste.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
-  updated: "2026-07-27",
+  updated: "2026-11-08",
   readingMinutes: 10,
   intro:
     "Eine Scheidung mit Mediator kostet in der Regel deutlich weniger als zwei Anwälte plus Gerichtsverfahren – vor allem, weil weniger gestritten und schneller entschieden wird. Online geführt wird sie noch einmal deutlich günstiger, ohne dass inhaltlich weniger geklärt wird. Dieser Artikel zeigt, welche Preismodelle üblich sind, womit Sie insgesamt rechnen müssen, wer bezahlt, wie gut die Erfolgsaussichten stehen und wann sich Mediation nicht mehr lohnt.",
@@ -44,7 +48,7 @@ export const article: RatgeberArticle = {
     },
     {
       type: "paragraph",
-      text: "Mediatorinnen und Mediatoren rechnen bei Trennung und Scheidung meist nach Stundensatz ab. Die Höhe hängt von Qualifikation, Region und Komplexität ab – in Großstädten liegt sie spürbar über dem Niveau ländlicher Regionen. Bezahlt wird die gemeinsame Sitzung, nicht jede Partei einzeln: Anders als beim Anwalt teilen sich die beiden Seiten in der Regel eine Rechnung. Wer sich persönlich begleiten lassen möchte, kann über medipact einen [Mediator finden](/mediator-finden).",
+      text: "Mediatorinnen und Mediatoren rechnen bei Trennung und Scheidung meist nach Stundensatz ab, üblich sind etwa 150 bis 250 Euro pro Stunde. Die Höhe hängt von Qualifikation, Region und Komplexität ab – in Großstädten liegt sie spürbar über dem Niveau ländlicher Regionen. Bezahlt wird die gemeinsame Sitzung, nicht jede Partei einzeln: Anders als beim Anwalt teilen sich die beiden Seiten in der Regel eine Rechnung. Wer sich persönlich begleiten lassen möchte, kann über medipact einen [Mediator finden](/mediator-finden).",
     },
     {
       type: "paragraph",

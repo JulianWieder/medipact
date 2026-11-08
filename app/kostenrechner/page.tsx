@@ -9,6 +9,7 @@ import KostenrechnerClient from "./KostenrechnerClient";
 import KostenrechnerEinbetten from "./KostenrechnerEinbetten";
 import { artParsen, einstieg } from "./art";
 import { ImagePinHero } from "@/app/components/ui/ImagePinHero";
+import { ArrowLink } from "@/app/components/ui/ArrowLink";
 import kostenrechnerPhoto from "@/fotos/prozess_kostenrechner.jpg";
 
 // ── /kostenrechner ──────────────────────────────────────────────────────────
@@ -198,6 +199,19 @@ export default async function Kostenrechner({
               {KOSTENRECHT_STAND}.
             </p>
             <KostenrechnerClient preise={preise} start={start} />
+            {/* 08.11.2026: "mediation versus gerichtsverfahren kosten und
+                dauer" (91 Impr, GSC 07.08.–06.11.) landete hier auf Pos 53.
+                Den Vergleich jenseits der Kosten trägt der Ratgeber
+                gericht-oder-mediation (Tabelle Kosten/Dauer/Ergebnis/
+                Vertraulichkeit), er verlinkt umgekehrt hierher. */}
+            <p className="mt-8 max-w-3xl leading-7 text-neutral-700">
+              Kosten sind nur ein Teil der Entscheidung. Wie lange beide Wege
+              dauern, wer am Ende entscheidet und was vertraulich bleibt, zeigt
+              der Vergleich im Ratgeber.{" "}
+              <ArrowLink href="/ratgeber/gericht-oder-mediation">
+                Mediation vs. Gerichtsverfahren: Kosten und Dauer im Vergleich
+              </ArrowLink>
+            </p>
           </div>
         </section>
 

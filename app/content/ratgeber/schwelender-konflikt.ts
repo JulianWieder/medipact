@@ -18,11 +18,15 @@ export const article: RatgeberArticle = {
   // 25.10.2026: Pos 6,4 / 228 Impr / 1,75 % CTR (GSC 3 Monate bis 23.10.). Die
   // Definition zeigt Google oft selbst an – wer sie in der Description wiederholt,
   // gibt keinen Grund zum Klick. Neu: Erkennen (5 Signale) + was man tun kann.
-  metaTitle: "Schwelender Konflikt: Bedeutung, Warnzeichen & was hilft",
+  // 08.11.2026: Pos 6,2 / 321 Impr / 1,6 % CTR (GSC 07.08.–06.11.), Query
+  // "schwelender konflikt" Pos 3,8. Snippet verspricht jetzt alle drei
+  // Suchintentionen (Bedeutung, Anzeichen/Beispiele, was tun); der
+  // Beispiel-Abschnitt ist dafür neu dazugekommen.
+  metaTitle: "Schwelender Konflikt: Bedeutung, Anzeichen & was tun",
   description:
-    "Was bedeutet schwelender Konflikt? Woran Sie ihn erkennen, welche 5 Signale eine Eskalation ankündigen – und wie Sie handeln, bevor er ausbricht.",
+    "Schwelende Konflikte erkennen: was der Begriff bedeutet, 5 Anzeichen mit Beispielen aus Familie, Job und Nachbarschaft – und was Sie jetzt tun können.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-10-16",
+  updated: "2026-11-08",
   readingMinutes: 8,
   intro:
     "Ein schwelender Konflikt ist ein Streit, der noch nicht offen ausgebrochen ist, aber unter der Oberfläche weiterwirkt. Die meisten Konflikte beginnen nicht mit einem Knall, sondern mit einem Knirschen: eine Bemerkung, die hängen bleibt, eine E-Mail im falschen Ton, ein Nachbar, der plötzlich nicht mehr grüßt. Monatelang ist unklar, ob sich das auswächst oder hochschaukelt. Genau in dieser Schwebephase machen viele den gleichen Fehler – sie tun nichts, bis es zu spät ist. Die Alternative heißt: strukturiert beobachten. So behalten Sie den Überblick, ohne den Konflikt größer zu machen, als er ist.",
@@ -31,6 +35,20 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "Abwarten fühlt sich deeskalierend an, hat aber zwei Tücken. Erstens verlieren Sie die Chronologie: Wenn der Konflikt nach acht Monaten doch eskaliert, wissen Sie nicht mehr, was wann passiert ist – und stehen mit „das geht schon ewig so“ da, wo eine saubere Liste von Vorfällen nötig wäre. Zweitens verzerrt sich Ihre Wahrnehmung schleichend: Ohne Aufzeichnung lässt sich nicht unterscheiden, ob die Lage wirklich schlimmer wird oder ob nur Ihre Geduld dünner wird. Beides sind schlechte Grundlagen für die wichtigste Frage: Muss ich handeln?",
+    },
+    { type: "heading", text: "Beispiele: So sieht ein schwelender Konflikt aus" },
+    {
+      type: "list",
+      items: [
+        "Familie: Seit dem Streit über die Pflege der Mutter telefonieren die Geschwister nur noch, wenn es sein muss – und jedes Gespräch endet mit einer Spitze.",
+        "Arbeit: Eine Kollegin wird nicht mehr zu Besprechungen eingeladen. Niemand sagt etwas, aber Informationen erreichen sie nur noch über Umwege.",
+        "Nachbarschaft: Der Nachbar grüßt nicht mehr, seit es um die Hecke ging. Jetzt steht sein Auto regelmäßig halb vor Ihrer Einfahrt.",
+        "Paarbeziehung: Über das Geld wird nicht mehr gestritten, sondern geschwiegen – und jede größere Ausgabe wird still gegeneinander aufgerechnet.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Gemeinsam ist allen Beispielen: Es gibt keinen offenen Streit, aber eine spürbare Spannung, die das Verhalten beider Seiten verändert. Fachlich spricht man auch von einem kalten Konflikt – im Gegensatz zum heißen, der offen ausgetragen wird. Welche Arten von Konflikten es sonst gibt, zeigt der Überblick [Konfliktarten](/ratgeber/konfliktarten).",
     },
     { type: "heading", text: "Beobachten statt eskalieren: die Logbuch-Methode" },
     {
@@ -107,6 +125,7 @@ export const article: RatgeberArticle = {
     { label: "Konflikt dokumentieren: das Streit-Tagebuch", href: "/ratgeber/konflikt-dokumentieren" },
     { label: "Konflikt-Journal: Gefühle privat sortieren", href: "/ratgeber/konflikt-journal" },
     { label: "Akuter Konflikt: was jetzt zu tun ist", href: "/ratgeber/akuter-konflikt-was-tun" },
+    { label: "Konfliktarten: heiß, kalt und schwelend", href: "/ratgeber/konfliktarten" },
     { label: "Mediation als Konfliktlösung", href: "/ratgeber/mediation-als-konfliktloesung" },
   ],
 };

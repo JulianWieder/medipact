@@ -1,5 +1,10 @@
 // Ziel-Suchbegriffe: "erbstreit lösen ohne gericht", "erbengemeinschaft
 // streit lösen", "erbauseinandersetzung ohne gericht".
+// 08.11.2026 dazu (GSC 07.08.–06.11., Seite Pos 11,4): "erbstreit ohne gericht"
+// (Pos 17), "erbengemeinschaft streit schlichten ohne gericht" (19),
+// "erbengemeinschaft konfliktlösung ohne gericht" (19,6) – je ein H2.
+// Zielseite des Erb-Clusters: andere Erb-Seiten verlinken mit Anchor
+// "Erbstreit ohne Gericht lösen" hierher.
 //
 // Pillar des Erb-Clusters. Vertiefung zum Pflichtteil steht bewusst in einem
 // eigenen Artikel (pflichtteil-einfordern), damit beide Suchintentionen eine
@@ -19,11 +24,11 @@ export const article: RatgeberArticle = {
   slug: "erbstreit-loesen-ohne-gericht",
   category: "Familie & Erbe",
   title: "Erbstreit lösen ohne Gericht",
-  metaTitle: "Erbstreit lösen ohne Gericht: die Einigung | medipact",
+  metaTitle: "Erbstreit ohne Gericht lösen: Wege für Erbengemeinschaften",
   description:
-    "Erbengemeinschaft blockiert, Immobilie strittig, Geschwister reden nicht mehr? Wie sich ein Erbstreit außergerichtlich löst – Ablauf, Kosten, Grenzen.",
+    "Erbstreit ohne Gericht: wie eine Erbengemeinschaft Streit schlichtet – Mediation, Notar, Schiedsverfahren statt Teilungsversteigerung. Ablauf und Kosten.",
   eyebrow: "Ratgeber · Familie & Erbe",
-  updated: "2026-07-27",
+  updated: "2026-11-08",
   readingMinutes: 9,
   intro:
     "Ein Erbstreit ist selten ein reiner Streit ums Geld. Es geht um Anerkennung, um alte Rollen zwischen Geschwistern und um die Frage, wer sich damals gekümmert hat. Genau deshalb lassen sich Erbstreitigkeiten vor Gericht oft nur formal beenden – und emotional gar nicht. Dieser Artikel zeigt, wie eine außergerichtliche Einigung abläuft, was sie kostet und wann sie nicht mehr funktioniert.",
@@ -64,7 +69,37 @@ export const article: RatgeberArticle = {
     },
     {
       type: "heading",
-      text: "Erbstreit außergerichtlich lösen: der Ablauf",
+      text: "Erbstreit ohne Gericht: Diese Wege gibt es",
+    },
+    {
+      type: "paragraph",
+      text: "„Ohne Gericht“ heißt nicht „ohne Hilfe“. Zwischen dem Gespräch am Küchentisch und der Klage liegen mehrere Wege, die sich darin unterscheiden, wer am Ende entscheidet – die Erben selbst oder eine dritte Person.",
+    },
+    {
+      type: "list",
+      items: [
+        "Direkte Verhandlung: Funktioniert, solange alle noch miteinander reden und die Werte weitgehend unstrittig sind. Am besten mit gemeinsamem Nachlassverzeichnis und schriftlichem Ergebnis.",
+        "Mediation: Eine neutrale Person führt durch das Gespräch, entscheidet aber nichts. Die Erben erarbeiten die Lösung selbst – deshalb hält sie in der Regel auch.",
+        "Notarielle Vermittlung: Auf Antrag eines Miterben kann ein Notar die Auseinandersetzung vermitteln und einen Teilungsplan vorschlagen (§§ 363 ff. FamFG). Er kann aber keine Einigung erzwingen – widerspricht ein Erbe, stockt das Verfahren.",
+        "Schiedsverfahren: Ein privates Schiedsgericht entscheidet verbindlich anstelle des staatlichen Gerichts. Voraussetzung ist eine Schiedsvereinbarung aller Erben oder eine Schiedsklausel im Testament.",
+        "Anwaltlicher Vergleich: Die Anwälte beider Seiten handeln einen Vergleich aus. Das bleibt außergerichtlich, wird aber schnell teuer, weil jede Seite ihre eigene Vertretung bezahlt.",
+      ],
+    },
+    {
+      type: "heading",
+      text: "Erbengemeinschaft: Streit schlichten ohne Gericht",
+    },
+    {
+      type: "paragraph",
+      text: "In der Erbengemeinschaft gehört der Nachlass allen gemeinsam. Über die laufende Verwaltung – Reparaturen, Vermietung, Nebenkosten – entscheidet die Mehrheit nach Erbquoten; für die endgültige Aufteilung müssen dagegen alle zustimmen. Genau deshalb kann eine einzige Person die Auseinandersetzung blockieren. Wie man mit einer solchen Blockade umgeht, beschreibt der Ratgeber [Erbengemeinschaft: Einer blockiert](/ratgeber/erbengemeinschaft-blockade); geht es um eine Immobilie, lesen Sie [Haus verkaufen, aber einer will nicht](/ratgeber/haus-verkaufen-einer-will-nicht).",
+    },
+    {
+      type: "paragraph",
+      text: "Wer den Streit schlichten will, trennt am besten das Dringende vom Endgültigen: Zuerst eine Übergangsregelung für die laufenden Kosten und die Nutzung der Immobilie, damit kein Schaden entsteht, während verhandelt wird. Dann ein gemeinsames Nachlassverzeichnis und eine Bewertung durch eine Person, die alle akzeptieren. Erst danach geht es um die Verteilung.",
+    },
+    {
+      type: "heading",
+      text: "Erbengemeinschaft: Konfliktlösung ohne Gericht – der Ablauf",
     },
     {
       type: "paragraph",
@@ -148,6 +183,11 @@ export const article: RatgeberArticle = {
     },
   ],
   faq: [
+    {
+      question: "Wie kann eine Erbengemeinschaft Streit ohne Gericht schlichten?",
+      answer:
+        "Am häufigsten über eine Mediation oder eine notarielle Vermittlung: Beide setzen auf eine Einigung aller Erben, die eine neutrale Person begleitet. Soll eine dritte Person verbindlich entscheiden, ohne dass es vor ein staatliches Gericht geht, braucht es eine Schiedsvereinbarung aller Erben oder eine Schiedsklausel im Testament.",
+    },
     {
       question: "Wie kann man einen Erbstreit ohne Gericht lösen?",
       answer:

@@ -1,14 +1,21 @@
+// 08.11.2026: "mediation versus gerichtsverfahren kosten und dauer" (91 Impr,
+// GSC 07.08.–06.11.) landete auf /kostenrechner (Pos 53). Dieser Artikel ist
+// jetzt die Zielseite für den Vergleich: Tabelle Kosten/Dauer/Ergebnis/
+// Vertraulichkeit früh im Text, Title/Description auf die Query. Der
+// Kostenrechner verlinkt prominent hierher und umgekehrt. Stundensatz-Spanne
+// wie in mediation-kosten (Familie/Erbe), keine medipact-Preise.
+
 import type { RatgeberArticle } from "./types";
 
 export const article: RatgeberArticle = {
   slug: "gericht-oder-mediation",
   category: "Mediation",
   title: "„Wir sehen uns vor Gericht“ – warum dieser Satz teuer wird und was wirklich hilft",
-  metaTitle: "Gericht oder Mediation? Was wirklich hilft | medipact",
+  metaTitle: "Mediation vs. Gerichtsverfahren: Kosten & Dauer im Vergleich",
   description:
-    "Recht haben heißt nicht Recht bekommen: Was vor Gericht schiefgehen kann – Kosten, Dauer, Prozessrisiko – und wann sich der Weg daran vorbei lohnt.",
+    "Mediation oder Gerichtsverfahren? Kosten, Dauer, Ergebnis und Vertraulichkeit im direkten Vergleich – und wann der Weg vor Gericht trotzdem richtig ist.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-09-19",
+  updated: "2026-11-08",
   readingMinutes: 8,
   intro:
     "„Wir sehen uns vor Gericht.“ Der Satz fühlt sich stark an. Nach Gerechtigkeit. Nach: Jetzt wird das endlich geklärt. Aber zwischen diesem Satz und einem Urteil liegen Monate oder Jahre, eine Rechnung, die du heute nicht kennst – und ein Ausgang, den dir niemand versprechen kann. Dieser Artikel zeigt, was vor Gericht wirklich passiert. Und welchen Weg du gehen kannst, bevor du diesen Satz aussprichst.",
@@ -20,6 +27,53 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "Wird er vielleicht. Vielleicht auch nicht. Und genau da beginnt das Problem.",
+    },
+    { type: "heading", text: "Mediation vs. Gerichtsverfahren: Kosten und Dauer im Vergleich" },
+    {
+      type: "table",
+      caption: "Mediation und Gerichtsverfahren im Vergleich: Kosten, Dauer, Ergebnis, Vertraulichkeit",
+      headers: ["Merkmal", "Gerichtsverfahren", "Mediation"],
+      rows: [
+        [
+          "Kosten",
+          "Richten sich nach dem Streitwert: Gericht, eigener Anwalt, oft ein Gutachten. Wer verliert, zahlt in der Regel auch die gesetzlichen Anwaltskosten der Gegenseite.",
+          "Stundensatz (im privaten Bereich etwa 150–250 € pro Stunde) oder Festpreis, meist zwischen beiden Seiten geteilt. Kein Risiko, die Gegenseite zu bezahlen.",
+        ],
+        [
+          "Dauer",
+          "Erste Instanz häufig viele Monate, mit Gutachten oder Berufung oft mehrere Jahre.",
+          "Meist einige Wochen bis wenige Monate – je nachdem, wie viele Themen zu klären sind.",
+        ],
+        [
+          "Wer entscheidet",
+          "Eine Richterin oder ein Richter, nach Beweislage.",
+          "Die Beteiligten selbst. Die Mediatorin führt das Verfahren, entscheidet aber nichts.",
+        ],
+        [
+          "Ergebnis",
+          "Urteil oder Beschluss, oft Alles-oder-nichts. Muss notfalls vollstreckt werden.",
+          "Vereinbarung entlang der Interessen beider Seiten. Ein Vertrag; bei Bedarf notariell beurkundet und damit vollstreckbar.",
+        ],
+        [
+          "Vertraulichkeit",
+          "Verhandlungen sind grundsätzlich öffentlich (Familiensachen ausgenommen).",
+          "Vertraulich; die Mediatorin ist gesetzlich zur Verschwiegenheit verpflichtet.",
+        ],
+        [
+          "Beziehung danach",
+          "Meist zusätzlich belastet – es gibt Sieger und Verlierer.",
+          "Bleibt eher erhalten, weil beide der Lösung zugestimmt haben.",
+        ],
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Was ein Gerichtsverfahren in deinem Fall konkret kosten würde – nach den gesetzlichen Gebührentabellen, mit jeder Position –, rechnet der [Kostenrechner](/kostenrechner) aus und stellt die Kosten einer Mediation daneben. Die Tabelle zeigt die Unterschiede, der Rest dieses Artikels, warum sie im Alltag so viel ausmachen.",
+    },
+    {
+      type: "cta",
+      text: "Kosten für deinen Fall berechnen: Gericht oder Mediation?",
+      href: "/kostenrechner",
     },
     { type: "heading", text: "Was dir vorher niemand sagt: Recht haben ist nicht Recht bekommen" },
     {

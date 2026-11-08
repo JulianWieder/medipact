@@ -38,9 +38,12 @@ export const article: RatgeberArticle = {
   // 25.10.2026: Pos 6,1 / 63 Impr / 1,6 % CTR (GSC 3 Monate bis 23.10.). Title
   // fragt jetzt nach dem nächsten Schritt, die Description nennt die konkreten
   // Wege (alle im Artikel eingeordnet) – ohne eine Erfolgsaussicht zu versprechen.
-  metaTitle: "Sorgerecht verloren: Welche Wege jetzt noch bleiben",
+  // 08.11.2026: Pos 6,3 / 74 Impr (GSC 07.08.–06.11.). Die Suchanfrage lautet
+  // "sorgerecht verloren was tun" – Title nimmt sie jetzt wörtlich auf, die
+  // Description beginnt mit der konkreten Antwort statt mit einer Rückfrage.
+  metaTitle: "Sorgerecht verloren – was tun? Diese Wege bleiben noch",
   description:
-    "Sorgerechtsverfahren verloren? Wir ordnen ehrlich ein, was Ihnen jetzt noch bleibt: Anhörungsrüge, Verfassungsbeschwerde und Abänderung nach § 1696 BGB.",
+    "Sorgerecht verloren: Anhörungsrüge, Verfassungsbeschwerde, Abänderung nach § 1696 BGB – was jeder Weg bringt, welche Fristen gelten, ehrlich eingeordnet.",
   eyebrow: "Ratgeber · Trennung & Scheidung",
   updated: "2026-08-01",
   published: "2026-08-01",

@@ -7,6 +7,11 @@
 // Inhalte (6 Arten, Tabelle, Glasl-Zonen, FAQs) 1:1 aus app/konflikte/page.tsx
 // übernommen, nur in Ratgeber-Blöcke umgesetzt. Article- und FAQPage-Schema
 // erzeugt RatgeberArtikelTemplate automatisch.
+//
+// 08.11.2026: /konflikte rankt noch Pos 57 für "konfliktarten" (132 Impr,
+// GSC 07.08.–06.11.), dazu "4 konfliktarten", "konfliktarten beispiele",
+// "arten von konflikten", "kalte konflikte". Neu: heiß/kalt/schwelend und
+// die verbreitete Vierer-Einteilung, je mit FAQ.
 
 import type { RatgeberArticle } from "./types";
 
@@ -14,11 +19,11 @@ export const article: RatgeberArticle = {
   slug: "konfliktarten",
   category: "Mediation",
   title: "Konfliktarten: die 6 Arten von Konflikten im Überblick",
-  metaTitle: "Konfliktarten: die 6 Arten im Überblick | medipact",
+  metaTitle: "Konfliktarten: 6 Arten von Konflikten mit Beispielen",
   description:
-    "Sach-, Interessen-, Beziehungs-, Werte-, Rollen- und Machtkonflikt: die 6 Konfliktarten mit Beispielen, Lösungswegen und den Eskalationsstufen nach Glasl.",
+    "Welche Konfliktarten gibt es? Sach-, Interessen-, Beziehungs-, Werte-, Rollen- und Machtkonflikt mit Beispielen – und heiße, kalte, schwelende Konflikte.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-10-16",
+  updated: "2026-11-08",
   published: "2026-10-16",
   readingMinutes: 7,
   intro:
@@ -72,6 +77,41 @@ export const article: RatgeberArticle = {
       type: "callout",
       text: "In der Praxis treten die Konfliktarten fast nie allein auf. Hinter einem Sachthema steckt oft ein Beziehungs- oder Machtkonflikt. Entscheidend ist, welche Art das Gespräch gerade blockiert.",
     },
+    { type: "heading", text: "Heiße, kalte und schwelende Konflikte" },
+    {
+      type: "paragraph",
+      text: "Neben dem Inhalt lassen sich Konflikte danach unterscheiden, wie sie ausgetragen werden. Friedrich Glasl unterscheidet heiße und kalte Konflikte – eine Einteilung, die quer zu den sechs Arten oben liegt: Ein Erbstreit kann heiß oder kalt geführt werden.",
+    },
+    {
+      type: "list",
+      items: [
+        "Heißer Konflikt: offen, laut, emotional. Beide Seiten wollen überzeugen, suchen die Auseinandersetzung und sind überzeugt, im Recht zu sein. Beispiel: Geschwister, die sich bei jedem Treffen über das Elternhaus anschreien.",
+        "Kalter Konflikt: still, verhärtet, enttäuscht. Man meidet sich, kommuniziert nur noch schriftlich oder gar nicht, und die Abwertung läuft über Schweigen und Dienst nach Vorschrift. Beispiel: Kollegen, die seit Monaten nur noch per E-Mail miteinander verkehren.",
+        "Schwelender Konflikt: noch nicht offen ausgebrochen, aber spürbar unter der Oberfläche – oft die Vorstufe eines heißen oder der Anfang eines kalten Konflikts.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Kalte Konflikte werden oft unterschätzt, weil es ruhig wirkt. Sie sind aber schwerer zu bearbeiten als heiße, weil niemand mehr das Gespräch sucht. Wie man einen [schwelenden Konflikt](/ratgeber/schwelender-konflikt) erkennt und was man tun kann, bevor er sich verhärtet, steht in einem eigenen Ratgeber.",
+    },
+    { type: "heading", text: "4 Konfliktarten? Die verschiedenen Einteilungen" },
+    {
+      type: "paragraph",
+      text: "Je nach Lehrbuch ist von vier, fünf oder sechs Konfliktarten die Rede. Das ist kein Widerspruch – die Modelle schneiden dasselbe Feld nur unterschiedlich fein. Verbreitet ist etwa die Einteilung in vier Arten:",
+    },
+    {
+      type: "list",
+      items: [
+        "Zielkonflikt: Die Beteiligten wollen Unterschiedliches erreichen (der eine will das Haus verkaufen, der andere behalten).",
+        "Beurteilungskonflikt: Das Ziel ist gleich, aber man schätzt den Weg oder die Fakten unterschiedlich ein (beide wollen verkaufen, sind sich aber über den Wert uneinig).",
+        "Verteilungskonflikt: Es geht darum, wer wie viel von etwas Knappem bekommt – Geld, Zeit, Raum, Anerkennung.",
+        "Beziehungskonflikt: Die Störung liegt zwischen den Personen selbst – Kränkung, Misstrauen, fehlender Respekt.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Eine andere Vierer-Einteilung ordnet nicht nach dem Inhalt, sondern nach den Beteiligten: der innere Konflikt einer einzelnen Person, der Konflikt zwischen zwei Personen, der Konflikt innerhalb einer Gruppe und der zwischen Gruppen. Das Sechser-Modell oben ist feiner, weil es Werte, Rollen und Macht als eigene Ursachen ausweist – für die Frage, welcher Lösungsweg passt, ist das meist hilfreicher.",
+    },
     { type: "heading", text: "Konfliktarten und Eskalationsstufen nach Glasl" },
     {
       type: "paragraph",
@@ -103,6 +143,16 @@ export const article: RatgeberArticle = {
       question: "Welche Arten von Konflikten gibt es?",
       answer:
         "Die Konfliktforschung unterscheidet sechs wichtige Konfliktarten: Sachkonflikte, Interessenkonflikte, Beziehungskonflikte, Wertekonflikte, Rollenkonflikte und Machtkonflikte. In der Praxis treten sie meist gemischt auf – hinter einem Sachthema steckt oft ein Beziehungs- oder Machtkonflikt.",
+    },
+    {
+      question: "Was sind die 4 Konfliktarten?",
+      answer:
+        "Eine verbreitete Einteilung unterscheidet vier Konfliktarten: Zielkonflikt, Beurteilungskonflikt, Verteilungskonflikt und Beziehungskonflikt. Andere Modelle ordnen nach den Beteiligten (innerer Konflikt, zwischen zwei Personen, in einer Gruppe, zwischen Gruppen) oder unterscheiden feiner sechs Arten.",
+    },
+    {
+      question: "Was ist ein kalter Konflikt?",
+      answer:
+        "Ein kalter Konflikt wird nicht offen ausgetragen, sondern durch Rückzug, Schweigen und Vermeidung. Die Beteiligten haben sich innerlich voneinander verabschiedet und kommunizieren kaum noch. Er wirkt ruhig, ist aber oft schwerer zu lösen als ein heißer Konflikt, weil niemand mehr das Gespräch sucht.",
     },
     {
       question: "Welche Konfliktarten gibt es im Unternehmen?",

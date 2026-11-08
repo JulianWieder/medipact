@@ -162,14 +162,12 @@ const nextConfig: NextConfig = {
         destination: '/en/divorce-mediation',
         permanent: true,
       },
-      // 31.10.2026 – /en traegt eine englische URL (routing.pathnames in
-      // i18n/routing.ts). next-intl selbst leitet nur mit 307 um; fuer
-      // Google soll der Umzug dauerhaft sein.
-      {
-        source: '/en/scheidungsmediation',
-        destination: '/en/divorce-mediation',
-        permanent: true,
-      },
+      // 31.10.2026 – /en/scheidungsmediation -> /en/divorce-mediation stand
+      // hier, ist aber am 08.11.2026 nach proxy.ts umgezogen: redirects()
+      // greift in Next 16 auch auf den von next-intl UMGESCHRIEBENEN Pfad.
+      // /en/divorce-mediation wird intern zu /en/scheidungsmediation, passte
+      // damit auf diese Regel und leitete auf sich selbst um (308-Schleife,
+      // die URL steht in der Sitemap). Nicht wieder hier eintragen.
     ];
   },
 

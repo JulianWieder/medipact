@@ -17,7 +17,7 @@ export const routing = defineRouting({
   // Sprechende URLs je Sprache. Schlüssel = interner Pfad (Ordner unter
   // app/[locale]/), Wert = was im Browser steht. Die Middleware schreibt
   // /en/divorce-mediation intern auf den Ordner um und leitet das alte
-  // /en/scheidungsmediation per 301 dorthin; Link, getPathname, Canonical,
+  // /en/scheidungsmediation per 308 dorthin (proxy.ts); Link, getPathname, Canonical,
   // hreflang und Sitemap (localizedPath unten) ziehen dieselbe Tabelle.
   // Jeder Pfad aus MIGRATED_LOCALE_ROUTES muss hier stehen.
   pathnames: {

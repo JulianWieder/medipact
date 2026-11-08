@@ -14,11 +14,16 @@ export const article: RatgeberArticle = {
   // 25.10.2026: Pos 7,7 / 58 Impr / 1,7 % CTR (GSC 3 Monate bis 23.10.). Title
   // und Description versprechen jetzt die drei Dinge, die der Artikel zusätzlich
   // zur Aufzählung liefert: Ziel je Phase, Beispiel, 7-Phasen-Modell.
-  metaTitle: "Die 5 Phasen der Mediation: Ablauf, Ziele & Beispiel",
+  // 08.11.2026: Pos 8,3 / 66 Impr (GSC 07.08.–06.11.). Neue Queries fragen
+  // nach dem Ablauf ("wie läuft eine mediation ab", "mediation ablauf",
+  // "mediationsprozess"). Title und Description nehmen das auf, die Zahl 5
+  // bleibt vorne; zwei FAQs beantworten die Ablauf-Frage wörtlich
+  // (FAQPage-JSON-LD erzeugt RatgeberArtikelTemplate automatisch).
+  metaTitle: "5 Phasen der Mediation: So läuft eine Mediation ab",
   description:
-    "Die 5 Phasen der Mediation auf einen Blick: was in jeder Phase passiert und welches Ziel sie hat – mit Tabelle, Praxisbeispiel und 7-Phasen-Modell.",
+    "Wie läuft eine Mediation ab? Die 5 Phasen des Mediationsprozesses von der Einleitung bis zur Vereinbarung – mit Ziel je Phase, Tabelle und Praxisbeispiel.",
   eyebrow: "Ratgeber · Mediation",
-  updated: "2026-08-05",
+  updated: "2026-11-08",
   readingMinutes: 8,
   intro:
     "Die 5 Phasen der Mediation sind der Standard-Ablauf jedes Mediationsverfahrens: Einleitung, Themensammlung, Interessenklärung, Lösungssuche und Abschlussvereinbarung. Zählt man Vorbereitung und Umsetzung dazu, ergibt sich das ausführlichere 7-Phasen-Modell – gemeint ist derselbe Prozess. Dieser Ablauf gibt dem Gespräch Struktur und sorgt dafür, dass am Ende eine tragfähige Lösung steht statt eines neuen Streits.",
@@ -158,6 +163,16 @@ export const article: RatgeberArticle = {
       question: "Was sind die 5 Phasen der Mediation?",
       answer:
         "Die 5 Phasen der Mediation sind: Einleitung, Themensammlung, Interessenklärung, Suche nach Lösungsoptionen und Abschlussvereinbarung. Jede Phase baut auf der vorherigen auf – erst wenn Themen und Interessen geklärt sind, ergibt die Lösungssuche Sinn.",
+    },
+    {
+      question: "Wie läuft eine Mediation ab?",
+      answer:
+        "Eine Mediation läuft in festen Phasen ab: Zuerst klärt die Mediatorin Rolle und Regeln, dann sammeln die Beteiligten die Streitthemen, arbeiten die Interessen dahinter heraus, entwickeln gemeinsam Lösungsoptionen und halten die Einigung zum Schluss schriftlich fest. Die Mediatorin entscheidet nichts, sie führt durch diesen Ablauf.",
+    },
+    {
+      question: "Wie lange dauert ein Mediationsprozess?",
+      answer:
+        "Das hängt vor allem von der Zahl der Streitthemen ab. Ein klar umrissener Konflikt, etwa unter Nachbarn, ist oft nach wenigen Sitzungen geklärt; eine Trennung mit Kindern, Unterhalt und Vermögen braucht mehr Termine und zieht sich meist über einige Wochen bis Monate. Ein Gerichtsverfahren dauert in vergleichbaren Fällen in der Regel deutlich länger.",
     },
     {
       question: "Wie viele Phasen hat eine Mediation?",

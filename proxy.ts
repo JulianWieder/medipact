@@ -116,6 +116,18 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  // Alte /en-URL der Scheidungsseite, dauerhaft umgezogen (31.10.2026).
+  // Bewusst HIER und nicht in next.config.ts redirects(): dort wurde die
+  // Regel auch auf den intern umgeschriebenen Pfad angewandt und erzeugte
+  // eine Schleife auf /en/divorce-mediation (Kommentar in next.config.ts).
+  // Der Proxy sieht nur den eingehenden Pfad.
+  if (pathname === "/en/scheidungsmediation") {
+    return NextResponse.redirect(
+      new URL("/en/divorce-mediation" + req.nextUrl.search, req.url),
+      308,
+    );
+  }
+
   if (isMigratedLocalePath(pathname)) {
     return intlMiddleware(req);
   }
