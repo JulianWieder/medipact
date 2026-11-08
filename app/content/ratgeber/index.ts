@@ -48,7 +48,6 @@ import { article as mediationImUnternehmen } from "./mediation-im-unternehmen";
 import { article as mediationAmArbeitsplatz } from "./mediation-am-arbeitsplatz";
 import { article as kuendigungOhneGericht } from "./kuendigung-ohne-gericht";
 import { article as vermoegensauseinandersetzung } from "./vermoegensauseinandersetzung";
-import { article as streitUmsErbeInDerFamilie } from "./streit-ums-erbe-in-der-familie";
 import { article as erbstreitLoesenOhneGericht } from "./erbstreit-loesen-ohne-gericht";
 import { article as pflichtteilEinfordern } from "./pflichtteil-einfordern";
 import { article as nachbarschaftsstreitWasTun } from "./nachbarschaftsstreit-was-tun";
@@ -116,7 +115,6 @@ export const ratgeberArticles: RatgeberArticle[] = [
   vermoegensauseinandersetzung,
   geschwisterStreitenUmsErbe,
   erbengemeinschaftBlockade,
-  streitUmsErbeInDerFamilie,
   erbstreitLoesenOhneGericht,
   pflichtteilEinfordern,
   nachbarLaermWasTun,

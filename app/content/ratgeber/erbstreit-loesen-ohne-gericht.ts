@@ -53,6 +53,7 @@ export const article: RatgeberArticle = {
         "Vorempfänge: Schenkungen zu Lebzeiten an ein Kind gelten den anderen als längst erhaltener Erbteil.",
         "Testament: Formulierungen sind unklar, oder eine Seite zweifelt die Wirksamkeit an.",
         "Hausrat und Erinnerungsstücke: Objektiv geringwertig, emotional der härteste Streitpunkt.",
+        "Unternehmensnachfolge: Wer übernimmt den Familienbetrieb, wer wird ausgezahlt, welche Rolle behalten die Eltern?",
       ],
     },
     {
@@ -157,6 +158,14 @@ export const article: RatgeberArticle = {
     },
     {
       type: "heading",
+      text: "Erbstreit vermeiden: Erbmediation schon zu Lebzeiten",
+    },
+    {
+      type: "paragraph",
+      text: "Mediation wirkt nicht nur, wenn der Streit schon da ist. Eltern, die Nachlass, Schenkungen oder die Übergabe des Familienbetriebs gemeinsam mit allen Kindern besprechen, nehmen dem späteren Erbfall viel Sprengkraft. Gerade die Fragen, an denen Erbengemeinschaften später scheitern – wer das Haus übernimmt, wie Pflege angerechnet wird, was eine frühere Schenkung bedeutet –, lassen sich zu Lebzeiten in Ruhe klären. Das Ergebnis fließt dann in Testament, Übergabevertrag oder Pflichtteilsverzicht ein, die notariell beurkundet werden.",
+    },
+    {
+      type: "heading",
       text: "Wann Mediation im Erbstreit nicht der richtige Weg ist",
     },
     {
@@ -187,6 +196,16 @@ export const article: RatgeberArticle = {
       question: "Wie kann eine Erbengemeinschaft Streit ohne Gericht schlichten?",
       answer:
         "Am häufigsten über eine Mediation oder eine notarielle Vermittlung: Beide setzen auf eine Einigung aller Erben, die eine neutrale Person begleitet. Soll eine dritte Person verbindlich entscheiden, ohne dass es vor ein staatliches Gericht geht, braucht es eine Schiedsvereinbarung aller Erben oder eine Schiedsklausel im Testament.",
+    },
+    {
+      question: "Was ist Erbmediation?",
+      answer:
+        "Erbmediation ist ein strukturiertes Verfahren, in dem eine allparteiliche Mediatorin Erben oder künftige Erben dabei unterstützt, Streit über den Nachlass einvernehmlich zu lösen, statt vor Gericht zu prozessieren. Sie kann nach dem Erbfall oder vorbeugend zu Lebzeiten stattfinden.",
+    },
+    {
+      question: "Kann Mediation einen Erbstreit schon zu Lebzeiten verhindern?",
+      answer:
+        "Ja. In einer vorbeugenden Erbmediation regeln Eltern und Kinder Nachlass, Schenkungen oder die Unternehmensnachfolge gemeinsam. Weil alle Beteiligten die Regelung mittragen, entstehen im Erbfall deutlich seltener Konflikte.",
     },
     {
       question: "Wie kann man einen Erbstreit ohne Gericht lösen?",
@@ -220,7 +239,6 @@ export const article: RatgeberArticle = {
     { label: "Kostenrechner: Gericht oder Mediation?", href: "/kostenrechner" },
     { label: "Erbschaft & Familie: Mediation im Überblick", href: "/konflikte/erbschaft" },
     { label: "Pflichtteil: streiten oder verhandeln?", href: "/ratgeber/pflichtteil-einfordern" },
-    { label: "Familien- und Erbmediation", href: "/ratgeber/streit-ums-erbe-in-der-familie" },
     { label: "Gericht oder Mediation?", href: "/ratgeber/gericht-oder-mediation" },
     { label: "Was kostet eine Mediation?", href: "/ratgeber/mediation-kosten" },
   ],

@@ -76,9 +76,21 @@ const nextConfig: NextConfig = {
       // 31.07.2026 – Umstellung auf Suchsprache. Die alten Slugs trugen den
       // Fachbegriff "Mediation", nach dem Betroffene nicht suchen.
       // Hintergrund: docs/ratgeber-suchsprache.md
+      // Ziel seit 08.11.2026 direkt erbstreit-loesen-ohne-gericht (vorher
+      // streit-ums-erbe-in-der-familie, siehe unten) – keine Kette aus zwei
+      // Weiterleitungen.
       {
         source: '/ratgeber/familien-und-erbmediation',
-        destination: '/ratgeber/streit-ums-erbe-in-der-familie',
+        destination: '/ratgeber/erbstreit-loesen-ohne-gericht',
+        permanent: true,
+      },
+      // 08.11.2026 – Kannibalisierung im Erb-Cluster: streit-ums-erbe-in-der-
+      // familie war inhaltlich fast eine Teilmenge der Zielseite. Was nur dort
+      // stand (Erbmediation zu Lebzeiten, Unternehmensnachfolge), ist in
+      // erbstreit-loesen-ohne-gericht aufgegangen.
+      {
+        source: '/ratgeber/streit-ums-erbe-in-der-familie',
+        destination: '/ratgeber/erbstreit-loesen-ohne-gericht',
         permanent: true,
       },
       {

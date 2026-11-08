@@ -51,7 +51,7 @@ irgendwo im Netz ein Link auf die alte Adresse steht.
 
 | alt | neu | warum |
 |---|---|---|
-| `familien-und-erbmediation` | `streit-ums-erbe-in-der-familie` | Kompositum wird nicht gesucht |
+| `familien-und-erbmediation` | `streit-ums-erbe-in-der-familie` → seit 08.11.2026 `erbstreit-loesen-ohne-gericht` | Kompositum wird nicht gesucht; Artikel danach wegen Kannibalisierung in die Erb-Zielseite zusammengeführt |
 | `pflichtteil-mediation` | `pflichtteil-einfordern` | „einfordern" ist das Suchverb |
 | `sorgerecht-umgang-mediation` | `sorgerecht-und-umgangsrecht` | beide Begriffe haben Volumen |
 | `nachbarschaftsstreit-mediation` | `nachbarschaftsstreit-was-tun` | „was tun" ist die reale Query |
