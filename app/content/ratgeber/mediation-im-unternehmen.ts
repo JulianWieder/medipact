@@ -1,5 +1,9 @@
 import type { RatgeberArticle } from "./types";
 
+// 09.11.2026: von ~900 auf ~1.700 Wörter ausgebaut. Dieser Artikel ist die
+// ARBEITGEBER-Sicht (Geschäftsführung, HR, Führung): erkennen, beauftragen,
+// nachhalten. Die Sicht der Betroffenen steht in mediation-am-arbeitsplatz,
+// Konflikte zwischen Unternehmen in wirtschaftsmediation.
 export const article: RatgeberArticle = {
   slug: "mediation-im-unternehmen",
   category: "Wirtschaftsmediation",
@@ -8,8 +12,8 @@ export const article: RatgeberArticle = {
   description:
     "Teamkonflikte kosten Produktivität und Mitarbeiter. Wie Mediation im Unternehmen wirkt, wann sie sich lohnt und was sie kostet – jetzt lesen.",
   eyebrow: "Ratgeber · Wirtschaftsmediation",
-  updated: "2026-07-17",
-  readingMinutes: 7,
+  updated: "2026-11-09",
+  readingMinutes: 9,
   intro:
     "Zwei Abteilungen blockieren sich, ein Team zerfällt in Lager, zwischen Führungskraft und Mitarbeitenden herrscht Eiszeit: Ungelöste Konflikte im Unternehmen sind teuer – durch Reibungsverluste, Krankheitstage, innere Kündigung und Fluktuation. Dieser Artikel richtet sich an Geschäftsführung, HR und Führungskräfte und zeigt, wann Mediation im Unternehmen das richtige Instrument ist und wie sie abläuft.",
   blocks: [
@@ -17,6 +21,29 @@ export const article: RatgeberArticle = {
     {
       type: "paragraph",
       text: "Konflikte am Arbeitsplatz verursachen Kosten, die in keiner Bilanz direkt auftauchen: Führungskräfte verbringen einen erheblichen Teil ihrer Arbeitszeit mit Konfliktbearbeitung, Betroffene arbeiten unkonzentriert oder melden sich krank, Wissensträger verlassen das Unternehmen. Eskaliert der Konflikt bis zur Kündigung, kommen Kosten für Abfindung, Nachbesetzung und Einarbeitung hinzu – häufig ein Vielfaches dessen, was eine frühzeitige Mediation gekostet hätte.",
+    },
+    {
+      type: "paragraph",
+      text: "Teurer als die Zahlen ist oft etwas anderes: das, was ein Team dabei verlernt. Wenn zwei Menschen monatelang erkennbar gegeneinander arbeiten und nichts geschieht, ziehen alle anderen ihre Schlüsse. Man sagt in Besprechungen weniger. Man sichert sich per E-Mail ab. Man hört auf, Fehler offen anzusprechen. Der Konflikt zweier Personen wird so zur Kultur einer ganzen Abteilung – und die bleibt, auch wenn einer der beiden längst gegangen ist.",
+    },
+    { type: "heading", text: "Was Führungskräfte häufig zu spät sehen" },
+    {
+      type: "paragraph",
+      text: "Kaum jemand kommt zur Führungskraft und sagt: Wir haben einen Konflikt. Was oben ankommt, sind Symptome. Ein Projekt verzögert sich, zwei Abteilungen schicken widersprüchliche Zahlen, eine verlässliche Mitarbeiterin bittet um Versetzung. Die naheliegende Reaktion ist, das Sachproblem zu lösen. Das eigentliche Problem bleibt und sucht sich das nächste Projekt.",
+    },
+    {
+      type: "list",
+      items: [
+        "Abstimmungen, die früher ein Gespräch brauchten, laufen jetzt über lange E-Mail-Ketten mit vielen Empfängern.",
+        "In Besprechungen redet immer nur eine Seite, die andere schweigt – und widerspricht anschließend auf dem Flur.",
+        "Beschwerden erreichen Sie über Dritte, nie direkt.",
+        "Krankmeldungen häufen sich rund um bestimmte Termine oder Konstellationen.",
+        "Gute Leute kündigen und nennen im Abschlussgespräch auffallend allgemeine Gründe.",
+      ],
+    },
+    {
+      type: "callout",
+      text: "Menschen kündigen selten dem Unternehmen. Sie kündigen der Situation, in der sie sich allein gelassen fühlen.",
     },
     { type: "heading", text: "Wann ist Mediation im Unternehmen sinnvoll?" },
     {
@@ -47,6 +74,40 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Wichtig für den Erfolg: Die Teilnahme ist freiwillig, die Inhalte bleiben vertraulich – auch gegenüber dem Auftraggeber. Das Unternehmen erfährt, ob eine Vereinbarung zustande kam und was die Beteiligten davon teilen möchten, nicht aber, was im Verfahren besprochen wurde.",
     },
+    { type: "heading", text: "So beauftragen Sie eine Mediation: sechs Punkte vor dem Start" },
+    {
+      type: "paragraph",
+      text: "Ob eine Mediation im Betrieb gelingt, entscheidet sich häufig, bevor das erste Gespräch stattfindet – in der Auftragsklärung. Das Unternehmen ist Auftraggeber, aber nicht Partei. Dieses Dreieck muss von Anfang an sauber geregelt sein:",
+    },
+    {
+      type: "list",
+      items: [
+        "Freiwilligkeit ernst meinen: Anbieten und empfehlen, nicht anordnen. Wer geschickt wird, sitzt körperlich am Tisch und innerlich im Widerstand.",
+        "Vertraulichkeit schriftlich zusagen: Halten Sie fest, dass Inhalte nicht an Vorgesetzte oder die Personalakte gehen und was genau Sie als Auftraggeber am Ende erfahren.",
+        "Keine Nachteile: Stellen Sie klar, dass weder die Teilnahme noch eine Ablehnung arbeitsrechtliche Folgen hat.",
+        "Arbeitszeit und Kosten klären: Üblich ist, dass die Mediation in der Arbeitszeit stattfindet und das Unternehmen die Kosten trägt.",
+        "Spielraum benennen: Sagen Sie vorab, worüber die Beteiligten selbst entscheiden dürfen – etwa Aufgabenverteilung oder Abläufe – und was außerhalb liegt, zum Beispiel Gehalt oder Stellenplan.",
+        "Betriebsrat früh einbinden: Wo es einen Betriebs- oder Personalrat gibt, schafft frühe Information Vertrauen in das Verfahren. Manche Unternehmen regeln den Umgang mit Konflikten in einer Betriebsvereinbarung.",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Der häufigste Fehler ist ein verdeckter Auftrag: Die Führung wünscht sich insgeheim, dass die Mediation eine Person „zur Vernunft bringt“ oder eine Trennung vorbereitet. Ein seriöser Mediator nimmt einen solchen Auftrag nicht an – und die Beteiligten spüren ihn sofort. Wenn eine Entscheidung bereits gefallen ist, ist ein ehrliches Gespräch darüber fairer als eine Mediation zum Schein. Wie sich eine Trennung dann ohne Arbeitsgericht regeln lässt, beschreibt der Ratgeber [Kündigung ohne Gericht klären](/ratgeber/kuendigung-ohne-gericht).",
+    },
+    { type: "heading", text: "Wann Mediation nicht das richtige Instrument ist" },
+    {
+      type: "paragraph",
+      text: "Mediation setzt voraus, dass beide Seiten etwas zu verhandeln haben. Bei Pflichtverletzungen, Belästigung, Diskriminierung oder Mobbing mit klarem Machtgefälle hat der Arbeitgeber eigene Schutz- und Handlungspflichten; dann ist zuerst Aufklärung und Schutz der betroffenen Person gefragt, nicht ein Gespräch auf Augenhöhe. Mediation kann später helfen, die Zusammenarbeit im Team wiederherzustellen – sie ersetzt aber weder eine Untersuchung noch eine Entscheidung der Führung.",
+    },
+    { type: "heading", text: "Nach der Mediation: damit die Vereinbarung hält" },
+    {
+      type: "paragraph",
+      text: "Eine Vereinbarung ist ein Anfang, kein Abschluss. In den Wochen danach entscheidet sich, ob aus guten Vorsätzen ein neuer Alltag wird. Drei Dinge helfen: Was die Beteiligten für die Umsetzung brauchen – eine geklärte Zuständigkeit, ein anderer Besprechungsrhythmus, eine Entlastung –, sollte die Führung zügig ermöglichen. Ein Folgetermin nach zwei bis drei Monaten gibt beiden die Sicherheit, dass Rückfälle besprochen werden können. Und das Team verdient eine kurze, mit den Beteiligten abgestimmte Information, dass der Konflikt bearbeitet wurde; über das Wie wird nicht gesprochen.",
+    },
+    {
+      type: "paragraph",
+      text: "Unternehmen, die mehr als einmal im Jahr vor dieser Situation stehen, sollten den Einzelfall zum Anlass nehmen, eine feste Anlaufstelle zu schaffen. Je früher jemand weiß, an wen er sich wenden kann, desto kleiner sind die Konflikte, die überhaupt eine Mediation brauchen. Wie Betroffene selbst den ersten Schritt gehen können, steht im Ratgeber [Mediation am Arbeitsplatz](/ratgeber/mediation-am-arbeitsplatz).",
+    },
     { type: "heading", text: "Online-Mediation: niedrige Hürde, klare Struktur" },
     {
       type: "paragraph",
@@ -57,9 +118,23 @@ export const article: RatgeberArticle = {
       type: "paragraph",
       text: "Bei medipact gibt es feste Paketpreise statt offener Stundensätze – das macht die Kosten planbar. Für Unternehmen mit wiederkehrendem Bedarf gibt es Firmenpakete mit inkludierten Fällen. Verglichen mit den Folgekosten eines eskalierten Konflikts – Fluktuation, Krankenstand, Arbeitsgerichtsverfahren – ist Mediation fast immer die wirtschaftlichste Option.",
     },
-    { type: "cta", text: "Geschäftskonflikte lösen mit medipact", href: "/konflikte/odr" },
+    {
+      type: "paragraph",
+      text: "Konflikte mit Kunden, Lieferanten oder Mitgesellschaftern folgen anderen Regeln als Konflikte im Team; dafür gibt es den Ratgeber zur [Wirtschaftsmediation](/ratgeber/wirtschaftsmediation).",
+    },
+    { type: "cta", text: "Konflikte am Arbeitsplatz mit medipact klären", href: "/konflikte/arbeitsplatz" },
   ],
   faq: [
+    {
+      question: "Wie läuft die Beauftragung einer Mediation im Unternehmen ab?",
+      answer:
+        "Das Unternehmen klärt mit dem Mediator den Auftrag: Freiwilligkeit, Vertraulichkeit, Kosten, Arbeitszeit und was der Auftraggeber am Ende erfährt. Erst dann werden die Beteiligten eingeladen. Partei der Mediation ist das Unternehmen nicht.",
+    },
+    {
+      question: "Wann ist Mediation im Betrieb nicht geeignet?",
+      answer:
+        "Bei Pflichtverletzungen, Belästigung, Diskriminierung oder Mobbing mit klarem Machtgefälle. Dann muss der Arbeitgeber zuerst aufklären und schützen. Mediation kann danach helfen, die Zusammenarbeit im Team wiederherzustellen.",
+    },
     {
       question: "Wann sollte ein Unternehmen eine Mediation einleiten?",
       answer:
@@ -94,5 +169,7 @@ export const article: RatgeberArticle = {
     { label: "Online Dispute Resolution (ODR): Streit digital beilegen", href: "/ratgeber/online-dispute-resolution" },
     { label: "Mediation am Arbeitsplatz (Arbeitnehmer-Sicht)", href: "/ratgeber/mediation-am-arbeitsplatz" },
     { label: "Fallbeispiel: Konflikt im Team", href: "/cases/team-konflikt" },
+    { label: "Konflikte am Arbeitsplatz mit medipact klären", href: "/konflikte/arbeitsplatz" },
+    { label: "Mobbing-Tagebuch führen (mit Vorlage)", href: "/ratgeber/mobbing-tagebuch-fuehren" },
   ],
 };
