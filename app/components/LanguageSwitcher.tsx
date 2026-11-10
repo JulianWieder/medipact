@@ -21,6 +21,11 @@ import { routing, isMigratedLocalePath } from "@/i18n/routing";
  * proxy.ts uses avoids that entirely: the switcher simply doesn't
  * render on pages it can't safely operate on.
  *
+ * Rendered as real <a href> links (09.11.2026), not buttons: /en had no
+ * crawlable internal link at all (only hreflang), which is one reason
+ * Google listed it as "found, not indexed". A plain <a> also IS the full
+ * page load described below; onClick only writes the cookie first.
+ *
  * Switching does a full page load on purpose, not router.replace():
  * NextIntlClientProvider lives in the ROOT layout (app/layout.tsx, above
  * the [locale] segment), and Next.js keeps shared layouts mounted on
@@ -40,16 +45,6 @@ export function LanguageSwitcher() {
   const rawPathname = useRawPathname();
   const pathname = usePathname();
 
-  function switchTo(nextLocale: string) {
-    if (nextLocale === locale) return;
-    setLocaleCookie(nextLocale);
-    window.location.assign(
-      getPathname({ href: pathname, locale: nextLocale }) +
-        window.location.search +
-        window.location.hash,
-    );
-  }
-
   if (!isMigratedLocalePath(rawPathname)) {
     return null;
   }
@@ -59,9 +54,11 @@ export function LanguageSwitcher() {
       {routing.locales.map((nextLocale, index) => (
         <span key={nextLocale} className="flex items-center">
           {index > 0 && <span className="mx-1 text-neutral-300">/</span>}
-          <button
-            type="button"
-            onClick={() => switchTo(nextLocale)}
+          <a
+            href={getPathname({ href: pathname, locale: nextLocale })}
+            hrefLang={nextLocale}
+            lang={nextLocale}
+            onClick={() => setLocaleCookie(nextLocale)}
             aria-current={nextLocale === locale ? "true" : undefined}
             className={
               nextLocale === locale
@@ -70,7 +67,7 @@ export function LanguageSwitcher() {
             }
           >
             {nextLocale.toUpperCase()}
-          </button>
+          </a>
         </span>
       ))}
     </div>

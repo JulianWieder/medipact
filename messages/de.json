@@ -150,7 +150,8 @@
           "tag": "Wirtschaft",
           "title": "Konflikte lösen, bevor sie das Geschäft kosten.",
           "text": "Gesellschafterstreit, Teamkonflikte, B2B – Wirtschaftsmediation für Unternehmen.",
-          "href": "/konflikte/geschaeft",
+          "href": "/konflikte/odr",
+          "anlass": "geschaeft",
           "cta": "Mehr erfahren"
         }
       ]
@@ -205,7 +206,7 @@
         "title": "Konflikte, die jeden Tag Geld kosten.",
         "text": "Gesellschafterstreit, Teamkonflikte, B2B: Der Streit blockiert Entscheidungen, bindet Führungszeit und beschädigt die Geschäftsbeziehung, die danach noch tragen muss. Ein Gerichtsverfahren dauert Jahre – unser Verfahren sechs Schritte.",
         "ctaLabel": "Für Unternehmen",
-        "ctaHref": "/konflikte/geschaeft"
+        "ctaHref": "/konflikte/odr"
       }
     },
     "themen": {
@@ -440,7 +441,7 @@
       {
         "n": 1,
         "text": "Gilt, solange keine Mediation läuft. Bei laufendem Verfahren wird Ihr Löschwunsch vermerkt und das Konto nach Abschluss des Verfahrens gelöscht.",
-        "href": "/konto-loeschen",
+        "href": "https://app.medipact.de/konto-loeschen",
         "linkLabel": "Konto löschen"
       },
       {

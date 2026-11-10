@@ -125,8 +125,9 @@ Logbuch, dort als Paar-Check-Variante (`paarcheckTeaserDe`, Button zum
 There are FOUR conflict types (matching the backend `mediation_type`s):
 trennung, nachbarschaft, erbschaft, geschaeft ("Wirtschaft"; the URL
 `/konflikte/geschaeft` is a 308 redirect to `/konflikte/odr`, which carries
-the content — keep linking `geschaeft` where the `anlass` for registration
-is derived from the href, e.g. `KampagnenKarussell`). When a
+the content — link `/konflikte/odr` directly, never the redirect; where the
+`anlass` for registration is derived from the href (`KampagnenKarussell`),
+the card carries a separate `anlass: "geschaeft"` field in `messages/*.json`). When a
 page lists conflict types (ThemenTabs, EmpfehlungenGrid, Header dropdown,
 `/konflikte` overview, sitemap, metadata descriptions), include all four —
 geschaeft was added last and is easy to forget.

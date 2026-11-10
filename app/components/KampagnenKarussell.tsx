@@ -4,8 +4,10 @@
 // immer alle gleichzeitig sichtbar (Raster statt Karussell, 4 Spalten ab lg).
 // Karten + Copy liegen in messages/*.json unter home.kampagnen. Bewusst bei
 // vier Karten bleiben: eine fünfte bricht das Raster. ODR hat keine eigene
-// Karte, „Wirtschaft" führt über /konflikte/geschaeft (Redirect) schon
-// dorthin; der href bleibt geschaeft, weil daraus der `anlass` entsteht.
+// Karte, „Wirtschaft" verlinkt direkt auf /konflikte/odr (kein interner Link
+// auf den Redirect /konflikte/geschaeft). Der `anlass` für die Registrierung
+// kommt aus dem letzten Teil des href; weicht er davon ab (Wirtschaft:
+// geschaeft), steht er als eigenes Feld `anlass` in messages/*.json.
 
 import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { LocaleLink } from "@/app/components/ui/LocaleLink";
@@ -16,6 +18,7 @@ type KampagnenCard = {
   title: string;
   text: string;
   href: string;
+  anlass?: string;
   cta: string;
 };
 
@@ -55,7 +58,7 @@ export default function KampagnenKarussell() {
               </div>
               <div className="mt-6 flex flex-col gap-3">
                 <a
-                  href={`${REGISTRIEREN_URL}?anlass=${card.href.split("/").pop()}`}
+                  href={`${REGISTRIEREN_URL}?anlass=${card.anlass ?? card.href.split("/").pop()}`}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500 active:scale-[0.98]"
                 >
                   {startCta} →

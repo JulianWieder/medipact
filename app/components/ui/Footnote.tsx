@@ -65,12 +65,23 @@ export function FootnoteList({
             {f.href && f.linkLabel && (
               <>
                 {" "}
-                <Link
-                  href={f.href}
-                  className="text-neutral-600 underline underline-offset-2 hover:text-accent-700"
-                >
-                  {f.linkLabel}
-                </Link>
+                {/^https?:/.test(f.href) ? (
+                  // Externes Ziel (z. B. Nutzerbereich auf app.medipact.de):
+                  // direkt verlinken statt über einen internen Redirect.
+                  <a
+                    href={f.href}
+                    className="text-neutral-600 underline underline-offset-2 hover:text-accent-700"
+                  >
+                    {f.linkLabel}
+                  </a>
+                ) : (
+                  <Link
+                    href={f.href}
+                    className="text-neutral-600 underline underline-offset-2 hover:text-accent-700"
+                  >
+                    {f.linkLabel}
+                  </Link>
+                )}
                 .
               </>
             )}{" "}

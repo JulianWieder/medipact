@@ -150,7 +150,8 @@
           "tag": "Business",
           "title": "Resolve conflicts before they cost you business.",
           "text": "Shareholder disputes, team conflicts, B2B – commercial mediation for companies.",
-          "href": "/konflikte/geschaeft",
+          "href": "/konflikte/odr",
+          "anlass": "geschaeft",
           "cta": "Learn more"
         }
       ]
@@ -205,7 +206,7 @@
         "title": "Conflicts that cost money every day.",
         "text": "Shareholder disputes, team conflicts, B2B: the dispute blocks decisions, ties up management time and damages the business relationship that still has to work afterwards. Court proceedings take years – our process takes six steps.",
         "ctaLabel": "For companies",
-        "ctaHref": "/konflikte/geschaeft"
+        "ctaHref": "/konflikte/odr"
       }
     },
     "themen": {
@@ -695,7 +696,7 @@
       {
         "n": 1,
         "text": "Applies as long as no mediation is in progress. During an ongoing procedure, your deletion request is recorded and the account is deleted once the procedure has ended.",
-        "href": "/konto-loeschen",
+        "href": "https://app.medipact.de/konto-loeschen",
         "linkLabel": "Delete account"
       },
       {
