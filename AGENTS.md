@@ -113,7 +113,10 @@ zentral in `app/content/eignungscheck.ts`; beworben wird er über
 `EignungscheckTeaser` (Startseite, /konflikte, /preise, nachbarschaft,
 verbraucher). Antworten bleiben im Browser — kein fetch, kein Storage,
 kein Tracking mit Inhalt; das steht so auf der Seite und in der FAQ. Bei
-Rot (und immer bei Gewalt/Angst) kein Verkaufs-CTA.
+Gewalt/Angst nie ein Angebot (nur Hilfetelefone + Alternativen). Bei Rot
+ohne Gewalt/Angst (Stufe 7–8): Alternativen plus Paar-Check als
+zurückhaltender Button, immer mit dem Hinweis, dass er weder Erfolg noch
+Scheitern sicher vorhersagt; kein Starterpaket-Button bei Rot.
 Der Paar-Check ist im Starterpaket enthalten (auch einzeln buchbar) und
 führt nie „direkt zur Einigung“: nach dem Check kommt das Starterpaket,
 die Einigung erst danach. Auf /preise steht der Teaser direkt unter dem

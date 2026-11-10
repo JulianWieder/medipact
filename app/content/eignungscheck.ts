@@ -13,7 +13,9 @@
 // Glasl-Stufe, für die sie typisch ist (0 = kein Signal). Es zählt die
 // HÖCHSTE ausgelöste Stufe, nicht die Summe – ein einziges Ultimatum wiegt
 // mehr als drei holprige Gespräche. `ausschluss` (Gewalt/Angst) setzt das
-// Ergebnis unabhängig davon auf Rot und zeigt die Hilfetelefone.
+// Ergebnis unabhängig davon auf Rot und zeigt die Hilfetelefone – ohne
+// Angebot. Rot nur über Stufe 7–8 (ohne Gewalt/Angst) zeigt Alternativen
+// UND den Paar-Check mit dem Hinweis, dass er nichts garantiert.
 //
 // Die Zuordnung ist eine Orientierung in Anlehnung an Glasl, kein
 // validiertes Diagnoseinstrument – so steht es auch auf der Seite.
@@ -161,9 +163,31 @@ export const ampelErgebnis: Record<
     label: "Rot",
     phase: "Phase 3: Hauptsache, der andere verliert",
     stufen: "Stufe 7–9",
-    titel: "Mediation ist hier nicht der richtige erste Schritt",
-    text: "Wenn eine Seite der anderen gezielt schadet oder Angst im Spiel ist, fehlt die Grundlage für eine freiwillige Einigung auf Augenhöhe. Jetzt geht es zuerst um Schutz und um klare Regeln von außen.",
+    titel: "Eine Mediation wird hier schwierig",
+    text: "Nach Ihren Antworten ist der Konflikt sehr weit eskaliert: Es geht weniger um eine gemeinsame Lösung als darum, der anderen Seite zu schaden. In dieser Phase gelingt eine freiwillige Einigung selten aus eigener Kraft. Ausgeschlossen ist sie nicht – das hängt auch davon ab, wie die andere Seite den Konflikt erlebt.",
   },
+};
+
+/**
+ * Rot wegen Gewalt/Angst (`ausschluss`): bewusst eindeutig und ohne jedes
+ * Angebot – hier wird nichts relativiert und nichts verkauft.
+ */
+export const rotSicherheitErgebnis = {
+  ...ampelErgebnis.rot,
+  titel: "Zuerst geht es um Ihre Sicherheit",
+  text: "Wenn Angst oder Gewalt im Spiel ist, fehlt die Grundlage für eine freiwillige Einigung auf Augenhöhe. Mediation ist dann nicht der richtige Weg. Jetzt geht es zuerst um Schutz und um klare Regeln von außen.",
+};
+
+/**
+ * Rot OHNE Gewalt/Angst (Stufe 7–8 aus Ihrer Sicht): Paar-Check als
+ * ehrliche Option, ausdrücklich ohne Erfolgs- oder Misserfolgsversprechen.
+ * Kein Starterpaket-Button an dieser Stelle.
+ */
+export const paarcheckBeiRot = {
+  titel: "Noch unsicher? Beide Sichten nebeneinanderlegen",
+  text: "Ihr Ergebnis beruht nur auf Ihrer Einschätzung. Die andere Seite erlebt denselben Konflikt oft anders – manchmal weniger verhärtet, manchmal noch mehr. Im Paar-Check beantworten beide die Fragen getrennt; danach sehen Sie, ob es eine gemeinsame Gesprächsbasis gibt.",
+  einschraenkung:
+    "Auch der Paar-Check ist keine Garantie: Er sagt nicht sicher voraus, dass eine Mediation gelingt – und auch nicht, dass sie scheitert. Er ist eine bessere Grundlage für die Entscheidung, nicht die Entscheidung selbst.",
 };
 
 /** Empfehlung bei Rot – bewusst ohne Verkaufs-CTA. */
@@ -281,7 +305,7 @@ export const eignungscheckFaqs = [
   {
     frage: "Ab welcher Eskalationsstufe ist Mediation sinnvoll?",
     antwort:
-      "In den ersten beiden Phasen (Stufe 1 bis 6) ist Mediation in der Regel sinnvoll – früh ist sie am einfachsten, in den Stufen 4 bis 6 braucht sie eine klare, neutrale Führung. Ab Stufe 7, und immer bei Gewalt oder Angst, fehlt die Grundlage für eine freiwillige Einigung. Dann sind Schutz, anwaltliche Beratung, Schlichtung oder ein Gericht der richtige Weg.",
+      "In den ersten beiden Phasen (Stufe 1 bis 6) ist Mediation in der Regel sinnvoll – früh ist sie am einfachsten, in den Stufen 4 bis 6 braucht sie eine klare, neutrale Führung. Ab Stufe 7 wird eine freiwillige Einigung schwierig; oft sind dann anwaltliche Beratung, Schlichtung oder ein Gericht der passendere Weg – ob die andere Seite den Konflikt ähnlich sieht, zeigt erst der Abgleich beider Sichten. Bei Gewalt oder Angst ist Mediation nicht der richtige Weg: Dann gehen Schutz und Sicherheit vor.",
   },
   {
     frage: "Eskaliert jeder Konflikt automatisch weiter?",

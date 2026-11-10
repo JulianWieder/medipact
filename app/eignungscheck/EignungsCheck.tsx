@@ -11,7 +11,9 @@ import {
   ampelFuerStufe,
   checkFragen,
   hilfetelefone,
+  paarcheckBeiRot,
   rotEmpfehlungen,
+  rotSicherheitErgebnis,
   type Ampel,
   type CheckAntwort,
 } from "@/app/content/eignungscheck";
@@ -114,7 +116,7 @@ function Ergebnis({ antworten, onNeu }: { antworten: CheckAntwort[]; onNeu: () =
   // Höchstes Signal zählt, nicht die Summe (siehe app/content/eignungscheck.ts).
   const stufe = Math.max(1, ...antworten.map((a) => a.stufe));
   const ampel: Ampel = ausschluss ? "rot" : ampelFuerStufe(stufe);
-  const e = ampelErgebnis[ampel];
+  const e = ausschluss ? rotSicherheitErgebnis : ampelErgebnis[ampel];
   const stil = ampelStil[ampel];
 
   return (
@@ -153,8 +155,25 @@ function Ergebnis({ antworten, onNeu }: { antworten: CheckAntwort[]; onNeu: () =
               </ul>
             </div>
           )}
+          {!ausschluss && (
+            <div className="rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8">
+              <h3 className="text-lg font-bold text-neutral-900">{paarcheckBeiRot.titel}</h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">{paarcheckBeiRot.text}</p>
+              <p className="mt-3 rounded-2xl bg-neutral-50 p-4 text-sm leading-6 text-neutral-600">
+                {paarcheckBeiRot.einschraenkung}
+              </p>
+              <Link
+                href={PAARCHECK_URL}
+                className="mt-5 inline-flex justify-center rounded-full border border-neutral-300 px-6 py-3 text-sm font-semibold text-neutral-800 transition hover:border-accent-400 hover:text-accent-700"
+              >
+                Paar-Check für {PAARCHECK_PREIS} – beide Sichten vergleichen
+              </Link>
+            </div>
+          )}
           <div>
-            <h3 className="text-lg font-bold text-neutral-900">Was jetzt eher hilft</h3>
+            <h3 className="text-lg font-bold text-neutral-900">
+              {ausschluss ? "Was jetzt eher hilft" : "Wege, die auch ohne Zusammenarbeit funktionieren"}
+            </h3>
             <ul className="mt-4 grid gap-3 sm:grid-cols-3">
               {rotEmpfehlungen.map((r) => (
                 <li key={r.titel} className="rounded-2xl border border-neutral-200 p-5">
