@@ -292,6 +292,14 @@ export default function Header() {
 
   return (
     <>
+      {/* Sprunglink fuer Tastatur und Screenreader: erst bei Fokus sichtbar.
+          Ziel ist der Anker #inhalt direkt hinter dem Header (app/layout.tsx). */}
+      <a
+        href="#inhalt"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-neutral-900 focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-accent-400"
+      >
+        {t("skipToContent")}
+      </a>
       {/* Promo bar: bewusst NICHT sticky — scrollt weg und gibt auf dem
           Handy die ~36px wieder frei, die vorher dauerhaft klebten. */}
       <div className="w-full bg-neutral-900 text-white">

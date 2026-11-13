@@ -206,9 +206,24 @@ const nextConfig: NextConfig = {
         key: 'X-Content-Type-Options',
         value: 'nosniff',
       },
+      // X-XSS-Protection stand hier bis 13.11.2026: veraltet, aktuelle
+      // Browser ignorieren den Header.
       {
-        key: 'X-XSS-Protection',
-        value: '1; mode=block',
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+      },
+      // Kamera/Mikrofon nur fuer die eigene Seite (Video-Einladung im
+      // Nutzerbereich, InviteVideoRecorder), Standort gar nicht.
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(self), microphone=(self), geolocation=()',
+      },
+      // Ein Jahr HTTPS erzwingen. Bewusst OHNE includeSubDomains und ohne
+      // preload: das wuerde auch app.medipact.de und die Mail-Hosts binden
+      // und laesst sich nicht kurzfristig zuruecknehmen.
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000',
       },
     ];
     return [

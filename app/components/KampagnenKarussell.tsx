@@ -67,7 +67,10 @@ export default function KampagnenKarussell() {
                   href={card.href}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 transition hover:gap-2.5"
                 >
-                  {learnCta} →
+                  {/* Eigener Linktext je Karte (cards[].cta), sonst der
+                      allgemeine. "Mehr erfahren" sagt Google nichts ueber
+                      das Ziel, "Zur Scheidungsmediation" schon. */}
+                  {card.cta || learnCta} →
                 </LocaleLink>
               </div>
             </div>

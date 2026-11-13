@@ -1,4 +1,3 @@
-import { REGISTRIEREN_URL } from "@/lib/nutzerbereich";
 import { getTranslations } from "next-intl/server";
 import Image, { type StaticImageData } from "next/image";
 import { ArrowLink } from "@/app/components/ui/ArrowLink";
@@ -18,7 +17,7 @@ const cards: { key: CardKey; href: string; image: StaticImageData }[] = [
 
 /**
  * Mercedes-Benz-style "Empfehlungen" card grid: large image, short headline +
- * text, two CTAs ("Mehr erfahren" / "Kostenlos starten"). Replaces the
+ * text, one link to the sub-page ("Mehr erfahren"). Replaces the
  * one-line casesTeaser on the homepage.
  *
  * Only /scheidungsmediation is migrated into app/[locale]/ today (see
@@ -42,7 +41,10 @@ export async function EmpfehlungenGrid() {
               key={key}
               className="group overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white shadow-sm transition hover:shadow-lg"
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
+              {/* 16:9 statt 4:3 (13.11.2026): auf dem Handy stehen die vier
+                  Karten untereinander, das spart dort pro Karte ein Viertel
+                  der Bildhoehe. */}
+              <div className="relative aspect-[16/9] overflow-hidden">
                 <Image
                   src={image}
                   alt={t(`cards.${key}.title`)}
@@ -61,11 +63,11 @@ export async function EmpfehlungenGrid() {
                   {t(`cards.${key}.text`)}
                 </p>
 
-                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
+                {/* Nur noch der Link zur Unterseite. "Kostenlos starten" stand
+                    hier viermal; der Einstieg steht im Hero, im Karussell und
+                    im Abschluss-CTA. */}
+                <div className="mt-4 text-sm font-semibold">
                   <ArrowLink href={href}>{t("ctaPrimary")}</ArrowLink>
-                  <a href={REGISTRIEREN_URL} className="text-neutral-500 transition hover:text-neutral-800">
-                    {t("ctaSecondary")}
-                  </a>
                 </div>
               </div>
             </article>

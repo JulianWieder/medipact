@@ -45,6 +45,15 @@ function FooterLink({
   );
 }
 
+// /konflikte/odr direkt, nicht die Weiterleitung /konflikte/geschaeft.
+const KONFLIKT_LINKS = [
+  { href: "/scheidungsmediation", key: "conflictsDivorce" },
+  { href: "/konflikte/nachbarschaft", key: "conflictsNeighbour" },
+  { href: "/konflikte/erbschaft", key: "conflictsInheritance" },
+  { href: "/konflikte/odr", key: "conflictsBusiness" },
+  { href: "/konflikte", key: "conflictsAll" },
+] as const;
+
 interface FooterProps {
   brandName?: string;
   tagline?: string;
@@ -98,6 +107,25 @@ export default function Footer({
               <p>{email}</p>
               <p>{phone}</p>
             </div>
+          </div>
+
+          {/* Konflikte (13.11.2026). Alle vier Konfliktarten mit dem Suchbegriff
+              als Linktext, auf jeder Seite: vorher fuehrte von den meisten
+              Seiten nur das Header-Dropdown dorthin, und der Linktext auf
+              /scheidungsmediation hiess fast ueberall "Mehr erfahren". */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-300">
+              {t("conflictsHeading")}
+            </h4>
+            <ul className="mt-4 space-y-2 text-neutral-400">
+              {KONFLIKT_LINKS.map((link) => (
+                <li key={link.href}>
+                  <FooterLink href={link.href} className="transition hover:text-white">
+                    {t(link.key)}
+                  </FooterLink>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Produkt */}
@@ -208,8 +236,11 @@ export default function Footer({
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <NewsletterSignup variant="footer" source="footer" />
+          {/* Newsletter: eigene Zeile, seit die Konflikte-Spalte die sechste
+              Spalte belegt. */}
+          <div className="md:col-span-2 lg:col-span-6 lg:max-w-md">
+            <NewsletterSignup variant="footer" source="footer" />
+          </div>
         </div>
 
         {/* Bottom Section */}

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Icon from "@/app/components/ui/Icon";
-import { LogbuchApp } from "@/app/components/ui/LogbuchApp";
 import { LOGBUCH_WEB_URL } from "@/lib/logbuchApp";
 
 /**
@@ -70,13 +69,9 @@ export default function LogbuchSection() {
             </p>
           </div>
 
-          {/* Jetzt eigenständig: Web + App, per QR-Code direkt aufs Handy */}
-          <div className="lg:col-span-2">
-            <p className="mb-4 text-sm font-semibold text-neutral-800">
-              {t("availability")}
-            </p>
-            <LogbuchApp />
-          </div>
+          {/* Der Block "Web + App per QR-Code" stand bis 13.11.2026 hier. Er
+              steht vollstaendig auf /konflikt-logbuch (Link oben); auf der
+              Startseite verlaengerte er die Sektion um rund die Haelfte. */}
         </div>
       </div>
     </section>

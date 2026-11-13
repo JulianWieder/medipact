@@ -2,6 +2,7 @@
   "nav": {
     "promo": "Ihren Fall vertraulich schildern – der Einstieg ist kostenlos",
     "promoShort": "Fall vertraulich schildern",
+    "skipToContent": "Zum Inhalt springen",
     "start": "Start",
     "startCta": "Mediation starten",
     "about": "Über uns",
@@ -90,7 +91,13 @@
     "legalCookies": "Cookies",
     "legalCookieSettings": "Cookie-Einstellungen",
     "copyright": "Alle Rechte vorbehalten.",
-    "productLogbook": "Konflikt-Logbuch (kostenlos)"
+    "productLogbook": "Konflikt-Logbuch (kostenlos)",
+    "conflictsHeading": "Konflikte",
+    "conflictsDivorce": "Scheidungsmediation",
+    "conflictsNeighbour": "Nachbarschaftsstreit",
+    "conflictsInheritance": "Erbstreit",
+    "conflictsBusiness": "Wirtschaftsmediation",
+    "conflictsAll": "Alle Konfliktarten"
   },
   "cookieConsent": {
     "ariaLabel": "Cookie-Einstellungen",
@@ -128,9 +135,9 @@
         {
           "tag": "Trennung",
           "title": "Fair auseinandergehen, ohne Rosenkrieg.",
-          "text": "Sorgerecht, Wohnung, Finanzen – geregelt in Wochen statt Jahren vor Gericht.",
+          "text": "Scheidung oder Trennung: Sorgerecht, Wohnung, Finanzen – geregelt in Wochen statt Jahren vor Gericht.",
           "href": "/scheidungsmediation",
-          "cta": "Mehr erfahren"
+          "cta": "Zur Scheidungsmediation"
         },
         {
           "tag": "Nachbarschaft",
@@ -361,15 +368,15 @@
     "processSteps": [
       {
         "title": "Konflikt schildern",
-        "text": "Sie beschreiben die Situation aus Ihrer Sicht – vertraulich und in Ihrem Tempo. Die Gegenseite wird fair eingeladen."
+        "text": "Sie beschreiben die Situation aus Ihrer Sicht. Die Gegenseite wird fair eingeladen."
       },
       {
         "title": "Geführter Prozess",
-        "text": "Sechs strukturierte Phasen nach dem Harvard-Prinzip: von der Themensammlung über Interessen bis zu fairen Optionen."
+        "text": "Sechs Phasen nach dem Harvard-Prinzip: Themen, Interessen, faire Optionen."
       },
       {
         "title": "Verbindliche Vereinbarung",
-        "text": "Am Ende steht eine konkrete Vereinbarung: wer macht was bis wann – festgehalten und von beiden Seiten bestätigt."
+        "text": "Wer macht was bis wann – festgehalten und von beiden Seiten bestätigt."
       }
     ],
     "processLink": "So funktioniert medipact",

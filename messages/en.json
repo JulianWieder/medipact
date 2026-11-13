@@ -2,6 +2,7 @@
   "nav": {
     "promo": "Describe your case confidentially – getting started is free",
     "promoShort": "Describe your case confidentially",
+    "skipToContent": "Skip to content",
     "start": "Home",
     "startCta": "Start mediation",
     "about": "About us",
@@ -90,7 +91,13 @@
     "legalCookies": "Cookies",
     "legalCookieSettings": "Cookie settings",
     "copyright": "All rights reserved.",
-    "productLogbook": "Conflict log (free)"
+    "productLogbook": "Conflict log (free)",
+    "conflictsHeading": "Conflicts",
+    "conflictsDivorce": "Divorce mediation",
+    "conflictsNeighbour": "Neighbour disputes",
+    "conflictsInheritance": "Inheritance disputes",
+    "conflictsBusiness": "Business mediation",
+    "conflictsAll": "All conflict types"
   },
   "cookieConsent": {
     "ariaLabel": "Cookie settings",

@@ -30,6 +30,9 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
         <img
           src="/logbuch/qr-web.svg"
           alt={t("qrWebAlt")}
+          // Ohne `lazy` laedt React das Bild per <link rel="preload"> vor -
+          // auf der Startseite weit unten und auf dem Handy ausgeblendet.
+          loading="lazy"
           width={112}
           height={112}
           className="hidden h-28 w-28 shrink-0 rounded-lg bg-white p-1.5 sm:block"
@@ -55,6 +58,7 @@ export function LogbuchApp({ tone = "light" }: { tone?: "light" | "dark" }) {
           <img
             src="/logbuch/qr-app.svg"
             alt={t("qrAppAlt")}
+            loading="lazy"
             width={112}
             height={112}
             className="hidden h-28 w-28 shrink-0 rounded-lg bg-white p-1.5 sm:block"

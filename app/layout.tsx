@@ -183,6 +183,10 @@ export default async function RootLayout({
             <Seitenaufrufe />
           </AusserhalbEinbettung>
           <ConditionalHeader />
+          {/* Ziel des Sprunglinks im Header. Bewusst ein leerer Anker statt
+              eines Wrappers um {children}: ein zusaetzliches Eltern-Element
+              wuerde sticky-Bereiche der Seiten (SectionNav) beeinflussen. */}
+          <span id="inhalt" tabIndex={-1} className="block outline-none" />
           {children}
           <ConditionalFooter />
           <AusserhalbEinbettung>

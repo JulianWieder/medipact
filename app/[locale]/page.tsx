@@ -154,6 +154,23 @@ const serviceSchema = {
     description: "Festpreis je Partei, ab 49 € — kein Stundenhonorar",
     url: "https://medipact.de/preise",
   },
+  // 13.11.2026: Die vier Konfliktarten als benannte Teilleistungen mit ihrer
+  // eigenen Seite. Vorher standen sie nur als Aufzaehlung in `description`;
+  // "Scheidung" kam auf der Startseite genau einmal vor, eine maschinenlesbare
+  // Verbindung zu /scheidungsmediation gab es nicht.
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Konfliktarten",
+    itemListElement: [
+      ["Scheidungsmediation", "https://medipact.de/scheidungsmediation"],
+      ["Mediation bei Nachbarschaftsstreit", "https://medipact.de/konflikte/nachbarschaft"],
+      ["Mediation bei Erbstreit", "https://medipact.de/konflikte/erbschaft"],
+      ["Wirtschaftsmediation", "https://medipact.de/konflikte/odr"],
+    ].map(([name, url]) => ({
+      "@type": "Offer",
+      itemOffered: { "@type": "Service", name, url },
+    })),
+  },
 };
 
 const webApplicationSchema = {
