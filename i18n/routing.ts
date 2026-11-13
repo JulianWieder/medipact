@@ -14,6 +14,12 @@ export const routing = defineRouting({
   locales: ["de", "en"],
   defaultLocale: "de",
   localePrefix: "as-needed",
+  // 13.11.2026: Keine automatische Sprachumleitung. Vorher leitete "/" bei
+  // Accept-Language: en (oder NEXT_LOCALE=en) per 307 auf "/en" um - die
+  // kanonische Startseite war fuer englischsprachige Crawler nicht direkt
+  // erreichbar. Die Sprache folgt jetzt allein der URL; /en erreicht man
+  // ueber den Umschalter im Header und hreflang. Gilt auch fuer das Cookie.
+  localeDetection: false,
   // Sprechende URLs je Sprache. Schlüssel = interner Pfad (Ordner unter
   // app/[locale]/), Wert = was im Browser steht. Die Middleware schreibt
   // /en/divorce-mediation intern auf den Ordner um und leitet das alte

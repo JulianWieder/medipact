@@ -11,9 +11,10 @@ export default function robots(): MetadataRoute.Robots {
         "/auth/",
         "/workspace/",
         "/invite/",
-        // Bestätigungs- und Abmeldeseiten des Newsletters: tragen Token in der
-        // URL und haben ohne Token keinen Inhalt.
-        "/newsletter/",
+        // /newsletter/ steht bewusst NICHT mehr hier (13.11.2026): die
+        // Bestaetigungs- und Abmeldeseiten tragen noindex
+        // (app/newsletter/layout.tsx). Eine Sperre hier verhinderte, dass
+        // Google dieses noindex ueberhaupt sieht.
       ],
     },
     sitemap: "https://medipact.de/sitemap.xml",

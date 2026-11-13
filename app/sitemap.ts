@@ -16,7 +16,8 @@ import { mitPunkten, ortsseiten } from "@/lib/ortsseiten";
 //     /cases/nachbarschaft (-> /cases), /konflikte/trennung
 //     (-> /scheidungsmediation) und die Alt-Slugs in next.config.ts.
 //     Eine Sitemap listet Ziele, keine Weiterleitungen.
-//   - /auth, /workspace, /invite, /newsletter (robots.ts sperrt sie ohnehin).
+//   - /auth, /workspace, /invite (robots.ts sperrt sie ohnehin) und
+//     /newsletter/* (noindex, app/newsletter/layout.tsx).
 //
 // Sprachfassungen entstehen automatisch: Jeder Pfad in INDEXED_LOCALE_ROUTES
 // (i18n/routing.ts) bekommt pro Sprache einen Eintrag, alle mit denselben
